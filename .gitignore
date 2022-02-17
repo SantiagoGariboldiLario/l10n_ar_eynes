@@ -1,0 +1,10 @@
+*.py[cow]
+*.sw*
+*~
+*.orig
+*.mo
+__pycache__
+*.prpt
+*.jasper
+.vscode
+setup.cfg
