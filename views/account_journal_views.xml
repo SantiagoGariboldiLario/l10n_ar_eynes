@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="account_journal_view_form_inherit_localization_custom" model="ir.ui.view">
+        <field name="name">account.journal.view.form.inherit</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page name="pos_info" string="POS information" attrs="{'invisible': [('type','!=','sale')]}">
+                    <group>
+                        <group>
+                            <field name="denomination" attrs="{'required':[('type','=','sale')]}"/>
+                            <field name="fiscal_position_id" attrs="{'required':[('type','=','sale')]}"/>
+                        </group>
+                        <group>
+                            <field name="activity_start_date" attrs="{'required':[('type','=','sale')]}"/>
+                            <field name="warehouse_id" attrs="{'required':[('type','=','sale')]}"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>
