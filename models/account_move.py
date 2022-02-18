@@ -9,8 +9,8 @@ class AccountMove(models.Model):
     denomination = fields.Selection(string="Denomination", related='journal_id.denomination')
 
     def get_highest_pos_sequence(self):
-        print(self.journal_id)
         invoices = self.env['account.move'].search([('journal_id', '=', self.journal_id.id)])
+
         if not invoices:
             return '00000001'
 
@@ -24,9 +24,25 @@ class AccountMove(models.Model):
         super(AccountMove, self)._onchange_journal()
         if self.journal_id.code.isnumeric:
             self.name = self.journal_id.code + '-' + self.get_highest_pos_sequence()
-        self.fiscal_position_id = self.journal_id.fiscal_position_id
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
+        if not self.partner_id:
+            return
         super(AccountMove, self)._onchange_partner_id()
-        self.onchange_journal_id()
+        self.fiscal_position_id = self.partner_id.property_account_position_id
+        relations = self.env['user.journal.rel'].search(
+            [
+                ('journal_id.fiscal_position_id', '=', self.fiscal_position_id.id),
+                ('user_id', '=', self.env.user.id)
+            ],
+            order='sequence asc',
+        )
+        if relations:
+            ids = list(map(lambda relation: relation.journal_id.id, relations))
+            domain = {'journal_id' : [('id', 'in', ids)]}
+            self.journal_id = relations[0].journal_id
+            self.onchange_journal_id()
+            return{
+                'domain' : domain,
+            }
