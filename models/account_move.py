@@ -9,8 +9,8 @@ class AccountMove(models.Model):
     denomination = fields.Selection(string="Denomination", related='journal_id.denomination')
 
     def get_highest_pos_sequence(self):
-        print(self.journal_id)
         invoices = self.env['account.move'].search([('journal_id', '=', self.journal_id.id)])
+
         if not invoices:
             return '00000001'
 

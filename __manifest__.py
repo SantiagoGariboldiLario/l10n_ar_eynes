@@ -26,7 +26,8 @@
     'depends': ['account', 'sale', 'stock'],
     'data': [
         'views/account_journal_views.xml',
-        'views/account_move_views.xml'
+        'views/account_move_views.xml',
+        'views/user_journal_rel_views.xml',
     ],
     'installable': True,
     'application': True,
