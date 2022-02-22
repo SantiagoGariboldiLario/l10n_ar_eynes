@@ -34,7 +34,11 @@ class AccountJournal(models.Model):
         string='Warehouse',
         default=get_default_warehouse
     )
-
+    due_date = fields.date(
+        string='Due Date',
+        help='after this expiration date, account moves are not allowed to use this journal till its extended',
+        readonly=True
+    )
     _sql_constraints = [
         ('code_unique', 'unique(code)', 'code already exists!')
     ]
