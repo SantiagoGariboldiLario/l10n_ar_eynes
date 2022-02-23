@@ -1,4 +1,4 @@
-from odoo import api, models, fields
+from odoo import models, fields
 
 
 class UserJournalRel(models.Model):
@@ -25,5 +25,5 @@ class UserJournalRel(models.Model):
     sequence = fields.Integer(string="Sequence", default=get_last_sequence, readonly=True)
 
     _sql_constraints = [
-        ('unique_combinatio', 'unique(user_id,journal_id)', 'User already assigned to this journal!')
+        ('unique_combination', 'unique(user_id,journal_id)', 'User already assigned to this journal!')
     ]
