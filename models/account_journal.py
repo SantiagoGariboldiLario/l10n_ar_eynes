@@ -34,7 +34,7 @@ class AccountJournal(models.Model):
         string='Warehouse',
         default=get_default_warehouse
     )
-    due_date = fields.date(
+    due_date = fields.Date(
         string='Due Date',
         help='after this expiration date, account moves are not allowed to use this journal till its extended',
         readonly=True
