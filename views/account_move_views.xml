@@ -11,7 +11,7 @@
             </xpath>
 
             <group name="accounting_info_group" position="inside">
-                <field name="denomination" attrs="{'invisible': [('journal_id','=','')]}"/>
+                <field name="denomination" attrs="{'invisible': [('journal_id','=','')], 'readonly': [('move_type','!=','in_invoice')]}"/>
             </group>
 
             <xpath expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']" position="attributes">
