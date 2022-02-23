@@ -19,6 +19,9 @@
                     </group>
                 </page>
             </notebook>
+            <xpath expr="//field[@name='type']" position="after">
+                <field name="due_date" />
+            </xpath>
         </field>
     </record>
 </odoo>
