@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="account_journal_view_form_inherit_localization_custom" model="ir.ui.view">
+    <record id="account_journal_view_form_inherit_l10n_ar_eynes" model="ir.ui.view">
         <field name="name">account.journal.view.form.inherit</field>
         <field name="model">account.journal</field>
         <field name="inherit_id" ref="account.view_account_journal_form"/>
