@@ -12,7 +12,7 @@ class AccountMove(models.Model):
         string='Denomination',
         default='not_defined'
     )
-    supplier_move_reference = fields.Char(string='Supplier Invoivce Reference', size=14)
+    supplier_move_reference = fields.Char(string='Supplier Invoice Reference')
 
     def get_highest_pos_sequence(self):
         invoices = self.env['account.move'].search([('journal_id', '=', self.journal_id.id)])
@@ -24,35 +24,38 @@ class AccountMove(models.Model):
         return str(last_sequence_number + 1).zfill(8)
 
 # ONCHANGE METHODS
-    @api.onchange('journal_id')
+    @api.onchange('journal_id', 'partner_id')
     def _onchange_journal(self):
-        super(AccountMove, self)._onchange_journal()
         if self.journal_id.type == 'sale':
+            super(AccountMove, self)._onchange_journal()
             if self.journal_id.code.isnumeric:
                 self.name = self.journal_id.code + '-' + self.get_highest_pos_sequence()
 
     @api.onchange('partner_id')
     def _onchange_partner(self):
-        if (not self.partner_id) or (self.move_type == 'in_invoice'):
+        if not self.partner_id:
             return
         super(AccountMove, self)._onchange_partner_id()
-        relations = self.env['user.journal.rel'].search(
-            [
-                ('journal_id.fiscal_position_id', '=', self.fiscal_position_id.id),
-                ('user_id', '=', self.env.user.id)
-            ],
-            order='sequence asc',
-        )
-        if relations:
-            ids = list(map(lambda relation: relation.journal_id.id, relations))
-            domain = {'journal_id' : [('id', 'in', ids)]}
-            self.journal_id = relations[0].journal_id
-            self.onchange_journal_id()
-            return{
-                'domain' : domain,
-            }
+        # if self.move_type == 'in_invoice':
+        #     self._onchange_fiscal_position()
+        if self.move_type == 'out_invoice':
+            relations = self.env['user.journal.rel'].search(
+                [
+                    ('journal_id.fiscal_position_id', '=', self.fiscal_position_id.id),
+                    ('user_id', '=', self.env.user.id)
+                ],
+                order='sequence asc',
+            )
+            if relations:
+                ids = list(map(lambda relation: relation.journal_id.id, relations))
+                domain = {'journal_id' : [('id', 'in', ids)]}
+                self.journal_id = relations[0].journal_id
+                self._onchange_journal()
+                return{
+                    'domain' : domain,
+                }
 
-    @api.onchange('supplier_move_reference')
+    @api.onchange('supplier_move_reference', 'denomination', 'fiscal_position_id', 'partner_id')
     def _onchange_supplier_move_reference(self):
         if not self.supplier_move_reference:
             return
@@ -69,15 +72,22 @@ class AccountMove(models.Model):
         if len(pos_code) > 5 or len(move_code) > 8:
             raise ValidationError('Some of the fields exceeds length')
 
-        self.supplier_move_reference = pos_code.zfill(5) + '-' + move_code.zfill(8)
+        self.supplier_move_reference = pos_code.zfill(4) + '-' + move_code.zfill(8)
         self.name = f'{self.supplier_move_reference}'
 
-        if self.denomination != 'not_defined':
+        if self.denomination and self.denomination != 'not_defined':
             self.name = f'{self.denomination.capitalize()} {self.name}'
 
-    @api.onchange('denomination')
-    def _onchange_denomination(self):
-        self._onchange_supplier_move_reference()
+    @api.onchange('fiscal_position_id', 'partner_id')
+    def _onchange_fiscal_position(self):
+        fiscal_position = self.fiscal_position_id or self.partner_id.property_account_position_id
+        if self.move_type == 'in_invoice':
+            self.denomination = fiscal_position.supplier_denomination
+
+    def action_post(self):
+        if self.journal_id.due_date < fields.Date.today():
+            raise ValidationError("Journal period date has expired. Change journal or update period expiration date")
+        super(AccountMove, self).action_post()
 
     _sql_constraints = [
         ('unique_move', 'unique(journal_id,supplier_move_reference)', 'move already exists!'),
