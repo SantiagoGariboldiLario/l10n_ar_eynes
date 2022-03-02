@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_document_type_view_form" model="ir.ui.view">
+        <field name="name">res.document.type.view.form</field>
+        <field name="model">res.document.type</field>
+        <field name="arch" type="xml">
+            <form string="Document Type">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="afip_code"/>
+                        <field name="verification_required"/>
+                        <field name="check_duplicated"/>
+                        <field name="dst_cuit"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="res_document_type_view_tree" model="ir.ui.view">
+        <field name="name">res.document.type.view.tree</field>
+        <field name="model">res.document.type</field>
+        <field name="arch" type="xml">
+            <tree string="Document Type">
+                <field name="name"/>
+                <field name="afip_code"/>
+                <field name="verification_required"/>
+                <field name="check_duplicated"/>
+                <field name="dst_cuit"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- action -->
+    <record id="res_document_type_action" model="ir.actions.act_window">
+        <field name="name">Document Types</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.document.type</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="res_document_type_view_tree"/>
+    </record>
+
+</odoo>

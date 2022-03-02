@@ -8,8 +8,20 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
                 <field name="supplier_denomination"/>
+                <field name="afip_code"/>
             </xpath>
         </field>
     </record>
 
+    <record id="account_fiscal_position_tree_inherit_l10n_ar_eynes" model="ir.ui.view">
+        <field name="name">account.fiscal.position.tree.inherit</field>
+        <field name="model">account.fiscal.position</field>
+        <field name="inherit_id" ref="account.view_account_position_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="supplier_denomination"/>
+                <field name="afip_code"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>
