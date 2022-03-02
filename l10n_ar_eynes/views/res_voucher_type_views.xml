@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_voucher_type_view_form" model="ir.ui.view">
+        <field name="name">res.voucher.type.view.form</field>
+        <field name="model">res.voucher.type</field>
+        <field name="arch" type="xml">
+            <form string="Voucher type">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="afip_code"/>
+                        <field name="voucher_model"/>
+                        <field name="doc_type"/>
+                        <field name="denomination"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="res_voucher_type_view_tree" model="ir.ui.view">
+        <field name="name">res.voucher.type.view.tree</field>
+        <field name="model">res.voucher.type</field>
+        <field name="arch" type="xml">
+            <tree string="Voucher type" default_order="afip_code">
+                <field name="name"/>
+                <field name="afip_code"/>
+                <field name="voucher_model"/>
+                <field name="doc_type"/>
+                <field name="denomination"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- action -->
+    <record id="res_voucher_type_action" model="ir.actions.act_window">
+        <field name="name">Voucher Types</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.voucher.type</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="res_voucher_type_view_tree"/>
+    </record>
+
+    <record id="res_partner_action" model="ir.actions.act_window">
+        <field name="name">Contacts</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="contacts_menu" name="Contacts" sequence="10">
+        <menuitem id="res_partner_menu" name="Contacts" action="res_partner_action" groups="base.group_user" sequence="1"/>
+        <menuitem id="contacts_configuration_menu" name="Configuration" sequence="2">
+            <menuitem id="menu_action_res_voucher_type" name="Voucher Types" action="res_voucher_type_action" sequence="2"/>
+            <menuitem id="menu_action_res_document_type" name="Document Types" action="res_document_type_action" sequence="3"/>
+        </menuitem>
+    </menuitem>
+
+</odoo>

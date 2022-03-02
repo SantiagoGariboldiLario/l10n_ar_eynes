@@ -11,3 +11,5 @@ class AccountFiscalPosition(models.Model):
         required=True,
         default='not_defined'
     )
+
+    afip_code = fields.Integer(string="AFIP Code")
