@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="treasury_menu" name="Treasury" sequence="6">
+        <menuitem id="treasury_check_menu" name="Checks" action="account_check_action" sequence="1"/>
+        <menuitem id="treasury_configuration_menu" name="Configuration" sequence="2"/>
+    </menuitem>
+
+</odoo>

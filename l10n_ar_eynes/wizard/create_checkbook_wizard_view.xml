@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="create_checkbook_wizard_view_form" model="ir.ui.view">
+        <field name="name">create.checkbook.wizard.view.form</field>
+        <field name="model">create.checkbook.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create Checkbook">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="journal_id"/>
+                        </group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </group>
+                    <group attrs="{'invisible' : [('checkbook_format', '=', 'echeq')]}" >
+                        <group>
+                            <field name="start_num" attrs="{'required' : [('checkbook_format', '!=', 'echeq')]}"/>
+                        </group>
+                        <group>
+                            <field name="end_num" attrs="{'required' : [('checkbook_format', '!=', 'echeq')]}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="checkbook_format" />
+                    </group>
+                    <footer>
+                        <button
+                            name="create_checkbook"
+                            type="object"
+                            class="btn btn-primary">
+                            Create Checkbook
+                        </button>
+                        <button string="Cancel" class="btn-default" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="create_checkbook_wizard_action" model="ir.actions.act_window">
+        <field name="name">Create Checkbook</field>
+        <field name="res_model">create.checkbook.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        id="create_checkbook_menu"
+        name="Create Checkbook"
+        action="create_checkbook_wizard_action"
+        parent="treasury_configuration_menu"
+        sequence="10"/>
+
+</odoo>
