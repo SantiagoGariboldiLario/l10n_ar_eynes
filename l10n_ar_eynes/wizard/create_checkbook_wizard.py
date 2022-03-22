@@ -30,6 +30,7 @@ class CreateCheckbookWizard(models.TransientModel):
             'journal_id' : self.journal_id.id,
             'payment_method_id' : payment_method.id,
             'name' : payment_method_name,
+            'format' : self.checkbook_format
         })]
 
         if self.checkbook_format != 'echeq':
