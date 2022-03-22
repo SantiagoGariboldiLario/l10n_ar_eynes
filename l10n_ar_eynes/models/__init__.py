@@ -6,3 +6,4 @@ from . import account_tax
 from . import res_voucher_type
 from . import res_document_type
 from . import account_check
+from . import account_payment_method
