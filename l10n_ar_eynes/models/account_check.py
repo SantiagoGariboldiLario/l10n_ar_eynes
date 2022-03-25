@@ -7,28 +7,46 @@ class AccountCheck(models.Model):
 
     name = fields.Char('Check Number', required=True)
 
-    bank_account_id = fields.Many2one(comodel_name='account.journal', string='Bank Account', required=True)
+    bank_account_id = fields.Many2one(
+        comodel_name='account.journal',
+        string='Bank Account',
+        required=True,
+        domain=[('type', '=', 'bank')]
+    )
     checkbook_id = fields.Many2one(
         comodel_name='account.payment.method.line',
         string='Checkbook ID',
         ondelete='restrict',
+        domain=[('payment_method_id.code', '=', 'check_printing')]
     )
     checkbook_format = fields.Selection(
         selection=[('physical', 'Physical'), ('virtual', 'Virtual'), ('echeq', 'Echeq')],
+        related='checkbook_id.format',
         string='Format',
         required=True
     )
-    state = fields.Selection(
+    issued_check_state = fields.Selection(
         selection=[
             ('draft', 'Draft'),
-            ('waiting', 'Waiting Accreditation'),
-            ('issued', 'Issued'),
-            ('cancel', 'Cancelled'),
-            ('rejected', 'Rejected')
+            ('waiting_accreditation', 'Waiting accreditation'),
+            ('cancelled', 'Cancelled'),
+            ('paid', 'Paid'),
+            ('expired', 'Expired'),
+            ('rejected', 'Rejected'),
+            ('waiting_numeration', 'Waiting numeration')
         ],
         default='draft',
         string='State',
-        required=True,
+    )
+    third_party_check_state = fields.Selection(
+        selection=[
+            ('in_wallet', 'In wallet'),
+            ('deposited', 'Deposited'),
+            ('delivered', 'Delivered'),
+            ('rejected', 'Rejected')
+        ],
+        default='in_wallet',
+        string='State',
     )
     type = fields.Selection(
         selection=[('common', 'Common'), ('deferred', 'Deferred')],
@@ -79,6 +97,9 @@ class AccountCheck(models.Model):
                 check.accredited = True
             else:
                 check.accredited = False
+
+    def deposit_check(self):
+        print("deposited")
 
     _sql_constraints = [
         ("unique_record", "unique(name, checkbook_id, bank_account_id, checkbook_format)", _("This record already exists")),
