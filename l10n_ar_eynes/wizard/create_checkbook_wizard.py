@@ -46,9 +46,9 @@ class CreateCheckbookWizard(models.TransientModel):
                     'bank_account_id' : self.journal_id.id,
                     'checkbook_id' : self.env['account.payment.method.line'].search([('name', '=', payment_method_name)]).id,
                     'checkbook_format' : self.checkbook_format,
-                    'state' : 'draft',
+                    'internal_type' : 'issued',
+                    'issued_check_state' : 'draft',
                     'type' : 'common',
-                    'internal_type' : 'issued'
                 })
 
     def create_payment_method(self):
