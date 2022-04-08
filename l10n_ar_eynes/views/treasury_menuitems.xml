@@ -2,8 +2,22 @@
 <odoo>
 
     <menuitem id="treasury_menu" name="Treasury" sequence="6">
-        <menuitem id="treasury_check_menu" name="Checks" action="account_check_action" sequence="1"/>
-        <menuitem id="treasury_configuration_menu" name="Configuration" sequence="2"/>
+        <menuitem
+            id="treasury_issued_check_menu"
+            name="Issued Checks"
+            action="account_issued_check_action"
+            sequence="1"/>
+
+        <menuitem
+            id="treasury_third_party_check_menu"
+            name="Third party Checks"
+            action="account_third_party_check_action"
+            sequence="2"/>
+
+        <menuitem
+            id="treasury_configuration_menu"
+            name="Configuration"
+            sequence="3"/>
     </menuitem>
 
 </odoo>

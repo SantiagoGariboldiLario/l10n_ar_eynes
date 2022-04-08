@@ -12,7 +12,7 @@
                             <field name="journal_id"/>
                         </group>
                         <group>
-                            <field name="name"/>
+                            <field name="number"/>
                         </group>
                     </group>
                     <group attrs="{'invisible' : [('checkbook_format', '=', 'echeq')]}" >

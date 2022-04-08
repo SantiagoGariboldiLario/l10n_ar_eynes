@@ -1,4 +1,4 @@
-from odoo import api, models, fields
+from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
 
 
@@ -8,10 +8,14 @@ class AccountMove(models.Model):
     _description = "Account Move"
 
     denomination = fields.Selection(
-        [("a", "A"), ("b", "B"), ("c", "C"), ("e", "E"), ("not_defined", "Not Defined")],
+        selection=[
+            ("a", "A"), ("b", "B"),
+            ("c", "C"), ("e", "E"),
+            ("not_defined", "Not Defined")
+        ],
         string='Denomination',
-        default='not_defined'
-    )
+        default='not_defined')
+
     supplier_move_reference = fields.Char(string='Supplier Invoice Reference')
 
     def get_highest_pos_sequence(self):
@@ -66,11 +70,11 @@ class AccountMove(models.Model):
 
         pos_code, move_code = self.supplier_move_reference.split('-')
         if not pos_code or not move_code:
-            raise ValidationError('numbers missing after or before separator')
+            raise ValidationError(_('numbers missing after or before separator'))
         if not pos_code.isnumeric() or not move_code.isnumeric():
-            raise ValidationError('the reference must be numbers only')
+            raise ValidationError(_('the reference must be numbers only'))
         if len(pos_code) > 5 or len(move_code) > 8:
-            raise ValidationError('Some of the fields exceeds length')
+            raise ValidationError(_('Some of the fields exceeds length'))
 
         self.supplier_move_reference = pos_code.zfill(4) + '-' + move_code.zfill(8)
         self.name = f'{self.supplier_move_reference}'
@@ -86,10 +90,10 @@ class AccountMove(models.Model):
 
     def action_post(self):
         if self.journal_id.due_date < fields.Date.today():
-            raise ValidationError("Journal period date has expired. Change journal or update period expiration date")
+            raise ValidationError(_("Journal period date has expired. Change journal or update period expiration date"))
         super(AccountMove, self).action_post()
 
     _sql_constraints = [
-        ('unique_move', 'unique(journal_id,supplier_move_reference)', 'move already exists!'),
-        ('unique_name', 'unique(name)', 'move already exists!')
+        ('unique_move', 'unique(journal_id,supplier_move_reference)', _('move already exists!')),
+        ('unique_name', 'unique(name)', _('move already exists!'))
     ]
