@@ -5,24 +5,25 @@ from odoo.exceptions import ValidationError
 class CreateCheckbookWizard(models.TransientModel):
     _name = 'create.checkbook.wizard'
     _description = 'Create Checkbook Wizard'
+    _rec_name = 'number'
 
-    name = fields.Char(string='Checkbook Number', required=True)
+    number = fields.Char(string='Checkbook Number', required=True)
     journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Journal',
         required=True,
-        domain=[('type', '=', 'bank')]
-    )
+        domain=[('type', '=', 'bank')])
+
     checkbook_format = fields.Selection(
         selection=[('physical', 'Physical'), ('virtual', 'Virtual'), ('echeq', 'Echeq')],
         string='Format',
-        required=True
-    )
+        required=True)
+
     start_num = fields.Char('Start Number', size=8)
     end_num = fields.Char('End Number', size=8)
 
     def create_checkbook(self):
-        payment_method_name = _('Checkbook') + f" {self.journal_id.name} {self.name}"
+        payment_method_name = _('Checkbook') + f" {self.journal_id.name} {self.number}"
 
         payment_method = self.env.ref('account_check_printing.account_payment_method_check')
 
@@ -42,7 +43,7 @@ class CreateCheckbookWizard(models.TransientModel):
 
             for i in range(start_numer, end_number + 1):
                 self.env['account.check'].create({
-                    'name': str(i).zfill(8),
+                    'number': str(i).zfill(8),
                     'bank_account_id' : self.journal_id.id,
                     'checkbook_id' : self.env['account.payment.method.line'].search([('name', '=', payment_method_name)]).id,
                     'checkbook_format' : self.checkbook_format,
@@ -51,20 +52,16 @@ class CreateCheckbookWizard(models.TransientModel):
                     'type' : 'common',
                 })
 
-    def create_payment_method(self):
-        vals = {
-            'code' : self.name,
-            'name': 'Checks',
-            'payment_type' : 'outbound'
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload'
         }
-        new_payment_method = self.env['account.payment.method'].create(vals)
-        return new_payment_method
 
-    @api.onchange('name')
-    def _onchange_name(self):
-        if not self.name:
+    @api.onchange('number')
+    def _onchange_number(self):
+        if not self.number:
             return
-        if not self.name.isnumeric():
+        if not self.number.isnumeric():
             raise ValidationError(_('Checkbook Number must be numeric'))
 
     @api.onchange('start_num')
