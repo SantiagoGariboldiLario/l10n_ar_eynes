@@ -89,7 +89,9 @@ class AccountMove(models.Model):
             self.denomination = fiscal_position.supplier_denomination
 
     def action_post(self):
-        if self.journal_id.due_date < fields.Date.today():
+        if not self.journal_id.due_date:
+            raise ValidationError(_("This journal Does not have a period established. Please Establish period before moving on. This can be accomplished in Accounting/Journals/Update Journals Period"))
+        elif self.journal_id.due_date < fields.Date.today():
             raise ValidationError(_("Journal period date has expired. Change journal or update period expiration date"))
         super(AccountMove, self).action_post()
 
