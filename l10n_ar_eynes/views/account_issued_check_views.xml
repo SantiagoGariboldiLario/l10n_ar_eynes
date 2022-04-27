@@ -7,13 +7,19 @@
         <field name="arch" type="xml">
             <form string="Checks" create="false">
                 <header>
+                    <button
+                        string="Reject Check"
+                        name="reject_check"
+                        type="object"
+                        class="oe_highlight"
+                        attrs="
+                            {'invisible' : [('issued_check_state', '=', 'rejected')]}"/>
                     <field
                         name="issued_check_state"
                         widget="statusbar"
                         statusbar_visible="draft,waiting_accreditation,cancelled,paid,expired,rejected,waiting_numeration"
                         statusbar_colors='{"cancel":"red"}'
-                        attrs="{'invisible' : [('internal_type', '=', 'third_party')]}"
-                    />
+                        attrs="{'invisible' : [('internal_type', '=', 'third_party')]}"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -66,11 +72,14 @@
         <field name="arch" type="xml">
             <tree string="Checks" create="false">
                 <field name="number"/>
-                <field name="checkbook_id"/>
+                <field name="checkbook_format" />
+                <field name="receiving_partner_id" />
+                <field name="issue_date" />
+                <field name="payment_date" />
                 <field name="bank_account_id"/>
+                <field name="checkbook_id"/>
+                <field name="account_payment_order_id"/>
                 <field name="amount"/>
-                <field name="type"/>
-                <field name="internal_type"/>
                 <field name="issued_check_state" string="State"/>
             </tree>
         </field>
