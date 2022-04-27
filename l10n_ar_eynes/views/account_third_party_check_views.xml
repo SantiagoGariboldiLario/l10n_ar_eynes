@@ -78,10 +78,17 @@
         <field name="arch" type="xml">
             <tree string="Checks" create="false">
                 <field name="number"/>
+                <field name="checkbook_format" />
+                <field name="type" />
+                <field name="receiving_partner_id" />
+                <field name="issue_date" />
+                <field name="reception_date" />
+                <field name="payment_date" />
                 <field name="bank_account_id"/>
+                <field name="checkbook_id"/>
+                <field name="account_payment_order_id"/>
+                <field name="deposit_slip"/>
                 <field name="amount"/>
-                <field name="type"/>
-                <field name="internal_type"/>
                 <field name="third_party_check_state" string="State"/>
             </tree>
         </field>
