@@ -1,6 +1,7 @@
 from odoo import fields, models, _, api
 from odoo.exceptions import ValidationError
 
+
 class AccountCheck(models.Model):
     _name = 'account.check'
     _description = 'Check'
@@ -76,6 +77,11 @@ class AccountCheck(models.Model):
 
     note = fields.Text(string="Note")
 
+    account_payment_order_id = fields.Many2one(
+        comodel_name='account.payment.order',
+        string='Account payment order',
+        ondelete='cascade')
+
     payment_move_id = fields.Many2one(
         comodel_name='account.move',
         string='Payment Account Move')
@@ -95,6 +101,20 @@ class AccountCheck(models.Model):
                 check.accredited = True
             else:
                 check.accredited = False
+
+    def reject_check(self, state):
+        """
+            This function is called by the any of the reject wizard actions (issued or 3rd party).
+            It updates de state of the rejected check. Since both type of check are combined in a single class,
+            the function takes a 2nd argument to choose which one of the state needs to be updated.
+
+        Args:
+            state (selection): this argument can take 2 values:
+                issued_check_state or third_party_check_state.
+        """
+        self.write({
+            state : 'rejected',
+        })
 
     # ISSUED CHECK FIELDS AND METHODS
     issued_check_state = fields.Selection(
@@ -121,13 +141,28 @@ class AccountCheck(models.Model):
         default='in_wallet',
         string='State')
 
-    account_payment_order_id = fields.Many2one(
-        comodel_name='account.payment.order',
-        string='Account payment order',
-        ondelete='cascade')
+    deposit_move_id = fields.Many2one(
+        comodel_name='account.move',
+        string='Deposit Move',
+        readonly=True)
+
+    deposit_journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        string='Deposit Journal',
+        readonly=True,
+        compute='_compute_deposit_journal_id')
 
     signatory_vat = fields.Char(string='Signatory VAT', size=64)
     signatory_account = fields.Char(string='Signatory account', size=64)
+    deposit_slip = fields.Char(string='Deposit Slip', size=64)
+
+    @api.depends('deposit_move_id')
+    def _compute_deposit_journal_id(self):
+        for check in self.filtered(lambda rec: rec.interal_type == 'third_party'):
+            if check.deposit_move_id:
+                check.deposit_journal_id = check.deposit_move_id.journal_id
+            else:
+                check.deposit_journal_id = False
 
     @api.onchange('number')
     def _onchange_number(self):
@@ -138,10 +173,14 @@ class AccountCheck(models.Model):
         self.number = self.number.zfill(8)
 
     def deposit_check(self):
-        print("deposited")
-
-    def reject_check(self):
-        print("rejected")
+        """
+            This function is called after the deposit_check action is executed.
+            It updates the state of the check to 'deposited'.
+            Since the button is only on 3rd party checks, it doesn't need another argument.
+        """
+        self.write({
+            'third_party_check_state' : 'deposited'
+        })
 
     _sql_constraints = [
         ("unique_record", "unique(name, checkbook_id, bank_account_id, checkbook_format)", _("This record already exists")),
