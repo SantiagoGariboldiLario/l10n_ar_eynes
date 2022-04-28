@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--reject issued check wizard form-->
+    <record id="reject_issued_check_wizard_view_form" model="ir.ui.view">
+        <field name="name">reject.issued.check.wizard.view.form</field>
+        <field name="model">reject.issued.check.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="reject_date" />
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" />
+                    </group>
+                    <footer>
+                        <button name="action_reject" type="object" string="Reject check" class="btn btn-primary"/>
+                        <button string="Cancel" class="btn-default" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!--reject third party check wizard form-->
+    <record id="reject_third_party_check_wizard_view_form" model="ir.ui.view">
+        <field name="name">reject.third.party.check.wizard.view.form</field>
+        <field name="model">reject.third.party.check.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="reject_date" />
+                        <field name="journal_id" />
+                    </group>
+                    <footer>
+                        <button name="action_reject" type="object" string="Reject check" class="btn btn-primary"/>
+                        <button string="Cancel" class="btn-default" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <!--reject issued check action-->
+    <record id="reject_issued_check_action" model="ir.actions.act_window">
+        <field name="name">Reject issued check</field>
+        <field name="res_model">reject.issued.check.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!--reject third party check action-->
+    <record id="reject_third_party_check_action" model="ir.actions.act_window">
+        <field name="name">Reject third party check</field>
+        <field name="res_model">reject.third.party.check.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>
