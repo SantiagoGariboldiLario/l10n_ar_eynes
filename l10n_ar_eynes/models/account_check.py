@@ -262,7 +262,6 @@ class AccountCheck(models.Model):
             'third_party_check_state' : 'deposited'
         })
 
-    @api.multi
     def unlink(self):
         for check in self:
             if (check.third_party_check_state and check.third_party_check_state != 'draft') or \
