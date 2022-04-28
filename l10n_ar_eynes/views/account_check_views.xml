@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- CHECK CONFIGURATION FORM VIEW-->
+    <record id="account_check_view_form_config" model="ir.ui.view">
+        <field name="name">account.check.config.view.form</field>
+        <field name="model">account.check.config</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Check Config" version="7.0">
+                <sheet>
+                    <h1>
+                        <p>Account Check Configuration</p>
+                    </h1>
+                    <group>
+                        <field name="company_id" readonly="True"/>
+                        <field name="account_id"/>
+                        <field name="deferred_account_id"/>
+                        <field name="receivable_rejected_account_id"/>
+                        <field name="rejected_account_id"/>
+                        <field name="deferred_journal_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- CHECK CONFIGURATION TREE VIEW-->
+    <record id="account_check_view_tree_config" model="ir.ui.view">
+        <field name="name">account.check.config.view.tree</field>
+        <field name="model">account.check.config</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree string="Checks Config">
+                <field name="company_id"/>
+                <field name="account_id"/>
+                <field name="deferred_account_id"/>
+                <field name="receivable_rejected_account_id"/>
+                <field name="rejected_account_id"/>
+                <field name="deferred_journal_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- CHECK CONFIGURATION ACTION-->
+    <record id="account_check_config_action" model="ir.actions.act_window">
+        <field name="name">Check Config</field>
+        <field name="res_model">account.check.config</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="check_config_menu"
+        name="Check configuration"
+        action="account_check_config_action"
+        parent="treasury_configuration_menu"
+        sequence="1"/>
+
+    <!-- ISSUED CHECK FORM VIEW-->
+    <record id="account_issued_check_view_form" model="ir.ui.view">
+        <field name="name">account.issued.check.view.form</field>
+        <field name="model">account.check</field>
+        <field name="arch" type="xml">
+            <form string="Checks" create="false">
+                <header>
+                    <button
+                        name="%(reject_issued_check_action)d"
+                        string="Reject Check"
+                        type="action"
+                        class="oe_highlight"
+                        attrs="
+                            {'invisible' : [('issued_check_state', '=', 'rejected')]}"/>
+                    <field
+                        name="issued_check_state"
+                        widget="statusbar"
+                        statusbar_visible="draft,waiting_accreditation,cancelled,paid,expired,rejected,waiting_numeration"
+                        statusbar_colors='{"cancel":"red"}'
+                        attrs="{'invisible' : [('internal_type', '=', 'third_party')]}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <label for="number" string="Check Number"/>
+                            <field name="number" class="oe_inline" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="checkbook_id" required="1"/>
+                            <field name="checkbook_format"/>
+                            <field name="type"/>
+                            <field name="internal_type" readonly="1"/>
+                            <field name="amount" required="1"/>
+                            <field name="bank_account_id"/>
+                            <field name="bank_id"/>
+                        </group>
+                        <group>
+                            <field name="issue_date"/>
+                            <field name="payment_date" attrs="{'invisible': [('type', '=', 'common')]}"/>
+                            <field name="reject_date" attrs="{'invisible': [('issued_check_state', '!=', 'rejected')]}"/>
+                            <field name="crossed"/>
+                            <field name="not_order"/>
+                        </group>
+                    </group>
+                    <group string="Adittional Information">
+                        <group>
+                            <field name="clearing"/>
+                            <field name="signatory"/>
+                        </group>
+                        <group>
+                            <field name="origin"/>
+                            <field name="payment_move_id"/>
+                            <field name="clearance_move_id" attrs="{'readonly': True, 'invisible': [('type', '=', 'common')]}"/>
+                            <field name="accredited"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" attrs="{'invisible': [('issued_check_state', '!=', 'rejected')]}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ISSUED CHECK TREE VIEW-->
+    <record id="account_issued_check_view_tree" model="ir.ui.view">
+        <field name="name">account.issued.check.view.tree</field>
+        <field name="model">account.check</field>
+        <field name="arch" type="xml">
+            <tree string="Checks" create="false">
+                <field name="number"/>
+                <field name="checkbook_format" />
+                <field name="receiving_partner_id" />
+                <field name="issue_date" />
+                <field name="payment_date" />
+                <field name="bank_account_id"/>
+                <field name="checkbook_id"/>
+                <field name="account_payment_order_id"/>
+                <field name="amount"/>
+                <field name="issued_check_state" string="State"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ISSUED CHECK ACTION-->
+    <record id="account_issued_check_action" model="ir.actions.act_window">
+        <field name="name">Issued Checks</field>
+        <field name="res_model">account.check</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('internal_type', '=', 'issued')]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('account_issued_check_view_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('account_issued_check_view_form')})]"/>
+    </record>
+
+    <!-- THIRD PARTY CHECK FORM VIEW-->
+    <record id="account_third_party_check_view_form" model="ir.ui.view">
+        <field name="name">account.third.party.check.view.form</field>
+        <field name="model">account.check</field>
+        <field name="arch" type="xml">
+            <form string="Checks" create="false">
+                <header>
+                    <button
+                        string="Deposit Check"
+                        name="deposit_check"
+                        type="object"
+                        class="oe_highlight"
+                        attrs="{'invisible' : [('internal_type', '=', 'issued')]}"/>
+
+                    <button
+                        name="%(reject_third_party_check_action)d"
+                        string="Reject Check"
+                        type="action"
+                        class="oe_highlight"
+                        attrs="{'invisible' : [('internal_type', '=', 'issued')]}"/>
+
+                    <field
+                        name="third_party_check_state"
+                        widget="statusbar"
+                        statusbar_visible="in_wallet,deposited,delivered,rejected"
+                        statusbar_colors='{"cancel":"red"}'
+                        attrs="{'invisible' : [('internal_type', '=', 'issued')]}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <label for="number" string="Check Number"/>
+                            <field name="number" class="oe_inline" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="type"/>
+                            <field name="amount"/>
+                            <field name="source_partner_id"/>
+                            <field name="destiny_partner_id" attrs="{'invisible': [('third_party_check_state', 'not in', ('delivered', 'rejected'))]}"/>
+                            <field name="checkbook_format"/>
+                            <field name="internal_type" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="reception_date"/>
+                            <field name="issue_date"/>
+                            <field name="endorsement_date" attrs="{'invisible': [('third_party_check_state', 'not in', ('in_wallet', 'delivered', 'rejected'))]}"/>
+                            <field name="payment_date" attrs="{'invisible': [('type', '=', 'common')]}"/>
+                        </group>
+                    </group>
+                    <group string="Other Information">
+                        <group>
+                            <field name="bank_id"/>
+                            <field name="bank_branch"/>
+                            <field name="zip"/>
+                            <field name="origin"/>
+                            <field name="crossed"/>
+                            <field name="not_order"/>
+                            <field name="dest" attrs="{'invisible': [('third_party_check_state','!=','delivered')]}"/>
+                        </group>
+                        <group>
+                            <field name="clearing"/>
+                            <field name="signatory"/>
+                            <field name="signatory_vat"/>
+                            <field name="signatory_account"/>
+                        </group>
+                    </group>
+                    <group string="Check Deposit" attrs="{'invisible': [('third_party_check_state','not in',('deposited', 'rejected'))]}">
+                        <group>
+                            <field name="deposit_date"/>
+                            <field name="deposit_slip"/>
+                            <field name="deposit_move_id"/>
+                            <field name="deposit_bank_id" />
+                        </group>
+                    </group>
+                    <group string="Payments, Receipts and Debits">
+                        <group>
+                            <field name="source_payment_order_id"/>
+                            <field name="debit_note_id"/>
+                            <field name="reject_date" attrs="{'invisible': [('third_party_check_state', '!=', 'rejected')]}"/>
+                        </group>
+                    </group>
+                    <group string="Additional Information">
+                        <div class="oe_clear"/>
+                        <field name="note" colspan="4" nolabel="1" placeholder="Additional Information..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- THIRD PARTY CHECK TREE VIEW-->
+    <record id="account_third_party_check_view_tree" model="ir.ui.view">
+        <field name="name">account.third.party.check.view.tree</field>
+        <field name="model">account.check</field>
+        <field name="arch" type="xml">
+            <tree string="Checks" create="false">
+                <field name="number"/>
+                <field name="checkbook_format" />
+                <field name="type" />
+                <field name="receiving_partner_id" />
+                <field name="source_partner_id" />
+                <field name="issue_date" />
+                <field name="reception_date" />
+                <field name="payment_date" />
+                <field name="bank_id" />
+                <field name="deposit_journal_id"/>
+                <field name="deposit_slip"/>
+                <field name="amount"/>
+                <field name="third_party_check_state" string="State"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <!-- THIRD PARTY CHECK ACTION -->
+    <record id="account_third_party_check_action" model="ir.actions.act_window">
+        <field name="name">Third Party Checks</field>
+        <field name="res_model">account.check</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('internal_type', '=', 'third_party')]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('account_third_party_check_view_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('account_third_party_check_view_form')})]"/>
+    </record>
+
+</odoo>
