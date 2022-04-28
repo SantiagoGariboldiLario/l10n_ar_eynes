@@ -225,7 +225,7 @@ class AccountPaymentOrder(models.Model):
 
     third_party_check_receipt_ids = fields.One2many(
         comodel_name='account.check',
-        inverse_name='account_payment_order_id',
+        inverse_name='source_payment_order_id',
         string='Third party checks')
 
     def action_clean_lines(self):

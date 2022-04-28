@@ -52,6 +52,6 @@
         name="Create Checkbook"
         action="create_checkbook_wizard_action"
         parent="treasury_configuration_menu"
-        sequence="10"/>
+        sequence="2"/>
 
 </odoo>

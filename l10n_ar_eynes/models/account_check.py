@@ -1,5 +1,52 @@
 from odoo import fields, models, _, api
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
+
+
+class AccountCheckConfig(models.Model):
+    _name = 'account.check.config'
+    _description = 'Check Account Configuration'
+
+    def name_get(self):
+        ret = []
+        for config in self:
+            ret.append((config.id, "%s: %s" % (
+                config.company_id.name, config.account_id.name)))
+        return ret
+
+    account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Main Check Account',
+        required=True,
+        help="In Argentina, Valores a Depositar is used, for example")
+
+    deferred_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Deferred Check Account',
+        required=True)
+
+    deferred_journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        string='Deferred Check Journal',
+        required=True)
+
+    receivable_rejected_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Receivable Rejected Check Account',
+        domain=[('internal_type', '=', 'receivable')],
+        help=_("Partner's account in debit note generation."),
+        required=True)
+
+    rejected_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Rejected Check Account',
+        domain=[('internal_type', 'not in', ('receivable', 'payable'))],
+        required=True)
+
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        string='Company',
+        required=True,
+        default=lambda self: self.env.user.company_id.id)
 
 
 class AccountCheck(models.Model):
@@ -55,6 +102,7 @@ class AccountCheck(models.Model):
 
     issue_date = fields.Date(string='Issue Date')
     reception_date = fields.Date(string='Reception Date')
+    reject_date = fields.Date(string='Reject Date')
 
     payment_date = fields.Date(
         string='Payment Date',
@@ -76,11 +124,6 @@ class AccountCheck(models.Model):
     signatory = fields.Char(string='Signatory', size=64)
 
     note = fields.Text(string="Note")
-
-    account_payment_order_id = fields.Many2one(
-        comodel_name='account.payment.order',
-        string='Account payment order',
-        ondelete='cascade')
 
     payment_move_id = fields.Many2one(
         comodel_name='account.move',
@@ -112,9 +155,10 @@ class AccountCheck(models.Model):
             state (selection): this argument can take 2 values:
                 issued_check_state or third_party_check_state.
         """
-        self.write({
-            state : 'rejected',
-        })
+        print(f'state: {state}')
+        # self.write({
+        #     state : 'rejected',
+        # })
 
     # ISSUED CHECK FIELDS AND METHODS
     issued_check_state = fields.Selection(
@@ -130,9 +174,15 @@ class AccountCheck(models.Model):
         default='draft',
         string='State')
 
+    account_payment_order_id = fields.Many2one(
+        comodel_name='account.payment.order',
+        string='Voucher',
+        ondelete='cascade')
+
     # THIRD PARTY CHECK FIELDS AND METHODS
     third_party_check_state = fields.Selection(
         selection=[
+            ('draft', 'Draft'),
             ('in_wallet', 'In wallet'),
             ('deposited', 'Deposited'),
             ('delivered', 'Delivered'),
@@ -140,6 +190,31 @@ class AccountCheck(models.Model):
         ],
         default='in_wallet',
         string='State')
+
+    deposit_bank_id = fields.Many2one(
+        comodel_name='res.partner.bank',
+        string='Deposit Account')
+
+    source_payment_order_id = fields.Many2one(
+        comodel_name='account.payment.order',
+        string='Source Voucher',
+        ondelete="cascade",
+        readonly=True)
+    debit_note_id = fields.Many2one(
+        comodel_name='account.move',
+        string='Debit Note',
+        readonly=True,
+        help="In case of rejection of the third check")
+
+    source_partner_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Source Partner',
+        required=False,
+        readonly=True)
+
+    destiny_partner_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Destiny Partner')
 
     deposit_move_id = fields.Many2one(
         comodel_name='account.move',
@@ -152,13 +227,18 @@ class AccountCheck(models.Model):
         readonly=True,
         compute='_compute_deposit_journal_id')
 
+    bank_branch = fields.Char(string='Bank Branch', size=64)
+    zip = fields.Char(string='Zip Code', size=64)
+    endorsement_date = fields.Date(string='Endorsement Date')
+    deposit_date = fields.Date(string='Deposit Date', readonly=True)
     signatory_vat = fields.Char(string='Signatory VAT', size=64)
     signatory_account = fields.Char(string='Signatory account', size=64)
     deposit_slip = fields.Char(string='Deposit Slip', size=64)
+    dest = fields.Char(string='Destiny', size=64)
 
     @api.depends('deposit_move_id')
     def _compute_deposit_journal_id(self):
-        for check in self.filtered(lambda rec: rec.interal_type == 'third_party'):
+        for check in self.filtered(lambda rec: rec.internal_type == 'third_party'):
             if check.deposit_move_id:
                 check.deposit_journal_id = check.deposit_move_id.journal_id
             else:
@@ -181,6 +261,14 @@ class AccountCheck(models.Model):
         self.write({
             'third_party_check_state' : 'deposited'
         })
+
+    @api.multi
+    def unlink(self):
+        for check in self:
+            if (check.third_party_check_state and check.third_party_check_state != 'draft') or \
+               (check.issued_check_state and check.issued_check_state != 'draft'):
+                raise UserError(_("Check Error! You cannot delete a check that is not in Draft"))
+        return super(AccountCheck, self).unlink()
 
     _sql_constraints = [
         ("unique_record", "unique(name, checkbook_id, bank_account_id, checkbook_format)", _("This record already exists")),
