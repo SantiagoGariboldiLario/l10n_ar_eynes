@@ -39,10 +39,19 @@ class AccountJournal(models.Model):
         help='after this expiration date, account moves are not allowed to use this journal till its extended')
 
     type = fields.Selection(
-        selection_add=[('receipt', 'Receipt'), ('payment', 'Payment')],
+        selection_add=[
+            ('receipt', 'Receipt'),
+            ('payment', 'Payment'),
+            ('third_party_checks', 'Third party checks'),
+            ('retentions', 'Retentions'),
+            ('perceptions', 'Perceptions')
+        ],
         ondelete={
             'receipt': lambda recs: recs.write({'type': 'general'}),
-            'payment': lambda recs: recs.write({'type': 'general'})
+            'payment': lambda recs: recs.write({'type': 'general'}),
+            'third_party_checks': lambda recs: recs.write({'type': 'general'}),
+            'retentions': lambda recs: recs.write({'type': 'general'}),
+            'perceptions': lambda recs: recs.write({'type': 'general'}),
         }
     )
 
