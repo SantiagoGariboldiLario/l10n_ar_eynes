@@ -54,17 +54,24 @@ class AccountCheck(models.Model):
     _description = 'Check'
     _rec_name = 'number'
 
-    number = fields.Char('Check Number', required=True, size=8)
+    def _get_default_journal(self):
+        if self._context.get('default_internal_type') == 'third_party':
+            return self.env.ref('l10n_ar_eynes.third_party_checks_journal')
+        return False
 
-    bank_account_id = fields.Many2one(
+    number = fields.Char(
+        'Check Number',
+        required=True,
+        size=8)
+
+    journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Journal',
         required=True,
-        domain=[('type', '=', 'bank')])
+        default=_get_default_journal)
 
     bank_id = fields.Many2one(
         comodel_name='res.bank',
-        related='bank_account_id.bank_id',
         string='Bank')
 
     checkbook_id = fields.Many2one(
@@ -160,6 +167,13 @@ class AccountCheck(models.Model):
         #     state : 'rejected',
         # })
 
+    def unlink(self):
+        for check in self:
+            if (check.third_party_check_state and check.third_party_check_state != 'in_wallet') or \
+               (check.issued_check_state and check.issued_check_state != 'draft'):
+                raise UserError(_("Check Error! You cannot delete a check that is not in Draft or in Wallet"))
+        return super(AccountCheck, self).unlink()
+
     # ISSUED CHECK FIELDS AND METHODS
     issued_check_state = fields.Selection(
         selection=[
@@ -182,11 +196,11 @@ class AccountCheck(models.Model):
     # THIRD PARTY CHECK FIELDS AND METHODS
     third_party_check_state = fields.Selection(
         selection=[
-            ('draft', 'Draft'),
             ('in_wallet', 'In wallet'),
             ('deposited', 'Deposited'),
             ('delivered', 'Delivered'),
-            ('rejected', 'Rejected')
+            ('rejected', 'Rejected'),
+            ('returned', 'Returned')
         ],
         default='in_wallet',
         string='State')
@@ -200,6 +214,7 @@ class AccountCheck(models.Model):
         string='Source Voucher',
         ondelete="cascade",
         readonly=True)
+
     debit_note_id = fields.Many2one(
         comodel_name='account.move',
         string='Debit Note',
@@ -262,13 +277,6 @@ class AccountCheck(models.Model):
             'third_party_check_state' : 'deposited'
         })
 
-    def unlink(self):
-        for check in self:
-            if (check.third_party_check_state and check.third_party_check_state != 'draft') or \
-               (check.issued_check_state and check.issued_check_state != 'draft'):
-                raise UserError(_("Check Error! You cannot delete a check that is not in Draft"))
-        return super(AccountCheck, self).unlink()
-
     _sql_constraints = [
-        ("unique_record", "unique(name, checkbook_id, bank_account_id, checkbook_format)", _("This record already exists")),
+        ("unique_record", "unique(number, checkbook_id, journal_id, checkbook_format)", _("This record already exists")),
     ]

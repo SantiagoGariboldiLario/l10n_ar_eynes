@@ -43,6 +43,7 @@
         'data/account_taxes_data.xml',
         'data/res_document_type_data.xml',
         'data/res_voucher_type_data.xml',
+        'data/account_default_journals_data.xml',
     ],
     'installable': True,
     'application': True,
