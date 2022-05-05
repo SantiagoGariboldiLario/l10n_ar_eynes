@@ -44,7 +44,8 @@ class CreateCheckbookWizard(models.TransientModel):
             for i in range(start_numer, end_number + 1):
                 self.env['account.check'].create({
                     'number': str(i).zfill(8),
-                    'bank_account_id' : self.journal_id.id,
+                    'journal_id' : self.journal_id.id,
+                    'bank_id' : self.journal_id.bank_id.id,
                     'checkbook_id' : self.env['account.payment.method.line'].search([('name', '=', payment_method_name)]).id,
                     'checkbook_format' : self.checkbook_format,
                     'internal_type' : 'issued',

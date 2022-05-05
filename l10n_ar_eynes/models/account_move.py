@@ -32,6 +32,7 @@ class AccountMove(models.Model):
     def _onchange_journal(self):
         if self.journal_id.type == 'sale':
             super(AccountMove, self)._onchange_journal()
+            self.denomination = self.journal_id.denomination
             if self.journal_id.code.isnumeric:
                 self.name = self.journal_id.code + '-' + self.get_highest_pos_sequence()
 
@@ -40,8 +41,6 @@ class AccountMove(models.Model):
         if not self.partner_id:
             return
         super(AccountMove, self)._onchange_partner_id()
-        # if self.move_type == 'in_invoice':
-        #     self._onchange_fiscal_position()
         if self.move_type == 'out_invoice':
             relations = self.env['user.journal.rel'].search(
                 [
