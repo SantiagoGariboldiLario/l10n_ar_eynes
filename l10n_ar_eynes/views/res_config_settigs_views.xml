@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_inherit_l10n_ar_eynes" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@class='settings']/div[5]" position="inside">
+                <h2>Journals</h2>
+                <div class="row mt16 o_settings_container" id="default_journals">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">Default Journals</span>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <label for="rejected_issued_checks_journal_id"
+                                        class="col-lg-4 o_light_label"
+                                        string="Rejected issued checks Journal" />
+                                    <field name="rejected_issued_checks_journal_id"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
