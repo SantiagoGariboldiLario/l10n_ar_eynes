@@ -10,7 +10,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="reject_date" />
+                            <field name="reject_date" required="1"/>
                         </group>
                     </group>
                     <group>
@@ -44,7 +44,6 @@
             </form>
         </field>
     </record>
-
 
     <!--reject issued check action-->
     <record id="reject_issued_check_action" model="ir.actions.act_window">
