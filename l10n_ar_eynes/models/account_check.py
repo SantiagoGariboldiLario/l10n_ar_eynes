@@ -6,47 +6,48 @@ class AccountCheckConfig(models.Model):
     _name = 'account.check.config'
     _description = 'Check Account Configuration'
 
+    account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Main Check Account',
+        required=True,
+        help="In Argentina, Valores a Depositar is used, for example"
+    )
+    deferred_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Deferred Check Account',
+        required=True
+    )
+    deferred_journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        string='Deferred Check Journal',
+        required=True
+    )
+    receivable_rejected_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Receivable Rejected Check Account',
+        domain=[('internal_type', '=', 'receivable')],
+        help=_("Partner's account in debit note generation."),
+        required=True
+    )
+    rejected_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Rejected Check Account',
+        domain=[('internal_type', 'not in', ('receivable', 'payable'))],
+        required=True
+    )
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        string='Company',
+        required=True,
+        default=lambda self: self.env.user.company_id.id
+    )
+
     def name_get(self):
         ret = []
         for config in self:
             ret.append((config.id, "%s: %s" % (
                 config.company_id.name, config.account_id.name)))
         return ret
-
-    account_id = fields.Many2one(
-        comodel_name='account.account',
-        string='Main Check Account',
-        required=True,
-        help="In Argentina, Valores a Depositar is used, for example")
-
-    deferred_account_id = fields.Many2one(
-        comodel_name='account.account',
-        string='Deferred Check Account',
-        required=True)
-
-    deferred_journal_id = fields.Many2one(
-        comodel_name='account.journal',
-        string='Deferred Check Journal',
-        required=True)
-
-    receivable_rejected_account_id = fields.Many2one(
-        comodel_name='account.account',
-        string='Receivable Rejected Check Account',
-        domain=[('internal_type', '=', 'receivable')],
-        help=_("Partner's account in debit note generation."),
-        required=True)
-
-    rejected_account_id = fields.Many2one(
-        comodel_name='account.account',
-        string='Rejected Check Account',
-        domain=[('internal_type', 'not in', ('receivable', 'payable'))],
-        required=True)
-
-    company_id = fields.Many2one(
-        comodel_name='res.company',
-        string='Company',
-        required=True,
-        default=lambda self: self.env.user.company_id.id)
 
 
 class AccountCheck(models.Model):
@@ -59,27 +60,23 @@ class AccountCheck(models.Model):
             return self.env.ref('l10n_ar_eynes.third_party_checks_journal')
         return False
 
-    number = fields.Char(
-        'Check Number',
-        required=True,
-        size=8)
-
+    number = fields.Char(string='Check Number', required=True, size=8)
     journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Journal',
         required=True,
-        default=_get_default_journal)
-
+        default=_get_default_journal
+    )
     bank_id = fields.Many2one(
         comodel_name='res.bank',
-        string='Bank')
-
+        string='Bank'
+    )
     checkbook_id = fields.Many2one(
         comodel_name='account.payment.method.line',
         string='Checkbook ID',
         ondelete='restrict',
-        domain=[('payment_method_id.code', '=', 'check_printing')])
-
+        domain=[('payment_method_id.code', '=', 'check_printing')]
+    )
     checkbook_format = fields.Selection(
         selection=[
             ('physical', 'Physical'),
@@ -87,62 +84,54 @@ class AccountCheck(models.Model):
             ('echeq', 'Echeq')
         ],
         string='Format',
-        required=True)
-
+        required=True
+    )
     type = fields.Selection(
         selection=[('common', 'Common'), ('deferred', 'Deferred')],
         string='Type',
         default='common',
-        required=True)
-
+        required=True
+    )
     internal_type = fields.Selection(
         selection=[('issued', 'Issued'), ('third_party', 'Third Party')],
         string='Internal Type',
         default='third_party',
-        required=True)
-
+        required=True
+    )
     amount = fields.Float(string='Amount')
-
     receiving_partner_id = fields.Many2one(
         comodel_name='res.partner',
-        string='Receiving Entity')
-
+        string='Receiving Entity'
+    )
     issue_date = fields.Date(string='Issue Date')
     reception_date = fields.Date(string='Reception Date')
     reject_date = fields.Date(string='Reject Date')
-
     payment_date = fields.Date(
         string='Payment Date',
-        help="Only if this check is post dated")
-
+        help="Only if this check is post dated"
+    )
     crossed = fields.Boolean(string='Crossed')
     not_order = fields.Boolean(string='Not Order')
-
     clearing = fields.Selection(
-        selection=[
-            ('24', '24 hs'),
-            ('48', '48 hs'),
-            ('72', '72 hs')
-        ],
+        selection=[('24', '24 hs'), ('48', '48 hs'), ('72', '72 hs')],
         string='Clearing',
-        default='24')
-
+        default='24'
+    )
     origin = fields.Char(string='Origin', size=64)
     signatory = fields.Char(string='Signatory', size=64)
-
     note = fields.Text(string="Note")
-
     payment_move_id = fields.Many2one(
         comodel_name='account.move',
-        string='Payment Account Move')
-
+        string='Payment Account Move'
+    )
     clearance_move_id = fields.Many2one(
         comodel_name='account.move',
-        string='Clearance Account Move')
-
+        string='Clearance Account Move'
+    )
     accredited = fields.Boolean(
         string='Accredited',
-        compute='_compute_accredit_state')
+        compute='_compute_accredit_state'
+    )
 
     @api.depends('clearance_move_id')
     def _compute_accredit_state(self):
@@ -152,26 +141,20 @@ class AccountCheck(models.Model):
             else:
                 check.accredited = False
 
-    def reject_check(self, state):
-        """
-            This function is called by the any of the reject wizard actions (issued or 3rd party).
-            It updates de state of the rejected check. Since both type of check are combined in a single class,
-            the function takes a 2nd argument to choose which one of the state needs to be updated.
-
-        Args:
-            state (selection): this argument can take 2 values:
-                issued_check_state or third_party_check_state.
-        """
-        print(f'state: {state}')
-        # self.write({
-        #     state : 'rejected',
-        # })
-
     def unlink(self):
+        """method gets overrided to ensure that check must be in specif state to get deleted"""
+
         for check in self:
-            if (check.third_party_check_state and check.third_party_check_state != 'in_wallet') or \
-               (check.issued_check_state and check.issued_check_state != 'draft'):
-                raise UserError(_("Check Error! You cannot delete a check that is not in Draft or in Wallet"))
+            if check.internal_type == 'third_party':
+                if check.third_party_check_state != 'in_wallet':
+                    raise UserError(
+                        _("Check Error! You cannot delete a third check that is not in Wallet")
+                    )
+            elif check.internal_type == 'issued':
+                if check.issued_check_state != 'draft':
+                    raise UserError(
+                        _("Check Error! You cannot delete a check that is not in Draft")
+                    )
         return super(AccountCheck, self).unlink()
 
     # ISSUED CHECK FIELDS AND METHODS
@@ -186,12 +169,13 @@ class AccountCheck(models.Model):
             ('waiting_numeration', 'Waiting numeration')
         ],
         default='draft',
-        string='State')
-
-    account_payment_order_id = fields.Many2one(
+        string='State'
+    )
+    payment_order_id = fields.Many2one(
         comodel_name='account.payment.order',
-        string='Voucher',
-        ondelete='cascade')
+        string='Payment Order',
+        ondelete='cascade'
+    )
 
     # THIRD PARTY CHECK FIELDS AND METHODS
     third_party_check_state = fields.Selection(
@@ -203,45 +187,45 @@ class AccountCheck(models.Model):
             ('returned', 'Returned')
         ],
         default='in_wallet',
-        string='State')
-
+        string='State'
+    )
     deposit_bank_id = fields.Many2one(
         comodel_name='res.partner.bank',
-        string='Deposit Account')
-
+        string='Deposit Account'
+    )
     source_payment_order_id = fields.Many2one(
         comodel_name='account.payment.order',
-        string='Source Voucher',
+        string='Source Payment Order',
         ondelete="cascade",
-        readonly=True)
-
+        readonly=True
+    )
     debit_note_id = fields.Many2one(
         comodel_name='account.move',
         string='Debit Note',
         readonly=True,
-        help="In case of rejection of the third check")
-
+        help="In case of rejection of the third check"
+    )
     source_partner_id = fields.Many2one(
         comodel_name='res.partner',
         string='Source Partner',
         required=False,
-        readonly=True)
-
+        readonly=True
+    )
     destiny_partner_id = fields.Many2one(
         comodel_name='res.partner',
-        string='Destiny Partner')
-
+        string='Destiny Partner'
+    )
     deposit_move_id = fields.Many2one(
         comodel_name='account.move',
         string='Deposit Move',
-        readonly=True)
-
+        readonly=True
+    )
     deposit_journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Deposit Journal',
         readonly=True,
-        compute='_compute_deposit_journal_id')
-
+        compute='_compute_deposit_journal_id'
+    )
     bank_branch = fields.Char(string='Bank Branch', size=64)
     zip = fields.Char(string='Zip Code', size=64)
     endorsement_date = fields.Date(string='Endorsement Date')
@@ -264,18 +248,10 @@ class AccountCheck(models.Model):
         if not self.number:
             return
         if not self.number.isnumeric():
-            raise ValidationError(_('Check Number must not have non numerical characters'))
+            raise ValidationError(
+                _('Check Number must not have non numerical characters')
+            )
         self.number = self.number.zfill(8)
-
-    def deposit_check(self):
-        """
-            This function is called after the deposit_check action is executed.
-            It updates the state of the check to 'deposited'.
-            Since the button is only on 3rd party checks, it doesn't need another argument.
-        """
-        self.write({
-            'third_party_check_state' : 'deposited'
-        })
 
     _sql_constraints = [
         ("unique_record", "unique(number, checkbook_id, journal_id, checkbook_format)", _("This record already exists")),

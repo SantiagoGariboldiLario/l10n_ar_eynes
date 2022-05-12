@@ -4,8 +4,6 @@ from odoo.exceptions import ValidationError
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
-    _name = 'account.move'
-    _description = "Account Move"
 
     denomination = fields.Selection(
         selection=[
@@ -14,12 +12,14 @@ class AccountMove(models.Model):
             ("not_defined", "Not Defined")
         ],
         string='Denomination',
-        default='not_defined')
-
+        default='not_defined'
+    )
     supplier_move_reference = fields.Char(string='Supplier Invoice Reference')
 
     def get_highest_pos_sequence(self):
-        invoices = self.env['account.move'].search([('journal_id', '=', self.journal_id.id)])
+        invoices = self.env['account.move'].search([
+            ('journal_id', '=', self.journal_id.id)
+        ])
 
         if not invoices:
             return '1'.zfill(8)
@@ -34,7 +34,8 @@ class AccountMove(models.Model):
             super(AccountMove, self)._onchange_journal()
             self.denomination = self.journal_id.denomination
             if self.journal_id.code.isnumeric:
-                self.name = self.journal_id.code + '-' + self.get_highest_pos_sequence()
+                self.name = self.journal_id.code \
+                    + '-' + self.get_highest_pos_sequence()
 
     @api.onchange('partner_id')
     def _onchange_partner(self):
@@ -42,11 +43,9 @@ class AccountMove(models.Model):
             return
         super(AccountMove, self)._onchange_partner_id()
         if self.move_type == 'out_invoice':
-            relations = self.env['user.journal.rel'].search(
-                [
-                    ('journal_id.fiscal_position_id', '=', self.fiscal_position_id.id),
-                    ('user_id', '=', self.env.user.id)
-                ],
+            relations = self.env['user.journal.rel'].search([
+                ('journal_id.fiscal_position_id', '=', self.fiscal_position_id.id),
+                ('user_id', '=', self.env.user.id)],
                 order='sequence asc',
             )
             if relations:
@@ -58,7 +57,8 @@ class AccountMove(models.Model):
                     'domain' : domain,
                 }
 
-    @api.onchange('supplier_move_reference', 'denomination', 'fiscal_position_id', 'partner_id')
+    @api.onchange('supplier_move_reference', 'denomination',
+                  'fiscal_position_id', 'partner_id')
     def _onchange_supplier_move_reference(self):
         if not self.supplier_move_reference:
             return
@@ -69,13 +69,20 @@ class AccountMove(models.Model):
 
         pos_code, move_code = self.supplier_move_reference.split('-')
         if not pos_code or not move_code:
-            raise ValidationError(_('numbers missing after or before separator'))
+            raise ValidationError(
+                _('numbers missing after or before separator')
+            )
         if not pos_code.isnumeric() or not move_code.isnumeric():
-            raise ValidationError(_('the reference must be numbers only'))
+            raise ValidationError(
+                _('the reference must be numbers only')
+            )
         if len(pos_code) > 5 or len(move_code) > 8:
-            raise ValidationError(_('Some of the fields exceeds length'))
+            raise ValidationError(
+                _('Some of the fields exceeds length')
+            )
 
-        self.supplier_move_reference = pos_code.zfill(4) + '-' + move_code.zfill(8)
+        self.supplier_move_reference = pos_code.zfill(4) \
+            + '-' + move_code.zfill(8)
         self.name = f'{self.supplier_move_reference}'
 
         if self.denomination and self.denomination != 'not_defined':
@@ -83,18 +90,37 @@ class AccountMove(models.Model):
 
     @api.onchange('fiscal_position_id', 'partner_id')
     def _onchange_fiscal_position(self):
-        fiscal_position = self.fiscal_position_id or self.partner_id.property_account_position_id
+        fiscal_position = self.fiscal_position_id \
+            or self.partner_id.property_account_position_id
         if self.move_type == 'in_invoice':
             self.denomination = fiscal_position.supplier_denomination
 
     def action_post(self):
         if not self.journal_id.due_date:
-            raise ValidationError(_("This journal Does not have a period established. Please Establish period before moving on. This can be accomplished in Accounting/Journals/Update Journals Period"))
+            raise ValidationError(
+                _("This journal Does not have a period established. \
+                    Please Establish period before moving on. \
+                    This can be accomplished in \
+                    Accounting/Journals/Update Journals Period")
+            )
         elif self.journal_id.due_date < fields.Date.today():
-            raise ValidationError(_("Journal period date has expired. Change journal or update period expiration date"))
+            raise ValidationError(
+                _("Journal period date has expired. \
+                    Change journal or update period expiration date")
+            )
         super(AccountMove, self).action_post()
 
     _sql_constraints = [
         ('unique_move', 'unique(journal_id,supplier_move_reference)', _('move already exists!')),
         ('unique_name', 'unique(name)', _('move already exists!'))
     ]
+
+
+class AccountMoveLine(models.Model):
+    _inherit = 'account.move.line'
+
+    issued_check_id = fields.Many2one(
+        comodel_name='account.check',
+        string='Issued Check',
+        domain=[('internal_type', '=', 'issued')]
+    )

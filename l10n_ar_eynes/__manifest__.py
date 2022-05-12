@@ -25,6 +25,7 @@
     'category': 'Accounting/Accounting',
     'depends': ['account', 'sale', 'stock'],
     'data': [
+        'views/res_config_settigs_views.xml',
         'views/res_partner_views.xml',
         'views/account_journal_views.xml',
         'views/account_payment_order_views.xml',
