@@ -295,7 +295,7 @@
 
     <menuitem
         id="account_payment_order_menu"
-        name="Payment to clients"
+        name="Customer Payments"
         action="account_payment_order_action"
         parent="account.menu_finance_receivables"
         sequence="4"/>

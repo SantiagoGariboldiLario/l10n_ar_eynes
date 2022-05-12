@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, _
 
 
 class UserJournalRel(models.Model):
@@ -22,8 +22,13 @@ class UserJournalRel(models.Model):
         ondelete='cascade',
         domain="[('type','=','sale')]"
     )
-    sequence = fields.Integer(string="Sequence", default=get_last_sequence, readonly=True)
+    sequence = fields.Integer(
+        string="Sequence",
+        default=get_last_sequence,
+        readonly=True
+    )
 
     _sql_constraints = [
-        ('unique_combination', 'unique(user_id,journal_id)', 'User already assigned to this journal!')
+        (
+            'unique_combination', 'unique(user_id,journal_id)', _('User already assigned to this journal!'))
     ]
