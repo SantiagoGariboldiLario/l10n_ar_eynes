@@ -160,12 +160,12 @@
         <field name="arch" type="xml">
             <form string="Checks" create="false">
                 <header>
-                    <button
+                    <!-- <button
                         string="Deposit Check"
                         name="deposit_check"
                         type="object"
                         class="oe_highlight"
-                        attrs="{'invisible' : [('internal_type', '=', 'issued')]}"/>
+                        attrs="{'invisible' : [('internal_type', '=', 'issued')]}"/> -->
 
                     <button
                         name="%(reject_third_party_check_action)d"

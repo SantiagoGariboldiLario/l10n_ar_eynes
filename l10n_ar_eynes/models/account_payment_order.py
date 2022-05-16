@@ -1,6 +1,5 @@
 import logging
 from odoo import _, api, fields, models
-from odoo.addons import decimal_precision as dp
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
 from odoo.tools import float_compare
 
@@ -9,6 +8,7 @@ _logger = logging.getLogger(__name__)
 
 class AccountPaymentOrder(models.Model):
     _name = 'account.payment.order'
+    _description = 'Account payment order'
     _inherit = ['mail.thread']
     _rec_name = 'number'
     _order = 'date DESC'
@@ -29,48 +29,52 @@ class AccountPaymentOrder(models.Model):
             return domain
         return domain
 
+    number = fields.Char(string='Number', copy=False, required=True)
     name = fields.Char(string='Memo', default='')
-
-    number = fields.Char(string='Number', copy=False)
-
     narration = fields.Text(string='Notes', default=lambda s: s._get_narration())
-
     partner_id = fields.Many2one(
         comodel_name='res.partner', string='Partner',
-        default=lambda s: s._get_partner())
-
-    account_id = fields.Many2one(comodel_name='account.account', string='Account')
-
+        default=lambda s: s._get_partner()
+    )
+    account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Account'
+    )
     pay_now = fields.Selection(
         selection=[
             ('pay_now', 'Pay Directly'),
             ('pay_later', 'Pay Later or Group Funds')
         ],
-        default='pay_now', string='Payment')
-
-    reference = fields.Char(string='Ref #', default=lambda s: s._get_reference())
-
+        default='pay_now', string='Payment'
+    )
+    reference = fields.Char(
+        string='Ref #',
+        default=lambda s: s._get_reference()
+    )
     journal_id = fields.Many2one(
-        comodel_name='account.journal', string='Journal', required=True,
+        comodel_name='account.journal',
+        string='Journal',
+        required=True,
         default=lambda s: s._get_journal(),
-        domain=_get_journals)
-
+        domain=_get_journals
+    )
     move_id = fields.Many2one(
         comodel_name='account.move',
         string='Account Entry',
-        copy=False)
-
+        copy=False
+    )
     move_line_ids = fields.One2many(
         comodel_name='account.move.line',
         related='move_id.line_ids',
-        string='Journal Items')
-
+        string='Journal Items'
+    )
     date = fields.Date(
         string='Date',
-        default=lambda self: self._context.get('date', fields.Date.context_today(self)))
-
+        default=lambda self: self._context.get(
+            'date', fields.Date.context_today(self)
+        )
+    )
     date_due = fields.Date(string="Due Date")
-
     state = fields.Selection(
         string='Status',
         selection=[
@@ -80,39 +84,39 @@ class AccountPaymentOrder(models.Model):
             ('posted', 'Posted')
         ],
         default='draft',
-        readonly=True)
-
+        readonly=True
+    )
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         string='Currency',
-        compute='_get_journal_currency')
-
+        compute='_get_journal_currency'
+    )
     amount = fields.Float(
         string='Tax Amount',
-        digits=dp.get_precision('Account'),
+        digits='Account',
         default=lambda s: s._get_amount(),
-        required=True)
-
+        required=True
+    )
     writeoff_acc_id = fields.Many2one(
         comodel_name='account.account',
-        string='Counterpart Account')
-
+        string='Counterpart Account'
+    )
     comment = fields.Char(
         string='Counterpart Comment',
         default=_('Write-Off'),
-        required=True)
-
+        required=True
+    )
     analytic_id = fields.Many2one(
         comodel_name='account.analytic.account',
-        string='Write-Off Analytic Account')
-
+        string='Write-Off Analytic Account'
+    )
     writeoff_amount = fields.Float(
         string='Difference Amount',
         compute='_get_writeoff_amount',
         readonly=True,
         help="Computed as the difference between the amount stated "
-        + "in the voucher and the sum of allocation on the voucher lines.")
-
+        + "in the voucher and the sum of allocation on the voucher lines."
+    )
     type = fields.Selection(
         string='Default Type',
         selection=[
@@ -121,15 +125,15 @@ class AccountPaymentOrder(models.Model):
             ('payment', 'Payment'),
             ('receipt', 'Receipt')
         ],
-        default=lambda s: s._get_type())
-
+        default=lambda s: s._get_type()
+    )
     tax_id = fields.Many2one(
         comodel_name='account.tax',
         string='Tax',
         readonly=True,
         domain=[('price_include', '=', False)],
-        help="Only for tax excluded from price")
-
+        help="Only for tax excluded from price"
+    )
     payment_option = fields.Selection(
         string='Payment Difference',
         required=True,
@@ -142,51 +146,50 @@ class AccountPaymentOrder(models.Model):
         to do with the eventual difference between the paid \
         amount and the sum of allocated amounts. You can either \
         choose to keep open this difference on the partner's \
-        account, or reconcile it with the payment(s)")
-
+        account, or reconcile it with the payment(s)"
+    )
     company_id = fields.Many2one(
         comodel_name='res.company',
         string='Company',
         default=lambda s: s._get_default_company(),
         required=True,
-        readonly=True)
-
+        readonly=True
+    )
     company_currency = fields.Many2one(
         related='company_id.currency_id',
-        string='Primary currency')
-
+        string='Primary currency'
+    )
     pre_line = fields.Boolean(string='Previous Payments ?')
-
     payment_mode_line_ids = fields.One2many(
         comodel_name='account.payment.mode.line',
         inverse_name='payment_order_id',
-        string='Payments Lines')
-
+        string='Payments Lines'
+    )
     line_ids = fields.One2many(
         comodel_name='account.payment.order.line',
         inverse_name='payment_order_id',
-        string='Payment Lines')
-
+        string='Payment Lines'
+    )
     income_line_ids = fields.One2many(
         comodel_name='account.payment.order.line',
         inverse_name='payment_order_id',
         string='Credits',
         domain=[('type', '=', 'income')],
-        context={'default_type': 'income'})
-
+        context={'default_type': 'income'}
+    )
     debt_line_ids = fields.One2many(
         comodel_name='account.payment.order.line',
         inverse_name='payment_order_id',
         string='Debits',
         domain=[('type', '=', 'debt')],
-        context={'default_type': 'debt'})
-
+        context={'default_type': 'debt'}
+    )
     payment_rate_currency_id = fields.Many2one(
         comodel_name='res.currency',
         string='Payment Rate Currency',
         default=lambda s: s._get_payment_rate_currency(),
-        required=True)
-
+        required=True
+    )
     payment_rate = fields.Float(
         string='Exchange Rate',
         digits=(12, 6),
@@ -195,38 +198,44 @@ class AccountPaymentOrder(models.Model):
         help='The specific rate that will be used, in \
         this voucher, between the selected currency \
         (in \'Payment Rate Currency\' field)  and the \
-        voucher currency.')
-
+        voucher currency.'
+    )
     paid_amount_in_company_currency = fields.Float(
         string='Paid Amount in Company Currency',
         compute='_paid_amount_in_company_currency',
-        readonly=True)
-
+        readonly=True
+    )
     is_multi_currency = fields.Boolean(
         string='Multi Currency Voucher',
         help='Fields with internal purpose \
         only that depicts if the voucher is \
         a multi currency one or not',
-        compute='_is_multicurrency')
-
+        compute='_is_multicurrency'
+    )
     invoice_ids = fields.Many2many(
         comodel_name='account.move',
         compute='_get_invoice_ids',
-        string='Invoices', readonly=True)
-
-    # period_id = fields.Many2one(
-    #     comodel_name="date.period",
-    #     compute='_compute_period',
-    #     store=True,
-    #     string="Period",
-    #     required=False)
-
+        string='Invoices',
+        readonly=True
+    )
     message = fields.Char()
-
     third_party_check_receipt_ids = fields.One2many(
         comodel_name='account.check',
         inverse_name='source_payment_order_id',
-        string='Third party checks')
+        string='Third party checks',
+        required=False,
+        domain=[('internal_type', '=', 'third_party')]
+    )
+    issued_check_ids = fields.One2many(
+        comodel_name='account.check',
+        inverse_name='payment_order_id',
+        string='Issued Checks',
+        required=False,
+        domain=[
+            ('internal_type', '=', 'issued'),
+            ('issued_check_state', '=', 'draft')
+        ]
+    )
 
     def action_clean_lines(self):
         for rec in self:
@@ -239,21 +248,22 @@ class AccountPaymentOrder(models.Model):
         self._payment_rate()
         self.action_clean_lines()
 
-    @api.depends('date')
-    def _compute_period(self):
-        for rec in self:
-            if not rec.date:
-                continue
-            period_obj = rec.env['date.period']
-            period = period_obj._get_period(rec.date)
-            rec.period_id = period.id
+    # @api.depends('date')
+    # def _compute_period(self):
+    #     for rec in self:
+    #         if not rec.date:
+    #             continue
+    #         period_obj = rec.env['date.period']
+    #         period = period_obj._get_period(rec.date)
+    #         rec.period_id = period.id
 
     @api.onchange('date')
     def _payment_rate(self):
 
         rate = self.currency_id._get_rates(self.company_id, self.date)[self.currency_id.id]
 
-        if hasattr(self.currency_id, 'preciated') and self.currency_id.preciated:
+        if hasattr(self.currency_id, 'preciated') \
+                and self.currency_id.preciated:
             rate = 1 / rate
 
         self.payment_rate = rate
@@ -699,7 +709,8 @@ class AccountPaymentOrder(models.Model):
         return res
 
     def _create_move_line_payment(self, move_id, name, journal_id, amount,
-                                  company_currency, amount_currency, current_currency, sign):
+                                  company_currency, amount_currency,
+                                  current_currency, sign):
 
         amount_in_company_currency = self.\
             _convert_paid_amount_in_company_currency(amount)
@@ -854,6 +865,7 @@ class AccountPaymentOrder(models.Model):
 
     def _get_exchange_lines(self, line, move_id, amount_residual,
                             company_currency, current_currency):
+
         if amount_residual > 0:
             account_id = line.payment_order_id.company_id.\
                 expense_currency_exchange_account_id
@@ -1199,7 +1211,7 @@ class AccountPaymentOrderLine(models.Model):
         related='payment_order_id.partner_id'
     )
     untax_amount = fields.Float(string='untax amount')
-    amount = fields.Float(string='amount', digits=dp.get_precision('account'))
+    amount = fields.Float(string='amount', digits='account')
     reconcile = fields.Boolean(string='full reconcile')
 
     type = fields.Selection(
@@ -1213,18 +1225,18 @@ class AccountPaymentOrderLine(models.Model):
     account_analytic_id = fields.Many2one(comodel_name='account.analytic.account', string='Analytic Account')
     date_due = fields.Date(string='Due Date', related='move_line_id.date_maturity', readonly=True)
     amount_original = fields.Float(
-        string='Original Amount', digits=dp.get_precision('Account'),
+        string='Original Amount', digits='Account',
         compute='_compute_balance', store=True)
     amount_unreconciled = fields.Float(
-        string='Open Balance', digits=dp.get_precision('Account'),
+        string='Open Balance', digits='Account',
         compute='_compute_balance', store=True)
     amount_currency = fields.Float(
-        string='Amount CCY', digits=dp.get_precision('Account'))
+        string='Amount CCY', digits='Account')
     amount_original_currency = fields.Float(
-        string='Original Amount CCY', digits=dp.get_precision('Account'),
+        string='Original Amount CCY', digits='Account',
         compute='_compute_balance', store=True)
     amount_unreconciled_currency = fields.Float(
-        string='Open Balance CCY', digits=dp.get_precision('Account'),
+        string='Open Balance CCY', digits='Account',
         compute='_compute_balance', store=True)
     company_id = fields.Many2one(
         comodel_name='res.company', string='Company',
@@ -1336,9 +1348,14 @@ class AccountPaymentModeLine(models.Model):
     _description = 'Payment method lines'
 
     name = fields.Text(help='Payment reference', string='Description')
-    payment_order_id = fields.Many2one(comodel_name='account.payment.order', string='Payment Order')
-    payment_mode_id = fields.Many2one(comodel_name='account.journal', string='Payment Method')
-
+    payment_order_id = fields.Many2one(
+        comodel_name='account.payment.order',
+        string='Payment Order'
+    )
+    payment_mode_id = fields.Many2one(
+        comodel_name='account.journal',
+        string='Payment Method'
+    )
     amount = fields.Float(
         string='Amount',
         digits=(16, 2),
@@ -1346,26 +1363,25 @@ class AccountPaymentModeLine(models.Model):
         required=False,
         help='Payment amount in the company currency'
     )
-
     amount_currency = fields.Float(
         string='Amount in Partner Currency',
         digits=(16, 2),
         required=False,
         help='Payment amount in the partner currency'
     )
-
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         default=lambda s: s._compute_currency_id(),
         string='Currency'
     )
-
     company_currency = fields.Many2one(
         comodel_name='res.currency', string='Company Currency',
-        readonly=True, default=lambda s: s._get_company_currency())
-
+        readonly=True, default=lambda s: s._get_company_currency()
+    )
     date = fields.Date(
-        string='Payment Date', help="This date is informative only.")
+        string='Payment Date',
+        help="This date is informative only."
+    )
 
     # @api.depends('payment_mode_id')
     # def _compute_currency(self):
