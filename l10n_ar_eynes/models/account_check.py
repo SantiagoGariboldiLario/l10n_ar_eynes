@@ -1,7 +1,6 @@
 from odoo import fields, models, _, api
 from odoo.exceptions import ValidationError, UserError
 
-
 class AccountCheckConfig(models.Model):
     _name = 'account.check.config'
     _description = 'Check Account Configuration'
@@ -60,6 +59,12 @@ class AccountCheck(models.Model):
             return self.env.ref('l10n_ar_eynes.third_party_checks_journal')
         return False
 
+    record_ids = fields.Many2one(
+        comodel_name='account.check',
+        string='Checks',
+        store=False,
+        domain=[('internal_type', '=', 'issued')]
+    )
     number = fields.Char(string='Check Number', required=True, size=8)
     journal_id = fields.Many2one(
         comodel_name='account.journal',
@@ -133,6 +138,39 @@ class AccountCheck(models.Model):
         compute='_compute_accredit_state'
     )
 
+    currency_id = fields.Many2one(
+        related='payment_order_id.currency_id',
+    )
+    currency_rate = fields.Float(
+        related='payment_order_id.payment_rate',
+    )
+    amount_currency = fields.Float(
+        digits='Account',
+        compute='_compute_amount_currency',
+        string='Amount Currency',
+    )
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        string='Company',
+        required=True,
+        readonly=True,
+        default=lambda self: self.env.user.company_id.id
+    )
+
+    @api.onchange('checkbook_id', 'journal_id')
+    def _onchange_checkbook_id(self):
+        if not self.checkbook_id:
+            return
+        elif self.record_ids.checkbook_id != self.checkbook_id:
+            self.record_ids = False
+
+    @api.onchange('record_ids')
+    def _onchange_record_ids(self):
+        check = self.record_ids
+        self.type = check.type
+        self.number = check.number
+        self.bank_id = check.bank_id
+
     @api.depends('clearance_move_id')
     def _compute_accredit_state(self):
         for check in self:
@@ -140,6 +178,26 @@ class AccountCheck(models.Model):
                 check.accredited = True
             else:
                 check.accredited = False
+
+    @api.depends('amount', 'currency_rate')
+    def _compute_amount_currency(self):
+        for rec in self:
+            rec.amount_currency = rec.amount / rec.currency_rate
+
+    def create(self, vals_list):
+        """
+        Method gets overrided to update issued checks when added to supplier payment order.
+        In this case, the checks selected should be updated, otherwise they are created.
+        """
+        # checks are select from supplier payment order
+        if self._context.get('default_type') == 'payment':
+            for vals in vals_list:
+                if vals.get('record_ids'):
+                    rec_id = vals.pop('record_ids')
+                    self.env['account.check'].browse(rec_id).write(vals)
+            return
+        else:
+            return super(AccountCheck, self).create(vals_list)
 
     def unlink(self):
         """method gets overrided to ensure that check must be in specif state to get deleted"""
@@ -256,3 +314,4 @@ class AccountCheck(models.Model):
     _sql_constraints = [
         ("unique_record", "unique(number, checkbook_id, journal_id, checkbook_format)", _("This record already exists")),
     ]
+
