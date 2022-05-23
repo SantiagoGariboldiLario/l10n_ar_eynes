@@ -310,32 +310,11 @@
         <field name="arch" type="xml">
             <form string="Payment Order" context="{'default_type' : 'payment'}">
                 <header>
-                    <button name="proforma_voucher"
-                        string="Validate"
-                        states="draft"
-                        invisible="context.get('line_type', False)"
-                        class="oe_highlight"
-                        type="object"/>
-                    <button name="cancel_voucher"
-                        string="Cancel Payment"
-                        states="draft,proforma"
-                        type="object"
-                        invisible="context.get('line_type', False)"/>
-                    <button name="cancel_voucher"
-                        string="Unreconcile"
-                        type="object"
-                        states="posted"
-                        invisible="context.get('line_type', False)"
-                        confirm="Are you sure to unreconcile and cancel this record ?"/>
-                    <button name="action_cancel_draft"
-                        type="object"
-                        states="cancel"
-                        string="Set to Draft"
-                        invisible="context.get('line_type', False)"/>
-                    <field name="state"
-                        widget="statusbar"
-                        statusbar_visible="draft,posted"
-                        statusbar_colors='{"proforma":"blue"}'/>
+                    <button name="proforma_voucher" string="Validate" states="draft" invisible="context.get('line_type', False)" class="oe_highlight" type="object"/>
+                    <button name="cancel_voucher" string="Cancel Payment" states="draft,proforma" type="object" invisible="context.get('line_type', False)"/>
+                    <button name="cancel_voucher" string="Unreconcile" type="object" states="posted" invisible="context.get('line_type', False)" confirm="Are you sure to unreconcile and cancel this record ?"/>
+                    <button name="action_cancel_draft" type="object" states="cancel" string="Set to Draft" invisible="context.get('line_type', False)"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,posted" statusbar_colors='{"proforma":"blue"}'/>
                 </header>
                 <sheet>
                     <h1>
@@ -641,6 +620,9 @@
                                     <field name="currency_id" groups="base.group_multi_currency"/>
                                 </tree>
                             </field>
+                        </page>
+                        <page name="retentions_and_perceptions" string="Retentions and Perceptions">
+                            <p>Retentions and Perceptions</p>
                         </page>
                     </notebook>
                 </sheet>

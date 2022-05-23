@@ -19,6 +19,14 @@
                         </group>
                     </group>
                 </page>
+
+                <page name="perceptions" string="Perceptions" attrs="{'invisible': [('type','!=','perceptions')]}">
+                    <p>Perceptions</p>
+                </page>
+
+                <page name="retentions" string="Retentions" attrs="{'invisible': [('type','!=','retentions')]}">
+                    <p>Retentions</p>
+                </page>
             </notebook>
 
             <xpath expr="//field[@name='type']" position="after">
@@ -38,6 +46,12 @@
             <xpath expr="//field[@name='loss_account_id']" position="attributes">
                 <attribute name="attrs">
                     {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks', 'retentions', 'perceptions'))]}
+                </attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='default_account_id'][3]" position="attributes">
+                <attribute name="attrs">
+                    {'required':False}
                 </attribute>
             </xpath>
 

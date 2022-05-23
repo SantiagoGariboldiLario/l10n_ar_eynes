@@ -12,7 +12,6 @@ class AccountMove(models.Model):
             ("not_defined", "Not Defined")
         ],
         string='Denomination',
-        default='not_defined'
     )
     supplier_move_reference = fields.Char(string='Supplier Invoice Reference')
 
@@ -30,12 +29,13 @@ class AccountMove(models.Model):
 # ONCHANGE METHODS
     @api.onchange('journal_id', 'partner_id')
     def _onchange_journal(self):
+        if not self.partner_id:
+            return
         if self.journal_id.type == 'sale':
             super(AccountMove, self)._onchange_journal()
             self.denomination = self.journal_id.denomination
             if self.journal_id.code.isnumeric:
-                self.name = self.journal_id.code \
-                    + '-' + self.get_highest_pos_sequence()
+                self.update_name()
 
     @api.onchange('partner_id')
     def _onchange_partner(self):
@@ -98,21 +98,35 @@ class AccountMove(models.Model):
     def action_post(self):
         if not self.journal_id.due_date:
             raise ValidationError(
-                _("This journal Does not have a period established. \
-                    Please Establish period before moving on. \
-                    This can be accomplished in \
-                    Accounting/Journals/Update Journals Period")
+                _("This journal Does not have a period established.\n"
+                  + "Please Establish period before moving on.\n"
+                  + "This can be accomplished in \
+                  Accounting/Journals/Update Journals Period")
             )
         elif self.journal_id.due_date < fields.Date.today():
             raise ValidationError(
-                _("Journal period date has expired. \
-                    Change journal or update period expiration date")
+                _("Journal period date has expired.\n"
+                  + "Change journal or update period expiration date")
             )
         super(AccountMove, self).action_post()
 
+    def update_name(self):
+        denomination = self.denomination.capitalize()
+        code = self.journal_id.code
+        sequence = self.get_highest_pos_sequence()
+        self.name = f'{denomination}{code}-{sequence}'
+
     _sql_constraints = [
-        ('unique_move', 'unique(journal_id,supplier_move_reference)', _('move already exists!')),
-        ('unique_name', 'unique(name)', _('move already exists!'))
+        (
+            'unique_move',
+            'unique(journal_id,supplier_move_reference)',
+            _('move already exists!')
+        ),
+        (
+            'unique_name',
+            'unique(name)',
+            _('move already exists!')
+        )
     ]
 
 
