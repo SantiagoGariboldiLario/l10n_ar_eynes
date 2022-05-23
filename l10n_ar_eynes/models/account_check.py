@@ -1,6 +1,7 @@
 from odoo import fields, models, _, api
 from odoo.exceptions import ValidationError, UserError
 
+
 class AccountCheckConfig(models.Model):
     _name = 'account.check.config'
     _description = 'Check Account Configuration'
@@ -311,7 +312,62 @@ class AccountCheck(models.Model):
             )
         self.number = self.number.zfill(8)
 
-    _sql_constraints = [
-        ("unique_record", "unique(number, checkbook_id, journal_id, checkbook_format)", _("This record already exists")),
-    ]
+    def to_wallet(self):
+        # Funcion llamada al validar un pago de cliente que contenga cheques
+        for check in self.filtered(lambda rec: rec.internal_type == 'third_party'):
+            voucher = check.source_payment_order_id
+            if not voucher:
+                raise UserError(_('Check Error! Check has to \
+                    be associated with a voucher'))
 
+            partner_id = voucher.partner_id.id
+            vals = {}
+            if voucher.type == 'receipt':
+                vals['source_partner_id'] = partner_id
+
+            if not check.origin:
+                vals['origin'] = voucher.reference
+            vals['third_party_check_state'] = 'in_wallet'
+
+            # Si es cheque comun tomamos la fecha de emision
+            # como feche de pago tambien porque seria un cheque al dia
+            if check.type == 'common':
+                vals['payment_date'] = check.issue_date
+
+            check.write(vals)
+        return True
+
+    def check_to_wallet(self):
+        if self.deposit_move_id:
+            self.deposit_move_id.button_cancel()
+            self.deposit_move_id.unlink()
+            self.write({'third_party_check_state': 'wallet'})
+        else:
+            raise ValidationError(
+                _('There is no reference for account move. '
+                  + 'Imposible to go back to wallet.')
+            )
+
+    def return_wallet(self):
+        # Todos los cheques tienen que estar en delivered
+        for check in self.filtered(lambda rec: rec.internal_type == 'third_party'):
+            if check.third_party_check_state != 'delivered':
+                raise UserError(
+                    _("Third Check Error! You cannot return to \
+                    wallet a check if it is not in Delivered state")
+                )
+        self.write({
+            'third_party_check_state': 'in_wallet',
+            'endorsement_date': False,
+            'destiny_partner_id': False,
+            'dest': '',
+        })
+        return True
+
+    _sql_constraints = [
+        (
+            "unique_record",
+            "unique(number, checkbook_id, journal_id, checkbook_format)",
+            _("This record already exists")
+        ),
+    ]

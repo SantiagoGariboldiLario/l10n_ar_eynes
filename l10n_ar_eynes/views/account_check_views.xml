@@ -166,7 +166,13 @@
                         type="object"
                         class="oe_highlight"
                         attrs="{'invisible' : [('internal_type', '=', 'issued')]}"/> -->
-
+                    <button
+                        name="check_to_wallet"
+                        type='object'
+                        string='Back to Wallet'
+                        class="btn-secondary"
+                        attrs="{'invisible': [('internal_type', '=', 'third_party'), ('third_party_check_state','in', ('draft', 'in_wallet'))]}"
+                        confirm="You are going to delete an account move. Are you sure?"/>
                     <button
                         name="%(reject_third_party_check_action)d"
                         string="Reject Check"
