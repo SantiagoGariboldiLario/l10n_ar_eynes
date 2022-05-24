@@ -36,6 +36,7 @@
         'views/res_voucher_type_views.xml',
         'views/account_check_views.xml',
         'views/treasury_menuitems.xml',
+        'views/taxes_menuitems.xml',
         'wizard/update_journal_period_view.xml',
         'wizard/create_checkbook_wizard_view.xml',
         'wizard/reject_check_wizard_view.xml',

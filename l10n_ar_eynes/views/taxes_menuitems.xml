@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_retention_journals" model="ir.actions.act_window">
+        <field name="name">Retention Journals</field>
+        <field name="res_model">account.journal</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('type', '=', 'retentions')]</field>
+    </record>
+
+    <record id="action_perception_journals" model="ir.actions.act_window">
+        <field name="name">Perception Journals</field>
+        <field name="res_model">account.journal</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('type', '=', 'perceptions')]</field>
+    </record>
+
+    <menuitem id="taxes_submenu" name="Taxes" parent="account.menu_finance_configuration" sequence="3">
+        <menuitem id="account.menu_action_tax_form" name="Taxes" action="account.action_tax_form" sequence="1"/>
+        <menuitem id="taxes_retentions_menu" name="Retentions" action="action_retention_journals" sequence="2"/>
+        <menuitem id="taxes_perceptions_menu" name="Perceptions" action="action_perception_journals" sequence="3"/>
+    </menuitem>
+
+
+</odoo>
