@@ -49,7 +49,6 @@
                                 attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
                             <field name="pre_line" invisible="1"/>
                             <field name="type" invisible="1" attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="company_currency" invisible="0" readonly="1"/>
                             <field name="currency_id" attrs="{'readonly': True}" force_save="True"/>
 
                             <div attrs="{'invisible':[('is_multi_currency','=',False)]}">
@@ -245,15 +244,15 @@
                                             <field name="number"/>
                                             <field name="type"/>
                                             <field name="checkbook_format"/>
-                                            <field name="amount"/>
-                                            <field name="bank_id" />
+                                            <field name="amount" required="1"/>
+                                            <field name="bank_id" required="1"/>
                                             <field name="crossed"/>
                                             <field name="not_order"/>
                                         </group>
                                         <group>
-                                            <field name="reception_date"/>
-                                            <field name="issue_date"/>
-                                            <field name="payment_date" attrs="{'invisible': [('type', '=', 'common')], 'required': [('type','=','postdated')]}"/>
+                                            <field name="reception_date" required="1"/>
+                                            <field name="issue_date" required="1"/>
+                                            <field name="payment_date" attrs="{'invisible': [('type', '=', 'common')], 'required': [('type','=','deferred')]}"/>
                                             <field name="clearing"/>
                                             <field name="signatory"/>
                                             <field name="signatory_vat"/>
@@ -336,11 +335,6 @@
                                 invisible="context.get('line_type', False)"
                                 options="{'no_quick_create': True, 'no_create': True, 'no_create_edit': True}"
                                 string="Journal"/>
-                            <!-- <field name="journal_id"
-                                domain="[('type', '=', 'payment'), ('company_id', '=', company_id)]"
-                                invisible="context.get('line_type', False)"
-                                options="{'no_quick_create': True, 'no_create': True, 'no_create_edit': True}"
-                                string="Journal"/> -->
                             <field name="amount" class="oe_inline"
                                 string="Paid Amount"
                                 widget="monetary" options="{'currency_field': 'company_currency'}"
@@ -391,22 +385,11 @@
                                         '|',('currency_id', '=', False), ('currency_id', '=', parent.currency_id)
                                         ]"
                                     />
-                                    <field name="name" invisible="1"/>
+                                    <field name="currency_id" readonly="1"/>
                                     <field name="date"/>
                                     <field name="payment_order_id" invisible="1"/>
                                     <field name="name" invisible="0"/>
-                                    <field name="company_currency" invisible="1" readonly="1"/>
-                                    <field name="amount" sum="Total"
-                                        widget="monetary" options="{'currency_field': 'company_currency'}"/>
-                                    <field name="currency_id"
-                                        readonly="1"
-                                        force_save="1"
-                                        groups="base.group_multi_currency"
-                                        attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"/>
-
-                                    <field name="amount_currency" sum="Total CCY" groups="base.group_multi_currency"
-                                        attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="amount" sum="Total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 </tree>
                             </field>
                             <field name="invoice_ids" widget="many2many_tags" invisible="1"/>
