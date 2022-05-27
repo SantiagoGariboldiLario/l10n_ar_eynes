@@ -6,14 +6,20 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-17 18:16+0000\n"
-"PO-Revision-Date: 2022-03-17 18:16+0000\n"
+"POT-Creation-Date: 2022-05-24 20:42+0000\n"
+"PO-Revision-Date: 2022-05-24 20:42+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid " and no income lines"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__clearing__24
@@ -31,6 +37,11 @@ msgid "72 hs"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
+msgid "<span class=\"o_form_label\">Default Journals</span>"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_fiscal_position__afip_code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__afip_code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__afip_code
@@ -39,9 +50,35 @@ msgid "AFIP Code"
 msgstr "Código AFIP"
 
 #. module: l10n_ar_eynes
-#: model:ir.model,name:l10n_ar_eynes.model_account_move
-msgid "Account Move"
-msgstr "Movimiento"
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__account_id
+msgid "Account"
+msgstr "Cuenta"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_check_view_form_config
+msgid "Account Check Configuration"
+msgstr "Configuración de la cuenta de cheque"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__move_id
+msgid "Account Entry"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_customer_payment_order_action
+msgid "Account customer payment order"
+msgstr "Pagos de cliente"
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_account_payment_order
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_payment_order_view_tree
+msgid "Account payment order"
+msgstr "Pagos de Clientes"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_supplier_payment_order_action
+msgid "Account supplier payment order"
+msgstr "Pagos de Proveedores"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__accredited
@@ -49,14 +86,29 @@ msgid "Accredited"
 msgstr "Acreditado"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_needaction
+msgid "Action Needed"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__activity_start_date
 msgid "Activity Start Date"
 msgstr "Fecha de Comienzo de Actividad"
 
 #. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_check_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
+msgid "Additional Information"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
+msgid "Additional Information..."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
 msgid "Adittional Information"
-msgstr "Informacion Adicional"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__update_journal_period_wizard__selection_type__all
@@ -64,9 +116,61 @@ msgid "All Journals"
 msgstr "Todos los Diarios"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Allocation"
+msgstr "Importe"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Allocation CCY"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__amount
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__amount
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__price
 msgid "Amount"
-msgstr "Cantidad"
+msgstr "Importe"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_currency
+msgid "Amount CCY"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__amount_currency
+msgid "Amount Currency"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Amount Original CCY"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Amount Residual CCY"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__amount_currency
+msgid "Amount in Partner Currency"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__account_analytic_id
+msgid "Analytic Account"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Are you sure to unreconcile and cancel this record ?"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.update_journal_period_wizard_view_form
@@ -80,15 +184,24 @@ msgid "Assign Journals to Users"
 msgstr "Asignar Diarios Contables a Usuarios"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__bank_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_attachment_count
+msgid "Attachment Count"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
+msgid "Back to Wallet"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__bank_id
 msgid "Bank"
 msgstr "Banco"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__bank_account_id
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__bank_account_id
-msgid "Bank Account"
-msgstr "Cuenta Bancaria"
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__bank_branch
+msgid "Bank Branch"
+msgstr "Sucursal Bancaria"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__res_voucher_type__doc_type__b
@@ -96,15 +209,49 @@ msgid "Bill"
 msgstr "Cuenta"
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid "Can't break conciliation of a not accredited check!"
+msgstr "No se puede romper la conciliación de un cheque no acreditado!"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid "Can't break conciliation of a not issued check!"
+msgstr "No se puede romper la conciliación de un cheque no emitido!"
+
+#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.create_checkbook_wizard_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.reject_issued_check_wizard_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.reject_third_party_check_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.update_journal_period_wizard_view_form
 msgid "Cancel"
 msgstr "Cancelar"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__state__cancel
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Cancel Payment"
+msgstr "Cancelar pago"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+msgid "Cancel Receipt"
+msgstr "Cancelar recibo"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__cancelled
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__cancelled
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__cancel
 msgid "Cancelled"
 msgstr "Cancelado"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid ""
+"Cannot deposit! You cannot deposit check %s                        because "
+"Payment Date is greater than                        Deposit Date."
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_check
@@ -112,50 +259,135 @@ msgid "Check"
 msgstr "Cheque"
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid "Check %s can't be accredited!"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
+#, python-format
+msgid "Check : %s"
+msgstr "Cheque : %s"
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_account_check_config
+msgid "Check Account Configuration"
+msgstr "Configuracion de cuenta de cheque"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_check_config_action
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_check_view_form_config
+msgid "Check Config"
+msgstr "Configuración de Cheques"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
+#, python-format
+msgid "Check Deposit"
+msgstr "Depósito de Cheque"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__check_duplicated
 msgid "Check Duplicated"
 msgstr "Cheque duplicado"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__name
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_check_view_form
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid ""
+"Check Error! Check has to                     be associated with a voucher"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid "Check Error! You cannot delete a check that is not in Draft"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid "Check Error! You cannot delete a third check that is not in Wallet"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__number
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
 msgid "Check Number"
-msgstr "Numero de Cheque"
+msgstr "Numero de cheque"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid "Check Number must not have non numerical characters"
+msgstr "El numero de cheque debe contener numeros solamente"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
+#, python-format
+msgid "Check Rejected %s %s"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.check_config_menu
+msgid "Check configuration"
+msgstr "Configuracion de cheque"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid ""
+"Check number %s is postdated and has                         already been accredited!\n"
+"Please break the                         conciliation of that check first."
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_checkbook_wizard.py:0
-#: model:ir.model,name:l10n_ar_eynes.model_account_checkbook
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__checkbook_id
 #, python-format
 msgid "Checkbook"
 msgstr "Chequera"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__name
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__name
-msgid "Checkbook Number"
-msgstr "Numero de Chequera"
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__checkbook_id
+msgid "Checkbook ID"
+msgstr "ID de chequera"
 
 #. module: l10n_ar_eynes
-#: code:addons/l10n_ar_eynes/models/acccount_checkbook.py:0
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__number
+msgid "Checkbook Number"
+msgstr "Numero de chequera"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid "Checkbook Number %s"
+msgstr "Numero de chequera %s"
+
+#. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_checkbook_wizard.py:0
 #, python-format
 msgid "Checkbook Number must be numeric"
-msgstr "El numero de chequera solo puede contener caracteres numericos"
+msgstr "La chequera debe conter solo numeros"
 
 #. module: l10n_ar_eynes
-#: code:addons/l10n_ar_eynes/models/acccount_checkbook.py:0
-#, python-format
-msgid "Checkbook number already exists!"
-msgstr "El numero de la chequera ya existe!"
-
-#. module: l10n_ar_eynes
-#: model:ir.actions.act_window,name:l10n_ar_eynes.account_check_action
-#: model:ir.ui.menu,name:l10n_ar_eynes.treasury_check_menu
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_check_view_form
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_check_view_tree
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__record_ids
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_tree
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_tree
 msgid "Checks"
 msgstr "Cheques"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_check_view_tree_config
+msgid "Checks Config"
+msgstr "Configuración de Cheques"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__clearance_move_id
@@ -168,19 +400,39 @@ msgid "Clearing"
 msgstr "Claro"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_checkbook__state__closed
-msgid "Closed"
-msgstr ""
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__type__common
 msgid "Common"
 msgstr "Comun"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__company_id
+#: model:ir.model,name:l10n_ar_eynes.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__company_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__company_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__company_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__company_id
 msgid "Company"
 msgstr "Compañia"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__company_currency
+msgid "Company Currency"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__writeoff_amount
+msgid ""
+"Computed as the difference between the amount stated in the voucher and the "
+"sum of allocation on the voucher lines."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_res_config_settings
+msgid "Config Settings"
+msgstr "Opciones de configuración"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.contacts_configuration_menu
@@ -189,11 +441,34 @@ msgid "Configuration"
 msgstr "Configuracion"
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid ""
+"Configuration Error !\n"
+"Please activate the sequence of selected journal !"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_res_partner
+msgid "Contact"
+msgstr "Contacto"
+
+#. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.res_partner_action
 #: model:ir.ui.menu,name:l10n_ar_eynes.contacts_menu
 #: model:ir.ui.menu,name:l10n_ar_eynes.res_partner_menu
 msgid "Contacts"
 msgstr "Contactos"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__writeoff_acc_id
+msgid "Counterpart Account"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__comment
+msgid "Counterpart Comment"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.create_checkbook_wizard_action
@@ -209,8 +484,14 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__create_uid
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__create_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__create_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__create_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__create_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__create_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__create_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_issued_check_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__create_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__create_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__create_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__create_uid
@@ -221,8 +502,14 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__create_date
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__create_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__create_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__create_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__create_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__create_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__create_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_issued_check_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__create_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__create_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__create_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__create_date
@@ -237,19 +524,88 @@ msgid "Credit Note"
 msgstr "Nota de Credito"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__income_line_ids
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Credits"
+msgstr "Creditos"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__crossed
 msgid "Crossed"
 msgstr "Cruzado"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__currency_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__currency_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__currency_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__currency_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__original_currency_id
+msgid "Currency"
+msgstr "Moneda"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Currency Options"
+msgstr "Opciones de Moneda"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+msgid "Customer"
+msgstr "Cliente"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.account_customer_payment_order_menu
+msgid "Customer Payments"
+msgstr "Pagos de cliente"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__date_original
+msgid "Date"
+msgstr "Fecha"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__debit_note_id
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__res_voucher_type__doc_type__dn
 msgid "Debit Note"
 msgstr "Nota de Debito"
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
+#, python-format
+msgid "Debit Note due to rejected check %s [%s]"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__debt_line_ids
+msgid "Debits"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__type
+msgid "Default Type"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__type__deferred
 msgid "Deferred"
 msgstr "Diferido"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__deferred_account_id
+msgid "Deferred Check Account"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__deferred_journal_id
+msgid "Deferred Check Journal"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__delivered
+msgid "Delivered"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__denomination
@@ -261,9 +617,84 @@ msgid "Denomination"
 msgstr "Denominacion"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_bank_id
+msgid "Deposit Account"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid "Deposit Check %s"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid "Deposit Check %s [%s]"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid "Deposit Check %s on %s"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_date
+msgid "Deposit Date"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_journal_id
+msgid "Deposit Journal"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_move_id
+msgid "Deposit Move"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_slip
+msgid "Deposit Slip"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__deposited
+msgid "Deposited"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__name
+msgid "Description"
+msgstr "Descripcion"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__dest
+msgid "Destiny"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__destiny_partner_id
+msgid "Destiny Partner"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__writeoff_amount
+msgid "Difference Amount"
+msgstr "Importe de la diferencia"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__display_name
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_issued_check_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__display_name
@@ -291,22 +722,32 @@ msgid "Document type"
 msgstr "Tipo de documento"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__state__draft
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__draft
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__draft
 msgid "Draft"
 msgstr "Borrador"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__due_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__date_due
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__date_due
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__due_date
 msgid "Due Date"
 msgstr "Fecha de vencimiento"
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
+#, python-format
+msgid "ERROR! There is no check configuration for this Company!"
+msgstr "ERROR! No hay configuración de cheques para esta empresa!"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__checkbook_format__echeq
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_checkbook__format__echeq
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_method_line__format__echeq
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__create_checkbook_wizard__checkbook_format__echeq
 msgid "Echeq"
-msgstr "Echeq"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__dst_cuit
@@ -325,17 +766,179 @@ msgid "End number must be an integer"
 msgstr "El numero final tiene que ser un entero"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__endorsement_date
+msgid "Endorsement Date"
+msgstr "Fecha de Endoso"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid "Error when searching for the check"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid ""
+"Error!\n"
+" Cannot validate a voucher with negative amount.\n"
+" Please check that Writeoff Amount is not negative."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid ""
+"Error!\n"
+"Please define a sequence on the journal."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid ""
+"Error!\n"
+"The Partner must be set to gather accounting information."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid ""
+"Error!\n"
+"The amount assigned to an invoice must not excede the unreconciled amount, nor be negative."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid ""
+"Error!\n"
+"You can't unlink a posted payment order.\n"
+"First you should unreconcile It."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid "Error! Bad Treasury configuration for this Company!"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid ""
+"Error! Bank Account has no accountconfigured. Please, configure an account "
+"for the bank account used for checks!"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid ""
+"Error! The selected checks must be                     in wallet.\n"
+"Check %s is not in wallet"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid ""
+"Error! The selected checks must to be in                     cartera.\n"
+"Check %s is not in wallet"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid ""
+"Error! There is no Journal                 configured for deferred checks."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid "Error! There is no check configuration for this Company!"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid ""
+"Error! You have to configure an account on                 Bank Account %s: "
+"%s"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__currency_rate
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__payment_rate
+msgid "Exchange Rate"
+msgstr "Tipo de cambio"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__expense_line_ids
+msgid "Expenses"
+msgstr "Gastos"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__expired
+msgid "Expired"
+msgstr "Vencido"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__is_multi_currency
+msgid ""
+"Fields with internal purpose         only that depicts if the voucher is"
+"         a multi currency one or not"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_fiscal_position
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__fiscal_position_id
 msgid "Fiscal Position"
 msgstr "Posición fiscal"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_follower_ids
+msgid "Followers"
+msgstr "Seguidores"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidores (Empresas)"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__checkbook_format
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__format
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__format
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__checkbook_format
 msgid "Format"
 msgstr "Formato"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Full"
+msgstr "Completo"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Gather Lines"
+msgstr "Obtener lineas"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid "Go to the configuration panel"
+msgstr "Ir al panel de configuración"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid "Go to the journal configuration"
+msgstr "Ir a la configuración de diario"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_upgrade_record_search
@@ -343,16 +946,59 @@ msgid "Group By"
 msgstr "Agrupar por"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__id
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_issued_check_wizard__id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard_line__id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_user_journal_rel__id
 msgid "ID"
-msgstr "ID"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_needaction
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_unread
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_has_error
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_check_config__account_id
+msgid "In Argentina, Valores a Depositar is used, for example"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_check__debit_note_id
+msgid "In case of rejection of the third check"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__in_wallet
+msgid "In wallet"
+msgstr "En billetera"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Internal Notes"
+msgstr "Notas internas"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__internal_type
@@ -360,34 +1006,134 @@ msgid "Internal Type"
 msgstr "Tipo interno"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__issue_date
-msgid "Issue Date"
+#: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__invoice_id
+#, python-format
+msgid "Invoice"
+msgstr "Factura"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__invoice_ids
+msgid "Invoices"
+msgstr "Facturas"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+msgid "Invoices and outstanding transactions"
+msgstr "Facturas y transacciones pendientes"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__customer
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__customer
+msgid "Is Customer"
+msgstr "Es cliente"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_is_follower
+msgid "Is Follower"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__supplier
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__supplier
+msgid "Is Supplier"
+msgstr "Es proveedor"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
+msgid "Is a Customer"
+msgstr "Es cliente"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__issue_date
+msgid "Issue Date"
+msgstr "Fecha de emision"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__internal_type__issued
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__state__issued
 msgid "Issued"
 msgstr "Propio"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move_line__issued_check_id
+msgid "Issued Check"
+msgstr "Cheque propio"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid "Issued Check %s"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_issued_check_action
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__issued_check_ids
+#: model:ir.ui.menu,name:l10n_ar_eynes.treasury_issued_check_menu
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Issued Checks"
+msgstr "Cheques propios"
+
+#. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_journal
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__journal_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__journal_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__journal_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__journal_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard_line__journal_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_user_journal_rel__journal_id
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Journal"
 msgstr "Diario"
 
 #. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_account_move
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__move_invoice_id
+msgid "Journal Entry"
+msgstr "Asiento contable"
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_account_move_line
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__move_line_id
+msgid "Journal Item"
+msgstr "Apunte contable"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__move_line_ids
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Journal Items"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid ""
+"Journal period date has expired.\n"
+"Change journal or update period expiration date"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__journal_ids
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.update_journal_period_wizard_view_form
 msgid "Journals"
 msgstr "Diarios"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__payment_option__without_writeoff
+msgid "Keep Open"
+msgstr "Mantener abierto"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check____last_update
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook____last_update
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config____last_update
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line____last_update
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order____last_update
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line____last_update
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense____last_update
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard____last_update
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_issued_check_wizard____last_update
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard____last_update
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type____last_update
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type____last_update
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard____last_update
@@ -398,8 +1144,14 @@ msgstr "Última modificación en"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__write_uid
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__write_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__write_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__write_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__write_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__write_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__write_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_issued_check_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__write_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__write_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__write_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__write_uid
@@ -410,8 +1162,14 @@ msgstr "Última actualización por"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__write_date
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__write_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__write_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__write_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__write_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__write_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__write_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_issued_check_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__write_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__write_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__write_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__write_date
@@ -421,10 +1179,59 @@ msgid "Last Updated on"
 msgstr "Última actualización el"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+msgid "Limpiar imputaciones"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Adjuntos principales"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__account_id
+msgid "Main Check Account"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__name
+msgid "Memo"
+msgstr "Circular"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message
+msgid "Message"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_has_error
+msgid "Message Delivery error"
+msgstr "Error de Envío de Mensaje"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_ids
+msgid "Messages"
+msgstr "Mensajes"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__is_multi_currency
+msgid "Multi Currency Voucher"
+msgstr "Pago Multimoneda"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__name
 msgid "Name"
 msgstr "Nombre"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
+#, python-format
+msgid ""
+"No default journal configured yet.\n"
+"Journal reject issued checks configuration is needed.\n"
+"To do that go to Invoicing/configuration/settings/journals "
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_fiscal_position__supplier_denomination__not_defined
@@ -440,8 +1247,59 @@ msgstr "No a la Orden"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__note
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_issued_check_wizard__note
 msgid "Note"
 msgstr "Nota"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__narration
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+msgid "Notes"
+msgstr "Notas"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__number
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Number"
+msgstr "Numero"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_payment_order_unique_number
+#, python-format
+msgid "Number must be unique"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Número de acciones"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_has_error_counter
+msgid "Number of errors"
+msgstr "Número de errores"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_needaction_counter
+msgid "Number of messages which requires an action"
+msgstr "Número de mensajes que requieren una acción"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Número de mensajes con error de envío"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_unread_counter
+msgid "Number of unread messages"
+msgstr "Número de mensajes no leidos"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__tax_id
+msgid "Only for tax excluded from price"
+msgstr "Sólo para impuestos excluídos del precio"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_check__payment_date
@@ -449,14 +1307,34 @@ msgid "Only if this check is post dated"
 msgstr "Origen"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_checkbook__state__open
-msgid "Open"
-msgstr "Abrir"
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_unreconciled
+msgid "Open Balance"
+msgstr "Balance inicial"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_unreconciled_currency
+msgid "Open Balance CCY"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__origin
 msgid "Origin"
 msgstr "Origen"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_original
+msgid "Original Amount"
+msgstr "Monto original"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_original_currency
+msgid "Original Amount CCY"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
+msgid "Other Information"
+msgstr "Otra informacion"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__code
@@ -469,9 +1347,49 @@ msgid "POS information"
 msgstr "Informacion POS"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__partner_id
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__paid
+msgid "Paid"
+msgstr "Pagado"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Paid Amount"
+msgstr "Monto pagado"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__paid_amount_in_company_currency
+msgid "Paid Amount in Company Currency"
+msgstr "Monto pagado en la moneda de la compania"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__partner_id
 msgid "Partner"
-msgstr "Cliente"
+msgstr "Empresa"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_check_config__receivable_rejected_account_id
+#, python-format
+msgid "Partner's account in debit note generation."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__pay_now__pay_now
+msgid "Pay Directly"
+msgstr "Pagar Directamente"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__pay_now__pay_later
+msgid "Pay Later or Group Funds"
+msgstr "Pagar más tarde o Agrupar Fondos"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__pay_now
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__type__payment
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__type__payment
+msgid "Payment"
+msgstr "Pago"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__payment_move_id
@@ -480,20 +1398,163 @@ msgstr "Asiento del Pago"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__payment_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__date
 msgid "Payment Date"
 msgstr "Fecha de pago"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__payment_option
+msgid "Payment Difference"
+msgstr "Diferencia de pago"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Payment Information"
+msgstr "Informacion de pago"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__line_ids
+msgid "Payment Lines"
+msgstr "Lineas de pago"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__payment_mode_id
+msgid "Payment Method"
+msgstr "Método de pago"
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_account_payment_method_line
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Payment Methods"
+msgstr "Métodos de pago"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Payment Options"
+msgstr "Opciones de pago"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__payment_order_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__payment_order_id
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Payment Order"
+msgstr "Orden de pago"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__payment_rate_currency_id
+msgid "Payment Rate Currency"
+msgstr "Tipo de Cambio del Pago"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Payment Ref"
+msgstr "Ref. Pago"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_mode_line__amount
+msgid "Payment amount in the company currency"
+msgstr "Monto del pago en la moneda de la compañía"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_mode_line__amount_currency
+msgid "Payment amount in the partner currency"
+msgstr "Monto del pago en la moneda del contacto"
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_account_payment_mode_line
+msgid "Payment method lines"
+msgstr "Líneas del metodo de pago"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_mode_line__name
+msgid "Payment reference"
+msgstr "Referencia del pago"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__payment_mode_line_ids
+msgid "Payments Lines"
+msgstr "Líneas del metodo de pago"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
+msgid "Payments, Receipts and Debits"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_perception_journals
+msgid "Perception Journals"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__type__perceptions
+#: model:ir.ui.menu,name:l10n_ar_eynes.taxes_perceptions_menu
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_journal_view_form_inherit_l10n_ar_eynes
+msgid "Perceptions"
+msgstr "Percepciones"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__checkbook_format__physical
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_checkbook__format__physical
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_method_line__format__physical
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__create_checkbook_wizard__checkbook_format__physical
 msgid "Physical"
 msgstr "Fisico"
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
+#, python-format
+msgid "Please, fill the expense account in the product."
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_journal__code
 msgid "Point of sale reference code"
-msgstr "Codigo de referencia al Punto de Venta"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__posted
+msgid "Posted"
+msgstr "Validado"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__pre_line
+msgid "Previous Payments ?"
+msgstr "Pagos previos?"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__company_currency
+msgid "Primary currency"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__proforma
+msgid "Pro-forma"
+msgstr "Pro-forma"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__product_id
+msgid "Product"
+msgstr "Producto"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__type__purchase
+msgid "Purchase"
+msgstr "Compra"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__type__receipt
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__type__receipt
+msgid "Receipt"
+msgstr "Recibo"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__receivable_rejected_account_id
+msgid "Receivable Rejected Check Account"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__receiving_partner_id
@@ -506,9 +1567,147 @@ msgid "Reception Date"
 msgstr "Fecha de recepción"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__state__rejected
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__payment_option__with_writeoff
+msgid "Reconcile Payment Balance"
+msgstr "Conciliar saldo del pago"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__reference
+msgid "Ref #"
+msgstr "Ref #"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__ref
+msgid "Reference"
+msgstr "Referencia"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__reject_id
+msgid "Reject"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
+msgid "Reject Check"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__reject_date
+msgid "Reject Date"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_check_reject_expense
+msgid "Reject Expense"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.reject_issued_check_wizard_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.reject_third_party_check_wizard_view_form
+msgid "Reject check"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_issued_check_wizard__reject_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__reject_date
+msgid "Reject date"
+msgstr "Fecha de rechazo"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.reject_issued_check_action
+msgid "Reject issued check"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_reject_issued_check_wizard
+msgid "Reject issued check wizard"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.reject_third_party_check_action
+msgid "Reject third party check"
+msgstr "Rechazar cheque de terceros"
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_reject_third_party_check_wizard
+msgid "Reject third party check wizard"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__rejected
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__rejected
 msgid "Rejected"
 msgstr "Rechazado"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__rejected_account_id
+msgid "Rejected Check Account"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
+#: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
+#: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
+#, python-format
+msgid "Rejected check"
+msgstr "Rechazar cheque"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
+msgid "Rejected issued checks Journal"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__rejected_issued_checks_journal_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_config_settings__rejected_issued_checks_journal_id
+msgid "Rejected issued checks journal"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_retention_journals
+msgid "Retention Journals"
+msgstr "Diarios de retenciones"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__type__retentions
+#: model:ir.ui.menu,name:l10n_ar_eynes.taxes_retentions_menu
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_journal_view_form_inherit_l10n_ar_eynes
+msgid "Retentions"
+msgstr "Retenciones"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Retentions and Perceptions"
+msgstr "Retenciones y percepciones"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__returned
+msgid "Returned"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__type__sale
+msgid "Sale"
+msgstr "Venta"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_journal__type
+msgid ""
+"Select 'Sale' for customer invoices journals.\n"
+"Select 'Purchase' for vendor bills journals.\n"
+"Select 'Cash' or 'Bank' for journals that are used in customer or vendor payments.\n"
+"Select 'General' for miscellaneous operations journals."
+msgstr ""
+"Selecciona 'Ventas' para diarios de facturas de cliente.\n"
+"Selecciona 'Compras' para diarios de facturas de proveedor.\n"
+"Selecciona 'Caja' o 'Banco' para diarios que se usan para pagos de clientes y proveedores. \n"
+"Selecciona 'General' para diarios que contienen operaciones varias."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard_line__selected
@@ -526,14 +1725,46 @@ msgid "Sequence"
 msgstr "Secuencia"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Set to Draft"
+msgstr "Volver a borrador"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__signatory
 msgid "Signatory"
 msgstr "Firmante"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__signatory_vat
+msgid "Signatory VAT"
+msgstr "CUIT del Firmante"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__signatory_account
+msgid "Signatory account"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__update_journal_period_wizard__selection_type__some
 msgid "Some Journals"
 msgstr "Algunos diarios"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid "Some of the fields exceeds length"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__source_partner_id
+msgid "Source Partner"
+msgstr "Contacto de origen"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__source_payment_order_id
+msgid "Source Payment Order"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__start_num
@@ -547,10 +1778,23 @@ msgid "Start number must be smaller than End number"
 msgstr "El numero inicial tiene que ser mayor al final"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__state
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__state
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__issued_check_state
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__third_party_check_state
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__state
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_tree
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_tree
 msgid "State"
 msgstr "Estado"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__state
+msgid "Status"
+msgstr "Estado"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Supplier"
+msgstr "Proveedor"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_fiscal_position__supplier_denomination
@@ -565,14 +1809,144 @@ msgid "Supplier Invoice Reference"
 msgstr "referencia de la factura del proveedor"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Supplier Invoices and Outstanding transactions"
+msgstr "Facturas de proveedor y Tansacciones pendientes"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.account_supplier_payment_order_menu
+msgid "Supplier Payments"
+msgstr "Pagos de proveedores"
+
+#. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_tax
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__tax_id
 msgid "Tax"
 msgstr "Impuesto"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__amount
+msgid "Tax Amount"
+msgstr "Importe impuesto"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.taxes_submenu
+msgid "Taxes"
+msgstr "Impuestos"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_line__move_invoice_id
+msgid "The move of this entry line."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_check__currency_rate
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__payment_rate
+msgid ""
+"The specific rate that will be used, in         this voucher, between the "
+"selected currency         (in 'Payment Rate Currency' field)  and the"
+"         voucher currency."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid "There are more than one voucher referenced to check %s."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid "There is no check configuration for this Company!"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid ""
+"There is no reference for account move. Imposible to go back to wallet."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid "Third Check "
+msgstr "Cheque de terceros "
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid ""
+"Third Check Error! You cannot cancel'                         check if it is"
+" not in Wallet"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#, python-format
+msgid ""
+"Third Check Error! You cannot return to                     wallet a check "
+"if it is not in Delivered state"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__third_party_check_ids
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Third Checks"
+msgstr "Cheques de terceros"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__internal_type__third_party
 msgid "Third Party"
 msgstr "Terceros"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_third_party_check_action
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Third Party Checks"
+msgstr "Cheques de terceros"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.treasury_third_party_check_menu
+msgid "Third party Checks"
+msgstr "Cheques de terceros"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__third_party_check_receipt_ids
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__type__third_party_checks
+msgid "Third party checks"
+msgstr "Cheques de terceros"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_mode_line__date
+msgid "This date is informative only."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__payment_option
+msgid ""
+"This field helps you to choose what you want         to do with the eventual"
+" difference between the paid         amount and the sum of allocated "
+"amounts. You can either         choose to keep open this difference on the "
+"partner's         account, or reconcile it with the payment(s)"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_line__date_due
+msgid ""
+"This field is used for payable and receivable journal entries. You can put "
+"the limit date for the payment of this line."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid ""
+"This journal Does not have a period established.\n"
+"Please Establish period before moving on.\n"
+"This can be accomplished in                   Accounting/Journals/Update Journals Period"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
@@ -582,14 +1956,66 @@ msgid "This record already exists"
 msgstr "Este registro ya existe"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Total"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Total Allocation"
+msgstr "Importe total"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Total Allocation CCY"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Total Amount"
+msgstr "Monto total"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Total CCY"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Total Unreconciled"
+msgstr "Total Desconciliado"
+
+#. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.treasury_menu
 msgid "Treasury"
 msgstr "Tesoreria"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__type
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__type
 msgid "Type"
 msgstr "Tipo"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_unread
+msgid "Unread Messages"
+msgstr "Mensajes por leer"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_unread_counter
+msgid "Unread Messages Counter"
+msgstr "Contador de mensajes sin leer"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Unreconcile"
+msgstr "Romper conciliación"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_update_journal_period_wizard
@@ -626,9 +2052,23 @@ msgid "User Journal Relation"
 msgstr "Relacion entre Usuario y Diario Contable"
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/user_journal_rel.py:0
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_user_journal_rel_unique_combination
+#, python-format
 msgid "User already assigned to this journal!"
 msgstr "El Usuario ya tiene asignado el Diario seleccionado"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Validate"
+msgstr "Validar"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid "Validate Error!\n"
+msgstr "Error de Validación"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__verification_required
@@ -637,33 +2077,46 @@ msgstr "Verificacion requerida"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__checkbook_format__virtual
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_checkbook__format__virtual
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_method_line__format__virtual
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__create_checkbook_wizard__checkbook_format__virtual
 msgid "Virtual"
-msgstr "Virtual"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid ""
+"Voucher Error!\n"
+"                    Voucher Paid Amount and sum of different payment                         mode must be equal"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__voucher_model
 msgid "Voucher Model"
-msgstr "Modelo de voucher"
+msgstr "Modelo de comprobante"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.res_voucher_type_action
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_action_res_voucher_type
 msgid "Voucher Types"
-msgstr "Tipos de voucher"
+msgstr "Tipos de comprobante"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_res_voucher_type
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_voucher_type_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_voucher_type_view_tree
 msgid "Voucher type"
-msgstr "Tipo de voucher"
+msgstr "Tipo de comprobante"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__state__waiting
-msgid "Waiting Accreditation"
-msgstr "Esperando Acreditación"
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_accreditation
+msgid "Waiting accreditation"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_numeration
+msgid "Waiting numeration"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__warehouse_id
@@ -671,9 +2124,77 @@ msgid "Warehouse"
 msgstr "Depósito"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__website_message_ids
+msgid "Website Messages"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__website_message_ids
+msgid "Website communication history"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard_line__wizard_id
 msgid "Wizard"
 msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid "Write-Off"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__analytic_id
+msgid "Write-Off Analytic Account"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid ""
+"Wrong voucher line\n"
+"                        The invoice you are willing to                         pay is not valid anymore."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
+msgid "You are going to delete an account move. Are you sure?"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid "You cannot validate a voucher with amount of 0.0"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid ""
+"You should configure the 'Gain Exchange Rate Account' to manage "
+"automatically the booking of accounting entries related to differences "
+"between exchange rates."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid ""
+"You should configure the 'Loss Exchange Rate Account' to manage "
+"automatically the booking of accounting entries related to differences "
+"between exchange rates."
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__zip
+msgid "Zip Code"
+msgstr "Codigo psotal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__account_id
+msgid "account"
+msgstr "Cuenta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_journal__due_date
@@ -683,9 +2204,16 @@ msgid ""
 msgstr ""
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_checkbook__check_ids
-msgid "checks"
-msgstr "Cheques"
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount
+msgid "amount"
+msgstr "Importe"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid "change"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_journal_code_unique
@@ -693,13 +2221,85 @@ msgid "code already exists!"
 msgstr "El codigo ya existe!"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order_line__type__debt
+msgid "debt"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__name
+msgid "description"
+msgstr "Descripcion"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__type
+msgid "dr/cr"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "e.g. 003/10"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "e.g. Invoice SAJ/0042"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__reconcile
+msgid "full reconcile"
+msgstr "Conciliación completa"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order_line__type__income
+msgid "income"
+msgstr "ingresos"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_move_unique_move
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_move_unique_name
+#, python-format
 msgid "move already exists!"
 msgstr "El movimiento ya existe!"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid "numbers missing after or before separator"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__partner_id
+msgid "partner"
+msgstr "cliente"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__payment_order_id
+msgid "payment order"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_checkbook_wizard.py:0
 #, python-format
 msgid "start number must be an integer"
 msgstr "El numero inicial tiene que ser un entero"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid "the reference must be numbers only"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__untax_amount
+msgid "untax amount"
+msgstr "base imponible"
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_account_payment_order_line
+msgid "voucher lines"
+msgstr "lineas de comprobante"
