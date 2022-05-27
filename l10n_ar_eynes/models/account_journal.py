@@ -55,6 +55,57 @@ class AccountJournal(models.Model):
         }
     )
 
+    # RETENTIONS FIELDS
+    tax_id = fields.Many2one(
+        comodel_name='account.tax',
+        string='Tax'
+    )
+    type_tax_use = fields.Selection(
+        string='Tax Application',
+        related='tax_id.type_tax_use',
+        readonly=True,
+    )
+    check_sit_iibb = fields.Boolean(
+        string='Check IIBB Situation',
+        default=False,
+        help="If checked, when IIBB situation is Multilateral, "
+        + "this perception is always applicable"
+    )
+    always_apply_padron = fields.Boolean(
+        'Always Apply from Padron',
+        default=False,
+        help="If checked, when the partner has a perception exception "
+        + "and it was generated from a padron, this perception will be applied"
+    )
+    jurisdiccion = fields.Selection(
+        selection=[
+            ('nacional', 'Nacional'),
+            ('provincial', 'Provincial'),
+            ('municipal', 'Municipal'),
+        ],
+        default='nacional',
+    )
+    state_id = fields.Many2one(
+        comodel_name='res.country.state',
+        string='State/Province',
+        domain="[('country_id','=','Argentina')]",
+    )
+    applicable_state = fields.Selection(
+        selection=[
+            ('dest', 'Destination'),
+            ('source', 'Source'),
+            ('always', 'Always')
+        ],
+        string='Applicable State',
+        default='dest',
+        help="Indicates if this Perception is applicable when:\n"
+        "* State/Province is equals to source address\n"
+        "* State/Province is equals to destination address\n"
+        "* Always"
+    )
+    from_register_ARBA = fields.Boolean('From ARBA Register')
+    from_register_AGIP = fields.Boolean('From AGIP Register')
+
     _sql_constraints = [
         ('code_unique', 'unique(code)', 'code already exists!')
     ]
