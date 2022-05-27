@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="account_check_deposit_form_view" model="ir.ui.view">
+            <field name="name">account.check.deposit.wizard.form</field>
+            <field name="model">account.check.deposit</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Check Deposit">
+                    <group>
+                        <group>
+                            <field name="company_id" invisible="1"/>
+                            <field name="bank_account_id" domain="[('company_id','=',company_id)]"/>
+                            <field name="journal_id" domain="[('type','=','bank')]"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="voucher_number"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button type="object" name="action_deposit" string="Deposit" class="oe_highlight"/>
+                        or
+                        <button class="oe_link" special="cancel" string="Cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="deposit_check_action" model="ir.actions.act_window">
+            <field name="name">Deposit check</field>
+            <field name="res_model">deposit.check.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</odoo>

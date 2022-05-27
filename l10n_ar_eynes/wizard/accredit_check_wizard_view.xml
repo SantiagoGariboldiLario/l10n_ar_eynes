@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="accredit_check_action" model="ir.actions.act_window">
+        <field name="name">Accredit check</field>
+        <field name="res_model">accredit.check.wizard</field>
+        <field name="view_mode">form</field>
+    </record>
+
+</odoo>
