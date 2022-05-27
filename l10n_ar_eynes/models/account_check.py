@@ -1,5 +1,6 @@
 from odoo import fields, models, _, api
 from odoo.exceptions import ValidationError, UserError
+import time
 
 
 class AccountCheckConfig(models.Model):
@@ -60,12 +61,6 @@ class AccountCheck(models.Model):
             return self.env.ref('l10n_ar_eynes.third_party_checks_journal')
         return False
 
-    record_ids = fields.Many2one(
-        comodel_name='account.check',
-        string='Checks',
-        store=False,
-        domain=[('internal_type', '=', 'issued')]
-    )
     number = fields.Char(string='Check Number', required=True, size=8)
     journal_id = fields.Many2one(
         comodel_name='account.journal',
@@ -76,12 +71,6 @@ class AccountCheck(models.Model):
     bank_id = fields.Many2one(
         comodel_name='res.bank',
         string='Bank'
-    )
-    checkbook_id = fields.Many2one(
-        comodel_name='account.payment.method.line',
-        string='Checkbook ID',
-        ondelete='restrict',
-        domain=[('payment_method_id.code', '=', 'check_printing')]
     )
     checkbook_format = fields.Selection(
         selection=[
@@ -105,12 +94,7 @@ class AccountCheck(models.Model):
         required=True
     )
     amount = fields.Float(string='Amount')
-    receiving_partner_id = fields.Many2one(
-        comodel_name='res.partner',
-        string='Receiving Entity'
-    )
     issue_date = fields.Date(string='Issue Date')
-    reception_date = fields.Date(string='Reception Date')
     reject_date = fields.Date(string='Reject Date')
     payment_date = fields.Date(
         string='Payment Date',
@@ -126,24 +110,17 @@ class AccountCheck(models.Model):
     origin = fields.Char(string='Origin', size=64)
     signatory = fields.Char(string='Signatory', size=64)
     note = fields.Text(string="Note")
-    payment_move_id = fields.Many2one(
-        comodel_name='account.move',
-        string='Payment Account Move'
-    )
-    clearance_move_id = fields.Many2one(
-        comodel_name='account.move',
-        string='Clearance Account Move'
-    )
-    accredited = fields.Boolean(
-        string='Accredited',
-        compute='_compute_accredit_state'
-    )
-
     currency_id = fields.Many2one(
-        related='payment_order_id.currency_id',
+        comodel_name='res.currency',
+        compute='_compute_currency',
+        readonly=True,
+        store=True
     )
     currency_rate = fields.Float(
-        related='payment_order_id.payment_rate',
+        digits=(12, 6),
+        compute='_compute_currency_rate',
+        readonly=True,
+        store=True
     )
     amount_currency = fields.Float(
         digits='Account',
@@ -156,6 +133,12 @@ class AccountCheck(models.Model):
         required=True,
         readonly=True,
         default=lambda self: self.env.user.company_id.id
+    )
+    record_ids = fields.Many2one(
+        comodel_name='account.check',
+        string='Checks',
+        store=False,
+        domain=[('internal_type', '=', 'issued')]
     )
 
     @api.onchange('checkbook_id', 'journal_id')
@@ -171,14 +154,6 @@ class AccountCheck(models.Model):
         self.type = check.type
         self.number = check.number
         self.bank_id = check.bank_id
-
-    @api.depends('clearance_move_id')
-    def _compute_accredit_state(self):
-        for check in self:
-            if check.clearance_move_id:
-                check.accredited = True
-            else:
-                check.accredited = False
 
     @api.depends('amount', 'currency_rate')
     def _compute_amount_currency(self):
@@ -201,8 +176,9 @@ class AccountCheck(models.Model):
             return super(AccountCheck, self).create(vals_list)
 
     def unlink(self):
-        """method gets overrided to ensure that check must be in specif state to get deleted"""
-
+        """
+        method gets overrided to ensure that check must be in specif state to get deleted
+        """
         for check in self:
             if check.internal_type == 'third_party':
                 if check.third_party_check_state != 'in_wallet':
@@ -260,11 +236,42 @@ class AccountCheck(models.Model):
         default='draft',
         string='State'
     )
+    checkbook_id = fields.Many2one(
+        comodel_name='account.payment.method.line',
+        string='Checkbook ID',
+        ondelete='restrict',
+        domain=[('payment_method_id.code', '=', 'check_printing')]
+    )
+    receiving_partner_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Receiving Entity'
+    )
+    payment_move_id = fields.Many2one(
+        comodel_name='account.move',
+        string='Payment Account Move'
+    )
     payment_order_id = fields.Many2one(
         comodel_name='account.payment.order',
         string='Payment Order',
         ondelete='cascade'
     )
+    clearance_move_id = fields.Many2one(
+        comodel_name='account.move',
+        string='Clearance Account Move'
+    )
+    accredited = fields.Boolean(
+        string='Accredited',
+        compute='_compute_accredit_state'
+    )
+
+    @api.depends('clearance_move_id')
+    def _compute_accredit_state(self):
+        for check in self.filtered(lambda rec: rec.internal_type == 'issued'):
+            if check.clearance_move_id:
+                check.accredited = True
+            else:
+                check.accredited = False
+
     def accredit_checks(self):
         if self.issued_check_state != "waiting_accreditation":
             raise ValidationError(
@@ -434,6 +441,7 @@ class AccountCheck(models.Model):
             ('in_wallet', 'In wallet'),
             ('deposited', 'Deposited'),
             ('delivered', 'Delivered'),
+            ('cancelled', 'Cancelled'),
             ('rejected', 'Rejected'),
             ('returned', 'Returned')
         ],
@@ -479,6 +487,7 @@ class AccountCheck(models.Model):
     )
     bank_branch = fields.Char(string='Bank Branch', size=64)
     zip = fields.Char(string='Zip Code', size=64)
+    reception_date = fields.Date(string='Reception Date')
     endorsement_date = fields.Date(string='Endorsement Date')
     deposit_date = fields.Date(string='Deposit Date', readonly=True)
     signatory_vat = fields.Char(string='Signatory VAT', size=64)
@@ -533,7 +542,7 @@ class AccountCheck(models.Model):
         if self.deposit_move_id:
             self.deposit_move_id.button_cancel()
             self.deposit_move_id.unlink()
-            self.write({'third_party_check_state': 'wallet'})
+            self.write({'third_party_check_state': 'in_wallet'})
         else:
             raise ValidationError(
                 _('There is no reference for account move. '
@@ -545,8 +554,8 @@ class AccountCheck(models.Model):
         for check in self.filtered(lambda rec: rec.internal_type == 'third_party'):
             if check.third_party_check_state != 'delivered':
                 raise UserError(
-                    _("Third Check Error! You cannot return to \
-                    wallet a check if it is not in Delivered state")
+                    _("Third Check Error! You cannot return to "
+                        + "wallet a check if it is not in Delivered state")
                 )
         self.write({
             'third_party_check_state': 'in_wallet',
