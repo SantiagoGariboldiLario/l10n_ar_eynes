@@ -575,8 +575,11 @@
                                     <field name="receiving_partner_id" invisible="1"/>
                                 </form>
                             </field>
-                            <!-- <label for="third_check_ids"/>
-                            <field name="third_check_ids" string="Third Checks" nolabel="1" colspan="4" domain="[('state', '=', 'wallet'), ('company_id', '=', company_id)]">
+                            <label for="third_party_check_ids"/>
+                            <field name="third_party_check_ids"
+                                string="Third Party Checks"
+                                nolabel="1" colspan="4"
+                                domain="[('internal_type', '=', 'third_party'), ('third_party_check_state', '=', 'in_wallet'), ('company_id', '=', company_id)]">
                                 <tree string="Third Checks">
                                     <field name="currency_id" invisible="1"/>
                                     <field name="number"/>
@@ -591,9 +594,9 @@
                                         options="{'currency_field': 'currency_id'}"
                                         attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
                                         sum="Total Amount"/>
-                                    <field name="state" invisible="1"/>
+                                    <field name="third_party_check_state" invisible="1"/>
                                 </tree>
-                            </field> -->
+                            </field>
                         </page>
                         <page string="Journal Items" name="journal_items" attrs="{'invisible': [('state','!=','posted')]}">
                             <group col="4">
