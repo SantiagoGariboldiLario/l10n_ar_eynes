@@ -1,5 +1,4 @@
 from odoo import fields, models, _
-from odoo.addons import decimal_precision as dp
 from odoo.exceptions import ValidationError, UserError
 
 
@@ -21,7 +20,7 @@ class RejectIssuedCheckWizard(models.TransientModel):
     def action_reject(self):
         """
         This method is called when the rejection is confirmed in the wizard.
-        It change the state of the check to 'rejected' and also creates a move.
+        It change the state of the issued check to 'rejected' and also creates a move.
         """
         self.validate_journal()
 
@@ -46,9 +45,8 @@ class RejectIssuedCheckWizard(models.TransientModel):
         check rejection as an invoice movement. It also adds the lines to the payment order
 
         Args:
-            check (_type_): check record
+            check (account.issued.check): check record
         """
-        # object models
         move_obj = self.env['account.move']
         move_line_obj = self.env['account.move.line']
         account_obj = self.env['account.account']
@@ -153,14 +151,17 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
         return journal and journal.id or False
 
     def action_reject(self):
-
-        # object models
+        """
+        This method is called when the rejection is confirmed in the wizard.
+        It change the state of the 3rd party check to 'rejected' and also creates a move.
+        """
         check_config_obj = self.env['account.check.config']
         check_obj = self.env['account.check']
         invoice_obj = self.env['account.move']
 
-        record_id = self._context.get('active_id')
-        check = check_obj.browse(record_id)
+        check = check_obj.browse(
+            self._context.get('active_id')
+        )
 
         if check:
             check.reject_date = self.reject_date
@@ -180,6 +181,7 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
 
             name = _('Debit Note due to rejected check %s [%s]') \
                 % (check.number or '', check.source_payment_order_id.number)
+
             invoice_vals = {
                 'origin': _('Check : %s') % check.number,
                 'name': name,
@@ -195,13 +197,7 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             lines = []
             # Linea del cheque rechazado
 
-            account_id = False
-            if check.state == 'delivered':
-                account_id = config.rejected_account_id.id
-            elif check.state == 'deposited':
-                account_id = check.deposit_bank_id.account_id.id
-            elif check.state == 'in_wallet':
-                account_id = config.account_id.id
+            account_id = self.get_account(config, check)
 
             date_format = self.env["res.lang"].search([
                 ("code", "=", self.env.user.lang)
@@ -275,6 +271,26 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             'type': 'ir.actions.act_window',
         }
 
+    def get_account(self, config, check):
+        """
+        Return account based on check state
+
+        Args:
+            config (account.check.config): company check configuration
+            check (account.third.party.check): 3rd party check
+
+        Returns:
+            account.account: Returns account object
+        """
+        account_id = False
+        if check.state == 'delivered':
+            account_id = config.rejected_account_id.id
+        elif check.state == 'deposited':
+            account_id = check.deposit_bank_id.account_id.id
+        elif check.state == 'in_wallet':
+            account_id = config.account_id.id
+        return account_id
+
 
 class CheckRejectExpense(models.TransientModel):
     _name = 'check.reject.expense'
@@ -291,6 +307,6 @@ class CheckRejectExpense(models.TransientModel):
     )
     price = fields.Float(
         string='Amount',
-        digits=dp.get_precision('Account'),
+        digits='Account',
         required=True
     )

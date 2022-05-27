@@ -219,13 +219,6 @@ class AccountPaymentOrder(models.Model):
         readonly=True
     )
     message = fields.Char()
-    third_party_check_receipt_ids = fields.One2many(
-        comodel_name='account.check',
-        inverse_name='source_payment_order_id',
-        string='Third party checks',
-        required=False,
-        domain=[('internal_type', '=', 'third_party')]
-    )
     issued_check_ids = fields.One2many(
         comodel_name='account.check',
         inverse_name='payment_order_id',
@@ -236,18 +229,31 @@ class AccountPaymentOrder(models.Model):
             ('issued_check_state', '=', 'draft')
         ]
     )
+    third_party_check_receipt_ids = fields.One2many(
+        comodel_name='account.check',
+        inverse_name='source_payment_order_id',
+        string='Third party checks',
+        required=False,
+        domain=[('internal_type', '=', 'third_party')]
+    )
+    third_party_check_ids = fields.Many2many(
+        comodel_name='account.check',
+        relation='third_check_voucher_rel',
+        column1='dest_payment_order_id',
+        column2='third_check_id',
+        string='Third Checks',
+    )
 
     def get_issued_checks_amount(self):
         return sum(self.issued_check_ids.mapped('amount'))
 
-    # @api.multi
-    # def get_third_checks_amount(self):
-    #     return sum(self.third_check_ids.mapped('amount'))
+    def get_third_party_checks_amount(self):
+        return sum(self.third_party_check_ids.mapped('amount'))
 
     def get_third_party_check_receipts_amount(self):
         return sum(self.third_party_check_receipt_ids.mapped('amount'))
 
-    @api.onchange('third_check_ids', 'third_check_receipt_ids')
+    @api.onchange('third_party_check_ids', 'third_party_check_receipt_ids')
     def onchange_checks(self):
         amount = self.payment_order_amount_hook()
         self.amount = amount
@@ -255,6 +261,7 @@ class AccountPaymentOrder(models.Model):
     def payment_order_amount_hook(self):
         amount = self.get_payment_lines_amount()
         amount += self.get_issued_checks_amount()
+        amount += self.get_third_party_checks_amount()
         amount += self.get_third_party_check_receipts_amount()
         return amount
 
@@ -448,7 +455,7 @@ class AccountPaymentOrder(models.Model):
             )
         for voucher in self:
             if voucher.type == 'receipt':
-                voucher.third_check_ids.unlink()
+                voucher.third_party_check_ids.unlink()
             voucher.issued_check_ids.unlink()
         super(AccountPaymentOrder, self).unlink()
 
@@ -818,22 +825,22 @@ class AccountPaymentOrder(models.Model):
         move_lines = _move_lines
 
         if self.type in ('sale', 'receipt'):
-            for check in self.third_check_receipt_ids:
+            for check in self.third_party_check_receipt_ids:
                 if check.amount == 0.0:
                     continue
 
-                res = check.create_voucher_move_line(self)
+                res = check.issued_create_voucher_move_line()
                 res['move_id'] = move_id
                 move_lines.append(res)
                 check.to_wallet()
 
         elif self.type in ('purchase', 'payment'):
             # Cheques recibidos de terceros que los damos a un proveedor
-            for check in self.third_check_ids:
+            for check in self.third_party_check_ids:
                 if check.amount == 0.0:
                     continue
 
-                res = check.create_voucher_move_line(self)
+                res = check.third_party_create_voucher_move_line(self)
                 res['move_id'] = move_id
                 move_lines.append(res)
                 check.check_delivered()
@@ -1254,6 +1261,7 @@ class AccountPaymentOrder(models.Model):
         return move_line
 
     def cancel_voucher(self):
+
         for payment in self:
             if payment.move_id:
                 payment.move_id.line_ids.remove_move_reconcile()
@@ -1263,6 +1271,25 @@ class AccountPaymentOrder(models.Model):
             'state': 'cancel',
             'move_id': False,
         })
+
+        for voucher in self:
+            # Cancelamos los cheques de tercero en recibos
+            third_receipt_checks = voucher.third_party_check_receipt_ids
+            third_receipt_checks.cancel_check(internal_type='third_party')
+
+            # Volvemos a cartera los cheques de tercero en pagos
+            third_checks = voucher.third_party_check_ids
+            third_checks.return_wallet()
+
+            # Cancelamos los cheques emitidos
+            issued_checks = voucher.issued_check_ids
+            issued_checks.cancel_check(internal_type='issued')
+            # for check in issued_checks:
+            #     if check.type == 'deferred' and check.accredited:
+            #         err = _('Check number %s is postdated and has \
+            #             already been accredited!\nPlease break the \
+            #             conciliation of that check first.') % check.number
+            #         raise ValidationError(err)
         return True
 
     def action_cancel_draft(self):
@@ -1272,7 +1299,7 @@ class AccountPaymentOrder(models.Model):
             issued_checks.write({'issued_check_state': 'draft'})
 
             # A draft los cheques de tercero en cobros
-            third_checks = voucher.third_check_receipt_ids
+            third_checks = voucher.third_party_check_receipt_ids
             third_checks.write({'third_party_check_state': 'in_wallet'})
         self.write({'state': 'draft'})
         return True
