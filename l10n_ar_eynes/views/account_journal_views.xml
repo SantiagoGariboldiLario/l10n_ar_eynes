@@ -6,6 +6,27 @@
         <field name="inherit_id" ref="account.view_account_journal_form"/>
         <field name="arch" type="xml">
 
+            <notebook position="before">
+                <group name="retentions_info" attrs="{'invisible' : [('type', '!=', 'retentions')]}">
+                    <group string="Tax Information">
+                        <field name="tax_id" select="1" attrs="{'required':[('type', '=', 'retentions')]}"/>
+                        <field name="type_tax_use" select="1"/>
+                    </group>
+                    <group string="Jurisdiction Information">
+                        <field name="jurisdiccion" select="1"/>
+                        <field name="state_id" select="1" attrs="{'invisible':[('jurisdiccion','!=','provincial')], 'required':[('jurisdiccion','=','provincial'), ('type', '=', 'retentions')]}"/>
+                        <field name="applicable_state" attrs="{'invisible':[('jurisdiccion','!=','provincial')], 'required':[('jurisdiccion','=','provincial'), ('type', '=', 'retentions')]}"/>
+                        <field name="from_register_ARBA"/>
+                        <field name="from_register_AGIP"/>
+                    </group>
+                    <group string="Usability Configuration">
+                        <!-- <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/> -->
+                        <field name="check_sit_iibb" attrs="{'invisible':[('jurisdiccion','!=','provincial')]}"/>
+                        <field name="always_apply_padron"/>
+                    </group>
+                </group>
+            </notebook>
+
             <notebook position="inside">
                 <page name="pos_info" string="POS information" attrs="{'invisible': [('type','!=','sale')]}">
                     <group>
