@@ -56,6 +56,8 @@ class AccountJournal(models.Model):
     )
 
     # RETENTIONS FIELDS
+    general_resolution = fields.Char('GR Number', required=False, size=64)
+    notes = fields.Text('Notes')
     tax_id = fields.Many2one(
         comodel_name='account.tax',
         string='Tax'
@@ -105,6 +107,38 @@ class AccountJournal(models.Model):
     )
     from_register_ARBA = fields.Boolean('From ARBA Register')
     from_register_AGIP = fields.Boolean('From AGIP Register')
+    retention_type = fields.Selection(
+        selection=[
+            ('vat', 'VAT'),
+            ('gross_income', 'Gross Income'),
+            ('profit', 'Profit'),
+            ('other', 'Other'),
+        ],
+        string='Type',
+        required=True,
+    )
+    vat_application_ids = fields.One2many(
+        comodel_name='retention.tax.application',
+        inverse_name='retention_journal_id',
+        string='VAT Tax Application',
+        domain=[('type', '=', 'vat')]
+    )
+    profit_application_ids = fields.One2many(
+        comodel_name='retention.tax.application',
+        inverse_name='retention_journal_id',
+        string='Profit Tax Application',
+        domain=[('type', '=', 'profit')]
+    )
+    gi_application_ids = fields.One2many(
+        comodel_name='retention.tax.application',
+        inverse_name='retention_journal_id',
+        string='Gross Income Tax Application',
+        domain=[('type', '=', 'gross_income')]
+    )
+    sequence_to_use = fields.Many2one(
+        comodel_name='ir.sequence',
+        string='Sequence to use'
+    )
 
     _sql_constraints = [
         ('code_unique', 'unique(code)', 'code already exists!')
