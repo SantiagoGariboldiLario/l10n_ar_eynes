@@ -48,6 +48,108 @@
                 <page name="retentions" string="Retentions" attrs="{'invisible': [('type','!=','retentions')]}">
                     <p>Retentions</p>
                 </page>
+
+                <page string="Tax Application" attrs="{'invisible': [('type', '!=', 'retentions')]}">
+                    <group colspan="4" col="6">
+                        <field name="retention_type" colspan="2" attrs="{'required': [('type', '!=', 'retentions')]}"/>
+                    </group>
+                    <separator string="Tax Application"/>
+                    <field name="vat_application_ids" nolabel="1" colspan="4" attrs="{'invisible':[('retention_type','!=','vat')]}" context="{'default_retention_type':'vat'}">
+                        <tree string="VAT Tax Application">
+                            <field name="reg_code"/>
+                            <field name="concept_id"/>
+                            <field name="activity_id"/>
+                            <field name="tax_allowance"/>
+                            <field name="exclude_tax_allowance"/>
+                            <field name="calculation_base" required="1"/>
+                            <field name="tax_minimum" />
+                            <field name="aliq_type" required="1"/>
+                            <field name="percent"/>
+                            <field name="scale_id"/>
+                            <field name="type" invisible="1"/>
+                        </tree>
+                        <form string="VAT Tax Application">
+                            <group>
+                                <field name="concept_id" domain="[('type', '=', 'vat')]"/>
+                                <field name="activity_id" domain="[('type', '=', 'vat')]"/>
+                                <field name="tax_allowance" />
+                                <field name="exclude_tax_allowance" />
+                                <field name="calculation_base" required="1"/>
+                                <field name="tax_minimum" />
+                                <field name="aliq_type" required="1"/>
+                                <field name="percent" attrs="{'invisible':[('aliq_type', '=', 'scale')]}"/>
+                                <field name="scale_id" attrs="{'invisible':[('aliq_type', '=', 'percent')], 'required':[('aliq_type', '=', 'scale')]}"/>
+                                <field name="name" />
+                                <field name="reg_code"/>
+                                <field name="type" invisible="1"/>
+                            </group>
+                        </form>
+                    </field>
+                    <field name="gi_application_ids" nolabel="1" colspan="4" attrs="{'invisible':[('retention_type','!=','gross_income')]}" context="{'default_retention_type':'gross_income'}">
+                        <tree string="Gross Income Tax Application">
+                            <field name="reg_code"/>
+                            <field name="concept_id"/>
+                            <field name="activity_id"/>
+                            <field name="tax_allowance"/>
+                            <field name="exclude_tax_allowance"/>
+                            <field name="calculation_base" required="1"/>
+                            <field name="tax_minimum" />
+                            <field name="aliq_type" required="1"/>
+                            <field name="percent"/>
+                            <field name="scale_id"/>
+                            <field name="sit_iibb"/>
+                            <field name="type" invisible="1"/>
+                        </tree>
+                        <form string="Gross Income Tax Application">
+                            <group>
+                                <field name="concept_id" domain="[('type', '=', 'gross_income')]"/>
+                                <field name="activity_id" domain="[('type', '=', 'gross_income')]"/>
+                                <field name="tax_allowance" />
+                                <field name="exclude_tax_allowance" />
+                                <field name="calculation_base" required="1"/>
+                                <field name="tax_minimum" />
+                                <field name="aliq_type" required="1"/>
+                                <field name="percent" attrs="{'invisible':[('aliq_type', '=', 'scale')]}"/>
+                                <field name="scale_id" attrs="{'invisible':[('aliq_type', '=', 'percent')], 'required':[('aliq_type', '=', 'scale')]}"/>
+                                <field name="name" />
+                                <field name="reg_code"/>
+                                <field name="sit_iibb"/>
+                                <field name="type" invisible="1"/>
+                            </group>
+                        </form>
+                    </field>
+                    <field name="profit_application_ids" nolabel="1" colspan="4" attrs="{'invisible':[('retention_type','!=','profit')]}" context="{'default_retention_type':'profit'}" >
+                        <tree string="Profit Tax Application">
+                            <field name="reg_code"/>
+                            <field name="concept_id"/>
+                            <field name="activity_id"/>
+                            <field name="tax_allowance"/>
+                            <field name="exclude_tax_allowance"/>
+                            <field name="calculation_base" required="1"/>
+                            <field name="tax_minimum" />
+                            <field name="aliq_type" required="1"/>
+                            <field name="percent"/>
+                            <field name="scale_id"/>
+                            <field name="type" invisible="1"/>
+                        </tree>
+                        <form string="Profit Tax Application">
+                            <group>
+                                <field name="concept_id" domain="[('type', '=', 'profit')]"/>
+                                <field name="activity_id" domain="[('type', '=', 'profit')]"/>
+                                <field name="tax_allowance" />
+                                <field name="exclude_tax_allowance" />
+                                <field name="calculation_base" required="1"/>
+                                <field name="tax_minimum" />
+                                <field name="aliq_type" required="1"/>
+                                <field name="percent" attrs="{'invisible':[('aliq_type', '=', 'scale')]}"/>
+                                <field name="scale_id" attrs="{'invisible':[('aliq_type', '=', 'percent')], 'required':[('aliq_type', '=', 'scale')]}"/>
+                                <field name="name" />
+                                <field name="reg_code"/>
+                                <field name="type" invisible="1"/>
+                            </group>
+                        </form>
+                    </field>
+                </page>
             </notebook>
 
             <xpath expr="//field[@name='type']" position="after">
