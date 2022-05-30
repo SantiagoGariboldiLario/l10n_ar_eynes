@@ -135,6 +135,10 @@ class AccountJournal(models.Model):
         string='Gross Income Tax Application',
         domain=[('type', '=', 'gross_income')]
     )
+    sequence_to_use = fields.Many2one(
+        comodel_name='ir.sequence',
+        string='Sequence to use'
+    )
 
     _sql_constraints = [
         ('code_unique', 'unique(code)', 'code already exists!')
