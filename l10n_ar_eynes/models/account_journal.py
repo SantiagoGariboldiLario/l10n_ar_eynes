@@ -119,19 +119,19 @@ class AccountJournal(models.Model):
     )
     vat_application_ids = fields.One2many(
         comodel_name='retention.tax.application',
-        inverse_name='retention_id',
+        inverse_name='retention_journal_id',
         string='VAT Tax Application',
         domain=[('type', '=', 'vat')]
     )
     profit_application_ids = fields.One2many(
         comodel_name='retention.tax.application',
-        inverse_name='retention_id',
+        inverse_name='retention_journal_id',
         string='Profit Tax Application',
         domain=[('type', '=', 'profit')]
     )
     gi_application_ids = fields.One2many(
         comodel_name='retention.tax.application',
-        inverse_name='retention_id',
+        inverse_name='retention_journal_id',
         string='Gross Income Tax Application',
         domain=[('type', '=', 'gross_income')]
     )

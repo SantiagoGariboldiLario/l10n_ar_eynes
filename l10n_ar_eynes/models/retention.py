@@ -122,7 +122,11 @@ class RetentionTaxApplication(models.Model):
     reg_code = fields.Integer('Reg. Code')
     concept_id = fields.Many2one('retention.concept', 'Concept')
     activity_id = fields.Many2one('retention.activity', 'Activity')
-    retention_id = fields.Many2one('retention.retention')
+    retention_journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        string='Retention',
+        domain=[('type', '=', 'retentions')]
+    )
     # Minimo No Imponible
     tax_allowance = fields.Float(
         string='Tax Allowance',
