@@ -150,6 +150,16 @@
                         </form>
                     </field>
                 </page>
+                <page string="Other Information" attrs="{'invisible': [('type', '!=', 'retentions')]}">
+                    <group>
+                        <field name="general_resolution" string="General Resolution Associated"/>
+                        <field name="sequence_to_use" attrs="{'required' : [('type', '=', 'retentions')]}"/>
+                    </group>
+                    <newline/>
+                    <separator string="Notes" colspan="4"/>
+                    <field name="notes" nolabel="1" colspan="4"/>
+                </page>
+
             </notebook>
 
             <xpath expr="//field[@name='type']" position="after">
