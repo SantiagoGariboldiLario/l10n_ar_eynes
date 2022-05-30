@@ -9,13 +9,13 @@
             <notebook position="before">
                 <group name="retentions_info" attrs="{'invisible' : [('type', '!=', 'retentions')]}">
                     <group string="Tax Information">
-                        <field name="tax_id" select="1"/>
+                        <field name="tax_id" select="1" attrs="{'required':[('type', '=', 'retentions')]}"/>
                         <field name="type_tax_use" select="1"/>
                     </group>
                     <group string="Jurisdiction Information">
                         <field name="jurisdiccion" select="1"/>
-                        <field name="state_id" select="1" attrs="{'invisible':[('jurisdiccion','!=','provincial')], 'required':[('jurisdiccion','=','provincial')]}"/>
-                        <field name="applicable_state" attrs="{'invisible':[('jurisdiccion','!=','provincial')], 'required':[('jurisdiccion','=','provincial')]}"/>
+                        <field name="state_id" select="1" attrs="{'invisible':[('jurisdiccion','!=','provincial')], 'required':[('jurisdiccion','=','provincial'), ('type', '=', 'retentions')]}"/>
+                        <field name="applicable_state" attrs="{'invisible':[('jurisdiccion','!=','provincial')], 'required':[('jurisdiccion','=','provincial'), ('type', '=', 'retentions')]}"/>
                         <field name="from_register_ARBA"/>
                         <field name="from_register_AGIP"/>
                     </group>
