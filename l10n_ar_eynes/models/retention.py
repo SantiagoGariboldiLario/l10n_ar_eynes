@@ -199,7 +199,6 @@ class RetentionTaxApplication(models.Model):
          'The tuple of Concept, Activity must be unique per Retention !'),
     ]
 
-    @api.multi
     def _compute_proportional_vat(self, percent, line_vals):
         vat_tax = {}
         base = 0.0
@@ -234,7 +233,6 @@ class RetentionTaxApplication(models.Model):
 
         return amount
 
-    @api.multi
     def _get_month_date_span_from_date(self, date=False):
         if not date:
             date = fields.Date.context_today(self)
@@ -248,7 +246,6 @@ class RetentionTaxApplication(models.Model):
         date_finish = (dt + relatived(day=31)).strftime(DSDF)
         return date_start, date_finish
 
-    @api.multi
     def get_period_partner_payments(self, partner, concept, po_date=False):
 
         date_start, date_finish = self._get_month_date_span_from_date(po_date)
@@ -317,7 +314,6 @@ class RetentionTaxApplication(models.Model):
         untaxed_amount += self.get_period_partner_advance_payments(prev_pos)
         return untaxed_amount
 
-    @api.multi
     def get_period_partner_advance_payments(self, prev_pos):
         extra_untaxed_amount = 0.0
         for po in prev_pos:
