@@ -1676,11 +1676,12 @@ class AccountPaymentOrderRetentionLine(models.Model):
         string='Amount Currency',
     )
     retention_id = fields.Many2one(
-        comodel_name='retention.retention',
+        comodel_name='account.journal',
         string='Retention Configuration',
         required=True,
-        help="Retention configuration used for this retention tax, where " +
-        "all the configuration resides. Accounts, Tax Codes, etc.",
+        domain=[('type', '=', 'retentions')],
+        help="Retention configuration used for this retention tax, where "
+        + "all the configuration resides. Accounts, Tax Codes, etc.",
     )
     base_amount = fields.Float(
         comodel_name='Base Code Amount',
