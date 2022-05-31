@@ -1590,3 +1590,181 @@ class AccountPaymentModeLine(models.Model):
             return self.env.user.company_id.currency_id
         else:
             return currency_obj.search([('rate', '=', 1.0)], limit=1)
+
+
+class AccountPaymentOrderRetentionLine(models.Model):
+    _name = 'account.payment.order.retention.line'
+    _description = 'Retention lines in payment order'
+
+    name = fields.Char(
+        string='Retention',
+        size=64,
+    )
+    date = fields.Date(
+        index=True,
+    )
+    payment_order_id = fields.Many2one(
+        comodel_name='account.payment.order',
+        string='Payment Order',
+        ondelete='cascade',
+    )
+    currency_id = fields.Many2one(related='payment_order_id.currency_id')
+    currency_rate = fields.Float(related='payment_order_id.payment_rate')
+    voucher_number = fields.Char(
+        string='Reference',
+        size=64,
+    )
+    account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Tax Account',
+        required=True,
+        domain=[
+            ('type', 'not in', ['view', 'income', 'closed']),
+        ],
+    )
+    base = fields.Float(
+        digits='Account',
+    )
+    amount = fields.Float(
+        digits='Account',
+    )
+
+    base_currency = fields.Float(
+        digits='Account',
+        compute='_compute_base_currency',
+        string='Base Currency',
+    )
+    amount_currency = fields.Float(
+        digits='Account',
+        compute='_compute_amount_currency',
+        string='Amount Currency',
+    )
+    retention_id = fields.Many2one(
+        comodel_name='retention.retention',
+        string='Retention Configuration',
+        required=True,
+        help="Retention configuration used for this retention tax, where " +
+        "all the configuration resides. Accounts, Tax Codes, etc.",
+    )
+    base_amount = fields.Float(
+        comodel_name='Base Code Amount',
+        digits='Account',
+    )
+    tax_amount = fields.Float(
+        string='Tax Code Amount',
+        digits='Account',
+    )
+    company_id = fields.Many2one(
+        string='Company',
+        related='account_id.company_id',
+        store=True,
+        readonly=True,
+    )
+    partner_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Partner',
+        required=False,
+    )
+    vat = fields.Char(
+        string='CIF/NIF',
+        related='partner_id.vat',
+        readonly=True,
+    )
+    certificate_no = fields.Char(
+        string='Certificate No.',
+        required=False,
+        size=32,
+    )
+    state_id = fields.Many2one(
+        comodel_name='res.country.state',
+        string="State/Province",
+    )
+
+    @api.onchange('retention_id')
+    def _onchange_retention(self):
+        retention = self.retention_id
+        if retention.id:
+            self.name = retention.name
+            self.account_id = retention.tax_id.account_id.id
+
+            if retention.state_id:
+                self.state_id = retention.state_id.id
+            else:
+                self.state_id = False
+
+    @api.depends('amount', 'currency_rate')
+    def _compute_amount_currency(self):
+        for rec in self:
+            rec.amount_currency = rec.amount / rec.currency_rate
+
+    @api.depends('base', 'currency_rate')
+    def _compute_base_currency(self):
+        for rec in self:
+            rec.base_currency = rec.base / rec.currency_rate
+
+    def create_voucher_move_line(self):
+        voucher = self.payment_order_id
+        self.ensure_one()
+        retention = self
+
+        if retention.amount == 0.0:
+            return {}
+
+        # Check if the date is already setted
+        # if not set the date of the voucher
+        retention_vals = {}
+        if not retention.date:
+            retention_vals['date'] = voucher.date
+
+        company_currency = voucher.company_id.currency_id.id
+        current_currency = self.currency_id.id
+
+        tax_amount_in_company_currency = \
+            voucher._convert_paid_amount_in_company_currency(retention.amount)
+
+        debit = credit = 0.0
+
+        retention.write(retention_vals)
+
+        debit = credit = 0.0
+        if voucher.type in ('purchase', 'payment'):
+            credit = tax_amount_in_company_currency
+        elif voucher.type in ('sale', 'receipt'):
+            debit = tax_amount_in_company_currency
+        if debit < 0:
+            credit = -debit
+            debit = 0.0
+        if credit < 0:
+            debit = -credit
+            credit = 0.0
+        sign = debit - credit < 0 and -1 or 1
+
+        self.apply_retention_sequence()
+
+        # Create the move line of the retetention
+        move_line = {
+            'name': retention.name or '/',
+            'debit': debit,
+            'credit': credit,
+            'account_id': retention.account_id.id,
+            'tax_line_id': retention.retention_id.tax_id.id,
+            'journal_id': voucher.journal_id.id,
+            'period_id': voucher.period_id.id,
+            'partner_id': voucher.partner_id.id,
+            'currency_id': company_currency != current_currency
+            and current_currency or False,
+            'amount_currency': company_currency != current_currency
+            and sign * retention.amount_currency or 0.0,
+            'date': voucher.date,
+            'date_maturity': voucher.date_due,
+        }
+
+        return move_line
+
+    def apply_retention_sequence(self):
+        sequence_model = self.env['ir.sequence']
+        for rtl in self:
+            number = sequence_model.next_by_code('retention.applied')
+            rtl.write({
+                'certificate_no': number,
+            })
