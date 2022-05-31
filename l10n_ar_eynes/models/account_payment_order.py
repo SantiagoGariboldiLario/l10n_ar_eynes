@@ -243,6 +243,23 @@ class AccountPaymentOrder(models.Model):
         column2='third_check_id',
         string='Third Checks',
     )
+    retention_ids = fields.One2many(
+        comodel_name='retention.tax.line',
+        inverse_name='payment_order_id',
+        string='Retentions',
+        readonly=True,
+        states={
+            'draft': [('readonly', False)],
+        },
+    )
+
+    @api.onchange('retention_ids')
+    def _onchange_retentions(self):
+        amount = self.payment_order_amount_hook()
+        self.amount = amount
+
+    def get_retentions_amount(self):
+        return sum(self.retention_ids.mapped('amount'))
 
     def get_issued_checks_amount(self):
         return sum(self.issued_check_ids.mapped('amount'))
@@ -263,6 +280,7 @@ class AccountPaymentOrder(models.Model):
         amount += self.get_issued_checks_amount()
         amount += self.get_third_party_checks_amount()
         amount += self.get_third_party_check_receipts_amount()
+        amount += self.get_retentions_amount()
         return amount
 
     def action_clean_lines(self):
