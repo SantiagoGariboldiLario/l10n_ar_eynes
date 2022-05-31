@@ -253,6 +253,13 @@ class AccountPaymentOrder(models.Model):
         },
     )
 
+    def prepare_retention_values(self, voucher):
+        ret_vals = {
+            'voucher_number': voucher.number,
+            'partner_id': voucher.partner_id.id,
+        }
+        return ret_vals
+
     @api.onchange('retention_ids')
     def _onchange_retentions(self):
         amount = self.payment_order_amount_hook()
@@ -890,6 +897,17 @@ class AccountPaymentOrder(models.Model):
                 if not check.issue_date:
                     vals['issue_date'] = self.date
                 check.write(vals)
+
+        for ret in self.retention_ids:
+            res = ret.create_voucher_move_line()
+            if res:
+                res['move_id'] = move_id
+                move_lines.append(res)
+
+            # Write voucher values in the retention tax line using method
+            # prepare_retention_values()
+            ret_vals = self.prepare_retention_values(self)
+            ret.write(ret_vals)
 
         return move_lines
 
