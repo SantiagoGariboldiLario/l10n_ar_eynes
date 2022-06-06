@@ -244,7 +244,7 @@ class AccountPaymentOrder(models.Model):
         string='Third Checks',
     )
     retention_ids = fields.One2many(
-        comodel_name='retention.tax.line',
+        comodel_name='account.payment.order.retention.line',
         inverse_name='payment_order_id',
         string='Retentions',
         readonly=True,
