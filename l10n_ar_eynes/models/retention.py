@@ -5,6 +5,19 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta as relatived
 
 
+class AccountAccount(models.Model):
+    _name = 'account.account'
+    _inherit = 'account.account'
+
+    retention_concept_ids = fields.Many2many(
+        comodel_name='retention.concept',
+        relation='account_retention_concept_rel',
+        column1='account_id',
+        column2='concept_id',
+        string='Concepts'
+    )
+
+
 class RetentionConcept(models.Model):
     _name = "retention.concept"
     _description = "Retention Profit Concepts"
@@ -199,7 +212,7 @@ class RetentionTaxApplication(models.Model):
 
     _sql_constraints = [
         ('concept_activity_uniq',
-         'unique (concept_id, activity_id, retention_id)',
+         'unique (concept_id, activity_id, retention_journal_id)',
          'The tuple of Concept, Activity must be unique per Retention !'),
     ]
 
