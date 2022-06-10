@@ -11,7 +11,7 @@
                 <field name="customer" string="Is a Customer"/>
             </xpath>
 
-            <xpath expr="//group[@name='purchase']" position="inside">
+            <xpath expr="//field[@name='property_supplier_payment_term_id']" position="before">
                 <field name="supplier" string="Is a Supplier"/>
             </xpath>
 
@@ -34,6 +34,7 @@
                                 <field name="exclusion_certificate" />
                                 <field name="exclusion_date_certificate" />
                                 <field name="sit_iibb"/>
+                                <field name="from_padron" readonly="True"/>
                                 <field name="company_id" invisible="1"/>
                             </tree>
                         </field>
