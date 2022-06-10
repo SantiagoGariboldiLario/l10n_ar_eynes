@@ -236,6 +236,7 @@
                                     <field name="third_party_check_state"/>
                                 </tree>
                                 <form string="Third Checks">
+                                    <field name="source_partner_id" invisible="1"/>
                                     <group>
                                         <group>
                                             <field name="source_payment_order_id" invisible="1"/>
