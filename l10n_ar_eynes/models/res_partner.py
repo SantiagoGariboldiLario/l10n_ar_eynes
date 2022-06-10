@@ -16,7 +16,7 @@ class ResPartner(models.Model):
 
     customer = fields.Boolean(string='Is Customer')
     supplier = fields.Boolean(string='Is Supplier')
-    activity_id = fields.Many2one(
+    retention_activity_id = fields.Many2one(
         comodel_name='retention.activity',
         string='Activity'
     )
@@ -95,8 +95,9 @@ class ResPartnerAdvanceRetention(models.Model):
     _description = "Retention advanced defined in Partner"
 
     retention_id = fields.Many2one(
-        comodel_name='retention.retention',
+        comodel_name='account.journal',
         string='Retention',
+        domain=[('type', '=', 'retentions')],
         required=True)
     concept_id = fields.Many2one(
         comodel_name='retention.concept',
