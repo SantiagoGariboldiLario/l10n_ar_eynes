@@ -1,3 +1,5 @@
+# from datetime import datetime as dt
+
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
 
@@ -34,6 +36,64 @@ class ResPartner(models.Model):
         domain=lambda self: self._get_retentions_domain(),
         string="Advance Payment Concept"
     )
+
+    def _get_retentions_to_apply(self, operation_date):
+
+        # Buscamos las retenciones a aplicar segun la posicion fiscal
+        retentions = {}
+        for ret in self.property_account_position_id.retention_ids:
+            retention = {
+                'retention': ret,
+                'activity_id': False,
+                'excluded_percent': False,
+                'percent': -1.0,
+                'ex_date_to': False,
+                'ex_date_from': False,
+                'sit_iibb': False,
+                'exclusion_date_certificate': False,
+                'from_padron': False,
+            }
+            retentions[ret.id] = retention
+
+        # Ahora buscamos a ver si tiene alguna excepcion
+        partner_retentions = {}
+        for p_ret in self.retention_ids:
+            excluded_percent = p_ret.excluded_percent
+            # ~ ddate = dt.strftime(operation_date, DSDF)
+            # ddate = dt.strftime(operation_date, "%Y-%m-%d %H:%M:%S")
+            # ~ tzd = fields.Datetime.context_timestamp(self, ddate)
+            # Chequeamos que la retencion este en un periodo valido
+            if excluded_percent:
+                if p_ret.ex_date_from and p_ret.ex_date_to:
+                    # Exclusion applies if we are into the boundaries
+                    if not (p_ret.ex_date_from <= operation_date <= p_ret.ex_date_to):
+                        excluded_percent = False
+                elif p_ret.ex_date_from:
+                    # Exclusion applies only if we are latter than date_from
+                    if not (p_ret.ex_date_from <= operation_date):
+                        excluded_percent = False
+                elif p_ret.ex_date_to:
+                    # Exclusion applies only if we are before than ex_date_to
+                    if not (operation_date <= p_ret.ex_date_to):
+                        excluded_percent = False
+
+            retention = {
+                'retention': p_ret.retention_id,
+                'activity_id': p_ret.activity_id,
+                'excluded_percent': excluded_percent,
+                'percent': p_ret.percent,
+                'ex_date_to': p_ret.ex_date_to,
+                'ex_date_from': p_ret.ex_date_from,
+                'sit_iibb': p_ret.sit_iibb,
+                'exclusion_date_certificate': p_ret.exclusion_date_certificate,
+                'from_padron': p_ret.from_padron,
+            }
+
+            partner_retentions[p_ret.retention_id.id] = retention
+
+        # Actualizamos el diccionario de retenciones
+        retentions.update(partner_retentions)
+        return retentions
 
 
 class resPartnerRetention(models.Model):
