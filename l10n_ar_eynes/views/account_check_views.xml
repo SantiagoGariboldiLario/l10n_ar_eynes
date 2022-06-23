@@ -49,12 +49,7 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem
-        id="check_config_menu"
-        name="Check configuration"
-        action="account_check_config_action"
-        parent="treasury_configuration_menu"
-        sequence="1"/>
+
 
     <!-- ISSUED CHECK FORM VIEW-->
     <record id="account_issued_check_view_form" model="ir.ui.view">
