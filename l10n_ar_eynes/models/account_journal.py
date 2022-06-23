@@ -1,4 +1,18 @@
-from odoo import fields, models
+import logging
+
+from odoo import fields, models, _, api
+from odoo.exceptions import ValidationError
+_logger = logging.getLogger(__name__)
+
+
+class FO:
+    """
+    Fake Object ( ͡º ͜ʖ ͡º)
+    """
+    id = False
+
+    def address_get():
+        return {}
 
 
 class AccountJournal(models.Model):
@@ -143,3 +157,14 @@ class AccountJournal(models.Model):
     _sql_constraints = [
         ('code_unique', 'unique(code)', 'code already exists!')
     ]
+
+
+class RetentionError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+    def __repr__(self):
+        return self.__str__()
