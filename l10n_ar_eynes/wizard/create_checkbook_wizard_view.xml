@@ -47,11 +47,4 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem
-        id="create_checkbook_menu"
-        name="Create Checkbook"
-        action="create_checkbook_wizard_action"
-        parent="treasury_configuration_menu"
-        sequence="2"/>
-
 </odoo>
