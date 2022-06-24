@@ -51,7 +51,7 @@
 
                 <page string="Tax Application" attrs="{'invisible': [('type', '!=', 'retentions')]}">
                     <group colspan="4" col="6">
-                        <field name="retention_type" colspan="2" attrs="{'required': [('type', '!=', 'retentions')]}"/>
+                        <field name="retention_type" colspan="2" attrs="{'required': [('type', '=', 'retentions')]}"/>
                     </group>
                     <separator string="Tax Application"/>
                     <field name="vat_application_ids" nolabel="1" colspan="4" attrs="{'invisible':[('retention_type','!=','vat')]}" context="{'default_retention_type':'vat'}">
