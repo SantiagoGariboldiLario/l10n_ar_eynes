@@ -115,7 +115,7 @@ class AccountJournal(models.Model):
             ('other', 'Other'),
         ],
         string='Type',
-        required=True,
+        help='Retention type'
     )
     vat_application_ids = fields.One2many(
         comodel_name='retention.tax.application',
