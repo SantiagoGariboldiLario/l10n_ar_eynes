@@ -17,3 +17,18 @@ class AccountFiscalPosition(models.Model):
     )
 
     afip_code = fields.Integer(string="AFIP Code")
+
+    retention_ids = fields.Many2many(
+        comodel_name='account.journal',
+        relation='fiscal_position_retention_rel',
+        column1='position_id',
+        column2='retention_id',
+        string='Retentions',
+        domain=lambda self: [
+            ('type', '=', 'retentions'),
+            ('company_id', '=', self.env.user.company_id.id)
+        ],
+        help="These are the retentions that will be applied to Suppliers "
+        + "belonging to this Fiscal Position. Exceptions to this have to be "
+        + "loaded at partner form."
+    )
