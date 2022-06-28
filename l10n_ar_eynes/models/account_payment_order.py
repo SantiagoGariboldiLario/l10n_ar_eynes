@@ -1,4 +1,8 @@
 import logging
+from pprint import pformat as pf
+from datetime import date
+import json
+
 from odoo import _, api, fields, models
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
 from odoo.tools import float_compare
@@ -243,6 +247,7 @@ class AccountPaymentOrder(models.Model):
         column2='third_check_id',
         string='Third Checks',
     )
+    # RETENTION FIELDS
     retention_ids = fields.One2many(
         comodel_name='account.payment.order.retention.line',
         inverse_name='payment_order_id',
@@ -251,6 +256,21 @@ class AccountPaymentOrder(models.Model):
         states={
             'draft': [('readonly', False)],
         },
+    )
+    date_effective = fields.Date(
+        string='Effective Date',
+        help="This is the effective date when one give this voucher "
+        + "to the Supplier"
+    )
+    receipt_number = fields.Char(
+        string='Supplier Receipt Number',
+        size=32,
+        help="This is the number of the receipt given by the Supplier"
+    )
+    disable_retentions = fields.Boolean(
+        string='Disable Retentions',
+        help="Check this if you want to disable automatic "
+        + "calculation of retention on this payment"
     )
 
     def prepare_retention_values(self, voucher):
@@ -1664,7 +1684,6 @@ class AccountPaymentOrderRetentionLine(models.Model):
     amount = fields.Float(
         digits='Account',
     )
-
     base_currency = fields.Float(
         digits='Account',
         compute='_compute_base_currency',
@@ -1805,3 +1824,80 @@ class AccountPaymentOrderRetentionLine(models.Model):
             rtl.write({
                 'certificate_no': number,
             })
+
+    @api.model
+    def get_readeable_name(self):
+        """
+        Returns an easy name used for exporters to print error messages
+        """
+        rl_id = self.id
+        rl_name = self.name
+        rl_partner_name = self.partner_id.name or 'Undefined'
+        name = u"RTL(#{0})[{1}-{2}]".format(rl_id, rl_name, rl_partner_name)
+        return name
+
+
+class RetentionMoveLine(models.Model):
+    _name = 'retention.move.line'
+    _description = 'Retention move lines showed in payment order'
+
+    payment_order_line_id = fields.Many2one(
+        comodel_name='account.payment.order.retention.line',
+        string='Payment order'
+    )
+    move_id = fields.Many2one(
+        comodel_name='account.move',
+        string='Move'
+    )
+    move_type = fields.Char(
+        string='Move type',
+        readonly=True
+    )
+    move_name = fields.Char(
+        string='Move name',
+        readonly=True
+    )
+    total_without_vat = fields.Float(
+        string='Total without vat',
+        readonly=True
+    )
+    payment_order_reference = fields.Char(
+        string="Payment order",
+        readonly=True,
+    )
+
+    # @api.onchange('move_id')
+    # def _onchange_move(self):
+    #     move = self.move_id
+    #     self.move_name = move.name
+    #     self.move_type = move.move_type
+    #     self.total_without_vat = self._get_total_without_vat()
+    #     self.payment_order_reference = self.get_payment_order()
+
+    def _get_total_without_vat(self):
+        return json.loads(self.move_id.tax_totals_json)['amount_untaxed']
+
+    def get_payment_order(self):
+        for rec in self:
+            po = self.env['account.payment.order'].search([
+                ('move_id', '=', rec.move_id.id)
+            ])
+            rec.payment_order_reference = po.number if po else ''
+
+
+class RetentionConceptLine(models.Model):
+    _name = 'retention.concept.line'
+    _description = 'Retention concept lines in payment order'
+
+    payment_order_line_id = fields.Many2one(
+        comodel_name='account.payment.order.retention.line',
+        string='Retention',
+    )
+    concept_id = fields.Many2one(
+        comodel_name='retention.concept',
+        string='Concept',
+    )
+    amount = fields.Float(
+        string='Amount',
+        digits='Account',
+    )
