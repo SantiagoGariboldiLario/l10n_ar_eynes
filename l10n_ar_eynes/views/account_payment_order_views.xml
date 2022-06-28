@@ -628,6 +628,29 @@
                                             <field name="account_id" invisible="1"/>
                                         </group>
                                     </group>
+                                    <group name="name" string="More information">
+                                        <field name="retention_move_line_ids">
+                                            <tree create="false" edit="false" delete="false">
+                                                <field name="payment_order_line_id" invisible="1"/>
+                                                <field name="move_id" />
+                                                <field name="payment_order_reference" string="OP reference"/>
+                                                <field name="move_type" string="Type"/>
+                                                <field name="move_name" string="Name"/>
+                                                <field name="total_without_vat" />
+                                            </tree>
+                                        </field>
+                                        <field name="retention_move_lines_total" />
+                                        <field name="retention_concept_line_ids" create="true">
+                                            <tree>
+                                                <field name="concept_id" />
+                                                <field name="amount" />
+                                            </tree>
+                                        </field>
+                                        <field name="applied_aliquot" />
+                                        <field name="total_month_retention" />
+                                        <field name="month_applied_retentions" />
+                                        <field name="actual_payment_retention" />
+                                    </group>
                                 </form>
                             </field>
                         </page>
