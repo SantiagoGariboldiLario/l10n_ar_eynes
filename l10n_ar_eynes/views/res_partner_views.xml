@@ -15,14 +15,11 @@
                 <field name="supplier" string="Is a Supplier"/>
             </xpath>
 
-            <xpath expr="//sheet/group" position="after">
-                <group name="retention_activity" string="Retention activity">
-                    <field name="retention_activity_id"/>
-                </group>
-            </xpath>
-
             <page name="accounting" position="after">
                 <page string="Retentions" name="retentions">
+                    <group name="retention_activity" string="Retention activity">
+                        <field name="retention_activity_id"/>
+                    </group>
                     <group string="Partner Retentions">
                         <field name="retention_ids" nolabel="1">
                             <tree string="Retentions to Apply" editable="bottom">
