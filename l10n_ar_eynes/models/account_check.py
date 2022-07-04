@@ -386,7 +386,7 @@ class AccountCheck(models.Model):
 
         if not account_id:
             raise UserError(
-                _("Error! Bank Account has no account"
+                _("Error! Bank Account has no account "
                   + "configured. Please, configure an "
                   + "account for the bank account used for checks!")
             )
