@@ -9,6 +9,7 @@ from . import company
 from . import iibb_situation
 from . import res_config_settings
 from . import res_document_type
+from . import res_partner_bank
 from . import res_partner
 from . import res_voucher_type
 from . import retention
