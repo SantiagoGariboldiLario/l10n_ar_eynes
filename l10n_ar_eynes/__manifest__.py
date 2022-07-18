@@ -32,6 +32,7 @@
         'views/account_move_views.xml',
         'views/user_journal_rel_views.xml',
         'views/account_fiscal_position_views.xml',
+        'views/account_tax_views.xml',
         'views/res_document_type_views.xml',
         'wizard/reject_check_wizard_view.xml',
         'views/res_voucher_type_views.xml',
