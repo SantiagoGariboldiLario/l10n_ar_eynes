@@ -70,57 +70,6 @@ class AccountJournal(models.Model):
     )
 
     # RETENTIONS FIELDS
-    general_resolution = fields.Char('GR Number', required=False, size=64)
-    notes = fields.Text('Notes')
-    tax_id = fields.Many2one(
-        comodel_name='account.tax',
-        string='Tax'
-    )
-    type_tax_use = fields.Selection(
-        string='Tax Application',
-        related='tax_id.type_tax_use',
-        readonly=True,
-    )
-    check_sit_iibb = fields.Boolean(
-        string='Check IIBB Situation',
-        default=False,
-        help="If checked, when IIBB situation is Multilateral, "
-        + "this perception is always applicable"
-    )
-    always_apply_padron = fields.Boolean(
-        'Always Apply from Padron',
-        default=False,
-        help="If checked, when the partner has a perception exception "
-        + "and it was generated from a padron, this perception will be applied"
-    )
-    jurisdiccion = fields.Selection(
-        selection=[
-            ('nacional', 'Nacional'),
-            ('provincial', 'Provincial'),
-            ('municipal', 'Municipal'),
-        ],
-        default='nacional',
-    )
-    state_id = fields.Many2one(
-        comodel_name='res.country.state',
-        string='State/Province',
-        domain="[('country_id','=','Argentina')]",
-    )
-    applicable_state = fields.Selection(
-        selection=[
-            ('dest', 'Destination'),
-            ('source', 'Source'),
-            ('always', 'Always')
-        ],
-        string='Applicable State',
-        default='dest',
-        help="Indicates if this Perception is applicable when:\n"
-        "* State/Province is equals to source address\n"
-        "* State/Province is equals to destination address\n"
-        "* Always"
-    )
-    from_register_ARBA = fields.Boolean('From ARBA Register')
-    from_register_AGIP = fields.Boolean('From AGIP Register')
     retention_type = fields.Selection(
         selection=[
             ('vat', 'VAT'),
@@ -130,6 +79,15 @@ class AccountJournal(models.Model):
         ],
         string='Type',
         help='Retention type'
+    )
+    tax_id = fields.Many2one(
+        comodel_name='account.tax',
+        string='Tax'
+    )
+    type_tax_use = fields.Selection(
+        string='Tax Application',
+        related='tax_id.type_tax_use',
+        readonly=True,
     )
     vat_application_ids = fields.One2many(
         comodel_name='retention.tax.application',
@@ -148,10 +106,6 @@ class AccountJournal(models.Model):
         inverse_name='retention_journal_id',
         string='Gross Income Tax Application',
         domain=[('type', '=', 'gross_income')]
-    )
-    sequence_to_use = fields.Many2one(
-        comodel_name='ir.sequence',
-        string='Sequence to use'
     )
 
     @api.model
@@ -173,19 +127,21 @@ class AccountJournal(models.Model):
             self, sit_iibb=False, from_padron=False,
             source_shipping_id=FO(), destination_shipping_id=FO()):
         self.ensure_one()
+
         partner_model = self.env['res.partner']
-        if not self.state_id:
+        tax_id = self.tax_id
+
+        if not tax_id.state_id:
+            return True
+        if tax_id.applicable_state == 'always':
             return True
 
-        if self.applicable_state == 'always':
-            return True
-
-        if self.always_apply_padron and from_padron:
+        if tax_id.always_apply_padron and from_padron:
             return True
 
         # Chequeamos la situacion de IIBB, si es CM,
         # directamente retornamos True
-        if self.check_sit_iibb:
+        if tax_id.check_sit_iibb:
             _logger.info("Chequeo de situacion IIBB activado")
             multilateral = self.env.ref("iibb_situation_multilateral")
             if sit_iibb == multilateral:
@@ -196,9 +152,9 @@ class AccountJournal(models.Model):
                 return True
 
         partner_state = False
-        retention_state = self.state_id.id
+        retention_state = tax_id.state_id.id
 
-        if self.applicable_state == 'dest':
+        if tax_id.applicable_state == 'dest':
             partner_state = partner_model.browse(
                 destination_shipping_id.address_get(['delivery']).get('delivery')
             ).id
@@ -208,7 +164,7 @@ class AccountJournal(models.Model):
                     f'the Supplier while computing Retention: {self.name}'
                 ))
 
-        elif self.applicable_state == 'source':
+        elif tax_id.applicable_state == 'source':
             user = self.env.user
             partner = user.company_id.partner_id
             partner_state = partner_model.browse(
