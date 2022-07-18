@@ -70,16 +70,6 @@ class AccountJournal(models.Model):
     )
 
     # RETENTIONS FIELDS
-    retention_type = fields.Selection(
-        selection=[
-            ('vat', 'VAT'),
-            ('gross_income', 'Gross Income'),
-            ('profit', 'Profit'),
-            ('other', 'Other'),
-        ],
-        string='Type',
-        help='Retention type'
-    )
     tax_id = fields.Many2one(
         comodel_name='account.tax',
         string='Tax'
@@ -88,24 +78,6 @@ class AccountJournal(models.Model):
         string='Tax Application',
         related='tax_id.type_tax_use',
         readonly=True,
-    )
-    vat_application_ids = fields.One2many(
-        comodel_name='retention.tax.application',
-        inverse_name='retention_journal_id',
-        string='VAT Tax Application',
-        domain=[('type', '=', 'vat')]
-    )
-    profit_application_ids = fields.One2many(
-        comodel_name='retention.tax.application',
-        inverse_name='retention_journal_id',
-        string='Profit Tax Application',
-        domain=[('type', '=', 'profit')]
-    )
-    gi_application_ids = fields.One2many(
-        comodel_name='retention.tax.application',
-        inverse_name='retention_journal_id',
-        string='Gross Income Tax Application',
-        domain=[('type', '=', 'gross_income')]
     )
 
     @api.model
