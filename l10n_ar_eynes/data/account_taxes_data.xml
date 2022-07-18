@@ -111,6 +111,13 @@
             <field name="description">2.50%</field>
         </record>
 
+        <record id="retentions_tax_group" model="account.tax.group" forcecreate="0">
+            <field name="name">Retentions</field>
+        </record>
+
+        <record id="perceptions_tax_group" model="account.tax.group" forcecreate="0">
+            <field name="name">Perceptions</field>
+        </record>
     </data>
 
 

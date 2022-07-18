@@ -55,27 +55,32 @@ class AccountTax(models.Model):
         string='Type',
         help='Retention type'
     )
-    # vat_application_ids = fields.One2many(
-    #     comodel_name='retention.tax.application',
-    #     inverse_name='retention_journal_id',
-    #     string='VAT Tax Application',
-    #     domain=[('type', '=', 'vat')]
-    # )
-    # profit_application_ids = fields.One2many(
-    #     comodel_name='retention.tax.application',
-    #     inverse_name='retention_journal_id',
-    #     string='Profit Tax Application',
-    #     domain=[('type', '=', 'profit')]
-    # )
-    # gi_application_ids = fields.One2many(
-    #     comodel_name='retention.tax.application',
-    #     inverse_name='retention_journal_id',
-    #     string='Gross Income Tax Application',
-    #     domain=[('type', '=', 'gross_income')]
-    # )
+    vat_application_ids = fields.One2many(
+        comodel_name='retention.tax.application',
+        inverse_name='retention_tax_id',
+        string='VAT Tax Application',
+        domain=[('type', '=', 'vat')]
+    )
+    profit_application_ids = fields.One2many(
+        comodel_name='retention.tax.application',
+        inverse_name='retention_tax_id',
+        string='Profit Tax Application',
+        domain=[('type', '=', 'profit')]
+    )
+    gi_application_ids = fields.One2many(
+        comodel_name='retention.tax.application',
+        inverse_name='retention_tax_id',
+        string='Gross Income Tax Application',
+        domain=[('type', '=', 'gross_income')]
+    )
     sequence_to_use = fields.Many2one(
         comodel_name='ir.sequence',
         string='Sequence to use'
     )
     general_resolution = fields.Char('GR Number', required=False, size=64)
     notes = fields.Text('Notes')
+
+    tax_group_name = fields.Char(
+        string='Tax group name',
+        related='tax_group_id.name'
+    )
