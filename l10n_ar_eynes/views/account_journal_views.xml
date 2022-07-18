@@ -8,10 +8,6 @@
 
             <notebook position="before">
                 <group name="retentions_info" attrs="{'invisible' : [('type', '!=', 'retentions')]}">
-                    <group string="Tax Information">
-                        <field name="tax_id" select="1" attrs="{'required':[('type', '=', 'retentions')]}"/>
-                        <field name="type_tax_use" select="1"/>
-                    </group>
                     <group string="Jurisdiction Information">
                         <field name="jurisdiccion" select="1"/>
                         <field name="state_id" select="1" attrs="{'invisible':[('jurisdiccion','!=','provincial')], 'required':[('jurisdiccion','=','provincial'), ('type', '=', 'retentions')]}"/>
@@ -42,11 +38,17 @@
                 </page>
 
                 <page name="perceptions" string="Perceptions" attrs="{'invisible': [('type','!=','perceptions')]}">
-                    <p>Perceptions</p>
+                    <group string="Tax Information">
+                        <field name="tax_id" select="1" attrs="{'required':[('type', '=', 'perceptions')]}"/>
+                        <field name="type_tax_use" select="1"/>
+                    </group>
                 </page>
 
                 <page name="retentions" string="Retentions" attrs="{'invisible': [('type','!=','retentions')]}">
-                    <p>Retentions</p>
+                    <group string="Tax Information">
+                        <field name="tax_id" select="1" attrs="{'required':[('type', '=', 'retentions')]}"/>
+                        <field name="type_tax_use" select="1"/>
+                    </group>
                 </page>
 
                 <page string="Tax Application" attrs="{'invisible': [('type', '!=', 'retentions')]}">
