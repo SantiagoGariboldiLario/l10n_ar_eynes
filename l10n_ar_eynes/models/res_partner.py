@@ -144,10 +144,10 @@ class resPartnerRetention(models.Model):
     def _check_excluded_percent(self):
         for p_ret in self:
             if not (0 <= p_ret.excluded_percent <= 1):
-                raise ValidationError(
-                    _("The Excluded Percent Should be a value "
-                      + "between 0 and 1")
-                )
+                raise ValidationError(_(
+                    "The Excluded Percent Should be a value "
+                    "between 0 and 1"
+                ))
 
 
 class ResPartnerAdvanceRetention(models.Model):

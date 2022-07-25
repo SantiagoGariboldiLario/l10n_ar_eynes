@@ -15,9 +15,7 @@ class AccountFiscalPosition(models.Model):
         required=True,
         default='not_defined'
     )
-
     afip_code = fields.Integer(string="AFIP Code")
-
     retention_ids = fields.Many2many(
         comodel_name='account.journal',
         relation='fiscal_position_retention_rel',

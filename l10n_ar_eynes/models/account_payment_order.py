@@ -146,16 +146,16 @@ class AccountPaymentOrder(models.Model):
             ('with_writeoff', 'Reconcile Payment Balance')
         ],
         default='without_writeoff',
-        help="This field helps you to choose what you want \
-        to do with the eventual difference between the paid \
-        amount and the sum of allocated amounts. You can either \
-        choose to keep open this difference on the partner's \
-        account, or reconcile it with the payment(s)"
+        help="This field helps you to choose what you want "
+        + "to do with the eventual difference between the paid "
+        + "amount and the sum of allocated amounts. You can either "
+        + "choose to keep open this difference on the partner's "
+        + "account, or reconcile it with the payment(s)"
     )
     company_id = fields.Many2one(
         comodel_name='res.company',
         string='Company',
-        default=lambda s: s._get_default_company(),
+        default=lambda self: self._get_default_company(),
         required=True,
         readonly=True
     )
@@ -199,10 +199,10 @@ class AccountPaymentOrder(models.Model):
         digits=(12, 6),
         required=True,
         default=1.0,
-        help='The specific rate that will be used, in \
-        this voucher, between the selected currency \
-        (in \'Payment Rate Currency\' field)  and the \
-        voucher currency.'
+        help="The specific rate that will be used, in "
+        + "this voucher, between the selected currency "
+        + "(in 'Payment Rate Currency' field) and the "
+        + "voucher currency."
     )
     paid_amount_in_company_currency = fields.Float(
         string='Paid Amount in Company Currency',
@@ -211,10 +211,10 @@ class AccountPaymentOrder(models.Model):
     )
     is_multi_currency = fields.Boolean(
         string='Multi Currency Voucher',
-        help='Fields with internal purpose \
-        only that depicts if the voucher is \
-        a multi currency one or not',
-        compute='_is_multicurrency'
+        compute='_is_multicurrency',
+        help="Fields with internal purpose "
+        + "only that depicts if the voucher is "
+        + "a multi currency one or not"
     )
     invoice_ids = fields.Many2many(
         comodel_name='account.move',
@@ -393,7 +393,7 @@ class AccountPaymentOrder(models.Model):
             'certificate_no': '',
             'taxapp_id': taxapp.id,
             'reg_code': taxapp.reg_code,
-            'state_id': advance_ret.retention_id.state_id.id,
+            'state_id': advance_ret.retention_id.tax_id.state_id.id,
             'excluded_percent': ret_vals.get('excluded_percent'),
             'exclusion_date_certificate': ret_vals.get(
                 'exclusion_date_certificate'),
@@ -462,8 +462,8 @@ class AccountPaymentOrder(models.Model):
         logging_messages.append("\n\nAplicando %s ==>" % (self.name))
         logging_messages.append((
             f"Actividad: {activity} "
-            "Porcentaje en partner: {percent}. "
-            "Porcentaje de Exclusion: {excluded_percent}"
+            f"Porcentaje en partner: {percent}. "
+            f"Porcentaje de Exclusion: {excluded_percent}"
         ))
         for po_line in [
                 line for line in (self.income_line_ids + self.debt_line_ids)
@@ -1041,11 +1041,11 @@ class AccountPaymentOrder(models.Model):
                   + 'that Writeoff Amount is not negative.')
             )
         if self.amount == 0.0 and not self._get_income_amount():
-            raise ValidationError(
-                _("Validate Error!\n")
-                + _("You cannot validate a voucher with amount of 0.0")
-                + _(" and no income lines")
-            )
+            raise ValidationError(_(
+                "Validate Error!\n"
+                "You cannot validate a voucher with amount of 0.0 "
+                "and no income lines"
+            ))
 
         self._clean_payment_lines()
         self.action_move_line_create()
@@ -1179,15 +1179,15 @@ class AccountPaymentOrder(models.Model):
             name = self.number
         elif self.journal_id.sequence_id:
             if not self.journal_id.sequence_id.active:
-                raise UserError(
-                    _('Configuration Error !\n'
-                      + 'Please activate the sequence of selected journal !')
-                )
+                raise UserError(_(
+                    'Configuration Error!\n'
+                    'Please activate the sequence of selected journal!'
+                ))
             name = self.journal_id.sequence_id.next_by_id()
         else:
-            raise UserError(
-                _('Error!\n' + 'Please define a sequence on the journal.')
-            )
+            raise UserError(_(
+                'Error!\n Please define a sequence on the journal.'
+            ))
         if not self.reference:
             ref = name.replace('/', '')
         else:
@@ -1512,14 +1512,16 @@ class AccountPaymentOrder(models.Model):
             sign = line.type == 'debt' and -1 or 1
             amount = sign * self._convert_amount(
                 line.untax_amount or line.amount)
-            currency_rate_difference = 0.0
+            # currency_rate_difference = 0.0
             if line.amount == line.amount_unreconciled:
                 if not line.move_line_id:
-                    raise UserError(_("Wrong voucher line\n\
-                        The invoice you are willing to \
-                        pay is not valid anymore."))
-                currency_rate_difference = (
-                    line.move_line_id.amount_residual - amount)
+                    raise UserError(_(
+                        "Wrong voucher line\n"
+                        "The invoice you are willing to "
+                        "pay is not valid anymore."
+                    ))
+                # currency_rate_difference = (
+                    # line.move_line_id.amount_residual - amount)
             move_line_analytic_account_id = line.account_analytic_id and \
                 line.account_analytic_id.id or False
             move_line = {
@@ -1676,12 +1678,6 @@ class AccountPaymentOrder(models.Model):
             # Cancelamos los cheques emitidos
             issued_checks = voucher.issued_check_ids
             issued_checks.cancel_check(internal_type='issued')
-            # for check in issued_checks:
-            #     if check.type == 'deferred' and check.accredited:
-            #         err = _('Check number %s is postdated and has \
-            #             already been accredited!\nPlease break the \
-            #             conciliation of that check first.') % check.number
-            #         raise ValidationError(err)
         return True
 
     def action_cancel_draft(self):
@@ -1726,8 +1722,10 @@ class AccountPaymentOrderLine(models.Model):
     amount = fields.Float(string='amount', digits='account')
     reconcile = fields.Boolean(string='full reconcile')
     type = fields.Selection(
+        selection=[
+            ('debt', 'debt'), ('income', 'income')
+        ],
         string='dr/cr',
-        selection=[('debt', 'debt'), ('income', 'income')]
     )
     move_line_id = fields.Many2one(
         comodel_name='account.move.line',
@@ -1826,7 +1824,6 @@ class AccountPaymentOrderLine(models.Model):
             amount_computed = self.amount_currency * parent.payment_rate
         else:
             amount_computed = 0
-
         self.amount = amount_computed
 
     @api.depends('move_line_id')
@@ -1868,9 +1865,10 @@ class AccountPaymentOrderLine(models.Model):
             return None
         if not (0 <= self.amount <= self.amount_unreconciled):
             print(self.amount, self.amount_unreconciled)
-            raise ValidationError(
-                _("Error!\nThe amount assigned to an invoice must not excede"
-                  + " the unreconciled amount, nor be negative."))
+            raise ValidationError(_(
+                "Error!\nThe amount assigned to an invoice must not excede "
+                "the unreconciled amount, nor be negative."
+            ))
 
     @api.constrains('amount')
     def _check_amount(self):
@@ -1899,7 +1897,7 @@ class AccountPaymentModeLine(models.Model):
     _name = 'account.payment.mode.line'
     _description = 'Payment method lines'
 
-    name = fields.Text(help='Payment reference', string='Description')
+    name = fields.Text(string='Description', help='Payment reference')
     payment_order_id = fields.Many2one(
         comodel_name='account.payment.order',
         string='Payment Order'
@@ -1954,7 +1952,6 @@ class AccountPaymentModeLine(models.Model):
             amount_computed = self.amount / parent.payment_rate
         else:
             amount_computed = self.amount
-
         self.amount_currency = amount_computed
 
     @api.onchange('payment_mode_id')
@@ -1989,13 +1986,8 @@ class AccountPaymentOrderRetentionLine(models.Model):
     _name = 'account.payment.order.retention.line'
     _description = 'Retention lines in payment order'
 
-    name = fields.Char(
-        string='Retention',
-        size=64,
-    )
-    date = fields.Date(
-        index=True,
-    )
+    name = fields.Char(string='Retention', size=64)
+    date = fields.Date(index=True)
     payment_order_id = fields.Many2one(
         comodel_name='account.payment.order',
         string='Payment Order',
@@ -2003,10 +1995,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
     )
     currency_id = fields.Many2one(related='payment_order_id.currency_id')
     currency_rate = fields.Float(related='payment_order_id.payment_rate')
-    voucher_number = fields.Char(
-        string='Reference',
-        size=64,
-    )
+    voucher_number = fields.Char(string='Reference', size=64)
     account_id = fields.Many2one(
         comodel_name='account.account',
         string='Tax Account',
@@ -2015,12 +2004,8 @@ class AccountPaymentOrderRetentionLine(models.Model):
             ('type', 'not in', ['view', 'income', 'closed']),
         ],
     )
-    base = fields.Float(
-        digits='Account',
-    )
-    amount = fields.Float(
-        digits='Account',
-    )
+    base = fields.Float(digits='Account')
+    amount = fields.Float(digits='Account')
     base_currency = fields.Float(
         digits='Account',
         compute='_compute_base_currency',
@@ -2037,7 +2022,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         required=True,
         domain=[('type', '=', 'retentions')],
         help="Retention configuration used for this retention tax, where "
-        + "all the configuration resides. Accounts, Tax Codes, etc.",
+        + "all the configuration resides. Accounts, Tax Codes, etc."
     )
     base_amount = fields.Float(
         comodel_name='Base Code Amount',
@@ -2195,7 +2180,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         res = {}
         if self.retention_id:
             res['domain'] = {
-                'concept_id': [('type', '=', self.retention_id.retention_type)],
+                'concept_id': [('type', '=', self.retention_id.tax_id.retention_type)],
             }
         return res
 
@@ -2256,7 +2241,6 @@ class AccountPaymentOrderRetentionLine(models.Model):
             'account_id': retention.account_id.id,
             'tax_line_id': retention.retention_id.tax_id.id,
             'journal_id': voucher.journal_id.id,
-            'period_id': voucher.period_id.id,
             'partner_id': voucher.partner_id.id,
             'currency_id': company_currency != current_currency
             and current_currency or False,

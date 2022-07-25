@@ -23,6 +23,7 @@ class AccountTax(models.Model):
             ('provincial', 'Provincial'),
             ('municipal', 'Municipal'),
         ],
+        string='Jurisdiccion',
         default='nacional',
     )
     state_id = fields.Many2one(
@@ -79,7 +80,6 @@ class AccountTax(models.Model):
     )
     general_resolution = fields.Char('GR Number', required=False, size=64)
     notes = fields.Text('Notes')
-
     tax_group_name = fields.Char(
         string='Tax group name',
         related='tax_group_id.name'
