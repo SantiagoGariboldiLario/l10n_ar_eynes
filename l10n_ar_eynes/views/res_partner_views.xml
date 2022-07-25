@@ -52,4 +52,23 @@
         </field>
     </record>
 
+    <record id="res_partner_bank_view_form_check" model="ir.ui.view">
+        <field name="name">res.partner.bank.form.check.inherit</field>
+        <field name="model">res.partner.bank</field>
+        <field name="inherit_id" ref="base.view_partner_bank_form"/>
+        <field name="type">form</field>
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+
+            <field name="acc_number" position="after">
+                <field name="account_id"/>
+            </field>
+
+            <field name="bank_id" position="attributes">
+                <attribute name="required">True</attribute>
+            </field>
+
+        </field>
+    </record>
+
 </odoo>
