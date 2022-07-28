@@ -7,8 +7,11 @@
         <field name="arch" type="xml">
             <form string="Document Type">
                 <sheet>
-                    <group>
-                        <field name="name"/>
+                    <h1>
+                        <label for="name" string="Document type"/>
+                        <field name="name" required="1"/>
+                    </h1>
+                    <group col="4" colspan="2">
                         <field name="afip_code"/>
                         <field name="verification_required"/>
                         <field name="check_duplicated"/>
@@ -42,4 +45,10 @@
         <field name="view_id" ref="res_document_type_view_tree"/>
     </record>
 
+    <menuitem
+        id="res_document_type_menu"
+        name="Document types"
+        action="res_document_type_action"
+        parent="account.account_account_menu"
+        sequence="10"/>
 </odoo>
