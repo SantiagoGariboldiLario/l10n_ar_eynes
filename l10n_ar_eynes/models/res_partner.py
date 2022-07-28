@@ -264,8 +264,7 @@ class resPartnerRetention(models.Model):
     company_id = fields.Many2one(
         comodel_name='res.company',
         related='retention_id.company_id',
-        string='Company',
-        store=True,
+        string='Company'
     )
     from_padron = fields.Boolean(string="From Padron")
 
@@ -273,8 +272,7 @@ class resPartnerRetention(models.Model):
         (
             'retention_partner_unique',
             'unique(partner_id, retention_id)',
-            _('There must be only one retention of this type configured for '
-                + 'the partner')
+            _('There must be only one retention of this type configured for the partner')
         )
     ]
 
@@ -282,10 +280,10 @@ class resPartnerRetention(models.Model):
     def _check_excluded_percent(self):
         for p_ret in self:
             if not (0 <= p_ret.excluded_percent <= 1):
-                raise ValidationError(
-                    _("The Excluded Percent Should be a value "
-                      + "between 0 and 1")
-                )
+                raise ValidationError(_(
+                    "The Excluded Percent Should be a value "
+                    "between 0 and 1"
+                ))
 
 
 class ResPartnerAdvanceRetention(models.Model):
@@ -296,7 +294,8 @@ class ResPartnerAdvanceRetention(models.Model):
         comodel_name='account.journal',
         string='Retention',
         domain=[('type', '=', 'retentions')],
-        required=True)
+        required=True
+    )
     concept_id = fields.Many2one(
         comodel_name='retention.concept',
         string="Concept",
