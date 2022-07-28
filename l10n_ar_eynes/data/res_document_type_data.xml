@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
 
+    <record id="document_cuit_country" model="res.document.type">
+        <field name="name">CUIT País</field>
+        <field name="afip_code">80</field>
+        <field name="dst_cuit" eval="True"/>
+    </record>
+
     <record id="document_cuit" model="res.document.type">
         <field name="name">CUIT</field>
         <field name="afip_code">80</field>
+        <field name="verification_required" eval="True"/>
+        <field name="check_duplicated" eval="True"/>
     </record>
 
     <record id="document_cuil" model="res.document.type">
         <field name="name">CUIL</field>
         <field name="afip_code">86</field>
+        <field name="verification_required" eval="True"/>
+        <field name="check_duplicated" eval="True"/>
     </record>
 
     <record id="document_cdi" model="res.document.type">
@@ -58,52 +68,52 @@
 
     <record id="document_ci_policia" model="res.document.type">
         <field name="name">CI Policia Federal</field>
-        <field name="afip_code">00</field>
+        <field name="afip_code">0</field>
     </record>
 
     <record id="document_ci_bs_as" model="res.document.type">
         <field name="name">CI Buenos Aires</field>
-        <field name="afip_code">01</field>
+        <field name="afip_code">1</field>
     </record>
 
     <record id="document_ci_catamarca" model="res.document.type">
         <field name="name">CI Catamarca</field>
-        <field name="afip_code">02</field>
+        <field name="afip_code">2</field>
     </record>
 
     <record id="document_ci_cordoba" model="res.document.type">
         <field name="name">CI Cordoba</field>
-        <field name="afip_code">03</field>
+        <field name="afip_code">3</field>
     </record>
 
     <record id="document_ci_corrientes" model="res.document.type">
         <field name="name">CI Corrientes</field>
-        <field name="afip_code">04</field>
+        <field name="afip_code">4</field>
     </record>
 
     <record id="document_ci_entre_rios" model="res.document.type">
         <field name="name">CI Entre Rios</field>
-        <field name="afip_code">05</field>
+        <field name="afip_code">5</field>
     </record>
 
     <record id="document_ci_jujuy" model="res.document.type">
         <field name="name">CI Jujuy</field>
-        <field name="afip_code">06</field>
+        <field name="afip_code">6</field>
     </record>
 
     <record id="document_ci_mendoza" model="res.document.type">
         <field name="name">CI Mendoza</field>
-        <field name="afip_code">07</field>
+        <field name="afip_code">7</field>
     </record>
 
     <record id="document_ci_la_rioja" model="res.document.type">
         <field name="name">CI La Rioja</field>
-        <field name="afip_code">08</field>
+        <field name="afip_code">8</field>
     </record>
 
     <record id="document_ci_salta" model="res.document.type">
         <field name="name">CI Salta</field>
-        <field name="afip_code">09</field>
+        <field name="afip_code">9</field>
     </record>
 
     <record id="document_ci_san_juan" model="res.document.type">

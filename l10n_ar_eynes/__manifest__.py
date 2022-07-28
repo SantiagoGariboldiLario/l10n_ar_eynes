@@ -48,6 +48,7 @@
         'data/res_voucher_type_data.xml',
         'data/account_default_journals_data.xml',
         'data/iibb_situation_data.xml',
+        'data/dst_cuit_codes_data.xml',
     ],
     'installable': True,
     'application': True,
