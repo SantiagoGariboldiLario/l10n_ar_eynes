@@ -15,6 +15,9 @@ class ResVoucherType(models.Model):
     )
     denomination = fields.Selection(
         string="Denomination",
-        selection=[("a", "A"), ("b", "B"), ("c", "C"), ("e", "E"), ("m", "M")],
+        selection=[
+            ("a", "A"), ("b", "B"), ("c", "C"),
+            ("e", "E"), ("m", "M")
+        ],
         required=True
     )

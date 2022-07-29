@@ -784,10 +784,10 @@ class AccountPaymentOrder(models.Model):
     def unlink(self):
         self._check_retentions_unlinkable()
         if self.state not in ['draft', 'cancel']:
-            raise ValidationError(
-                _("Error!\nYou can't unlink a posted payment order.\n"
-                  + "First you should unreconcile It.")
-            )
+            raise ValidationError(_(
+                "Error!\nYou can't unlink a posted payment order.\n"
+                "First you should unreconcile It."
+            ))
         for voucher in self:
             if voucher.type == 'receipt':
                 voucher.third_party_check_ids.unlink()
@@ -804,14 +804,16 @@ class AccountPaymentOrder(models.Model):
                       "%s") % (
                           voucher.name, voucher.id,
                           ("\n").join(["%s [id: %s]" % (r.name, r.id) for r
-                                       in u_rets])))
+                                       in u_rets]))
+                )
         return True
 
     def _check_partner_set(self):
         if not self.partner_id:
-            raise UserError(
-                _("Error!\n"
-                  + "The Partner must be set to gather accounting information."))
+            raise UserError(_(
+                "Error!\n"
+                "The Partner must be set to gather accounting information."
+            ))
 
     def update_o2m(self, field_str, lines):
         if not hasattr(self, field_str) or not lines:
@@ -1035,11 +1037,11 @@ class AccountPaymentOrder(models.Model):
             })
         # Chequeamos si la writeoff_amount no es negativa
         if round(self.writeoff_amount, 2) < 0.0:
-            raise ValidationError(
-                _('Error!\n Cannot validate a '
-                  + 'voucher with negative amount.\n Please check '
-                  + 'that Writeoff Amount is not negative.')
-            )
+            raise ValidationError(_(
+                'Error!\n Cannot validate a '
+                'voucher with negative amount.\n Please check '
+                'that Writeoff Amount is not negative.'
+            ))
         if self.amount == 0.0 and not self._get_income_amount():
             raise ValidationError(_(
                 "Validate Error!\n"
@@ -1373,9 +1375,11 @@ class AccountPaymentOrder(models.Model):
                 amount_credit -= amount_credit
             if round(amount_credit, 3) != round(total_credit, 3) or \
                     round(amount_debit, 3) != round(total_debit, 3):
-                raise UserError(_('Voucher Error!\n\
-                    Voucher Paid Amount and sum of different payment \
-                        mode must be equal'))
+                raise UserError(_(
+                    "Voucher Error!\n"
+                    "Voucher Paid Amount and sum of different payment "
+                    "mode must be equal"
+                ))
 
         return move_lines
 
@@ -1438,10 +1442,12 @@ class AccountPaymentOrder(models.Model):
                 expense_currency_exchange_account_id
             if not account_id:
                 action_id = self.env.ref('account.action_account_form').id
-                msg = _("You should configure the 'Loss Exchange Rate "
-                        + "Account' to manage automatically the booking of "
-                        + "accounting entries related to differences "
-                        + "between exchange rates.")
+                msg = _(
+                    "You should configure the 'Loss Exchange Rate "
+                    "Account' to manage automatically the booking of "
+                    "accounting entries related to differences "
+                    "between exchange rates."
+                )
                 raise RedirectWarning(
                     msg, action_id, _('Go to the configuration panel'))
         else:
@@ -1449,10 +1455,12 @@ class AccountPaymentOrder(models.Model):
                 income_currency_exchange_account_id
             if not account_id:
                 action_id = self.env.ref('account.action_account_form').id
-                msg = _("You should configure the 'Gain Exchange Rate "
-                        + "Account' to manage automatically the booking of "
-                        + "accounting entries related to differences "
-                        + "between exchange rates.")
+                msg = _(
+                    "You should configure the 'Gain Exchange Rate "
+                    "Account' to manage automatically the booking of "
+                    "accounting entries related to differences "
+                    "between exchange rates."
+                )
                 raise RedirectWarning(
                     msg, action_id, _('Go to the configuration panel'))
         # Even if the amount_currency is never filled, we need to pass the foreign currency because otherwise  # noqa
