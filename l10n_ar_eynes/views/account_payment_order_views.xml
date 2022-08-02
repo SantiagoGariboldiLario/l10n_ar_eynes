@@ -346,6 +346,9 @@
                             <field name="date" invisible="context.get('line_type', False)"/>
                             <field name="reference" invisible="context.get('line_type', False)" string="Payment Ref" placeholder="e.g. 003/10"/>
                             <field name="name" colspan="2" invisible="context.get('line_type', False)" placeholder="e.g. Invoice SAJ/0042"/>
+                            <field name="date_effective"/>
+                            <field name="receipt_number"/>
+                            <field name="disable_retentions" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                             <field name="company_id" widget="selection" groups="base.group_multi_company"/>
                         </group>
                         <group col="2" attrs="{'invisible':[('is_multi_currency','=',False)]}">
@@ -560,10 +563,7 @@
                                 </form>
                             </field>
                             <label for="third_party_check_ids"/>
-                            <field name="third_party_check_ids"
-                                string="Third Party Checks"
-                                nolabel="1" colspan="4"
-                                domain="[('internal_type', '=', 'third_party'), ('third_party_check_state', '=', 'in_wallet'), ('company_id', '=', company_id)]">
+                            <field name="third_party_check_ids" string="Third Party Checks" nolabel="1" colspan="4" domain="[('internal_type', '=', 'third_party'), ('third_party_check_state', '=', 'in_wallet'), ('company_id', '=', company_id)]">
                                 <tree string="Third Checks">
                                     <field name="currency_id" invisible="1"/>
                                     <field name="number"/>
@@ -583,28 +583,34 @@
                             </field>
                         </page>
                         <page string="Retentions">
-                            <field name="retention_ids" nolabel="1">
+                            <field name="retention_ids" nolabel="1" attrs="{'readonly': [('disable_retentions', '=', False)]}">
                                 <tree string="Retention Lines">
                                     <field name="currency_id" invisible="1"/>
                                     <field name="name" invisible="1"/>
                                     <field name="state_id" invisible="1"/>
                                     <field name="date"/>
-                                    <field name="retention_id"
-                                        string="Retention Type"/>
+                                    <field name="retention_id" string="Retention Type"/>
+                                    <field name="taxapp_id" invisible="1"/>
+                                    <field name="date_applied"/>
+                                    <field name="concept_id"/>
+                                    <field name="invoice_ref"/>
+                                    <field name="invoice_id" invisible="1"/>
+                                    <field name="manual" invisible="1"/>
+                                    <field name="reg_code" invisible="1"/>
+                                    <field name="excluded_percent" invisible="1"/>
+                                    <field name="exclusion_date_certificate" invisible="1"/>
                                     <field name="partner_id" invisible="1"/>
                                     <field name="certificate_no"/>
                                     <field name="base"/>
                                     <field name="base_currency"
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
-                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
-                                        />
+                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"/>
                                     <field name="amount"/>
                                     <field name="amount_currency"
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
-                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
-                                        />
+                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"/>
                                     <field name="account_id" invisible="1"/>
                                 </tree>
                                 <form>
@@ -614,20 +620,38 @@
                                     <group>
                                         <group string="Information" name="info">
                                             <field name="state_id" invisible="1"/>
-                                            <field name="retention_id"
-                                                domain="[('type_tax_use', '=', 'sale')]" />
-                                            <field name="certificate_no"/>
-                                            <field name="state_id"/>
-                                            <field name="date"/>
-                                            <!-- <label string="Keep it empty if the date is the same as the voucher."
-                                                class="oe_grey"/> -->
+                                            <field name="retention_id" domain="[('type_tax_use', '=', 'sale')]" attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
+                                            <field name="certificate_no" attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
+                                            <field name="state_id" attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
+                                            <field name="date_applied" attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
+                                            <field name="date" attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
+                                            <label for="date" string="Keep it empty if the date is the same as the voucher." class="oe_grey"/>
                                         </group>
                                         <group string="Amounts" name="amount">
-                                            <field name="base"/>
-                                            <field name="amount"/>
-                                            <field name="account_id" invisible="1"/>
+                                            <field name="base"
+                                            attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
+                                        <field name="amount"
+                                            attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
+                                        <field name="account_id" invisible="1"/>
                                         </group>
                                     </group>
+                                    <!-- <group string="Moves Information" name="moves">
+                                        <field name="manual" colspan="1" invisible="1"/>
+                                        <field name="concept_id" colspan="1"
+                                            attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
+                                        <field name="move_line_ids" readonly="1" colspan="4" nolabel="1">
+                                            <separator string="Move Lines"/>
+                                            <tree string="Included Lines">
+                                                <field name="name"/>
+                                                <field name="move_id"/>
+                                                <field name="date"/>
+                                                <field name="date_maturity"/>
+                                                <field name="invoice_id"/>
+                                                <field name="amount_residual"/>
+                                                <field name="balance"/>
+                                            </tree>
+                                        </field>
+                                    </group> -->
                                     <group name="name" string="More information">
                                         <field name="retention_move_line_ids">
                                             <tree create="false" edit="false" delete="false">
@@ -671,10 +695,6 @@
                                     <field name="name"/>
                                     <field name="debit"/>
                                     <field name="credit"/>
-                                    <!-- TODO: No existe mas el campo state -->
-                                    <!-- <field name="state"/> -->
-                                    <!-- TODO: No existe el modelo 'account.move.reconcile' -->
-                                    <!-- <field name="reconcile_id"/> -->
                                     <field name="amount_currency" groups="base.group_multi_currency"/>
                                     <field name="currency_id" groups="base.group_multi_currency"/>
                                 </tree>

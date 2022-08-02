@@ -15,4 +15,6 @@ class ResParterBank(models.Model):
         return result
 
     account_id = fields.Many2one(
-        comodel_name='account.account', string='Account')
+        comodel_name='account.account',
+        string='Account'
+    )
