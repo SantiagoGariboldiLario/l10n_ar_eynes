@@ -17,7 +17,7 @@
                 <sheet>
                     <h1>
                         <label for="number" string="Number"/>
-                        <field name="number" />
+                        <field name="number" readonly="1"/>
                     </h1>
                     <group>
                         <group>
@@ -319,7 +319,7 @@
                 <sheet>
                     <h1>
                         <label for="number" string="Number"/>
-                        <field name="number" />
+                        <field name="number" readonly="1"/>
                     </h1>
                     <field name="account_id" invisible="1"/>
                     <field name="company_currency" invisible="1"/>
