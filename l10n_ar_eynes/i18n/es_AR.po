@@ -132,7 +132,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__amount
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__price
 msgid "Amount"
-msgstr "Monto"
+msgstr "Importe"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_currency
@@ -354,7 +354,7 @@ msgstr "Chequera"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__checkbook_id
 msgid "Checkbook ID"
-msgstr "ID de chequera"
+msgstr "Chequera"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__number
@@ -2115,7 +2115,7 @@ msgstr "Tipo de comprobante"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_accreditation
 msgid "Waiting accreditation"
-msgstr ""
+msgstr "Esperando Acreditación"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_numeration
@@ -2210,7 +2210,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount
 msgid "amount"
-msgstr "Monto"
+msgstr "Importe"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
