@@ -33,7 +33,7 @@ class AccountPaymentOrder(models.Model):
             return domain
         return domain
 
-    number = fields.Char(string='Number', copy=False, required=True)
+    number = fields.Char(string='Number', copy=False)
     name = fields.Char(string='Memo', default='')
     narration = fields.Text(string='Notes', default=lambda s: s._get_narration())
     partner_id = fields.Many2one(
@@ -1701,8 +1701,17 @@ class AccountPaymentOrder(models.Model):
         self.write({'state': 'draft'})
         return True
 
+    @api.model
+    def create(self, vals_list):
+        sequence_model = self.env['ir.sequence']
+        if vals_list.get('type') == 'receipt':
+            vals_list['number'] = sequence_model.next_by_code('customer.payment.order') or _('New')
+        elif vals_list.get('type') == 'payment':
+            vals_list['number'] = sequence_model.next_by_code('supplier.payment.order') or _('New')
+        return super(AccountPaymentOrder, self).create(vals_list=vals_list)
+
     _sql_constraints = [
-        ("unique_number", "unique(number)", _("Number must be unique")),
+        ("unique_number", "unique(type, number)", _("Number must be unique")),
     ]
 
 
