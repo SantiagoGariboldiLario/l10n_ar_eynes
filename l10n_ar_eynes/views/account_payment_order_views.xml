@@ -5,7 +5,7 @@
         <field name="name">account.customer.payment.order.view.form</field>
         <field name="model">account.payment.order</field>
         <field name="arch" type="xml">
-            <form string="Payment Order" context="{'default_type' : 'payment'}">
+            <form string="Payment Order" context="{'default_type' : 'receipt'}">
                 <header invisible="context.get('line_type', False)">
                     <button name="proforma_voucher" string="Validate" class="oe_highlight" type="object" states="draft"/>
                     <button name="cancel_voucher" string="Cancel Receipt" type="object" states="draft,proforma"/>
@@ -121,8 +121,15 @@
                                     <field name="state" invisible="1"/>
                                     <field name="invoice_id"
                                         force_save="true"
-                                        domain="[('state', '=', 'open'), ('commercial_partner_id', '=', parent.partner_id), ('id', 'not in', parent.invoice_ids), ('move_type', '=', 'out_invoice')]"
-                                        attrs="{ 'required': ['|', ('move_line_id', '=', False), ('move_invoice_id', '!=', False)], 'readonly': [('move_line_id', '!=', False)]}"
+                                        domain="[
+                                            ('state', '=', 'posted'),
+                                            ('payment_state', 'in', ('not_paid', 'in_payment', 'partial')),
+                                            ('commercial_partner_id', '=', parent.partner_id),
+                                            ('id', 'not in', parent.invoice_ids),
+                                            ('move_type', '=', 'out_invoice')]"
+                                        attrs="{
+                                            'required': ['|', ('move_line_id', '=', False), ('move_invoice_id', '!=', False)],
+                                            'readonly': [('move_line_id', '!=', False)]}"
                                         options="{'no_quick_create': True, 'no_create_edit': True}"/>
                                     <field name="ref" readonly="1" force_save="True"/>
                                     <field name="move_line_id" context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
@@ -264,6 +271,28 @@
                                 </form>
                             </field>
                         </page>
+
+                        <page string="Journal Items" name="journal_items" attrs="{'invisible': [('state','!=','posted')]}">
+                            <group col="4">
+                                <field name="move_id"/>
+                            </group>
+                            <field name="move_line_ids" readonly="1">
+                                <tree string="Journal Items">
+                                    <field name="move_id"/>
+                                    <field name="ref"/>
+                                    <field name="date"/>
+                                    <field name="statement_id"/>
+                                    <field name="partner_id"/>
+                                    <field name="account_id"/>
+                                    <field name="name"/>
+                                    <field name="debit"/>
+                                    <field name="credit"/>
+                                    <field name="amount_currency"/>
+                                    <field name="currency_id" groups="base.group_multi_currency"/>
+                                </tree>
+                            </field>
+                        </page>
+
                     </notebook>
                 </sheet>
             </form>
@@ -411,10 +440,12 @@
                                     <field name="move_invoice_id" invisible="1"/>
                                     <field name="state" invisible="1"/>
                                     <field name="invoice_id" force_save="true"
-                                        domain="[('state', '=', 'open'),
-                                        ('commercial_partner_id', '=', parent.partner_id),
-                                        ('id', 'not in', parent.invoice_ids),
-                                        ('move_type', '=', 'out_invoice')]"
+                                        domain="[('state', '=', 'posted'),
+                                            ('payment_state', 'in', ('not_paid', 'in_payment', 'partial')),
+                                            ('commercial_partner_id', '=', parent.partner_id),
+                                            ('id', 'not in', parent.invoice_ids),
+                                            ('move_type', '=', 'out_invoice')
+                                        ]"
                                         attrs="{
                                         'required': ['|',
                                         ('move_line_id', '=', False),
@@ -469,15 +500,15 @@
                                     <field name="move_invoice_id" invisible="1"/>
                                     <field name="state" invisible="1"/>
                                     <field name="invoice_id" force_save="true"
-                                        domain="[('state', '=', 'open'),
-                                        ('commercial_partner_id', '=', parent.partner_id),
-                                        ('id', 'not in', parent.invoice_ids),
-                                        ('move_type', '=', 'out_refund')]"
+                                        domain="[
+                                            ('state', '=', 'open'),
+                                            ('payment_state', 'in', ('not_paid', 'in_payment', 'partial')),
+                                            ('commercial_partner_id', '=', parent.partner_id),
+                                            ('id', 'not in', parent.invoice_ids),
+                                            ('move_type', '=', 'out_refund')]"
                                         attrs="{
-                                        'required': ['|',
-                                        ('move_line_id', '=', False),
-                                        ('move_invoice_id', '!=', False)],
-                                        'readonly': [('move_line_id', '!=', False)]}"
+                                            'required': ['|', ('move_line_id', '=', False), ('move_invoice_id', '!=', False)],
+                                            'readonly': [('move_line_id', '!=', False)]}"
                                         options="{'no_quick_create': True, 'no_create_edit': True}"/>
                                     <field name="ref" attrs="{'readonly': True}" force_save="True"/>
                                     <field name="move_line_id" context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
