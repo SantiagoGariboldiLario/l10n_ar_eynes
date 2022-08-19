@@ -444,7 +444,7 @@
                                             ('payment_state', 'in', ('not_paid', 'in_payment', 'partial')),
                                             ('commercial_partner_id', '=', parent.partner_id),
                                             ('id', 'not in', parent.invoice_ids),
-                                            ('move_type', '=', 'out_invoice')
+                                            ('move_type', '=', 'in_invoice')
                                         ]"
                                         attrs="{
                                         'required': ['|',
@@ -505,7 +505,7 @@
                                             ('payment_state', 'in', ('not_paid', 'in_payment', 'partial')),
                                             ('commercial_partner_id', '=', parent.partner_id),
                                             ('id', 'not in', parent.invoice_ids),
-                                            ('move_type', '=', 'out_refund')]"
+                                            ('move_type', '=', 'in_refund')]"
                                         attrs="{
                                             'required': ['|', ('move_line_id', '=', False), ('move_invoice_id', '!=', False)],
                                             'readonly': [('move_line_id', '!=', False)]}"
