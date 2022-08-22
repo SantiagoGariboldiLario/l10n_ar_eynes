@@ -29,7 +29,7 @@ class AccountTax(models.Model):
     state_id = fields.Many2one(
         comodel_name='res.country.state',
         string='State/Province',
-        domain="[('country_id','=','Argentina')]",
+        domain="[('country_id','=', country_id)]",
     )
     applicable_state = fields.Selection(
         selection=[
