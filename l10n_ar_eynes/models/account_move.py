@@ -34,8 +34,6 @@ class AccountMove(models.Model):
         if self.journal_id.type == 'sale':
             super(AccountMove, self)._onchange_journal()
             self.denomination = self.journal_id.denomination
-            if self.journal_id.code.isnumeric:
-                self.update_name()
 
     @api.onchange('partner_id')
     def _onchange_partner(self):
@@ -94,27 +92,6 @@ class AccountMove(models.Model):
             or self.partner_id.property_account_position_id
         if self.move_type == 'in_invoice':
             self.denomination = fiscal_position.supplier_denomination
-
-    # def action_post(self):
-    #     if not self.journal_id.due_date:
-    #         raise ValidationError(
-    #             _("This journal Does not have a period established.\n"
-    #               + "Please Establish period before moving on.\n"
-    #               + "This can be accomplished in \
-    #               Accounting/Journals/Update Journals Period")
-    #         )
-    #     elif self.journal_id.due_date < fields.Date.today():
-    #         raise ValidationError(
-    #             _("Journal period date has expired.\n"
-    #               + "Change journal or update period expiration date")
-    #         )
-    #     super(AccountMove, self).action_post()
-
-    def update_name(self):
-        denomination = self.denomination.capitalize()
-        code = self.journal_id.code
-        sequence = self.get_highest_pos_sequence()
-        self.name = f'{denomination}{code}-{sequence}'
 
     _sql_constraints = [
         (

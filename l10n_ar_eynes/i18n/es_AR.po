@@ -1045,6 +1045,17 @@ msgid "Is a Customer"
 msgstr "Es cliente"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__supplier
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__supplier
+msgid "Is Supplier"
+msgstr "Es proveedor"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
+msgid "Is a Supplier"
+msgstr "Es proveedor"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__issue_date
 msgid "Issue Date"
 msgstr "Fecha de emision"
