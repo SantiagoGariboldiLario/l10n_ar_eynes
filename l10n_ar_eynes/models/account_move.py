@@ -20,10 +20,10 @@ class AccountMove(models.Model):
             ('journal_id', '=', self.journal_id.id)
         ])
 
-        if not invoices:
+        if not invoices or len(invoices) == 1:
             return '1'.zfill(8)
 
-        last_sequence_number = max([inv.sequence_number for inv in invoices])
+        last_sequence_number = max(invoices.mapped('sequence_number'))
         return str(last_sequence_number + 1).zfill(8)
 
 # ONCHANGE METHODS
@@ -93,17 +93,22 @@ class AccountMove(models.Model):
         if self.move_type == 'in_invoice':
             self.denomination = fiscal_position.supplier_denomination
 
+    def _post(self, soft=True):
+        if self.is_sale_document() and not self.payment_reference:
+            self.write({
+                'name': f'{self.journal_id.code}-{self.get_highest_pos_sequence()}',
+            })
+        res = super(AccountMove, self)._post(soft=soft)
+        if res:
+            self.write({'name': self.denomination.capitalize() + self.name})
+        return res
+
     _sql_constraints = [
         (
             'unique_move',
             'unique(journal_id,supplier_move_reference)',
             _('move already exists!')
         ),
-        (
-            'unique_name',
-            'unique(name)',
-            _('move already exists!')
-        )
     ]
 
 
