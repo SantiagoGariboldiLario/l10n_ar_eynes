@@ -74,7 +74,7 @@ class AccountJournal(models.Model):
         comodel_name='account.tax',
         string='Tax',
         domain=lambda self: [
-            ('tax_group_id', '=', self.env.ref('l10n_ar_eynes.retentions_tax_group').id),
+            ('tax_group_id', '=', self.env.ref('l10n_ar_eynes.retentions_tax_group', raise_if_not_found=False).id),
             ('active', '=', True)
         ]
     )
