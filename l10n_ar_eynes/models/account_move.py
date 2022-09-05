@@ -84,7 +84,7 @@ class AccountMove(models.Model):
         self.name = f'{self.supplier_move_reference}'
 
         if self.denomination and self.denomination != 'not_defined':
-            self.name = f'{self.denomination.capitalize()} {self.name}'
+            self.name = f'{self.denomination.capitalize()}{self.name}'
 
     @api.onchange('fiscal_position_id', 'partner_id')
     def _onchange_fiscal_position(self):
@@ -99,7 +99,7 @@ class AccountMove(models.Model):
                 'name': f'{self.journal_id.code}-{self.get_highest_pos_sequence()}',
             })
         res = super(AccountMove, self)._post(soft=soft)
-        if res:
+        if res and self.is_sale_document():
             self.write({'name': self.denomination.capitalize() + self.name})
         return res
 
