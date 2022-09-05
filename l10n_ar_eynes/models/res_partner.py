@@ -86,8 +86,8 @@ class ResPartner(models.Model):
         vat = vals.get("vat")
         if not vat:
             return False
-        ci_extranjera = self.env.ref('base_vat_ar.document_ci_extranjera')
-        pasaporte = self.env.ref('base_vat_ar.document_pasaporte')
+        ci_extranjera = self.env.ref('l10n_ar_eynes.document_ci_extranjera')
+        pasaporte = self.env.ref('l10n_ar_eynes.document_pasaporte')
 
         if [x for x in self if x.document_type_id not in [
                 ci_extranjera, pasaporte]]:
@@ -141,9 +141,9 @@ class ResPartner(models.Model):
         """
         Check VAT Routine for Argentina.
         """
-        cuit = self.sudo().env.ref('base_vat_ar.document_cuit')
-        cuil = self.sudo().env.ref('base_vat_ar.document_cuil')
-        dni = self.sudo().env.ref('base_vat_ar.document_dni')
+        cuit = self.sudo().env.ref('l10n_ar_eynes.document_cuit')
+        cuil = self.sudo().env.ref('l10n_ar_eynes.document_cuil')
+        dni = self.sudo().env.ref('l10n_ar_eynes.document_dni')
         if self.document_type_id == cuit:
             if len(vat) != 11:
                 return False
@@ -333,9 +333,9 @@ class ResDocumentType(models.Model):
     dst_cuit = fields.Boolean(string="Enable DST CUIT")
 
     def get_website_sale_documents(self, mode='billing'):
-        cuit = self.sudo().env.ref('base_vat_ar.document_cuit').name
-        cuil = self.sudo().env.ref('base_vat_ar.document_cuil').name
-        dni = self.sudo().env.ref('base_vat_ar.document_dni').name
+        cuit = self.sudo().env.ref('l10n_ar_eynes.document_cuit').name
+        cuil = self.sudo().env.ref('l10n_ar_eynes.document_cuil').name
+        dni = self.sudo().env.ref('l10n_ar_eynes.document_dni').name
         return self.sudo().search([
             ('name', 'in', (cuit, cuil, dni))
         ])
