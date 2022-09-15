@@ -1045,12 +1045,6 @@ msgid "Is a Customer"
 msgstr "Es cliente"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__supplier
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__supplier
-msgid "Is Supplier"
-msgstr "Es proveedor"
-
-#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
 msgid "Is a Supplier"
 msgstr "Es proveedor"
@@ -2324,3 +2318,17 @@ msgstr "lineas de comprobante"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_tree
 msgid "Bank Account"
 msgstr "Cuenta Bancaria"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_fiscal_position__local
+msgid "Local Fiscal Rules"
+msgstr "Reglas Fiscales Locales"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_fiscal_position__local
+msgid ""
+"Check this if it corresponds to apply local fiscal rules, like invoice "
+"number validation, etc."
+msgstr ""
+"Márquelo si corresponde aplicar reglas fiscales locales como validación de "
+"Número de Factura, etc."
