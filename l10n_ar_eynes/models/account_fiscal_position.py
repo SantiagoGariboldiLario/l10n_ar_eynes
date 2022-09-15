@@ -30,3 +30,9 @@ class AccountFiscalPosition(models.Model):
         + "belonging to this Fiscal Position. Exceptions to this have to be "
         + "loaded at partner form."
     )
+    local = fields.Boolean(
+        string='Local Fiscal Rules',
+        default=True,
+        help='Check this if it corresponds to apply local fiscal rules, '
+        'like invoice number validation, etc.',
+    )
