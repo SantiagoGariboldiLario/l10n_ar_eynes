@@ -9,6 +9,7 @@
             <xpath expr="//field[@name='name']" position="after">
                 <field name="supplier_denomination"/>
                 <field name="afip_code"/>
+                <field name="local" />
             </xpath>
             <page name="tax_mapping" position="after">
                 <page name="applied_retentions" string="Applied Retentions">
