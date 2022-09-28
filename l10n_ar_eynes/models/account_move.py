@@ -26,7 +26,7 @@ class AccountMove(models.Model):
         last_sequence_number = max(invoices.mapped('sequence_number'))
         return str(last_sequence_number + 1).zfill(8)
 
-# ONCHANGE METHODS
+    # ONCHANGE METHODS
     @api.onchange('journal_id', 'partner_id')
     def _onchange_journal(self):
         if not self.partner_id:
@@ -81,10 +81,7 @@ class AccountMove(models.Model):
 
         self.supplier_move_reference = pos_code.zfill(4) \
             + '-' + move_code.zfill(8)
-        self.name = f'{self.supplier_move_reference}'
-
-        if self.denomination and self.denomination != 'not_defined':
-            self.name = f'{self.denomination.capitalize()}{self.name}'
+        self.name = self.supplier_move_reference
 
     @api.onchange('fiscal_position_id', 'partner_id')
     def _onchange_fiscal_position(self):
@@ -94,14 +91,15 @@ class AccountMove(models.Model):
             self.denomination = fiscal_position.supplier_denomination
 
     def _post(self, soft=True):
+        if not self.denomination:
+            raise ValidationError(_(
+                "Invoice must have a denomination configured"
+            ))
         if self.is_sale_document() and not self.payment_reference:
             self.write({
                 'name': f'{self.journal_id.code}-{self.get_highest_pos_sequence()}',
             })
-        res = super(AccountMove, self)._post(soft=soft)
-        if res and self.is_sale_document():
-            self.write({'name': self.denomination.capitalize() + self.name})
-        return res
+        return super(AccountMove, self)._post(soft=soft)
 
     _sql_constraints = [
         (
