@@ -90,16 +90,17 @@ class AccountMove(models.Model):
         if self.move_type == 'in_invoice':
             self.denomination = fiscal_position.supplier_denomination
 
-    def _post(self, soft=True):
-        if not self.denomination:
-            raise ValidationError(_(
-                "Invoice must have a denomination configured"
-            ))
-        if self.is_sale_document() and not self.payment_reference:
-            self.write({
-                'name': f'{self.journal_id.code}-{self.get_highest_pos_sequence()}',
-            })
-        return super(AccountMove, self)._post(soft=soft)
+    def action_post(self):
+        if self.id:
+            if not self.denomination:
+                raise ValidationError(_(
+                    "Invoice must have a denomination configured"
+                ))
+            if self.is_sale_document() and not self.payment_reference:
+                self.write({
+                    'name': f'{self.journal_id.code}-{self.get_highest_pos_sequence()}',
+                })
+        return super(AccountMove, self).action_post()
 
     _sql_constraints = [
         (
