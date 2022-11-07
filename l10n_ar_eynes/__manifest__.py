@@ -23,7 +23,7 @@
     'license': 'AGPL-3',
     'description': 'Localization customizations module.',
     'category': 'Accounting/Accounting',
-    'depends': ['account', 'sale', 'stock'],
+    'depends': ['account', 'sale', 'stock', 'purchase', 'contacts'],
     'data': [
         'views/res_config_settigs_views.xml',
         'views/res_partner_views.xml',
