@@ -49,12 +49,16 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem id="contacts_menu" name="Contacts" sequence="10">
-        <menuitem id="res_partner_menu" name="Contacts" action="res_partner_action" groups="base.group_user" sequence="1"/>
-        <menuitem id="contacts_configuration_menu" name="Configuration" sequence="2">
-            <menuitem id="menu_action_res_voucher_type" name="Voucher Types" action="res_voucher_type_action" sequence="2"/>
-            <menuitem id="menu_action_res_document_type" name="Document Types" action="res_document_type_action" sequence="3"/>
-        </menuitem>
-    </menuitem>
+    <menuitem id="menu_action_res_voucher_type"
+        name="Voucher Types"
+        parent="contacts.res_partner_menu_config"
+        action="res_voucher_type_action"
+        sequence="3"/>
+
+    <menuitem id="menu_action_res_document_type"
+        name="Document Types"
+        parent="contacts.res_partner_menu_config"
+        action="res_document_type_action"
+        sequence="3"/>
 
 </odoo>
