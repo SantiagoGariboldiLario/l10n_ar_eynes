@@ -4,71 +4,85 @@
 
         <record id="fiscal_position_ri" model="account.fiscal.position" forcecreate="0" >
             <field name="name">IVA Responsable Inscripto</field>
+            <field name="supplier_denomination">a</field>
             <field name="afip_code">1</field>
         </record>
 
         <record id="fiscal_position_rni" model="account.fiscal.position" forcecreate="0">
             <field name="name">IVA Responsable no Inscripto</field>
+            <field name="supplier_denomination">not_defined</field>
             <field name="afip_code">2</field>
         </record>
 
         <record id="fiscal_position_nr" model="account.fiscal.position" forcecreate="0">
             <field name="name">IVA no Responsable</field>
+            <field name="supplier_denomination">not_defined</field>
             <field name="afip_code">3</field>
         </record>
 
         <record id="fiscal_position_se" model="account.fiscal.position" forcecreate="0">
             <field name="name">IVA Sujeto Exento</field>
+            <field name="supplier_denomination">c</field>
             <field name="afip_code">4</field>
         </record>
 
         <record id="fiscal_position_cf" model="account.fiscal.position" forcecreate="0">
             <field name="name">Consumidor Final</field>
+            <field name="supplier_denomination">not_defined</field>
             <field name="afip_code">5</field>
         </record>
 
         <record id="fiscal_position_rem" model="account.fiscal.position" forcecreate="0">
             <field name="name">Responsable Monotributo</field>
+            <field name="supplier_denomination">c</field>
             <field name="afip_code">6</field>
         </record>
 
         <record id="fiscal_position_snc" model="account.fiscal.position" forcecreate="0">
             <field name="name">Sujeto no Categorizado</field>
+            <field name="supplier_denomination">not_defined</field>
             <field name="afip_code">7</field>
         </record>
 
         <record id="fiscal_position_pe" model="account.fiscal.position" forcecreate="0">
             <field name="name">Proveedor del Exterior</field>
+            <field name="supplier_denomination">e</field>
             <field name="afip_code">8</field>
         </record>
 
         <record id="fiscal_position_ce" model="account.fiscal.position" forcecreate="0">
             <field name="name">Cliente del Exterior</field>
+            <field name="supplier_denomination">e</field>
             <field name="afip_code">9</field>
         </record>
 
         <record id="fiscal_position_lib" model="account.fiscal.position" forcecreate="0">
             <field name="name">IVA Liberado - Ley Nº 19.640</field>
+            <field name="supplier_denomination">not_defined</field>
             <field name="afip_code">10</field>
         </record>
 
         <record id="fiscal_position_ri_ap" model="account.fiscal.position" forcecreate="0">
             <field name="name">IVA Responsable Inscripto - Agente de Percepción</field>
+            <field name="supplier_denomination">not_defined</field>
             <field name="afip_code">11</field>
         </record>
 
         <record id="fiscal_position_pce" model="account.fiscal.position" forcecreate="0">
             <field name="name">Pequeño Contribuyente Eventual</field>
+            <field name="supplier_denomination">c</field>
             <field name="afip_code">12</field>
         </record>
 
         <record id="fiscal_position_ms" model="account.fiscal.position" forcecreate="0">
             <field name="name">Monotributista Social</field>
+            <field name="supplier_denomination">c</field>
             <field name="afip_code">13</field>
         </record>
 
         <record id="fiscal_position_pces" model="account.fiscal.position" forcecreate="0">
             <field name="name">Pequeño Contribuyente Eventual Social</field>
+            <field name="supplier_denomination">c</field>
             <field name="afip_code">14</field>
         </record>
 
