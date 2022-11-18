@@ -12,13 +12,17 @@ class CreateCheckbookWizard(models.TransientModel):
         comodel_name='account.journal',
         string='Journal',
         required=True,
-        domain=[('type', '=', 'bank')])
-
+        domain=[('type', '=', 'bank')]
+    )
     checkbook_format = fields.Selection(
-        selection=[('physical', 'Physical'), ('virtual', 'Virtual'), ('echeq', 'Echeq')],
+        selection=[
+            ('physical', 'Physical'),
+            ('virtual', 'Virtual'),
+            ('echeq', 'Echeq')
+        ],
         string='Format',
-        required=True)
-
+        required=True
+    )
     start_num = fields.Char('Start Number', size=8)
     end_num = fields.Char('End Number', size=8)
 
