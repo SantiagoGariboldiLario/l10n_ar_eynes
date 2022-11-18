@@ -17,7 +17,7 @@ class ResVoucherType(models.Model):
         string="Denomination",
         selection=[
             ("a", "A"), ("b", "B"), ("c", "C"),
-            ("e", "E"), ("m", "M")
+            ("e", "E"), ("m", "M"), ('oc', 'OC'),
         ],
         required=True
     )
