@@ -348,8 +348,8 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_checkbook_wizard.py:0
 #, python-format
-msgid "Checkbook"
-msgstr "Chequera"
+msgid "Checkbook %s %s-%s"
+msgstr "Chequera %s %s-%s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__checkbook_id
