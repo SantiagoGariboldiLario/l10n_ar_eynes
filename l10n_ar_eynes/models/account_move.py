@@ -124,8 +124,8 @@ class AccountMove(models.Model):
     _sql_constraints = [
         (
             'unique_move',
-            'unique(journal_id,supplier_move_reference)',
-            _('move already exists!')
+            'unique(partner_id, supplier_move_reference)',
+            _('This invoice reference already exists for this supplier')
         ),
     ]
 
