@@ -27,9 +27,14 @@ class CreateCheckbookWizard(models.TransientModel):
     end_num = fields.Char('End Number', size=8)
 
     def create_checkbook(self):
-        payment_method_name = _('Checkbook') + f" {self.journal_id.name} {self.number}"
+        payment_method = self.env.ref(
+            'account_check_printing.account_payment_method_check'
+        )
 
-        payment_method = self.env.ref('account_check_printing.account_payment_method_check')
+        payment_method_name = _('Checkbook %s %s-%s',
+                                self.journal_id.name,
+                                self.checkbook_format[0].upper(),
+                                self.number)
 
         self.journal_id.outbound_payment_method_line_ids = [(0, 0, {
             'journal_id' : self.journal_id.id,
