@@ -31,7 +31,12 @@ class AccountJournal(models.Model):
         default='')
 
     denomination = fields.Selection(
-        [("a", "A"), ("b", "B"), ("c", "C"), ("e", "E"), ("not_defined", "Not Defined")],
+        selection=[
+            ("a", "A"), ("b", "B"),
+            ("c", "C"), ("e", "E"),
+            ('m', 'M'), ('oc', 'OC'),
+            ("not_defined", "Not Defined")
+        ],
         string='Denomination',
         default='not_defined')
 

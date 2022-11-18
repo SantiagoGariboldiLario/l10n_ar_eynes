@@ -9,6 +9,7 @@ class AccountFiscalPosition(models.Model):
         selection=[
             ("a", "A"), ("b", "B"),
             ("c", "C"), ("e", "E"),
+            ('m', 'M'), ('oc', 'OC'),
             ("not_defined", "Not Defined")
         ],
         string='Supplier Denomination',
