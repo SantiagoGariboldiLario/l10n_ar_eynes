@@ -31,6 +31,7 @@ class CreateCheckbookWizard(models.TransientModel):
             'journal_id' : self.journal_id.id,
             'payment_method_id' : payment_method.id,
             'name' : payment_method_name,
+            'number': self.number,
             'format' : self.checkbook_format
         })]
 
