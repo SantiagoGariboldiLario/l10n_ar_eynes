@@ -93,15 +93,33 @@ class AccountMove(models.Model):
     def action_post(self):
         if self.is_sale_document():
             if self.id:
-                if not self.denomination:
-                    raise ValidationError(_(
-                        "Invoice must have a denomination configured"
-                    ))
+                self.validate_denomination()
+                self.validate_period()
                 if not self.payment_reference:
                     self.write({
                         'name': f'{self.journal_id.code}-{self.get_highest_pos_sequence()}',
                     })
         return super(AccountMove, self).action_post()
+
+    def validate_period(self):
+        if not self.journal_id.due_date:
+            raise ValidationError(_(
+                "The journal does not have a period established\n"
+                "Please add a period in: "
+                "accounting/journals/update journals periods"
+            ))
+        if self.invoice_date > self.journal_id.due_date:
+            raise ValidationError(_(
+                "The journal_id is outdated\n"
+                "Please modify its period in: "
+                "accounting/journals/update journals periods"
+            ))
+
+    def validate_denomination(self):
+        if not self.denomination or self.denomination == 'not_defined':
+            raise ValidationError(_(
+                "Invoice must have a denomination configured"
+            ))
 
     _sql_constraints = [
         (
