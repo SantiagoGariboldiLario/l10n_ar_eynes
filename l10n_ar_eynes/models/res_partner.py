@@ -78,25 +78,38 @@ class ResPartner(models.Model):
             self.dst_cuit_id = False
 
     def write(self, vals):
-        self.check_vat_string(vals)
+        self.check_vat_string(vals, write=True)
         res = super().write(vals)
         return res
 
-    def check_vat_string(self, vals):
+    @api.model
+    def create(self, vals_list):
+        self.check_vat_string(vals_list)
+        return super(ResPartner, self).create(vals_list)
+
+    def check_vat_string(self, vals, write=False):
         vat = vals.get("vat")
         if not vat:
             return False
         ci_extranjera = self.env.ref('l10n_ar_eynes.document_ci_extranjera')
         pasaporte = self.env.ref('l10n_ar_eynes.document_pasaporte')
-
-        if [x for x in self if x.document_type_id not in [
-                ci_extranjera, pasaporte]]:
-            vat = vat.replace('.', '').replace('-', '')
-            if not vat.isdigit():
-                raise ValidationError(_(
-                    'The Vat only supports numbers.'
-                ))
-            vals['vat'] = vat
+        if write:
+            if [x for x in self if x.document_type_id not in [
+                    ci_extranjera, pasaporte]]:
+                vat = vat.replace('.', '').replace('-', '')
+                if not vat.isdigit():
+                    raise ValidationError(_(
+                        'The Vat only supports numbers.'
+                    ))
+                vals['vat'] = vat
+        else:
+            if vals.get('document_type_id') not in [ci_extranjera, pasaporte]:
+                vat = vat.replace('.', '').replace('-', '')
+                if not vat.isdigit():
+                    raise ValidationError(_(
+                        'The Vat only supports numbers.'
+                    ))
+                vals['vat'] = vat
         return False
 
     @api.constrains('vat', 'country_id', 'document_type_id')
