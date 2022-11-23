@@ -16,8 +16,6 @@ class ResPartner(models.Model):
             ('company_id', '=', company.id),
         ]
 
-    customer = fields.Boolean(string='Is Customer')
-    supplier = fields.Boolean(string='Is Supplier')
     retention_activity_id = fields.Many2one(
         comodel_name='retention.activity',
         string='Activity'

@@ -22,9 +22,10 @@
                     <group>
                         <group>
                             <field name="partner_id"
-                                domain="[('customer','=',True)]"
+                                domain="[('customer_rank', '>', 0)]"
                                 required="1"
                                 string="Customer"
+                                widget="res_partner_many2one"
                                 context="{'search_default_customer': 1}"
                                 attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
                             <field name="journal_id"
@@ -356,9 +357,13 @@
                     <field name="type" invisible="1"/>
                     <group>
                         <group>
-                            <field name="partner_id" required="1" invisible="context.get('line_type', False)"
-                                context="{'invoice_currency':currency_id, 'default_customer': 0, 'search_default_supplier': 1, 'default_supplier': 1}"
-                                domain="[('supplier','=',True)]" string="Supplier"/>
+                            <field name="partner_id"
+                                required="1"
+                                domain="[('supplier_rank', '>', 0)]"
+                                widget="res_partner_many2one"
+                                invisible="context.get('line_type', False)"
+                                context="{'invoice_currency':currency_id, 'search_default_supplier': 1, 'default_supplier': 1}"
+                                string="Supplier"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="journal_id"
                                 domain="[('type', '=', 'payment'), ('company_id', '=', company_id)]"
