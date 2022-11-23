@@ -11,18 +11,12 @@
                 <field name="dst_cuit" invisible="1"/>
                 <field name="document_type_id" placeholder="Document Type..." widget="selection"/>
                 <field name="dst_cuit_id" attrs="{'invisible': [('dst_cuit', '!=', True)]}"/>
+                <field name="supplier_rank" invisible="1"/>
+                <field name="customer_rank" invisible="1"/>
             </xpath>
 
             <xpath expr="//field[@name='vat']" position="attributes">
                 <attribute name="string">NIF</attribute>
-            </xpath>
-
-            <xpath expr="//group[@name='sale']/field[@name='user_id']" position="before">
-                <field name="customer" string="Is a Customer"/>
-            </xpath>
-
-            <xpath expr="//field[@name='property_supplier_payment_term_id']" position="before">
-                <field name="supplier" string="Is a Supplier"/>
             </xpath>
 
             <page name="accounting" position="after">
@@ -47,7 +41,7 @@
                         </field>
                     </group>
                     <group string="Advance Payment Retentions"
-                        attrs="{'invisible': [('supplier', '=', False)]}">
+                        attrs="{'invisible': [('supplier_rank', '=', 0)]}">
                         <field name="advance_retention_ids" nolabel="1">
                             <tree string="Retentions to Apply" editable="bottom">
                                 <field name="retention_id"/>
