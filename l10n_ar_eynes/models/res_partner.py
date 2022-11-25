@@ -159,7 +159,7 @@ class ResPartner(models.Model):
             if len(vat) != 11:
                 return False
         if self.document_type_id == cuil:
-            if len(vat) > 11:
+            if len(vat) != 11:
                 return False
         if self.document_type_id == dni:
             if len(vat) > 8:
