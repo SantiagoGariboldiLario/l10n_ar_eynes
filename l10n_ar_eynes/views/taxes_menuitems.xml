@@ -17,9 +17,14 @@
 
     <menuitem id="taxes_submenu" name="Taxes" parent="account.menu_finance_configuration" sequence="3">
         <menuitem id="account.menu_action_tax_form" name="Taxes" action="account.action_tax_form" sequence="1"/>
-        <menuitem id="taxes_retentions_menu" name="Retentions" action="action_retention_journals" sequence="2"/>
         <menuitem id="taxes_perceptions_menu" name="Perceptions" action="action_perception_journals" sequence="3"/>
     </menuitem>
 
+    <menuitem id="taxes_retentions_submenu" name="Retentions" parent="account.menu_finance_configuration" sequence="3">
+        <menuitem id="retentions_menu" name="Retentions" action="action_retention_journals" sequence="1"/>
+        <menuitem id="retention_concepts_menu" name="Concepts" action="action_retention_concept" sequence="2" />
+        <menuitem id="retention_activities_menu" name="Activities" action="action_retention_activity" sequence="3"/>
+        <menuitem id="retention_retention_scales_menu" name="Scales" action="action_retention_scale" sequence="4"/>
+    </menuitem>
 
 </odoo>
