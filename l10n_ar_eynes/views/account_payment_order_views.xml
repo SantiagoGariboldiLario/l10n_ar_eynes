@@ -619,7 +619,7 @@
                             </field>
                         </page>
                         <page string="Retentions">
-                            <field name="retention_ids" nolabel="1" attrs="{'readonly': [('disable_retentions', '=', False)]}">
+                            <field name="retention_ids" force_save="1" nolabel="1" attrs="{'readonly': [('disable_retentions', '=', False)]}">
                                 <tree string="Retention Lines">
                                     <field name="currency_id" invisible="1"/>
                                     <field name="name" invisible="1"/>
