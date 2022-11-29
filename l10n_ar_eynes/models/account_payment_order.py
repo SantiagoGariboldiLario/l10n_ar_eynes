@@ -610,7 +610,7 @@ class AccountPaymentOrder(models.Model):
                 'invoice_id': invoice and invoice.id,
                 'invoice_ref': invoice and invoice.name_get()[0][1],
                 'date': self.date,
-                'account_id': retention.tax_id.account_id.id,
+                'account_id': retention.profit_account_id.id,
                 'base': base,
                 'amount': amount,
                 'manual': False,  # La creamos por sistema
@@ -624,12 +624,11 @@ class AccountPaymentOrder(models.Model):
             }
 
             res.append(retention_line_vals)
-
         return res
 
     def _check_previous_retentions(self, retention, move_line=False):
         sql = """
-        SELECT rl.id FROM retention_retention r
+        SELECT rl.id FROM account_journal r
         JOIN account_payment_order_retention_line rl ON r.id=rl.retention_id
         JOIN retention_line_move_line_rel rv ON rv.retention_line_id=rl.id
         JOIN account_move_line ml ON ml.id=rv.move_line_id
@@ -1517,7 +1516,6 @@ class AccountPaymentOrder(models.Model):
                 'debit': 0.0,
                 'date': self.date
             }
-            print(move_line)
             if amount < 0:
                 amount = -amount
 
@@ -1796,7 +1794,6 @@ class AccountPaymentOrderLine(models.Model):
             _logger.warning('Voucher is multicurrency: Ignoring _check_amount_over_original')
             return None
         if not (0 <= self.amount <= self.amount_unreconciled):
-            print(self.amount, self.amount_unreconciled)
             raise ValidationError(_(
                 "Error!\nThe amount assigned to an invoice must not excede "
                 "the unreconciled amount, nor be negative."

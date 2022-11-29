@@ -15,6 +15,14 @@ class AccountMove(models.Model):
         string='Denomination',
     )
     supplier_move_reference = fields.Char(string='Supplier Invoice Reference')
+    address_shipping_id = fields.Many2one(
+        comodel_name='res.partner',
+        name='Shipping Address',
+        readonly=True, required=False,
+        states={
+            'draft': [('readonly', False)],
+        }
+    )
 
     def get_highest_pos_sequence(self):
         invoices = self.env['account.move'].search([

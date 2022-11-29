@@ -23,6 +23,10 @@ class AccountJournal(models.Model):
     def get_default_warehouse(self):
         return self.env['stock.warehouse'].browse(1).id
 
+    @api.model
+    def _get_company(self):
+        return self.env.user.company_id
+
     code = fields.Char(
         string='POS code',
         size=5,
@@ -93,14 +97,14 @@ class AccountJournal(models.Model):
     def _get_concepts_from_account(self, retention, account):
         company = self._get_company()
         concepts = account.retention_concept_ids.filtered(
-            lambda c: c.type == retention.type
+            lambda c: c.type == retention.tax_id.retention_type
             and (c.company_id.id == company.id or not c.company_id)
         )
         if not concepts:
             raise ValidationError(_(
                 "Retention Error\n"
                 f"Account {account.name}[{account.code}] must have "
-                f"an associated concept for {retention.name}.Please configure it!"
+                f"an associated concept for {retention.name}. Please configure it!"
             ))
         return concepts
 
@@ -239,7 +243,7 @@ class AccountJournal(models.Model):
 
                 # Buscamos las taxapps que concuerden
                 tapp_domain = [
-                    ('retention_id', '=', retention.id),
+                    ('retention_tax_id', '=', retention.tax_id.id),
                     ('concept_id', 'in', concepts.ids)
                 ]
                 if activity:
@@ -308,7 +312,7 @@ class AccountJournal(models.Model):
                 # Factura (no por actividad)
                 # TODO: Deberiamos tener alguna configuracion
                 # para agrupar o no por factura tambien
-                invoice = ml.invoice_id or False
+                invoice = ml.move_id or False
 
                 concept = taxapp.concept_id
                 if taxapp.calculation_base in [

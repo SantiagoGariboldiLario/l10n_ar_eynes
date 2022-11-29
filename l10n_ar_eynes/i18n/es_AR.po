@@ -414,6 +414,11 @@ msgstr "Compañías"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__company_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__company_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_advance_retention__company_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__company_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_activity__company_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__company_id
 msgid "Company"
 msgstr "Compañia"
 
@@ -562,6 +567,7 @@ msgstr "Pagos de cliente"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__date_original
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__date
 msgid "Date"
 msgstr "Fecha"
 
@@ -667,6 +673,9 @@ msgstr "Depositado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_activity__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__name
 msgid "Description"
 msgstr "Descripcion"
 
@@ -1105,9 +1114,10 @@ msgstr "Apunte contable"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__move_line_ids
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Journal Items"
-msgstr ""
+msgstr "Apuntes contables"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -1224,8 +1234,11 @@ msgid "Multi Currency Voucher"
 msgstr "Pago Multimoneda"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_iibb_situation__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale_line__name
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Name"
 msgstr "Nombre"
 
@@ -1258,7 +1271,13 @@ msgstr "Nota"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__narration
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__notes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_activity__notes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__notes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_view_tax_form_inherit_l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_activity_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_concept_form
 msgid "Notes"
 msgstr "Notas"
 
@@ -1679,11 +1698,56 @@ msgid "Retention Journals"
 msgstr "Diarios de retenciones"
 
 #. module: l10n_ar_eynes
+#: model:account.tax.group,name:l10n_ar_eynes.retentions_tax_group
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_fiscal_position__retention_ids
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__retention_ids
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__type__retentions
-#: model:ir.ui.menu,name:l10n_ar_eynes.taxes_retentions_menu
+#: model:ir.ui.menu,name:l10n_ar_eynes.retentions_menu
+#: model:ir.ui.menu,name:l10n_ar_eynes.taxes_retentions_submenu
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_fiscal_position_form_inherit_l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_journal_view_form_inherit_l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_view_tax_form_inherit_l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
 msgid "Retentions"
 msgstr "Retenciones"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_advance_retention__retention_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__retention_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept_line__payment_order_line_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__retention_tax_id
+msgid "Retention"
+msgstr "Retención"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__concept_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_advance_retention__concept_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept_line__concept_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__concept_id
+msgid "Concept"
+msgstr "Concepto"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_retention_concept
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_account__retention_concept_ids
+#: model:ir.ui.menu,name:l10n_ar_eynes.retention_concepts_menu
+msgid "Concepts"
+msgstr "Conceptos"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__retention_activity_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__retention_activity_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__activity_id
+msgid "Activity"
+msgstr "Actividad"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_retention_activity
+#: model:ir.ui.menu,name:l10n_ar_eynes.retention_activities_menu
+msgid "Activities"
+msgstr "Actividades"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
@@ -1829,9 +1893,17 @@ msgstr "Pagos de proveedores"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_tax
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__tax_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__tax_id
 msgid "Tax"
 msgstr "Impuesto"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__type_tax_use
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__taxapp_id
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_view_tax_form_inherit_l10n_ar_eynes
+msgid "Tax Application"
+msgstr "Aplicación del impuesto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__amount
@@ -2007,6 +2079,11 @@ msgstr "Tesoreria"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__type
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__type
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__retention_type
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_activity__type
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__type
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__type
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Type"
 msgstr "Tipo"
 
@@ -2332,3 +2409,148 @@ msgid ""
 msgstr ""
 "Márquelo si corresponde aplicar reglas fiscales locales como validación de "
 "Número de Factura, etc."
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_dst_cuit_codes__code
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_activity__code
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__code
+msgid "Code"
+msgstr "Código"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__percent
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale_line__percent
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__percent
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_tax_application__aliq_type__percent
+msgid "Percent"
+msgstr "Porcentaje"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__ex_date_from
+msgid "From date"
+msgstr "Desde"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__ex_date_to
+msgid "To date"
+msgstr "Hasta"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__retention_type__gross_income
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_activity__type__gross_income
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_concept__type__gross_income
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_tax_application__type__gross_income
+msgid "Gross Income"
+msgstr "Ingresos Brutos"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__exclusion_certificate
+msgid "Exclusion Certificate"
+msgstr "Certificado de Exclusión"
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_iibb_situation
+msgid "IIBB Situation"
+msgstr "Situación IIBB"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__excluded_percent
+msgid "Percentage of Exclusion"
+msgstr "Porcentaje de Exclusión"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__excluded_percent
+msgid "Percentage of exclusion"
+msgstr "Porcentaje de Exclusión"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__from_padron
+msgid "From Padron"
+msgstr "Desde Padrón"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
+msgid "Advance Payment Retentions"
+msgstr "Retenciones para adelantos"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_scale_form
+msgid "Lines"
+msgstr "Lineas"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale_line__limit
+msgid "Limit"
+msgstr "Límite"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_retention_scale
+msgid "Retention Scales"
+msgstr "Escalas de Retenciones"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__always_apply_padron
+msgid "Always Apply from Padron"
+msgstr "Siempre aplicar desde el padron"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__calculation_base
+msgid "Calculation Base"
+msgstr "Calculo de la base"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__tax_minimum
+msgid "Tax Minimum"
+msgstr "Impuesto minimo"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__aliq_type
+msgid "Aliquot Type"
+msgstr "Tpo de alicuota"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__retention_type__profit
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_activity__type__profit
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_concept__type__profit
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_tax_application__type__profit
+msgid "Profit"
+msgstr "Ganancia"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__retention_type__other
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_activity__type__other
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_concept__type__other
+msgid "Other"
+msgstr "Otro"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_view_tax_form_inherit_l10n_ar_eynes
+msgid "Jurisdiction Information"
+msgstr "Información de jurisdicción"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.retention_retention_scales_menu
+msgid "Scales"
+msgstr "Escalas"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale_line__scale_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__scale_id
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_tax_application__aliq_type__scale
+msgid "Scale"
+msgstr "Escala"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_view_tax_form_inherit_l10n_ar_eynes
+msgid "General Resolution Associated"
+msgstr "Resolucion general asociada"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+msgid "Retention Type"
+msgstr "Tipo de Retención"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__invoice_ref
+msgid "Invoice Reference"
+msgstr "Referencia factura"

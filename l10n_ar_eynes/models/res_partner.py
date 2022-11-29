@@ -228,7 +228,6 @@ class ResPartner(models.Model):
 
             retention = {
                 'retention': p_ret.retention_id,
-                'activity_id': p_ret.activity_id,
                 'excluded_percent': excluded_percent,
                 'percent': p_ret.percent,
                 'ex_date_to': p_ret.ex_date_to,

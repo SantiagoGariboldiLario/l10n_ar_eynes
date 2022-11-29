@@ -54,6 +54,7 @@
         'wizard/reject_check_wizard_view.xml',
         'views/res_voucher_type_views.xml',
         'views/account_check_views.xml',
+        'views/retention_views.xml',
         'wizard/create_checkbook_wizard_view.xml',
         'views/treasury_menuitems.xml',
         'views/taxes_menuitems.xml',
