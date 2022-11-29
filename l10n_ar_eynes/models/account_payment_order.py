@@ -610,7 +610,7 @@ class AccountPaymentOrder(models.Model):
                 'invoice_id': invoice and invoice.id,
                 'invoice_ref': invoice and invoice.name_get()[0][1],
                 'date': self.date,
-                'account_id': retention.tax_id.account_id.id,
+                'account_id': retention.profit_account_id.id,
                 'base': base,
                 'amount': amount,
                 'manual': False,  # La creamos por sistema
