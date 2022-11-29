@@ -12,7 +12,7 @@
             </xpath>
 
             <notebook position="inside">
-                <page string="Retentions" attrs="{'invisible': [('tax_group_name', '!=', 'Retentions')]}">
+                <page string="Retentions" attrs="{'invisible': [('tax_group_name', 'not in', ('Retentions', 'Retenciones'))]}">
                     <group>
                         <group string="Jurisdiction Information">
                             <field name="jurisdiccion" select="1"/>
