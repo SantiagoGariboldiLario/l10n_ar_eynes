@@ -6,6 +6,7 @@
         <field name="res_model">account.journal</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('type', '=', 'retentions')]</field>
+        <field name="context">{'default_type':'retentions'}</field>
     </record>
 
     <record id="action_perception_journals" model="ir.actions.act_window">
@@ -13,6 +14,7 @@
         <field name="res_model">account.journal</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('type', '=', 'perceptions')]</field>
+        <field name="context">{'default_type':'perceptions'}</field>
     </record>
 
     <menuitem id="taxes_submenu" name="Taxes" parent="account.menu_finance_configuration" sequence="3">
