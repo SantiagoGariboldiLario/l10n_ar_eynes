@@ -111,13 +111,14 @@ class AccountMove(models.Model):
         return super(AccountMove, self).action_post()
 
     def validate_period(self):
+        date = self.invoice_date or fields.Date.context_today(self)
         if not self.journal_id.due_date:
             raise ValidationError(_(
                 "The journal does not have a period established\n"
                 "Please add a period in: "
                 "accounting/journals/update journals periods"
             ))
-        if self.invoice_date > self.journal_id.due_date:
+        if date > self.journal_id.due_date:
             raise ValidationError(_(
                 "The journal_id is outdated\n"
                 "Please modify its period in: "
