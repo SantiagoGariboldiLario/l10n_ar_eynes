@@ -12,13 +12,19 @@
 
             <xpath expr="//h1[hasclass('mt0')]" position="replace">
                 <h1 class="mt0">
-                    <field name="denomination" class="oe_inline" force_save="1" required="1" attrs="{'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]}"/>
-                    <field name="name" readonly="1" force_save="1" class="oe_inline" attrs="{'invisible': [('state', '=', 'draft'),('supplier_move_reference', '=', False)]}"/>
+                    <field name="name"
+                        readonly="1" force_save="1" class="oe_inline"
+                        attrs="{'invisible': [('state', '=', 'draft'),('supplier_move_reference', '=', False)]}"/>
                 </h1>
             </xpath>
 
             <xpath expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']" position="attributes">
                 <attribute name="attrs">{'required': 1}</attribute>
+            </xpath>
+            <xpath expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']" position="after">
+                <field name="denomination"
+                    force_save="1" required="1"
+                    attrs="{'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]}"/>
             </xpath>
 
             <xpath expr="//div[@name='journal_div']" position="after">
