@@ -1,16 +1,17 @@
-from . import account_check
-from . import account_fiscal_position
-from . import account_journal
-from . import account_move
-from . import account_payment_method
-from . import account_payment_order
-from . import account_tax
-from . import company
-from . import iibb_situation
-from . import res_config_settings
-from . import res_document_type
-from . import res_partner_bank
-from . import res_partner
-from . import res_voucher_type
-from . import retention
-from . import user_journal_rel
+from . import account_check # noqa
+from . import account_fiscal_position # noqa
+from . import account_journal # noqa
+from . import account_move # noqa
+from . import account_payment_method # noqa
+from . import account_payment_order # noqa
+from . import account_tax # noqa
+from . import company # noqa
+from . import iibb_situation # noqa
+from . import res_config_settings # noqa
+from . import res_document_type # noqa
+from . import res_partner_bank # noqa
+from . import res_partner # noqa
+from . import res_voucher_type # noqa
+from . import retention # noqa
+from . import user_journal_rel # noqa
+from . import sale_order  # noqa
