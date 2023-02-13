@@ -1,6 +1,6 @@
 import logging
 from pprint import pformat as pf
-from datetime import date
+from dateutil.relativedelta import relativedelta
 import json
 
 from odoo import _, api, fields, models
@@ -790,13 +790,12 @@ class AccountPaymentOrder(models.Model):
         for voucher in self:
             u_rets = voucher.retention_ids.filtered(lambda x: not x.unlinkable)
             if u_rets:
-                raise ValidationError(
-                    _("Error!\n") +
-                    _("Voucher %s [id: %s] has Unlinkable Retentions:\n" +
-                      "%s") % (
-                          voucher.name, voucher.id,
-                          ("\n").join(["%s [id: %s]" % (r.name, r.id) for r
-                                       in u_rets]))
+                raise ValidationError(_(
+                    "Error!\n"
+                    "Voucher %s [id: %s] has Unlinkable Retentions:\n" "%s") %
+                    (voucher.name, voucher.id, ("\n").join(
+                        ["%s [id: %s]" % (r.name, r.id) for r in u_rets]
+                    ))
                 )
         return True
 
@@ -1954,7 +1953,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         + "all the configuration resides. Accounts, Tax Codes, etc."
     )
     base_amount = fields.Float(
-        comodel_name='Base Code Amount',
+        string='Base Code Amount',
         digits='Account',
     )
     tax_amount = fields.Float(
@@ -1998,10 +1997,6 @@ class AccountPaymentOrderRetentionLine(models.Model):
         string='Invoice'
     )
     invoice_ref = fields.Char(string='Invoice Reference', size=64)
-    concept_id = fields.Many2one(
-        comodel_name='retention.concept',
-        string='Concept'
-    )
     taxapp_id = fields.Many2one(
         comodel_name='retention.tax.application',
         string='Tax Application'
@@ -2021,18 +2016,28 @@ class AccountPaymentOrderRetentionLine(models.Model):
         comodel_name='retention.move.line',
         inverse_name='payment_order_line_id',
         string='Retention move lines',
+        compute='_comupute_retention_move_lines'
     )
     retention_move_lines_total = fields.Float(
         string='Total',
         digits='Account',
         compute='_compute_total_retention_move_lines'
     )
-    retention_concept_line_ids = fields.One2many(
-        comodel_name='retention.concept.line',
-        inverse_name='payment_order_line_id',
-        string='Retention concept lines'
+    concept_id = fields.Many2one(
+        comodel_name='retention.concept',
+        string='Concept',
+        related='taxapp_id.concept_id'
     )
-    applied_aliquot = fields.Float(string='Aliquot applied')
+    concept_amount = fields.Float(
+        string='Amount',
+        digits='Account',
+        related='taxapp_id.tax_allowance'
+    )
+    applied_aliquot = fields.Float(
+        string='Aliquot applied',
+        digits='Account',
+        related='taxapp_id.percent'
+    )
     total_month_retention = fields.Float(
         string='Total month retention',
         compute='_compute_total_month_retention',
@@ -2049,33 +2054,77 @@ class AccountPaymentOrderRetentionLine(models.Model):
         store=False
     )
 
-    def get_retention_lines(self):
-        this_month = date.today().month
-        this_year = date.today().year
-        if self.retention_move_line_ids:
-            return
-        moves = self.env['account.move'].search([
-            ('partner_id', '=', self.payment_order_id.partner_id.id)
-        ])
-        move_lines = []
-        for move in moves.filtered(lambda m: m.invoice_date.month == this_month
-                                   and m.invoice_date.year == this_year):
-            total_without_vat = json.loads(
-                move.tax_totals_json
-            )['amount_untaxed'] or 0.00
+    def _comupute_retention_move_lines(self):
+        RetMoveLine = self.env['retention.move.line']
+        for rec in self:
+            rec.clear_retention_lines()
+            ids = rec.create_retention_lines()
+            rec.retention_move_line_ids = RetMoveLine.browse(ids)
+
+    def clear_retention_lines(self):
+        self.env['retention.move.line'].search([
+            ('payment_order_line_id', '=', self.id)
+        ]).unlink()
+
+    def create_retention_lines(self):
+        """This method creates the retention move lines and return the ID's"""
+        move_line_ids = []
+
+        for move in self.get_current_month_moves():
+            rec = self.retention_move_line_ids.create(
+                self.get_retention_line_vals(move)
+            )
+            if rec:
+                move_line_ids.append(rec.id)
+        for line in self.payment_order_id.debt_line_ids.filtered(
+                lambda l: l.amount > 0):
             rec = self.retention_move_line_ids.create({
                 'payment_order_line_id': self.id,
-                'move_id': move.id,
-                'move_name': move.name,
-                'move_type': move.type,
-                'total_without_vat': total_without_vat
+                'move_id': line.invoice_id.id,
+                'move_name': 'draft',
+                'move_type': line.invoice_id.move_type,
+                'total_without_vat': json.loads(
+                    line.invoice_id.tax_totals_json)['amount_untaxed'],
+                'payment_order_reference': self.payment_order_id.number or ''
             })
             if rec:
-                rec.write({
-                    'payment_order_reference': rec.get_payment_order()
-                })
-                move_lines.append(rec.id)
-        return move_lines
+                move_line_ids.append(rec.id)
+        return move_line_ids
+
+    def get_current_month_moves(self):
+        return self.env['account.move'].search([
+            ('move_type', '!=', 'entry'),
+            ('payment_state', 'in', ('paid', 'partial')),
+            ('partner_id', '=', self.payment_order_id.partner_id.id),
+            ('invoice_date', '>=', self.date.replace(day=1)),
+            ('invoice_date', '<=', self.date + relativedelta(day=31))
+        ])
+
+    def get_retention_line_vals(self, move):
+        """Return move line values to insert into retention lines o2m
+
+        Args:
+            move (account.move): Invoices which values are taken
+
+        Returns:
+            dict: Dictionary with values to insert
+        """
+        move_type_map = {
+            'in_invoice': 'In Invoice',
+            'out_invoice': 'Out Invoice',
+            'in_refund': 'In Refund',
+            'out_refund': 'Out Refund'
+        }
+        total_without_vat = json.loads(
+            move.tax_totals_json)['amount_untaxed'] or 0.00
+        return {
+            'payment_order_line_id': self.id,
+            'move_id': move.id,
+            'move_name': move.name,
+            'move_type': move_type_map[move.move_type],
+            'total_without_vat': total_without_vat,
+            'payment_order_reference': self.payment_order_id.number or ''
+        }
 
     @api.depends('retention_move_line_ids')
     def _compute_total_retention_move_lines(self):
@@ -2085,24 +2134,26 @@ class AccountPaymentOrderRetentionLine(models.Model):
             )
 
     @api.depends('retention_move_lines_total',
-                 'retention_concept_line_ids.amount',
+                 'concept_amount',
                  'applied_aliquot')
     def _compute_total_month_retention(self):
         for rec in self:
             total = rec.retention_move_lines_total
-            amount = sum(rec.retention_concept_line_ids.mapped('amount'))
+            amount = rec.concept_amount
             rec.total_month_retention = (total - amount) * (rec.applied_aliquot / 100)
 
     @api.depends('retention_move_line_ids', 'applied_aliquot')
     def _compute_month_applied_retentions(self):
         for rec in self:
-            rec.month_applied_retentions = 1000.00 * rec.applied_aliquot * 0.01
+            total = sum(rec.retention_move_line_ids.filtered(lambda l: l.move_name != 'draft').mapped('total_without_vat'))
+            amount = rec.concept_amount
+            rec.month_applied_retentions = (total - amount) * (rec.applied_aliquot / 100)
 
     @api.depends('total_month_retention', 'month_applied_retentions')
     def _compute_actual_payment_retention(self):
         for rec in self:
-            rec.actual_payment_retention = rec.month_applied_retentions \
-                - rec.total_month_retention
+            rec.actual_payment_retention = rec.total_month_retention \
+                - rec.month_applied_retentions
 
     @api.onchange('retention_id')
     def onchange_retention_id(self):
@@ -2209,59 +2260,8 @@ class RetentionMoveLine(models.Model):
         comodel_name='account.payment.order.retention.line',
         string='Payment order'
     )
-    move_id = fields.Many2one(
-        comodel_name='account.move',
-        string='Move'
-    )
-    move_type = fields.Char(
-        string='Move type',
-        readonly=True
-    )
-    move_name = fields.Char(
-        string='Move name',
-        readonly=True
-    )
-    total_without_vat = fields.Float(
-        string='Total without vat',
-        readonly=True
-    )
-    payment_order_reference = fields.Char(
-        string="Payment order",
-        readonly=True,
-    )
-
-    # @api.onchange('move_id')
-    # def _onchange_move(self):
-    #     move = self.move_id
-    #     self.move_name = move.name
-    #     self.move_type = move.move_type
-    #     self.total_without_vat = self._get_total_without_vat()
-    #     self.payment_order_reference = self.get_payment_order()
-
-    def _get_total_without_vat(self):
-        return json.loads(self.move_id.tax_totals_json)['amount_untaxed']
-
-    def get_payment_order(self):
-        for rec in self:
-            po = self.env['account.payment.order'].search([
-                ('move_id', '=', rec.move_id.id)
-            ])
-            rec.payment_order_reference = po.number if po else ''
-
-
-class RetentionConceptLine(models.Model):
-    _name = 'retention.concept.line'
-    _description = 'Retention concept lines in payment order'
-
-    payment_order_line_id = fields.Many2one(
-        comodel_name='account.payment.order.retention.line',
-        string='Retention',
-    )
-    concept_id = fields.Many2one(
-        comodel_name='retention.concept',
-        string='Concept',
-    )
-    amount = fields.Float(
-        string='Amount',
-        digits='Account',
-    )
+    move_id = fields.Many2one(comodel_name='account.move', string='Move')
+    move_type = fields.Char(string='Move type', readonly=True)
+    move_name = fields.Char(string='Move name', readonly=True)
+    total_without_vat = fields.Float(string='Total without vat', readonly=True)
+    payment_order_reference = fields.Char(string="Payment order", readonly=True)

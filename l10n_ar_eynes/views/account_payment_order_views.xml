@@ -651,7 +651,9 @@
                                 </tree>
                                 <form>
                                     <h1>
-                                        <field name="name" class="oe_inline"/>
+                                        <field name="name"
+                                            class="oe_inline"
+                                            attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
                                     </h1>
                                     <group>
                                         <group string="Information" name="info">
@@ -682,34 +684,31 @@
                                                 <field name="move_id"/>
                                                 <field name="date"/>
                                                 <field name="date_maturity"/>
-                                                <field name="invoice_id"/>
                                                 <field name="amount_residual"/>
                                                 <field name="balance"/>
                                             </tree>
                                         </field>
                                     </group> -->
-                                    <group name="name" string="More information">
-                                        <field name="retention_move_line_ids">
-                                            <tree create="false" edit="false" delete="false">
+                                    <group name="more_information" string="More information">
+                                        <field name="retention_move_line_ids" readonly="1">
+                                            <tree>
                                                 <field name="payment_order_line_id" invisible="1"/>
-                                                <field name="move_id" />
                                                 <field name="payment_order_reference" string="OP reference"/>
                                                 <field name="move_type" string="Type"/>
+                                                <field name="move_id" invisible="1"/>
                                                 <field name="move_name" string="Name"/>
                                                 <field name="total_without_vat" />
                                             </tree>
                                         </field>
                                         <field name="retention_move_lines_total" />
-                                        <field name="retention_concept_line_ids" create="true">
-                                            <tree>
-                                                <field name="concept_id" />
-                                                <field name="amount" />
-                                            </tree>
-                                        </field>
-                                        <field name="applied_aliquot" />
-                                        <field name="total_month_retention" />
-                                        <field name="month_applied_retentions" />
-                                        <field name="actual_payment_retention" />
+                                        <group name="concept" string="Concept">
+                                            <field name="concept_id"/>
+                                            <field name="concept_amount"/>
+                                            <field name="applied_aliquot" />
+                                            <field name="total_month_retention" />
+                                            <field name="month_applied_retentions" />
+                                            <field name="actual_payment_retention" />
+                                        </group>
                                     </group>
                                 </form>
                             </field>
