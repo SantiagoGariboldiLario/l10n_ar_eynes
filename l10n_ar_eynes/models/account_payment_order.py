@@ -1777,7 +1777,7 @@ class AccountPaymentOrderLine(models.Model):
     @api.onchange('reconcile')
     def amount_full_conciliation(self):
         for line in self:
-            if line.amount or line.amount_currency:
+            if not line.reconcile:
                 line.amount = 0
                 line.amount_currency = 0
             else:
