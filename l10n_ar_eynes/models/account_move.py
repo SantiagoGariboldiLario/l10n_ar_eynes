@@ -51,7 +51,7 @@ class AccountMove(models.Model):
         super(AccountMove, self)._onchange_partner_id()
         if self.move_type == 'out_invoice':
             relations = self.env['user.journal.rel'].search([
-                ('journal_id.fiscal_position_id', '=', self.fiscal_position_id.id),
+                ('journal_id.fiscal_position_id', '=', self.partner_id.property_account_position_id.id),
                 ('user_id', '=', self.env.user.id)],
                 order='sequence asc',
             )

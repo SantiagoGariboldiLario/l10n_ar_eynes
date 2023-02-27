@@ -19,7 +19,12 @@
             </xpath>
 
             <xpath expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']" position="attributes">
-                <attribute name="attrs">{'required': 1}</attribute>
+                <attribute name="attrs">
+                    {
+                        'required': 1,
+                        'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
+                    }
+                </attribute>
             </xpath>
             <xpath expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']" position="after">
                 <field name="denomination"
