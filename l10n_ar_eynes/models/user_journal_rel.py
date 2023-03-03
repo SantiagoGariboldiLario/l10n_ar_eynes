@@ -1,4 +1,4 @@
-from odoo import models, fields, _
+from odoo import models, fields, _, api
 
 
 class UserJournalRel(models.Model):
@@ -27,6 +27,15 @@ class UserJournalRel(models.Model):
         default=get_last_sequence,
         readonly=True
     )
+
+    @api.model
+    def get_first_journal(self, partner):
+        first_relation_seq = self.search([
+            ('journal_id.fiscal_position_id', '=', partner.property_account_position_id.id),
+            ('user_id', '=', self.env.user.id)],
+            order='sequence asc', limit=1
+        )
+        return first_relation_seq.journal_id or False
 
     _sql_constraints = [
         (
