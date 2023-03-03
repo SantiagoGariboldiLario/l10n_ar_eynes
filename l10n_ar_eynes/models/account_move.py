@@ -131,6 +131,14 @@ class AccountMove(models.Model):
                 "Invoice must have a denomination configured"
             ))
 
+    @api.model_create_multi
+    def create(self, vals):
+        res = super().create(vals)
+        for move in res.filtered(lambda m: m.is_sale_document()):
+            if not move.denomination:
+                move.write({'denomination': move.journal_id.denomination})
+        return res
+
     _sql_constraints = [
         (
             'unique_move',
