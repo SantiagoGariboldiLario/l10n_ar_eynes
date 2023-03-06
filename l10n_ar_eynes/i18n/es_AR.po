@@ -50,7 +50,11 @@ msgid "AFIP Code"
 msgstr "Código AFIP"
 
 #. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_account_account
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__account_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_concept_line__account_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_setup_bank_manual_config__account_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_bank__account_id
 msgid "Account"
 msgstr "Cuenta"
 
@@ -62,7 +66,7 @@ msgstr "Configuración de la cuenta de cheque"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__move_id
 msgid "Account Entry"
-msgstr ""
+msgstr "Asiento Contable"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_customer_payment_order_action
@@ -130,6 +134,9 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__amount
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__amount
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_concept_line__amount
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__amount
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__concept_amount
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__price
 msgid "Amount"
 msgstr "Importe"
@@ -162,9 +169,10 @@ msgid "Amount in Partner Currency"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_concept_line__account_analytic_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__account_analytic_id
 msgid "Analytic Account"
-msgstr ""
+msgstr "Cuenta Analítica"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -381,6 +389,7 @@ msgstr "La chequera debe conter solo numeros"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_tree
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Checks"
 msgstr "Cheques"
 
@@ -673,11 +682,12 @@ msgstr "Depositado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_concept_line__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_activity__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__name
 msgid "Description"
-msgstr "Descripcion"
+msgstr "Descripción"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__dest
@@ -1084,6 +1094,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__issued_check_ids
 #: model:ir.ui.menu,name:l10n_ar_eynes.treasury_issued_check_menu
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Issued Checks"
 msgstr "Cheques propios"
 
@@ -1091,12 +1102,14 @@ msgstr "Cheques propios"
 #: model:ir.model,name:l10n_ar_eynes.model_account_journal
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__journal_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__journal_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_concept_line__journal_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__journal_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__journal_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard_line__journal_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_user_journal_rel__journal_id
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Journal"
 msgstr "Diario"
 
@@ -1116,6 +1129,7 @@ msgstr "Apunte contable"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__move_line_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Journal Items"
 msgstr "Apuntes contables"
 
@@ -1378,6 +1392,7 @@ msgstr "Pagado"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Paid Amount"
 msgstr "Monto pagado"
 
@@ -1434,6 +1449,7 @@ msgstr "Diferencia de pago"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Payment Information"
 msgstr "Informacion de pago"
 
@@ -1457,6 +1473,7 @@ msgstr "Métodos de pago"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Payment Options"
 msgstr "Opciones de pago"
 
@@ -1480,6 +1497,7 @@ msgstr "Tipo de Cambio del Pago"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Payment Ref"
 msgstr "Ref. Pago"
 
@@ -2314,7 +2332,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__name
 msgid "description"
-msgstr "Descripcion"
+msgstr "Descripción"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__type
@@ -2554,3 +2572,19 @@ msgstr "Tipo de Retención"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__invoice_ref
 msgid "Invoice Reference"
 msgstr "Referencia factura"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__other_payment
+#: model:ir.ui.menu,name:l10n_ar_eynes.other_payments_menu
+msgid "Other Payments"
+msgstr "Otros Pagos"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.other_receipts_action
+msgid "Other Receipts"
+msgstr "Otros Pagos"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__concept_line_ids
+msgid "Other Concepts"
+msgstr "Otros Conceptos"
