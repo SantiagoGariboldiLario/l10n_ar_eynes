@@ -28,8 +28,9 @@
         'stock',
         'purchase',
         'contacts',
+        'hr',
         'account_check_printing',
-        'account'
+        'account',
     ],
     'data': [
         'data/fiscal_position_data.xml',
@@ -46,6 +47,7 @@
         'views/res_partner_views.xml',
         'views/account_journal_views.xml',
         'views/account_payment_order_views.xml',
+        'views/account_payment_order_other_payments_views.xml',
         'views/account_move_views.xml',
         'views/user_journal_rel_views.xml',
         'views/account_fiscal_position_views.xml',

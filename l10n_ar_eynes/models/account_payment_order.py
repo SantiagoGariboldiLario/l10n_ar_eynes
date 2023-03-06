@@ -332,6 +332,15 @@ class AccountPaymentOrder(models.Model):
         help="Check this if you want to disable automatic "
         + "calculation of retention on this payment"
     )
+    # OTHER PAYMENTS FIELDS
+    concept_line_ids = fields.One2many(
+        comodel_name='account.payment.order.concept.line',
+        inverse_name='payment_order_id',
+        string="Other Concepts"
+    )
+    other_payment = fields.Boolean(string='Other Payments')
+    employee_id = fields.Many2one('hr.employee', string="Employee")
+    employee_payment = fields.Boolean(string='Employee Payments')
 
     def prepare_retention_values(self, voucher):
         ret_vals = {
@@ -702,7 +711,10 @@ class AccountPaymentOrder(models.Model):
             payment.currency_id = payment.journal_id.currency_id or \
                 payment.company_id.currency_id
 
-    @api.depends('debt_line_ids', 'income_line_ids', 'amount')
+    @api.depends('debt_line_ids',
+                 'income_line_ids',
+                 'amount',
+                 'concept_line_ids')
     def _get_writeoff_amount(self):
         for po in self:
             writeoff_amount = po._get_writeoff_amount_hook()
@@ -718,7 +730,11 @@ class AccountPaymentOrder(models.Model):
         for line in self.income_line_ids:
             credit += line.amount
         amount = self.amount - sign * (credit - debit)
+        amount -= self.get_concept_lines_amount()
         return amount
+
+    def get_concept_lines_amount(self):
+        return sum(self.concept_line_ids.mapped('amount'))
 
     @api.depends('amount')
     def _paid_amount_in_company_currency(self):
@@ -892,7 +908,7 @@ class AccountPaymentOrder(models.Model):
         return res
 
     def recompute_payment_lines(self, onchange_attr):
-        move_line_obj = self.env['account.move.line']
+        MoveLine = self.env['account.move.line']
         currency_obj = self.env['res.currency']
 
         ttype = self.env.context.get('type', 'bank')
@@ -916,7 +932,7 @@ class AccountPaymentOrder(models.Model):
             return
         line_ids = the_line
         if not self.env.context.get('move_line_ids', False):
-            ids = move_line_obj.search([
+            ids = MoveLine.search([
                 ('account_id.internal_type', '=', account_type),
                 ('reconciled', '=', False),
                 ('partner_id', '=', self.partner_id.id),
@@ -1058,8 +1074,8 @@ class AccountPaymentOrder(models.Model):
         Confirm the vouchers given in ids and create
         the journal entries for each of them
         '''
-        move_obj = self.env['account.move']
-        move_line_obj = self.env['account.move.line']
+        Move = self.env['account.move']
+        MoveLine = self.env['account.move.line']
         if self.move_id:
             return
 
@@ -1071,7 +1087,7 @@ class AccountPaymentOrder(models.Model):
             'check_move_validity': False,
         }
         # Create the account move record.
-        move_recordset = move_obj.with_context(ctx).create(
+        move_recordset = Move.with_context(ctx).create(
             self.account_move_get()
         )
         # Get the name of the account_move just created
@@ -1084,10 +1100,10 @@ class AccountPaymentOrder(models.Model):
             line_total = 0.0
             for vals in move_line_vals:
                 line_total += vals['debit'] - vals['credit']
-                move_line_obj.with_context(ctx).create(vals)
+                MoveLine.with_context(ctx).create(vals)
         else:
             # Create the first line of the voucher
-            move_line_brw = move_line_obj.with_context(ctx).create(
+            move_line_brw = MoveLine.with_context(ctx).create(
                 self.first_move_line_get(
                     move_id, company_currency,
                     current_currency))
@@ -1107,7 +1123,7 @@ class AccountPaymentOrder(models.Model):
         ml_writeoff = self.writeoff_move_line_get(
             line_total, move_id, name, company_currency, current_currency)
         if ml_writeoff:
-            move_line_obj.with_context(ctx).create(ml_writeoff)
+            MoveLine.with_context(ctx).create(ml_writeoff)
 
         # We post the voucher.
         self.write({
@@ -1290,7 +1306,6 @@ class AccountPaymentOrder(models.Model):
             'date': self.date,
             'date_maturity': self.date_due
         }
-
         return move_line
 
     def create_move_lines(self, move_id, company_currency, current_currency):
@@ -1468,7 +1483,7 @@ class AccountPaymentOrder(models.Model):
         return (move_line, move_line_counterpart)
 
     def voucher_move_line_create(self, line_total, move_id, company_currency, current_currency):
-        move_line_obj = self.env['account.move.line']
+        MoveLine = self.env['account.move.line']
         tot_line = line_total
         rec_lst_ids = []
 
@@ -1507,8 +1522,10 @@ class AccountPaymentOrder(models.Model):
                 'account_id': line.account_id.id,
                 'move_id': move_id,
                 'partner_id': self.partner_id.id,
-                'currency_id': line.original_currency_id != company_currency and line.original_currency_id.id or False,
-                'amount_currency': line.amount_currency and line.amount_currency * sign * -1 or 0,
+                'currency_id': line.original_currency_id != company_currency
+                and line.original_currency_id.id or False,
+                'amount_currency': line.amount_currency
+                and line.amount_currency * sign * -1 or 0,
                 'analytic_account_id': move_line_analytic_account_id,
                 'quantity': 1,
                 'credit': 0.0,
@@ -1529,10 +1546,44 @@ class AccountPaymentOrder(models.Model):
                 move_line.update({
                     'account_tax_id': self.tax_id.id,
                 })
-            payment_line = move_line_obj.create(move_line)
+            payment_line = MoveLine.create(move_line)
             new_amls = payment_line + line.move_line_id
             if line.move_line_id.id:
                 rec_lst_ids.append(new_amls)
+
+        for line in self.concept_line_ids:
+            if not line.amount:
+                continue
+
+            if line.payment_order_id.type == 'payment':
+                amount = line.amount
+            else:
+                amount = line.amount * (-1)
+
+            move_line = {
+                'journal_id': self.journal_id.id,
+                'name': line.name or '/',
+                'account_id': line.account_id.id,
+                'move_id': move_id,
+                'partner_id': self.partner_id.id,
+                'currency_id': False,
+                'analytic_account_id': line.account_analytic_id
+                and line.account_analytic_id.id or False,
+                'quantity': 1,
+                'credit': 0.0,
+                'debit': 0.0,
+                'date': self.date,
+            }
+            if amount < 0:
+                amount = -amount
+                tot_line -= amount
+                move_line['credit'] = amount
+            else:
+                tot_line += amount
+                move_line['debit'] = amount
+
+            # Creamos la linea
+            MoveLine.create(move_line)
 
         return (tot_line, rec_lst_ids)
 
@@ -2265,3 +2316,41 @@ class RetentionMoveLine(models.Model):
     move_name = fields.Char(string='Move name', readonly=True)
     total_without_vat = fields.Float(string='Total without vat', readonly=True)
     payment_order_reference = fields.Char(string="Payment order", readonly=True)
+
+
+class AccountPaymentOrderConceptLine(models.Model):
+    _name = "account.payment.order.concept.line"
+    _description = "Account Payment Order Concept Line"
+
+    name = fields.Char(string='Description', size=128)
+    journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        string='Journal'
+    )
+    account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Account',
+        required=True
+    )
+    payment_order_id = fields.Many2one(
+        comodel_name='account.payment.order',
+        string='Voucher'
+    )
+    amount = fields.Float(string='Amount', digits='Account',)
+    account_analytic_id = fields.Many2one(
+        comodel_name='account.analytic.account',
+        string='Analytic Account'
+    )
+
+    @api.onchange('journal_id')
+    def change_journal_id(self):
+        if self.journal_id:
+            self.account_id = self.journal_id.loss_account_id.id
+
+    @api.onchange('account_id')
+    def change_account_id(self):
+        if self.account_id:
+            journal_ids = self.env['account.journal'].search([
+                ('loss_account_id', '=', self.account_id.id)
+            ])
+            self.journal_id = journal_ids and journal_ids[0] or False

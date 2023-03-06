@@ -92,6 +92,7 @@ class AccountJournal(models.Model):
     state_id = fields.Many2one(
         related='tax_id.state_id'
     )
+    priority = fields.Integer()
 
     @api.model
     def _get_concepts_from_account(self, retention, account):
