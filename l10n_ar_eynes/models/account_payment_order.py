@@ -908,7 +908,7 @@ class AccountPaymentOrder(models.Model):
         return res
 
     def recompute_payment_lines(self, onchange_attr):
-        move_line_obj = self.env['account.move.line']
+        MoveLine = self.env['account.move.line']
         currency_obj = self.env['res.currency']
 
         ttype = self.env.context.get('type', 'bank')
@@ -932,7 +932,7 @@ class AccountPaymentOrder(models.Model):
             return
         line_ids = the_line
         if not self.env.context.get('move_line_ids', False):
-            ids = move_line_obj.search([
+            ids = MoveLine.search([
                 ('account_id.internal_type', '=', account_type),
                 ('reconciled', '=', False),
                 ('partner_id', '=', self.partner_id.id),
@@ -1074,8 +1074,8 @@ class AccountPaymentOrder(models.Model):
         Confirm the vouchers given in ids and create
         the journal entries for each of them
         '''
-        move_obj = self.env['account.move']
-        move_line_obj = self.env['account.move.line']
+        Move = self.env['account.move']
+        MoveLine = self.env['account.move.line']
         if self.move_id:
             return
 
@@ -1087,7 +1087,7 @@ class AccountPaymentOrder(models.Model):
             'check_move_validity': False,
         }
         # Create the account move record.
-        move_recordset = move_obj.with_context(ctx).create(
+        move_recordset = Move.with_context(ctx).create(
             self.account_move_get()
         )
         # Get the name of the account_move just created
@@ -1100,10 +1100,10 @@ class AccountPaymentOrder(models.Model):
             line_total = 0.0
             for vals in move_line_vals:
                 line_total += vals['debit'] - vals['credit']
-                move_line_obj.with_context(ctx).create(vals)
+                MoveLine.with_context(ctx).create(vals)
         else:
             # Create the first line of the voucher
-            move_line_brw = move_line_obj.with_context(ctx).create(
+            move_line_brw = MoveLine.with_context(ctx).create(
                 self.first_move_line_get(
                     move_id, company_currency,
                     current_currency))
@@ -1123,7 +1123,7 @@ class AccountPaymentOrder(models.Model):
         ml_writeoff = self.writeoff_move_line_get(
             line_total, move_id, name, company_currency, current_currency)
         if ml_writeoff:
-            move_line_obj.with_context(ctx).create(ml_writeoff)
+            MoveLine.with_context(ctx).create(ml_writeoff)
 
         # We post the voucher.
         self.write({
@@ -1306,7 +1306,6 @@ class AccountPaymentOrder(models.Model):
             'date': self.date,
             'date_maturity': self.date_due
         }
-
         return move_line
 
     def create_move_lines(self, move_id, company_currency, current_currency):
@@ -1484,7 +1483,7 @@ class AccountPaymentOrder(models.Model):
         return (move_line, move_line_counterpart)
 
     def voucher_move_line_create(self, line_total, move_id, company_currency, current_currency):
-        move_line_obj = self.env['account.move.line']
+        MoveLine = self.env['account.move.line']
         tot_line = line_total
         rec_lst_ids = []
 
@@ -1523,8 +1522,10 @@ class AccountPaymentOrder(models.Model):
                 'account_id': line.account_id.id,
                 'move_id': move_id,
                 'partner_id': self.partner_id.id,
-                'currency_id': line.original_currency_id != company_currency and line.original_currency_id.id or False,
-                'amount_currency': line.amount_currency and line.amount_currency * sign * -1 or 0,
+                'currency_id': line.original_currency_id != company_currency
+                and line.original_currency_id.id or False,
+                'amount_currency': line.amount_currency
+                and line.amount_currency * sign * -1 or 0,
                 'analytic_account_id': move_line_analytic_account_id,
                 'quantity': 1,
                 'credit': 0.0,
@@ -1545,7 +1546,7 @@ class AccountPaymentOrder(models.Model):
                 move_line.update({
                     'account_tax_id': self.tax_id.id,
                 })
-            payment_line = move_line_obj.create(move_line)
+            payment_line = MoveLine.create(move_line)
             new_amls = payment_line + line.move_line_id
             if line.move_line_id.id:
                 rec_lst_ids.append(new_amls)
