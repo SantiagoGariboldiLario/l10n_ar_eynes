@@ -9,7 +9,21 @@
             <xpath expr="//field[@name='name']" position="after">
                 <field name="supplier_denomination"/>
                 <field name="afip_code"/>
+                <field name="local" />
             </xpath>
+            <page name="tax_mapping" position="after">
+                <page name="applied_retentions" string="Applied Retentions">
+                    <group>
+                        <field name="retention_ids" nolabel="1" domain="[('tax_id.type_tax_use','=','purchase')]">
+                            <tree string="Retentions">
+                                <field name="name" />
+                                <field name="tax_id" />
+                                <field name="state_id" />
+                            </tree>
+                        </field>
+                    </group>
+                </page>
+            </page>
         </field>
     </record>
 

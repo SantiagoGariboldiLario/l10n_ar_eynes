@@ -346,13 +346,13 @@ class AccountCheck(models.Model):
     def break_conciliation(self):
         for check in self.filtered(lambda rec: rec.internal_type == 'issued'):
             if check.issued_check_state != "issued":
-                raise ValidationError(
-                    _("Can't break conciliation of a not issued check!")
-                )
+                raise ValidationError(_(
+                    "Can't break conciliation of a not issued check!"
+                ))
             if not check.accredited:
-                raise ValidationError(
-                    _("Can't break conciliation of a not accredited check!")
-                )
+                raise ValidationError(_(
+                    "Can't break conciliation of a not accredited check!"
+                ))
         for check in self.filtered(lambda rec: rec.internal_type == 'issued'):
             move = check.clearance_move_id
             move.line_ids.remove_move_reconcile()
@@ -370,13 +370,13 @@ class AccountCheck(models.Model):
         if self.type == 'deferred':
             # Buscamos la configuracion de cheques
             check_config_obj = self.env['account.check.config']
-            config = check_config_obj.search(
-                [('company_id', '=', voucher.company_id.id)]
-            )
+            config = check_config_obj.search([
+                ('company_id', '=', voucher.company_id.id)
+            ])
             if not len(config):
-                raise ValidationError(
-                    _('There is no check configuration for this Company!')
-                )
+                raise ValidationError(_(
+                    'There is no check configuration for this Company!'
+                ))
 
             account_id = config.deferred_account_id.id
             date_maturity = self.payment_date
@@ -385,11 +385,11 @@ class AccountCheck(models.Model):
             date_maturity = voucher.date_due
 
         if not account_id:
-            raise UserError(
-                _("Error! Bank Account has no account"
-                  + "configured. Please, configure an "
-                  + "account for the bank account used for checks!")
-            )
+            raise UserError(_(
+                "Error! Bank Account has no account "
+                "configured. Please, configure an "
+                "account for the bank account used for checks!"
+            ))
 
         # TODO: Chequear que funcione bien en
         # multicurrency estas dos lineas de abajo
@@ -424,7 +424,6 @@ class AccountCheck(models.Model):
             'credit': credit,
             'account_id': account_id,
             'journal_id': voucher.journal_id.id,
-            'period_id': voucher.period_id.id,
             'partner_id': voucher.partner_id.id,
             'currency_id': company_currency != current_currency
             and current_currency or False,
@@ -508,9 +507,9 @@ class AccountCheck(models.Model):
         if not self.number:
             return
         if not self.number.isnumeric():
-            raise ValidationError(
-                _('Check Number must not have non numerical characters')
-            )
+            raise ValidationError(_(
+                'Check Number must not have non numerical characters'
+            ))
         self.number = self.number.zfill(8)
 
     def to_wallet(self):
@@ -518,8 +517,10 @@ class AccountCheck(models.Model):
         for check in self.filtered(lambda rec: rec.internal_type == 'third_party'):
             voucher = check.source_payment_order_id
             if not voucher:
-                raise UserError(_('Check Error! Check has to \
-                    be associated with a voucher'))
+                raise UserError(_(
+                    'Check Error! Check has to '
+                    'be associated with a voucher'
+                ))
 
             partner_id = voucher.partner_id.id
             vals = {}
@@ -544,19 +545,19 @@ class AccountCheck(models.Model):
             self.deposit_move_id.unlink()
             self.write({'third_party_check_state': 'in_wallet'})
         else:
-            raise ValidationError(
-                _('There is no reference for account move. '
-                  + 'Imposible to go back to wallet.')
-            )
+            raise ValidationError(_(
+                'There is no reference for account move. '
+                'Imposible to go back to wallet.'
+            ))
 
     def return_wallet(self):
         # Todos los cheques tienen que estar en delivered
         for check in self.filtered(lambda rec: rec.internal_type == 'third_party'):
             if check.third_party_check_state != 'delivered':
-                raise UserError(
-                    _("Third Check Error! You cannot return to "
-                        + "wallet a check if it is not in Delivered state")
-                )
+                raise UserError(_(
+                    "Third Check Error! You cannot return to "
+                    "wallet a check if it is not in Delivered state"
+                ))
         self.write({
             'third_party_check_state': 'in_wallet',
             'endorsement_date': False,
@@ -573,7 +574,8 @@ class AccountCheck(models.Model):
         for check in self:
             voucher = voucher_obj.search([
                 ('third_check_ids', '=', check.id),
-                ('third_party_check_state', '!=', 'cancelled')])
+                ('third_party_check_state', '!=', 'cancelled')
+            ])
 
             if len(voucher) > 1:
                 raise UserError(
@@ -598,8 +600,9 @@ class AccountCheck(models.Model):
         config = check_config_obj.search([
             ('company_id', '=', voucher.company_id.id)])
         if not len(config):
-            raise UserError(
-                _('ERROR! There is no check configuration for this Company!'))
+            raise UserError(_(
+                'ERROR! There is no check configuration for this Company!'
+            ))
 
         # TODO: Chequear que funcione bien en
         # multicurrency estas dos lineas de abajo
@@ -630,12 +633,11 @@ class AccountCheck(models.Model):
             'credit': credit,
             'account_id': config.account_id.id,
             'journal_id': voucher.journal_id.id,
-            'period_id': voucher.period_id.id,
             'partner_id': voucher.partner_id.id,
-            'currency_id': company_currency !=
-            current_currency and current_currency or False,
-            'amount_currency': company_currency !=
-            current_currency and sign * self.amount_currency or 0.0,
+            'currency_id': company_currency != current_currency
+            and current_currency or False,
+            'amount_currency': company_currency != current_currency
+            and sign * self.amount_currency or 0.0,
             'date': voucher.date,
             'date_maturity': self.payment_date or self.issue_date,
         }

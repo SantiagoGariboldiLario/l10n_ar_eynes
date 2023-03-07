@@ -9,24 +9,33 @@ class AccountMove(models.Model):
         selection=[
             ("a", "A"), ("b", "B"),
             ("c", "C"), ("e", "E"),
+            ('m', 'M'), ('oc', 'OC'),
             ("not_defined", "Not Defined")
         ],
         string='Denomination',
     )
     supplier_move_reference = fields.Char(string='Supplier Invoice Reference')
+    address_shipping_id = fields.Many2one(
+        comodel_name='res.partner',
+        name='Shipping Address',
+        readonly=True, required=False,
+        states={
+            'draft': [('readonly', False)],
+        }
+    )
 
     def get_highest_pos_sequence(self):
         invoices = self.env['account.move'].search([
             ('journal_id', '=', self.journal_id.id)
         ])
 
-        if not invoices:
+        if not invoices or len(invoices) == 1:
             return '1'.zfill(8)
 
-        last_sequence_number = max([inv.sequence_number for inv in invoices])
+        last_sequence_number = max(invoices.mapped('sequence_number'))
         return str(last_sequence_number + 1).zfill(8)
 
-# ONCHANGE METHODS
+    # ONCHANGE METHODS
     @api.onchange('journal_id', 'partner_id')
     def _onchange_journal(self):
         if not self.partner_id:
@@ -34,8 +43,6 @@ class AccountMove(models.Model):
         if self.journal_id.type == 'sale':
             super(AccountMove, self)._onchange_journal()
             self.denomination = self.journal_id.denomination
-            if self.journal_id.code.isnumeric:
-                self.update_name()
 
     @api.onchange('partner_id')
     def _onchange_partner(self):
@@ -44,7 +51,7 @@ class AccountMove(models.Model):
         super(AccountMove, self)._onchange_partner_id()
         if self.move_type == 'out_invoice':
             relations = self.env['user.journal.rel'].search([
-                ('journal_id.fiscal_position_id', '=', self.fiscal_position_id.id),
+                ('journal_id.fiscal_position_id', '=', self.partner_id.property_account_position_id.id),
                 ('user_id', '=', self.env.user.id)],
                 order='sequence asc',
             )
@@ -53,7 +60,7 @@ class AccountMove(models.Model):
                 domain = {'journal_id' : [('id', 'in', ids)]}
                 self.journal_id = relations[0].journal_id
                 self._onchange_journal()
-                return{
+                return {
                     'domain' : domain,
                 }
 
@@ -83,10 +90,7 @@ class AccountMove(models.Model):
 
         self.supplier_move_reference = pos_code.zfill(4) \
             + '-' + move_code.zfill(8)
-        self.name = f'{self.supplier_move_reference}'
-
-        if self.denomination and self.denomination != 'not_defined':
-            self.name = f'{self.denomination.capitalize()} {self.name}'
+        self.name = self.supplier_move_reference
 
     @api.onchange('fiscal_position_id', 'partner_id')
     def _onchange_fiscal_position(self):
@@ -96,37 +100,51 @@ class AccountMove(models.Model):
             self.denomination = fiscal_position.supplier_denomination
 
     def action_post(self):
-        if not self.journal_id.due_date:
-            raise ValidationError(
-                _("This journal Does not have a period established.\n"
-                  + "Please Establish period before moving on.\n"
-                  + "This can be accomplished in \
-                  Accounting/Journals/Update Journals Period")
-            )
-        elif self.journal_id.due_date < fields.Date.today():
-            raise ValidationError(
-                _("Journal period date has expired.\n"
-                  + "Change journal or update period expiration date")
-            )
-        super(AccountMove, self).action_post()
+        if self.is_sale_document():
+            if self.id:
+                self.validate_denomination()
+                self.validate_period()
+                if not self.payment_reference:
+                    self.write({
+                        'name': f'{self.journal_id.code}-{self.get_highest_pos_sequence()}',
+                    })
+        return super(AccountMove, self).action_post()
 
-    def update_name(self):
-        denomination = self.denomination.capitalize()
-        code = self.journal_id.code
-        sequence = self.get_highest_pos_sequence()
-        self.name = f'{denomination}{code}-{sequence}'
+    def validate_period(self):
+        date = self.invoice_date or fields.Date.context_today(self)
+        if not self.journal_id.due_date:
+            raise ValidationError(_(
+                "The journal does not have a period established\n"
+                "Please add a period in: "
+                "accounting/journals/update journals periods"
+            ))
+        if date > self.journal_id.due_date:
+            raise ValidationError(_(
+                "The journal_id is outdated\n"
+                "Please modify its period in: "
+                "accounting/journals/update journals periods"
+            ))
+
+    def validate_denomination(self):
+        if not self.denomination or self.denomination == 'not_defined':
+            raise ValidationError(_(
+                "Invoice must have a denomination configured"
+            ))
+
+    @api.model_create_multi
+    def create(self, vals):
+        res = super().create(vals)
+        for move in res.filtered(lambda m: m.is_sale_document()):
+            if not move.denomination:
+                move.write({'denomination': move.journal_id.denomination})
+        return res
 
     _sql_constraints = [
         (
             'unique_move',
-            'unique(journal_id,supplier_move_reference)',
-            _('move already exists!')
+            'unique(partner_id, supplier_move_reference)',
+            _('This invoice reference already exists for this supplier')
         ),
-        (
-            'unique_name',
-            'unique(name)',
-            _('move already exists!')
-        )
     ]
 
 

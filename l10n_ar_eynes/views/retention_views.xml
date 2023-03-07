@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ********************** -->
+    <!-- * Retention Concepts * -->
+    <!-- ********************** -->
+    <record id="view_retention_concept_form" model="ir.ui.view">
+        <field name="name">retention.concept.form</field>
+        <field name="model">retention.concept</field>
+        <field name="arch" type="xml">
+            <form string="Retention Concept" version="7.0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code" select="1"/>
+                            <field name="type" select="1"/>
+                            <field name="company_id"
+                                groups="base.group_multi_company"
+                                options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="name" select="1"/>
+                            <field name="no_subject"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Accounts Associated" name="accounts">
+                            <field name="account_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="internal_type"/>
+                                    <field name="user_type_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    <separator string="Notes" name="notes"/>
+                    <field name="notes" colspan="4" nolabel="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_retention_concept_tree" model="ir.ui.view">
+        <field name="name">retention.concept.tree</field>
+        <field name="model">retention.concept</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree string="Retention Concepts">
+                <field name="code"/>
+                <field name="type"/>
+                <field name="name"/>
+                <field name="no_subject"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_retention_concept">
+        <field name="name">Concepts</field>
+        <field name="res_model">retention.concept</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- ************************ -->
+    <!-- * Retention Activities * -->
+    <!-- ************************ -->
+    <record id="view_retention_activity_form" model="ir.ui.view">
+        <field name="name">retention.activity.form</field>
+        <field name="model">retention.activity</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Retention Activity">
+                <sheet>
+                    <h1 style="width: 100%%">
+                        <field name="name" select="1" style="width: 100%%"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="code" select="1"/>
+                            <field name="company_id"
+                                groups="base.group_multi_company"
+                                options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="type" select="1"/>
+                        </group>
+                    </group>
+                    <separator string="Notes" colspan="4"/>
+                    <field name="notes" colspan="4" nolabel="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_retention_activity_tree" model="ir.ui.view">
+        <field name="name">retention.activity.tree</field>
+        <field name="model">retention.activity</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree string="Retention Activities" editable="bottom">
+                <field name="code"/>
+                <field name="type"/>
+                <field name="name"/>
+                <field name="company_id"
+                    groups="base.group_multi_company"
+                    options="{'no_create': True}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_retention_activity">
+        <field name="name">Activities</field>
+        <field name="res_model">retention.activity</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- ************************ -->
+    <!-- * Retention Scales * -->
+    <!-- ************************ -->
+    <record id="view_retention_scale_form" model="ir.ui.view">
+        <field name="name">retention.scale.form</field>
+        <field name="model">retention.scale</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Retention Scale">
+                <sheet>
+                    <h1 style="width: 100%%">
+                        <field name="name" select="1" style="width: 100%%"/>
+                    </h1>
+                    <notebook>
+                        <page string="Lines" name="lines">
+                            <field name="line_ids" colspan="4" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="name" />
+                                    <field name="limit" />
+                                    <field name="percent" />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_retention_scale_tree" model="ir.ui.view">
+        <field name="name">retention.scale.tree</field>
+        <field name="model">retention.scale</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree string="Retention Scale">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_retention_scale">
+        <field name="name">Retention Scales</field>
+        <field name="res_model">retention.scale</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

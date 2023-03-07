@@ -6,17 +6,30 @@
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
 
-            <xpath expr="//field[@name='name']" position="attributes">
-                <attribute name="attrs">{'readonly': 1}</attribute>
-                <attribute name="force_save">True</attribute>
+            <xpath expr="//sheet/div[hasclass('oe_title')]/h1[1]" position="attributes">
+                <attribute name="attrs">{'invisible': 1}</attribute>
             </xpath>
 
-            <group name="accounting_info_group" position="inside">
-                <field name="denomination" force_save="1"  attrs="{'invisible': [('journal_id','=', False)], 'readonly': [('move_type','!=','in_invoice')]}"/>
-            </group>
+            <xpath expr="//h1[hasclass('mt0')]" position="replace">
+                <h1 class="mt0">
+                    <field name="name"
+                        readonly="1" force_save="1" class="oe_inline"
+                        attrs="{'invisible': [('state', '=', 'draft'),('supplier_move_reference', '=', False)]}"/>
+                </h1>
+            </xpath>
 
             <xpath expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']" position="attributes">
-                <attribute name="attrs">{'required': 1}</attribute>
+                <attribute name="attrs">
+                    {
+                        'required': 1,
+                        'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
+                    }
+                </attribute>
+            </xpath>
+            <xpath expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']" position="after">
+                <field name="denomination"
+                    force_save="1" required="1"
+                    attrs="{'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]}"/>
             </xpath>
 
             <xpath expr="//div[@name='journal_div']" position="after">
@@ -27,6 +40,16 @@
                         }"
                 />
             </xpath>
+        </field>
+    </record>
+    <record id="account_move_view_tree_inherit_l10n_ar_eynes" model="ir.ui.view">
+        <field name="name">account.move.view.tree.inherit.l10n_ar_eynes</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="before">
+                <field name="denomination" />
+            </field>
         </field>
     </record>
 </odoo>

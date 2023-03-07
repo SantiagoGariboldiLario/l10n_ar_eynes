@@ -124,13 +124,13 @@
         <field name="arch" type="xml">
             <tree string="Checks" create="false">
                 <field name="number"/>
-                <field name="checkbook_format" />
-                <field name="receiving_partner_id" />
+                <field name="checkbook_id"/>
+                <field name="bank_id"/>
                 <field name="issue_date" />
                 <field name="payment_date" />
-                <field name="journal_id" string="Bank Account"/>
-                <field name="payment_order_id"/>
                 <field name="amount"/>
+                <field name="type"/>
+                <field name="checkbook_format"/>
                 <field name="issued_check_state" string="State"/>
             </tree>
         </field>

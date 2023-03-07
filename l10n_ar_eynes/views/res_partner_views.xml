@@ -7,22 +7,23 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
 
-            <xpath expr="//group[@name='sale']/field[@name='user_id']" position="before">
-                <field name="customer" string="Is a Customer"/>
+            <xpath expr="//field[@name='vat']" position="before">
+                <field name="dst_cuit" invisible="1"/>
+                <field name="document_type_id" placeholder="Document Type..." widget="selection"/>
+                <field name="dst_cuit_id" attrs="{'invisible': [('dst_cuit', '!=', True)]}"/>
+                <field name="supplier_rank" invisible="1"/>
+                <field name="customer_rank" invisible="1"/>
             </xpath>
 
-            <xpath expr="//field[@name='property_supplier_payment_term_id']" position="before">
-                <field name="supplier" string="Is a Supplier"/>
-            </xpath>
-
-            <xpath expr="//sheet/group" position="after">
-                <group name="retention_activity" string="Retention activity">
-                    <field name="retention_activity_id"/>
-                </group>
+            <xpath expr="//field[@name='vat']" position="attributes">
+                <attribute name="string">NIF</attribute>
             </xpath>
 
             <page name="accounting" position="after">
                 <page string="Retentions" name="retentions">
+                    <group name="retention_activity" string="Retention activity">
+                        <field name="retention_activity_id"/>
+                    </group>
                     <group string="Partner Retentions">
                         <field name="retention_ids" nolabel="1">
                             <tree string="Retentions to Apply" editable="bottom">
@@ -40,7 +41,7 @@
                         </field>
                     </group>
                     <group string="Advance Payment Retentions"
-                        attrs="{'invisible': [('supplier', '=', False)]}">
+                        attrs="{'invisible': [('supplier_rank', '=', 0)]}">
                         <field name="advance_retention_ids" nolabel="1">
                             <tree string="Retentions to Apply" editable="bottom">
                                 <field name="retention_id"/>
@@ -51,6 +52,25 @@
                     </group>
                 </page>
             </page>
+
+        </field>
+    </record>
+
+    <record id="res_partner_bank_view_form_check" model="ir.ui.view">
+        <field name="name">res.partner.bank.form.check.inherit</field>
+        <field name="model">res.partner.bank</field>
+        <field name="inherit_id" ref="base.view_partner_bank_form"/>
+        <field name="type">form</field>
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+
+            <field name="acc_number" position="after">
+                <field name="account_id"/>
+            </field>
+
+            <field name="bank_id" position="attributes">
+                <attribute name="required">True</attribute>
+            </field>
 
         </field>
     </record>

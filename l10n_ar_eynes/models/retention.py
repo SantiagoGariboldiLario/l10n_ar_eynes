@@ -135,10 +135,9 @@ class RetentionTaxApplication(models.Model):
     reg_code = fields.Integer('Reg. Code')
     concept_id = fields.Many2one('retention.concept', 'Concept')
     activity_id = fields.Many2one('retention.activity', 'Activity')
-    retention_journal_id = fields.Many2one(
-        comodel_name='account.journal',
+    retention_tax_id = fields.Many2one(
+        comodel_name='account.tax',
         string='Retention',
-        domain=[('type', '=', 'retentions')]
     )
     # Minimo No Imponible
     tax_allowance = fields.Float(
@@ -212,7 +211,7 @@ class RetentionTaxApplication(models.Model):
 
     _sql_constraints = [
         ('concept_activity_uniq',
-         'unique (concept_id, activity_id, retention_journal_id)',
+         'unique (concept_id, activity_id, retention_tax_id)',
          'The tuple of Concept, Activity must be unique per Retention !'),
     ]
 
@@ -343,14 +342,14 @@ class RetentionTaxApplication(models.Model):
         return extra_untaxed_amount
 
     def get_period_base_amount(self, partner, concept, po_date=False):
-        retention_line_model = self.env['retention.tax.line']
+        retention_line_model = self.env['account.payment.order.retention.line']
 
         date_start, date_finish = self._get_month_date_span_from_date(po_date)
 
         # Buscamos las retenciones
         domain = [
             ('partner_id', '=', partner.id),
-            ('retention_id.type', '=', 'profit'),
+            ('retention_id.tax_id.retention_type', '=', 'profit'),
             ('concept_id', '=', concept.id),
             ('date', '>=', date_start),
             ('date', '<=', date_finish),
@@ -382,8 +381,7 @@ class RetentionTaxApplication(models.Model):
         if self.calculation_base in [
                 'payment_amount', 'payment_amount_untaxed']:
             base = to_pay
-
-        if self.retention_id.type == 'profit':
+        if self.retention_tax_id.retention_type == 'profit':
             period_base, period_amount = self.get_period_base_amount(
                 partner, self.concept_id, po_date)
             period_payment_amount = self.get_period_partner_payments(
@@ -421,7 +419,7 @@ class RetentionTaxApplication(models.Model):
         # Si es de ganancias, le detraemos las retenciones de ganancias
         # ya practicadas para este concepto
         # en el mes calendario en pagos previos a este proveedor
-        if self.retention_id.type == 'profit':
+        if self.retention_tax_id.retention_type == 'profit':
             amount -= period_amount
 
         # Chequeamos contra el minimo a percibir
@@ -433,7 +431,7 @@ class RetentionTaxApplication(models.Model):
             raise ValidationError(
                 _('Retention Error!\n')
                 + _('There is an error in retention configuration because '
-                    + 'amount of %s is negative') % self.retention_id.name)
+                    + 'amount of %s is negative') % self.retention_tax_id.name)
         elif amount == 0.0:
             return 0.0, 0.0
 

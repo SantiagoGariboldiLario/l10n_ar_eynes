@@ -12,25 +12,35 @@ class CreateCheckbookWizard(models.TransientModel):
         comodel_name='account.journal',
         string='Journal',
         required=True,
-        domain=[('type', '=', 'bank')])
-
+        domain=[('type', '=', 'bank')]
+    )
     checkbook_format = fields.Selection(
-        selection=[('physical', 'Physical'), ('virtual', 'Virtual'), ('echeq', 'Echeq')],
+        selection=[
+            ('physical', 'Physical'),
+            ('virtual', 'Virtual'),
+            ('echeq', 'Echeq')
+        ],
         string='Format',
-        required=True)
-
+        required=True
+    )
     start_num = fields.Char('Start Number', size=8)
     end_num = fields.Char('End Number', size=8)
 
     def create_checkbook(self):
-        payment_method_name = _('Checkbook') + f" {self.journal_id.name} {self.number}"
+        payment_method = self.env.ref(
+            'account_check_printing.account_payment_method_check'
+        )
 
-        payment_method = self.env.ref('account_check_printing.account_payment_method_check')
+        payment_method_name = _('Checkbook %s %s-%s',
+                                self.journal_id.name,
+                                self.checkbook_format[0].upper(),
+                                self.number)
 
         self.journal_id.outbound_payment_method_line_ids = [(0, 0, {
             'journal_id' : self.journal_id.id,
             'payment_method_id' : payment_method.id,
             'name' : payment_method_name,
+            'number': self.number,
             'format' : self.checkbook_format
         })]
 
