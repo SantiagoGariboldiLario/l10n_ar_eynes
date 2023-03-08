@@ -2574,6 +2574,7 @@ msgid "Invoice Reference"
 msgstr "Referencia factura"
 
 #. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.other_payments_action
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__other_payment
 #: model:ir.ui.menu,name:l10n_ar_eynes.other_payments_menu
 msgid "Other Payments"
@@ -2581,8 +2582,9 @@ msgstr "Otros Pagos"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.other_receipts_action
+#: model:ir.ui.menu,name:l10n_ar_eynes.other_receipts_menu
 msgid "Other Receipts"
-msgstr "Otros Pagos"
+msgstr "Otros Cobros"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__concept_line_ids

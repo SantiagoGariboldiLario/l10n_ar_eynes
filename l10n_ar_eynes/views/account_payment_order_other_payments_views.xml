@@ -252,11 +252,37 @@
 		</field>
 	</record>
 
+	<record id="other_payments_action" model="ir.actions.act_window">
+		<field name="name">Other Payments</field>
+		<field name="res_model">account.payment.order</field>
+		<field name="view_mode">tree,form</field>
+		<field name="domain">[('journal_id.type','=','payment'), ('type','=','payment'), ('other_payment', '=', True), ('employee_payment', '=', False)]</field>
+		<field name="context">{'default_type': 'payment', 'type': 'payment', 'default_other_payment': True}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('account_payment_order_view_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('other_payment_view_form')})]"/>
+		<field name="help" type="html">
+			<p class="oe_view_nocontent_create">
+				Click to register a purchase receipt.
+				</p><p>
+				When the purchase receipt is confirmed, you can record the
+				supplier payment related to this purchase receipt.
+			</p>
+		</field>
+	</record>
+
     <menuitem
         id="other_payments_menu"
         name="Other Payments"
-        action="other_receipts_action"
+        action="other_payments_action"
         parent="account.menu_finance_payables"
+        sequence="5"/>
+
+    <menuitem
+        id="other_receipts_menu"
+        name="Other Receipts"
+        action="other_receipts_action"
+        parent="account.menu_finance_receivables"
         sequence="5"/>
 
 </odoo>
