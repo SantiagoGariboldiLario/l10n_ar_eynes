@@ -82,7 +82,7 @@ class AccountJournal(models.Model):
     tax_id = fields.Many2one(
         comodel_name='account.tax',
         string='Tax',
-        domain="[('tax_group_id.name', '=', 'Retentions'),('active', '=', True)]"
+        domain="[('tax_group_id.name', 'in', ('Retentions', 'Retenciones')),('active', '=', True)]"
     )
     type_tax_use = fields.Selection(
         string='Tax Application',
