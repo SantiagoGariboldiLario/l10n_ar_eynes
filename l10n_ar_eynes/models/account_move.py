@@ -139,6 +139,61 @@ class AccountMove(models.Model):
                 move.write({'denomination': move.journal_id.denomination})
         return res
 
+    def action_register_payment(self):
+        """Override to redirect to account payment order
+        """
+        move_line_domain = [
+            ('id', 'in', self.line_ids.ids),
+            ('reconciled', '=', False)
+        ]
+        if self.is_sale_document():
+            move_line_domain += [
+                ('debit', '>', 0),
+                ('credit', '=', 0),
+            ]
+        else:
+            move_line_domain += [
+                ('debit', '=', 0),
+                ('credit', '>', 0),
+            ]
+        move_line = self.env['account.move.line'].search(move_line_domain)
+        po = self.env['account.payment.order'].create({
+            'type': 'receipt' if self.is_sale_document() else 'payment',
+            'partner_id': self.partner_id.id,
+            'journal_id': self.get_receipt_journal().id
+            if self.is_sale_document() else self.get_payment_journal().id,
+            'debt_line_ids': [(0, 0, {
+                'invoice_id': self.id,
+                'move_line_id': move_line.id,
+                'account_id': move_line.account_id.id
+            })]
+        })
+
+        if self.is_sale_document():
+            view_id = self.env.ref('l10n_ar_eynes.account_customer_payment_order_view_form')
+        else:
+            view_id = self.env.ref('l10n_ar_eynes.account_supplier_payment_order_view_form')
+        return {
+            'name': _('Customer Payment'),
+            'res_model': 'account.payment.order',
+            'res_id': po.id,
+            'view_mode': 'form',
+            'view_id': view_id.id,
+            'target': 'current',
+            'type': 'ir.actions.act_window',
+        }
+
+    def get_payment_journal(self):
+        return self.env['account.journal'].search([
+            ('type', '=', 'payment')
+        ])[0]
+
+    def get_receipt_journal(self):
+        return self.env['account.journal'].search([
+            ('type', '=', 'receipt')
+        ])[0]
+
+
     _sql_constraints = [
         (
             'unique_move',
