@@ -747,12 +747,16 @@ msgid "Draft"
 msgstr "Borrador"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__due_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__date_due
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__date_due
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__due_date
 msgid "Due Date"
 msgstr "Fecha de vencimiento"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__due_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__due_date
+msgid "Due Date"
+msgstr "Fecha de Cierre"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
@@ -2590,3 +2594,19 @@ msgstr "Otros Cobros"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__concept_line_ids
 msgid "Other Concepts"
 msgstr "Otros Conceptos"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid ""
+"You are trying to create an invoice with a date older date than the allowed "
+"by the journal"
+msgstr ""
+"Estas intentando validar una factura cuya "
+"fecha es menor a la fecha de cierre del diario contable"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_update_journal_period_wizard__due_date
+msgid "This date is used to restrict new invoices past this date"
+msgstr "Esta fecha de corte es utilizada para bloquear el diario seleccionado y que los usuarios "
+"no puedan registrar nuevos movimientos para dicho diario en una fecha posterior a la elegida"
