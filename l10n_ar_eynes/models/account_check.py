@@ -158,7 +158,10 @@ class AccountCheck(models.Model):
     @api.depends('amount', 'currency_rate')
     def _compute_amount_currency(self):
         for rec in self:
-            rec.amount_currency = rec.amount / rec.currency_rate
+            try:
+                rec.amount_currency = rec.amount / rec.currency_rate
+            except ZeroDivisionError:
+                rec.amount_currency = 0
 
     def create(self, vals_list):
         """
@@ -230,6 +233,7 @@ class AccountCheck(models.Model):
             ('cancelled', 'Cancelled'),
             ('paid', 'Paid'),
             ('expired', 'Expired'),
+            ('returned', 'Returned'),
             ('rejected', 'Rejected'),
             ('waiting_numeration', 'Waiting numeration')
         ],

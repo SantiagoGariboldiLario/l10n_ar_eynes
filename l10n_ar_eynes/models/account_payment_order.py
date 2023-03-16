@@ -1229,18 +1229,18 @@ class AccountPaymentOrder(models.Model):
                 if check.amount == 0.0:
                     continue
 
-                res = check.create_voucher_move_line()
+                res = check.issued_create_voucher_move_line()
                 res['move_id'] = move_id
                 res['issued_check_id'] = check.id
                 move_lines.append(res)
 
                 if check.type == 'postdated':
-                    state = 'waiting'
+                    state = 'waiting_accreditation'
                 else:
-                    state = 'issued'
+                    state = 'paid'
 
                 vals = {
-                    'state': state,
+                    'issued_check_state': state,
                     'payment_move_id': move_id,
                     'receiving_partner_id': self.partner_id.id
                 }
