@@ -19,7 +19,8 @@ class UpdateJournalPeriodWizard(models.TransientModel):
 
     due_date = fields.Date(
         string='Due Date',
-        required=True
+        required=True,
+        help="This date is used to restrict new invoices past this date"
     )
     selection_type = fields.Selection(
         selection=[("all", "All Journals"), ("some", "Some Journals")],
@@ -46,7 +47,7 @@ class UpdateJournalPeriodWizard(models.TransientModel):
 
     @api.constrains('due_date')
     def check_date(self):
-        if self.due_date < fields.Date.today():
+        if self.due_date > fields.Date.today():
             raise ValidationError("invalid date")
 
 

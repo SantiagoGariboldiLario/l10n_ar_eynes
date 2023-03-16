@@ -59,7 +59,8 @@ class AccountJournal(models.Model):
 
     due_date = fields.Date(
         string='Due Date',
-        help='after this expiration date, account moves are not allowed to use this journal till its extended')
+        help='after this expiration date, account moves are not allowed to use this journal till its extended'
+    )
 
     type = fields.Selection(
         selection_add=[

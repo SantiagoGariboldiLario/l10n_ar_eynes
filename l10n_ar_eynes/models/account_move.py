@@ -118,11 +118,10 @@ class AccountMove(models.Model):
                 "Please add a period in: "
                 "accounting/journals/update journals periods"
             ))
-        if date > self.journal_id.due_date:
+        if date < self.journal_id.due_date:
             raise ValidationError(_(
-                "The journal_id is outdated\n"
-                "Please modify its period in: "
-                "accounting/journals/update journals periods"
+                "You are trying to create an invoice with a date older date "
+                "than the allowed by the journal"
             ))
 
     def validate_denomination(self):
