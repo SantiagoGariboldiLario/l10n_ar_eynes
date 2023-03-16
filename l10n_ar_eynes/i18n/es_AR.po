@@ -82,7 +82,7 @@ msgstr "Pagos de Clientes"
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_supplier_payment_order_action
 msgid "Account supplier payment order"
-msgstr "Pagos de Proveedores"
+msgstr "Pagos a Proveedores"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__accredited
@@ -1911,7 +1911,7 @@ msgstr "Facturas de proveedor y Tansacciones pendientes"
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.account_supplier_payment_order_menu
 msgid "Supplier Payments"
-msgstr "Pagos de proveedores"
+msgstr "Pagos a proveedores"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_tax
