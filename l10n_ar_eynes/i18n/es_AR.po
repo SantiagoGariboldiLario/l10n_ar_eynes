@@ -2609,4 +2609,4 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_ar_eynes.field_update_journal_period_wizard__due_date
 msgid "This date is used to restrict new invoices past this date"
 msgstr "Esta fecha de corte es utilizada para bloquear el diario seleccionado y que los usuarios "
-"no puedan registrar nuevos movimientos para dicho diario en una fecha posterior a la elegida"
+"no puedan registrar nuevos movimientos para dicho diario en una fecha anterior a la elegida"
