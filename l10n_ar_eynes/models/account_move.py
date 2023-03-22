@@ -97,7 +97,7 @@ class AccountMove(models.Model):
     def _onchange_fiscal_position(self):
         fiscal_position = self.fiscal_position_id \
             or self.partner_id.property_account_position_id
-        if self.move_type == 'in_invoice':
+        if self.is_purchase_document():
             self.denomination = fiscal_position.supplier_denomination
 
     def action_post(self):
@@ -192,7 +192,6 @@ class AccountMove(models.Model):
         return self.env['account.journal'].search([
             ('type', '=', 'receipt')
         ])[0]
-
 
     _sql_constraints = [
         (
