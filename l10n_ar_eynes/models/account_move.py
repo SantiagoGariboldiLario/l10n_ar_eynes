@@ -26,7 +26,8 @@ class AccountMove(models.Model):
 
     def get_highest_pos_sequence(self):
         invoices = self.env['account.move'].search([
-            ('journal_id', '=', self.journal_id.id)
+            ('journal_id', '=', self.journal_id.id),
+            ('move_type', '=', self.move_type)
         ])
 
         if not invoices or len(invoices) == 1:
