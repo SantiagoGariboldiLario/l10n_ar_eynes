@@ -1208,7 +1208,7 @@ class AccountPaymentOrder(models.Model):
                 if check.amount == 0.0:
                     continue
 
-                res = check.issued_create_voucher_move_line()
+                res = check.third_party_create_voucher_move_line(self)
                 res['move_id'] = move_id
                 move_lines.append(res)
                 check.to_wallet()
