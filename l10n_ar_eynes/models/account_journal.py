@@ -29,7 +29,7 @@ class AccountJournal(models.Model):
 
     code = fields.Char(
         string='POS code',
-        size=5,
+        size=6,
         required=True,
         help="Point of sale reference code",
         default='')
