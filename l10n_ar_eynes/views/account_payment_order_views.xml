@@ -735,9 +735,6 @@
                                 </tree>
                             </field>
                         </page>
-                        <page name="retentions_and_perceptions" string="Retentions and Perceptions">
-                            <p>Retentions and Perceptions</p>
-                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter" invisible="context.get('line_type', False)">

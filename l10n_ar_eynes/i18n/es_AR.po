@@ -1772,11 +1772,6 @@ msgid "Activities"
 msgstr "Actividades"
 
 #. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
-msgid "Retentions and Perceptions"
-msgstr "Retenciones y percepciones"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__returned
 msgid "Returned"
 msgstr ""
