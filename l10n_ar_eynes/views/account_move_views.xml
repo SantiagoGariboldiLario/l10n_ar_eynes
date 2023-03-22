@@ -12,6 +12,10 @@
 
             <xpath expr="//h1[hasclass('mt0')]" position="replace">
                 <h1 class="mt0">
+                    <field name="denomination"
+                        force_save="1"
+                        readonly="1"
+                        attrs="{'invisible': [('move_type','not in', ('in_invoice', 'in_refund'))]}"/>
                     <field name="name"
                         readonly="1" force_save="1" class="oe_inline"
                         attrs="{'invisible': [('state', '=', 'draft'),('supplier_move_reference', '=', False)]}"/>
@@ -35,8 +39,8 @@
             <xpath expr="//div[@name='journal_div']" position="after">
                 <field name="supplier_move_reference"
                        attrs="{
-                           'invisible': [('move_type','!=','in_invoice')],
-                           'required': [('move_type','=','in_invoice')]
+                           'invisible': [('move_type','not in',('in_invoice', 'in_refund'))],
+                           'required': [('move_type','in',('in_invoice', 'in_refund'))]
                         }"
                 />
             </xpath>

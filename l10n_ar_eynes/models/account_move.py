@@ -26,7 +26,8 @@ class AccountMove(models.Model):
 
     def get_highest_pos_sequence(self):
         invoices = self.env['account.move'].search([
-            ('journal_id', '=', self.journal_id.id)
+            ('journal_id', '=', self.journal_id.id),
+            ('move_type', '=', self.move_type)
         ])
 
         if not invoices or len(invoices) == 1:
@@ -96,7 +97,7 @@ class AccountMove(models.Model):
     def _onchange_fiscal_position(self):
         fiscal_position = self.fiscal_position_id \
             or self.partner_id.property_account_position_id
-        if self.move_type == 'in_invoice':
+        if self.is_purchase_document():
             self.denomination = fiscal_position.supplier_denomination
 
     def action_post(self):
@@ -191,7 +192,6 @@ class AccountMove(models.Model):
         return self.env['account.journal'].search([
             ('type', '=', 'receipt')
         ])[0]
-
 
     _sql_constraints = [
         (
