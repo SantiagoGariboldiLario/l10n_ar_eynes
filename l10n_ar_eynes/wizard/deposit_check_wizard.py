@@ -7,13 +7,30 @@ class DepositCheckwizard(models.TransientModel):
     _name = 'deposit.check.wizard'
     _description = 'Deposit check wizard'
 
+    def _get_journal(self):
+        journal_id = False
+        voucher_obj = self.env['account.payment.order']
+        model = self._context.get('active_model', False)
+        if model and model == 'account.third.check':
+            ids = self.env.context.get('active_ids', [])
+            vouchers = self.env[model].browse(ids).read(
+                ['source_payment_order_id'])
+            if vouchers and vouchers[0] and \
+                    'source_payment_order_id' in vouchers[0]:
+                if vouchers[0]['source_payment_order_id']:
+                    payment_order_id = vouchers[0][
+                        'source_payment_order_id'][0]
+                    journal_id = voucher_obj.browse(payment_order_id).read(
+                        ['journal_id'])[0]['journal_id'][0]
+        return journal_id
+
     voucher_number = fields.Char(string='Voucher Number', size=32)
     journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Journal',
         required=True,
         domain=[('type', 'in', ('cash', 'bank'))],
-        default='_get_journal'
+        default=_get_journal
     )
     bank_account_id = fields.Many2one(
         comodel_name='res.partner.bank',
@@ -32,23 +49,6 @@ class DepositCheckwizard(models.TransientModel):
         default=lambda self: self.env.user.company_id.id
     )
 
-    def _get_journal(self):
-        journal_id = False
-        voucher_obj = self.env['account.payment.order']
-        model = self._context.get('active_model', False)
-        if model and model == 'account.third.check':
-            ids = self.env.context.get('active_ids', [])
-            vouchers = self.env[model].browse(ids).read(
-                ['source_payment_order_id'])
-            if vouchers and vouchers[0] and \
-                    'source_payment_order_id' in vouchers[0]:
-                if vouchers[0]['source_payment_order_id']:
-                    payment_order_id = vouchers[0][
-                        'source_payment_order_id'][0]
-                    journal_id = voucher_obj.browse(payment_order_id).read(
-                        ['journal_id'])[0]['journal_id'][0]
-        return journal_id
-
     def view_init(self, fields_list):
         """
         This method gets overrided to ensure that the check's
@@ -56,7 +56,7 @@ class DepositCheckwizard(models.TransientModel):
         """
         check = self.env['account.check'].search(
             [
-                ('id', '=', self.env.context.get('active_id')),  # active check_id
+                ('id', '=', self.env.context.get('active_id')),
                 ('internal_type', '=', 'third_party')
             ],
             limit=1
@@ -80,7 +80,7 @@ class DepositCheckwizard(models.TransientModel):
         res = self.env['account.check.config'].search([
             ('company_id', '=', company_id)
         ])
-        if not len(res):
+        if not res:
             raise UserError(
                 _('Error! There is no check configuration for this Company!')
             )
@@ -100,8 +100,7 @@ class DepositCheckwizard(models.TransientModel):
             self.journal_id = self.bank_account_id.journal_id.id
 
     def action_deposit(self):
-        check_obj = self.env['account.check']
-        move_line_obj = self.env['account.move.line']
+        AccountMoveLine = self.env['account.move.line']
 
         deposit_date = self.date or time.strftime('%Y-%m-%d')
 
@@ -114,15 +113,14 @@ class DepositCheckwizard(models.TransientModel):
                 )
             )
 
-        record_id = self.env.context.get('active_id', False)
-        company_id = self.company_id.id
+        check = self.env['account.check'].browse(
+            self.env.context.get('active_id', False)
+        )
 
-        check_objs = check_obj.browse(record_id)
-
-        for check in check_objs:
-            if check.state != 'in_wallet':
+        if check:
+            if check.third_party_check_state != 'in_wallet':
                 raise UserError(_("Error! The selected checks must to be in \
-                    cartera.\nCheck %s is not in wallet") % (check.number))
+                    wallet.\nCheck %s is not in wallet") % (check.number))
 
             if check.payment_date > deposit_date:
                 raise UserError(
@@ -131,7 +129,9 @@ class DepositCheckwizard(models.TransientModel):
                        Deposit Date.") % (check.number)
                 )
 
-            account_check_id = self._get_source_account_check(company_id)
+            account_check_id = self._get_source_account_check(
+                self.company_id.id
+            )
 
             # name = self.pool.get('ir.sequence').get_id(cr, uid,
             # check.payment_order_id.journal_id.id)
@@ -149,7 +149,7 @@ class DepositCheckwizard(models.TransientModel):
                 'date': deposit_date,
                 'ref': move_ref,
             })
-            move_line_obj.with_context({'check_move_validity': False}).create({
+            AccountMoveLine.with_context({'check_move_validity': False}).create({
                 'name': _('Check Deposit'),
                 # 'centralisation': 'normal',
                 'account_id': self.bank_account_id.account_id.id,
@@ -161,9 +161,9 @@ class DepositCheckwizard(models.TransientModel):
                 'ref': _('Deposit Check %s on %s') %
                 (check.number, self.bank_account_id.acc_number),
             })
-            move_line_obj.with_context({'check_move_validity': False}).create({
+            AccountMoveLine.with_context({'check_move_validity': False}).create({
                 'name': _('Check Deposit'),
-                'centralisation': 'normal',
+                # 'centralisation': 'normal',
                 'account_id': account_check_id,
                 'move_id': move_id.id,
                 'journal_id': self.journal_id.id,
