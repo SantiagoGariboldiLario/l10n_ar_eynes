@@ -154,12 +154,12 @@
         <field name="arch" type="xml">
             <form string="Checks" create="false">
                 <header>
-                    <!-- <button
+                    <button
                         string="Deposit Check"
-                        name="deposit_check"
-                        type="object"
+                        name="%(deposit_check_action)d"
+                        type="action"
                         class="oe_highlight"
-                        attrs="{'invisible' : [('internal_type', '=', 'issued')]}"/> -->
+                        attrs="{'invisible' : ['|', ('third_party_check_state', '!=', 'in_wallet'), ('internal_type', '=', 'issued')]}"/>
                     <button
                         name="check_to_wallet"
                         type='object'

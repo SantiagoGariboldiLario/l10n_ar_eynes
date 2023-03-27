@@ -43,6 +43,7 @@
         'data/ir_sequence_data.xml',
         'security/ir.model.access.csv',
         'security/account_security.xml',
+        'wizard/deposit_check_wizard_view.xml',
         'views/res_config_settigs_views.xml',
         'views/res_partner_views.xml',
         'views/account_journal_views.xml',

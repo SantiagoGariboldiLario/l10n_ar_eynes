@@ -277,73 +277,74 @@ class AccountCheck(models.Model):
                 check.accredited = False
 
     def accredit_checks(self):
-        if self.issued_check_state != "waiting_accreditation":
-            raise ValidationError(
-                _("Check %s can't be accredited!") % self.number
-            )
+        """ method for checks accreditation """
+        for check in self:
+            if check.issued_check_state != "waiting_accreditation":
+                raise ValidationError(
+                    _("Check %s can't be accredited!") % self.number
+                )
 
-        company = self.env.user.company_id
-        check_conf_obj = self.env['account.check.config']
-        def_check_account = check_conf_obj.search([
-            ('company_id', '=', company.id)]
-        ).deferred_account_id
-        def_check_journal = check_conf_obj.search([
-            ('company_id', '=', company.id)]
-        ).deferred_journal_id
-        if not def_check_journal:
-            raise UserError(_("Error! There is no Journal \
-                configured for deferred checks."))
+        for check in self:
+            AccountCheckConfig = self.env['account.check.config']
+            def_check_account = AccountCheckConfig.search([
+                ('company_id', '=', self.env.user.company_id.id)]
+            ).deferred_account_id
+            def_check_journal = AccountCheckConfig.search([
+                ('company_id', '=', self.env.user.company_id.id)]
+            ).deferred_journal_id
+            if not def_check_journal:
+                raise UserError(_("Error! There is no Journal \
+                    configured for deferred checks."))
 
-        current_date = time.strftime('%Y-%m-%d')
+            current_date = time.strftime('%Y-%m-%d')
 
-        move_line_obj = self.env['account.move.line']
-        move_obj = self.env['account.move']
-        name_ref = 'Clearance Check ' + self.number
-        move_vals = {
-            'ref': name_ref,
-            'journal_id': def_check_journal.id,
-        }
-        move_id = move_obj.create(move_vals)
+            AccountMoveLine = self.env['account.move.line']
+            name_ref = 'Clearance Check ' + self.number
+            move_vals = {
+                'ref': name_ref,
+                'journal_id': def_check_journal.id,
+            }
+            move_id = self.env['account.move'].create(move_vals)
 
-        self.write({'clearance_move_id': move_id.id})
+            self.write({'clearance_move_id': move_id.id})
 
-        # Creamos la línea contable que iguala el pago del cheque
-        check_move_line_vals = {
-            'journal_id': def_check_journal.id,
-            'date': current_date,
-            'name': name_ref,
-            'account_id': def_check_account.id,
-            'debit': self.amount,
-            'move_id': move_id.id,
-        }
-
-        clearance_move_line = move_line_obj.with_context(
-            {'check_move_validity': False}).create(check_move_line_vals)
-
-        if self.checkbook_id:
-            # Creamos la línea contable que refiere
-            # a la acreditación por parte del banco
-            # solo si tiene referenciada una chequera (checkbook_id)
-            bank_move_line_vals = {
+            # Creamos la línea contable que iguala el pago del cheque
+            check_move_line_vals = {
                 'journal_id': def_check_journal.id,
                 'date': current_date,
                 'name': name_ref,
-                'account_id': self.checkbook_id.bank_account_id.account_id.id,
-                'credit': self.amount,
+                'account_id': def_check_account.id,
+                'debit': self.amount,
                 'move_id': move_id.id,
             }
 
-            move_line_obj.with_context(
-                {'check_move_validity': False}
-            ).create(bank_move_line_vals)
+            clearance_move_line = AccountMoveLine.with_context(
+                {'check_move_validity': False}).create(check_move_line_vals)
 
-            # move_lines_to_reconcile = []
-            # payment_move_line = move_line_obj.search([
-            #     ('issued_check_id', '=', check.id)])
-            # move_lines_to_reconcile.append(payment_move_line.id)
-            # move_lines_to_reconcile.append(clearance_move_line.id)
-            # reconcile_recordset = move_line_obj.browse(move_lines_to_reconcile)
-            # reconcile_recordset.reconcile()
+            if self.checkbook_id:
+                # Creamos la línea contable que refiere
+                # a la acreditación por parte del banco
+                # solo si tiene referenciada una chequera (checkbook_id)
+                bank_move_line_vals = {
+                    'journal_id': def_check_journal.id,
+                    'date': current_date,
+                    'name': name_ref,
+                    'account_id': self.checkbook_id.bank_account_id.account_id.id,
+                    'credit': self.amount,
+                    'move_id': move_id.id,
+                }
+
+                AccountMoveLine.with_context(
+                    {'check_move_validity': False}
+                ).create(bank_move_line_vals)
+
+                # move_lines_to_reconcile = []
+                # payment_move_line = move_line_obj.search([
+                #     ('issued_check_id', '=', check.id)])
+                # move_lines_to_reconcile.append(payment_move_line.id)
+                # move_lines_to_reconcile.append(clearance_move_line.id)
+                # reconcile_recordset = move_line_obj.browse(move_lines_to_reconcile)
+                # reconcile_recordset.reconcile()
 
         return self.write({"issued_check_state": "issued"})
 
