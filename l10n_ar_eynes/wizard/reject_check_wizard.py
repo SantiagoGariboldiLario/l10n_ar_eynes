@@ -12,6 +12,11 @@ class RejectIssuedCheckWizard(models.TransientModel):
 
     reject_date = fields.Date(string='Reject date')
     note = fields.Text(string='Note')
+    reason_id = fields.Many2one(
+        comodel_name='reason.rejected.check',
+        domain="[('type', '=', 'rejected')]",
+        string='Reason'
+    )
     generate_rejection_journal_entry = fields.Boolean(
         string='Generate Rejection Journal Entry',
         default=True
