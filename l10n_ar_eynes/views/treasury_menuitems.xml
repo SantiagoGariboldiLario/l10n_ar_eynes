@@ -15,8 +15,18 @@
             sequence="2"/>
 
         <menuitem id="treasury_configuration_menu" name="Configuration" sequence="3">
-            <menuitem id="check_config_menu" name="Check configuration" action="account_check_config_action" sequence="1"/>
-            <menuitem id="create_checkbook_menu" name="Create Checkbook" action="create_checkbook_wizard_action" sequence="2"/>
+            <menuitem id="check_config_menu"
+                name="Check configuration"
+                action="account_check_config_action"
+                sequence="1"/>
+            <menuitem id="create_checkbook_menu"
+                name="Create Checkbook"
+                action="create_checkbook_wizard_action"
+                sequence="2"/>
+            <menuitem id="menu_treasury_reason_rejected_check"
+                name="Reasons for rejected checks"
+                action="reason_rejected_check_action"
+                sequence="3"/>
         </menuitem>
     </menuitem>
 

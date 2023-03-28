@@ -210,3 +210,20 @@ class AccountMoveLine(models.Model):
         string='Issued Check',
         domain=[('internal_type', '=', 'issued')]
     )
+    counterpart = fields.Char(
+        "Counterpart",
+        compute='_get_counterpart',
+        help="Compute the counter part accounts of "
+        "this journal item for this journal entry. This can be needed in reports."
+    )
+
+    @api.depends('move_id.line_ids')
+    def _get_counterpart(self):
+        for rec in self:
+            counterpart = set()
+            for line in rec.move_id.line_ids:
+                if (line.account_id.code != rec.account_id.code):
+                    counterpart.add(line.account_id.code)
+            if len(counterpart) > 2:
+                counterpart = list(counterpart)[0:2] + ["..."]
+            self.counterpart = ",".join(counterpart)
