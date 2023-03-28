@@ -1,14 +1,10 @@
 from odoo import fields, models, _
-from odoo.exceptions import ValidationError, UserError
+from odoo.exceptions import ValidationError
 
 
 class RejectIssuedCheckWizard(models.TransientModel):
     _name = 'reject.issued.check.wizard'
     _description = 'Reject issued check wizard'
-
-    def get_default_journal(self):
-        return self.env.user.company_id.rejected_issued_checks_journal_id.id \
-            or False
 
     reject_date = fields.Date(string='Reject date')
     note = fields.Text(string='Note')
@@ -23,14 +19,9 @@ class RejectIssuedCheckWizard(models.TransientModel):
     )
 
     def action_reject(self):
-        """
-        This method is called when the rejection is confirmed in the wizard.
-        It change the state of the issued check to 'rejected' and also creates a move.
-        """
-        self.validate_journal()
-
+        """ action that rejects the issued check """
         check = self.env['account.check'].browse(
-            self._context.get('active_id')  # active check_id
+            self.env.context.get('active_id', False)
         )
         if check:
             check.write({
@@ -38,13 +29,11 @@ class RejectIssuedCheckWizard(models.TransientModel):
                 'note': self.note
             })
             if self.generate_rejection_journal_entry:
-                self.generate_rejection_journal_entry(check)
+                self.create_rejected_journal_entry(check)
+            check.write({'issued_check_state': 'rejected'})
+        return {'type': 'ir.actions.act_window_close'}
 
-            check.write({
-                'issued_check_state' : 'rejected'
-            })
-
-    def generate_rejection_journal_entry(self, check):
+    def create_rejected_journal_entry(self, check):
         """
         This method generates an invoice which register the
         check rejection as an invoice movement. It also adds the lines to the payment order
@@ -52,16 +41,22 @@ class RejectIssuedCheckWizard(models.TransientModel):
         Args:
             check (account.issued.check): check record
         """
-        move_obj = self.env['account.move']
-        move_line_obj = self.env['account.move.line']
-        account_obj = self.env['account.account']
+        AccoutMoveLine = self.env['account.move.line']
 
-        journal = self.env.user.company_id.rejected_issued_checks_journal_id
         payment = check.payment_order_id
+        journal = self.env.user.company_id.rejected_issued_checks_journal_id
+        if not journal:
+            raise ValidationError(_(
+                "No journal configured for rejected checks"
+            ))
 
         def_check_account = self.env['account.check.config'].search([
             ('company_id', '=', self.env.user.company_id.id)
         ]).deferred_account_id.id
+        if not def_check_account:
+            raise ValidationError(_(
+                "No Deferred account id configured"
+            ))
 
         ctx = {
             'date': self.reject_date,
@@ -72,21 +67,23 @@ class RejectIssuedCheckWizard(models.TransientModel):
             if payment_line.issued_check_id == check:
                 original_move_data = payment.account_move_get()
                 original_move_data['journal_id'] = journal.id
-                original_move_data['state'] = 'posted'
-                move_recordset = move_obj.with_context(ctx).create(
+                original_move_data['state'] = 'draft'
+                move = self.env['account.move'].with_context(ctx).create(
                     original_move_data
                 )
 
             # Get the name of the account_move just created
-                move_id = move_recordset.id
-                counterpart_account = account_obj.search([
+                counterpart_account = self.env['account.account'].search([
                     ('code', '=', payment_line.counterpart)
                 ]).id
-
+                if not counterpart_account:
+                    raise ValidationError(_(
+                        "No counterpart account found"
+                    ))
                 inverse_supplier_line = {
                     'name': '/',
                     'account_id': counterpart_account,
-                    'move_id': move_id,
+                    'move_id': move.id,
                     'partner_id': payment_line.partner_id.id,
                     'date': self.reject_date,
                     'credit': payment_line.credit,
@@ -97,12 +94,12 @@ class RejectIssuedCheckWizard(models.TransientModel):
                     'analytic_account_id': payment_line.analytic_account_id.id,
                     'ref': _('Rejected check') + ': ' + (payment_line.name or '/'),
                 }
-                move_line_obj.with_context(ctx).create(inverse_supplier_line)
+                AccoutMoveLine.with_context(ctx).create(inverse_supplier_line)
 
                 inverse_check_line = {
                     'name': _('Rejected check') + ': ' + (payment_line.name or '/'),
                     'account_id': def_check_account,
-                    'move_id': move_id,
+                    'move_id': move.id,
                     'partner_id': payment_line.partner_id.id,
                     'date': self.reject_date,
                     'credit': 0,
@@ -113,38 +110,13 @@ class RejectIssuedCheckWizard(models.TransientModel):
                     'analytic_account_id': payment_line.analytic_account_id.id,
                     'ref': _('Rejected check') + ': ' + (payment_line.name or '/'),
                 }
-                move_line_obj.with_context(ctx).create(inverse_check_line)
-
-    def validate_journal(self):
-        """
-        This methods checks that the journal field is not empty.
-        The journal in the model is loaded by default from the company reject issued check journal.
-        If the default journal is not loaded it raise an error explaining this.
-        """
-        if not self.env.user.company_id.rejected_issued_checks_journal_id:
-            raise UserError(
-                _("No default journal configured yet.\n"
-                  + "Journal reject issued checks configuration is needed.\n"
-                  + "To do that go to Invoicing/configuration/settings/journals ")
-            )
+                AccoutMoveLine.with_context(ctx).create(inverse_check_line)
+                move.post()
 
 
 class RejectThirdPartyCheckWizard(models.TransientModel):
     _name = 'reject.third.party.check.wizard'
     _description = 'Reject third party check wizard'
-
-    reject_date = fields.Date('Reject date')
-    journal_id = fields.Many2one(
-        comodel_name='account.journal',
-        string='Journal',
-        required=True,
-        default='_get_journal'
-    )
-    expense_line_ids = fields.One2many(
-        comodel_name='check.reject.expense',
-        inverse_name='reject_id',
-        string='Expenses'
-    )
 
     def _get_journal(self):
         user = self.env.user
@@ -155,16 +127,31 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
         )
         return journal and journal.id or False
 
+    reject_date = fields.Date('Reject date')
+    journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        string='Journal',
+        required=True,
+        default=_get_journal
+    )
+    expense_line_ids = fields.One2many(
+        comodel_name='check.reject.expense',
+        inverse_name='reject_id',
+        string='Expenses'
+    )
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        string='Company',
+        required=True,
+        default=lambda self: self.env.company
+    )
+
     def action_reject(self):
         """
         This method is called when the rejection is confirmed in the wizard.
         It change the state of the 3rd party check to 'rejected' and also creates a move.
         """
-        check_config_obj = self.env['account.check.config']
-        check_obj = self.env['account.check']
-        invoice_obj = self.env['account.move']
-
-        check = check_obj.browse(
+        check = self.env['account.check'].browse(
             self._context.get('active_id')
         )
 
@@ -172,7 +159,7 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             check.reject_date = self.reject_date
             partner = check.source_partner_id
 
-            config = check_config_obj.search([
+            config = self.env['account.check.config'].search([
                 ('company_id', '=', check.company_id.id)
             ])
             if not config:
@@ -190,8 +177,8 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             invoice_vals = {
                 'origin': _('Check : %s') % check.number,
                 'name': name,
-                'type': 'out_invoice',
-                'is_debit_note': True,
+                'move_type': 'out_invoice',
+                # 'is_debit_note': True,
                 'account_id': inv_account_id.id,
                 'partner_id': partner.id,
                 'journal_id': self.journal_id.id,
@@ -201,13 +188,10 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
 
             lines = []
             # Linea del cheque rechazado
-
             account_id = self.get_account(config, check)
-
             date_format = self.env["res.lang"].search([
                 ("code", "=", self.env.user.lang)
             ]).date_format
-
             rejected_date = self.reject_date.strftime(date_format)
             name = _('Check Rejected %s %s') % (check.number, rejected_date)
 
@@ -241,8 +225,10 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
                         (6, 0, expense.product_id.taxes_id.ids)
                     ],
                 }))
+            invoice_vals['invoice_line_ids'] = lines
 
-            debit_note_id = invoice_obj.create(invoice_vals)
+            # creamos la nota de debito
+            debit_note_id = self.env['account.move'].create(invoice_vals)
             debit_note_id._onchange_partner_id()
 
             # Volvemos a cambiar la cuenta que sobreescribio el onchange
@@ -250,17 +236,13 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             debit_note_id._onchange_invoice_line_ids()
 
         if check.third_party_check_state in ('delivered', 'deposited'):
+            # Guardamos la referencia a la nota de debito del rechazo y cambiamos el estado
             check.write({
-                'third_party_check_state' : 'rejected'
+                'third_party_check_state' : 'rejected',
+                'debit_note_id': debit_note_id.id
             })
 
-        # Guardamos la referencia a la nota de debito del rechazo
-        check.third_party_check_state = 'rejected'
-        check.debit_note_id = debit_note_id
-
-        form_res = self.env.ref(
-            'l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes'
-        )
+        form_res = self.env.ref('l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes')
         form_id = form_res and form_res.id or False
         tree_res = self.env.ref('base.view_move_tree')
         tree_id = tree_res and tree_res.id or False
@@ -288,11 +270,12 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             account.account: Returns account object
         """
         account_id = False
-        if check.state == 'delivered':
+        state = check.third_party_check_state
+        if state == 'delivered':
             account_id = config.rejected_account_id.id
-        elif check.state == 'deposited':
+        elif state == 'deposited':
             account_id = check.deposit_bank_id.account_id.id
-        elif check.state == 'in_wallet':
+        elif state == 'in_wallet':
             account_id = config.account_id.id
         return account_id
 

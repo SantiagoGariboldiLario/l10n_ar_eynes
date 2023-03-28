@@ -172,7 +172,7 @@
                         string="Reject Check"
                         type="action"
                         class="oe_highlight"
-                        attrs="{'invisible' : [('third_party_check_state', '!=', 'deposited')]}"/>
+                        attrs="{'invisible' : [('third_party_check_state', 'not in', ('deposited', 'delivered'))]}"/>
 
                     <field
                         name="third_party_check_state"

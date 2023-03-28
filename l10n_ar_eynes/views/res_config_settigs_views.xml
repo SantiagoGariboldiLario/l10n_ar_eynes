@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="account.res_config_settings_view_form"/>
         <field name="arch" type="xml">
 
-            <xpath expr="//div[@class='settings']/div[5]" position="inside">
+            <xpath expr="//div[@class='settings']/div[2]" position="inside">
                 <h2>Journals</h2>
                 <div class="row mt16 o_settings_container" id="default_journals">
                     <div class="col-12 col-lg-6 o_setting_box">
