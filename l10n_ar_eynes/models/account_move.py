@@ -162,7 +162,7 @@ class AccountMove(models.Model):
             'partner_id': self.partner_id.id,
             'journal_id': self.get_receipt_journal().id
             if self.is_sale_document() else self.get_payment_journal().id,
-            'debt_line_ids': [(0, 0, {
+            'income_line_ids': [(0, 0, {
                 'invoice_id': self.id,
                 'move_line_id': move_line.id,
                 'account_id': move_line.account_id.id
