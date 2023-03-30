@@ -124,7 +124,8 @@ class AccountPaymentOrder(models.Model):
     move_id = fields.Many2one(
         comodel_name='account.move',
         string='Account Entry',
-        copy=False
+        copy=False,
+        readonly=True
     )
     move_line_ids = fields.One2many(
         comodel_name='account.move.line',
