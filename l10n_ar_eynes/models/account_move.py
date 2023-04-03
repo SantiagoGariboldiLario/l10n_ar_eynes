@@ -23,11 +23,13 @@ class AccountMove(models.Model):
             'draft': [('readonly', False)],
         }
     )
+    is_debit_note = fields.Boolean(string='Debit Note', default=False)
 
     def get_highest_pos_sequence(self):
         invoices = self.env['account.move'].search([
             ('journal_id', '=', self.journal_id.id),
-            ('move_type', '=', self.move_type)
+            ('move_type', '=', self.move_type),
+            ('is_debit_note', '=', self.is_debit_note)
         ])
 
         if not invoices or len(invoices) == 1:
@@ -193,10 +195,35 @@ class AccountMove(models.Model):
             ('type', '=', 'receipt')
         ])[0]
 
+    @api.constrains('name', 'journal_id', 'state')
+    def _check_unique_sequence_number(self):
+        moves = self.filtered(lambda move: move.state == 'posted')
+        if not moves:
+            return
+
+        self.flush(['name', 'journal_id', 'move_type', 'state'])
+
+        # /!\ Computed stored fields are not yet inside the database.
+        self._cr.execute('''
+            SELECT move2.id, move2.name
+            FROM account_move move
+            INNER JOIN account_move move2 ON
+                move2.name = move.name
+                AND move2.journal_id = move.journal_id
+                AND move2.move_type = move.move_type
+                AND move2.is_debit_note = move.is_debit_note
+                AND move2.id != move.id
+            WHERE move.id IN %s AND move2.state = 'posted'
+        ''', [tuple(moves.ids)])
+        res = self._cr.fetchall()
+        if res:
+            raise ValidationError(_('Posted journal entry must have an unique sequence number per company.\n'
+                                    'Problematic numbers: %s\n') % ', '.join(r[1] for r in res))
+
     _sql_constraints = [
         (
             'unique_move',
-            'unique(partner_id, supplier_move_reference)',
+            'unique(partner_id, supplier_move_reference, is_debit_note)',
             _('This invoice reference already exists for this supplier')
         ),
     ]
