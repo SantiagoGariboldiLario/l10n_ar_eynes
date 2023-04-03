@@ -581,10 +581,29 @@ msgid "Date"
 msgstr "Fecha"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__is_debit_note
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__debit_note_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__is_debit_note
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__is_debit_note
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__res_voucher_type__doc_type__dn
 msgid "Debit Note"
-msgstr "Nota de Debito"
+msgstr "Nota de Débito"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.account_invoice_menu_debit_note
+#: model:ir.ui.menu,name:l10n_ar_eynes.account_invoice_menu_dn_supp
+msgid "Debit Notes"
+msgstr "Notas de Débito"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_invoice_action_debit_note
+msgid "Customer Debit Notes"
+msgstr "Notas de Débito"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_invoice_action_debit_note_supplier
+msgid "Supplier Debit Notes"
+msgstr "Notas de Débito"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
@@ -2364,10 +2383,9 @@ msgstr "ingresos"
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_move_unique_move
-#: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_move_unique_name
 #, python-format
-msgid "move already exists!"
-msgstr "El movimiento ya existe!"
+msgid "This invoice reference already exists for this supplier"
+msgstr "Este movimiento ya existe para este cliente"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
