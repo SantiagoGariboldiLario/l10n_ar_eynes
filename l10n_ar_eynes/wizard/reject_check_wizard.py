@@ -178,7 +178,7 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
                 'origin': _('Check : %s') % check.number,
                 'name': name,
                 'move_type': 'out_invoice',
-                # 'is_debit_note': True,
+                'is_debit_note': True,
                 'account_id': inv_account_id.id,
                 'partner_id': partner.id,
                 'journal_id': self.journal_id.id,
