@@ -941,6 +941,11 @@ msgid "Fiscal Position"
 msgstr "Posición fiscal"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__fiscal_position_ids
+msgid "Fiscal Positions"
+msgstr "Posiciones Fiscales"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_follower_ids
 msgid "Followers"
 msgstr "Seguidores"
