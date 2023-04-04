@@ -32,8 +32,8 @@ class AccountJournal(models.Model):
         size=6,
         required=True,
         help="Point of sale reference code",
-        default='')
-
+        default=''
+    )
     denomination = fields.Selection(
         selection=[
             ("a", "A"), ("b", "B"),
@@ -42,26 +42,32 @@ class AccountJournal(models.Model):
             ("not_defined", "Not Defined")
         ],
         string='Denomination',
-        default='not_defined')
-
+        default='not_defined'
+    )
     fiscal_position_id = fields.Many2one(
         comodel_name='account.fiscal.position',
-        string='Fiscal Position')
-
+        string='Fiscal Position'
+    )
+    fiscal_position_ids = fields.Many2many(
+        comodel_name='account.fiscal.position',
+        relation='journal_fiscal_position_rel',
+        column1='journal_id',
+        column2='fiscal_position_id',
+        string='Fiscal Positions'
+    )
     activity_start_date = fields.Date(
         string="Activity Start Date",
-        default=fields.date.today())
-
+        default=fields.date.today()
+    )
     warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse',
         string='Warehouse',
-        default=get_default_warehouse)
-
+        default=get_default_warehouse
+    )
     due_date = fields.Date(
         string='Due Date',
         help='after this expiration date, account moves are not allowed to use this journal till its extended'
     )
-
     type = fields.Selection(
         selection_add=[
             ('receipt', 'Receipt'),
