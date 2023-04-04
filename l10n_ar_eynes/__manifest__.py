@@ -18,7 +18,7 @@
 ###############################################################################
 {
     'name': 'l10n Argentina',
-    'version': '15.0.1',
+    'version': '15.0.6',
     'author': 'Eynes/E-MIPS',
     'license': 'AGPL-3',
     'description': 'Localization customizations module.',
