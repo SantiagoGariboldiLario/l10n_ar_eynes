@@ -11,7 +11,8 @@
                     <group>
                         <group>
                             <field name="denomination" attrs="{'required':[('type','=','sale')]}"/>
-                            <field name="fiscal_position_id" attrs="{'required':[('type','=','sale')]}"/>
+                            <field name="fiscal_position_id" attrs="{'required':[('type','=','sale')]}" invisible="1"/>
+                            <field name="fiscal_position_ids" widget="many2many_tags" attrs="{'required':[('type','=','sale')]}"/>
                         </group>
                         <group>
                             <field name="activity_start_date" attrs="{'required':[('type','=','sale')]}"/>
