@@ -60,6 +60,7 @@
         'views/reason_rejected_check_views.xml',
         'views/retention_views.xml',
         'views/res_users_views.xml',
+        'views/account_checkbook_views.xml',
         'wizard/create_checkbook_wizard_view.xml',
         'views/treasury_menuitems.xml',
         'views/taxes_menuitems.xml',
