@@ -29,6 +29,33 @@ class AccountPaymentMethodLine(models.Model):
         help="Account used for account moves with checks. If not set, "
         "account in treasury configuration is used."
     )
+    draft_issued_check_ids = fields.One2many(
+        comodel_name='account.check',
+        inverse_name='checkbook_id',
+        string='Available Checks',
+        domain=[
+            ('internal_type', '=', 'issued'),
+            ('issued_check_state', '=', 'draft')
+        ]
+    )
+    cancelled_issued_check_ids = fields.One2many(
+        comodel_name='account.check',
+        inverse_name='checkbook_id',
+        string='Cancelled Checks',
+        domain=[
+            ('internal_type', '=', 'issued'),
+            ('issued_check_state', '=', 'cancelled')
+        ]
+    )
+    issued_check_ids = fields.One2many(
+        comodel_name='account.check',
+        inverse_name='checkbook_id',
+        string='Issued Checks',
+        domain=[
+            ('internal_type', '=', 'issued'),
+            ('issued_check_state', 'not in', ('draft', 'cancelled'))
+        ]
+    )
 
     _sql_constraints = [
         (

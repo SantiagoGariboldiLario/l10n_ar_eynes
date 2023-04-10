@@ -1,6 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="account_checkbook_view_form" model="ir.ui.view">
+        <field name="name">account.checkbook.view.form</field>
+        <field name="model">account.payment.method.line</field>
+        <field name="arch" type="xml">
+            <form string="Checkbook">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <label for="number" string="Checkbook Number"/>
+                            <field name="number" class="oe_inline" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="bank_account_id" />
+                            <field name="bank_id" />
+                        </group>
+                        <group>
+                            <field name="format" readonly="1"/>
+                            <field name="account_check_id" />
+                            <field name="company_id" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="checks" string="Checks">
+                            <group>
+                                <field name="draft_issued_check_ids" widget="many2many_tags" readonly="1"/>
+                                <field name="cancelled_issued_check_ids" widget="many2many_tags" readonly="1"/>
+                                <field name="issued_check_ids">
+                                    <tree string="Issued Checks" name="issued_checks" create="false" edit="false" delete="false">
+                                        <field name="number"/>
+                                        <field name="receiving_partner_id"/>
+                                        <field name="issue_date"/>
+                                        <field name="payment_date"/>
+                                        <field name="journal_id"/>
+                                        <field name="bank_id"/>
+                                        <field name="payment_order_id"/>
+                                        <field name="issued_check_state"/>
+                                        <field name="amount" sum="Total Amount"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <record id="account_checkbook_view_tree" model="ir.ui.view">
         <field name="name">account.checkbook.view.tree</field>
         <field name="model">account.payment.method.line</field>
@@ -19,7 +68,7 @@
     <record id="account_checkbook_action" model="ir.actions.act_window">
         <field name="name">Checkbooks</field>
         <field name="res_model">account.payment.method.line</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">tree,form</field>
         <field name="domain">[('code', '=', 'check_printing')]</field>
         <field name="view_id" ref="account_checkbook_view_tree"/>
     </record>
