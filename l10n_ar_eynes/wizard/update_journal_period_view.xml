@@ -38,7 +38,7 @@
         <field name="res_model">update.journal.period.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="view_id" ref="user_journal_rel_view_tree"/>
+        <field name="view_id" ref="update_journal_period_wizard_view_form"/>
     </record>
 
     <menuitem
