@@ -8,7 +8,7 @@ def update_res_users_journals(cr):
         cr.execute("""
             INSERT INTO users_journals_rel
             (user_id, journal_id)
-            (SELECT user_id, journal_id FROM user_journal_rel)
+            (SELECT user_id, journal_id FROM user_journal_rel where user_id is not null and journal_id is not null)
         """)
     except psycopg2.ProgrammingError:
         cr.rollback()
