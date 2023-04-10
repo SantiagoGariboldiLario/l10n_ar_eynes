@@ -18,7 +18,7 @@
 ###############################################################################
 {
     'name': 'l10n Argentina',
-    'version': '15.0.6',
+    'version': '15.0.6.0.2',
     'author': 'Eynes/E-MIPS',
     'license': 'AGPL-3',
     'description': 'Localization customizations module.',
@@ -51,7 +51,7 @@
         'views/account_payment_order_views.xml',
         'views/account_payment_order_other_payments_views.xml',
         'views/account_move_views.xml',
-        'views/user_journal_rel_views.xml',
+        # 'views/user_journal_rel_views.xml',
         'views/account_fiscal_position_views.xml',
         'views/account_tax_views.xml',
         'views/res_document_type_views.xml',
@@ -59,6 +59,7 @@
         'views/account_check_views.xml',
         'views/reason_rejected_check_views.xml',
         'views/retention_views.xml',
+        'views/res_users_views.xml',
         'wizard/create_checkbook_wizard_view.xml',
         'views/treasury_menuitems.xml',
         'views/taxes_menuitems.xml',
