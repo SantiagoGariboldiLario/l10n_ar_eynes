@@ -203,8 +203,14 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__bank_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__bank_id
 msgid "Bank"
 msgstr "Banco"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__account_check_id
+msgid "Check Account"
+msgstr "Cuenta de Cheque"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__bank_branch
@@ -1121,10 +1127,19 @@ msgstr ""
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_issued_check_action
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__issued_check_ids
 #: model:ir.ui.menu,name:l10n_ar_eynes.treasury_issued_check_menu
+#: model:ir.ui.menu,name:l10n_ar_eynes.treasury_issued_check_submenu
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Issued Checks"
 msgstr "Cheques propios"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_checkbook_action
+#: model:ir.ui.menu,name:l10n_ar_eynes.treasury_checkbooks_menu
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_checkbook_view_tree
+msgid "Checkbooks"
+msgstr "Chequeras"
+
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_journal
@@ -1324,11 +1339,12 @@ msgid "Notes"
 msgstr "Notas"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__number
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__number
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Number"
-msgstr "Numero"
+msgstr "Número"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
@@ -2431,8 +2447,9 @@ msgid "voucher lines"
 msgstr "lineas de comprobante"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__bank_account_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__bank_account_id
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_tree
 msgid "Bank Account"
 msgstr "Cuenta Bancaria"
 
