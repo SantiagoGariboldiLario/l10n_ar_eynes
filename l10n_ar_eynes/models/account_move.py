@@ -52,19 +52,16 @@ class AccountMove(models.Model):
         if not self.partner_id:
             return
         super(AccountMove, self)._onchange_partner_id()
-        if self.move_type == 'out_invoice':
-            relations = self.env['user.journal.rel'].search([
-                ('journal_id.fiscal_position_ids', 'in', self.partner_id.property_account_position_id.id),
-                ('user_id', '=', self.env.user.id)],
-                order='sequence asc',
+        if self.is_sale_document():
+            partner_fiscal_position = self.partner_id.property_account_position_id
+            journals = self.env.user.journal_ids.filtered(
+                lambda j: partner_fiscal_position in j.fiscal_position_ids
             )
-            if relations:
-                ids = list(map(lambda relation: relation.journal_id.id, relations))
-                domain = {'journal_id' : [('id', 'in', ids)]}
-                self.journal_id = relations[0].journal_id
+            if journals:
+                self.journal_id = journals[0]
                 self._onchange_journal()
                 return {
-                    'domain' : domain,
+                    'domain': {'journal_id': [('id', 'in', journals.ids)]}
                 }
 
     @api.onchange('supplier_move_reference', 'denomination',

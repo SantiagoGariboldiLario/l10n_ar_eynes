@@ -2628,3 +2628,8 @@ msgstr ""
 msgid "This date is used to restrict new invoices past this date"
 msgstr "Esta fecha de corte es utilizada para bloquear el diario seleccionado y que los usuarios "
 "no puedan registrar nuevos movimientos para dicho diario en una fecha anterior a la elegida"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__journal_ids
+msgid "Available Journals"
+msgstr "Diarios Disponibles"
