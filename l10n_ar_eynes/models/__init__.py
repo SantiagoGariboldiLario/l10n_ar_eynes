@@ -12,6 +12,7 @@ from . import res_config_settings # noqa
 from . import res_document_type # noqa
 from . import res_partner_bank # noqa
 from . import res_partner # noqa
+from . import res_users # noqa
 from . import res_voucher_type # noqa
 from . import retention # noqa
 from . import user_journal_rel # noqa
