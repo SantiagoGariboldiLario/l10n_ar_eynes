@@ -372,6 +372,7 @@ msgstr "Chequera"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__number
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_checkbook_view_form
 msgid "Checkbook Number"
 msgstr "Numero de chequera"
 
@@ -389,6 +390,7 @@ msgstr "La chequera debe conter solo numeros"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__record_ids
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_checkbook_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_tree
@@ -1125,13 +1127,25 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_issued_check_action
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__issued_check_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__issued_check_ids
 #: model:ir.ui.menu,name:l10n_ar_eynes.treasury_issued_check_menu
 #: model:ir.ui.menu,name:l10n_ar_eynes.treasury_issued_check_submenu
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_checkbook_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Issued Checks"
 msgstr "Cheques propios"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__cancelled_issued_check_ids
+msgid "Cancelled Checks"
+msgstr "Cheques Cancelados"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__draft_issued_check_ids
+msgid "Available Checks"
+msgstr "Cheques Disponibles"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_checkbook_action
