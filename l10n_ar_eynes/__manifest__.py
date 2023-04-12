@@ -19,9 +19,9 @@
 {
     'name': 'l10n Argentina',
     'version': '15.0.6.0.2',
-    'author': 'Eynes/E-MIPS',
+    'author': 'Eynes',
     'license': 'AGPL-3',
-    'description': 'Localization customizations module.',
+    'description': 'Localization customizations module',
     'category': 'Accounting/Accounting',
     'depends': [
         'sale',
