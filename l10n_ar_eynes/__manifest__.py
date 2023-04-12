@@ -21,7 +21,7 @@
     'version': '15.0.6.0.2',
     'author': 'Eynes',
     'license': 'AGPL-3',
-    'description': 'Localization customizations module',
+    'description': 'Argentina Localization',
     'category': 'Accounting/Accounting',
     'depends': [
         'sale',
