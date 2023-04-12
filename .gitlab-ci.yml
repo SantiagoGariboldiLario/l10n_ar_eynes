@@ -14,6 +14,8 @@ lint-test-job:   # This job also runs in the test stage.
 
 deploy-job:      # This job runs in the deploy stage.
   stage: deploy  # It only runs when jobs in the test stage complete successfully.
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   trigger:
     project: localization/l10n-v15-testing
     strategy: depend
