@@ -153,7 +153,7 @@ class AccountPaymentOrder(models.Model):
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         string='Currency',
-        compute='default_journal_currency'
+        compute='_compute_default_journal_currency'
     )
     amount = fields.Float(
         string='Tax Amount',
@@ -167,7 +167,7 @@ class AccountPaymentOrder(models.Model):
     )
     comment = fields.Char(
         string='Counterpart Comment',
-        default=_('Write-Off'),
+        default='Write-Off',
         required=True
     )
     analytic_id = fields.Many2one(
@@ -176,7 +176,7 @@ class AccountPaymentOrder(models.Model):
     )
     writeoff_amount = fields.Float(
         string='Difference Amount',
-        compute='_get_writeoff_amount',
+        compute='_compute_writeoff_amount',
         readonly=True,
         help="Computed as the difference between the amount stated "
         + "in the voucher and the sum of allocation on the voucher lines."
@@ -266,19 +266,17 @@ class AccountPaymentOrder(models.Model):
     )
     paid_amount_in_company_currency = fields.Float(
         string='Paid Amount in Company Currency',
-        compute='_paid_amount_in_company_currency',
+        compute='_compute_paid_amount_in_company_currency',
         readonly=True
     )
     is_multi_currency = fields.Boolean(
         string='Multi Currency Voucher',
-        compute='_is_multicurrency',
-        help="Fields with internal purpose "
-        + "only that depicts if the voucher is "
-        + "a multi currency one or not"
+        compute='_compute_is_multicurrency',
+        help="Fields with internal purpose only that depicts if the voucher is a multi currency one or not"
     )
     invoice_ids = fields.Many2many(
         comodel_name='account.move',
-        compute='_get_invoice_ids',
+        compute='_compute_invoice_ids',
         string='Invoices',
         readonly=True
     )
@@ -700,14 +698,14 @@ class AccountPaymentOrder(models.Model):
         self.payment_rate = rate
 
     @api.depends('income_line_ids.invoice_id', 'debt_line_ids.invoice_id')
-    def _get_invoice_ids(self):
+    def _compute_invoice_ids(self):
         for payment in self:
             income_invs = payment.income_line_ids.mapped('invoice_id')
             debt_invs = payment.debt_line_ids.mapped('invoice_id')
             payment.invoice_ids = income_invs + debt_invs
 
     @api.depends('journal_id', 'company_id')
-    def default_journal_currency(self):
+    def _compute_default_journal_currency(self):
         for payment in self:
             payment.currency_id = payment.journal_id.currency_id or \
                 payment.company_id.currency_id
@@ -716,7 +714,7 @@ class AccountPaymentOrder(models.Model):
                  'income_line_ids',
                  'amount',
                  'concept_line_ids')
-    def _get_writeoff_amount(self):
+    def _compute_writeoff_amount(self):
         for po in self:
             writeoff_amount = po._get_writeoff_amount_hook()
             currency = po.currency_id or po.company_id.currency_id
@@ -738,19 +736,13 @@ class AccountPaymentOrder(models.Model):
         return sum(self.concept_line_ids.mapped('amount'))
 
     @api.depends('amount')
-    def _paid_amount_in_company_currency(self):
+    def _compute_paid_amount_in_company_currency(self):
         """Returns the same amount"""
         for p in self:
             p.paid_amount_in_company_currency = p.amount
-#        for p in self:
-#            payment = self.with_context({'date': p.date})
-#            self.paid_amount_in_company_currency = \
-#                payment.currency_id.compute(
-#                    payment.amount,
-#                    payment.company_id.currency_id)
 
     @api.depends('currency_id')
-    def _is_multicurrency(self):
+    def _compute_is_multicurrency(self):
         for p in self:
             p.is_multi_currency = p.currency_id != p.company_id.currency_id
 
@@ -801,7 +793,7 @@ class AccountPaymentOrder(models.Model):
             if voucher.type == 'receipt':
                 voucher.third_party_check_ids.unlink()
             voucher.issued_check_ids.unlink()
-        super(AccountPaymentOrder, self).unlink()
+        return super(AccountPaymentOrder, self).unlink()
 
     def _check_retentions_unlinkable(self):
         for voucher in self:
@@ -809,8 +801,8 @@ class AccountPaymentOrder(models.Model):
             if u_rets:
                 raise ValidationError(_(
                     "Error!\n"
-                    "Voucher %s [id: %s] has Unlinkable Retentions:\n" "%s") %
-                    (voucher.name, voucher.id, ("\n").join(
+                    "Voucher %(voucher_name)s [id: %(voucher_id)s] has Unlinkable Retentions:\n" "%(retentions)s",
+                    voucher_name=voucher.name, voucher_id=voucher.id, retentions=("\n").join(
                         ["%s [id: %s]" % (r.name, r.id) for r in u_rets]
                     ))
                 )
@@ -996,23 +988,6 @@ class AccountPaymentOrder(models.Model):
         else:
             setattr(self, onchange_attr, False)
 
-    @api.model
-    def _compute_writeoff_amount(self, line_dr_ids, line_cr_ids, amount, ttype):
-        debit = credit = 0.0
-        sign = ttype == 'payment' and -1 or 1
-
-        for dr_line in line_dr_ids:
-            if isinstance(dr_line, dict):
-                debit += dr_line['amount']
-            elif isinstance(dr_line, models.Model):
-                debit += dr_line.amount
-        for cr_line in line_cr_ids:
-            if isinstance(cr_line, dict):
-                credit += cr_line['amount']
-            elif isinstance(cr_line, models.Model):
-                credit += cr_line.amount
-        return amount - sign * (credit - debit)
-
     @api.onchange('income_line_ids', 'debt_line_ids', 'disable_retentions',
                   'date')
     def onchange_lines(self):
@@ -1088,7 +1063,7 @@ class AccountPaymentOrder(models.Model):
             'check_move_validity': False,
         }
         # Create the account move record.
-        move_recordset = Move.with_context(ctx).create(
+        move_recordset = Move.with_context(**ctx).create(
             self.account_move_get()
         )
         # Get the name of the account_move just created
@@ -1101,10 +1076,10 @@ class AccountPaymentOrder(models.Model):
             line_total = 0.0
             for vals in move_line_vals:
                 line_total += vals['debit'] - vals['credit']
-                MoveLine.with_context(ctx).create(vals)
+                MoveLine.with_context(**ctx).create(vals)
         else:
             # Create the first line of the voucher
-            move_line_brw = MoveLine.with_context(ctx).create(
+            move_line_brw = MoveLine.with_context(**ctx).create(
                 self.first_move_line_get(
                     move_id, company_currency,
                     current_currency))
@@ -1116,15 +1091,13 @@ class AccountPaymentOrder(models.Model):
         elif self.type == 'purchase':
             line_total = line_total + self.amount
         # Create one move line per voucher line where amount is not 0.0
-        line_total, rec_list_ids = self.with_context(
-            ctx).voucher_move_line_create(
-                line_total, move_id, company_currency, current_currency)
+        line_total, rec_list_ids = self.with_context(**ctx).voucher_move_line_create(line_total, move_id, company_currency, current_currency)
 
         # Create the writeoff line if needed
         ml_writeoff = self.writeoff_move_line_get(
             line_total, move_id, name, company_currency, current_currency)
         if ml_writeoff:
-            MoveLine.with_context(ctx).create(ml_writeoff)
+            MoveLine.with_context(**ctx).create(ml_writeoff)
 
         # We post the voucher.
         self.write({
@@ -1268,9 +1241,7 @@ class AccountPaymentOrder(models.Model):
     @api.model
     def _convert_paid_amount_in_company_currency(self, amount):
         """ Return actual amount, the user defines the rate of conversion and its result"""
-        return amount
-        res = {}
-        currency = self.currency_id.with_context({'date': self.date})
+        currency = self.currency_id.with_context(date=self.date)
         company_currency = self.company_id.currency_id
         res = currency.compute(amount, company_currency)
         return res
@@ -1416,7 +1387,6 @@ class AccountPaymentOrder(models.Model):
         return move_line
 
     def _convert_amount(self, amount):
-        return amount
         return self.currency_id.compute(amount, self.company_id.currency_id)
 
     def _get_exchange_lines(self, line, move_id, amount_residual,
@@ -1489,7 +1459,7 @@ class AccountPaymentOrder(models.Model):
         rec_lst_ids = []
 
         date = self.read(['date'])[0]['date']
-        self = self.with_context({'date': date})
+        self = self.with_context(date=date)
         # voucher_currency = self.journal_id.currency_id or self.company_id.currency_id  # noqa
         prec = self.env['decimal.precision'].precision_get('account')
         for line in self.line_ids:
@@ -1855,23 +1825,6 @@ class AccountPaymentOrderLine(models.Model):
         for order_line in self:
             order_line._check_amount_over_original()
 
-    # @api.onchange('amount')
-    # def onchange_amount(self):
-    #     self._check_amount_over_original()
-
-    def _compute_writeoff_amount(
-        self, debt_line_ids, income_line_ids,
-            amount, type, old_writeoff):
-        debit = credit = 0.0
-        sign = type == 'payment' and -1 or 1
-        for line in debt_line_ids:
-            if isinstance(line, dict):
-                debit += line['amount']
-        for line in income_line_ids:
-            if isinstance(line, dict):
-                credit += line['amount']
-        return (amount - sign * (credit - debit)) + old_writeoff
-
 
 class AccountPaymentModeLine(models.Model):
     _name = 'account.payment.mode.line'
@@ -2068,7 +2021,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         comodel_name='retention.move.line',
         inverse_name='payment_order_line_id',
         string='Retention move lines',
-        compute='_comupute_retention_move_lines'
+        compute='_compute_retention_move_lines'
     )
     retention_move_lines_total = fields.Float(
         string='Total',
@@ -2106,7 +2059,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         store=False
     )
 
-    def _comupute_retention_move_lines(self):
+    def _compute_retention_move_lines(self):
         RetMoveLine = self.env['retention.move.line']
         for rec in self:
             rec.clear_retention_lines()

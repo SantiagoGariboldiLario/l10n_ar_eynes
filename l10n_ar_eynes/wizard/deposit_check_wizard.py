@@ -105,9 +105,12 @@ class DepositCheckwizard(models.TransientModel):
         deposit_date = self.date or time.strftime('%Y-%m-%d')
 
         if not self.bank_account_id.account_id:
-            raise UserError(
-                _("Error! You have to configure an account on Bank Account %s: %s") % (self.bank_account_id.bank_name, self.bank_account_id.acc_number)
-            )
+            raise UserError(_(
+                "Error! You have to configure an account on "
+                "Bank Account %(bank_name)s: %(acc_number)s",
+                bank_name=self.bank_account_id.bank_name,
+                acc_number=self.bank_account_id.acc_number
+            ))
 
         check = self.env['account.check'].browse(
             self.env.context.get('active_id', False)
@@ -133,8 +136,11 @@ class DepositCheckwizard(models.TransientModel):
             # check.payment_order_id.journal_id.id)
 
             if self.voucher_number:
-                move_ref = _('Deposit Check %s [%s]') \
-                    % (check.number, self.voucher_number)
+                move_ref = _(
+                    'Deposit Check %(check_number)s [%(voucher_number)s]',
+                    check_number=check.number,
+                    voucher_number=self.voucher_number
+                )
             else:
                 move_ref = _('Deposit Check %s') % (check.number)
 
@@ -145,7 +151,7 @@ class DepositCheckwizard(models.TransientModel):
                 'date': deposit_date,
                 'ref': move_ref,
             })
-            AccountMoveLine.with_context({'check_move_validity': False}).create({
+            AccountMoveLine.with_context(check_move_validity=False).create({
                 'name': _('Check Deposit'),
                 # 'centralisation': 'normal',
                 'account_id': self.bank_account_id.account_id.id,
@@ -154,10 +160,13 @@ class DepositCheckwizard(models.TransientModel):
                 'date': deposit_date,
                 'debit': check.amount,
                 'credit': 0.0,
-                'ref': _('Deposit Check %s on %s') %
-                (check.number, self.bank_account_id.acc_number),
+                'ref': _(
+                    'Deposit Check %(check_number)s on %(acc_number)s',
+                    check_number=check.number,
+                    acc_number=self.bank_account_id.acc_number
+                ),
             })
-            AccountMoveLine.with_context({'check_move_validity': False}).create({
+            AccountMoveLine.with_context(check_move_validity=False).create({
                 'name': _('Check Deposit'),
                 # 'centralisation': 'normal',
                 'account_id': account_check_id,
