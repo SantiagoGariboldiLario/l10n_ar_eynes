@@ -31,10 +31,12 @@ class CreateCheckbookWizard(models.TransientModel):
             'account_check_printing.account_payment_method_check'
         )
 
-        payment_method_name = _('Checkbook %s %s-%s',
-                                self.journal_id.name,
-                                self.checkbook_format[0].upper(),
-                                self.number)
+        payment_method_name = _(
+            'Checkbook %(name)s %(format)s-%(number)s',
+            name=self.journal_id.name,
+            format=self.checkbook_format[0].upper(),
+            number=self.number
+        )
 
         self.journal_id.outbound_payment_method_line_ids = [(0, 0, {
             'journal_id' : self.journal_id.id,
