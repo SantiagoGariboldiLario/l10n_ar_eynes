@@ -1,16 +1,29 @@
-stages:          # List of stages for jobs, and their order of execution
+stages:
   - test
   - deploy
 
-lint-test-job:   # This job also runs in the test stage.
-  image: alpine:latest
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
+lint-test-job:
+  image: python:3.8-alpine
+  stage: test
   tags:
     - deployment
+  variables:
+    FOLDER_NAME: 'logs'
+    LOG_NAME: 'linter.log'
+    CHECKING_FOLDER: '.'
+  before_script:
+    - python -m pip install --upgrade pip
+    - pip install flake8
+    - export
+    - mkdir -p $FOLDER_NAME
   script:
     - echo "Linting code... This will take about 10 seconds."
-    - sleep 10
+    - flake8 --tee --output-file=$FOLDER_NAME/$LOG_NAME $CHECKING_FOLDER
     - echo "No lint issues found."
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - $FOLDER_NAME/
 
 deploy-job:      # This job runs in the deploy stage.
   stage: deploy  # It only runs when jobs in the test stage complete successfully.
