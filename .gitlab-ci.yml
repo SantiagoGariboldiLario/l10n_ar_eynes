@@ -41,9 +41,9 @@ lint-pylint:
     - mkdir -p $FOLDER_NAME
   script:
     - echo "Linting code (non-mandatory)..."
-    - pylint --output=$FOLDER_NAME/$LOG_NAME_NM --load-plugins=pylint_odoo --rcfile=.pylintrc --exit-zero *
+    - pylint --load-plugins=pylint_odoo --rcfile=.pylintrc --exit-zero * | tee -a --output=$FOLDER_NAME/$LOG_NAME_NM 
     - echo "Linting code (mandatory)..."
-    - pylint --output=$FOLDER_NAME/$LOG_NAME_MN --load-plugins=pylint_odoo --rcfile=.pylintrc-mandatory *
+    - pylint --load-plugins=pylint_odoo --rcfile=.pylintrc-mandatory * | tee -a $FOLDER_NAME/$LOG_NAME_MN 
   artifacts:
     when: on_failure
     expire_in: 2 days
