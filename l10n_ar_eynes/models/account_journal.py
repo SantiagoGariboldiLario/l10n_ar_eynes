@@ -206,6 +206,7 @@ class AccountJournal(models.Model):
         }
         return result
 
+    # pylint: disable-next=dangerous-default-value
     def _compute_base_retention(
             self, move_line, factor_to_pay, factor_unrec, prev_ret_ids,
             line_type, sit_iibb, logging_messages=[], activity=None):
