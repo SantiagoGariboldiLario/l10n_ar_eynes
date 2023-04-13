@@ -21,6 +21,7 @@ lint-test-job:
     - flake8 --tee --output-file=$FOLDER_NAME/$LOG_NAME $CHECKING_FOLDER
     - echo "No lint issues found."
   artifacts:
+    when: on_failure
     expire_in: 2 days
     paths:
       - $FOLDER_NAME/
