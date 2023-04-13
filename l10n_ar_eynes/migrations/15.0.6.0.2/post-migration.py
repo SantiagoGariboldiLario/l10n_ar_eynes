@@ -1,15 +1,18 @@
 import logging
 import psycopg2
+
 _logger = logging.getLogger(__name__)
 
 
 def update_res_users_journals(cr):
     try:
-        cr.execute("""
+        cr.execute(
+            """
             INSERT INTO users_journals_rel
             (user_id, journal_id)
             (SELECT user_id, journal_id FROM user_journal_rel where user_id is not null and journal_id is not null)
-        """)
+        """
+        )
     except psycopg2.ProgrammingError:
         cr.rollback()
     return True

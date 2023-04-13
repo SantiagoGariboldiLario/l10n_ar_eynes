@@ -11,7 +11,9 @@ class ReasonRejectedCheck(models.Model):
     _description = "Reasons for rejected checks"
 
     name = fields.Char(string='Reason')
-    type = fields.Selection([('rejected', 'Rejected'), ('returned', 'Returned')], string='Type')
+    type = fields.Selection(
+        [('rejected', 'Rejected'), ('returned', 'Returned')], string='Type'
+    )
     code = fields.Char(string='Code')
     is_critical = fields.Boolean(string='Critical')
     description = fields.Text(string='Description')

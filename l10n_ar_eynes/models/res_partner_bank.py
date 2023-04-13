@@ -14,7 +14,4 @@ class ResParterBank(models.Model):
             result.append((rpb.id, " ".join(name)))
         return result
 
-    account_id = fields.Many2one(
-        comodel_name='account.account',
-        string='Account'
-    )
+    account_id = fields.Many2one(comodel_name='account.account', string='Account')

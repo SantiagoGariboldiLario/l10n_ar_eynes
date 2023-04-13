@@ -12,16 +12,12 @@ class CreateCheckbookWizard(models.TransientModel):
         comodel_name='account.journal',
         string='Journal',
         required=True,
-        domain=[('type', '=', 'bank')]
+        domain=[('type', '=', 'bank')],
     )
     checkbook_format = fields.Selection(
-        selection=[
-            ('physical', 'Physical'),
-            ('virtual', 'Virtual'),
-            ('echeq', 'Echeq')
-        ],
+        selection=[('physical', 'Physical'), ('virtual', 'Virtual'), ('echeq', 'Echeq')],
         string='Format',
-        required=True
+        required=True,
     )
     start_num = fields.Char('Start Number', size=8)
     end_num = fields.Char('End Number', size=8)
@@ -35,16 +31,22 @@ class CreateCheckbookWizard(models.TransientModel):
             'Checkbook %(name)s %(format)s-%(number)s',
             name=self.journal_id.name,
             format=self.checkbook_format[0].upper(),
-            number=self.number
+            number=self.number,
         )
 
-        self.journal_id.outbound_payment_method_line_ids = [(0, 0, {
-            'journal_id' : self.journal_id.id,
-            'payment_method_id' : payment_method.id,
-            'name' : payment_method_name,
-            'number': self.number,
-            'format' : self.checkbook_format
-        })]
+        self.journal_id.outbound_payment_method_line_ids = [
+            (
+                0,
+                0,
+                {
+                    'journal_id': self.journal_id.id,
+                    'payment_method_id': payment_method.id,
+                    'name': payment_method_name,
+                    'number': self.number,
+                    'format': self.checkbook_format,
+                },
+            )
+        ]
 
         if self.checkbook_format != 'echeq':
             self.check_range()
@@ -54,21 +56,22 @@ class CreateCheckbookWizard(models.TransientModel):
             end_number = int(self.end_num)
 
             for i in range(start_numer, end_number + 1):
-                self.env['account.check'].create({
-                    'number': str(i).zfill(8),
-                    'journal_id' : self.journal_id.id,
-                    'bank_id' : self.journal_id.bank_id.id,
-                    'checkbook_id' : self.env['account.payment.method.line'].search([('name', '=', payment_method_name)]).id,
-                    'checkbook_format' : self.checkbook_format,
-                    'internal_type' : 'issued',
-                    'issued_check_state' : 'draft',
-                    'type' : 'common',
-                })
+                self.env['account.check'].create(
+                    {
+                        'number': str(i).zfill(8),
+                        'journal_id': self.journal_id.id,
+                        'bank_id': self.journal_id.bank_id.id,
+                        'checkbook_id': self.env['account.payment.method.line']
+                        .search([('name', '=', payment_method_name)])
+                        .id,
+                        'checkbook_format': self.checkbook_format,
+                        'internal_type': 'issued',
+                        'issued_check_state': 'draft',
+                        'type': 'common',
+                    }
+                )
 
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'reload'
-        }
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
 
     @api.onchange('number')
     def _onchange_number(self):

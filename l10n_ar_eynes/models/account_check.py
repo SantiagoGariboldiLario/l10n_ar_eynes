@@ -11,43 +11,40 @@ class AccountCheckConfig(models.Model):
         comodel_name='account.account',
         string='Main Check Account',
         required=True,
-        help="In Argentina, Valores a Depositar is used, for example"
+        help="In Argentina, Valores a Depositar is used, for example",
     )
     deferred_account_id = fields.Many2one(
-        comodel_name='account.account',
-        string='Deferred Check Account',
-        required=True
+        comodel_name='account.account', string='Deferred Check Account', required=True
     )
     deferred_journal_id = fields.Many2one(
-        comodel_name='account.journal',
-        string='Deferred Check Journal',
-        required=True
+        comodel_name='account.journal', string='Deferred Check Journal', required=True
     )
     receivable_rejected_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Receivable Rejected Check Account',
         domain=[('internal_type', '=', 'receivable')],
         help="Partner's account in debit note generation.",
-        required=True
+        required=True,
     )
     rejected_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Rejected Check Account',
         domain=[('internal_type', 'not in', ('receivable', 'payable'))],
-        required=True
+        required=True,
     )
     company_id = fields.Many2one(
         comodel_name='res.company',
         string='Company',
         required=True,
-        default=lambda self: self.env.user.company_id.id
+        default=lambda self: self.env.user.company_id.id,
     )
 
     def name_get(self):
         ret = []
         for config in self:
-            ret.append((config.id, "%s: %s" % (
-                config.company_id.name, config.account_id.name)))
+            ret.append(
+                (config.id, "%s: %s" % (config.company_id.name, config.account_id.name))
+            )
         return ret
 
 
@@ -66,46 +63,38 @@ class AccountCheck(models.Model):
         comodel_name='account.journal',
         string='Journal',
         required=True,
-        default=_get_default_journal
+        default=_get_default_journal,
     )
-    bank_id = fields.Many2one(
-        comodel_name='res.bank',
-        string='Bank'
-    )
+    bank_id = fields.Many2one(comodel_name='res.bank', string='Bank')
     checkbook_format = fields.Selection(
-        selection=[
-            ('physical', 'Physical'),
-            ('virtual', 'Virtual'),
-            ('echeq', 'Echeq')
-        ],
+        selection=[('physical', 'Physical'), ('virtual', 'Virtual'), ('echeq', 'Echeq')],
         string='Format',
-        required=True
+        required=True,
     )
     type = fields.Selection(
         selection=[('common', 'Common'), ('deferred', 'Deferred')],
         string='Type',
         default='common',
-        required=True
+        required=True,
     )
     internal_type = fields.Selection(
         selection=[('issued', 'Issued'), ('third_party', 'Third Party')],
         string='Internal Type',
         default='third_party',
-        required=True
+        required=True,
     )
     amount = fields.Float(string='Amount')
     issue_date = fields.Date(string='Issue Date')
     reject_date = fields.Date(string='Reject Date')
     payment_date = fields.Date(
-        string='Payment Date',
-        help="Only if this check is post dated"
+        string='Payment Date', help="Only if this check is post dated"
     )
     crossed = fields.Boolean(string='Crossed')
     not_order = fields.Boolean(string='Not Order')
     clearing = fields.Selection(
         selection=[('24', '24 hs'), ('48', '48 hs'), ('72', '72 hs')],
         string='Clearing',
-        default='24'
+        default='24',
     )
     origin = fields.Char(string='Origin', size=64)
     signatory = fields.Char(string='Signatory', size=64)
@@ -114,13 +103,10 @@ class AccountCheck(models.Model):
         comodel_name='res.currency',
         compute='_compute_currency',
         readonly=True,
-        store=True
+        store=True,
     )
     currency_rate = fields.Float(
-        digits=(12, 6),
-        compute='_compute_currency_rate',
-        readonly=True,
-        store=True
+        digits=(12, 6), compute='_compute_currency_rate', readonly=True, store=True
     )
     amount_currency = fields.Float(
         digits='Account',
@@ -132,13 +118,13 @@ class AccountCheck(models.Model):
         string='Company',
         required=True,
         readonly=True,
-        default=lambda self: self.env.user.company_id.id
+        default=lambda self: self.env.user.company_id.id,
     )
     record_ids = fields.Many2one(
         comodel_name='account.check',
         string='Checks',
         store=False,
-        domain=[('internal_type', '=', 'issued')]
+        domain=[('internal_type', '=', 'issued')],
     )
 
     @api.onchange('checkbook_id', 'journal_id')
@@ -187,16 +173,20 @@ class AccountCheck(models.Model):
         for check in self:
             if check.internal_type == 'third_party':
                 if check.third_party_check_state != 'in_wallet':
-                    raise UserError(_(
-                        "Check Error! You cannot delete a third check that is "
-                        "not in Wallet"
-                    ))
+                    raise UserError(
+                        _(
+                            "Check Error! You cannot delete a third check that is "
+                            "not in Wallet"
+                        )
+                    )
             elif check.internal_type == 'issued':
                 if check.issued_check_state != 'draft':
-                    raise UserError(_(
-                        "Check Error! You cannot delete a check that is not in "
-                        "Draft"
-                    ))
+                    raise UserError(
+                        _(
+                            "Check Error! You cannot delete a check that is not in "
+                            "Draft"
+                        )
+                    )
         return super(AccountCheck, self).unlink()
 
     def cancel_check(self, internal_type):
@@ -214,18 +204,23 @@ class AccountCheck(models.Model):
             state = 'third_party_check_state'
             for check in self.filtered(lambda rec: rec.internal_type == internal_type):
                 if check.third_party_check_state != 'in_wallet':
-                    raise UserError(_(
-                        "Third Check Error! You cannot cancel check if it is "
-                        "not in Wallet"
-                    ))
+                    raise UserError(
+                        _(
+                            "Third Check Error! You cannot cancel check if it is "
+                            "not in Wallet"
+                        )
+                    )
         elif internal_type == 'issued':
             state = 'issued_check_state'
             for check in self.filtered(lambda rec: rec.internal_type == internal_type):
                 if check.type == 'deferred' and check.accredited:
-                    raise ValidationError(_(
-                        'Check number %s is postdated and has already been '
-                        'accredited!\nPlease break the conciliation of that '
-                        'check first.') % check.number
+                    raise ValidationError(
+                        _(
+                            'Check number %s is postdated and has already been '
+                            'accredited!\nPlease break the conciliation of that '
+                            'check first.'
+                        )
+                        % check.number
                     )
         self.write({state: 'cancelled'})
 
@@ -239,38 +234,30 @@ class AccountCheck(models.Model):
             ('expired', 'Expired'),
             ('returned', 'Returned'),
             ('rejected', 'Rejected'),
-            ('waiting_numeration', 'Waiting numeration')
+            ('waiting_numeration', 'Waiting numeration'),
         ],
         default='draft',
-        string='State'
+        string='State',
     )
     checkbook_id = fields.Many2one(
         comodel_name='account.payment.method.line',
         string='Checkbook ID',
         ondelete='restrict',
-        domain=[('payment_method_id.code', '=', 'check_printing')]
+        domain=[('payment_method_id.code', '=', 'check_printing')],
     )
     receiving_partner_id = fields.Many2one(
-        comodel_name='res.partner',
-        string='Receiving Entity'
+        comodel_name='res.partner', string='Receiving Entity'
     )
     payment_move_id = fields.Many2one(
-        comodel_name='account.move',
-        string='Payment Account Move'
+        comodel_name='account.move', string='Payment Account Move'
     )
     payment_order_id = fields.Many2one(
-        comodel_name='account.payment.order',
-        string='Payment Order',
-        ondelete='cascade'
+        comodel_name='account.payment.order', string='Payment Order', ondelete='cascade'
     )
     clearance_move_id = fields.Many2one(
-        comodel_name='account.move',
-        string='Clearance Account Move'
+        comodel_name='account.move', string='Clearance Account Move'
     )
-    accredited = fields.Boolean(
-        string='Accredited',
-        compute='_compute_accredit_state'
-    )
+    accredited = fields.Boolean(string='Accredited', compute='_compute_accredit_state')
 
     @api.depends('clearance_move_id')
     def _compute_accredit_state(self):
@@ -281,21 +268,23 @@ class AccountCheck(models.Model):
                 check.accredited = False
 
     def accredit_checks(self):
-        """ method for checks accreditation """
+        """method for checks accreditation"""
         for check in self:
             if check.issued_check_state != "waiting_accreditation":
-                raise ValidationError(
-                    _("Check %s can't be accredited!") % self.number
-                )
+                raise ValidationError(_("Check %s can't be accredited!") % self.number)
 
         for check in self:
             AccountCheckConfig = self.env['account.check.config']
-            def_check_journal = AccountCheckConfig.search([
-                ('company_id', '=', self.env.user.company_id.id)]
+            def_check_journal = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
             ).deferred_journal_id
             if not def_check_journal:
-                raise UserError(_("Error! There is no Journal \
-                    configured for deferred checks."))
+                raise UserError(
+                    _(
+                        "Error! There is no Journal \
+                    configured for deferred checks."
+                    )
+                )
 
             current_date = time.strftime('%Y-%m-%d')
 
@@ -341,13 +330,13 @@ class AccountCheck(models.Model):
     def break_conciliation(self):
         for check in self.filtered(lambda rec: rec.internal_type == 'issued'):
             if check.issued_check_state != "issued":
-                raise ValidationError(_(
-                    "Can't break conciliation of a not issued check!"
-                ))
+                raise ValidationError(
+                    _("Can't break conciliation of a not issued check!")
+                )
             if not check.accredited:
-                raise ValidationError(_(
-                    "Can't break conciliation of a not accredited check!"
-                ))
+                raise ValidationError(
+                    _("Can't break conciliation of a not accredited check!")
+                )
         for check in self.filtered(lambda rec: rec.internal_type == 'issued'):
             move = check.clearance_move_id
             move.line_ids.remove_move_reconcile()
@@ -365,13 +354,11 @@ class AccountCheck(models.Model):
         if self.type == 'deferred':
             # Buscamos la configuracion de cheques
             check_config_obj = self.env['account.check.config']
-            config = check_config_obj.search([
-                ('company_id', '=', voucher.company_id.id)
-            ])
+            config = check_config_obj.search([('company_id', '=', voucher.company_id.id)])
             if not len(config):
-                raise ValidationError(_(
-                    'There is no check configuration for this Company!'
-                ))
+                raise ValidationError(
+                    _('There is no check configuration for this Company!')
+                )
 
             account_id = config.deferred_account_id.id
             date_maturity = self.payment_date
@@ -380,18 +367,21 @@ class AccountCheck(models.Model):
             date_maturity = voucher.date_due
 
         if not account_id:
-            raise UserError(_(
-                "Error! Bank Account has no account "
-                "configured. Please, configure an "
-                "account for the bank account used for checks!"
-            ))
+            raise UserError(
+                _(
+                    "Error! Bank Account has no account "
+                    "configured. Please, configure an "
+                    "account for the bank account used for checks!"
+                )
+            )
 
         # TODO: Chequear que funcione bien en
         # multicurrency estas dos lineas de abajo
         company_currency = voucher.company_id.currency_id.id
         current_currency = self.currency_id.id
-        amount_in_company_currency = voucher.\
-            _convert_paid_amount_in_company_currency(self.amount)
+        amount_in_company_currency = voucher._convert_paid_amount_in_company_currency(
+            self.amount
+        )
 
         debit = credit = 0.0
         if voucher.type in ('purchase', 'payment'):
@@ -410,8 +400,7 @@ class AccountCheck(models.Model):
         if self.number:
             reference = _('Issued Check %s') % (self.number or '/')
         else:
-            reference = _('Checkbook Number %s') % \
-                (self.checkbook_id.name or '/')
+            reference = _('Checkbook Number %s') % (self.checkbook_id.name or '/')
 
         move_line = {
             'name': reference,
@@ -421,9 +410,11 @@ class AccountCheck(models.Model):
             'journal_id': voucher.journal_id.id,
             'partner_id': voucher.partner_id.id,
             'currency_id': company_currency != current_currency
-            and current_currency or False,
+            and current_currency
+            or False,
             'amount_currency': company_currency != current_currency
-            and sign * self.amount_currency or 0.0,
+            and sign * self.amount_currency
+            or 0.0,
             'date': voucher.date,
             'date_maturity': date_maturity,
         }
@@ -437,47 +428,40 @@ class AccountCheck(models.Model):
             ('delivered', 'Delivered'),
             ('cancelled', 'Cancelled'),
             ('rejected', 'Rejected'),
-            ('returned', 'Returned')
+            ('returned', 'Returned'),
         ],
         default='in_wallet',
-        string='State'
+        string='State',
     )
     deposit_bank_id = fields.Many2one(
-        comodel_name='res.partner.bank',
-        string='Deposit Account'
+        comodel_name='res.partner.bank', string='Deposit Account'
     )
     source_payment_order_id = fields.Many2one(
         comodel_name='account.payment.order',
         string='Source Payment Order',
         ondelete="cascade",
-        readonly=True
+        readonly=True,
     )
     debit_note_id = fields.Many2one(
         comodel_name='account.move',
         string='Debit Note',
         readonly=True,
-        help="In case of rejection of the third check"
+        help="In case of rejection of the third check",
     )
     source_partner_id = fields.Many2one(
-        comodel_name='res.partner',
-        string='Source Partner',
-        required=False,
-        readonly=True
+        comodel_name='res.partner', string='Source Partner', required=False, readonly=True
     )
     destiny_partner_id = fields.Many2one(
-        comodel_name='res.partner',
-        string='Destiny Partner'
+        comodel_name='res.partner', string='Destiny Partner'
     )
     deposit_move_id = fields.Many2one(
-        comodel_name='account.move',
-        string='Deposit Move',
-        readonly=True
+        comodel_name='account.move', string='Deposit Move', readonly=True
     )
     deposit_journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Deposit Journal',
         readonly=True,
-        compute='_compute_deposit_journal_id'
+        compute='_compute_deposit_journal_id',
     )
     bank_branch = fields.Char(string='Bank Branch', size=64)
     zip = fields.Char(string='Zip Code', size=64)
@@ -502,9 +486,9 @@ class AccountCheck(models.Model):
         if not self.number:
             return
         if not self.number.isnumeric():
-            raise ValidationError(_(
-                'Check Number must not have non numerical characters'
-            ))
+            raise ValidationError(
+                _('Check Number must not have non numerical characters')
+            )
         self.number = self.number.zfill(8)
 
     def to_wallet(self):
@@ -512,10 +496,9 @@ class AccountCheck(models.Model):
         for check in self.filtered(lambda rec: rec.internal_type == 'third_party'):
             voucher = check.source_payment_order_id
             if not voucher:
-                raise UserError(_(
-                    'Check Error! Check has to '
-                    'be associated with a voucher'
-                ))
+                raise UserError(
+                    _('Check Error! Check has to ' 'be associated with a voucher')
+                )
 
             partner_id = voucher.partner_id.id
             vals = {}
@@ -540,25 +523,31 @@ class AccountCheck(models.Model):
             self.deposit_move_id.unlink()
             self.write({'third_party_check_state': 'in_wallet'})
         else:
-            raise ValidationError(_(
-                'There is no reference for account move. '
-                'Imposible to go back to wallet.'
-            ))
+            raise ValidationError(
+                _(
+                    'There is no reference for account move. '
+                    'Imposible to go back to wallet.'
+                )
+            )
 
     def return_wallet(self):
         # Todos los cheques tienen que estar en delivered
         for check in self.filtered(lambda rec: rec.internal_type == 'third_party'):
             if check.third_party_check_state != 'delivered':
-                raise UserError(_(
-                    "Third Check Error! You cannot return to "
-                    "wallet a check if it is not in Delivered state"
-                ))
-        self.write({
-            'third_party_check_state': 'in_wallet',
-            'endorsement_date': False,
-            'destiny_partner_id': False,
-            'dest': '',
-        })
+                raise UserError(
+                    _(
+                        "Third Check Error! You cannot return to "
+                        "wallet a check if it is not in Delivered state"
+                    )
+                )
+        self.write(
+            {
+                'third_party_check_state': 'in_wallet',
+                'endorsement_date': False,
+                'destiny_partner_id': False,
+                'dest': '',
+            }
+        )
         return True
 
     def check_delivered(self):
@@ -567,18 +556,20 @@ class AccountCheck(models.Model):
         voucher_obj = self.env['account.payment.order']
         vals = {'third_party_check_state': 'delivered'}
         for check in self:
-            voucher = voucher_obj.search([
-                ('third_check_ids', '=', check.id),
-                ('third_party_check_state', '!=', 'cancelled')
-            ])
+            voucher = voucher_obj.search(
+                [
+                    ('third_check_ids', '=', check.id),
+                    ('third_party_check_state', '!=', 'cancelled'),
+                ]
+            )
 
             if len(voucher) > 1:
                 raise UserError(
-                    _('There are more than one voucher referenced to check %s.') % check.number
+                    _('There are more than one voucher referenced to check %s.')
+                    % check.number
                 )
             if not check.endorsement_date:
-                vals['endorsement_date'] = voucher.date or \
-                    time.strftime('%Y-%m-%d')
+                vals['endorsement_date'] = voucher.date or time.strftime('%Y-%m-%d')
             vals['destiny_partner_id'] = voucher.partner_id.id
 
             if not check.dest:
@@ -592,21 +583,18 @@ class AccountCheck(models.Model):
         check_config_obj = self.env['account.check.config']
 
         # Buscamos la configuracion de cheques
-        config = check_config_obj.search([
-            ('company_id', '=', voucher.company_id.id)])
+        config = check_config_obj.search([('company_id', '=', voucher.company_id.id)])
         if not len(config):
-            raise UserError(_(
-                'ERROR! There is no check configuration for this Company!'
-            ))
+            raise UserError(_('ERROR! There is no check configuration for this Company!'))
 
         # TODO: Chequear que funcione bien en
         # multicurrency estas dos lineas de abajo
         company_currency = voucher.company_id.currency_id.id
         current_currency = self.currency_id.id
 
-        amount_in_company_currency = voucher.\
-            _convert_paid_amount_in_company_currency(
-                self.amount)
+        amount_in_company_currency = voucher._convert_paid_amount_in_company_currency(
+            self.amount
+        )
 
         debit = credit = 0.0
         if voucher.type in ('purchase', 'payment'):
@@ -630,9 +618,11 @@ class AccountCheck(models.Model):
             'journal_id': voucher.journal_id.id,
             'partner_id': voucher.partner_id.id,
             'currency_id': company_currency != current_currency
-            and current_currency or False,
+            and current_currency
+            or False,
             'amount_currency': company_currency != current_currency
-            and sign * self.amount_currency or 0.0,
+            and sign * self.amount_currency
+            or 0.0,
             'date': voucher.date,
             'date_maturity': self.payment_date or self.issue_date,
         }
@@ -659,6 +649,6 @@ class AccountCheck(models.Model):
         (
             "unique_record",
             "unique(number, checkbook_id, journal_id, checkbook_format)",
-            _("This record already exists")
+            _("This record already exists"),
         ),
     ]

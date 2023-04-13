@@ -7,14 +7,17 @@ class AccountFiscalPosition(models.Model):
 
     supplier_denomination = fields.Selection(
         selection=[
-            ("a", "A"), ("b", "B"),
-            ("c", "C"), ("e", "E"),
-            ('m', 'M'), ('oc', 'OC'),
-            ("not_defined", "Not Defined")
+            ("a", "A"),
+            ("b", "B"),
+            ("c", "C"),
+            ("e", "E"),
+            ('m', 'M'),
+            ('oc', 'OC'),
+            ("not_defined", "Not Defined"),
         ],
         string='Supplier Denomination',
         required=True,
-        default='not_defined'
+        default='not_defined',
     )
     afip_code = fields.Integer(string="AFIP Code")
     retention_ids = fields.Many2many(
@@ -25,11 +28,11 @@ class AccountFiscalPosition(models.Model):
         string='Retentions',
         domain=lambda self: [
             ('type', '=', 'retentions'),
-            ('company_id', '=', self.env.user.company_id.id)
+            ('company_id', '=', self.env.user.company_id.id),
         ],
         help="These are the retentions that will be applied to Suppliers "
         + "belonging to this Fiscal Position. Exceptions to this have to be "
-        + "loaded at partner form."
+        + "loaded at partner form.",
     )
     local = fields.Boolean(
         string='Local Fiscal Rules',

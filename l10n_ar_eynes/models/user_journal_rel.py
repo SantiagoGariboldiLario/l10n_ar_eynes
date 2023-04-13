@@ -11,33 +11,35 @@ class UserJournalRel(models.Model):
             return max(map(lambda rec: rec.sequence, relations)) + 1
         return 1
 
-    user_id = fields.Many2one(
-        string='User',
-        comodel_name='res.users',
-        ondelete='cascade'
-    )
+    user_id = fields.Many2one(string='User', comodel_name='res.users', ondelete='cascade')
     journal_id = fields.Many2one(
         string='Journal',
         comodel_name='account.journal',
         ondelete='cascade',
-        domain="[('type','=','sale')]"
+        domain="[('type','=','sale')]",
     )
-    sequence = fields.Integer(
-        string="Sequence",
-        default=get_last_sequence,
-        readonly=True
-    )
+    sequence = fields.Integer(string="Sequence", default=get_last_sequence, readonly=True)
 
     @api.model
     def get_first_journal(self, partner):
-        first_relation_seq = self.search([
-            ('journal_id.fiscal_position_id', '=', partner.property_account_position_id.id),
-            ('user_id', '=', self.env.user.id)],
-            order='sequence asc', limit=1
+        first_relation_seq = self.search(
+            [
+                (
+                    'journal_id.fiscal_position_id',
+                    '=',
+                    partner.property_account_position_id.id,
+                ),
+                ('user_id', '=', self.env.user.id),
+            ],
+            order='sequence asc',
+            limit=1,
         )
         return first_relation_seq.journal_id or False
 
     _sql_constraints = [
         (
-            'unique_combination', 'unique(user_id,journal_id)', _('User already assigned to this journal!'))
+            'unique_combination',
+            'unique(user_id,journal_id)',
+            _('User already assigned to this journal!'),
+        )
     ]

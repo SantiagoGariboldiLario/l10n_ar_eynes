@@ -3,11 +3,13 @@ from odoo import fields, models, api
 
 class AccreditCheckWizard(models.Model):
     _name = 'accredit.check.wizard'
-    _description = 'Select several checks which are Waiting Accreditation so you can accredit them'
+    _description = (
+        'Select several checks which are Waiting Accreditation so you can accredit them'
+    )
 
     @api.model
     def get_default_checks(self):
-        """ Get active checks"""
+        """Get active checks"""
         check_ids = self.env.context.get("active_ids", [])
         return [(6, False, check_ids)]
 
@@ -20,5 +22,5 @@ class AccreditCheckWizard(models.Model):
     )
 
     def button_accredit_checks(self):
-        """ button that run accredit checks action"""
+        """button that run accredit checks action"""
         return self.issued_checks.accredit_checks()

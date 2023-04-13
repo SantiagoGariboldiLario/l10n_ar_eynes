@@ -2,6 +2,7 @@ import logging
 
 from odoo import fields, models, _, api
 from odoo.exceptions import ValidationError
+
 _logger = logging.getLogger(__name__)
 
 
@@ -9,6 +10,7 @@ class FO:
     """
     Fake Object ( ͡º ͜ʖ ͡º)
     """
+
     id = False
 
     def address_get():
@@ -32,41 +34,40 @@ class AccountJournal(models.Model):
         size=6,
         required=True,
         help="Point of sale reference code",
-        default=''
+        default='',
     )
     denomination = fields.Selection(
         selection=[
-            ("a", "A"), ("b", "B"),
-            ("c", "C"), ("e", "E"),
-            ('m', 'M'), ('oc', 'OC'),
-            ("not_defined", "Not Defined")
+            ("a", "A"),
+            ("b", "B"),
+            ("c", "C"),
+            ("e", "E"),
+            ('m', 'M'),
+            ('oc', 'OC'),
+            ("not_defined", "Not Defined"),
         ],
         string='Denomination',
-        default='not_defined'
+        default='not_defined',
     )
     fiscal_position_id = fields.Many2one(
-        comodel_name='account.fiscal.position',
-        string='Fiscal Position'
+        comodel_name='account.fiscal.position', string='Fiscal Position'
     )
     fiscal_position_ids = fields.Many2many(
         comodel_name='account.fiscal.position',
         relation='journal_fiscal_position_rel',
         column1='journal_id',
         column2='fiscal_position_id',
-        string='Fiscal Positions'
+        string='Fiscal Positions',
     )
     activity_start_date = fields.Date(
-        string="Activity Start Date",
-        default=fields.date.today()
+        string="Activity Start Date", default=fields.date.today()
     )
     warehouse_id = fields.Many2one(
-        comodel_name='stock.warehouse',
-        string='Warehouse',
-        default=get_default_warehouse
+        comodel_name='stock.warehouse', string='Warehouse', default=get_default_warehouse
     )
     due_date = fields.Date(
         string='Due Date',
-        help='after this expiration date, account moves are not allowed to use this journal till its extended'
+        help='after this expiration date, account moves are not allowed to use this journal till its extended',
     )
     type = fields.Selection(
         selection_add=[
@@ -74,7 +75,7 @@ class AccountJournal(models.Model):
             ('payment', 'Payment'),
             ('third_party_checks', 'Third party checks'),
             ('retentions', 'Retentions'),
-            ('perceptions', 'Perceptions')
+            ('perceptions', 'Perceptions'),
         ],
         ondelete={
             'receipt': lambda recs: recs.write({'type': 'general'}),
@@ -82,23 +83,21 @@ class AccountJournal(models.Model):
             'third_party_checks': lambda recs: recs.write({'type': 'general'}),
             'retentions': lambda recs: recs.write({'type': 'general'}),
             'perceptions': lambda recs: recs.write({'type': 'general'}),
-        }
+        },
     )
 
     # RETENTIONS FIELDS
     tax_id = fields.Many2one(
         comodel_name='account.tax',
         string='Tax',
-        domain="[('tax_group_id.name', 'in', ('Retentions', 'Retenciones')),('active', '=', True)]"
+        domain="[('tax_group_id.name', 'in', ('Retentions', 'Retenciones')),('active', '=', True)]",
     )
     type_tax_use = fields.Selection(
         string='Tax Application',
         related='tax_id.type_tax_use',
         readonly=True,
     )
-    state_id = fields.Many2one(
-        related='tax_id.state_id'
-    )
+    state_id = fields.Many2one(related='tax_id.state_id')
     priority = fields.Integer()
 
     @api.model
@@ -109,16 +108,22 @@ class AccountJournal(models.Model):
             and (c.company_id.id == company.id or not c.company_id)
         )
         if not concepts:
-            raise ValidationError(_(
-                "Retention Error\n"
-                f"Account {account.name}[{account.code}] must have "
-                f"an associated concept for {retention.name}. Please configure it!"
-            ))
+            raise ValidationError(
+                _(
+                    "Retention Error\n"
+                    f"Account {account.name}[{account.code}] must have "
+                    f"an associated concept for {retention.name}. Please configure it!"
+                )
+            )
         return concepts
 
     def check_applicable(
-            self, sit_iibb=False, from_padron=False,
-            source_shipping_id=FO(), destination_shipping_id=FO()):
+        self,
+        sit_iibb=False,
+        from_padron=False,
+        source_shipping_id=FO(),
+        destination_shipping_id=FO(),
+    ):
         self.ensure_one()
 
         partner_model = self.env['res.partner']
@@ -139,8 +144,7 @@ class AccountJournal(models.Model):
             multilateral = self.env.ref("iibb_situation_multilateral")
             if sit_iibb == multilateral:
                 _logger.info(
-                    "Partner es Convenio Multilateral, "
-                    f"aplica Retencion {self.name}"
+                    "Partner es Convenio Multilateral, " f"aplica Retencion {self.name}"
                 )
                 return True
 
@@ -152,10 +156,12 @@ class AccountJournal(models.Model):
                 destination_shipping_id.address_get(['delivery']).get('delivery')
             ).id
             if not partner_state:
-                raise RetentionError(_(
-                    'There is no State/Province configured for '
-                    f'the Supplier while computing Retention: {self.name}'
-                ))
+                raise RetentionError(
+                    _(
+                        'There is no State/Province configured for '
+                        f'the Supplier while computing Retention: {self.name}'
+                    )
+                )
 
         elif tax_id.applicable_state == 'source':
             user = self.env.user
@@ -166,9 +172,9 @@ class AccountJournal(models.Model):
             ).id
 
             if not partner_state:
-                raise RetentionError(_(
-                    'There is no State/Province configured for this Company'
-                ))
+                raise RetentionError(
+                    _('There is no State/Province configured for this Company')
+                )
         # Hacemos el chequeo de los states
         return retention_state == partner_state
 
@@ -208,8 +214,16 @@ class AccountJournal(models.Model):
 
     # pylint: disable-next=dangerous-default-value
     def _compute_base_retention(
-            self, move_line, factor_to_pay, factor_unrec, prev_ret_ids,
-            line_type, sit_iibb, logging_messages=[], activity=None):
+        self,
+        move_line,
+        factor_to_pay,
+        factor_unrec,
+        prev_ret_ids,
+        line_type,
+        sit_iibb,
+        logging_messages=[],
+        activity=None,
+    ):
         tax_app_obj = self.env['retention.tax.application']
         retention = self
 
@@ -227,13 +241,9 @@ class AccountJournal(models.Model):
             for ml in mls:
 
                 # Evitamos la linea de la deuda
-                concepts = self._get_concepts_from_account(
-                    retention, ml.account_id
-                )
+                concepts = self._get_concepts_from_account(retention, ml.account_id)
 
-                logging_messages.append(
-                    f"Linea: {ml.name} [{ml.account_id.name}]"
-                )
+                logging_messages.append(f"Linea: {ml.name} [{ml.account_id.name}]")
 
                 # Si el concepto no esta sujeto a retencion, continuamos
                 no_subject = False
@@ -253,12 +263,10 @@ class AccountJournal(models.Model):
                 # Buscamos las taxapps que concuerden
                 tapp_domain = [
                     ('retention_tax_id', '=', retention.tax_id.id),
-                    ('concept_id', 'in', concepts.ids)
+                    ('concept_id', 'in', concepts.ids),
                 ]
                 if activity:
-                    tapp_domain.append(
-                        ('activity_id', '=', activity and activity.id)
-                    )
+                    tapp_domain.append(('activity_id', '=', activity and activity.id))
                 iibb_domain = []
                 if retention.type == 'gross_income':
                     iibb_domain.append(
@@ -273,21 +281,25 @@ class AccountJournal(models.Model):
                     taxapps = tax_app_obj.search(tapp_domain)
 
                 if not taxapps:
-                    raise ValidationError(_(
-                        "Retention Error!\n"
-                        "There is no configured a Retention Application "
-                        f"({retention.name}) that corresponds to\nActivity: {activity_name} \n"
-                        f"Concept: {concept_name}\n for the Account {ml.account_id.name}"
-                    ))
+                    raise ValidationError(
+                        _(
+                            "Retention Error!\n"
+                            "There is no configured a Retention Application "
+                            f"({retention.name}) that corresponds to\nActivity: {activity_name} \n"
+                            f"Concept: {concept_name}\n for the Account {ml.account_id.name}"
+                        )
+                    )
 
                 if len(taxapps) > 1:
-                    raise ValidationError(_(
-                        "Retention Error!\n"
-                        "There is more than one Retention Application "
-                        f"({retention.name}) configured that corresponds to\n"
-                        f"Activity: {activity_name}\nConcept: {concept_name}\n"
-                        f"for the Account {ml.account_id.name}"
-                    ))
+                    raise ValidationError(
+                        _(
+                            "Retention Error!\n"
+                            "There is more than one Retention Application "
+                            f"({retention.name}) configured that corresponds to\n"
+                            f"Activity: {activity_name}\nConcept: {concept_name}\n"
+                            f"for the Account {ml.account_id.name}"
+                        )
+                    )
 
                 # Si ya retuvimos y esta calculado sobre
                 # el montos de la factura, continuamos,
@@ -297,12 +309,13 @@ class AccountJournal(models.Model):
                 # facturas con pagos parciales
                 taxapp = taxapps
                 logging_messages.append(
-                    "Tax Application: [id: %s ; reg_code: %s] %s" %
-                    (taxapp.id, taxapp.reg_code, taxapp.concept_id.name)
+                    "Tax Application: [id: %s ; reg_code: %s] %s"
+                    % (taxapp.id, taxapp.reg_code, taxapp.concept_id.name)
                 )
                 if taxapp.calculation_base not in [
-                        'payment_amount', 'payment_amount_untaxed'] \
-                        and len(prev_ret_ids):
+                    'payment_amount',
+                    'payment_amount_untaxed',
+                ] and len(prev_ret_ids):
                     continue
 
                 # Obtenemos toda la info contable de la linea de factura
@@ -325,36 +338,45 @@ class AccountJournal(models.Model):
 
                 concept = taxapp.concept_id
                 if taxapp.calculation_base in [
-                        'payment_amount', 'payment_amount_untaxed']:
+                    'payment_amount',
+                    'payment_amount_untaxed',
+                ]:
                     key = (concept, False)
                 else:
                     key = (concept, invoice)
 
                 base_to_pay = round(base / factor_to_pay, 2)
                 base_unrec = round(base / factor_unrec, 2)
-                retentions.setdefault(key, {
-                    'base': 0.0,
-                    'base_to_pay': 0.0,
-                    'base_unrec': 0.0,
-                    'taxapp': taxapp,
-                    'lines': self.env['account.move.line'],
-                })
+                retentions.setdefault(
+                    key,
+                    {
+                        'base': 0.0,
+                        'base_to_pay': 0.0,
+                        'base_unrec': 0.0,
+                        'taxapp': taxapp,
+                        'lines': self.env['account.move.line'],
+                    },
+                )
                 retentions[key]['base'] += base
                 retentions[key]['base_to_pay'] += base_to_pay
                 retentions[key]['base_unrec'] += base_unrec
                 retentions[key]['lines'] += ml
                 logging_messages.append(
-                    ("Agregando a la key %s ==> Base: %f Base "
-                     + "To Pay: %f Base Unrec: %f") %
-                    (key, base, base_to_pay, base_unrec)
+                    (
+                        "Agregando a la key %s ==> Base: %f Base "
+                        + "To Pay: %f Base Unrec: %f"
+                    )
+                    % (key, base, base_to_pay, base_unrec)
                 )
 
                 logging_messages.append(
-                    ("Subtotales %s ==> Base: %f Base To Pay: "
-                     + "%f Base Unrec: %f") %
-                    (key, retentions[key]['base'],
-                     retentions[key]['base_to_pay'],
-                     retentions[key]['base_unrec'])
+                    ("Subtotales %s ==> Base: %f Base To Pay: " + "%f Base Unrec: %f")
+                    % (
+                        key,
+                        retentions[key]['base'],
+                        retentions[key]['base_to_pay'],
+                        retentions[key]['base_unrec'],
+                    )
                 )
 
         # Mensajes de logging
@@ -363,9 +385,7 @@ class AccountJournal(models.Model):
             _logger.debug(msg)
         return retentions
 
-    _sql_constraints = [
-        ('code_unique', 'unique(code)', 'code already exists!')
-    ]
+    _sql_constraints = [('code_unique', 'unique(code)', 'code already exists!')]
 
 
 class RetentionError(Exception):

@@ -11,13 +11,17 @@ class ResVoucherType(models.Model):
     doc_type = fields.Selection(
         string="Document Type",
         selection=[("b", "Bill"), ("dn", "Debit Note"), ("cn", "Credit Note")],
-        required=True
+        required=True,
     )
     denomination = fields.Selection(
         string="Denomination",
         selection=[
-            ("a", "A"), ("b", "B"), ("c", "C"),
-            ("e", "E"), ("m", "M"), ('oc', 'OC'),
+            ("a", "A"),
+            ("b", "B"),
+            ("c", "C"),
+            ("e", "E"),
+            ("m", "M"),
+            ('oc', 'OC'),
         ],
-        required=True
+        required=True,
     )

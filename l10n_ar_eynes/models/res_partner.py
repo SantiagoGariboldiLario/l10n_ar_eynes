@@ -17,8 +17,7 @@ class ResPartner(models.Model):
         ]
 
     retention_activity_id = fields.Many2one(
-        comodel_name='retention.activity',
-        string='Activity'
+        comodel_name='retention.activity', string='Activity'
     )
     retention_ids = fields.One2many(
         comodel_name='res.partner.retention',
@@ -26,25 +25,20 @@ class ResPartner(models.Model):
         string='Retentions Exceptions',
         domain=lambda self: self._get_retentions_domain(),
         help="Here you have to configure retention exceptions for this "
-        + "partner with this Fiscal Position"
+        + "partner with this Fiscal Position",
     )
     advance_retention_ids = fields.One2many(
         comodel_name='res.partner.advance.retention',
         inverse_name='partner_id',
         domain=lambda self: self._get_retentions_domain(),
-        string="Advance Payment Concept"
+        string="Advance Payment Concept",
     )
     document_type_id = fields.Many2one(
-        comodel_name='res.document.type',
-        string='Document type'
+        comodel_name='res.document.type', string='Document type'
     )
-    dst_cuit_id = fields.Many2one(
-        comodel_name='dst.cuit.codes',
-        string='Country CUIT'
-    )
+    dst_cuit_id = fields.Many2one(comodel_name='dst.cuit.codes', string='Country CUIT')
     dst_cuit = fields.Boolean(
-        string="Enable DST CUIT",
-        related='document_type_id.dst_cuit'
+        string="Enable DST CUIT", related='document_type_id.dst_cuit'
     )
 
     @api.constrains('vat', 'document_type_id')
@@ -60,14 +54,13 @@ class ResPartner(models.Model):
                 search_param = [
                     ('vat', '=', partner.vat),
                     ('document_type_id', '=', document_type.id),
-                    ('parent_id', '=', False)
+                    ('parent_id', '=', False),
                 ]
                 res = self.search_count(search_param)
                 if res > 1:
-                    raise ValidationError(_(
-                        'There is another partner with same '
-                        'VAT Information'
-                    ))
+                    raise ValidationError(
+                        _('There is another partner with same ' 'VAT Information')
+                    )
 
     @api.onchange('document_type_id')
     def onchange_document_type(self):
@@ -92,21 +85,16 @@ class ResPartner(models.Model):
         ci_extranjera = self.env.ref('l10n_ar_eynes.document_ci_extranjera')
         pasaporte = self.env.ref('l10n_ar_eynes.document_pasaporte')
         if write:
-            if [x for x in self if x.document_type_id not in [
-                    ci_extranjera, pasaporte]]:
+            if [x for x in self if x.document_type_id not in [ci_extranjera, pasaporte]]:
                 vat = vat.replace('.', '').replace('-', '')
                 if not vat.isdigit():
-                    raise ValidationError(_(
-                        'The Vat only supports numbers.'
-                    ))
+                    raise ValidationError(_('The Vat only supports numbers.'))
                 vals['vat'] = vat
         else:
             if vals.get('document_type_id') not in [ci_extranjera, pasaporte]:
                 vat = vat.replace('.', '').replace('-', '')
                 if not vat.isdigit():
-                    raise ValidationError(_(
-                        'The Vat only supports numbers.'
-                    ))
+                    raise ValidationError(_('The Vat only supports numbers.'))
                 vals['vat'] = vat
         return False
 
@@ -127,26 +115,26 @@ class ResPartner(models.Model):
                     vat_country = 'ar'
                     vat_number = partner.vat
                 except ValueError:
-                    vat_country, vat_number = partner.vat[:2].lower(), \
-                        partner.vat[2:].replace(' ', '')
+                    vat_country, vat_number = partner.vat[:2].lower(), partner.vat[
+                        2:
+                    ].replace(' ', '')
             if not partner.document_type_id:
                 return True
-            if partner.document_type_id and \
-                    not partner.document_type_id.sudo().verification_required:
+            if (
+                partner.document_type_id
+                and not partner.document_type_id.sudo().verification_required
+            ):
                 return True
             if not hasattr(partner, 'check_vat_' + vat_country):
                 return True
             check = getattr(partner, 'check_vat_' + vat_country)
             if not check(vat_number):
-                raise ValidationError(_(
-                    'The Vat does not seems to be correct.'
-                ))
+                raise ValidationError(_('The Vat does not seems to be correct.'))
         return True
 
     @api.model
     def _commercial_fields(self):
-        return super(ResPartner, self)._commercial_fields() + \
-            ['document_type_id']
+        return super(ResPartner, self)._commercial_fields() + ['document_type_id']
 
     def check_vat_ar(self, vat):
         """
@@ -249,36 +237,24 @@ class resPartnerRetention(models.Model):
     _description = "Retention Defined in Partner"
     _rec_name = 'retention_id'
 
-    partner_id = fields.Many2one(
-        comodel_name='res.partner',
-        string='Partner'
-    )
+    partner_id = fields.Many2one(comodel_name='res.partner', string='Partner')
     retention_id = fields.Many2one(
         comodel_name='account.journal',
         string='Retention',
         domain=[('type', '=', 'retentions')],
-        required=True
+        required=True,
     )
     percent = fields.Float(
-        string='Percent',
-        compute='_compute_retention_percent',
-        store=True
+        string='Percent', compute='_compute_retention_percent', store=True
     )
     excluded_percent = fields.Float('Percentage of Exclusion')
     ex_date_from = fields.Date('From date')
     ex_date_to = fields.Date('To date')
     exclusion_certificate = fields.Binary(string='Exclusion Certificate')
-    exclusion_date_certificate = fields.Date(
-        string='Exclusion General Resolution Date'
-    )
-    sit_iibb = fields.Many2one(
-        comodel_name='iibb.situation',
-        string='Situation of IIBB'
-    )
+    exclusion_date_certificate = fields.Date(string='Exclusion General Resolution Date')
+    sit_iibb = fields.Many2one(comodel_name='iibb.situation', string='Situation of IIBB')
     company_id = fields.Many2one(
-        comodel_name='res.company',
-        related='retention_id.company_id',
-        string='Company'
+        comodel_name='res.company', related='retention_id.company_id', string='Company'
     )
     from_padron = fields.Boolean(string="From Padron")
 
@@ -286,15 +262,17 @@ class resPartnerRetention(models.Model):
         (
             'retention_partner_unique',
             'unique(partner_id, retention_id)',
-            _('There must be only one retention of this type configured for the partner')
+            _('There must be only one retention of this type configured for the partner'),
         )
     ]
 
-    @api.depends('retention_id',
-                 'partner_id.retention_activity_id',
-                 'retention_id.tax_id.vat_application_ids',
-                 'retention_id.tax_id.gi_application_ids',
-                 'retention_id.tax_id.profit_application_ids')
+    @api.depends(
+        'retention_id',
+        'partner_id.retention_activity_id',
+        'retention_id.tax_id.vat_application_ids',
+        'retention_id.tax_id.gi_application_ids',
+        'retention_id.tax_id.profit_application_ids',
+    )
     def _compute_retention_percent(self):
         for p_retention in self:
 
@@ -307,18 +285,19 @@ class resPartnerRetention(models.Model):
                 'gross_income': ret_tax.gi_application_ids,
                 'profit': ret_tax.profit_application_ids,
             }
-            p_retention.percent = ret_lines[ret_tax.retention_type].filtered(
-                lambda retline: retline.activity_id == ret_activity
-            ).percent
+            p_retention.percent = (
+                ret_lines[ret_tax.retention_type]
+                .filtered(lambda retline: retline.activity_id == ret_activity)
+                .percent
+            )
 
     @api.constrains('excluded_percent')
     def _check_excluded_percent(self):
         for p_ret in self:
             if not (0 <= p_ret.excluded_percent <= 1):
-                raise ValidationError(_(
-                    "The Excluded Percent Should be a value "
-                    "between 0 and 1"
-                ))
+                raise ValidationError(
+                    _("The Excluded Percent Should be a value " "between 0 and 1")
+                )
 
 
 class ResPartnerAdvanceRetention(models.Model):
@@ -329,17 +308,12 @@ class ResPartnerAdvanceRetention(models.Model):
         comodel_name='account.journal',
         string='Retention',
         domain=[('type', '=', 'retentions')],
-        required=True
+        required=True,
     )
     concept_id = fields.Many2one(
-        comodel_name='retention.concept',
-        string="Concept",
-        required=True
+        comodel_name='retention.concept', string="Concept", required=True
     )
-    partner_id = fields.Many2one(
-        comodel_name='res.partner',
-        string="Partner"
-    )
+    partner_id = fields.Many2one(comodel_name='res.partner', string="Partner")
     company_id = fields.Many2one(
         comodel_name='res.company',
         related='retention_id.company_id',
@@ -371,6 +345,4 @@ class ResDocumentType(models.Model):
         cuit = self.sudo().env.ref('l10n_ar_eynes.document_cuit').name
         cuil = self.sudo().env.ref('l10n_ar_eynes.document_cuil').name
         dni = self.sudo().env.ref('l10n_ar_eynes.document_dni').name
-        return self.sudo().search([
-            ('name', 'in', (cuit, cuil, dni))
-        ])
+        return self.sudo().search([('name', 'in', (cuit, cuil, dni))])

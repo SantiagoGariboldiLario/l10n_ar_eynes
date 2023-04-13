@@ -10,7 +10,7 @@ class ResUsers(models.Model):
         column1='user_id',
         column2='journal_id',
         string='Available Journals',
-        domain=[('type', '=', 'sale')]
+        domain=[('type', '=', 'sale')],
     )
     # journal_id = fields.Many2one(
     #     comodel_name='account.journal',
