@@ -14,10 +14,9 @@ lint-test-job:
   before_script:
     - python -m pip install --upgrade pip
     - pip install flake8
-    - export
     - mkdir -p $FOLDER_NAME
   script:
-    - echo "Linting code... This will take about 10 seconds."
+    - echo "Linting code..."
     - flake8 --tee --output-file=$FOLDER_NAME/$LOG_NAME $CHECKING_FOLDER
     - echo "No lint issues found."
   artifacts:
