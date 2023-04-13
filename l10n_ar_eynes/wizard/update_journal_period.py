@@ -1,4 +1,4 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 
@@ -40,7 +40,7 @@ class UpdateJournalPeriodWizard(models.TransientModel):
         else:
             selected_journals = [line.journal_id.id for line in self.journal_ids if line.selected is True]
             if not selected_journals:
-                raise ValidationError("no journals selected")
+                raise ValidationError(_("no journals selected"))
             journals = self.env['account.journal'].browse(selected_journals)
 
         journals.write({'due_date' : self.due_date})
@@ -48,7 +48,7 @@ class UpdateJournalPeriodWizard(models.TransientModel):
     @api.constrains('due_date')
     def check_date(self):
         if self.due_date > fields.Date.today():
-            raise ValidationError("invalid date")
+            raise ValidationError(_("invalid date"))
 
 
 class UpdateJournalPeriodWizardLine(models.TransientModel):

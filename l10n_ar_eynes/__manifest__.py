@@ -16,12 +16,13 @@
 #    along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+# pylint: disable=manifest-required-author, missing-readme
+
 {
     'name': 'l10n Argentina',
     'version': '15.0.6.0.2',
     'author': 'Eynes',
     'license': 'AGPL-3',
-    'description': 'Argentina Localization',
     'category': 'Accounting/Accounting',
     'depends': [
         'sale',
