@@ -286,9 +286,6 @@ class AccountCheck(models.Model):
 
         for check in self:
             AccountCheckConfig = self.env['account.check.config']
-            def_check_account = AccountCheckConfig.search([
-                ('company_id', '=', self.env.user.company_id.id)]
-            ).deferred_account_id
             def_check_journal = AccountCheckConfig.search([
                 ('company_id', '=', self.env.user.company_id.id)]
             ).deferred_journal_id
