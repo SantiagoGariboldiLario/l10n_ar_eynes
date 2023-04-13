@@ -308,7 +308,7 @@ class resPartnerRetention(models.Model):
                 'profit': ret_tax.profit_application_ids,
             }
             p_retention.percent = ret_lines[ret_tax.retention_type].filtered(
-                lambda l: l.activity_id == ret_activity
+                lambda retline: retline.activity_id == ret_activity
             ).percent
 
     @api.constrains('excluded_percent')

@@ -2129,7 +2129,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
             if rec:
                 move_line_ids.append(rec.id)
         for line in self.payment_order_id.debt_line_ids.filtered(
-                lambda l: l.amount > 0):
+                lambda debtline: debtline.amount > 0):
             rec = self.retention_move_line_ids.create({
                 'payment_order_line_id': self.id,
                 'move_id': line.invoice_id.id,
@@ -2197,7 +2197,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
     @api.depends('retention_move_line_ids', 'applied_aliquot')
     def _compute_month_applied_retentions(self):
         for rec in self:
-            total = sum(rec.retention_move_line_ids.filtered(lambda l: l.move_name != 'draft').mapped('total_without_vat'))
+            total = sum(rec.retention_move_line_ids.filtered(lambda rtml: rtml.move_name != 'draft').mapped('total_without_vat'))
             amount = rec.concept_amount
             rec.month_applied_retentions = (total - amount) * (rec.applied_aliquot / 100)
 

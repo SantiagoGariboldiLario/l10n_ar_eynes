@@ -318,9 +318,6 @@ class AccountCheck(models.Model):
                 'move_id': move_id.id,
             }
 
-            clearance_move_line = AccountMoveLine.with_context(
-                {'check_move_validity': False}).create(check_move_line_vals)
-
             if self.checkbook_id:
                 # Creamos la línea contable que refiere
                 # a la acreditación por parte del banco
