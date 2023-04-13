@@ -68,7 +68,7 @@ class RejectIssuedCheckWizard(models.TransientModel):
                 original_move_data = payment.account_move_get()
                 original_move_data['journal_id'] = journal.id
                 original_move_data['state'] = 'draft'
-                move = self.env['account.move'].with_context(ctx).create(
+                move = self.env['account.move'].with_context(**ctx).create(
                     original_move_data
                 )
 
@@ -94,7 +94,7 @@ class RejectIssuedCheckWizard(models.TransientModel):
                     'analytic_account_id': payment_line.analytic_account_id.id,
                     'ref': _('Rejected check') + ': ' + (payment_line.name or '/'),
                 }
-                AccoutMoveLine.with_context(ctx).create(inverse_supplier_line)
+                AccoutMoveLine.with_context(**ctx).create(inverse_supplier_line)
 
                 inverse_check_line = {
                     'name': _('Rejected check') + ': ' + (payment_line.name or '/'),
@@ -110,7 +110,7 @@ class RejectIssuedCheckWizard(models.TransientModel):
                     'analytic_account_id': payment_line.analytic_account_id.id,
                     'ref': _('Rejected check') + ': ' + (payment_line.name or '/'),
                 }
-                AccoutMoveLine.with_context(ctx).create(inverse_check_line)
+                AccoutMoveLine.with_context(**ctx).create(inverse_check_line)
                 move.post()
 
 
@@ -171,8 +171,11 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             if not inv_account_id:
                 inv_account_id = partner.property_account_receivable_id
 
-            name = _('Debit Note due to rejected check %s [%s]') \
-                % (check.number or '', check.source_payment_order_id.number)
+            name = _(
+                'Debit Note due to rejected check %(check_number)s [%(po_number)s]',
+                check_number=check.number or '',
+                po_number=check.source_payment_order_id.number
+            )
 
             invoice_vals = {
                 'origin': _('Check : %s') % check.number,
@@ -193,7 +196,11 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
                 ("code", "=", self.env.user.lang)
             ]).date_format
             rejected_date = self.reject_date.strftime(date_format)
-            name = _('Check Rejected %s %s') % (check.number, rejected_date)
+            name = _(
+                'Check Rejected %(check_number)s %(rejected_date)s',
+                check_number=check.number,
+                rejected_date=rejected_date
+            )
 
             lines.append((0, 0, {
                 'name': name,
