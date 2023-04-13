@@ -2,23 +2,48 @@ stages:
   - test
   - deploy
 
-lint-test-job:
+lint-flake8:
   image: python:3.8-alpine
   stage: test
   tags:
     - deployment
   variables:
     FOLDER_NAME: 'logs'
-    LOG_NAME: 'linter.log'
+    LOG_NAME: 'flake8.log'
     CHECKING_FOLDER: '.'
   before_script:
     - python -m pip install --upgrade pip
-    - pip install flake8
+    - pip install flake8 pylint-odoo
     - mkdir -p $FOLDER_NAME
   script:
     - echo "Linting code..."
     - flake8 --tee --output-file=$FOLDER_NAME/$LOG_NAME $CHECKING_FOLDER
     - echo "No lint issues found."
+  artifacts:
+    when: on_failure
+    expire_in: 2 days
+    paths:
+      - $FOLDER_NAME/
+
+lint-pylint:
+  image: python:3.8-alpine
+  stage: test
+  tags:
+    - deployment
+  variables:
+    FOLDER_NAME: 'logs'
+    LOG_NAME_NM: 'pylint-not-mandatory.log'
+    LOG_NAME_MN: 'pylint-mandatory.log'
+    CHECKING_FOLDER: '.'
+  before_script:
+    - python -m pip install --upgrade pip
+    - pip install pylint-odoo
+    - mkdir -p $FOLDER_NAME
+  script:
+    - echo "Linting code (non-mandatory)..."
+    - pylint --output=$FOLDER_NAME/$LOG_NAME_NM --load-plugins=pylint_odoo --rcfile=.pylintrc --exit-zero *
+    - echo "Linting code (mandatory)..."
+    - pylint --output=$FOLDER_NAME/$LOG_NAME_MN --load-plugins=pylint_odoo --rcfile=.pylintrc-mandatory *
   artifacts:
     when: on_failure
     expire_in: 2 days
