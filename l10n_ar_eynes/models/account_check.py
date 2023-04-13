@@ -309,14 +309,6 @@ class AccountCheck(models.Model):
             self.write({'clearance_move_id': move_id.id})
 
             # Creamos la línea contable que iguala el pago del cheque
-            check_move_line_vals = {
-                'journal_id': def_check_journal.id,
-                'date': current_date,
-                'name': name_ref,
-                'account_id': def_check_account.id,
-                'debit': self.amount,
-                'move_id': move_id.id,
-            }
 
             if self.checkbook_id:
                 # Creamos la línea contable que refiere
