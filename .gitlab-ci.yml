@@ -41,7 +41,7 @@ lint-pylint:
     - mkdir -p $FOLDER_NAME
   script:
     - echo "Linting code (non-mandatory)..."
-    - pylint --load-plugins=pylint_odoo --rcfile=.pylintrc --exit-zero * | tee -a --output=$FOLDER_NAME/$LOG_NAME_NM 
+    - pylint --load-plugins=pylint_odoo --rcfile=.pylintrc --exit-zero * | tee -a $FOLDER_NAME/$LOG_NAME_NM 
     - echo "Linting code (mandatory)..."
     - pylint --load-plugins=pylint_odoo --rcfile=.pylintrc-mandatory * | tee -a $FOLDER_NAME/$LOG_NAME_MN 
   artifacts:
