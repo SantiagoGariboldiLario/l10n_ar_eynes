@@ -72,7 +72,7 @@ class AccountMove(models.Model):
 
         # Separator missing or multiple separators error
         if self.supplier_move_reference.count('-') != 1:
-            raise ValidationError('Must be only one separator')
+            raise ValidationError(_('Must be only one separator'))
 
         pos_code, move_code = self.supplier_move_reference.split('-')
         if not pos_code or not move_code:
@@ -236,13 +236,13 @@ class AccountMoveLine(models.Model):
     )
     counterpart = fields.Char(
         "Counterpart",
-        compute='_get_counterpart',
+        compute='_compute_counterpart',
         help="Compute the counter part accounts of "
         "this journal item for this journal entry. This can be needed in reports."
     )
 
     @api.depends('move_id.line_ids')
-    def _get_counterpart(self):
+    def _compute_counterpart(self):
         for rec in self:
             counterpart = set()
             for line in rec.move_id.line_ids:

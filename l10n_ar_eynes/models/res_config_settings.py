@@ -13,7 +13,7 @@ class ResConfigSettings(models.TransientModel):
     )
 
     def set_values(self):
-        super(ResConfigSettings, self).set_values()
+        return super(ResConfigSettings, self).set_values()
 
     @api.model
     def get_values(self):

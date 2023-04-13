@@ -106,11 +106,7 @@ class DepositCheckwizard(models.TransientModel):
 
         if not self.bank_account_id.account_id:
             raise UserError(
-                _("Error! You have to configure an account on \
-                Bank Account %s: %s") % (
-                    self.bank_account_id.bank_name,
-                    self.bank_account_id.acc_number
-                )
+                _("Error! You have to configure an account on Bank Account %s: %s") % (self.bank_account_id.bank_name, self.bank_account_id.acc_number)
             )
 
         check = self.env['account.check'].browse(

@@ -27,7 +27,7 @@ class AccountCheckConfig(models.Model):
         comodel_name='account.account',
         string='Receivable Rejected Check Account',
         domain=[('internal_type', '=', 'receivable')],
-        help=_("Partner's account in debit note generation."),
+        help="Partner's account in debit note generation.",
         required=True
     )
     rejected_account_id = fields.Many2one(
@@ -165,8 +165,9 @@ class AccountCheck(models.Model):
 
     def create(self, vals_list):
         """
-        Method gets overrided to update issued checks when added to supplier payment order.
-        In this case, the checks selected should be updated, otherwise they are created.
+        Method gets overrided to update issued checks when added to supplier
+        payment order. In this case, the checks selected should be updated,
+        otherwise they are created.
         """
         # checks are select from supplier payment order
         if self._context.get('default_type') == 'payment':
@@ -180,19 +181,22 @@ class AccountCheck(models.Model):
 
     def unlink(self):
         """
-        method gets overrided to ensure that check must be in specif state to get deleted
+        method gets overrided to ensure that check must be in specif state to get
+        deleted
         """
         for check in self:
             if check.internal_type == 'third_party':
                 if check.third_party_check_state != 'in_wallet':
-                    raise UserError(
-                        _("Check Error! You cannot delete a third check that is not in Wallet")
-                    )
+                    raise UserError(_(
+                        "Check Error! You cannot delete a third check that is "
+                        "not in Wallet"
+                    ))
             elif check.internal_type == 'issued':
                 if check.issued_check_state != 'draft':
-                    raise UserError(
-                        _("Check Error! You cannot delete a check that is not in Draft")
-                    )
+                    raise UserError(_(
+                        "Check Error! You cannot delete a check that is not in "
+                        "Draft"
+                    ))
         return super(AccountCheck, self).unlink()
 
     def cancel_check(self, internal_type):
@@ -210,18 +214,18 @@ class AccountCheck(models.Model):
             state = 'third_party_check_state'
             for check in self.filtered(lambda rec: rec.internal_type == internal_type):
                 if check.third_party_check_state != 'in_wallet':
-                    raise UserError(
-                        _("Third Check Error! You cannot cancel' \
-                        check if it is not in Wallet")
-                    )
+                    raise UserError(_(
+                        "Third Check Error! You cannot cancel check if it is "
+                        "not in Wallet"
+                    ))
         elif internal_type == 'issued':
             state = 'issued_check_state'
             for check in self.filtered(lambda rec: rec.internal_type == internal_type):
                 if check.type == 'deferred' and check.accredited:
-                    raise ValidationError(
-                        _('Check number %s is postdated and has \
-                        already been accredited!\nPlease break the \
-                        conciliation of that check first.') % check.number
+                    raise ValidationError(_(
+                        'Check number %s is postdated and has already been '
+                        'accredited!\nPlease break the conciliation of that '
+                        'check first.') % check.number
                     )
         self.write({state: 'cancelled'})
 
@@ -320,9 +324,9 @@ class AccountCheck(models.Model):
                     'move_id': move_id.id,
                 }
 
-                AccountMoveLine.with_context(
-                    {'check_move_validity': False}
-                ).create(bank_move_line_vals)
+                AccountMoveLine.with_context(check_move_validity=False).create(
+                    bank_move_line_vals
+                )
 
                 # move_lines_to_reconcile = []
                 # payment_move_line = move_line_obj.search([
