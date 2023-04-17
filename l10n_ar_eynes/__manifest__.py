@@ -22,6 +22,7 @@
     'name': 'l10n Argentina',
     'version': '15.0.6.0.2',
     'author': 'Eynes',
+    'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
     'category': 'Accounting/Accounting',
     'depends': [
@@ -39,6 +40,7 @@
         'data/res_document_type_data.xml',
         'data/res_voucher_type_data.xml',
         'data/account_default_journals_data.xml',
+        'data/account_payment_method_data.xml',
         'data/iibb_situation_data.xml',
         'data/dst_cuit_codes_data.xml',
         'data/ir_sequence_data.xml',

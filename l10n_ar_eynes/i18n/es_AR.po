@@ -370,6 +370,11 @@ msgstr "Chequera %s %s-%s"
 msgid "Checkbook ID"
 msgstr "Chequera"
 
+#. module: account_check_printing
+#: model:account.payment.method,name:l10n_ar_eynes.account_payment_method_transfers
+msgid "Bank Transfers"
+msgstr "Transferencias Bancarias"
+
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__number
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_checkbook_view_form

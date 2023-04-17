@@ -1,4 +1,14 @@
-from odoo import fields, models, _
+from odoo import _, api, fields, models
+
+
+class AccountPaymentMethod(models.Model):
+    _inherit = 'account.payment.method'
+
+    @api.model
+    def _get_payment_method_information(self):
+        res = super()._get_payment_method_information()
+        res['bank_transfers'] = {'mode': 'multi', 'domain': [('type', '=', 'bank')]}
+        return res
 
 
 class AccountPaymentMethodLine(models.Model):
@@ -6,7 +16,11 @@ class AccountPaymentMethodLine(models.Model):
 
     number = fields.Integer('Number')
     format = fields.Selection(
-        selection=[('physical', 'Physical'), ('virtual', 'Virtual'), ('echeq', 'Echeq')],
+        selection=[
+            ('physical', 'Physical'),
+            ('virtual', 'Virtual'),
+            ('echeq', 'Echeq'),
+        ],
         string='Format',
     )
     bank_account_id = fields.Many2one(
