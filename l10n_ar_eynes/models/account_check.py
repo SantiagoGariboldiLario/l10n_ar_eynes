@@ -573,8 +573,8 @@ class AccountCheck(models.Model):
         for check in self:
             po = PaymentOrder.search(
                 [
-                    ('third_check_ids', '=', check.id),
-                    ('third_party_check_state', '!=', 'cancelled'),
+                    ('third_party_check_ids', '=', check.id),
+                    ('state', '!=', 'cancel'),
                 ]
             )
 
