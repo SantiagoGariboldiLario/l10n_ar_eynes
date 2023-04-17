@@ -1,4 +1,4 @@
-from odoo import api, models, fields, _
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -143,38 +143,7 @@ class AccountMove(models.Model):
 
     def action_register_payment(self):
         """Override to redirect to account payment order"""
-        move_line_domain = [('id', 'in', self.line_ids.ids), ('reconciled', '=', False)]
-        if self.is_sale_document():
-            move_line_domain += [
-                ('debit', '>', 0),
-                ('credit', '=', 0),
-            ]
-        else:
-            move_line_domain += [
-                ('debit', '=', 0),
-                ('credit', '>', 0),
-            ]
-        move_line = self.env['account.move.line'].search(move_line_domain)
-        po = self.env['account.payment.order'].create(
-            {
-                'type': 'receipt' if self.is_sale_document() else 'payment',
-                'partner_id': self.partner_id.id,
-                'journal_id': self.get_receipt_journal().id
-                if self.is_sale_document()
-                else self.get_payment_journal().id,
-                'income_line_ids': [
-                    (
-                        0,
-                        0,
-                        {
-                            'invoice_id': self.id,
-                            'move_line_id': move_line.id,
-                            'account_id': move_line.account_id.id,
-                        },
-                    )
-                ],
-            }
-        )
+        po = self.env['account.payment.order'].create(self.get_payment_order_vals())
 
         if self.is_sale_document():
             view_id = self.env.ref(
@@ -193,6 +162,45 @@ class AccountMove(models.Model):
             'target': 'current',
             'type': 'ir.actions.act_window',
         }
+
+    def get_payment_order_vals(self):
+        move_line_domain = [('id', 'in', self.line_ids.ids), ('reconciled', '=', False)]
+        if self.is_sale_document():
+            move_line_domain += [
+                ('debit', '>', 0),
+                ('credit', '=', 0),
+            ]
+        else:
+            move_line_domain += [
+                ('debit', '=', 0),
+                ('credit', '>', 0),
+            ]
+        move_line = self.env['account.move.line'].search(move_line_domain)
+        po_move_line = [
+            (
+                0,
+                0,
+                {
+                    'invoice_id': self.id,
+                    'move_line_id': move_line.id,
+                    'account_id': move_line.account_id.id,
+                },
+            )
+        ]
+
+        po_vals = {
+            'type': 'receipt' if self.is_sale_document() else 'payment',
+            'partner_id': self.partner_id.id,
+            'journal_id': self.get_receipt_journal().id
+            if self.is_sale_document()
+            else self.get_payment_journal().id,
+        }
+
+        if self.is_sale_document():
+            po_vals['income_line_ids'] = po_move_line
+        else:
+            po_vals['debt_line_ids'] = po_move_line
+        return po_vals
 
     def get_payment_journal(self):
         return self.env['account.journal'].search([('type', '=', 'payment')])[0]
