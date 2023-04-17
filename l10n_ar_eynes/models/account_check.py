@@ -1,6 +1,7 @@
-from odoo import fields, models, _, api
-from odoo.exceptions import ValidationError, UserError
 import time
+
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError, ValidationError
 
 
 class AccountCheckConfig(models.Model):
@@ -261,11 +262,13 @@ class AccountCheck(models.Model):
 
     @api.depends('clearance_move_id')
     def _compute_accredit_state(self):
-        for check in self.filtered(lambda rec: rec.internal_type == 'issued'):
-            if check.clearance_move_id:
-                check.accredited = True
-            else:
-                check.accredited = False
+        for check in self:
+            check.accredited = False
+            if check.internal_type == 'issued':
+                if check.clearance_move_id:
+                    check.accredited = True
+                else:
+                    check.accredited = False
 
     def accredit_checks(self):
         """method for checks accreditation"""
@@ -275,32 +278,44 @@ class AccountCheck(models.Model):
 
         for check in self:
             AccountCheckConfig = self.env['account.check.config']
+            def_check_account = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).deferred_account_id
             def_check_journal = AccountCheckConfig.search(
                 [('company_id', '=', self.env.user.company_id.id)]
             ).deferred_journal_id
             if not def_check_journal:
                 raise UserError(
-                    _(
-                        "Error! There is no Journal \
-                    configured for deferred checks."
-                    )
+                    _("Error! There is no Journal " "configured for deferred checks.")
                 )
 
             current_date = time.strftime('%Y-%m-%d')
 
             AccountMoveLine = self.env['account.move.line']
-            name_ref = 'Clearance Check ' + self.number
+            name_ref = 'Clearance Check ' + check.number
             move_vals = {
                 'ref': name_ref,
                 'journal_id': def_check_journal.id,
             }
             move_id = self.env['account.move'].create(move_vals)
 
-            self.write({'clearance_move_id': move_id.id})
+            check.write({'clearance_move_id': move_id.id})
 
             # Creamos la línea contable que iguala el pago del cheque
+            check_move_line_vals = {
+                'journal_id': def_check_journal.id,
+                'date': current_date,
+                'name': name_ref,
+                'account_id': def_check_account.id,
+                'debit': check.amount,
+                'move_id': move_id.id,
+            }
 
-            if self.checkbook_id:
+            AccountMoveLine.with_context(check_move_validity=False).create(
+                check_move_line_vals
+            )
+
+            if check.checkbook_id:
                 # Creamos la línea contable que refiere
                 # a la acreditación por parte del banco
                 # solo si tiene referenciada una chequera (checkbook_id)
@@ -553,27 +568,27 @@ class AccountCheck(models.Model):
     def check_delivered(self):
         # Transicion efectuada al validar un pago a proveedores que entregue
         # cheques de terceros
-        voucher_obj = self.env['account.payment.order']
+        PaymentOrder = self.env['account.payment.order']
         vals = {'third_party_check_state': 'delivered'}
         for check in self:
-            voucher = voucher_obj.search(
+            po = PaymentOrder.search(
                 [
                     ('third_check_ids', '=', check.id),
                     ('third_party_check_state', '!=', 'cancelled'),
                 ]
             )
 
-            if len(voucher) > 1:
+            if len(po) > 1:
                 raise UserError(
                     _('There are more than one voucher referenced to check %s.')
                     % check.number
                 )
             if not check.endorsement_date:
-                vals['endorsement_date'] = voucher.date or time.strftime('%Y-%m-%d')
-            vals['destiny_partner_id'] = voucher.partner_id.id
+                vals['endorsement_date'] = po.date or time.strftime('%Y-%m-%d')
+            vals['destiny_partner_id'] = po.partner_id.id
 
             if not check.dest:
-                vals['dest'] = voucher.reference
+                vals['dest'] = po.reference
 
             check.write(vals)
         return True
