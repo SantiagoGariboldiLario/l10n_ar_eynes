@@ -286,7 +286,7 @@ class AccountCheck(models.Model):
             ).deferred_journal_id
             if not def_check_journal:
                 raise UserError(
-                    _("Error! There is no Journal " "configured for deferred checks.")
+                    _("Error! There is no Journal configured for deferred checks.")
                 )
 
             current_date = time.strftime('%Y-%m-%d')
