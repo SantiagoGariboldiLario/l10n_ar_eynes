@@ -1,7 +1,8 @@
+import json
 import logging
 from pprint import pformat as pf
+
 from dateutil.relativedelta import relativedelta
-import json
 
 from odoo import _, api, fields, models
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
@@ -95,7 +96,10 @@ class AccountPaymentOrder(models.Model):
     name = fields.Char(string='Memo', default='')
     narration = fields.Text(string='Notes', default=default_narration)
     partner_id = fields.Many2one(
-        comodel_name='res.partner', string='Partner', default=default_partner
+        comodel_name='res.partner',
+        string='Partner',
+        default=default_partner,
+        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     account_id = fields.Many2one(comodel_name='account.account', string='Account')
     pay_now = fields.Selection(
@@ -113,6 +117,7 @@ class AccountPaymentOrder(models.Model):
         required=True,
         domain=domain_journal,
         default=default_journal,
+        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     move_id = fields.Many2one(
         comodel_name='account.move', string='Account Entry', copy=False, readonly=True
@@ -125,6 +130,7 @@ class AccountPaymentOrder(models.Model):
     date = fields.Date(
         string='Date',
         default=lambda self: self._context.get('date', fields.Date.context_today(self)),
+        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     date_due = fields.Date(string="Due Date")
     state = fields.Selection(
@@ -208,6 +214,7 @@ class AccountPaymentOrder(models.Model):
         comodel_name='account.payment.mode.line',
         inverse_name='payment_order_id',
         string='Payments Lines',
+        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     line_ids = fields.One2many(
         comodel_name='account.payment.order.line',
@@ -220,6 +227,7 @@ class AccountPaymentOrder(models.Model):
         string='Credits',
         domain=[('type', '=', 'income')],
         context={'default_type': 'income'},
+        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     debt_line_ids = fields.One2many(
         comodel_name='account.payment.order.line',
@@ -227,12 +235,14 @@ class AccountPaymentOrder(models.Model):
         string='Debits',
         domain=[('type', '=', 'debt')],
         context={'default_type': 'debt'},
+        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     payment_rate_currency_id = fields.Many2one(
         comodel_name='res.currency',
         string='Payment Rate Currency',
         default=default_payment_rate_currency,
         required=True,
+        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     payment_rate = fields.Float(
         string='Exchange Rate',
@@ -252,7 +262,8 @@ class AccountPaymentOrder(models.Model):
     is_multi_currency = fields.Boolean(
         string='Multi Currency Voucher',
         compute='_compute_is_multicurrency',
-        help="Fields with internal purpose only that depicts if the voucher is a multi currency one or not",
+        help="Fields with internal purpose only that depicts "
+        "if the voucher is a multi currency one or not",
     )
     invoice_ids = fields.Many2many(
         comodel_name='account.move',
@@ -267,7 +278,8 @@ class AccountPaymentOrder(models.Model):
         inverse_name='payment_order_id',
         string='Issued Checks',
         required=False,
-        domain=[('internal_type', '=', 'issued'), ('issued_check_state', '=', 'draft')],
+        domain=[('internal_type', '=', 'issued')],
+        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     third_party_check_receipt_ids = fields.One2many(
         comodel_name='account.check',
@@ -275,6 +287,7 @@ class AccountPaymentOrder(models.Model):
         string='Third party checks',
         required=False,
         domain=[('internal_type', '=', 'third_party')],
+        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     third_party_check_ids = fields.Many2many(
         comodel_name='account.check',
@@ -282,6 +295,7 @@ class AccountPaymentOrder(models.Model):
         column1='dest_payment_order_id',
         column2='third_check_id',
         string='Third Checks',
+        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     # RETENTION FIELDS
     retention_ids = fields.One2many(
@@ -522,11 +536,9 @@ class AccountPaymentOrder(models.Model):
 
         logging_messages.append("\n\nAplicando %s ==>" % (self.name))
         logging_messages.append(
-            (
-                f"Actividad: {activity} "
-                f"Porcentaje en partner: {percent}. "
-                f"Porcentaje de Exclusion: {excluded_percent}"
-            )
+            f"Actividad: {activity} "
+            f"Porcentaje en partner: {percent}. "
+            f"Porcentaje de Exclusion: {excluded_percent}"
         )
         for po_line in [
             line for line in (self.income_line_ids + self.debt_line_ids) if line.amount
@@ -604,7 +616,7 @@ class AccountPaymentOrder(models.Model):
 
         # Ahora que tenemos las bases agrupadas por concepto
         # aplicamos el calculo de la retencion
-        for (ret, concept, invoice), vals in all_concepts.items():
+        for (_ret, concept, invoice), vals in all_concepts.items():
             taxapp = vals['taxapp']
             base, amount = taxapp.apply_retention(
                 move_line.partner_id, percent, excluded_percent, vals, self.date
@@ -807,9 +819,8 @@ class AccountPaymentOrder(models.Model):
             if u_rets:
                 raise ValidationError(
                     _(
-                        "Error!\n"
-                        "Voucher %(voucher_name)s [id: %(voucher_id)s] has Unlinkable Retentions:\n"
-                        "%(retentions)s",
+                        "Error!\nVoucher %(voucher_name)s [id: %(voucher_id)s] "
+                        "has Unlinkable Retentions:\n%(retentions)s",
                         voucher_name=voucher.name,
                         voucher_id=voucher.id,
                         retentions=("\n").join(
@@ -2294,7 +2305,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         rl_id = self.id
         rl_name = self.name
         rl_partner_name = self.partner_id.name or 'Undefined'
-        name = u"RTL(#{0})[{1}-{2}]".format(rl_id, rl_name, rl_partner_name)
+        name = u"RTL(#{})[{}-{}]".format(rl_id, rl_name, rl_partner_name)
         return name
 
 
