@@ -29,7 +29,16 @@ class AccountMove(models.Model):
             'draft': [('readonly', False)],
         },
     )
-    is_debit_note = fields.Boolean(string='Debit Note', default=False)
+    is_debit_note = fields.Boolean(
+        string='Debit Note', compute='_compute_is_debit_note', store=True
+    )
+
+    @api.depends('debit_origin_id')
+    def _compute_is_debit_note(self):
+        for rec in self:
+            rec.is_debit_note = False
+            if rec.debit_origin_id:
+                rec.is_debit_note = True
 
     def get_highest_pos_sequence(self):
         invoices = self.env['account.move'].search(
