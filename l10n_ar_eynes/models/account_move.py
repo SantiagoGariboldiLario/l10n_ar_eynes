@@ -1,3 +1,5 @@
+from datetime import date
+
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -136,6 +138,8 @@ class AccountMove(models.Model):
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
+        if not res.invoice_date:
+            res.invoice_date = date.today()
         for move in res.filtered(lambda m: m.is_sale_document()):
             if not move.denomination:
                 move.write({'denomination': move.journal_id.denomination})

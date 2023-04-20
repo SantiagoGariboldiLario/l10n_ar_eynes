@@ -1,6 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* l10n_ar_eynes
+# 	* account
 #
 msgid ""
 msgstr ""
@@ -2669,3 +2670,11 @@ msgstr "Esta fecha de corte es utilizada para bloquear el diario seleccionado y 
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__journal_ids
 msgid "Available Journals"
 msgstr "Diarios Disponibles"
+
+#. module: account
+#: model:ir.actions.act_window,name:account.action_move_out_refund_type
+#: model:ir.ui.menu,name:account.menu_action_move_out_refund_type
+#: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
+#: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
+msgid "Credit Notes"
+msgstr "Notas de Credito"

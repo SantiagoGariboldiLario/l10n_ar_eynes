@@ -1,47 +1,87 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <record id="account_journal_view_form_inherit_l10n_ar_eynes" model="ir.ui.view">
         <field name="name">account.journal.view.form.inherit</field>
         <field name="model">account.journal</field>
-        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="inherit_id" ref="account.view_account_journal_form" />
         <field name="arch" type="xml">
 
             <notebook position="inside">
-                <page name="pos_info" string="POS information" attrs="{'invisible': [('type','!=','sale')]}">
+                <page
+                    name="pos_info"
+                    string="POS information"
+                    attrs="{'invisible': [('type','!=','sale')]}"
+                >
                     <group>
                         <group>
-                            <field name="denomination" attrs="{'required':[('type','=','sale')]}"/>
-                            <field name="fiscal_position_id" attrs="{'required':[('type','=','sale')]}" invisible="1"/>
-                            <field name="fiscal_position_ids" widget="many2many_tags" attrs="{'required':[('type','=','sale')]}"/>
+                            <field
+                                name="denomination"
+                                attrs="{'required':[('type','=','sale')]}"
+                            />
+                            <field
+                                name="fiscal_position_id"
+                                attrs="{'required':[('type','=','sale')]}"
+                                invisible="1"
+                            />
+                            <field
+                                name="fiscal_position_ids"
+                                widget="many2many_tags"
+                                attrs="{'required':[('type','=','sale')]}"
+                            />
                         </group>
                         <group>
-                            <field name="activity_start_date" attrs="{'required':[('type','=','sale')]}"/>
-                            <field name="warehouse_id" attrs="{'required':[('type','=','sale')]}"/>
+                            <field
+                                name="activity_start_date"
+                                attrs="{'required':[('type','=','sale')]}"
+                            />
+                            <field
+                                name="warehouse_id"
+                                attrs="{'required':[('type','=','sale')]}"
+                            />
                         </group>
                     </group>
                 </page>
 
-                <page name="perceptions" string="Perceptions" attrs="{'invisible': [('type','!=','perceptions')]}">
+                <page
+                    name="perceptions"
+                    string="Perceptions"
+                    attrs="{'invisible': [('type','!=','perceptions')]}"
+                >
                     <group string="Tax Information">
-                        <field name="tax_id" select="1" attrs="{'required':[('type', '=', 'perceptions')]}"/>
-                        <field name="type_tax_use" select="1"/>
+                        <field
+                            name="tax_id"
+                            select="1"
+                            attrs="{'required':[('type', '=', 'perceptions')]}"
+                        />
+                        <field name="type_tax_use" select="1" />
                     </group>
                 </page>
 
-                <page name="retentions" string="Retentions" attrs="{'invisible': [('type','!=','retentions')]}">
+                <page
+                    name="retentions"
+                    string="Retentions"
+                    attrs="{'invisible': [('type','!=','retentions')]}"
+                >
                     <group string="Tax Information">
-                        <field name="tax_id" select="1" attrs="{'required':[('type', '=', 'retentions')]}"/>
-                        <field name="type_tax_use" select="1"/>
+                        <field
+                            name="tax_id"
+                            select="1"
+                            attrs="{'required':[('type', '=', 'retentions')]}"
+                        />
+                        <field name="type_tax_use" select="1" />
                     </group>
                 </page>
             </notebook>
 
             <xpath expr="//field[@name='type']" position="after">
-                <field name="due_date" attrs="{'readonly': [('id', '!=', False)]}"/>
+                <field name="due_date" attrs="{'readonly': [('id', '!=', False)]}" />
             </xpath>
 
-            <xpath expr="//field[@name='outbound_payment_method_line_ids']/tree/field[@name='name']" position="after">
-                <field name="format" readonly="1"/>
+            <xpath
+                expr="//field[@name='outbound_payment_method_line_ids']/tree/field[@name='name']"
+                position="after"
+            >
+                <field name="format" readonly="1" />
             </xpath>
 
             <xpath expr="//field[@name='profit_account_id']" position="attributes">
@@ -58,7 +98,7 @@
 
             <xpath expr="//field[@name='default_account_id'][3]" position="attributes">
                 <attribute name="attrs">
-                    {'required':False}
+                    {'required':True}
                 </attribute>
             </xpath>
 
