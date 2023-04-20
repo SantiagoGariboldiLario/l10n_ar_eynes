@@ -32,6 +32,7 @@
         'contacts',
         'hr',
         'account_check_printing',
+        'account_debit_note',
         'account',
         'account_statement_import_txt_xlsx',
     ],
