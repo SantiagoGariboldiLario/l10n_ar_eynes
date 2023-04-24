@@ -2678,3 +2678,14 @@ msgstr "Diarios Disponibles"
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
 msgid "Credit Notes"
 msgstr "Notas de Credito"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
+msgid ""
+"<span class=\"o_form_label\" attrs=\"{'invisible': ['|', ('move_type', '=', 'entry'), ('debit_origin_id', '=', False)]}\">\n"
+"                    <span>Debit Note</span>\n"
+"                </span>"
+msgstr ""
+"<span class=\"o_form_label\" attrs=\"{'invisible': ['|', ('move_type', '=', 'entry'), ('debit_origin_id', '=', False)]}\">\n"
+"                    <span>Nota de Débito</span>\n"
+"                </span>"
