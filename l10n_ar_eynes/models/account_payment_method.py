@@ -15,6 +15,12 @@ class AccountPaymentMethodLine(models.Model):
     _inherit = 'account.payment.method.line'
 
     number = fields.Integer('Number')
+    type = fields.Selection(
+        selection=[('common', 'Common'), ('deferred', 'Deferred')],
+        string='Type',
+        default='common',
+        required=True,
+    )
     format = fields.Selection(
         selection=[
             ('physical', 'Physical'),

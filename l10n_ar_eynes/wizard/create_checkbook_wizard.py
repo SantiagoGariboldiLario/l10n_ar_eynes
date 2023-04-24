@@ -1,4 +1,4 @@
-from odoo import fields, models, _, api
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -17,6 +17,12 @@ class CreateCheckbookWizard(models.TransientModel):
     checkbook_format = fields.Selection(
         selection=[('physical', 'Physical'), ('virtual', 'Virtual'), ('echeq', 'Echeq')],
         string='Format',
+        required=True,
+    )
+    type = fields.Selection(
+        selection=[('common', 'Common'), ('deferred', 'Deferred')],
+        string='Type',
+        default='common',
         required=True,
     )
     start_num = fields.Char('Start Number', size=8)
@@ -44,6 +50,7 @@ class CreateCheckbookWizard(models.TransientModel):
                     'name': payment_method_name,
                     'number': self.number,
                     'format': self.checkbook_format,
+                    'type': self.type,
                 },
             )
         ]
@@ -67,7 +74,7 @@ class CreateCheckbookWizard(models.TransientModel):
                         'checkbook_format': self.checkbook_format,
                         'internal_type': 'issued',
                         'issued_check_state': 'draft',
-                        'type': 'common',
+                        'type': self.type,
                     }
                 )
 

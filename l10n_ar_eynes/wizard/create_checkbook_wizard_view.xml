@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
     <record id="create_checkbook_wizard_view_form" model="ir.ui.view">
@@ -9,31 +9,43 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="journal_id"/>
+                            <field name="journal_id" />
                         </group>
                         <group>
-                            <field name="number"/>
+                            <field name="number" />
                         </group>
                     </group>
-                    <group attrs="{'invisible' : [('checkbook_format', '=', 'echeq')]}" >
+                    <group attrs="{'invisible' : [('checkbook_format', '=', 'echeq')]}">
                         <group>
-                            <field name="start_num" attrs="{'required' : [('checkbook_format', '!=', 'echeq')]}"/>
+                            <field
+                                name="start_num"
+                                attrs="{'required' : [('checkbook_format', '!=', 'echeq')]}"
+                            />
                         </group>
                         <group>
-                            <field name="end_num" attrs="{'required' : [('checkbook_format', '!=', 'echeq')]}"/>
+                            <field
+                                name="end_num"
+                                attrs="{'required' : [('checkbook_format', '!=', 'echeq')]}"
+                            />
                         </group>
                     </group>
                     <group>
-                        <field name="checkbook_format" />
+                        <group>
+                            <field name="checkbook_format" />
+                        </group>
+                        <group>
+                            <field name="type" />
+                        </group>
                     </group>
                     <footer>
                         <button
                             name="create_checkbook"
                             type="object"
-                            class="btn btn-primary">
+                            class="btn btn-primary"
+                        >
                             Create Checkbook
                         </button>
-                        <button string="Cancel" class="btn-default" special="cancel"/>
+                        <button string="Cancel" class="btn-default" special="cancel" />
                     </footer>
                 </sheet>
             </form>

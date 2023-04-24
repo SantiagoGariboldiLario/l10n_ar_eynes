@@ -424,6 +424,8 @@ msgstr "Claro"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__type__common
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_method_line__type__common
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__create_checkbook_wizard__type__common
 msgid "Common"
 msgstr "Comun"
 
@@ -637,6 +639,8 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__type__deferred
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_method_line__type__deferred
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__create_checkbook_wizard__type__deferred
 msgid "Deferred"
 msgstr "Diferido"
 
@@ -2156,7 +2160,10 @@ msgstr "Tesoreria"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__type
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__type
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__type
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__retention_type
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__type
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_reason_rejected_check__type
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_activity__type
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__type
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__type
