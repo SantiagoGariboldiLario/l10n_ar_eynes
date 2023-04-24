@@ -35,6 +35,7 @@
         'account_debit_note',
         'account',
         'account_statement_import_txt_xlsx',
+        'account_reconciliation_widget',
     ],
     'data': [
         'data/fiscal_position_data.xml',
