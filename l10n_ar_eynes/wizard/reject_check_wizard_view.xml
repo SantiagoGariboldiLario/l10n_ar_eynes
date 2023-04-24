@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
     <!--reject issued check wizard form-->
@@ -10,7 +10,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="reject_date" required="1"/>
+                            <field name="reject_date" required="1" />
                         </group>
                     </group>
                     <group>
@@ -20,8 +20,13 @@
                         <field name="note" />
                     </group>
                     <footer>
-                        <button name="action_reject" type="object" string="Reject check" class="btn btn-primary"/>
-                        <button string="Cancel" class="btn-default" special="cancel"/>
+                        <button
+                            name="action_reject"
+                            type="object"
+                            string="Reject check"
+                            class="btn btn-primary"
+                        />
+                        <button string="Cancel" class="btn-default" special="cancel" />
                     </footer>
                 </sheet>
             </form>
@@ -37,20 +42,32 @@
                 <sheet>
                     <group>
                         <field name="reject_date" />
-                        <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                        <field
+                            name="company_id"
+                            groups="base.group_multi_company"
+                            widget="selection"
+                        />
                     </group>
                     <group>
-                        <field name="journal_id" domain="[('type', '=', 'sale'),('company_id','=',company_id)]"/>
+                        <field
+                            name="journal_id"
+                            domain="[('type', '=', 'sale'),('company_id','=',company_id)]"
+                        />
                     </group>
                     <field name="expense_line_ids">
-                        <tree string="Expenses" editable="bottom">
-                            <field name="product_id"/>
-                            <field name="price"/>
+                        <tree editable="bottom">
+                            <field name="product_id" />
+                            <field name="price" />
                         </tree>
                     </field>
                     <footer>
-                        <button name="action_reject" type="object" string="Reject check" class="btn btn-primary"/>
-                        <button string="Cancel" class="btn-default" special="cancel"/>
+                        <button
+                            name="action_reject"
+                            type="object"
+                            string="Reject check"
+                            class="btn btn-primary"
+                        />
+                        <button string="Cancel" class="btn-default" special="cancel" />
                     </footer>
                 </sheet>
             </form>

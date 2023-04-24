@@ -74,6 +74,7 @@
             </notebook>
 
             <xpath expr="//field[@name='type']" position="after">
+                <field name="fcred_is_fce_emitter" />
                 <field name="due_date" attrs="{'readonly': [('id', '!=', False)]}" />
             </xpath>
 

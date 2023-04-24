@@ -786,14 +786,10 @@ msgstr "Borrador"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__date_due
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__date_due
-msgid "Due Date"
-msgstr "Fecha de vencimiento"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__due_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__due_date
 msgid "Due Date"
-msgstr "Fecha de Cierre"
+msgstr "Fecha de vencimiento"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
@@ -1547,11 +1543,8 @@ msgstr "Opciones de pago"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__payment_order_id
-msgid "Payment Order"
-msgstr "Comprobante"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__payment_order_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__payment_order_id
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Payment Order"
@@ -2445,11 +2438,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__partner_id
 msgid "partner"
 msgstr "cliente"
-
-#. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__payment_order_id
-msgid "payment order"
-msgstr ""
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_checkbook_wizard.py:0

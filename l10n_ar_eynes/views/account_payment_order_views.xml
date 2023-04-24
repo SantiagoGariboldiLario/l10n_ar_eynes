@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
     <record id="account_customer_payment_order_view_form" model="ir.ui.view">
@@ -7,120 +7,258 @@
         <field name="arch" type="xml">
             <form string="Payment Order" context="{'default_type' : 'receipt'}">
                 <header invisible="context.get('line_type', False)">
-                    <button name="proforma_voucher" string="Validate" class="oe_highlight" type="object" states="draft"/>
-                    <button name="cancel_voucher" string="Cancel Receipt" type="object" states="draft,proforma"/>
-                    <button name="cancel_voucher" string="Unreconcile" type="object" states="posted" confirm="Are you sure to unreconcile and cancel this record ?"/>
-                    <button name="action_cancel_draft" type="object" states="cancel" string="Set to Draft"/>
-                    <button name="action_clean_lines" string="Limpiar imputaciones" type="object"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,posted" type="object" statusbar_colors='{"proforma":"blue"}'/>
+                    <button
+                        name="proforma_voucher"
+                        string="Validate"
+                        class="oe_highlight"
+                        type="object"
+                        states="draft"
+                    />
+                    <button
+                        name="cancel_voucher"
+                        string="Cancel Receipt"
+                        type="object"
+                        states="draft,proforma"
+                    />
+                    <button
+                        name="cancel_voucher"
+                        string="Unreconcile"
+                        type="object"
+                        states="posted"
+                        confirm="Are you sure to unreconcile and cancel this record ?"
+                    />
+                    <button
+                        name="action_cancel_draft"
+                        type="object"
+                        states="cancel"
+                        string="Set to Draft"
+                    />
+                    <button
+                        name="action_clean_lines"
+                        string="Limpiar imputaciones"
+                        type="object"
+                    />
+                    <field
+                        name="state"
+                        widget="statusbar"
+                        statusbar_visible="draft,posted"
+                        type="object"
+                        statusbar_colors='{"proforma":"blue"}'
+                    />
                 </header>
                 <sheet>
                     <h1>
-                        <label for="number" string="Number"/>
-                        <field name="number" readonly="1"/>
+                        <label for="number" string="Number" />
+                        <field name="number" readonly="1" />
                     </h1>
                     <group>
                         <group>
-                            <field name="partner_id"
+                            <field
+                                name="partner_id"
                                 domain="[('customer_rank', '>', 0)]"
                                 required="1"
                                 string="Customer"
                                 widget="res_partner_many2one"
                                 context="{'search_default_customer': 1}"
-                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="journal_id"
+                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                            />
+                            <field
+                                name="journal_id"
                                 domain="[('type','=','receipt'), ('company_id', '=', company_id)]"
                                 string="Journal"
                                 options="{'no_quick_create': True, 'no_create': True, 'no_create_edit': True}"
-                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="amount" class="oe_inline"
+                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                            />
+                            <field
+                                name="amount"
+                                class="oe_inline"
                                 string="Paid Amount"
-                                widget="monetary" options="{'currency_field': 'company_currency'}"
+                                widget="monetary"
+                                options="{'currency_field': 'company_currency'}"
                                 force_save="True"
-                                attrs="{'readonly': True}"/>
+                                attrs="{'readonly': True}"
+                            />
                         </group>
                         <group>
-                            <field name="date" attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="reference" string="Payment Ref" placeholder="e.g. 003/10" attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="name" colspan="2" placeholder="e.g. Invoice SAJ/0042" attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="company_id" readonly="1" groups="base.group_multi_company"/>
-                            <field name="account_id"
+                            <field
+                                name="date"
+                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                            />
+                            <field
+                                name="reference"
+                                string="Payment Ref"
+                                placeholder="e.g. 003/10"
+                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                            />
+                            <field
+                                name="name"
+                                colspan="2"
+                                placeholder="e.g. Invoice SAJ/0042"
+                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                            />
+                            <field
+                                name="company_id"
+                                readonly="1"
+                                groups="base.group_multi_company"
+                            />
+                            <field
+                                name="account_id"
                                 widget="selection"
                                 invisible="True"
-                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="pre_line" invisible="1"/>
-                            <field name="type" invisible="1" attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="currency_id" attrs="{'readonly': True}" force_save="True"/>
+                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                            />
+                            <field name="pre_line" invisible="1" />
+                            <field
+                                name="type"
+                                invisible="1"
+                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                            />
+                            <field
+                                name="currency_id"
+                                attrs="{'readonly': True}"
+                                force_save="True"
+                            />
 
-                            <div attrs="{'invisible':[('is_multi_currency','=',False)]}">
-                                    <field name="is_multi_currency" invisible="1"/>
-                                    <field name="payment_rate" required="1" class="oe_inline" attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
-                                    <field name="payment_rate_currency_id" readonly="1" class="oe_inline" attrs="{'readonly': [('state', 'not in', ('draft'))]}" groups="base.group_multi_currency"/>
+                            <div
+                                attrs="{'invisible':[('is_multi_currency','=',False)]}"
+                            >
+                                    <field name="is_multi_currency" invisible="1" />
+                                    <field
+                                    name="payment_rate"
+                                    required="1"
+                                    class="oe_inline"
+                                    attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                                />
+                                    <field
+                                    name="payment_rate_currency_id"
+                                    readonly="1"
+                                    class="oe_inline"
+                                    attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                                    groups="base.group_multi_currency"
+                                />
                                     <!-- <field name="currency_help_label" colspan="2" nolabel="1" class="oe_grey"/> -->
-                                    <field name="paid_amount_in_company_currency" colspan="4" invisible="1"/>
+                                    <field
+                                    name="paid_amount_in_company_currency"
+                                    colspan="4"
+                                    invisible="1"
+                                />
                             </div>
                         </group>
                         <group col="2">
-                            <separator string="Payment Options" colspan="2"/>
-                            <field name="writeoff_amount" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-                            <field name="payment_option"
+                            <separator string="Payment Options" colspan="2" />
+                            <field
+                                name="writeoff_amount"
+                                widget="monetary"
+                                options="{'currency_field': 'company_currency'}"
+                            />
+                            <field
+                                name="payment_option"
                                 required="1"
-                                attrs="{'invisible':[('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="writeoff_acc_id"
+                                attrs="{'invisible':[('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"
+                            />
+                            <field
+                                name="writeoff_acc_id"
                                 attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'required':[('payment_option','=','with_writeoff')], 'readonly': [('state', 'not in', ('draft'))]}"
-                                domain="[('user_type_id.type','=','other')]"/>
-                            <field name="comment"
-                                attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="analytic_id"
+                                domain="[('user_type_id.type','=','other')]"
+                            />
+                            <field
+                                name="comment"
+                                attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"
+                            />
+                            <field
+                                name="analytic_id"
                                 groups="analytic.group_analytic_accounting"
-                                attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"/>
+                                attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"
+                            />
                         </group>
                     </group>
 
                     <notebook>
-                        <page string="Payment Information" name="payment_information" groups="base.group_user">
-                            <label for="payment_mode_line_ids"/>
-                            <field name="payment_mode_line_ids" attrs="{'readonly': [('state', 'not in', ('draft'))]}">
-                                <tree string="Payment Methods" editable="bottom" decoration-muted="amount == 0">
-                                    <field name="payment_mode_id" invisible="0"
+                        <page
+                            string="Payment Information"
+                            name="payment_information"
+                            groups="base.group_user"
+                        >
+                            <label for="payment_mode_line_ids" />
+                            <field
+                                name="payment_mode_line_ids"
+                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                            >
+                                <tree editable="bottom" decoration-muted="amount == 0">
+                                    <field
+                                        name="payment_mode_id"
+                                        invisible="0"
                                         attrs="{'required': True}"
                                         domain="[('type', 'in', ['cash', 'bank']), ('company_id', '=', parent.company_id),
-                                        '|',('currency_id', '=', False), ('currency_id', '=', parent.currency_id)]"/>
-                                    <field name="name" invisible="1"/>
-                                    <field name="date"/>
-                                    <field name="payment_order_id" invisible="1"/>
-                                    <field name="name" invisible="0"/>
-                                    <field name="company_currency" invisible="1" readonly="1"/>
-                                    <field name="amount" sum="Total" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-                                    <field name="currency_id"
+                                        '|',('currency_id', '=', False), ('currency_id', '=', parent.currency_id)]"
+                                    />
+                                    <field name="name" invisible="1" />
+                                    <field name="date" />
+                                    <field name="payment_order_id" invisible="1" />
+                                    <field name="name" invisible="0" />
+                                    <field
+                                        name="company_currency"
+                                        invisible="1"
+                                        readonly="1"
+                                    />
+                                    <field
+                                        name="amount"
+                                        sum="Total"
+                                        widget="monetary"
+                                        options="{'currency_field': 'company_currency'}"
+                                    />
+                                    <field
+                                        name="currency_id"
                                         readonly="1"
                                         force_save="1"
                                         groups="base.group_multi_currency"
-                                        attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"/>
-                                    <field name="amount_currency"
+                                        attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
+                                    />
+                                    <field
+                                        name="amount_currency"
                                         sum="Total CCY"
                                         groups="base.group_multi_currency"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"/>
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
                                 </tree>
                             </field>
                             <div class="oe_button_box" name="button_box">
-                                <button name="gather_income_lines"
+                                <button
+                                    name="gather_income_lines"
                                     attrs="{'invisible': [('state', 'in', ['cancel', 'posted'])]}"
                                     type="object"
                                     class="oe_stat_button"
-                                    icon="fa-refresh slow-spin">
+                                    icon="fa-refresh slow-spin"
+                                >
                                     Gather Lines
                                 </button>
                             </div>
-                            <field name="invoice_ids" widget="many2many_tags" invisible="1"/>
-                            <label for="income_line_ids" invisible="context.get('line_type', False)" string="Invoices and outstanding transactions"/>
-                            <field name="income_line_ids" context="{'journal_id':journal_id, 'type':type, 'partner_id':partner_id}" attrs="{'readonly': [('state', 'not in', ('draft'))]}">
-                                <tree string="Invoices and outstanding transactions" editable="bottom" decoration-muted="amount == 0" decoration-success="amount == amount_unreconciled">
-                                    <field name="move_invoice_id" invisible="1"/>
-                                    <field name="state" invisible="1"/>
-                                    <field name="invoice_id"
+                            <field
+                                name="invoice_ids"
+                                widget="many2many_tags"
+                                invisible="1"
+                            />
+                            <label
+                                for="income_line_ids"
+                                invisible="context.get('line_type', False)"
+                                string="Invoices and outstanding transactions"
+                            />
+                            <field
+                                name="income_line_ids"
+                                context="{'journal_id':journal_id, 'type':type, 'partner_id':partner_id}"
+                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                            >
+                                <tree
+                                    editable="bottom"
+                                    decoration-muted="amount == 0"
+                                    decoration-success="amount == amount_unreconciled"
+                                >
+                                    <field name="move_invoice_id" invisible="1" />
+                                    <field name="state" invisible="1" />
+                                    <field
+                                        name="invoice_id"
                                         force_save="true"
                                         domain="[
                                             ('state', '=', 'posted'),
@@ -131,165 +269,310 @@
                                         attrs="{
                                             'required': ['|', ('move_line_id', '=', False), ('move_invoice_id', '!=', False)],
                                             'readonly': [('move_line_id', '!=', False)]}"
-                                        options="{'no_quick_create': True, 'no_create_edit': True}"/>
-                                    <field name="ref" readonly="1" force_save="True"/>
-                                    <field name="move_line_id" context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
+                                        options="{'no_quick_create': True, 'no_create_edit': True}"
+                                    />
+                                    <field name="ref" readonly="1" force_save="True" />
+                                    <field
+                                        name="move_line_id"
+                                        context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.internal_type','in',('receivable','payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
                                         readonly="1"
                                         groups="account.group_account_user"
-                                        force_save="True"/>
-                                    <field name="account_id"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="account_id"
                                         groups="base.group_no_one"
                                         domain="[('internal_type','=','receivable')]"
-                                        readonly="True" force_save="True"/>
-                                    <field name="date_original" readonly="1" force_save="True"/>
-                                    <field name="date_due" readonly="1" force_save="True"/>
-                                    <field name="currency_id" invisible="1"/>
-                                    <field name="original_currency_id" invisible="1"/>
-                                    <field name="amount_original" readonly="1" force_save="True" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="amount_unreconciled" readonly="1"
+                                        readonly="True"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="date_original"
+                                        readonly="1"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="date_due"
+                                        readonly="1"
+                                        force_save="True"
+                                    />
+                                    <field name="currency_id" invisible="1" />
+                                    <field name="original_currency_id" invisible="1" />
+                                    <field
+                                        name="amount_original"
+                                        readonly="1"
+                                        force_save="True"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
+                                    <field
+                                        name="amount_unreconciled"
+                                        readonly="1"
                                         groups="account.group_account_user"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"
-                                        sum="Total Unreconciled" force_save="True"/>
-                                    <field name="amount" sum="Total Allocation" string="Allocation" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="amount_original_currency" string="Amount Original CCY"
-                                            widget="monetary" options="{'currency_field': 'original_currency_id'}"
-                                            attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                            groups="base.group_multi_currency"/>
-                                    <field name="amount_unreconciled_currency" string="Amount Residual CCY"
-                                        widget="monetary" options="{'currency_field': 'original_currency_id'}"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                        sum="Total Unreconciled"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="amount"
+                                        sum="Total Allocation"
+                                        string="Allocation"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
+                                    <field
+                                        name="amount_original_currency"
+                                        string="Amount Original CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        groups="base.group_multi_currency"/>
-                                    <field name="amount_currency" sum="Total Allocation CCY" string="Allocation CCY"
-                                        widget="monetary" options="{'currency_field': 'original_currency_id'}"
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        name="amount_unreconciled_currency"
+                                        string="Amount Residual CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        groups="base.group_multi_currency"/>
-                                    <field string="Full" name="reconcile" class="reconcile_bullseye"/>
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        name="amount_currency"
+                                        sum="Total Allocation CCY"
+                                        string="Allocation CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
+                                        attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        string="Full"
+                                        name="reconcile"
+                                        class="reconcile_bullseye"
+                                    />
                                 </tree>
                             </field>
                             <div class="oe_button_box" name="button_box">
-                                <button name="gather_debt_lines"
+                                <button
+                                    name="gather_debt_lines"
                                     attrs="{'invisible': [('state', 'in', ['cancel', 'posted'])]}"
                                     type="object"
                                     class="oe_stat_button"
-                                    icon="fa-refresh slow-spin">
+                                    icon="fa-refresh slow-spin"
+                                >
                                     Gather Lines
                                 </button>
                             </div>
-                            <label for="debt_line_ids" string="Credits"/>
-                            <field name="debt_line_ids" attrs="{'readonly': [('state', 'not in', ('draft'))]}" context="{'journal_id':journal_id, 'partner_id':partner_id}">
-                                <tree string="Credits" editable="bottom" decoration-muted="amount == 0" decoration-success="amount == amount_unreconciled">
-                                    <field name="move_invoice_id" invisible="1"/>
-                                    <field name="original_currency_id" invisible="1"/>
-                                    <field name="state" invisible="1"/>
-                                    <field name="invoice_id" force_save="true"
+                            <label for="debt_line_ids" string="Credits" />
+                            <field
+                                name="debt_line_ids"
+                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                                context="{'journal_id':journal_id, 'partner_id':partner_id}"
+                            >
+                                <tree
+                                    editable="bottom"
+                                    decoration-muted="amount == 0"
+                                    decoration-success="amount == amount_unreconciled"
+                                >
+                                    <field name="move_invoice_id" invisible="1" />
+                                    <field name="original_currency_id" invisible="1" />
+                                    <field name="state" invisible="1" />
+                                    <field
+                                        name="invoice_id"
+                                        force_save="true"
                                         domain="[('state', '=', 'open'), ('commercial_partner_id', '=', parent.partner_id), ('id', 'not in', parent.invoice_ids), ('move_type', '=', 'out_refund')]"
                                         attrs="{
                                         'required': ['|',
                                         ('move_line_id', '=', False),
                                         ('move_invoice_id', '!=', False)],
                                         'readonly': [('move_line_id', '!=', False)]}"
-                                        options="{'no_quick_create': True, 'no_create_edit': True}"/>
-                                    <field name="ref" attrs="{'readonly': True}" force_save="True"/>
-                                    <field name="move_line_id" context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
+                                        options="{'no_quick_create': True, 'no_create_edit': True}"
+                                    />
+                                    <field
+                                        name="ref"
+                                        attrs="{'readonly': True}"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="move_line_id"
+                                        context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.internal_type','in',('receivable','payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        attrs="{'readonly': True}" force_save="True"/>
-                                    <field name="account_id"  groups="base.group_no_one"
+                                        attrs="{'readonly': True}"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="account_id"
+                                        groups="base.group_no_one"
                                         domain="[('internal_type','=','receivable')]"
                                         readonly="1"
-                                        force_save="True"/>
-                                    <field name="date_original" readonly="1" force_save="True"/>
-                                    <field name="date_due" readonly="1" force_save="True"/>
-                                    <field name="currency_id" invisible="1"/>
-                                    <field name="amount_original" readonly="1" force_save="True"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="amount_unreconciled" readonly="1"
-                                        sum="Total Unreconciled" force_save="True"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="reconcile" readonly="1" force_save="True" invisible="1"/>
-                                    <field name="amount" sum="Total Allocation" string="Allocation"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="amount_original_currency" string="Amount Original CCY"
-                                        widget="monetary" options="{'currency_field': 'original_currency_id'}"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="date_original"
+                                        readonly="1"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="date_due"
+                                        readonly="1"
+                                        force_save="True"
+                                    />
+                                    <field name="currency_id" invisible="1" />
+                                    <field
+                                        name="amount_original"
+                                        readonly="1"
+                                        force_save="True"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
+                                    <field
+                                        name="amount_unreconciled"
+                                        readonly="1"
+                                        sum="Total Unreconciled"
+                                        force_save="True"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
+                                    <field
+                                        name="reconcile"
+                                        readonly="1"
+                                        force_save="True"
+                                        invisible="1"
+                                    />
+                                    <field
+                                        name="amount"
+                                        sum="Total Allocation"
+                                        string="Allocation"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
+                                    <field
+                                        name="amount_original_currency"
+                                        string="Amount Original CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        groups="base.group_multi_currency"/>
-                                    <field name="amount_unreconciled_currency" string="Amount Residual CCY"
-                                        widget="monetary" options="{'currency_field': 'original_currency_id'}"
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        name="amount_unreconciled_currency"
+                                        string="Amount Residual CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        groups="base.group_multi_currency"/>
-                                    <field name="amount_currency" sum="Total Allocation CCY" string="Allocation CCY"
-                                        widget="monetary" options="{'currency_field': 'original_currency_id'}"
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        name="amount_currency"
+                                        sum="Total Allocation CCY"
+                                        string="Allocation CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        groups="base.group_multi_currency"/>
-                                    <field string="Full" name="reconcile" class="reconcile_bullseye"/>
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        string="Full"
+                                        name="reconcile"
+                                        class="reconcile_bullseye"
+                                    />
                                 </tree>
                             </field>
                             <group col="3">
                                 <group string="Notes">
-                                    <field name="narration" colspan="2" nolabel="1" attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
+                                    <field
+                                        name="narration"
+                                        colspan="2"
+                                        nolabel="1"
+                                        attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                                    />
                                 </group>
                             </group>
                         </page>
 
                         <page name="checks" string="Checks">
-                            <field  name="third_party_check_receipt_ids" string="Third Checks" nolabel="1" colspan="4" context="{'default_internal_type': 'third_party'}">
-                                <tree string="Third Checks">
-                                    <field name="number"/>
-                                    <field name="reception_date"/>
-                                    <field name="issue_date"/>
-                                    <field name="payment_date"/>
+                            <field
+                                name="third_party_check_receipt_ids"
+                                string="Third Checks"
+                                nolabel="1"
+                                colspan="4"
+                                context="{'default_internal_type': 'third_party'}"
+                            >
+                                <tree>
+                                    <field name="number" />
+                                    <field name="reception_date" />
+                                    <field name="issue_date" />
+                                    <field name="payment_date" />
                                     <field name="bank_id" />
-                                    <field name="type"/>
-                                    <field name="amount" sum="Total"/>
-                                    <field name="third_party_check_state"/>
+                                    <field name="type" />
+                                    <field name="amount" sum="Total" />
+                                    <field name="third_party_check_state" />
                                 </tree>
                                 <form string="Third Checks">
-                                    <field name="source_partner_id" invisible="1"/>
+                                    <field name="source_partner_id" invisible="1" />
                                     <group>
                                         <group>
-                                            <field name="source_payment_order_id" invisible="1"/>
+                                            <field
+                                                name="source_payment_order_id"
+                                                invisible="1"
+                                            />
                                             <field name="journal_id" />
-                                            <field name="internal_type" invisible="1"/>
-                                            <field name="number"/>
-                                            <field name="type"/>
-                                            <field name="checkbook_format"/>
-                                            <field name="amount" required="1"/>
-                                            <field name="bank_id" required="1"/>
-                                            <field name="crossed"/>
-                                            <field name="not_order"/>
+                                            <field name="internal_type" invisible="1" />
+                                            <field name="number" />
+                                            <field name="type" />
+                                            <field name="checkbook_format" />
+                                            <field name="amount" required="1" />
+                                            <field name="bank_id" required="1" />
+                                            <field name="crossed" />
+                                            <field name="not_order" />
                                         </group>
                                         <group>
-                                            <field name="reception_date" required="1"/>
-                                            <field name="issue_date" required="1"/>
-                                            <field name="payment_date" attrs="{'invisible': [('type', '=', 'common')], 'required': [('type','=','deferred')]}"/>
-                                            <field name="clearing"/>
-                                            <field name="signatory"/>
-                                            <field name="signatory_vat"/>
-                                            <field name="signatory_account"/>
+                                            <field name="reception_date" required="1" />
+                                            <field name="issue_date" required="1" />
+                                            <field
+                                                name="payment_date"
+                                                attrs="{'invisible': [('type', '=', 'common')], 'required': [('type','=','deferred')]}"
+                                            />
+                                            <field name="clearing" />
+                                            <field name="signatory" />
+                                            <field name="signatory_vat" />
+                                            <field name="signatory_account" />
                                         </group>
                                     </group>
-                                    <field name="third_party_check_state" invisible="1"/>
+                                    <field
+                                        name="third_party_check_state"
+                                        invisible="1"
+                                    />
                                 </form>
                             </field>
                         </page>
 
-                        <page string="Journal Items" name="journal_items" attrs="{'invisible': [('state','!=','posted')]}">
+                        <page
+                            string="Journal Items"
+                            name="journal_items"
+                            attrs="{'invisible': [('state','!=','posted')]}"
+                        >
                             <group col="4">
-                                <field name="move_id"/>
+                                <field name="move_id" />
                             </group>
                             <field name="move_line_ids" readonly="1">
-                                <tree string="Journal Items">
-                                    <field name="move_id"/>
-                                    <field name="ref"/>
-                                    <field name="date"/>
-                                    <field name="statement_id"/>
-                                    <field name="partner_id"/>
-                                    <field name="account_id"/>
-                                    <field name="name"/>
-                                    <field name="debit"/>
-                                    <field name="credit"/>
-                                    <field name="amount_currency"/>
-                                    <field name="currency_id" groups="base.group_multi_currency"/>
+                                <tree>
+                                    <field name="move_id" />
+                                    <field name="ref" />
+                                    <field name="date" />
+                                    <field name="statement_id" />
+                                    <field name="partner_id" />
+                                    <field name="account_id" />
+                                    <field name="name" />
+                                    <field name="debit" />
+                                    <field name="credit" />
+                                    <field name="amount_currency" />
+                                    <field
+                                        name="currency_id"
+                                        groups="base.group_multi_currency"
+                                    />
                                 </tree>
                             </field>
                         </page>
@@ -304,7 +587,10 @@
         <field name="name">account.payment.order.view.tree</field>
         <field name="model">account.payment.order</field>
         <field name="arch" type="xml">
-            <tree string="Account payment order" decoration-info="state == 'draft'" decoration-muted="state  == 'cancel'">
+            <tree
+                decoration-info="state == 'draft'"
+                decoration-muted="state  == 'cancel'"
+            >
                 <field name="date" />
                 <field name="number" />
                 <field name="name" />
@@ -321,10 +607,15 @@
         <field name="res_model">account.payment.order</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'default_type' : 'receipt'}</field>
-        <field name="domain">[('journal_id.type', '=', 'receipt'), ('type','=','receipt')]</field>
-        <field name="view_ids" eval="[(5, 0, 0),
+        <field
+            name="domain"
+        >[('journal_id.type', '=', 'receipt'), ('type','=','receipt')]</field>
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0),
         (0, 0, {'view_mode': 'tree', 'view_id': ref('account_payment_order_view_tree')}),
-        (0, 0, {'view_mode': 'form', 'view_id': ref('account_customer_payment_order_view_form')})]"/>
+        (0, 0, {'view_mode': 'form', 'view_id': ref('account_customer_payment_order_view_form')})]"
+        />
     </record>
 
     <menuitem
@@ -332,7 +623,8 @@
         name="Customer Payments"
         action="account_customer_payment_order_action"
         parent="account.menu_finance_receivables"
-        sequence="4"/>
+        sequence="4"
+    />
 
     <record id="account_supplier_payment_order_view_form" model="ir.ui.view">
         <field name="name">account.supplier.payment.order.view.form</field>
@@ -340,111 +632,227 @@
         <field name="arch" type="xml">
             <form string="Payment Order" context="{'default_type' : 'payment'}">
                 <header>
-                    <button name="proforma_voucher" string="Validate" states="draft" invisible="context.get('line_type', False)" class="oe_highlight" type="object"/>
-                    <button name="cancel_voucher" string="Cancel Payment" states="draft,proforma" type="object" invisible="context.get('line_type', False)"/>
-                    <button name="cancel_voucher" string="Unreconcile" type="object" states="posted" invisible="context.get('line_type', False)" confirm="Are you sure to unreconcile and cancel this record ?"/>
-                    <button name="action_cancel_draft" type="object" states="cancel" string="Set to Draft" invisible="context.get('line_type', False)"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,posted" statusbar_colors='{"proforma":"blue"}'/>
+                    <button
+                        name="proforma_voucher"
+                        string="Validate"
+                        states="draft"
+                        invisible="context.get('line_type', False)"
+                        class="oe_highlight"
+                        type="object"
+                    />
+                    <button
+                        name="cancel_voucher"
+                        string="Cancel Payment"
+                        states="draft,proforma"
+                        type="object"
+                        invisible="context.get('line_type', False)"
+                    />
+                    <button
+                        name="cancel_voucher"
+                        string="Unreconcile"
+                        type="object"
+                        states="posted"
+                        invisible="context.get('line_type', False)"
+                        confirm="Are you sure to unreconcile and cancel this record ?"
+                    />
+                    <button
+                        name="action_cancel_draft"
+                        type="object"
+                        states="cancel"
+                        string="Set to Draft"
+                        invisible="context.get('line_type', False)"
+                    />
+                    <field
+                        name="state"
+                        widget="statusbar"
+                        statusbar_visible="draft,posted"
+                        statusbar_colors='{"proforma":"blue"}'
+                    />
                 </header>
                 <sheet>
                     <h1>
-                        <label for="number" string="Number"/>
-                        <field name="number" readonly="1"/>
+                        <label for="number" string="Number" />
+                        <field name="number" readonly="1" />
                     </h1>
-                    <field name="account_id" invisible="1"/>
-                    <field name="company_currency" invisible="1"/>
-                    <field name="pre_line" invisible="1"/>
-                    <field name="type" invisible="1"/>
+                    <field name="account_id" invisible="1" />
+                    <field name="company_currency" invisible="1" />
+                    <field name="pre_line" invisible="1" />
+                    <field name="type" invisible="1" />
                     <group>
                         <group>
-                            <field name="partner_id"
+                            <field
+                                name="partner_id"
                                 required="1"
                                 domain="[('supplier_rank', '>', 0)]"
                                 widget="res_partner_many2one"
                                 invisible="context.get('line_type', False)"
                                 context="{'invoice_currency':currency_id, 'search_default_supplier': 1, 'default_supplier': 1}"
-                                string="Supplier"/>
-                            <field name="currency_id" invisible="1"/>
-                            <field name="journal_id"
+                                string="Supplier"
+                            />
+                            <field name="currency_id" invisible="1" />
+                            <field
+                                name="journal_id"
                                 domain="[('type', '=', 'payment'), ('company_id', '=', company_id)]"
                                 invisible="context.get('line_type', False)"
                                 options="{'no_quick_create': True, 'no_create': True, 'no_create_edit': True}"
-                                string="Journal"/>
-                            <field name="amount" class="oe_inline"
+                                string="Journal"
+                            />
+                            <field
+                                name="amount"
+                                class="oe_inline"
                                 string="Paid Amount"
-                                widget="monetary" options="{'currency_field': 'company_currency'}"
+                                widget="monetary"
+                                options="{'currency_field': 'company_currency'}"
                                 force_save="True"
-                                attrs="{'readonly': True}"/>
+                                attrs="{'readonly': True}"
+                            />
                         </group>
                         <group>
-                            <field name="date" invisible="context.get('line_type', False)"/>
-                            <field name="reference" invisible="context.get('line_type', False)" string="Payment Ref" placeholder="e.g. 003/10"/>
-                            <field name="name" colspan="2" invisible="context.get('line_type', False)" placeholder="e.g. Invoice SAJ/0042"/>
-                            <field name="date_effective"/>
-                            <field name="receipt_number"/>
-                            <field name="disable_retentions" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
-                            <field name="company_id" widget="selection" groups="base.group_multi_company"/>
+                            <field
+                                name="date"
+                                invisible="context.get('line_type', False)"
+                            />
+                            <field
+                                name="reference"
+                                invisible="context.get('line_type', False)"
+                                string="Payment Ref"
+                                placeholder="e.g. 003/10"
+                            />
+                            <field
+                                name="name"
+                                colspan="2"
+                                invisible="context.get('line_type', False)"
+                                placeholder="e.g. Invoice SAJ/0042"
+                            />
+                            <field name="date_effective" />
+                            <field name="receipt_number" />
+                            <field
+                                name="disable_retentions"
+                                attrs="{'readonly': [('state', '!=', 'draft')]}"
+                            />
+                            <field
+                                name="company_id"
+                                widget="selection"
+                                groups="base.group_multi_company"
+                            />
                         </group>
-                        <group col="2" attrs="{'invisible':[('is_multi_currency','=',False)]}">
-                            <separator string="Currency Options" colspan="2"/>
-                            <field name="is_multi_currency" invisible="1"/>
-                            <label for="payment_rate" colspan="1"/>
+                        <group
+                            col="2"
+                            attrs="{'invisible':[('is_multi_currency','=',False)]}"
+                        >
+                            <separator string="Currency Options" colspan="2" />
+                            <field name="is_multi_currency" invisible="1" />
+                            <label for="payment_rate" colspan="1" />
                             <div>
-                                <field name="payment_rate" required="1" class="oe_inline" attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
-                                <field name="payment_rate_currency_id" readonly="1" class="oe_inline" groups="base.group_multi_currency"/>
+                                <field
+                                    name="payment_rate"
+                                    required="1"
+                                    class="oe_inline"
+                                    attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                                />
+                                <field
+                                    name="payment_rate_currency_id"
+                                    readonly="1"
+                                    class="oe_inline"
+                                    groups="base.group_multi_currency"
+                                />
                             </div>
                             <!-- <field name="currency_help_label" colspan="2" nolabel="1" class="oe_grey"/> -->
-                            <field name="paid_amount_in_company_currency" colspan="2" invisible="1"/>
+                            <field
+                                name="paid_amount_in_company_currency"
+                                colspan="2"
+                                invisible="1"
+                            />
                         </group>
                         <group col="2">
-                            <separator string="Payment Options" colspan="2"/>
-                            <field name="writeoff_amount" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-                            <field name="payment_option"
+                            <separator string="Payment Options" colspan="2" />
+                            <field
+                                name="writeoff_amount"
+                                widget="monetary"
+                                options="{'currency_field': 'company_currency'}"
+                            />
+                            <field
+                                name="payment_option"
                                 required="1"
-                                attrs="{'invisible':[('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="writeoff_acc_id"
+                                attrs="{'invisible':[('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"
+                            />
+                            <field
+                                name="writeoff_acc_id"
                                 attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'required':[('payment_option','=','with_writeoff')], 'readonly': [('state', 'not in', ('draft'))]}"
-                                domain="[('user_type_id.type','=','other')]"/>
-                            <field name="comment"
-                                attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"/>
-                            <field name="analytic_id"
+                                domain="[('user_type_id.type','=','other')]"
+                            />
+                            <field
+                                name="comment"
+                                attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"
+                            />
+                            <field
+                                name="analytic_id"
                                 groups="analytic.group_analytic_accounting"
-                                attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"/>
+                                attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'readonly': [('state', 'not in', ('draft'))]}"
+                            />
                         </group>
                     </group>
                     <notebook>
                         <page string="Payment Information" name="payment_information">
-                            <label for="payment_mode_line_ids"/>
+                            <label for="payment_mode_line_ids" />
                             <field name="payment_mode_line_ids">
-                                <tree string="Payment Methods" editable="bottom" decoration-muted="amount == 0">
-                                    <field name="payment_mode_id" invisible="0"
-                                        attrs="{'required': True}" domain="[('type', 'in', ['cash', 'bank']),
+                                <tree editable="bottom" decoration-muted="amount == 0">
+                                    <field
+                                        name="payment_mode_id"
+                                        invisible="0"
+                                        attrs="{'required': True}"
+                                        domain="[('type', 'in', ['cash', 'bank']),
                                         ('company_id', '=', parent.company_id),
                                         '|',('currency_id', '=', False), ('currency_id', '=', parent.currency_id)
                                         ]"
                                     />
-                                    <field name="currency_id" readonly="1"/>
-                                    <field name="date"/>
-                                    <field name="payment_order_id" invisible="1"/>
-                                    <field name="name" invisible="0"/>
-                                    <field name="amount" sum="Total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="currency_id" readonly="1" />
+                                    <field name="date" />
+                                    <field name="payment_order_id" invisible="1" />
+                                    <field name="name" invisible="0" />
+                                    <field
+                                        name="amount"
+                                        sum="Total"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
                                 </tree>
                             </field>
-                            <field name="invoice_ids" widget="many2many_tags" invisible="1"/>
+                            <field
+                                name="invoice_ids"
+                                widget="many2many_tags"
+                                invisible="1"
+                            />
                             <div class="oe_button_box" name="button_box">
-                                <button name="gather_debt_lines"
+                                <button
+                                    name="gather_debt_lines"
                                     attrs="{'invisible': [('state', 'in', ['cancel', 'posted'])]}"
-                                    type="object" class="oe_stat_button" icon="fa-refresh slow-spin">
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-refresh slow-spin"
+                                >
                                     Gather Lines
                                 </button>
                             </div>
-                            <label for="debt_line_ids" string="Supplier Invoices and Outstanding transactions"/>
-                            <field name="debt_line_ids" context="{'journal_id':journal_id,
-                                'type':type, 'partner_id':partner_id, 'account_id':account_id}">
-                                <tree string="Supplier Invoices and Outstanding transactions" editable="bottom" decoration-muted="amount == 0" decoration-success="amount == amount_unreconciled">
-                                    <field name="move_invoice_id" invisible="1"/>
-                                    <field name="state" invisible="1"/>
-                                    <field name="invoice_id" force_save="true"
+                            <label
+                                for="debt_line_ids"
+                                string="Supplier Invoices and Outstanding transactions"
+                            />
+                            <field
+                                name="debt_line_ids"
+                                context="{'journal_id':journal_id,
+                                'type':type, 'partner_id':partner_id, 'account_id':account_id}"
+                            >
+                                <tree
+                                    editable="bottom"
+                                    decoration-muted="amount == 0"
+                                    decoration-success="amount == amount_unreconciled"
+                                >
+                                    <field name="move_invoice_id" invisible="1" />
+                                    <field name="state" invisible="1" />
+                                    <field
+                                        name="invoice_id"
+                                        force_save="true"
                                         domain="[('state', '=', 'posted'),
                                             ('payment_state', 'in', ('not_paid', 'in_payment', 'partial')),
                                             ('commercial_partner_id', '=', parent.partner_id),
@@ -456,55 +864,117 @@
                                         ('move_line_id', '=', False),
                                         ('move_invoice_id', '!=', False)],
                                         'readonly': [('move_line_id', '!=', False)]}"
-                                        options="{'no_quick_create': True, 'no_create_edit': True}"/>
-                                    <field name="ref" readonly="1" force_save="True"/>
-                                    <field name="move_line_id" context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
+                                        options="{'no_quick_create': True, 'no_create_edit': True}"
+                                    />
+                                    <field name="ref" readonly="1" force_save="True" />
+                                    <field
+                                        name="move_line_id"
+                                        context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.internal_type','in',('receivable','payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
                                         readonly="True"
-                                        groups="account.group_account_user" force_save="True"/>
-                                    <field name="account_id"
+                                        groups="account.group_account_user"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="account_id"
                                         groups="base.group_no_one"
                                         domain="[('internal_type','=','receivable')]"
-                                        readonly="True" force_save="True"/>
-                                    <field name="date_original" readonly="1" force_save="True"/>
-                                    <field name="date_due" readonly="1" force_save="True"/>
-                                    <field name="currency_id" invisible="1"/>
-                                    <field name="original_currency_id" invisible="1"/>
-                                    <field name="amount_original" readonly="1" force_save="True"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="amount_unreconciled" readonly="1" groups="account.group_account_user"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"
-                                        sum="Total Unreconciled" force_save="True"/>
-                                    <field name="amount" sum="Total Allocation" string="Allocation"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="amount_original_currency" string="Amount Original CCY"
-                                        widget="monetary" options="{'currency_field': 'original_currency_id'}"
+                                        readonly="True"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="date_original"
+                                        readonly="1"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="date_due"
+                                        readonly="1"
+                                        force_save="True"
+                                    />
+                                    <field name="currency_id" invisible="1" />
+                                    <field name="original_currency_id" invisible="1" />
+                                    <field
+                                        name="amount_original"
+                                        readonly="1"
+                                        force_save="True"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
+                                    <field
+                                        name="amount_unreconciled"
+                                        readonly="1"
+                                        groups="account.group_account_user"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                        sum="Total Unreconciled"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="amount"
+                                        sum="Total Allocation"
+                                        string="Allocation"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
+                                    <field
+                                        name="amount_original_currency"
+                                        string="Amount Original CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        groups="base.group_multi_currency"/>
-                                    <field name="amount_unreconciled_currency" string="Amount Residual CCY"
-                                        widget="monetary" options="{'currency_field': 'original_currency_id'}"
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        name="amount_unreconciled_currency"
+                                        string="Amount Residual CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        groups="base.group_multi_currency"/>
-                                    <field name="amount_currency" sum="Total Allocation CCY" string="Allocation CCY"
-                                        widget="monetary" options="{'currency_field': 'original_currency_id'}"
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        name="amount_currency"
+                                        sum="Total Allocation CCY"
+                                        string="Allocation CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        groups="base.group_multi_currency"/>
-                                    <field string="Full" name="reconcile" class="reconcile_bullseye"/>
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        string="Full"
+                                        name="reconcile"
+                                        class="reconcile_bullseye"
+                                    />
                                 </tree>
                             </field>
                             <div class="oe_button_box" name="button_box">
-                                <button name="gather_income_lines"
+                                <button
+                                    name="gather_income_lines"
                                     attrs="{'invisible': [('state', 'in', ['cancel', 'posted'])]}"
-                                    type="object" class="oe_stat_button" icon="fa-refresh slow-spin">
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-refresh slow-spin"
+                                >
                                     Gather Lines
                                 </button>
                             </div>
-                            <label for="income_line_ids" string="Credits"/>
-                            <field name="income_line_ids" context="{'journal_id':journal_id, 'partner_id':partner_id}">
-                                <tree string="Credits" editable="bottom" decoration-muted="amount == 0" decoration-success="amount == amount_unreconciled">
-                                    <field name="move_invoice_id" invisible="1"/>
-                                    <field name="state" invisible="1"/>
-                                    <field name="invoice_id" force_save="true"
+                            <label for="income_line_ids" string="Credits" />
+                            <field
+                                name="income_line_ids"
+                                context="{'journal_id':journal_id, 'partner_id':partner_id}"
+                            >
+                                <tree
+                                    editable="bottom"
+                                    decoration-muted="amount == 0"
+                                    decoration-success="amount == amount_unreconciled"
+                                >
+                                    <field name="move_invoice_id" invisible="1" />
+                                    <field name="state" invisible="1" />
+                                    <field
+                                        name="invoice_id"
+                                        force_save="true"
                                         domain="[
                                             ('state', '=', 'open'),
                                             ('payment_state', 'in', ('not_paid', 'in_payment', 'partial')),
@@ -514,163 +984,296 @@
                                         attrs="{
                                             'required': ['|', ('move_line_id', '=', False), ('move_invoice_id', '!=', False)],
                                             'readonly': [('move_line_id', '!=', False)]}"
-                                        options="{'no_quick_create': True, 'no_create_edit': True}"/>
-                                    <field name="ref" attrs="{'readonly': True}" force_save="True"/>
-                                    <field name="move_line_id" context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
+                                        options="{'no_quick_create': True, 'no_create_edit': True}"
+                                    />
+                                    <field
+                                        name="ref"
+                                        attrs="{'readonly': True}"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="move_line_id"
+                                        context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.internal_type','in',('receivable','payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        attrs="{'readonly': True}" force_save="True"/>
-                                    <field name="account_id"  groups="base.group_no_one"
+                                        attrs="{'readonly': True}"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="account_id"
+                                        groups="base.group_no_one"
                                         domain="[('internal_type','=','receivable')]"
                                         readonly="1"
-                                        force_save="True"/>
-                                    <field name="date_original" readonly="1" force_save="True"/>
-                                    <field name="date_due" readonly="1" force_save="True"/>
-                                    <field name="currency_id" invisible="1"/>
-                                    <field name="original_currency_id" invisible="1"/>
-                                    <field name="amount_original" readonly="1" force_save="True"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="amount_unreconciled" readonly="1"
-                                        sum="Total Unreconciled" force_save="True"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="reconcile" readonly="1" force_save="True" invisible="1"/>
-                                    <field name="amount" sum="Total Allocation" string="Allocation"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="amount_original_currency" string="Amount Original CCY"
-                                        widget="monetary" options="{'currency_field': 'original_currency_id'}"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="date_original"
+                                        readonly="1"
+                                        force_save="True"
+                                    />
+                                    <field
+                                        name="date_due"
+                                        readonly="1"
+                                        force_save="True"
+                                    />
+                                    <field name="currency_id" invisible="1" />
+                                    <field name="original_currency_id" invisible="1" />
+                                    <field
+                                        name="amount_original"
+                                        readonly="1"
+                                        force_save="True"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
+                                    <field
+                                        name="amount_unreconciled"
+                                        readonly="1"
+                                        sum="Total Unreconciled"
+                                        force_save="True"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
+                                    <field
+                                        name="reconcile"
+                                        readonly="1"
+                                        force_save="True"
+                                        invisible="1"
+                                    />
+                                    <field
+                                        name="amount"
+                                        sum="Total Allocation"
+                                        string="Allocation"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                    />
+                                    <field
+                                        name="amount_original_currency"
+                                        string="Amount Original CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        groups="base.group_multi_currency"/>
-                                    <field name="amount_unreconciled_currency" string="Amount Residual CCY"
-                                        widget="monetary" options="{'currency_field': 'original_currency_id'}"
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        name="amount_unreconciled_currency"
+                                        string="Amount Residual CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        groups="base.group_multi_currency"/>
-                                    <field name="amount_currency" sum="Total Allocation CCY" string="Allocation CCY"
-                                        widget="monetary" options="{'currency_field': 'original_currency_id'}"
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        name="amount_currency"
+                                        sum="Total Allocation CCY"
+                                        string="Allocation CCY"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
-                                        groups="base.group_multi_currency"/>
-                                    <field string="Full" name="reconcile" class="reconcile_bullseye"/>
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        string="Full"
+                                        name="reconcile"
+                                        class="reconcile_bullseye"
+                                    />
                                 </tree>
                             </field>
                             <group>
                                 <group string="Internal Notes">
-                                    <field name="narration" colspan="2" nolabel="1"/>
+                                    <field name="narration" colspan="2" nolabel="1" />
                                 </group>
                             </group>
                         </page>
                         <page string="Checks">
-                            <field name="issued_check_ids" string="Issued Checks" nolabel="1" colspan="4" >
-                                <tree string="Issued Checks">
-                                    <field name="currency_id" invisible="1"/>
-                                    <field name="number"/>
-                                    <field name="type"/>
-                                    <field name="issue_date"/>
-                                    <field name="payment_date"/>
-                                    <field name="bank_id"/>
-                                    <field name="amount" sum="Total Amount"/>
-                                    <field name="amount_currency"
+                            <field
+                                name="issued_check_ids"
+                                string="Issued Checks"
+                                nolabel="1"
+                                colspan="4"
+                            >
+                                <tree>
+                                    <field name="currency_id" invisible="1" />
+                                    <field name="number" />
+                                    <field name="type" />
+                                    <field name="issue_date" />
+                                    <field name="payment_date" />
+                                    <field name="bank_id" />
+                                    <field name="amount" sum="Total Amount" />
+                                    <field
+                                        name="amount_currency"
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
                                         attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
-                                        sum="Total Amount"/>
+                                        sum="Total Amount"
+                                    />
                                 </tree>
                                 <form string="Issued Checks">
                                     <group>
                                         <group>
-                                            <field name="journal_id" required="1" domain="[('type', '=', 'bank')]"/>
-                                            <field name="checkbook_id" required="1" domain="[('journal_id', '=', journal_id)]"/>
-                                            <field name="record_ids" required="1" domain="[('issued_check_state', '=', 'draft'), ('checkbook_id', '=', checkbook_id)]"/>
-                                            <field name="number" invisible="1"/>
-                                            <field name="type"/>
-                                            <field name="checkbook_format"/>
-                                            <field name="amount"/>
+                                            <field
+                                                name="journal_id"
+                                                required="1"
+                                                domain="[('type', '=', 'bank')]"
+                                            />
+                                            <field
+                                                name="checkbook_id"
+                                                required="1"
+                                                domain="[('journal_id', '=', journal_id)]"
+                                            />
+                                            <field
+                                                name="record_ids"
+                                                required="1"
+                                                domain="[('issued_check_state', '=', 'draft'), ('checkbook_id', '=', checkbook_id)]"
+                                            />
+                                            <field name="number" invisible="1" />
+                                            <field name="type" />
+                                            <field name="checkbook_format" />
+                                            <field name="amount" />
                                         </group>
                                         <group>
-                                            <field name="issue_date"/>
-                                            <field name="payment_date"
-                                                attrs="{'invisible': [('type', '=', 'common')],'required': [('type', '=', 'postdated')]}"/>
-                                            <field name="clearing"/>
-                                            <field name="signatory"/>
-                                            <field name="origin"/>
-                                            <field name="issued_check_state" invisible="1"/>
-                                            <field name="crossed"/>
-                                            <field name="not_order"/>
+                                            <field name="issue_date" />
+                                            <field
+                                                name="payment_date"
+                                                attrs="{'invisible': [('type', '=', 'common')],'required': [('type', '=', 'postdated')]}"
+                                            />
+                                            <field name="clearing" />
+                                            <field name="signatory" />
+                                            <field name="origin" />
+                                            <field
+                                                name="issued_check_state"
+                                                invisible="1"
+                                            />
+                                            <field name="crossed" />
+                                            <field name="not_order" />
                                         </group>
                                     </group>
-                                    <field name="receiving_partner_id" invisible="1"/>
+                                    <field name="receiving_partner_id" invisible="1" />
                                 </form>
                             </field>
-                            <label for="third_party_check_ids"/>
-                            <field name="third_party_check_ids" string="Third Party Checks" nolabel="1" colspan="4" domain="[('internal_type', '=', 'third_party'), ('third_party_check_state', '=', 'in_wallet'), ('company_id', '=', company_id)]">
-                                <tree string="Third Checks">
-                                    <field name="currency_id" invisible="1"/>
-                                    <field name="number"/>
-                                    <field name="source_partner_id"/>
-                                    <field name="issue_date"/>
-                                    <field name="payment_date"/>
-                                    <field name="bank_id"/>
-                                    <field name="origin"/>
-                                    <field name="amount" sum="Total"/>
-                                    <field name="amount_currency"
+                            <label for="third_party_check_ids" />
+                            <field
+                                name="third_party_check_ids"
+                                string="Third Party Checks"
+                                nolabel="1"
+                                colspan="4"
+                                domain="[('internal_type', '=', 'third_party'), ('third_party_check_state', '=', 'in_wallet'), ('company_id', '=', company_id)]"
+                            >
+                                <tree>
+                                    <field name="currency_id" invisible="1" />
+                                    <field name="number" />
+                                    <field name="source_partner_id" />
+                                    <field name="issue_date" />
+                                    <field name="payment_date" />
+                                    <field name="bank_id" />
+                                    <field name="origin" />
+                                    <field name="amount" sum="Total" />
+                                    <field
+                                        name="amount_currency"
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
                                         attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
-                                        sum="Total Amount"/>
-                                    <field name="third_party_check_state" invisible="1"/>
+                                        sum="Total Amount"
+                                    />
+                                    <field
+                                        name="third_party_check_state"
+                                        invisible="1"
+                                    />
                                 </tree>
                             </field>
                         </page>
                         <page string="Retentions">
-                            <field name="retention_ids" force_save="1" nolabel="1" attrs="{'readonly': [('disable_retentions', '=', False)]}">
-                                <tree string="Retention Lines">
-                                    <field name="currency_id" invisible="1"/>
-                                    <field name="name" invisible="1"/>
-                                    <field name="state_id" invisible="1"/>
-                                    <field name="date"/>
-                                    <field name="retention_id" string="Retention Type"/>
-                                    <field name="taxapp_id" invisible="1"/>
-                                    <field name="date_applied"/>
-                                    <field name="concept_id"/>
-                                    <field name="invoice_ref"/>
-                                    <field name="invoice_id" invisible="1"/>
-                                    <field name="manual" invisible="1"/>
-                                    <field name="reg_code" invisible="1"/>
-                                    <field name="excluded_percent" invisible="1"/>
-                                    <field name="exclusion_date_certificate" invisible="1"/>
-                                    <field name="partner_id" invisible="1"/>
-                                    <field name="certificate_no"/>
-                                    <field name="base"/>
-                                    <field name="base_currency"
+                            <field
+                                name="retention_ids"
+                                force_save="1"
+                                nolabel="1"
+                                attrs="{'readonly': [('disable_retentions', '=', False)]}"
+                            >
+                                <tree>
+                                    <field name="currency_id" invisible="1" />
+                                    <field name="name" invisible="1" />
+                                    <field name="state_id" invisible="1" />
+                                    <field name="date" />
+                                    <field
+                                        name="retention_id"
+                                        string="Retention Type"
+                                    />
+                                    <field name="taxapp_id" invisible="1" />
+                                    <field name="date_applied" />
+                                    <field name="concept_id" />
+                                    <field name="invoice_ref" />
+                                    <field name="invoice_id" invisible="1" />
+                                    <field name="manual" invisible="1" />
+                                    <field name="reg_code" invisible="1" />
+                                    <field name="excluded_percent" invisible="1" />
+                                    <field
+                                        name="exclusion_date_certificate"
+                                        invisible="1"
+                                    />
+                                    <field name="partner_id" invisible="1" />
+                                    <field name="certificate_no" />
+                                    <field name="base" />
+                                    <field
+                                        name="base_currency"
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
-                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"/>
-                                    <field name="amount"/>
-                                    <field name="amount_currency"
+                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
+                                    />
+                                    <field name="amount" />
+                                    <field
+                                        name="amount_currency"
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
-                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"/>
-                                    <field name="account_id" invisible="1"/>
+                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
+                                    />
+                                    <field name="account_id" invisible="1" />
                                 </tree>
                                 <form>
                                     <h1>
-                                        <field name="name"
+                                        <field
+                                            name="name"
                                             class="oe_inline"
-                                            attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
+                                            attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                        />
                                     </h1>
                                     <group>
                                         <group string="Information" name="info">
-                                            <field name="state_id" invisible="1"/>
-                                            <field name="retention_id" domain="[('type_tax_use', '=', 'sale')]" attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
-                                            <field name="certificate_no" attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
-                                            <field name="state_id" attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
-                                            <field name="date_applied" attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
-                                            <field name="date" attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
-                                            <label for="date" string="Keep it empty if the date is the same as the voucher." class="oe_grey"/>
+                                            <field name="state_id" invisible="1" />
+                                            <field
+                                                name="retention_id"
+                                                domain="[('type_tax_use', '=', 'sale')]"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                            <field
+                                                name="certificate_no"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                            <field
+                                                name="state_id"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                            <field
+                                                name="date_applied"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                            <field
+                                                name="date"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                            <label
+                                                for="date"
+                                                string="Keep it empty if the date is the same as the voucher."
+                                                class="oe_grey"
+                                            />
                                         </group>
                                         <group string="Amounts" name="amount">
-                                            <field name="base"
-                                            attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
-                                        <field name="amount"
-                                            attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
-                                        <field name="account_id" invisible="1"/>
+                                            <field
+                                                name="base"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                        <field
+                                                name="amount"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                        <field name="account_id" invisible="1" />
                                         </group>
                                     </group>
                                     <!-- <group string="Moves Information" name="moves">
@@ -689,21 +1292,33 @@
                                             </tree>
                                         </field>
                                     </group> -->
-                                    <group name="more_information" string="More information">
-                                        <field name="retention_move_line_ids" readonly="1">
+                                    <group
+                                        name="more_information"
+                                        string="More information"
+                                    >
+                                        <field
+                                            name="retention_move_line_ids"
+                                            readonly="1"
+                                        >
                                             <tree>
-                                                <field name="payment_order_line_id" invisible="1"/>
-                                                <field name="payment_order_reference" string="OP reference"/>
-                                                <field name="move_type" string="Type"/>
-                                                <field name="move_id" invisible="1"/>
-                                                <field name="move_name" string="Name"/>
+                                                <field
+                                                    name="payment_order_line_id"
+                                                    invisible="1"
+                                                />
+                                                <field
+                                                    name="payment_order_reference"
+                                                    string="OP reference"
+                                                />
+                                                <field name="move_type" string="Type" />
+                                                <field name="move_id" invisible="1" />
+                                                <field name="move_name" string="Name" />
                                                 <field name="total_without_vat" />
                                             </tree>
                                         </field>
                                         <field name="retention_move_lines_total" />
                                         <group name="concept" string="Concept">
-                                            <field name="concept_id"/>
-                                            <field name="concept_amount"/>
+                                            <field name="concept_id" />
+                                            <field name="concept_amount" />
                                             <field name="applied_aliquot" />
                                             <field name="total_month_retention" />
                                             <field name="month_applied_retentions" />
@@ -713,33 +1328,43 @@
                                 </form>
                             </field>
                         </page>
-                        <page string="Journal Items" name="journal_items" attrs="{'invisible': [('state','!=','posted')]}">
+                        <page
+                            string="Journal Items"
+                            name="journal_items"
+                            attrs="{'invisible': [('state','!=','posted')]}"
+                        >
                             <group col="4">
                                 <!-- <field name="audit"/> -->
                                 <!-- <field name="number"/> -->
-                                <field name="move_id"/>
+                                <field name="move_id" />
                             </group>
                             <field name="move_line_ids" readonly="1">
-                                <tree string="Journal Items">
-                                    <field name="move_id"/>
-                                    <field name="ref"/>
-                                    <field name="date"/>
-                                    <field name="statement_id"/>
-                                    <field name="partner_id"/>
-                                    <field name="account_id"/>
-                                    <field name="name"/>
-                                    <field name="debit"/>
-                                    <field name="credit"/>
-                                    <field name="amount_currency" groups="base.group_multi_currency"/>
-                                    <field name="currency_id" groups="base.group_multi_currency"/>
+                                <tree>
+                                    <field name="move_id" />
+                                    <field name="ref" />
+                                    <field name="date" />
+                                    <field name="statement_id" />
+                                    <field name="partner_id" />
+                                    <field name="account_id" />
+                                    <field name="name" />
+                                    <field name="debit" />
+                                    <field name="credit" />
+                                    <field
+                                        name="amount_currency"
+                                        groups="base.group_multi_currency"
+                                    />
+                                    <field
+                                        name="currency_id"
+                                        groups="base.group_multi_currency"
+                                    />
                                 </tree>
                             </field>
                         </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter" invisible="context.get('line_type', False)">
-                    <field name="message_follower_ids" widget="mail_followers"/>
-                    <field name="message_ids" widget="mail_thread"/>
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="message_ids" widget="mail_thread" />
                 </div>
             </form>
         </field>
@@ -750,10 +1375,15 @@
         <field name="res_model">account.payment.order</field>
         <field name="context">{'default_type' : 'payment'}</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('journal_id.type', '=', 'payment'), ('type','=','payment')]</field>
-        <field name="view_ids" eval="[(5, 0, 0),
+        <field
+            name="domain"
+        >[('journal_id.type', '=', 'payment'), ('type','=','payment')]</field>
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0),
         (0, 0, {'view_mode': 'tree', 'view_id': ref('account_payment_order_view_tree')}),
-        (0, 0, {'view_mode': 'form', 'view_id': ref('account_supplier_payment_order_view_form')})]"/>
+        (0, 0, {'view_mode': 'form', 'view_id': ref('account_supplier_payment_order_view_form')})]"
+        />
     </record>
 
     <menuitem
@@ -761,5 +1391,6 @@
         name="Supplier Payments"
         action="account_supplier_payment_order_action"
         parent="account.menu_finance_payables"
-        sequence="4"/>
+        sequence="4"
+    />
 </odoo>

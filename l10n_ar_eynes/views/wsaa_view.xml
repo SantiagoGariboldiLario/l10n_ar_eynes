@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <!-- Menuitems principales -->
+    <menuitem
+        id="base_afipws"
+        name="AFIP WebServices"
+        parent="account.menu_finance_configuration"
+    />
+
+    <!-- Tree View for wsaa_config -->
+    <record id="view_wsaa_config_tree" model="ir.ui.view">
+        <field name="name">wsaa.config.tree</field>
+        <field name="model">wsaa.config</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="company_id" select="1" />
+                <field name="url" select="1" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View for wsaa_config -->
+    <record id="view_wsaa_config_form" model="ir.ui.view">
+        <field name="name">wsaa.config.form</field>
+        <field name="model">wsaa.config</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form version="7.0">
+                <sheet>
+                    <h1>WSAA Config</h1>
+                    <group>
+                        <field name="name" select="1" />
+                        <field name="company_id" select="1" />
+                        <field name="url" select="1" />
+                    </group>
+                    <notebook colspan="4">
+                        <page string="Authorized Services">
+                            <field
+                                name="service_ids"
+                                colspan="4"
+                                nolabel="1"
+                                readonly="1"
+                            >
+                                <tree>
+                                    <field name="name" />
+                                    <field name="expiration_time" />
+                                    <field name="company_id" />
+                                    <button
+                                        name="action_renew"
+                                        string="Renew TA"
+                                        type="object"
+                                        icon="fa-refresh"
+                                    />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Security Info">
+                            <separator string="Certificate" class="oe_inline" />
+                            <div class="oe_right">
+                                <button
+                                    type="object"
+                                    context="{
+                                    'field': 'certificate',
+                                    'filename': 'cert.crt',
+                                    }"
+                                    class="oe_stat_button"
+                                    icon="fa-download"
+                                    attrs="{'invisible': [('certificate', '=', False)]}"
+                                    name="download_file"
+                                >
+                                    <div><strong>Download</strong></div>
+                                </button>
+                                <button
+                                    type="action"
+                                    class="oe_stat_button"
+                                    id="wsaa_certificate_renewal"
+                                    icon="fa-certificate"
+                                    name="%(certificate_renewal_wizard_action)d"
+                                >
+                                    <div><strong>Load Certificate</strong></div>
+                                </button>
+                            </div>
+                            <field
+                                name="certificate"
+                                colspan="4"
+                                nolabel="1"
+                                height="200"
+                            />
+
+                            <separator string="Key" class="oe_inline" />
+                            <div class="oe_right">
+                                <button
+                                    type="object"
+                                    context="{
+                                    'field': 'key',
+                                    'filename': 'priv.key',
+                                    }"
+                                    class="oe_stat_button"
+                                    icon="fa-download"
+                                    attrs="{'invisible': [('key', '=', False)]}"
+                                    name="download_file"
+                                >
+                                    <div><strong>Download</strong></div>
+                                </button>
+                                <button
+                                    type="action"
+                                    class="oe_stat_button"
+                                    id="wsaa_certificate_renewal"
+                                    icon="fa-key"
+                                    name="%(key_renewal_wizard_action)d"
+                                >
+                                    <div><strong>Load Key</strong></div>
+                                </button>
+                            </div>
+                            <field name="key" colspan="4" nolabel="1" height="200" />
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!--Window Action para wsaa_config -->
+    <record id="action_wsaa_config_tree" model="ir.actions.act_window">
+        <field name="name">WSAA Config</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">wsaa.config</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="wsaa_config_menu"
+        name="WSAA Configuration"
+        parent="base_afipws"
+        sequence="20"
+        action="action_wsaa_config_tree"
+    />
+
+</odoo>

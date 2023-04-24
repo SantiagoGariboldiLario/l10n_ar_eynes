@@ -16,7 +16,7 @@
 #    along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-# pylint: disable=manifest-required-author, missing-readme
+# pylint: disable=manifest-required-author, missing-readme, pointless-statement
 
 {
     'name': 'l10n Argentina',
@@ -47,6 +47,8 @@
         'data/iibb_situation_data.xml',
         'data/dst_cuit_codes_data.xml',
         'data/ir_sequence_data.xml',
+        "data/wsfe_data.xml",
+        "data/ir_cron.xml",
         'security/ir.model.access.csv',
         'security/account_security.xml',
         'wizard/deposit_check_wizard_view.xml',
@@ -71,7 +73,15 @@
         'views/treasury_menuitems.xml',
         'views/taxes_menuitems.xml',
         'wizard/update_journal_period_view.xml',
+        "wizard/wsaa_config_renewal.xml",
+        'views/wsaa_view.xml',
+        'views/certificate_request_view.xml',
+        "wizard/wsfe_sinchronize_voucher_view.xml",
+        "wizard/wsfe_massive_sinchronize_view.xml",
+        "views/wsfe_view.xml",
+        "views/res_company_view.xml",
     ],
     'installable': True,
     'application': True,
+    "external_dependencies": {"python": ["M2Crypto", "OpenSSL", "easywsy", "suds"]},
 }

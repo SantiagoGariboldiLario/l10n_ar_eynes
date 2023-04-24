@@ -1,6 +1,6 @@
 import logging
 
-from odoo import fields, models, _, api
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
@@ -99,6 +99,29 @@ class AccountJournal(models.Model):
     )
     state_id = fields.Many2one(related='tax_id.state_id')
     priority = fields.Integer()
+    fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
+
+    @api.constrains('fcred_is_fce_emitter', 'warehouse_id')
+    def _check_no_more_than_one_pos_fce_per_company(self):
+        if self.fcred_is_fce_emitter:
+            pos = self.env['account.journal'].search_count(
+                [
+                    ('warehouse_id', '=', self.warehouse_id.id),
+                    ('fcred_is_fce_emitter', '=', True),
+                ]
+            )
+            if pos > 1:
+                raise ValidationError(
+                    _(
+                        "You are not allowed to have more than "
+                        "one PoS per shop with FCE Enabled. %s"
+                    )
+                    % self.shop_id
+                )
+
+    def get_pos_number(self):
+        denomination = dict(self._fields['denomination'].selection).get(self.denomination)
+        return self.code.strip(denomination)
 
     @api.model
     def _get_concepts_from_account(self, retention, account):
@@ -188,10 +211,10 @@ class AccountJournal(models.Model):
             lambda ml: not (ml.tax_line_id + ml.tax_ids)
         )
 
-        amount_tax = sum([ml.credit or ml.debit for ml in tax_mls])
-        amount_untaxed = sum([ml.credit or ml.debit for ml in taxed_mls])
-        amount_no_taxed = sum([ml.credit or ml.debit for ml in untaxed_mls])
-        amount_total = sum([ml.credit or ml.debit for ml in not_payable_moves])
+        amount_tax = sum(ml.credit or ml.debit for ml in tax_mls)
+        amount_untaxed = sum(ml.credit or ml.debit for ml in taxed_mls)
+        amount_no_taxed = sum(ml.credit or ml.debit for ml in untaxed_mls)
+        amount_total = sum(ml.credit or ml.debit for ml in not_payable_moves)
 
         tax_lines = {
             at: tax_mls.filtered(lambda ml: ml.tax_line_id == at)
