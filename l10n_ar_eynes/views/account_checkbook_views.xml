@@ -40,7 +40,6 @@
                                 />
                                 <field name="issued_check_ids">
                                     <tree
-                                        string="Issued Checks"
                                         name="issued_checks"
                                         create="false"
                                         edit="false"
@@ -69,7 +68,7 @@
         <field name="name">account.checkbook.view.tree</field>
         <field name="model">account.payment.method.line</field>
         <field name="arch" type="xml">
-            <tree string="Checkbooks" create="false" edit="false">
+            <tree create="false" edit="false">
                 <field name="number" />
                 <field name="journal_id" />
                 <field name="bank_account_id" />

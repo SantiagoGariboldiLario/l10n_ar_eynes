@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
     <!-- CHECK CONFIGURATION FORM VIEW-->
@@ -13,12 +13,12 @@
                         <p>Account Check Configuration</p>
                     </h1>
                     <group>
-                        <field name="company_id" readonly="True"/>
-                        <field name="account_id"/>
-                        <field name="deferred_account_id"/>
-                        <field name="receivable_rejected_account_id"/>
-                        <field name="rejected_account_id"/>
-                        <field name="deferred_journal_id"/>
+                        <field name="company_id" readonly="True" />
+                        <field name="account_id" />
+                        <field name="deferred_account_id" />
+                        <field name="receivable_rejected_account_id" />
+                        <field name="rejected_account_id" />
+                        <field name="deferred_journal_id" />
                     </group>
                 </sheet>
             </form>
@@ -31,13 +31,13 @@
         <field name="model">account.check.config</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="Checks Config">
-                <field name="company_id"/>
-                <field name="account_id"/>
-                <field name="deferred_account_id"/>
-                <field name="receivable_rejected_account_id"/>
-                <field name="rejected_account_id"/>
-                <field name="deferred_journal_id"/>
+            <tree>
+                <field name="company_id" />
+                <field name="account_id" />
+                <field name="deferred_account_id" />
+                <field name="receivable_rejected_account_id" />
+                <field name="rejected_account_id" />
+                <field name="deferred_journal_id" />
             </tree>
         </field>
     </record>
@@ -64,53 +64,67 @@
                         type="action"
                         class="oe_highlight"
                         attrs="
-                            {'invisible' : [('issued_check_state', '=', 'rejected')]}"/>
+                            {'invisible' : [('issued_check_state', '=', 'rejected')]}"
+                    />
                     <field
                         name="issued_check_state"
                         widget="statusbar"
                         statusbar_visible="draft,waiting_accreditation,cancelled,paid,expired,rejected,waiting_numeration"
                         statusbar_colors='{"cancel":"red"}'
-                        attrs="{'invisible' : [('internal_type', '=', 'third_party')]}"/>
+                        attrs="{'invisible' : [('internal_type', '=', 'third_party')]}"
+                    />
                 </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <label for="number" string="Check Number"/>
-                            <field name="number" class="oe_inline" readonly="1"/>
+                            <label for="number" string="Check Number" />
+                            <field name="number" class="oe_inline" readonly="1" />
                         </h1>
                     </div>
                     <group>
                         <group>
-                            <field name="checkbook_id" required="1"/>
-                            <field name="checkbook_format"/>
-                            <field name="type"/>
-                            <field name="internal_type" readonly="1"/>
-                            <field name="amount" required="1"/>
-                            <field name="journal_id" string="Bank Account"/>
-                            <field name="bank_id"/>
+                            <field name="checkbook_id" required="1" />
+                            <field name="checkbook_format" />
+                            <field name="type" />
+                            <field name="internal_type" readonly="1" />
+                            <field name="amount" required="1" />
+                            <field name="journal_id" string="Bank Account" />
+                            <field name="bank_id" />
                         </group>
                         <group>
-                            <field name="issue_date"/>
-                            <field name="payment_date" attrs="{'invisible': [('type', '=', 'common')]}"/>
-                            <field name="reject_date" attrs="{'invisible': [('issued_check_state', '!=', 'rejected')]}"/>
-                            <field name="crossed"/>
-                            <field name="not_order"/>
+                            <field name="issue_date" />
+                            <field
+                                name="payment_date"
+                                attrs="{'invisible': [('type', '=', 'common')]}"
+                            />
+                            <field
+                                name="reject_date"
+                                attrs="{'invisible': [('issued_check_state', '!=', 'rejected')]}"
+                            />
+                            <field name="crossed" />
+                            <field name="not_order" />
                         </group>
                     </group>
                     <group string="Adittional Information">
                         <group>
-                            <field name="clearing"/>
-                            <field name="signatory"/>
+                            <field name="clearing" />
+                            <field name="signatory" />
                         </group>
                         <group>
-                            <field name="origin"/>
-                            <field name="payment_move_id"/>
-                            <field name="clearance_move_id" attrs="{'readonly': True, 'invisible': [('type', '=', 'common')]}"/>
-                            <field name="accredited"/>
+                            <field name="origin" />
+                            <field name="payment_move_id" />
+                            <field
+                                name="clearance_move_id"
+                                attrs="{'readonly': True, 'invisible': [('type', '=', 'common')]}"
+                            />
+                            <field name="accredited" />
                         </group>
                     </group>
                     <group>
-                        <field name="note" attrs="{'invisible': [('issued_check_state', '!=', 'rejected')]}"/>
+                        <field
+                            name="note"
+                            attrs="{'invisible': [('issued_check_state', '!=', 'rejected')]}"
+                        />
                     </group>
                 </sheet>
             </form>
@@ -122,16 +136,16 @@
         <field name="name">account.issued.check.view.tree</field>
         <field name="model">account.check</field>
         <field name="arch" type="xml">
-            <tree string="Checks" create="false">
-                <field name="number"/>
-                <field name="checkbook_id"/>
-                <field name="bank_id"/>
+            <tree create="false">
+                <field name="number" />
+                <field name="checkbook_id" />
+                <field name="bank_id" />
                 <field name="issue_date" />
                 <field name="payment_date" />
-                <field name="amount"/>
-                <field name="type"/>
-                <field name="checkbook_format"/>
-                <field name="issued_check_state" string="State"/>
+                <field name="amount" />
+                <field name="type" />
+                <field name="checkbook_format" />
+                <field name="issued_check_state" string="State" />
             </tree>
         </field>
     </record>
@@ -142,9 +156,12 @@
         <field name="res_model">account.check</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('internal_type', '=', 'issued')]</field>
-        <field name="view_ids" eval="[(5, 0, 0),
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0),
         (0, 0, {'view_mode': 'tree', 'view_id': ref('account_issued_check_view_tree')}),
-        (0, 0, {'view_mode': 'form', 'view_id': ref('account_issued_check_view_form')})]"/>
+        (0, 0, {'view_mode': 'form', 'view_id': ref('account_issued_check_view_form')})]"
+        />
     </record>
 
     <!-- THIRD PARTY CHECK FORM VIEW-->
@@ -159,113 +176,198 @@
                         name="%(deposit_check_action)d"
                         type="action"
                         class="oe_highlight"
-                        attrs="{'invisible' : ['|', ('third_party_check_state', '!=', 'in_wallet'), ('internal_type', '=', 'issued')]}"/>
+                        attrs="{'invisible' : ['|', ('third_party_check_state', '!=', 'in_wallet'), ('internal_type', '=', 'issued')]}"
+                    />
                     <button
                         name="check_to_wallet"
                         type='object'
                         string='Back to Wallet'
                         class="btn-secondary"
                         attrs="{'invisible': [('internal_type', '=', 'third_party'), ('third_party_check_state','in', ('draft', 'in_wallet'))]}"
-                        confirm="You are going to delete an account move. Are you sure?"/>
+                        confirm="You are going to delete an account move. Are you sure?"
+                    />
                     <button
                         name="%(reject_third_party_check_action)d"
                         string="Reject Check"
                         type="action"
                         class="oe_highlight"
-                        attrs="{'invisible' : [('third_party_check_state', 'not in', ('deposited', 'delivered'))]}"/>
+                        attrs="{'invisible' : [('third_party_check_state', 'not in', ('deposited', 'delivered'))]}"
+                    />
 
                     <field
                         name="third_party_check_state"
                         widget="statusbar"
                         statusbar_visible="in_wallet,deposited,delivered,rejected"
                         statusbar_colors='{"cancel":"red"}'
-                        attrs="{'invisible' : [('internal_type', '=', 'issued')]}"/>
+                        attrs="{'invisible' : [('internal_type', '=', 'issued')]}"
+                    />
                 </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <label for="number" string="Check Number"/>
-                            <field name="number" class="oe_inline" readonly="1"/>
+                            <label for="number" string="Check Number" />
+                            <field name="number" class="oe_inline" readonly="1" />
                         </h1>
                     </div>
                     <group>
                         <group>
-                            <field name="type" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="amount" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="source_partner_id" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="destiny_partner_id"
+                            <field
+                                name="type"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="amount"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="source_partner_id"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="destiny_partner_id"
                                 attrs="{
                                     'invisible': [('third_party_check_state', 'not in', ('delivered', 'rejected'))],
                                     'readonly': [('third_party_check_state', '!=', 'in_wallet')]
-                                }"/>
-                            <field name="checkbook_format" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="internal_type" readonly="1"/>
+                                }"
+                            />
+                            <field
+                                name="checkbook_format"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field name="internal_type" readonly="1" />
                         </group>
                         <group>
-                            <field name="reception_date" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="issue_date" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="endorsement_date"
+                            <field
+                                name="reception_date"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="issue_date"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="endorsement_date"
                                 attrs="{
                                     'invisible': [('third_party_check_state', 'not in', ('in_wallet', 'delivered', 'rejected'))],
                                     'readonly': [('third_party_check_state', '!=', 'in_wallet')]
-                                }"/>
-                            <field name="payment_date"
+                                }"
+                            />
+                            <field
+                                name="payment_date"
                                 attrs="{
                                     'invisible': [('type', '=', 'common')],
                                     'readonly': [('third_party_check_state', '!=', 'in_wallet')]
-                                }"/>
+                                }"
+                            />
                         </group>
                     </group>
                     <group string="Other Information">
                         <group>
-                            <field name="bank_id" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="bank_branch" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="zip" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="origin" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="crossed" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="not_order" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="dest"
+                            <field
+                                name="bank_id"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="bank_branch"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="zip"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="origin"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="crossed"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="not_order"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="dest"
                                 attrs="{
                                     'invisible': [('third_party_check_state','!=','delivered')],
                                     'readonly': [('third_party_check_state', '!=', 'in_wallet')]
-                                }"/>
+                                }"
+                            />
                         </group>
                         <group>
-                            <field name="clearing" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}" />
-                            <field name="signatory" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}" />
-                            <field name="signatory_vat" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}" />
-                            <field name="signatory_account" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}" />
+                            <field
+                                name="clearing"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="signatory"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="signatory_vat"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="signatory_account"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
                         </group>
                     </group>
-                    <group string="Check Deposit"
+                    <group
+                        string="Check Deposit"
                         attrs="{
                             'invisible': [('third_party_check_state','not in',('deposited', 'rejected'))],
                             'readonly': [('third_party_check_state', '!=', 'in_wallet')]
-                        }">
+                        }"
+                    >
                         <group>
-                            <field name="deposit_date" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="deposit_slip" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="deposit_move_id" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="deposit_bank_id" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
+                            <field
+                                name="deposit_date"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="deposit_slip"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="deposit_move_id"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="deposit_bank_id"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
                         </group>
                     </group>
                     <group string="Payments, Receipts and Debits">
                         <group>
-                            <field name="source_payment_order_id" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="debit_note_id" attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"/>
-                            <field name="reject_date"
+                            <field
+                                name="source_payment_order_id"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="debit_note_id"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                            <field
+                                name="reject_date"
                                 attrs="{
                                     'invisible': [('third_party_check_state', '!=', 'rejected')],
                                     'readonly': [('third_party_check_state', '!=', 'in_wallet')]
-                                }"/>
+                                }"
+                            />
                         </group>
                     </group>
                     <group string="Additional Information">
-                        <div class="oe_clear"/>
-                        <field name="note"
+                        <div class="oe_clear" />
+                        <field
+                            name="note"
                             attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
-                            colspan="4" nolabel="1"
-                            placeholder="Additional Information..."/>
+                            colspan="4"
+                            nolabel="1"
+                            placeholder="Additional Information..."
+                        />
                     </group>
                 </sheet>
             </form>
@@ -277,8 +379,8 @@
         <field name="name">account.third.party.check.view.tree</field>
         <field name="model">account.check</field>
         <field name="arch" type="xml">
-            <tree string="Checks" create="false">
-                <field name="number"/>
+            <tree create="false">
+                <field name="number" />
                 <field name="checkbook_format" />
                 <field name="type" />
                 <field name="receiving_partner_id" />
@@ -287,10 +389,10 @@
                 <field name="reception_date" />
                 <field name="payment_date" />
                 <field name="bank_id" />
-                <field name="deposit_journal_id"/>
-                <field name="deposit_slip"/>
-                <field name="amount"/>
-                <field name="third_party_check_state" string="State"/>
+                <field name="deposit_journal_id" />
+                <field name="deposit_slip" />
+                <field name="amount" />
+                <field name="third_party_check_state" string="State" />
             </tree>
         </field>
     </record>
@@ -302,9 +404,12 @@
         <field name="res_model">account.check</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('internal_type', '=', 'third_party')]</field>
-        <field name="view_ids" eval="[(5, 0, 0),
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0),
         (0, 0, {'view_mode': 'tree', 'view_id': ref('account_third_party_check_view_tree')}),
-        (0, 0, {'view_mode': 'form', 'view_id': ref('account_third_party_check_view_form')})]"/>
+        (0, 0, {'view_mode': 'form', 'view_id': ref('account_third_party_check_view_form')})]"
+        />
     </record>
 
 </odoo>

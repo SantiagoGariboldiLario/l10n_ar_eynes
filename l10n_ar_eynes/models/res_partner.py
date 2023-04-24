@@ -1,6 +1,6 @@
 # from datetime import datetime as dt
 
-from odoo import fields, models, api, _
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -40,6 +40,7 @@ class ResPartner(models.Model):
     dst_cuit = fields.Boolean(
         string="Enable DST CUIT", related='document_type_id.dst_cuit'
     )
+    fcred_transfer = fields.Char(string='SCA/ADC (FCE)?', default='SCA')
 
     @api.constrains('vat', 'document_type_id')
     def check_vat_duplicated(self):
@@ -232,7 +233,7 @@ class ResPartner(models.Model):
         return retentions
 
 
-class resPartnerRetention(models.Model):
+class ResPartnerRetention(models.Model):
     _name = "res.partner.retention"
     _description = "Retention Defined in Partner"
     _rec_name = 'retention_id'
@@ -329,6 +330,7 @@ class DstCuitCodes(models.Model):
 
     code = fields.Float('Code', digits=(12, 0), required=True)
     name = fields.Char('Desc', required=True, size=64)
+    wsfex_config_id = fields.Many2one('wsfex.config')
 
 
 class ResDocumentType(models.Model):

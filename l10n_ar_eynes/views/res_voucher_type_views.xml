@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
     <record id="res_voucher_type_view_form" model="ir.ui.view">
@@ -8,11 +8,11 @@
             <form string="Voucher type">
                 <sheet>
                     <group>
-                        <field name="name"/>
-                        <field name="afip_code"/>
-                        <field name="voucher_model"/>
-                        <field name="doc_type"/>
-                        <field name="denomination"/>
+                        <field name="name" />
+                        <field name="afip_code" />
+                        <field name="voucher_model" />
+                        <field name="doc_type" />
+                        <field name="denomination" />
                     </group>
                 </sheet>
             </form>
@@ -23,12 +23,12 @@
         <field name="name">res.voucher.type.view.tree</field>
         <field name="model">res.voucher.type</field>
         <field name="arch" type="xml">
-            <tree string="Voucher type" default_order="afip_code">
-                <field name="name"/>
-                <field name="afip_code"/>
-                <field name="voucher_model"/>
-                <field name="doc_type"/>
-                <field name="denomination"/>
+            <tree default_order="afip_code">
+                <field name="name" />
+                <field name="afip_code" />
+                <field name="voucher_model" />
+                <field name="doc_type" />
+                <field name="denomination" />
             </tree>
         </field>
     </record>
@@ -39,7 +39,7 @@
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">res.voucher.type</field>
         <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="res_voucher_type_view_tree"/>
+        <field name="view_id" ref="res_voucher_type_view_tree" />
     </record>
 
     <record id="res_partner_action" model="ir.actions.act_window">
@@ -49,16 +49,20 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem id="menu_action_res_voucher_type"
+    <menuitem
+        id="menu_action_res_voucher_type"
         name="Voucher Types"
         parent="contacts.res_partner_menu_config"
         action="res_voucher_type_action"
-        sequence="3"/>
+        sequence="3"
+    />
 
-    <menuitem id="menu_action_res_document_type"
+    <menuitem
+        id="menu_action_res_document_type"
         name="Document Types"
         parent="contacts.res_partner_menu_config"
         action="res_document_type_action"
-        sequence="3"/>
+        sequence="3"
+    />
 
 </odoo>

@@ -1,15 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
 
-    <data noupdate="1">
-
-        <record id="third_party_checks_journal" model="account.journal" forcecreate="0">
-            <field name="name">Third party checks</field>
-            <field name="type">third_party_checks</field>
-            <field name="code">CHQ</field>
-        </record>
-
-    </data>
-
+    <record id="third_party_checks_journal" model="account.journal" forcecreate="0">
+        <field name="name">Third party checks</field>
+        <field name="type">third_party_checks</field>
+        <field name="code">CHQ</field>
+    </record>
 
 </odoo>

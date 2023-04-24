@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
     <!-- form-->
@@ -10,7 +10,7 @@
                 <sheet>
                     <group>
                         <field name="user_id" />
-                        <field name="journal_id"/>
+                        <field name="journal_id" />
                         <field name="sequence" />
                     </group>
                 </sheet>
@@ -23,7 +23,7 @@
         <field name="name">user.journal.rel.view.tree</field>
         <field name="model">user.journal.rel</field>
         <field name="arch" type="xml">
-            <tree string="User Journal Relation">
+            <tree>
                 <field name="user_id" />
                 <field name="journal_id" />
                 <field name="sequence" />
@@ -37,7 +37,7 @@
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">user.journal.rel</field>
         <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="user_journal_rel_view_tree"/>
+        <field name="view_id" ref="user_journal_rel_view_tree" />
     </record>
 
     <!-- menuitem -->
@@ -54,7 +54,10 @@
             <search>
                 <group expand="1" string="Group By">
                     <filter name="group_by_user" context="{'group_by': 'user_id'}" />
-                    <filter name="group_by_journal" context="{'group_by': 'journal_id'}" />
+                    <filter
+                        name="group_by_journal"
+                        context="{'group_by': 'journal_id'}"
+                    />
                 </group>
             </search>
         </field>

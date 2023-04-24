@@ -17,3 +17,9 @@ from . import res_voucher_type  # noqa
 from . import retention  # noqa
 from . import user_journal_rel  # noqa
 from . import sale_order  # noqa
+from . import certificate_request  # noqa
+from . import wsaa  # noqa
+from . import account_move_optionals  # noqa
+from . import wsfe  # noqa
+from . import wsfex  # noqa
+from . import wsfe_request  # noqa

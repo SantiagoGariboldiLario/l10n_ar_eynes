@@ -1,21 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
     <record id="account_fiscal_position_form_inherit_l10n_ar_eynes" model="ir.ui.view">
         <field name="name">account.fiscal.position.form.inherit</field>
         <field name="model">account.fiscal.position</field>
-        <field name="inherit_id" ref="account.view_account_position_form"/>
+        <field name="inherit_id" ref="account.view_account_position_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
-                <field name="supplier_denomination"/>
-                <field name="afip_code"/>
+                <field name="supplier_denomination" />
+                <field name="afip_code" />
                 <field name="local" />
             </xpath>
             <page name="tax_mapping" position="after">
                 <page name="applied_retentions" string="Applied Retentions">
                     <group>
-                        <field name="retention_ids" nolabel="1" domain="[('tax_id.type_tax_use','=','purchase')]">
-                            <tree string="Retentions">
+                        <field
+                            name="retention_ids"
+                            nolabel="1"
+                            domain="[('tax_id.type_tax_use','=','purchase')]"
+                        >
+                            <tree>
                                 <field name="name" />
                                 <field name="tax_id" />
                                 <field name="state_id" />
@@ -30,11 +34,11 @@
     <record id="account_fiscal_position_tree_inherit_l10n_ar_eynes" model="ir.ui.view">
         <field name="name">account.fiscal.position.tree.inherit</field>
         <field name="model">account.fiscal.position</field>
-        <field name="inherit_id" ref="account.view_account_position_tree"/>
+        <field name="inherit_id" ref="account.view_account_position_tree" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
-                <field name="supplier_denomination"/>
-                <field name="afip_code"/>
+                <field name="supplier_denomination" />
+                <field name="afip_code" />
             </xpath>
         </field>
     </record>

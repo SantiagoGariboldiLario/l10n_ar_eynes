@@ -1,7 +1,13 @@
+import logging
 from datetime import date
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
+
+_logger = logging.getLogger(__name__)
+
+# Constant used to find FCE type:
+AFIP_FCE_CODE_START = 200
 
 
 class AccountMove(models.Model):
@@ -32,6 +38,55 @@ class AccountMove(models.Model):
     is_debit_note = fields.Boolean(
         string='Debit Note', compute='_compute_is_debit_note', store=True
     )
+    aut_cae = fields.Boolean(
+        'Autorizar', default=False, copy=False, help='Pedido de autorizacion a la AFIP'
+    )
+    cae = fields.Char(
+        string='CAE/CAI',
+        size=32,
+        required=False,
+        copy=False,
+        help='CAE (Codigo de Autorizacion Electronico assigned by AFIP.)',
+    )
+    cae_due_date = fields.Date(
+        'CAE Due Date', required=False, copy=False, help='Fecha de vencimiento del CAE'
+    )
+    associated_inv_ids = fields.Many2many(
+        'account.move', 'account_invoice_associated_rel', 'invoice_id', 'refund_debit_id'
+    )
+    voucher_type_id = fields.Many2one(
+        comodel_name='res.voucher.type',
+        string='Voucher type',
+        compute='_compute_voucher_type',
+        store=True,
+    )
+    wsfe_request_ids = fields.One2many('wsfe.request.detail', 'name')
+    local = fields.Boolean(related='journal_id.fiscal_position_id.local')
+    is_FCE_invoice = fields.Boolean(
+        string="Is FCE?",
+        default=False,
+        help="Set True if this invoice must be treated as Electronic Invoice of Credit.",
+    )
+    amount_no_taxed = fields.Monetary(
+        string='No Taxed', compute='_compute_amount_custom', store=True
+    )
+    amount_taxed = fields.Monetary(
+        string='Taxed', compute='_compute_amount_custom', store=True
+    )
+    amount_exempt = fields.Monetary(
+        string='Except', compute='_compute_amount_custom', store=True
+    )
+    # Campos para facturas de exportacion. Aca ninguno es requerido,
+    # eso lo hacemos en la vista ya que depende de
+    # si es o no factura de exportacion
+    export_type_id = fields.Many2one('wsfex.export.type.codes', 'Export Type')
+    dst_country_id = fields.Many2one('wsfex.dst.country.codes', 'Dest Country')
+    shipping_perm_ids = fields.One2many(
+        'wsfex.shipping.permission', 'invoice_id', 'Shipping Permissions'
+    )
+    wsfex_request_ids = fields.One2many('wsfex.request.detail', 'invoice_id')
+    optional_ids = fields.One2many('account.move.optional', 'invoice_id', 'Optionals')
+    dst_cuit_id = fields.Many2one('dst.cuit.codes', 'Country CUIT')
 
     @api.depends('debit_origin_id')
     def _compute_is_debit_note(self):
@@ -46,6 +101,7 @@ class AccountMove(models.Model):
                 ('journal_id', '=', self.journal_id.id),
                 ('move_type', '=', self.move_type),
                 ('is_debit_note', '=', self.is_debit_note),
+                ('is_FCE_invoice', '=', self.is_FCE_invoice),
             ]
         )
 
@@ -109,15 +165,198 @@ class AccountMove(models.Model):
         if self.is_purchase_document():
             self.denomination = fiscal_position.supplier_denomination
 
+    @api.depends('denomination', 'move_type', 'is_debit_note', 'is_FCE_invoice')
+    def _compute_voucher_type(self):
+        for rec in self:
+            if rec.is_sale_document():
+                voucher_type_obj = self.env['res.voucher.type']
+                res = self.env['res.voucher.type']
+
+                inv_type = 'b'
+                if rec.move_type.endswith("refund"):
+                    inv_type = 'cn'
+                elif rec.is_debit_note:
+                    inv_type = 'dn'
+
+                res = voucher_type_obj.search(
+                    [
+                        ('doc_type', '=', inv_type),
+                        ('denomination', '=', rec.denomination),
+                    ]
+                )
+
+                if not len(res):
+                    _logger.warning(
+                        _("There is no voucher type that corresponds " "to this object")
+                    )
+
+                if rec.is_FCE_invoice:
+                    res = res.filtered(
+                        lambda voucher_type: int(voucher_type.afip_code)
+                        > AFIP_FCE_CODE_START
+                    )
+
+                elif len(res) > 1:
+                    _logger.warning(
+                        _(
+                            "There is more than one voucher type that "
+                            "corresponds to this object"
+                        )
+                    )
+                else:
+                    rec.write({'voucher_type_id': res.id})
+
+    @api.depends('invoice_line_ids')
+    def _compute_amount_custom(self):
+        def _filter_exempt(line):
+            return any(line.tax_ids.mapped("is_exempt"))
+
+        def _filter_untaxed(line):
+            return not line.tax_ids
+
+        def _filter_taxed(line):
+            taxed = line.tax_ids.mapped(
+                lambda x: x.tax_group_id.name == 'vat' and not x.is_exempt
+            )
+            return any(taxed)
+
+        for inv in self:
+            # Amount exempt
+            inv.amount_exempt = sum(
+                inv.invoice_line_ids.filtered(_filter_exempt).mapped("price_subtotal")
+            )
+
+            # Amount untaxed
+            inv.amount_no_taxed = sum(
+                inv.invoice_line_ids.filtered(_filter_untaxed).mapped("price_subtotal")
+            )
+
+            # Amount taxed
+            inv.amount_taxed = sum(
+                inv.invoice_line_ids.filtered(_filter_taxed).mapped("price_subtotal")
+            )
+
+    def get_voucher_type(self):
+        self.ensure_one()
+        return self.voucher_type_id
+
+    def get_pos(self):
+        self.ensure_one()
+        return self.journal_id
+
+    def _get_next_wsfe_number(self, conf=False):
+        self.ensure_one()
+        if not conf:
+            conf = self.get_ws_conf()
+        _logger.info(self)
+        inv = self
+        tipo_cbte = self.get_voucher_type()
+        try:
+            pto_vta = int(inv.journal_id.get_pos_number())
+        except ValueError as value_err:
+            err = _('Error\n' 'El nombre del punto de venta tiene que ser numerico')
+            raise UserError(err) from value_err
+
+        last = conf.get_last_voucher(pto_vta, tipo_cbte)
+
+        return int(last + 1)
+
+    def get_last_date_invoice(self):
+        self.ensure_one()
+
+        last_invoice = self.env['account.move'].search(
+            [
+                ('journal_id', '=', self.journal_id.id),
+                ('state', 'in', ['open', 'paid', 'cancel']),
+                ('move_type', '=', self.move_type),
+                ('is_debit_note', '=', self.is_debit_note),
+                ('is_FCE_invoice', '=', self.is_FCE_invoice),
+            ],
+            order="invoice_date desc",
+            limit=1,
+        )
+
+        return last_invoice.invoice_date if last_invoice else False
+
+    def check_must_be_fce(self):
+        """
+        If the invoice matches some criteria, the invoice must be of credit -FCE-
+        """
+        if not self.company_id.fcred_is_fce_emitter:
+            return False
+        if self.move_type not in ('out_invoice', 'out_refund'):
+            return False
+        ABC = self.env['afip.big.company'].sudo()
+        is_bc = ABC.search([('cuit', '=like', self.partner_id.vat)])
+        amount_total = (
+            self.amount_total_cur if self.is_multi_currency else self.amount_total
+        )
+        fcred_minimum_amount = self.company_id.fcred_minimum_amount
+        if is_bc and amount_total > fcred_minimum_amount:
+            _logger.info('The %s must be of type FCRED' % self)
+            return True
+        return False
+
+    def ensure_fce_values(self):
+        """
+        If invoice must be of type FCE, ensure certain values are set.
+        """
+        # Ensure Fiscal Type FCE
+        self.is_FCE_invoice = True
+        conf = self.get_ws_conf()
+        set_optionals = True
+        if self.is_debit_note or self.move_type == 'out_refund':
+            set_optionals = False
+        # Optionals
+        if not self.optional_ids and set_optionals:
+            WO = self.env['wsfe.optionals']
+            aio_todo = WO.search(
+                [
+                    ('code', 'in', ('2101', '27')),
+                    ('wsfe_config_id', '=', conf.id),
+                ]
+            )
+            # 2101: cbu del emisor, 27 sca|adc
+            aios = []
+            for aio in aio_todo:
+                if aio.code == '2101':
+                    value = self.company_id.fcred_cbu_emitter
+                if aio.code == '27':
+                    value = self.partner_id.fcred_transfer
+                dd = {
+                    'optional_id': aio.id,
+                    'value': value,
+                }
+                aios.append((0, 0, dd))
+            self.optional_ids = aios
+        # Point Of Sale
+        pos_ar_id = (
+            self.env['account.journal'].search(
+                [
+                    ('fcred_is_fce_emitter', '=', True),
+                    ('warehouse_id', '=', self.journal_id.warehouse_id.id),
+                ]
+            )
+            or self.company_id.fcred_pos_ar_id.id
+        )
+        if pos_ar_id:
+            self.journal_id = pos_ar_id
+
     def action_post(self):
         if self.is_sale_document():
             if self.id:
                 self.validate_denomination()
                 self.validate_period()
+                if self.check_must_be_fce():
+                    self.ensure_fce_values()
+                self.action_aut_cae()
                 if not self.payment_reference:
+                    pos_num = (self.journal_id.get_pos_number(),)
+                    move_num = self.get_highest_pos_sequence()
+                    name = "%s - %s" % (pos_num, move_num)
                     self.write(
                         {
-                            'name': f'{self.journal_id.code}-{self.get_highest_pos_sequence()}',
+                            'name': name,
                         }
                     )
         return super(AccountMove, self).action_post()
@@ -143,6 +382,220 @@ class AccountMove(models.Model):
     def validate_denomination(self):
         if not self.denomination or self.denomination == 'not_defined':
             raise ValidationError(_("Invoice must have a denomination configured"))
+
+    def action_post_from_massive(self, first_number):
+        for rec in self:
+            rec.validate_denomination()
+            rec.validate_period()
+            if rec.check_must_be_fce():
+                rec.ensure_fce_values()
+
+        logs = self._validate_electronic_invoices(first_number)
+        super(AccountMove, self).action_post()
+        return logs
+
+    def button_draft(self):
+        for rec in self:
+            if rec.aut_cae:
+                err = _(
+                    "You cannot send to draft this Electronic Invoice "
+                    "because it has been informed to AFIP."
+                )
+                raise ValidationError(err)
+        return super(AccountMove, self).button_draft()
+
+    @api.model
+    def hook_add_taxes(self, inv, detalle):
+        return detalle
+
+    def action_aut_cae(self):
+        self.ensure_one()
+        self._validate_electronic_invoices()
+        return True
+
+    def _validate_electronic_invoices(self, first_number=False):
+        if not all(self.mapped('aut_cae')):
+            return True
+
+        # self._sanitize_taxes()
+        ws = self.new_ws()
+        new_cr = self.pool.cursor()
+        uid = self.env.user.id
+        ctx = self.env.context
+        inv_model = self.env['account.move']
+        try:
+            invoices_approved = ws.send_invoices(self, first_number=first_number)
+
+            for invoice_id, invoice_vals in invoices_approved.items():
+                invoice = inv_model.browse(invoice_id)
+                invoice.write({**invoice_vals, **{'state': 'open'}})
+            # Commit the info given by AFIP that was written to the invoice
+            # to prevent desynchronizations
+            # self.env.cr.commit()
+        except Exception as e:
+            # Simply reraise if the exception is already controlled
+            _logger.exception('WSFE Validation Error')
+            if isinstance(e, UserError):
+                raise
+            err = _('WSFE Validation Error\n' 'Error received was: \n %s') % repr(e)
+            raise UserError(err) from e
+        finally:
+            # Creamos el wsfe.request con otro cursor,
+            # porque puede pasar que
+            # tengamos una excepcion e igualmente,
+            # tenemos que escribir la request
+            # Sino al hacer el rollback se pierde hasta el wsfe.request
+            self.env.cr.rollback()
+            try:
+                with api.Environment.manage():
+                    new_env = api.Environment(new_cr, uid, ctx)
+                    logs = ws.log_request(new_env)
+                    new_cr.commit()
+                    new_cr.close()
+            except Exception:
+                _logger.exception('Unable to log afip request')
+                logs = None
+            else:
+                _logger.info('Success in logging afip request')
+        return logs
+
+    def wsfe_relate_invoice(self, pos, number, date_invoice, cae, cae_due_date):
+        for inv in self:
+            name = '%04d-%08d' % (pos, number)
+            invoice_vals = {
+                'name': name,
+                'payment_reference': name,
+                'invoice_date': date_invoice,
+                'cae': cae,
+                'cae_due_date': cae_due_date,
+                'state': 'open',
+            }
+
+            # Escribimos los campos necesarios de la factura
+            inv.write(invoice_vals)
+
+            # Tomamos la factura y mandamos a realizar
+            # el asiento contable.
+            inv._post(soft=False)
+            return
+
+    def new_ws(self, conf=False):
+        if not conf:
+            conf = self.get_ws_conf()
+        ws = conf._webservice_class(conf.url)
+        return ws
+
+    def ws_auth(self, ws=False, conf=False):
+        # TODO WSAA To easywsy and this could float between WSAA & WSFE
+        if not conf:
+            conf = self.get_ws_conf()
+        token, sign = conf.wsaa_ticket_id.get_token_sign()
+        auth = {'Token': token, 'Sign': sign, 'Cuit': conf.cuit}
+        if not ws:
+            ws = conf._webservice_class(conf.url)
+        ws.login('Auth', auth)
+        return ws
+
+    def complete_date_invoice(self):
+        for inv in self:
+            if not inv.date_invoice:
+                inv.write(
+                    {
+                        'date_invoice': fields.Date.context_today(self),
+                    }
+                )
+
+    def check_invoice_total(self, calculated_total):
+        # Chequeamos que el Total calculado por Odoo, se corresponda
+        # con el total calculado por nosotros, tal vez puede haber un error
+        # de redondeo
+        obj_precision = self.env['decimal.precision']
+        prec = obj_precision.precision_get('Account')
+        if round(calculated_total, prec) != round(self.amount_total, prec):
+            raise UserError(
+                _(
+                    "Error in amount_total!\n"
+                    "The total amount of the invoice does not "
+                    "match the total calculated.\n"
+                    "Maybe there is a rounding error!. "
+                    "(Amount Calculated: %f)"
+                )
+                % (calculated_total)
+            )
+
+    def get_ws_conf(self):
+        wsfe_conf_obj = self.env['wsfe.config']
+        wsfex_conf_obj = self.env['wsfex.config']
+        local_list = self.mapped('local')
+        if len(list(set(local_list))) != 1:
+            err = _(
+                "Trying to get the WSFE config for invoices mixed "
+                "between local and not local"
+            )
+            raise UserError(_("WSFE Error\n") + err)
+        ctx = self.env.context.copy()
+        company = self.mapped('journal_id.company_id')
+        company.ensure_one()
+        # ^- Raise if trying to validate invoice of != companies
+        ctx['company_id'] = company.id
+
+        ctx.setdefault('without_raise', True)
+        wsfe_conf = wsfe_conf_obj.with_context(**ctx).get_config()
+        wsfex_conf = wsfex_conf_obj.with_context(**ctx).get_config()
+
+        pos_ar_list = self.mapped('journal_id')
+        if len(list(set(pos_ar_list))) != 1:
+            err = _(
+                "Trying to get the WSFE config for invoices that "
+                "belong to different points of sale"
+            )
+            raise UserError(_("WSFE Error\n") + err)
+        pos_ar = pos_ar_list[0]
+        # Chequeamos si corresponde Factura Electronica
+        # Aca nos fijamos si el pos_ar_id tiene
+        # factura electronica asignada
+        confs_list = []
+        for c in [wsfe_conf, wsfex_conf]:
+            conf = c.point_of_sale_ids
+            if pos_ar in conf:
+                confs_list.append(c)
+
+        if len(confs_list) > 1:
+            err = (
+                _("There is more than one configuration " "with this POS %s")
+                % pos_ar.name
+            )
+            raise UserError(_("WSFE Error\n") + err)
+
+        if confs_list:
+            confs_obj = confs_list[0]
+        elif not ctx['without_raise']:
+            err = _("There is no configuration for this " "POS %s") % pos_ar.name
+            raise UserError(_("WSFE Error\n") + err)
+        else:
+            confs_obj = False
+        return confs_obj
+
+    def get_currency_code(self):
+        # Obtenemos la moneda de la factura
+        # Lo hacemos por el wsfex_config, por cualquiera de ellos
+        # si es que hay mas de uno
+        self.ensure_one()
+        currency_code_obj = self.env['wsfex.currency.codes']
+        currency_code_ids = currency_code_obj.search(
+            [('currency_id', '=', self.currency_id.id)]
+        )
+
+        if not currency_code_ids:
+            raise UserError(
+                _(
+                    "WSFE Error!\n"
+                    "Currency has to be configured correctly "
+                    "in WSFEX Configuration."
+                )
+            )
+        currency_code = currency_code_ids[0].code
+        return currency_code
 
     @api.model_create_multi
     def create(self, vals):

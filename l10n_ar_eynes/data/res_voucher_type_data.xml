@@ -1,152 +1,148 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
 
-    <data noupdate="1">
+    <record id="factura_a" model="res.voucher.type" forcecreate="0">
+        <field name="name">FACTURAS A</field>
+        <field name="afip_code">001</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">b</field>
+        <field name="denomination">a</field>
+    </record>
 
-        <record id="factura_a" model="res.voucher.type" forcecreate="0">
-            <field name="name">FACTURAS A</field>
-            <field name="afip_code">001</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">b</field>
-            <field name="denomination">a</field>
-        </record>
+    <record id="nota_debito_a" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTAS DE DEBITO A</field>
+        <field name="afip_code">002</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">dn</field>
+        <field name="denomination">a</field>
+    </record>
 
-        <record id="nota_debito_a" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTAS DE DEBITO A</field>
-            <field name="afip_code">002</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">dn</field>
-            <field name="denomination">a</field>
-        </record>
+    <record id="nota_credito_a" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTAS DE CREDITO A</field>
+        <field name="afip_code">003</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">cn</field>
+        <field name="denomination">a</field>
+    </record>
 
-        <record id="nota_credito_a" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTAS DE CREDITO A</field>
-            <field name="afip_code">003</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">cn</field>
-            <field name="denomination">a</field>
-        </record>
+    <record id="factura_b" model="res.voucher.type" forcecreate="0">
+        <field name="name">FACTURAS B</field>
+        <field name="afip_code">006</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">b</field>
+        <field name="denomination">b</field>
+    </record>
 
-        <record id="factura_b" model="res.voucher.type" forcecreate="0">
-            <field name="name">FACTURAS B</field>
-            <field name="afip_code">006</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">b</field>
-            <field name="denomination">b</field>
-        </record>
+    <record id="nota_debito_b" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTAS DE DEBITO B</field>
+        <field name="afip_code">007</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">dn</field>
+        <field name="denomination">b</field>
+    </record>
 
-        <record id="nota_debito_b" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTAS DE DEBITO B</field>
-            <field name="afip_code">007</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">dn</field>
-            <field name="denomination">b</field>
-        </record>
+    <record id="nota_credito_b" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTAS DE CREDITO B</field>
+        <field name="afip_code">008</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">cn</field>
+        <field name="denomination">b</field>
+    </record>
 
-        <record id="nota_credito_b" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTAS DE CREDITO B</field>
-            <field name="afip_code">008</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">cn</field>
-            <field name="denomination">b</field>
-        </record>
+    <record id="facturas_exportacion" model="res.voucher.type" forcecreate="0">
+        <field name="name">FACTURAS DE EXPORTACION</field>
+        <field name="afip_code">019</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">b</field>
+        <field name="denomination">e</field>
+    </record>
 
-        <record id="facturas_exportacion" model="res.voucher.type" forcecreate="0">
-            <field name="name">FACTURAS DE EXPORTACION</field>
-            <field name="afip_code">019</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">b</field>
-            <field name="denomination">e</field>
-        </record>
+    <record id="nota_debito_exportacion" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTAS DE DEBITO POR OPERACIONES CON EL EXTERIOR</field>
+        <field name="afip_code">020</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">dn</field>
+        <field name="denomination">e</field>
+    </record>
 
-        <record id="nota_debito_exportacion" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTAS DE DEBITO POR OPERACIONES CON EL EXTERIOR</field>
-            <field name="afip_code">020</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">dn</field>
-            <field name="denomination">e</field>
-        </record>
+    <record id="nota_credito_exportacion" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTAS DE CREDITO POR OPERACIONES CON EL EXTERIOR</field>
+        <field name="afip_code">021</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">cn</field>
+        <field name="denomination">e</field>
+    </record>
 
-        <record id="nota_credito_exportacion" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTAS DE CREDITO POR OPERACIONES CON EL EXTERIOR</field>
-            <field name="afip_code">021</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">cn</field>
-            <field name="denomination">e</field>
-        </record>
+    <record id="factura_m" model="res.voucher.type" forcecreate="0">
+        <field name="name">FACTURAS M</field>
+        <field name="afip_code">051</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">b</field>
+        <field name="denomination">m</field>
+    </record>
 
-        <record id="factura_m" model="res.voucher.type" forcecreate="0">
-            <field name="name">FACTURAS M</field>
-            <field name="afip_code">051</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">b</field>
-            <field name="denomination">b</field>
-        </record>
+    <record id="nota_debito_m" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTAS DE DEBITO M</field>
+        <field name="afip_code">052</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">dn</field>
+        <field name="denomination">m</field>
+    </record>
 
-        <record id="nota_debito_m" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTAS DE DEBITO M</field>
-            <field name="afip_code">052</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">dn</field>
-            <field name="denomination">m</field>
-        </record>
+    <record id="nota_credito_m" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTAS DE CREDITO M</field>
+        <field name="afip_code">053</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">cn</field>
+        <field name="denomination">m</field>
+    </record>
 
-        <record id="nota_credito_m" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTAS DE CREDITO M</field>
-            <field name="afip_code">053</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">cn</field>
-            <field name="denomination">m</field>
-        </record>
+    <record id="factura_credito_electronica_a" model="res.voucher.type" forcecreate="0">
+        <field name="name">FACTURA DE CRÉDITO ELECTRÓNICA MiPyMEs (FCE) A</field>
+        <field name="afip_code">201</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">b</field>
+        <field name="denomination">a</field>
+    </record>
 
-        <record id="factura_credito_electronica_a" model="res.voucher.type" forcecreate="0">
-            <field name="name">FACTURA DE CRÉDITO ELECTRÓNICA MiPyMEs (FCE) A</field>
-            <field name="afip_code">201</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">b</field>
-            <field name="denomination">a</field>
-        </record>
+    <record id="factura_debito_electronica_a" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTA DE DÉBITO ELECTRÓNICA MiPyMEs (FCE) A</field>
+        <field name="afip_code">202</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">dn</field>
+        <field name="denomination">a</field>
+    </record>
 
-        <record id="factura_debito_electronica_a" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTA DE DÉBITO ELECTRÓNICA MiPyMEs (FCE) A</field>
-            <field name="afip_code">202</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">dn</field>
-            <field name="denomination">a</field>
-        </record>
+    <record id="nota_credito_electronica_a" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTA DE CRÉDITO ELECTRÓNICA MiPyMEs (FCE) A</field>
+        <field name="afip_code">203</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">cn</field>
+        <field name="denomination">a</field>
+    </record>
 
-        <record id="nota_credito_electronica_a" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTA DE CRÉDITO ELECTRÓNICA MiPyMEs (FCE) A</field>
-            <field name="afip_code">203</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">cn</field>
-            <field name="denomination">a</field>
-        </record>
+    <record id="factura_credito_electronica_b" model="res.voucher.type" forcecreate="0">
+        <field name="name">FACTURA DE CRÉDITO ELECTRÓNICA MiPyMEs (FCE) B</field>
+        <field name="afip_code">206</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">b</field>
+        <field name="denomination">b</field>
+    </record>
 
-        <record id="factura_credito_electronica_b" model="res.voucher.type" forcecreate="0">
-            <field name="name">FACTURA DE CRÉDITO ELECTRÓNICA MiPyMEs (FCE) B</field>
-            <field name="afip_code">206</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">b</field>
-            <field name="denomination">b</field>
-        </record>
+    <record id="factura_debito_electronica_b" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTA DE DÉBITO ELECTRÓNICA MiPyMEs (FCE) B</field>
+        <field name="afip_code">207</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">dn</field>
+        <field name="denomination">b</field>
+    </record>
 
-        <record id="factura_debito_electronica_b" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTA DE DÉBITO ELECTRÓNICA MiPyMEs (FCE) B</field>
-            <field name="afip_code">207</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">dn</field>
-            <field name="denomination">b</field>
-        </record>
-
-        <record id="nota_credito_electronica_b" model="res.voucher.type" forcecreate="0">
-            <field name="name">NOTA DE CRÉDITO ELECTRÓNICA MiPyMEs (FCE) B</field>
-            <field name="afip_code">208</field>
-            <field name="voucher_model">Factura/NC/ND</field>
-            <field name="doc_type">cn</field>
-            <field name="denomination">b</field>
-        </record>
-
-    </data>
+    <record id="nota_credito_electronica_b" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTA DE CRÉDITO ELECTRÓNICA MiPyMEs (FCE) B</field>
+        <field name="afip_code">208</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">cn</field>
+        <field name="denomination">b</field>
+    </record>
 
 </odoo>

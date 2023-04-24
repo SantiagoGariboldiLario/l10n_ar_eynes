@@ -1,52 +1,71 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
     <record id="res_partner_view_form_inherit_l10n_ar_eynes" model="ir.ui.view">
         <field name="name">res.partner.view.form.inherit</field>
         <field name="model">res.partner</field>
-        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
 
             <xpath expr="//field[@name='vat']" position="before">
-                <field name="dst_cuit" invisible="1"/>
-                <field name="document_type_id" placeholder="Document Type..." widget="selection"/>
-                <field name="dst_cuit_id" attrs="{'invisible': [('dst_cuit', '!=', True)]}"/>
-                <field name="supplier_rank" invisible="1"/>
-                <field name="customer_rank" invisible="1"/>
+                <field name="dst_cuit" invisible="1" />
+                <field
+                    name="document_type_id"
+                    placeholder="Document Type..."
+                    widget="selection"
+                />
+                <field
+                    name="dst_cuit_id"
+                    attrs="{'invisible': [('dst_cuit', '!=', True)]}"
+                />
+                <field name="supplier_rank" invisible="1" />
+                <field name="customer_rank" invisible="1" />
             </xpath>
 
             <xpath expr="//field[@name='vat']" position="attributes">
                 <attribute name="string">NIF</attribute>
             </xpath>
 
+            <xpath
+                expr="//field[@name='property_account_position_id']"
+                position="after"
+            >
+                <field name="fcred_transfer" />
+            </xpath>
+
             <page name="accounting" position="after">
                 <page string="Retentions" name="retentions">
                     <group name="retention_activity" string="Retention activity">
-                        <field name="retention_activity_id"/>
+                        <field name="retention_activity_id" />
                     </group>
                     <group string="Partner Retentions">
                         <field name="retention_ids" nolabel="1">
-                            <tree string="Retentions to Apply" editable="bottom">
-                                <field name="retention_id" domain="[('type_tax_use','=','purchase')]"/>
-                                <field name="percent"/>
+                            <tree editable="bottom">
+                                <field
+                                    name="retention_id"
+                                    domain="[('type_tax_use','=','purchase')]"
+                                />
+                                <field name="percent" />
                                 <field name="excluded_percent" />
                                 <field name="ex_date_from" />
                                 <field name="ex_date_to" />
                                 <field name="exclusion_certificate" />
                                 <field name="exclusion_date_certificate" />
-                                <field name="sit_iibb"/>
-                                <field name="from_padron" readonly="True"/>
-                                <field name="company_id" invisible="1"/>
+                                <field name="sit_iibb" />
+                                <field name="from_padron" readonly="True" />
+                                <field name="company_id" invisible="1" />
                             </tree>
                         </field>
                     </group>
-                    <group string="Advance Payment Retentions"
-                        attrs="{'invisible': [('supplier_rank', '=', 0)]}">
+                    <group
+                        string="Advance Payment Retentions"
+                        attrs="{'invisible': [('supplier_rank', '=', 0)]}"
+                    >
                         <field name="advance_retention_ids" nolabel="1">
-                            <tree string="Retentions to Apply" editable="bottom">
-                                <field name="retention_id"/>
-                                <field name="concept_id"/>
-                                <field name="company_id" invisible="1"/>
+                            <tree editable="bottom">
+                                <field name="retention_id" />
+                                <field name="concept_id" />
+                                <field name="company_id" invisible="1" />
                             </tree>
                         </field>
                     </group>
@@ -59,13 +78,13 @@
     <record id="res_partner_bank_view_form_check" model="ir.ui.view">
         <field name="name">res.partner.bank.form.check.inherit</field>
         <field name="model">res.partner.bank</field>
-        <field name="inherit_id" ref="base.view_partner_bank_form"/>
+        <field name="inherit_id" ref="base.view_partner_bank_form" />
         <field name="type">form</field>
         <field name="priority">10</field>
         <field name="arch" type="xml">
 
             <field name="acc_number" position="after">
-                <field name="account_id"/>
+                <field name="account_id" />
             </field>
 
             <field name="bank_id" position="attributes">

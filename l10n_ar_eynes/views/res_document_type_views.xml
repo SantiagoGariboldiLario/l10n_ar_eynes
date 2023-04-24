@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
     <record id="res_document_type_view_form" model="ir.ui.view">
@@ -8,14 +8,14 @@
             <form string="Document Type">
                 <sheet>
                     <h1>
-                        <label for="name" string="Document type"/>
-                        <field name="name" required="1"/>
+                        <label for="name" string="Document type" />
+                        <field name="name" required="1" />
                     </h1>
                     <group col="4" colspan="2">
-                        <field name="afip_code"/>
-                        <field name="verification_required"/>
-                        <field name="check_duplicated"/>
-                        <field name="dst_cuit"/>
+                        <field name="afip_code" />
+                        <field name="verification_required" />
+                        <field name="check_duplicated" />
+                        <field name="dst_cuit" />
                     </group>
                 </sheet>
             </form>
@@ -26,12 +26,12 @@
         <field name="name">res.document.type.view.tree</field>
         <field name="model">res.document.type</field>
         <field name="arch" type="xml">
-            <tree string="Document Type">
-                <field name="name"/>
-                <field name="afip_code"/>
-                <field name="verification_required"/>
-                <field name="check_duplicated"/>
-                <field name="dst_cuit"/>
+            <tree>
+                <field name="name" />
+                <field name="afip_code" />
+                <field name="verification_required" />
+                <field name="check_duplicated" />
+                <field name="dst_cuit" />
             </tree>
         </field>
     </record>
@@ -42,7 +42,7 @@
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">res.document.type</field>
         <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="res_document_type_view_tree"/>
+        <field name="view_id" ref="res_document_type_view_tree" />
     </record>
 
     <menuitem
@@ -50,5 +50,6 @@
         name="Document types"
         action="res_document_type_action"
         parent="account.account_account_menu"
-        sequence="10"/>
+        sequence="10"
+    />
 </odoo>
