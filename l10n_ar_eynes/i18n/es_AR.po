@@ -2463,7 +2463,6 @@ msgstr "lineas de comprobante"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__bank_account_id
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__bank_account_id
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
 msgid "Bank Account"
 msgstr "Cuenta Bancaria"
@@ -2684,3 +2683,18 @@ msgstr ""
 "<span class=\"o_form_label\" attrs=\"{'invisible': ['|', ('move_type', '=', 'entry'), ('debit_origin_id', '=', False)]}\">\n"
 "                    <span>Nota de Débito</span>\n"
 "                </span>"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
+msgid "Issuing Bank"
+msgstr "Banco Emisor"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__journal_id
+msgid "Depositing Bank"
+msgstr "Banco Depositario"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__bank_account_id
+msgid "Depositing Bank Account"
+msgstr "Cuenta bancaria depositaria"

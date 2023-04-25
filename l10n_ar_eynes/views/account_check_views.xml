@@ -265,6 +265,7 @@
                         <group>
                             <field
                                 name="bank_id"
+                                string="Issuing Bank"
                                 attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
                             />
                             <field
