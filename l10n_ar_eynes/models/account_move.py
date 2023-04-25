@@ -39,7 +39,10 @@ class AccountMove(models.Model):
         string='Debit Note', compute='_compute_is_debit_note', store=True
     )
     aut_cae = fields.Boolean(
-        'Autorizar', default=False, copy=False, help='Pedido de autorizacion a la AFIP'
+        'Autorizar',
+        default=False,
+        copy=False,
+        help='Pedido de autorizacion a la AFIP',
     )
     cae = fields.Char(
         string='CAE/CAI',
@@ -49,10 +52,16 @@ class AccountMove(models.Model):
         help='CAE (Codigo de Autorizacion Electronico assigned by AFIP.)',
     )
     cae_due_date = fields.Date(
-        'CAE Due Date', required=False, copy=False, help='Fecha de vencimiento del CAE'
+        'CAE Due Date',
+        required=False,
+        copy=False,
+        help='Fecha de vencimiento del CAE',
     )
     associated_inv_ids = fields.Many2many(
-        'account.move', 'account_invoice_associated_rel', 'invoice_id', 'refund_debit_id'
+        'account.move',
+        'account_invoice_associated_rel',
+        'invoice_id',
+        'refund_debit_id',
     )
     voucher_type_id = fields.Many2one(
         comodel_name='res.voucher.type',
@@ -61,7 +70,7 @@ class AccountMove(models.Model):
         store=True,
     )
     wsfe_request_ids = fields.One2many('wsfe.request.detail', 'name')
-    local = fields.Boolean(related='journal_id.fiscal_position_id.local')
+    local = fields.Boolean(related='fiscal_position_id.local')
     is_FCE_invoice = fields.Boolean(
         string="Is FCE?",
         default=False,
@@ -85,7 +94,9 @@ class AccountMove(models.Model):
         'wsfex.shipping.permission', 'invoice_id', 'Shipping Permissions'
     )
     wsfex_request_ids = fields.One2many('wsfex.request.detail', 'invoice_id')
-    optional_ids = fields.One2many('account.move.optional', 'invoice_id', 'Optionals')
+    optional_ids = fields.One2many(
+        'account.move.optional', 'invoice_id', 'Optionals'
+    )
     dst_cuit_id = fields.Many2one('dst.cuit.codes', 'Country CUIT')
 
     @api.depends('debit_origin_id')
@@ -126,7 +137,9 @@ class AccountMove(models.Model):
             return
         super(AccountMove, self)._onchange_partner_id()
         if self.is_sale_document():
-            partner_fiscal_position = self.partner_id.property_account_position_id
+            partner_fiscal_position = (
+                self.partner_id.property_account_position_id
+            )
             journals = self.env.user.journal_ids.filtered(
                 lambda j: partner_fiscal_position in j.fiscal_position_ids
             )
@@ -136,7 +149,10 @@ class AccountMove(models.Model):
                 return {'domain': {'journal_id': [('id', 'in', journals.ids)]}}
 
     @api.onchange(
-        'supplier_move_reference', 'denomination', 'fiscal_position_id', 'partner_id'
+        'supplier_move_reference',
+        'denomination',
+        'fiscal_position_id',
+        'partner_id',
     )
     def _onchange_supplier_move_reference(self):
         if not self.supplier_move_reference:
@@ -148,19 +164,24 @@ class AccountMove(models.Model):
 
         pos_code, move_code = self.supplier_move_reference.split('-')
         if not pos_code or not move_code:
-            raise ValidationError(_('numbers missing after or before separator'))
+            raise ValidationError(
+                _('numbers missing after or before separator')
+            )
         if not pos_code.isnumeric() or not move_code.isnumeric():
             raise ValidationError(_('the reference must be numbers only'))
         if len(pos_code) > 5 or len(move_code) > 8:
             raise ValidationError(_('Some of the fields exceeds length'))
 
-        self.supplier_move_reference = pos_code.zfill(4) + '-' + move_code.zfill(8)
+        self.supplier_move_reference = (
+            pos_code.zfill(4) + '-' + move_code.zfill(8)
+        )
         self.name = self.supplier_move_reference
 
     @api.onchange('fiscal_position_id', 'partner_id')
     def _onchange_fiscal_position(self):
         fiscal_position = (
-            self.fiscal_position_id or self.partner_id.property_account_position_id
+            self.fiscal_position_id
+            or self.partner_id.property_account_position_id
         )
         if self.is_purchase_document():
             self.denomination = fiscal_position.supplier_denomination
@@ -187,7 +208,10 @@ class AccountMove(models.Model):
 
                 if not len(res):
                     _logger.warning(
-                        _("There is no voucher type that corresponds " "to this object")
+                        _(
+                            "There is no voucher type that corresponds "
+                            "to this object"
+                        )
                     )
 
                 if rec.is_FCE_invoice:
@@ -223,17 +247,23 @@ class AccountMove(models.Model):
         for inv in self:
             # Amount exempt
             inv.amount_exempt = sum(
-                inv.invoice_line_ids.filtered(_filter_exempt).mapped("price_subtotal")
+                inv.invoice_line_ids.filtered(_filter_exempt).mapped(
+                    "price_subtotal"
+                )
             )
 
             # Amount untaxed
             inv.amount_no_taxed = sum(
-                inv.invoice_line_ids.filtered(_filter_untaxed).mapped("price_subtotal")
+                inv.invoice_line_ids.filtered(_filter_untaxed).mapped(
+                    "price_subtotal"
+                )
             )
 
             # Amount taxed
             inv.amount_taxed = sum(
-                inv.invoice_line_ids.filtered(_filter_taxed).mapped("price_subtotal")
+                inv.invoice_line_ids.filtered(_filter_taxed).mapped(
+                    "price_subtotal"
+                )
             )
 
     def get_voucher_type(self):
@@ -254,7 +284,9 @@ class AccountMove(models.Model):
         try:
             pto_vta = int(inv.journal_id.get_pos_number())
         except ValueError as value_err:
-            err = _('Error\n' 'El nombre del punto de venta tiene que ser numerico')
+            err = _(
+                'Error\n' 'El nombre del punto de venta tiene que ser numerico'
+            )
             raise UserError(err) from value_err
 
         last = conf.get_last_voucher(pto_vta, tipo_cbte)
@@ -289,7 +321,9 @@ class AccountMove(models.Model):
         ABC = self.env['afip.big.company'].sudo()
         is_bc = ABC.search([('cuit', '=like', self.partner_id.vat)])
         amount_total = (
-            self.amount_total_cur if self.is_multi_currency else self.amount_total
+            self.amount_total_cur
+            if self.is_multi_currency
+            else self.amount_total
         )
         fcred_minimum_amount = self.company_id.fcred_minimum_amount
         if is_bc and amount_total > fcred_minimum_amount:
@@ -381,7 +415,9 @@ class AccountMove(models.Model):
 
     def validate_denomination(self):
         if not self.denomination or self.denomination == 'not_defined':
-            raise ValidationError(_("Invoice must have a denomination configured"))
+            raise ValidationError(
+                _("Invoice must have a denomination configured")
+            )
 
     def action_post_from_massive(self, first_number):
         for rec in self:
@@ -424,7 +460,9 @@ class AccountMove(models.Model):
         ctx = self.env.context
         inv_model = self.env['account.move']
         try:
-            invoices_approved = ws.send_invoices(self, first_number=first_number)
+            invoices_approved = ws.send_invoices(
+                self, first_number=first_number
+            )
 
             for invoice_id, invoice_vals in invoices_approved.items():
                 invoice = inv_model.browse(invoice_id)
@@ -437,7 +475,9 @@ class AccountMove(models.Model):
             _logger.exception('WSFE Validation Error')
             if isinstance(e, UserError):
                 raise
-            err = _('WSFE Validation Error\n' 'Error received was: \n %s') % repr(e)
+            err = _(
+                'WSFE Validation Error\n' 'Error received was: \n %s'
+            ) % repr(e)
             raise UserError(err) from e
         finally:
             # Creamos el wsfe.request con otro cursor,
@@ -570,7 +610,9 @@ class AccountMove(models.Model):
         if confs_list:
             confs_obj = confs_list[0]
         elif not ctx['without_raise']:
-            err = _("There is no configuration for this " "POS %s") % pos_ar.name
+            err = (
+                _("There is no configuration for this " "POS %s") % pos_ar.name
+            )
             raise UserError(_("WSFE Error\n") + err)
         else:
             confs_obj = False
@@ -609,7 +651,9 @@ class AccountMove(models.Model):
 
     def action_register_payment(self):
         """Override to redirect to account payment order"""
-        po = self.env['account.payment.order'].create(self.get_payment_order_vals())
+        po = self.env['account.payment.order'].create(
+            self.get_payment_order_vals()
+        )
 
         if self.is_sale_document():
             view_id = self.env.ref(
@@ -630,7 +674,10 @@ class AccountMove(models.Model):
         }
 
     def get_payment_order_vals(self):
-        move_line_domain = [('id', 'in', self.line_ids.ids), ('reconciled', '=', False)]
+        move_line_domain = [
+            ('id', 'in', self.line_ids.ids),
+            ('reconciled', '=', False),
+        ]
         if self.is_sale_document():
             move_line_domain += [
                 ('debit', '>', 0),
