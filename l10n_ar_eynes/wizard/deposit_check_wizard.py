@@ -1,4 +1,5 @@
 import time
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
@@ -25,16 +26,20 @@ class DepositCheckwizard(models.TransientModel):
     voucher_number = fields.Char(string='Voucher Number', size=32)
     journal_id = fields.Many2one(
         comodel_name='account.journal',
-        string='Journal',
+        string='Depositing Bank',
         required=True,
         domain=[('type', 'in', ('cash', 'bank'))],
         default=_get_journal,
     )
     bank_account_id = fields.Many2one(
-        comodel_name='res.partner.bank', string='Bank Account', required=True
+        comodel_name='res.partner.bank',
+        string='Depositing Bank Account',
+        required=True,
     )
     date = fields.Date(
-        string='Deposit Date', required=True, default=lambda *a: time.strftime('%Y-%m-%d')
+        string='Deposit Date',
+        required=True,
+        default=lambda *a: time.strftime('%Y-%m-%d'),
     )
     company_id = fields.Many2one(
         comodel_name='res.company',
@@ -59,8 +64,8 @@ class DepositCheckwizard(models.TransientModel):
             if check.third_party_check_state != 'in_wallet':
                 raise UserError(
                     _(
-                        "Error! The selected checks must be \
-                    in wallet.\nCheck %s is not in wallet"
+                        "Error! The selected checks must be in wallet.\n"
+                        "Check %s is not in wallet"
                     )
                     % (check.number)
                 )
