@@ -2710,3 +2710,19 @@ msgstr "Banco Depositario"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__bank_account_id
 msgid "Depositing Bank Account"
 msgstr "Cuenta bancaria depositaria"
+
+#. module: account
+#: code:addons/account/models/account_analytic_line.py:0
+#: code:addons/account/models/chart_template.py:0
+#: model:ir.actions.act_window,name:account.action_move_out_invoice_type
+#: model_terms:ir.ui.view,arch_db:account.account_analytic_account_view_form_inherit
+#: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:account.res_partner_view_search
+#, python-format
+msgid "Customer Invoices"
+msgstr "Facturas de Cliente"
+
+#. module: account
+#: model:ir.actions.act_window,name:account.action_move_in_invoice_type
+msgid "Supplier Invoices"
+msgstr "Facturas de Proveedor"
