@@ -211,18 +211,12 @@
                     </div>
                     <group>
                         <group>
-                            <field
-                                name="type"
-                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
-                            />
+                            <field name="type" readonly="1" />
                             <field
                                 name="amount"
                                 attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
                             />
-                            <field
-                                name="source_partner_id"
-                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
-                            />
+                            <field name="source_partner_id" readonly="1" />
                             <field
                                 name="destiny_partner_id"
                                 attrs="{
@@ -230,10 +224,7 @@
                                     'readonly': [('third_party_check_state', '!=', 'in_wallet')]
                                 }"
                             />
-                            <field
-                                name="checkbook_format"
-                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
-                            />
+                            <field name="checkbook_format" readonly="1" />
                             <field name="internal_type" readonly="1" />
                         </group>
                         <group>
@@ -343,14 +334,8 @@
                     </group>
                     <group string="Payments, Receipts and Debits">
                         <group>
-                            <field
-                                name="source_payment_order_id"
-                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
-                            />
-                            <field
-                                name="debit_note_id"
-                                attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
-                            />
+                            <field name="source_payment_order_id" readonly="1" />
+                            <field name="debit_note_id" readonly="1" />
                             <field
                                 name="reject_date"
                                 attrs="{
