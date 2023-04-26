@@ -548,10 +548,16 @@ msgstr ""
 msgid "Created on"
 msgstr ""
 
-#. module: l10n_ar_eynes
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#: code:addons/account/models/account_move.py:0
+#: model:ir.model.fields.selection,name:account.selection__account_payment__reconciled_invoices_type__credit_note
+#: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
+#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__res_voucher_type__doc_type__cn
+#, python-format
 msgid "Credit Note"
-msgstr "Nota de Credito"
+msgstr "Nota de Crédito"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__income_line_ids
@@ -2671,7 +2677,13 @@ msgstr "Diarios Disponibles"
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
 msgid "Credit Notes"
-msgstr "Notas de Credito"
+msgstr "Notas de Crédito"
+
+#. module: account
+#: model:ir.actions.act_window,name:account.action_move_in_refund_type
+#: model:ir.ui.menu,name:account.menu_action_move_in_refund_type
+msgid "Refunds"
+msgstr "Notas de Crédito"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
