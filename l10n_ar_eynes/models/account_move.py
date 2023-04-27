@@ -641,9 +641,17 @@ class AccountMove(models.Model):
         res = super().create(vals)
         if not res.invoice_date:
             res.invoice_date = date.today()
-        for move in res.filtered(lambda m: m.is_sale_document()):
+        for move in res.filtered(
+            lambda m: m.is_sale_document() or m.is_purchase_document()
+        ):
             if not move.denomination:
-                move.write({'denomination': move.journal_id.denomination})
+                if move.is_sale_document():
+                    denomination = move.journal_id.denomination
+                else:
+                    denomination = (
+                        move.partner_id.property_account_position_id.supplier_denomination
+                    )
+                move.write({'denomination': denomination})
         return res
 
     def action_register_payment(self):
