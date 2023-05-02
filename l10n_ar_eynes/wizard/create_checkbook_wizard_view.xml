@@ -34,7 +34,13 @@
                             <field name="checkbook_format" />
                         </group>
                         <group>
-                            <field name="type" />
+                            <field
+                                name="type"
+                                attrs="{
+                                    'invisible': [('checkbook_format','!=', 'physical')],
+                                    'required': [('checkbook_format','=', 'physical')],
+                                }"
+                            />
                         </group>
                     </group>
                     <footer>

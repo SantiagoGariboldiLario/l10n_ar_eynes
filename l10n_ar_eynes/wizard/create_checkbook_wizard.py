@@ -15,15 +15,17 @@ class CreateCheckbookWizard(models.TransientModel):
         domain=[('type', '=', 'bank')],
     )
     checkbook_format = fields.Selection(
-        selection=[('physical', 'Physical'), ('virtual', 'Virtual'), ('echeq', 'Echeq')],
+        selection=[
+            ('physical', 'Physical'),
+            ('virtual', 'Virtual'),
+            ('echeq', 'Echeq'),
+        ],
         string='Format',
         required=True,
     )
     type = fields.Selection(
         selection=[('common', 'Common'), ('deferred', 'Deferred')],
         string='Type',
-        default='common',
-        required=True,
     )
     start_num = fields.Char('Start Number', size=8)
     end_num = fields.Char('End Number', size=8)
@@ -105,4 +107,6 @@ class CreateCheckbookWizard(models.TransientModel):
 
     def check_range(self):
         if int(self.start_num) > int(self.end_num):
-            raise ValidationError(_("Start number must be smaller than End number"))
+            raise ValidationError(
+                _("Start number must be smaller than End number")
+            )
