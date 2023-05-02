@@ -13,7 +13,7 @@ class FO:
 
     id = False
 
-    def address_get():
+    def address_get(self):
         return {}
 
 
@@ -63,11 +63,14 @@ class AccountJournal(models.Model):
         string="Activity Start Date", default=fields.date.today()
     )
     warehouse_id = fields.Many2one(
-        comodel_name='stock.warehouse', string='Warehouse', default=get_default_warehouse
+        comodel_name='stock.warehouse',
+        string='Warehouse',
+        default=get_default_warehouse,
     )
     due_date = fields.Date(
         string='Due Date',
-        help='after this expiration date, account moves are not allowed to use this journal till its extended',
+        help='after this expiration date, account moves are not allowed '
+        'to use this journal till its extended',
     )
     type = fields.Selection(
         selection_add=[
@@ -90,7 +93,10 @@ class AccountJournal(models.Model):
     tax_id = fields.Many2one(
         comodel_name='account.tax',
         string='Tax',
-        domain="[('tax_group_id.name', 'in', ('Retentions', 'Retenciones')),('active', '=', True)]",
+        domain=[
+            ('tax_group_id.name', 'in', ('Retentions', 'Retenciones')),
+            ('active', '=', True),
+        ],
     )
     type_tax_use = fields.Selection(
         string='Tax Application',
@@ -100,6 +106,25 @@ class AccountJournal(models.Model):
     state_id = fields.Many2one(related='tax_id.state_id')
     priority = fields.Integer()
     fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
+
+    @api.depends('type')
+    def _compute_default_account_type(self):
+        super(AccountJournal, self)._compute_default_account_type()
+        default_account_id_types = {
+            'receipt': 'account.data_account_type_revenue',
+            'payment': 'account.data_account_type_expenses',
+        }
+
+        for journal in self.filtered(
+            lambda j: j.type in ('payment', 'receipt')
+        ):
+            if journal.type in default_account_id_types:
+                journal.default_account_type = self.env.ref(
+                    default_account_id_types[journal.type]
+                ).id
+            else:
+                journal.default_account_type = False
+        return
 
     @api.constrains('fcred_is_fce_emitter', 'warehouse_id')
     def _check_no_more_than_one_pos_fce_per_company(self):
@@ -120,7 +145,9 @@ class AccountJournal(models.Model):
                 )
 
     def get_pos_number(self):
-        denomination = dict(self._fields['denomination'].selection).get(self.denomination)
+        denomination = dict(self._fields['denomination'].selection).get(
+            self.denomination
+        )
         return self.code.strip(denomination)
 
     @api.model
@@ -144,8 +171,8 @@ class AccountJournal(models.Model):
         self,
         sit_iibb=False,
         from_padron=False,
-        source_shipping_id=FO(),
-        destination_shipping_id=FO(),
+        source_shipping_id=False,
+        destination_shipping_id=False,
     ):
         self.ensure_one()
 
@@ -167,7 +194,8 @@ class AccountJournal(models.Model):
             multilateral = self.env.ref("iibb_situation_multilateral")
             if sit_iibb == multilateral:
                 _logger.info(
-                    "Partner es Convenio Multilateral, " f"aplica Retencion {self.name}"
+                    "Partner es Convenio Multilateral, "
+                    f"aplica Retencion {self.name}"
                 )
                 return True
 
@@ -176,7 +204,9 @@ class AccountJournal(models.Model):
 
         if tax_id.applicable_state == 'dest':
             partner_state = partner_model.browse(
-                destination_shipping_id.address_get(['delivery']).get('delivery')
+                destination_shipping_id.address_get(['delivery']).get(
+                    'delivery'
+                )
             ).id
             if not partner_state:
                 raise RetentionError(
@@ -244,7 +274,7 @@ class AccountJournal(models.Model):
         prev_ret_ids,
         line_type,
         sit_iibb,
-        logging_messages=[],
+        logging_messages,
         activity=None,
     ):
         tax_app_obj = self.env['retention.tax.application']
@@ -260,13 +290,16 @@ class AccountJournal(models.Model):
         logging_messages.append(
             "Parseando lineas del asiento: %s [%s]" % (move.name, move.ref)
         )
-        for tax_id, mls in parsed_move['concept_lines'].items():
+        for _tax_id, mls in parsed_move['concept_lines'].items():
             for ml in mls:
-
                 # Evitamos la linea de la deuda
-                concepts = self._get_concepts_from_account(retention, ml.account_id)
+                concepts = self._get_concepts_from_account(
+                    retention, ml.account_id
+                )
 
-                logging_messages.append(f"Linea: {ml.name} [{ml.account_id.name}]")
+                logging_messages.append(
+                    f"Linea: {ml.name} [{ml.account_id.name}]"
+                )
 
                 # Si el concepto no esta sujeto a retencion, continuamos
                 no_subject = False
@@ -289,7 +322,9 @@ class AccountJournal(models.Model):
                     ('concept_id', 'in', concepts.ids),
                 ]
                 if activity:
-                    tapp_domain.append(('activity_id', '=', activity and activity.id))
+                    tapp_domain.append(
+                        ('activity_id', '=', activity and activity.id)
+                    )
                 iibb_domain = []
                 if retention.type == 'gross_income':
                     iibb_domain.append(
@@ -308,8 +343,10 @@ class AccountJournal(models.Model):
                         _(
                             "Retention Error!\n"
                             "There is no configured a Retention Application "
-                            f"({retention.name}) that corresponds to\nActivity: {activity_name} \n"
-                            f"Concept: {concept_name}\n for the Account {ml.account_id.name}"
+                            f"({retention.name}) that corresponds to\n"
+                            "Activity: {activity_name} \n"
+                            f"Concept: {concept_name}\n"
+                            f"for the Account {ml.account_id.name}"
                         )
                     )
 
@@ -393,7 +430,10 @@ class AccountJournal(models.Model):
                 )
 
                 logging_messages.append(
-                    ("Subtotales %s ==> Base: %f Base To Pay: " + "%f Base Unrec: %f")
+                    (
+                        "Subtotales %s ==> Base: %f Base To Pay: "
+                        + "%f Base Unrec: %f"
+                    )
                     % (
                         key,
                         retentions[key]['base'],

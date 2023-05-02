@@ -2726,3 +2726,13 @@ msgstr "Facturas de Cliente"
 #: model:ir.actions.act_window,name:account.action_move_in_invoice_type
 msgid "Supplier Invoices"
 msgstr "Facturas de Proveedor"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_journal_view_form_inherit_l10n_ar_eynes
+msgid "Default Expense Account"
+msgstr "Cuenta de gastos predeterminada"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_journal_view_form_inherit_l10n_ar_eynes
+msgid "Default Income Account"
+msgstr "Cuenta de ingresos predeterminada"
