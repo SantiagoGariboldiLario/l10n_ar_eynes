@@ -148,26 +148,21 @@ class AccountMove(models.Model):
                 self._onchange_journal()
                 return {'domain': {'journal_id': [('id', 'in', journals.ids)]}}
 
-    @api.onchange('name', 'partner_id')
-    def _onchange_name_warning(self):
-        if self.is_sale_document():
+    @api.onchange(
+        'supplier_move_reference',
+        'denomination',
+        'fiscal_position_id',
+        'partner_id',
+    )
+    def _onchange_supplier_move_reference(self):
+        if not self.supplier_move_reference:
             return
 
-        if self.name == '/':
-            self.name = ''
-
-        if not self.name:
-            return
-
-        pos_code, move_code = self.validate_supplier_invoice_number()
-        self.name = pos_code.zfill(4) + '-' + move_code.zfill(8)
-
-    def validate_supplier_invoice_number(self):
         # Separator missing or multiple separators error
-        if self.name.count('-') != 1:
+        if self.supplier_move_reference.count('-') != 1:
             raise ValidationError(_('Must be only one separator'))
 
-        pos_code, move_code = self.name.split('-')
+        pos_code, move_code = self.supplier_move_reference.split('-')
         if not pos_code or not move_code:
             raise ValidationError(
                 _('numbers missing after or before separator')
@@ -176,7 +171,11 @@ class AccountMove(models.Model):
             raise ValidationError(_('the reference must be numbers only'))
         if len(pos_code) > 5 or len(move_code) > 8:
             raise ValidationError(_('Some of the fields exceeds length'))
-        return pos_code, move_code
+
+        self.supplier_move_reference = (
+            pos_code.zfill(4) + '-' + move_code.zfill(8)
+        )
+        self.name = self.supplier_move_reference
 
     @api.onchange('fiscal_position_id', 'partner_id')
     def _onchange_fiscal_position(self):

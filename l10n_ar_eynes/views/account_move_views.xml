@@ -35,19 +35,21 @@
                     <field
                         name="name"
                         class="oe_inline"
+                        readonly="1"
+                        force_save="1"
+                        attrs="{'invisible': [('state', '=', 'draft')]}"
+                    />
+                    <field
+                        name="supplier_move_reference"
+                        class="oe_inline"
                         attrs="{
-                            'readonly': [
+                            'invisible': [
                                 '|',
                                 ('state', '!=', 'draft'),
                                 ('move_type','not in', ('in_invoice', 'in_refund'))
                             ],
-                            'invisible': [
-                                ('state', '=', 'draft'),
-                                ('move_type','not in', ('in_invoice', 'in_refund'))
-                            ],
-                            'required': [
-                                ('move_type','in', ('in_invoice', 'in_refund'))
-                            ]
+                            'required': [('move_type','in',('in_invoice', 'in_refund'))]
+
                         }"
                     />
                 </h1>
