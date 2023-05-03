@@ -195,6 +195,19 @@ class AccountCheck(models.Model):
                         )
                     )
             elif check.internal_type == 'issued':
+                if (
+                    self._context.get('params').get('model')
+                    == 'account.payment.order'
+                ):
+                    self.write(
+                        {
+                            'payment_order_id': False,
+                            'amount': 0.00,
+                            'issue_date': False,
+                            'payment_date': False,
+                        }
+                    )
+                    return
                 if check.issued_check_state != 'draft':
                     raise UserError(
                         _(
