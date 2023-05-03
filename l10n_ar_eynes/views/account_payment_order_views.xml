@@ -1117,7 +1117,7 @@
                                             <field
                                                 name="checkbook_id"
                                                 required="1"
-                                                domain="[('journal_id', '=', journal_id)]"
+                                                domain="[('journal_id', '=', journal_id), ('payment_method_id.code', '=', 'check_printing')]"
                                             />
                                             <field
                                                 name="record_ids"
