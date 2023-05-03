@@ -142,6 +142,13 @@ class AccountCheck(models.Model):
         domain=[('internal_type', '=', 'issued')],
     )
 
+    @api.onchange('issue_date')
+    def _onchange_issue_date(self):
+        if not self.issue_date:
+            return
+        if self.type == 'common':
+            self.payment_date = self.issue_date
+
     @api.onchange('checkbook_id', 'journal_id')
     def _onchange_checkbook_id(self):
         if not self.checkbook_id:
@@ -155,6 +162,7 @@ class AccountCheck(models.Model):
         self.type = check.type
         self.number = check.number
         self.bank_id = check.bank_id
+        self.checkbook_format = check.checkbook_format
 
     @api.depends('amount', 'currency_rate')
     def _compute_amount_currency(self):
