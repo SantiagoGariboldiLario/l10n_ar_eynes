@@ -103,7 +103,6 @@
                     string="Default Income Account"
                     attrs="{
                         'invisible': [('type', '!=', 'receipt')],
-                        'required': [('type', '=', 'receipt')],
                     }"
                 />
                 <field
