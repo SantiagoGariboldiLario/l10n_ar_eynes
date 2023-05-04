@@ -803,19 +803,18 @@ class AccountMove(models.Model):
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
-        if not res.invoice_date:
-            res.invoice_date = date.today()
-        for move in res.filtered(
-            lambda m: m.is_sale_document() or m.is_purchase_document()
-        ):
-            if not move.denomination:
-                if move.is_sale_document():
-                    denomination = move.journal_id.denomination
-                else:
-                    denomination = (
-                        move.partner_id.property_account_position_id.supplier_denomination
-                    )
-                move.write({'denomination': denomination})
+        for move in res:
+            if not move.invoice_date:
+                move.write({'invoice_date': date.today()})
+            if move.is_sale_document() or move.is_purchase_document():
+                if not move.denomination:
+                    if move.is_sale_document():
+                        denomination = move.journal_id.denomination
+                    else:
+                        denomination = (
+                            move.partner_id.property_account_position_id.supplier_denomination
+                        )
+                    move.write({'denomination': denomination})
         return res
 
     def action_register_payment(self):
