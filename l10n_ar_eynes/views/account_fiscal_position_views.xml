@@ -12,6 +12,22 @@
                 <field name="local" />
             </xpath>
             <page name="tax_mapping" position="after">
+                <page name="applied_perceptions" string="Applied Perceptions">
+                    <group>
+                        <field
+                            name="perception_ids"
+                            widget="one2many_list"
+                            nolabel="1"
+                            domain="[('tax_id.type_tax_use','=','sale')]"
+                        >
+                            <tree string="Perception">
+                                <field name="name" />
+                                <field name="tax_id" />
+                                <field name="state_id" />
+                            </tree>
+                        </field>
+                    </group>
+                </page>
                 <page name="applied_retentions" string="Applied Retentions">
                     <group>
                         <field

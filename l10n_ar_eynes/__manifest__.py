@@ -49,8 +49,10 @@
         'data/ir_sequence_data.xml',
         "data/wsfe_data.xml",
         "data/ir_cron.xml",
+        "data/perception_data.xml",
         'security/ir.model.access.csv',
         'security/account_security.xml',
+        'security/perception_ir_rule.xml',
         'wizard/deposit_check_wizard_view.xml',
         'wizard/reject_check_wizard_view.xml',
         'views/res_config_settigs_views.xml',
@@ -80,8 +82,12 @@
         "wizard/wsfe_massive_sinchronize_view.xml",
         "views/wsfe_view.xml",
         "views/res_company_view.xml",
+        "views/perception_view.xml",
+        "views/perception_menuitems.xml",
     ],
     'installable': True,
     'application': True,
-    "external_dependencies": {"python": ["M2Crypto", "OpenSSL", "easywsy", "suds"]},
+    "external_dependencies": {
+        "python": ["M2Crypto", "OpenSSL", "easywsy", "suds"]
+    },
 }

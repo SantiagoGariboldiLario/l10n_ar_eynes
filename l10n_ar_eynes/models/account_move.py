@@ -8,6 +8,7 @@ _logger = logging.getLogger(__name__)
 
 # Constant used to find FCE type:
 AFIP_FCE_CODE_START = 200
+PCODES = {'nacional': '1', 'provincial': '2', 'municipal': '3'}
 
 
 class AccountMove(models.Model):
@@ -37,6 +38,13 @@ class AccountMove(models.Model):
         string='Debit Note',
         compute='_compute_is_debit_note',
         store=True,
+    )
+    perception_ids = fields.One2many(
+        'perception.tax.line',
+        'invoice_id',
+        string='Perception',
+        readonly=True,
+        states={'draft': [('readonly', False)]},
     )
     aut_cae = fields.Boolean(
         'Autorizar',
@@ -147,6 +155,137 @@ class AccountMove(models.Model):
                 self.journal_id = journals[0]
                 self._onchange_journal()
                 return {'domain': {'journal_id': [('id', 'in', journals.ids)]}}
+
+    @api.onchange('partner_id', 'company_id')
+    def _onchange_partner_id(self):
+        res = super(AccountMove, self)._onchange_partner_id()
+        if self.is_sale_document():
+            # If partner changes set the partner_id for existent perceptions
+            perception_ids = self.perception_ids.ids
+            if self.partner_id and perception_ids:
+                upd_lst = [
+                    (1, p, {'partner_id': self.partner_id})
+                    for p in perception_ids
+                ]
+                self.perception_ids = upd_lst
+        return res
+
+    @api.onchange('perception_ids')
+    def _onchange_perception_ids(self):
+        if self.is_sale_document():
+            move_line_model = self.env['account.move.line']
+            for invoice in self:
+                tax_ids = []
+                tax_grouped = invoice.get_taxes_values()
+                for _key, tax_val in tax_grouped.items():
+                    tax_val.pop('invoice_id')
+                    tax_ids.append(move_line_model.create(tax_val).id)
+                invoice.tax_line_ids = [(6, 0, tax_ids)]
+
+    def prepare_perception_tax_line_vals(self, tax):
+        # Prepare values to create a perception.tax.line
+        # Tax parameter is the output of perception.tax.line.compute_all().
+        vals = {
+            'invoice_id': self.id,
+            'name': tax['name'],
+            'tax_id': tax['id'],
+            'amount': tax['amount'],
+            'base': tax['base'],
+            'manual': False,
+            'sequence': 10,
+            'is_exempt': False,
+            'account_analytic_id': tax.get('analytic', False),
+            'account_id': tax['account_id'],
+            'analytic_tag_ids': False,
+        }
+        return vals
+
+    def _prepare_tax_line_vals(self, line, tax):
+        """Prepare values to create an account.move.line
+
+        The line parameter is an account.move.line, and the
+        tax parameter is the output of account.tax.compute_all().
+        """
+        vals = {
+            'move_id': self.id,
+            'move_name': tax['name'],
+            'tax_id': tax['id'],
+            'account_id': self.type in ('out_invoice', 'in_invoice')
+            and (tax['account_id'] or line.account_id.id)
+            or (tax['refund_account_id'] or line.account_id.id),
+            'account_analytic_id': tax['analytic']
+            and line.account_analytic_id.id
+            or False,
+            'quantity': 1,
+            'price_unit': tax['amount'],
+            'credit': tax['amount'],
+            'balance': -tax['amount'],
+            'amount_currency': -tax['amount'],
+            'price_subtotal': tax['amount'],
+            'price_total': tax['amount'],
+            'tax_base_amount': tax['base'],
+            'sequence': tax['sequence'],
+            'analytic_tag_ids': tax['analytic']
+            and line.analytic_tag_ids.ids
+            or False,
+        }
+
+        # If the taxes generate moves on the same financial account as the invoice line,
+        # propagate the analytic account from the invoice line to the tax line.
+        # This is necessary in situations were (part of) the taxes cannot be reclaimed,
+        # to ensure the tax move is allocated to the proper analytic account.
+        if (
+            not vals.get('account_analytic_id')
+            and line.account_analytic_id
+            and vals['account_id'] == line.account_id.id
+        ):
+            vals['account_analytic_id'] = line.account_analytic_id.id
+        return vals
+
+    def get_taxes_values(self):
+        tax_grouped = {}
+        round_curr = self.currency_id.round
+        for line in self.invoice_line_ids:
+            if not line.account_id or line.display_type:
+                continue
+            price_unit = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            taxes = line.tax_ids.compute_all(
+                price_unit,
+                self.currency_id,
+                line.quantity,
+                line.product_id,
+                self.partner_id,
+            )['taxes']
+            for tax in taxes:
+                val = self._prepare_tax_line_vals(line, tax)
+                key = (
+                    self.env['account.tax']
+                    .browse(tax['id'])
+                    .get_grouping_key(val)
+                )
+
+                if key not in tax_grouped:
+                    tax_grouped[key] = val
+                    tax_grouped[key]['base'] = round_curr(val['base'])
+                else:
+                    tax_grouped[key]['amount'] += val['amount']
+                    tax_grouped[key]['base'] += round_curr(val['base'])
+        for perception in self.perception_ids:
+            taxes = perception.compute_all(self.currency_id)
+            for tax in taxes:
+                val = self.prepare_perception_tax_line_vals(tax)
+                key = (
+                    self.env['account.tax']
+                    .browse(tax['id'])
+                    .get_grouping_key(val)
+                )
+
+                if key not in tax_grouped:
+                    tax_grouped[key] = val
+                else:
+                    tax_grouped[key]['amount'] += val['amount']
+                    tax_grouped[key]['base'] += val['base']
+        return tax_grouped
 
     @api.onchange(
         'supplier_move_reference',
@@ -376,6 +515,13 @@ class AccountMove(models.Model):
         if pos_ar_id:
             self.journal_id = pos_ar_id
 
+    def _set_perception_date(self):
+        # If not date write the invoice date
+        for p in self.perception_ids:
+            if not p.date:
+                date = self.invoice_date or fields.Date.context_today(self)
+                p.write({'date': date})
+
     def action_post(self):
         if self.is_sale_document():
             if self.id:
@@ -389,6 +535,7 @@ class AccountMove(models.Model):
                     move_num = self.get_highest_pos_sequence()
                     name = "%s-%s" % (pos_num, move_num)
                     self.write({'name': name})
+                self._set_perception_date()
         return super(AccountMove, self).action_post()
 
     def validate_period(self):
@@ -438,6 +585,24 @@ class AccountMove(models.Model):
 
     @api.model
     def hook_add_taxes(self, inv, detalle):
+        perc_array = []
+
+        for perception in inv.perception_ids:
+            code = PCODES[perception.perception_id.jurisdiccion]
+            perc = {
+                'Id': code,
+                'BaseImp': perception.base,
+                'Importe': perception.amount,
+                'Alic': 0.0,
+                'Desc': perception.name,
+            }
+            perc_array.append(perc)
+
+        if detalle.get('Tributos'):
+            detalle['Tributos']['Tributo'] += perc_array
+        else:
+            detalle['Tributos'] = {'Tributo': perc_array}
+
         return detalle
 
     def action_aut_cae(self):
