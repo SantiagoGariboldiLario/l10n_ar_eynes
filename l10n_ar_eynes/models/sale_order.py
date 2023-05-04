@@ -11,6 +11,11 @@ class SaleOrder(models.Model):
         """
         invoice_vals = super()._prepare_invoice()
         partner = self.env['res.partner'].browse(invoice_vals['partner_id'])
+        invoice_vals.update(
+            {
+                'address_shipping_id': self.partner_shipping_id.id,
+            }
+        )
         journal = self.env['user.journal.rel'].get_first_journal(partner)
         if journal:
             invoice_vals['journal_id'] = journal.id

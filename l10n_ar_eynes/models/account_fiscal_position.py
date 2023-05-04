@@ -1,9 +1,18 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class AccountFiscalPosition(models.Model):
     _name = 'account.fiscal.position'
     _inherit = 'account.fiscal.position'
+
+    @api.model
+    def _get_perceptions_domain(self):
+        company = self.env.user.company_id
+        return [
+            '|',
+            ('company_id', '=', False),
+            ('company_id', '=', company.id),
+        ]
 
     supplier_denomination = fields.Selection(
         selection=[
@@ -33,6 +42,17 @@ class AccountFiscalPosition(models.Model):
         help="These are the retentions that will be applied to Suppliers "
         + "belonging to this Fiscal Position. Exceptions to this have to be "
         + "loaded at partner form.",
+    )
+    perception_ids = fields.Many2many(
+        'perception.perception',
+        'fiscal_position_perception_rel',
+        'position_id',
+        'perception_id',
+        'Perceptions',
+        domain=lambda self: self._get_perceptions_domain(),
+        help="These are the perceptions that will be applied to Suppliers "
+        "belonging to this Fiscal Position. Exceptions to this have to be "
+        "loaded at partner form.",
     )
     local = fields.Boolean(
         string='Local Fiscal Rules',

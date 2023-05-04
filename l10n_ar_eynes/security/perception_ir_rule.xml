@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo noupdate="1">
+
+        <record model="ir.rule" id="perception_concept_comp_rule">
+            <field name="name">Perception Concept multi-company</field>
+            <field name="model_id" ref="model_perception_concept" />
+            <field name="global" eval="True" />
+            <field name="domain_force">[
+                '|',
+                ('company_id', '=', False),
+                ('company_id', 'child_of', [user.company_id.id])
+            ]</field>
+        </record>
+
+        <record model="ir.rule" id="perception_activity_comp_rule">
+            <field name="name">Perception Activity multi-company</field>
+            <field name="model_id" ref="model_perception_activity" />
+            <field name="global" eval="True" />
+            <field name="domain_force">[
+                '|',
+                ('company_id', '=', False),
+                ('company_id', 'child_of', [user.company_id.id])
+            ]</field>
+        </record>
+
+        <record model="ir.rule" id="perception_perception_comp_rule">
+            <field name="name">Perception multi-company</field>
+            <field name="model_id" ref="model_perception_perception" />
+            <field name="global" eval="True" />
+            <field name="domain_force">[
+                '|',
+                ('company_id', '=', False),
+                ('company_id', 'child_of', [user.company_id.id])
+            ]</field>
+        </record>
+
+</odoo>
