@@ -87,6 +87,19 @@ class AccountTax(models.Model):
         default=False,
         help="Check this if this Tax represent Tax Exempts",
     )
+    # tax_group = fields.Selection(
+    #     selection=[
+    #         ('vat', 'VAT'),
+    #         ('perception', 'Perception'),
+    #         ('retention', 'Retention'),
+    #         ('internal', 'Internal Tax'),
+    #         ('other', 'Other'),
+    #     ],
+    #     string='Tax Group',
+    #     default='vat',
+    #     required=True,
+    #     help="This is tax categorization.",
+    # )
 
     def get_grouping_key(self, invoice_tax_val):
         """Returns a string that will be used to group account.move.line
