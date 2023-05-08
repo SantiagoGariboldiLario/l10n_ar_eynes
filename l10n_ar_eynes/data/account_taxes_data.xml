@@ -129,4 +129,16 @@
         <field name="name">Perceptions</field>
     </record>
 
+    <record id="vat_tax_group" model="account.tax.group" forcecreate="0">
+        <field name="name">Vat</field>
+    </record>
+
+    <record id="internal_tax_group" model="account.tax.group" forcecreate="0">
+        <field name="name">Internal</field>
+    </record>
+
+    <record id="other_tax_group" model="account.tax.group" forcecreate="0">
+        <field name="name">Other</field>
+    </record>
+
 </odoo>
