@@ -50,6 +50,7 @@
         "data/wsfe_data.xml",
         "data/ir_cron.xml",
         "data/perception_data.xml",
+        "data/res_groups_data.xml",
         'security/ir.model.access.csv',
         'security/account_security.xml',
         'security/perception_ir_rule.xml',
