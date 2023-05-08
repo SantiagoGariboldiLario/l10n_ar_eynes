@@ -85,13 +85,19 @@ class AccountMove(models.Model):
         help="Set True if this invoice must be treated as Electronic Invoice of Credit.",
     )
     amount_no_taxed = fields.Monetary(
-        string='No Taxed', compute='_compute_amount_custom', store=True
+        string='No Taxed',
+        compute='_compute_amount_custom',
+        store=True,
     )
     amount_taxed = fields.Monetary(
-        string='Taxed', compute='_compute_amount_custom', store=True
+        string='Taxed',
+        compute='_compute_amount_custom',
+        store=True,
     )
     amount_exempt = fields.Monetary(
-        string='Except', compute='_compute_amount_custom', store=True
+        string='Except',
+        compute='_compute_amount_custom',
+        store=True,
     )
     # Campos para facturas de exportacion. Aca ninguno es requerido,
     # eso lo hacemos en la vista ya que depende de
@@ -99,13 +105,202 @@ class AccountMove(models.Model):
     export_type_id = fields.Many2one('wsfex.export.type.codes', 'Export Type')
     dst_country_id = fields.Many2one('wsfex.dst.country.codes', 'Dest Country')
     shipping_perm_ids = fields.One2many(
-        'wsfex.shipping.permission', 'invoice_id', 'Shipping Permissions'
+        'wsfex.shipping.permission',
+        'invoice_id',
+        'Shipping Permissions',
     )
     wsfex_request_ids = fields.One2many('wsfex.request.detail', 'invoice_id')
     optional_ids = fields.One2many(
-        'account.move.optional', 'invoice_id', 'Optionals'
+        'account.move.optional',
+        'invoice_id',
+        'Optionals',
     )
     dst_cuit_id = fields.Many2one('dst.cuit.codes', 'Country CUIT')
+    currency_preciated = fields.Boolean(
+        related='currency_id.preciated',
+        string="Currency Preciated",
+        readonly=True,
+    )
+    currency_rate = fields.Float(
+        string='Currency Rate',
+        digits=(12, 6),
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+        track_visibility='onchange',
+        default=lambda x: 1.00,
+        help="It is the preciated currency rate of the invoice",
+    )
+    is_multi_currency = fields.Boolean(
+        string='Multi Currency Invoice',
+        default=False,
+        help="""Fields with internal purpose only that depicts
+                if the invoice is a multi currency one or not""",
+    )
+    currency_converted = fields.Boolean(
+        'Invoice Converted',
+        default=False,
+        help="""If this invoice was fill as multicurrency and then
+                converted to local currency, this will be checked""",
+    )
+    secondary_currency_id = fields.Many2one(
+        'res.currency',
+        string='Secondary Currency',
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+        track_visibility='onchange',
+        default=lambda x: x.env.user.company_id.currency_id,
+    )
+    secondary_currency_rate = fields.Float(
+        string='Secondary Currency Rate',
+        digits=(12, 6),
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+        default=lambda x: 1.00,
+        help="It is the old currency rate of the last change of currency",
+    )
+    company_currency_id = fields.Many2one(
+        'res.currency',
+        string='Currency',
+        default=lambda x: x.env.user.company_id.currency_id,
+    )
+    amount_exempt_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Amount Exempt',
+    )
+    amount_no_taxed_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='No Taxed',
+    )
+    amount_taxed_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Taxed',
+    )
+    amount_untaxed_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Untaxed',
+    )
+    amount_tax_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Tax',
+    )
+    amount_total_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Total',
+    )
+    amount_fob_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='FOB',
+    )
+    is_company_cur = fields.Boolean(compute='_compute_is_company_cur')
+
+    @api.depends(
+        'invoice_line_ids',
+        'invoice_line_ids.price_unit',
+        # 'invoice_line_ids.invoice_line_tax_ids',
+        'invoice_line_ids.quantity',
+        'invoice_line_ids.discount',
+        'currency_rate',
+        # 'tax_line_ids',
+    )
+    def _compute_amount_all_cur(self):
+        Currency = self.env.get('res.currency')
+        for invoice in self:
+            res = {
+                'amount_untaxed_cur': 0.0,
+                'amount_tax_cur': 0.0,
+                'amount_total_cur': 0.0,
+                'amount_fob_cur': 0.0,
+                'amount_taxed_cur': 0.0,
+                'amount_no_taxed_cur': 0.0,
+                'amount_exempt_cur': 0.0,
+            }
+
+            secondary_currency = invoice.secondary_currency_id
+            if not secondary_currency:
+                invoice.update(res)
+                continue
+
+            amount_base = 0.0
+            amount_exempt = 0.0
+
+            for line in invoice.invoice_line_ids:
+                res['amount_untaxed_cur'] += line.price_subtotal
+
+            # for line in invoice.tax_line_ids:
+            #     # Para habilitar estos cambios hay que
+            #     # instalar l10n_ar_point_of_sale
+
+            #     if line.tax_id.tax_group == 'vat':
+            #         if line.is_exempt:
+            #             amount_exempt += line.base
+            #         else:
+            #             amount_base += line.base
+            #     res['amount_tax_cur'] += line.amount
+
+            date = invoice.date or invoice.date_invoice or fields.Date.today()
+            company = invoice.company_id
+            modify_cur_obj = Currency.with_context(
+                currency1=(invoice.currency_id, invoice.currency_rate),
+                currency2=(secondary_currency, invoice.secondary_currency_rate),
+            )
+            rate = modify_cur_obj._get_conversion_rate(
+                invoice.currency_id, secondary_currency, company, date
+            )
+
+            res['amount_total_cur'] *= rate
+            res['amount_untaxed_cur'] *= rate
+            res['amount_tax_cur'] *= rate
+            amount_base *= rate
+            amount_exempt *= rate
+
+            atc_rounded = secondary_currency.round(res['amount_tax_cur'])
+            atotc_rounded = secondary_currency.round(res['amount_total_cur'])
+            auc_rounded = secondary_currency.round(res['amount_untaxed_cur'])
+            amount_base = secondary_currency.round(amount_base)
+            amount_exempt = secondary_currency.round(amount_exempt)
+
+            res['amount_total_cur'] = atc_rounded + auc_rounded
+            res['amount_fob_cur'] = atotc_rounded
+            res['amount_no_taxed_cur'] = (
+                auc_rounded - amount_base - amount_exempt
+            )
+            res['amount_taxed_cur'] = amount_base
+            res['amount_exempt_cur'] = amount_exempt
+
+            invoice.amount_total_cur = res['amount_total_cur']
+            invoice.amount_fob_cur = res['amount_fob_cur']
+            invoice.amount_no_taxed_cur = res['amount_no_taxed_cur']
+            invoice.amount_taxed_cur = res['amount_taxed_cur']
+            invoice.amount_exempt_cur = res['amount_exempt_cur']
+            invoice.amount_untaxed_cur = res['amount_untaxed_cur']
+            invoice.amount_tax_cur = res['amount_tax_cur']
+
+    def _compute_is_company_cur(self):
+        for invoice in self:
+            invoice.is_company_cur = (
+                invoice.company_currency_id == invoice.currency_id
+            )
 
     @api.depends('debit_origin_id')
     def _compute_is_debit_note(self):
@@ -180,7 +375,77 @@ class AccountMove(models.Model):
                 for _key, tax_val in tax_grouped.items():
                     tax_val.pop('invoice_id')
                     tax_ids.append(move_line_model.create(tax_val).id)
-                invoice.tax_line_ids = [(6, 0, tax_ids)]
+                # invoice.tax_line_ids = [(6, 0, tax_ids)]
+
+    @api.onchange('currency_id', 'invoice_date')
+    def _onchange_currency_id(self):
+        self._compute_is_company_cur()
+        date_invoice = self.date or self.invoice_date or fields.Date.today()
+        if not self.currency_id:
+            self.is_multi_currency = False
+            # self.currency_rate = 1.0
+        else:
+            company = self.env.user.company_id
+            company_currency = company.currency_id
+            currency = self.currency_id
+            if currency != company_currency:
+                curr_rate = currency._get_currency_rate(company, date_invoice)
+                self.is_multi_currency = True
+                if currency.preciated:
+                    self.currency_rate = curr_rate.rate_preciated
+                else:
+                    self.currency_rate = curr_rate.rate
+            else:
+                self.is_multi_currency = False
+                self.currency_rate = 1.0
+
+        self._onchange_payment_term_date_invoice()
+        return
+
+    @api.onchange('invoice_payment_term_id', 'invoice_date')
+    def _onchange_payment_term_date_invoice(self):
+        date_invoice = self.invoice_date
+        if not date_invoice:
+            date_invoice = fields.Date.context_today(self)
+        if self.invoice_payment_term_id:
+            pterm = self.invoice_payment_term_id
+            pterm_list = pterm.with_context(
+                currency_id=self.company_id.currency_id.id
+            ).compute(value=1, date_ref=date_invoice)[0]
+            self.invoice_date_due = pterm_list[0]
+        elif self.invoice_date_due and (date_invoice > self.invoice_date_due):
+            self.invoice_date_due = date_invoice
+
+    def _get_refund_common_fields(self):
+        res = super(AccountMove, self)._get_refund_common_fields()
+        res.append('currency_rate')
+        return res
+
+    def get_invoice_amounts_in_company_cur(self):
+        res = {}
+        for inv in self:
+            if inv.is_multi_currency and not inv.currency_converted:
+                res[inv.id] = {
+                    'amount_total': inv.amount_total_cur,
+                    'amount_exempt': inv.amount_exempt_cur,
+                    'amount_no_taxed': inv.amount_no_taxed_cur,
+                    'amount_taxed': inv.amount_taxed_cur,
+                    'amount_untaxed': inv.amount_untaxed_cur,
+                    'amount_tax': inv.amount_tax_cur,
+                    'amount_fob': inv.amount_fob_cur,
+                }
+            else:
+                res[inv.id] = {
+                    'amount_total': inv.amount_total,
+                    'amount_exempt': inv.amount_exempt,
+                    'amount_no_taxed': inv.amount_no_taxed,
+                    'amount_taxed': inv.amount_taxed,
+                    'amount_untaxed': inv.amount_untaxed,
+                    'amount_tax': inv.amount_tax,
+                    # 'amount_fob': inv.amount_fob
+                }
+
+        return res
 
     def prepare_perception_tax_line_vals(self, tax):
         # Prepare values to create a perception.tax.line
@@ -286,6 +551,11 @@ class AccountMove(models.Model):
                     tax_grouped[key]['amount'] += val['amount']
                     tax_grouped[key]['base'] += val['base']
         return tax_grouped
+
+    def finalize_invoice_move_lines(self, line):
+        for rec in line:
+            rec[2]['currency_rate'] = self.currency_rate
+        return super(AccountMove, self).finalize_invoice_move_lines(line)
 
     @api.onchange(
         'supplier_move_reference',
@@ -699,10 +969,10 @@ class AccountMove(models.Model):
 
     def complete_date_invoice(self):
         for inv in self:
-            if not inv.date_invoice:
+            if not inv.invoice_date:
                 inv.write(
                     {
-                        'date_invoice': fields.Date.context_today(self),
+                        'invoice_date': fields.Date.context_today(self),
                     }
                 )
 
@@ -945,6 +1215,12 @@ class AccountMoveLine(models.Model):
         help="Compute the counter part accounts of "
         "this journal item for this journal entry. This can be needed in reports.",
     )
+    currency_rate = fields.Float(
+        'Currency Rate',
+        digits=(12, 6),
+        readonly=False,
+        help="It is the currency rate",
+    )
 
     @api.depends('move_id.line_ids')
     def _compute_counterpart(self):
@@ -956,3 +1232,10 @@ class AccountMoveLine(models.Model):
             if len(counterpart) > 2:
                 counterpart = list(counterpart)[0:2] + ["..."]
             self.counterpart = ",".join(counterpart)
+
+
+# class AccountInvoiceTax(models.Model):
+#     _inherit = "account.invoice.tax"
+
+#     tax_id = fields.Many2one('account.tax', string='Account Tax', required=True)
+#     is_exempt = fields.Boolean(string='Is Exempt', readonly=True)

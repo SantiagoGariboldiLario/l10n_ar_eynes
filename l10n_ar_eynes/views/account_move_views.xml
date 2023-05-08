@@ -25,6 +25,7 @@
                     <span>Debit Note</span>
                 </span>
             </xpath>
+
             <xpath expr="//sheet/div[hasclass('oe_title')]/h1[1]" position="attributes">
                 <attribute name="attrs">{'invisible': 1}</attribute>
             </xpath>
@@ -59,6 +60,77 @@
                 <attribute name="required">1</attribute>
             </xpath>
 
+            <div name="journal_div" position="after">
+                <field
+                    name="currency_rate"
+                    placeholder="Currency Rate"
+                    class="oe_inline"
+                    attrs="{'invisible': [('is_company_cur','=', True)]}"
+                />
+                <button
+                    name="%(action_account_change_currency)d"
+                    aria-label="Opened"
+                    type="action"
+                    class="btn-link"
+                    states="draft"
+                    groups="account.group_account_user"
+                >
+                    <i
+                        title="Update Currency: Will convert the amount lines to the new currency set"
+                        class="fa fa-fw fa-refresh"
+                    />
+                </button>
+                <p attrs="{'invisible': [('currency_preciated', '=', False)]}">
+                    <i
+                    >Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
+                </p>
+                <field name="currency_preciated" invisible="1" />
+                <field name="is_company_cur" invisible="1" />
+                <field name="is_multi_currency" invisible="1" />
+                <field
+                    name="company_currency_id"
+                    invisible="1"
+                    string="Company Currency"
+                />
+            </div>
+
+            <field name="fiscal_position_id" position="after">
+                <field name="currency_converted" invisible="1" />
+                <field name="secondary_currency_id" />
+                <field
+                    name="secondary_currency_rate"
+                    attrs="{'invisible': [('secondary_currency_id', '=', False)]}"
+                />
+            </field>
+
+            <xpath
+                expr="//group[@class='oe_subtotal_footer oe_right']"
+                position="after"
+            >
+                <!-- Pensar la idea de moneda secundaria y apartir de ahi decidir cuando se ve -->
+
+                <!-- <group class="oe_subtotal_footer" style="display: inline-block" attrs="{'invisible': [('is_multi_currency','=',False), ('currency_converted', '=', False)]}"> -->
+                <group
+                    class="oe_subtotal_footer"
+                    attrs="{'invisible': ['|',('secondary_currency_id', '=', False), ('is_company_cur','=', True)]}"
+                >
+                    <field name="amount_taxed_cur" />
+                    <field name="amount_no_taxed_cur" />
+                    <field name="amount_exempt_cur" />
+                    <field
+                        name="amount_untaxed_cur"
+                        class="oe_subtotal_footer_separator"
+                    />
+                    <field name="amount_tax_cur" />
+                    <field
+                        name="amount_total_cur"
+                        class="oe_subtotal_footer_separator"
+                    />
+                    <i>- Amounts in Secondary Currency</i>
+                </group>
+            </xpath>
+
+
             <xpath
                 expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']"
                 position="attributes"
@@ -70,6 +142,7 @@
                     }
                 </attribute>
             </xpath>
+
             <xpath
                 expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']"
                 position="after"
@@ -115,6 +188,7 @@
                     </field>
                 </group>
             </page>
+
             <page name="other_info" position="before">
                 <page string="Perceptions">
                     <field
@@ -163,6 +237,7 @@
                         </form>
                     </field>
                 </page>
+
                 <page string="FCRED" attrs="{'invisible': [('local','=', False)]}">
                     <group string="Optionals">
                         <field name="optional_ids" nolabel="1">
@@ -176,6 +251,7 @@
                         </field>
                     </group>
                 </page>
+
                 <page
                     string="Export Invoice"
                     attrs="{'invisible': [('local','=', True)]}"
@@ -230,6 +306,7 @@
                         </field>
                     </group>
                 </page>
+
                 <page string="WSFE Requests">
                     <field name="wsfe_request_ids" readonly="1">
                         <tree>
@@ -240,7 +317,21 @@
                         </tree>
                     </field>
                 </page>
+
+
             </page>
+
+            <xpath
+                expr="//field[@name='line_ids']/form/group/field[@name='currency_id']"
+                position="after"
+            >
+                <field
+                    name="currency_rate"
+                    attrs="{'invisible': [('currency_id', '=', False)]}"
+                    groups="base.group_multi_currency"
+                />
+            </xpath>
+
         </field>
     </record>
 
@@ -312,6 +403,24 @@
             [('move_type', '=', 'in_invoice'), ('debit_origin_id','=', False)]
         </field>
     </record>
+
+    <record id="view_account_move_multicurrency_filter" model="ir.ui.view">
+        <field name="name">account.move.multicurrency.select</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter" />
+        <field name="arch" type="xml">
+            <filter name="late" position="after">
+                <separator />
+                <filter
+                    name="multicurrency"
+                    string="MultiCurrency"
+                    domain="[('is_multi_currency','=',True)]"
+                    help="Invoices not in company currency"
+                />
+            </filter>
+        </field>
+    </record>
+
 
     <menuitem
         id="account_invoice_menu_debit_note"

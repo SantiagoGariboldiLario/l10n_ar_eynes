@@ -1,6 +1,6 @@
 # generated from manifests external_dependencies
 # pylint: disable=pointless-statement
-easywsy # noqa
-M2Crypto # noqa
-pyOpenSSL # noqa
-suds-jurko # noqa
+easywsy
+M2Crypto
+pyOpenSSL
+suds-jurko
