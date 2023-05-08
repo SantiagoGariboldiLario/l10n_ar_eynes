@@ -49,6 +49,7 @@
         'data/ir_sequence_data.xml',
         "data/wsfe_data.xml",
         "data/ir_cron.xml",
+        "data/res_groups_data.xml",
         'security/ir.model.access.csv',
         'security/account_security.xml',
         'wizard/deposit_check_wizard_view.xml',
