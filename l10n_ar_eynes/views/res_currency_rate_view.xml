@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+
+        <record id="view_currency_rate_tree" model="ir.ui.view">
+            <field name="name">res.currency.rate.tree.preciated</field>
+            <field name="model">res.currency.rate</field>
+            <field name="inherit_id" ref="base.view_currency_rate_tree" />
+            <field name="arch" type="xml">
+                <field name="rate" position="after">
+                    <field name="preciated" invisible="1" />
+                    <field
+                        name="rate_preciated"
+                        attrs="{'readonly': [('preciated', '=', False)]}"
+                        force_save="1"
+                    />
+                </field>
+                <field name="rate" position="attributes">
+                    <attribute
+                        name="attrs"
+                    >{'readonly': [('preciated', '=', True)]}</attribute>
+                    <attribute name="force_save">1</attribute>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</odoo>

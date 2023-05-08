@@ -9,6 +9,8 @@ from . import company  # noqa
 from . import iibb_situation  # noqa
 from . import reason_rejected_check  # noqa
 from . import res_config_settings  # noqa
+from . import res_currency_rate  # noqa
+from . import res_currency  # noqa
 from . import res_document_type  # noqa
 from . import res_partner_bank  # noqa
 from . import res_partner  # noqa
