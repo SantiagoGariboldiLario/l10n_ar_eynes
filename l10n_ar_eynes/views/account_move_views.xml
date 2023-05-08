@@ -60,7 +60,7 @@
                 <attribute name="required">1</attribute>
             </xpath>
 
-            <field name="currency_id" position="after">
+            <div name="journal_div" position="after">
                 <field
                     name="currency_rate"
                     placeholder="Currency Rate"
@@ -92,7 +92,7 @@
                     invisible="1"
                     string="Company Currency"
                 />
-            </field>
+            </div>
 
             <field name="fiscal_position_id" position="after">
                 <field name="currency_converted" invisible="1" />
@@ -403,6 +403,24 @@
             [('move_type', '=', 'in_invoice'), ('debit_origin_id','=', False)]
         </field>
     </record>
+
+    <record id="view_account_move_multicurrency_filter" model="ir.ui.view">
+        <field name="name">account.move.multicurrency.select</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter" />
+        <field name="arch" type="xml">
+            <filter name="late" position="after">
+                <separator />
+                <filter
+                    name="multicurrency"
+                    string="MultiCurrency"
+                    domain="[('is_multi_currency','=',True)]"
+                    help="Invoices not in company currency"
+                />
+            </filter>
+        </field>
+    </record>
+
 
     <menuitem
         id="account_invoice_menu_debit_note"

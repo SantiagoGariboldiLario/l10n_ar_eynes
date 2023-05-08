@@ -412,8 +412,7 @@ class AccountMove(models.Model):
             pterm_list = pterm.with_context(
                 currency_id=self.company_id.currency_id.id
             ).compute(value=1, date_ref=date_invoice)[0]
-
-            self.invoice_date_due = max(line[0] for line in pterm_list)
+            self.invoice_date_due = pterm_list[0]
         elif self.invoice_date_due and (date_invoice > self.invoice_date_due):
             self.invoice_date_due = date_invoice
 
