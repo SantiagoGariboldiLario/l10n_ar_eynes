@@ -150,6 +150,41 @@
         </field>
     </record>
 
+    <!-- ISSUED CHECK CALENDAR VIEWS -->
+    <record id="account_issued_check_view_calendar_issued" model="ir.ui.view">
+        <field name="name">account.issued.check.issued.calendar</field>
+        <field name="model">account.check</field>
+        <field name="type">calendar</field>
+        <field eval="2" name="priority" />
+        <field name="arch" type="xml">
+            <calendar
+                color="bank_id"
+                date_start="issue_date"
+                string="Issued Checks by Issue Date"
+            >
+                <field name="number" />
+                <field name="amount" />
+            </calendar>
+        </field>
+    </record>
+
+    <record id="account_issued_check_view_calendar_payment" model="ir.ui.view">
+        <field name="name">account.issued.check.payment.calendar</field>
+        <field name="model">account.check</field>
+        <field name="type">calendar</field>
+        <field eval="10" name="priority" />
+        <field name="arch" type="xml">
+            <calendar
+                color="bank_id"
+                date_start="payment_date"
+                string="Issued Checks by Payment Date"
+            >
+                <field name="number" />
+                <field name="amount" />
+            </calendar>
+        </field>
+    </record>
+
     <!-- ISSUED CHECK ACTION-->
     <record id="account_issued_check_action" model="ir.actions.act_window">
         <field name="name">Issued Checks</field>
@@ -160,6 +195,38 @@
             name="view_ids"
             eval="[(5, 0, 0),
         (0, 0, {'view_mode': 'tree', 'view_id': ref('account_issued_check_view_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('account_issued_check_view_form')})]"
+        />
+    </record>
+
+    <record
+        id="account_issued_check_action_calendar_payment_date"
+        model="ir.actions.act_window"
+    >
+        <field name="name">Issued Checks by Payment Date</field>
+        <field name="res_model">account.check</field>
+        <field name="view_mode">calendar,form</field>
+        <field name="domain">[('internal_type', '=', 'issued')]</field>
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'calendar', 'view_id': ref('account_issued_check_view_calendar_payment')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('account_issued_check_view_form')})]"
+        />
+    </record>
+
+    <record
+        id="account_issued_check_action_calendar_issued_date"
+        model="ir.actions.act_window"
+    >
+        <field name="name">Issued Checks by Issue Date</field>
+        <field name="res_model">account.check</field>
+        <field name="view_mode">calendar,form</field>
+        <field name="domain">[('internal_type', '=', 'issued')]</field>
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'calendar', 'view_id': ref('account_issued_check_view_calendar_issued')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('account_issued_check_view_form')})]"
         />
     </record>
@@ -383,6 +450,57 @@
         </field>
     </record>
 
+    <!-- THIRD PARTY CHECK CALENDAR VIEW-->
+    <record id="account_third_check_view_calendar_issued" model="ir.ui.view">
+        <field name="name">account.third.check.issued.calendar</field>
+        <field name="model">account.check</field>
+        <field name="type">calendar</field>
+        <field eval="2" name="priority" />
+        <field name="arch" type="xml">
+            <calendar
+                color="bank_id"
+                date_start="issue_date"
+                string="Third Checks by Issue Date"
+            >
+                <field name="number" />
+                <field name="amount" />
+            </calendar>
+        </field>
+    </record>
+
+    <record id="account_third_check_view_calendar_payment" model="ir.ui.view">
+        <field name="name">account.third.check.payment.calendar</field>
+        <field name="model">account.check</field>
+        <field name="type">calendar</field>
+        <field eval="10" name="priority" />
+        <field name="arch" type="xml">
+            <calendar
+                color="bank_id"
+                date_start="payment_date"
+                string="Third Checks by Payment Date"
+            >
+                <field name="number" />
+                <field name="amount" />
+            </calendar>
+        </field>
+    </record>
+
+    <record id="account_third_check_view_calendar_endorsement" model="ir.ui.view">
+        <field name="name">account.third.check.endorsement.calendar</field>
+        <field name="model">account.check</field>
+        <field name="type">calendar</field>
+        <field eval="10" name="priority" />
+        <field name="arch" type="xml">
+            <calendar
+                color="bank_id"
+                date_start="endorsement_date"
+                string="Third Checks by Endorsement Date"
+            >
+                <field name="number" />
+                <field name="amount" />
+            </calendar>
+        </field>
+    </record>
 
     <!-- THIRD PARTY CHECK ACTION -->
     <record id="account_third_party_check_action" model="ir.actions.act_window">
@@ -394,6 +512,56 @@
             name="view_ids"
             eval="[(5, 0, 0),
         (0, 0, {'view_mode': 'tree', 'view_id': ref('account_third_party_check_view_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('account_third_party_check_view_form')})]"
+        />
+    </record>
+
+    <record
+        id="account_third_check_action_calendar_payment_date"
+        model="ir.actions.act_window"
+    >
+        <field name="name">Third Checks by Payment Date</field>
+        <field name="res_model">account.check</field>
+        <field name="view_mode">calendar,form</field>
+        <field name="domain">[('internal_type', '=', 'third_party')]</field>
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'calendar', 'view_id': ref('account_third_check_view_calendar_payment')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('account_third_party_check_view_form')})]"
+        />
+    </record>
+
+    <record
+        id="account_third_check_action_calendar_issued_date"
+        model="ir.actions.act_window"
+    >
+        <field name="name">Third Checks by Issue Date</field>
+        <field name="res_model">account.check</field>
+        <field name="view_mode">calendar,form</field>
+        <field name="domain">[('internal_type', '=', 'third_party')]</field>
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'calendar', 'view_id': ref('account_third_check_view_calendar_issued')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('account_third_party_check_view_form')})]"
+        />
+    </record>
+
+    <record
+        id="account_third_check_action_calendar_endorsement_date"
+        model="ir.actions.act_window"
+    >
+        <field name="name">Third Checks by Endorsement Date</field>
+        <field name="res_model">account.check</field>
+        <field name="view_mode">calendar,form</field>
+        <field
+            name="domain"
+        >[('internal_type', '=', 'third_party'),('endorsement_date','!=',False)]</field>
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'calendar', 'view_id': ref('account_third_check_view_calendar_endorsement')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('account_third_party_check_view_form')})]"
         />
     </record>
