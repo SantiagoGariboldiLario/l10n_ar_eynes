@@ -2736,3 +2736,50 @@ msgstr "Cuenta de gastos predeterminada"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_journal_view_form_inherit_l10n_ar_eynes
 msgid "Default Income Account"
 msgstr "Cuenta de ingresos predeterminada"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_treasury_issued_check_calendar_payment
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_treasury_third_check_calendar_payment
+msgid "Calendar By Payment Date"
+msgstr "Calendario por Fecha de Pago"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_treasury_issued_check_calendar_issued
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_treasury_third_check_calendar_issued
+msgid "Calendar By Issue Date"
+msgstr "Calendario por Fecha de Emisión"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_treasury_third_check_calendar_endorsement
+msgid "Calendar By Endorsement Date"
+msgstr "Calendario por Fecha de Endoso"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_issued_check_action_calendar_issued_date
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_calendar_issued
+msgid "Issued Checks by Issue Date"
+msgstr "Cheques Propios por Fecha de Emisión"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_issued_check_action_calendar_payment_date
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_calendar_payment
+msgid "Issued Checks by Payment Date"
+msgstr "Cheques Propios por Fecha de Pago"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_third_check_action_calendar_endorsement_date
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_check_view_calendar_endorsement
+msgid "Third Checks by Endorsement Date"
+msgstr "Cheques de Tercero por Fecha de Endoso"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_third_check_action_calendar_issued_date
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_check_view_calendar_issued
+msgid "Third Checks by Issue Date"
+msgstr "Cheques de Tercero por Fecha de Emisión"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.account_third_check_action_calendar_payment_date
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_check_view_calendar_payment
+msgid "Third Checks by Payment Date"
+msgstr "Cheques de Tercero por Fecha de Pago"
