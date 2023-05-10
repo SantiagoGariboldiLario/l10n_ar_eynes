@@ -448,8 +448,6 @@ class AccountJournal(models.Model):
             _logger.debug(msg)
         return retentions
 
-    _sql_constraints = [('code_unique', 'unique(code)', 'code already exists!')]
-
 
 class RetentionError(Exception):
     def __init__(self, msg):
