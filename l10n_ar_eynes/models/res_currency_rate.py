@@ -41,9 +41,15 @@ class ResCurrencyRate(models.Model):
         if rate is False and rate_preciated is False:
             return super(ResCurrencyRate, self).create(vals)
 
-        currency = self.env['res.currency'].browse(
-            self._context['default_currency_id']
+        default_currency = (
+            self._context.get('default_currency_id')
+            or vals.get('currency_id')
+            or False
         )
+        currency = self.env['res.currency'].browse(default_currency)
+        if not currency:
+            return super(ResCurrencyRate, self).create(vals)
+
         preciated = currency.preciated
 
         if preciated and rate_preciated:
