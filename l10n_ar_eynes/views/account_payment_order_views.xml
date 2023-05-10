@@ -1084,7 +1084,61 @@
                             </group>
                         </page>
                         <page string="Checks">
-                            <field
+                            <label for="issued_check_line_ids" />
+                            <field name="issued_check_line_ids" nolabel="1" colspan="4">
+                                <tree>
+                                    <field name="issued_check_id" />
+                                    <field name="type" />
+                                    <field name="issue_date" />
+                                    <field name="payment_date" />
+                                    <field name="bank_id" />
+                                    <field name="amount" sum="Total Amount" />
+                                    <field
+                                        name="amount_currency"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
+                                        sum="Total Amount"
+                                    />
+                                </tree>
+                                <form string="Issued Checks">
+                                    <group>
+                                        <group>
+                                            <field name="journal_id" required="1" />
+                                            <field
+                                                name="checkbook_id"
+                                                domain="[('journal_id', '=', journal_id), ('payment_method_id.code', '=', 'check_printing')]"
+                                            />
+                                            <field
+                                                name="issued_check_id"
+                                                domain="[
+                                                    ('internal_type', '=', 'issued'),
+                                                    ('issued_check_state', '=', 'draft'),
+                                                    ('checkbook_id', '=', checkbook_id),
+                                                    ('payment_order_id', '=', False)
+                                                ]"
+                                            />
+                                            <field name="type" />
+                                            <field name="checkbook_format" />
+                                            <field name="amount" />
+                                        </group>
+                                        <group>
+                                            <field name="issue_date" />
+                                            <field
+                                                name="payment_date"
+                                                attrs="{'invisible': [('type', '=', 'common')],'required': [('type', '=', 'postdated')]}"
+                                            />
+                                            <field name="clearing" />
+                                            <field name="signatory" />
+                                            <field name="origin" />
+                                            <field name="crossed" />
+                                            <field name="not_order" />
+                                        </group>
+                                    </group>
+                                </form>
+                            </field>
+
+                            <!-- <field
                                 name="issued_check_ids"
                                 string="Issued Checks"
                                 nolabel="1"
@@ -1148,7 +1202,7 @@
                                     </group>
                                     <field name="receiving_partner_id" invisible="1" />
                                 </form>
-                            </field>
+                            </field> -->
                             <label for="third_party_check_ids" />
                             <field
                                 name="third_party_check_ids"

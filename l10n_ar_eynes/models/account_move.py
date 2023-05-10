@@ -126,7 +126,6 @@ class AccountMove(models.Model):
         digits=(12, 6),
         readonly=True,
         states={'draft': [('readonly', False)]},
-        track_visibility='onchange',
         default=lambda x: 1.00,
         help="It is the preciated currency rate of the invoice",
     )
@@ -147,7 +146,6 @@ class AccountMove(models.Model):
         string='Secondary Currency',
         readonly=True,
         states={'draft': [('readonly', False)]},
-        track_visibility='onchange',
         default=lambda x: x.env.user.company_id.currency_id,
     )
     secondary_currency_rate = fields.Float(

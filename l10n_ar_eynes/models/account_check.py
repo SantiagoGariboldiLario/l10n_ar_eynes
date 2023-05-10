@@ -135,34 +135,6 @@ class AccountCheck(models.Model):
         readonly=True,
         default=lambda self: self.env.user.company_id.id,
     )
-    record_ids = fields.Many2one(
-        comodel_name='account.check',
-        string='Checks',
-        store=False,
-        domain=[('internal_type', '=', 'issued')],
-    )
-
-    @api.onchange('issue_date')
-    def _onchange_issue_date(self):
-        if not self.issue_date:
-            return
-        if self.type == 'common':
-            self.payment_date = self.issue_date
-
-    @api.onchange('checkbook_id', 'journal_id')
-    def _onchange_checkbook_id(self):
-        if not self.checkbook_id:
-            return
-        elif self.record_ids.checkbook_id != self.checkbook_id:
-            self.record_ids = False
-
-    @api.onchange('record_ids')
-    def _onchange_record_ids(self):
-        check = self.record_ids
-        self.type = check.type
-        self.number = check.number
-        self.bank_id = check.bank_id
-        self.checkbook_format = check.checkbook_format
 
     @api.depends('amount', 'currency_rate')
     def _compute_amount_currency(self):
@@ -171,22 +143,6 @@ class AccountCheck(models.Model):
                 rec.amount_currency = rec.amount / rec.currency_rate
             except ZeroDivisionError:
                 rec.amount_currency = 0
-
-    def create(self, vals_list):
-        """
-        Method gets overrided to update issued checks when added to supplier
-        payment order. In this case, the checks selected should be updated,
-        otherwise they are created.
-        """
-        # checks are select from supplier payment order
-        if self._context.get('default_type') == 'payment':
-            for vals in vals_list:
-                if vals.get('record_ids'):
-                    rec_id = vals.pop('record_ids')
-                    self.env['account.check'].browse(rec_id).write(vals)
-            return
-        else:
-            return super(AccountCheck, self).create(vals_list)
 
     def unlink(self):
         """
@@ -203,19 +159,6 @@ class AccountCheck(models.Model):
                         )
                     )
             elif check.internal_type == 'issued':
-                if (
-                    self._context.get('params').get('model')
-                    == 'account.payment.order'
-                ):
-                    self.write(
-                        {
-                            'payment_order_id': False,
-                            'amount': 0.00,
-                            'issue_date': False,
-                            'payment_date': False,
-                        }
-                    )
-                    return
                 if check.issued_check_state != 'draft':
                     raise UserError(
                         _(
