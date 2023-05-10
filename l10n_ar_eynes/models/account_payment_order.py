@@ -933,10 +933,10 @@ class AccountPaymentOrder(models.Model):
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
         ]
-        if self.is_multi_currency:
-            domain += [('currency_id', '=', self.currency_id.id)]
-        else:
-            domain += [('currency_id', 'in', (self.currency_id.id, False))]
+        # if self.is_multi_currency:
+        #     domain += [('currency_id', '=', self.currency_id.id)]
+        # else:
+        #     domain += [('currency_id', 'in', (self.currency_id.id, False))]
 
         moves = self.env['account.move.line'].search(domain)
         lines = self._prepare_income_debt_lines('income', moves)
@@ -953,10 +953,10 @@ class AccountPaymentOrder(models.Model):
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
         ]
-        if self.is_multi_currency:
-            domain += [('currency_id', '=', self.currency_id.id)]
-        else:
-            domain += [('currency_id', 'in', (self.currency_id.id, False))]
+        # if self.is_multi_currency:
+        #     domain += [('currency_id', '=', self.currency_id.id)]
+        # else:
+        #     domain += [('currency_id', 'in', (self.currency_id.id, False))]
 
         moves = self.env['account.move.line'].search(domain)
         lines = self._prepare_income_debt_lines('debt', moves)
