@@ -1,9 +1,9 @@
-from odoo import models, fields, _, api
+from odoo import _, api, fields, models
 
 
 class UserJournalRel(models.Model):
     _name = 'user.journal.rel'
-    _description = 'User Journal Relation'
+    _description = 'User Journal Relation (deprecated module)'
 
     def get_last_sequence(self):
         relations = self.env['user.journal.rel'].search([])
@@ -11,14 +11,22 @@ class UserJournalRel(models.Model):
             return max(map(lambda rec: rec.sequence, relations)) + 1
         return 1
 
-    user_id = fields.Many2one(string='User', comodel_name='res.users', ondelete='cascade')
+    user_id = fields.Many2one(
+        string='User',
+        comodel_name='res.users',
+        ondelete='cascade',
+    )
     journal_id = fields.Many2one(
         string='Journal',
         comodel_name='account.journal',
         ondelete='cascade',
         domain="[('type','=','sale')]",
     )
-    sequence = fields.Integer(string="Sequence", default=get_last_sequence, readonly=True)
+    sequence = fields.Integer(
+        string="Sequence",
+        default=get_last_sequence,
+        readonly=True,
+    )
 
     @api.model
     def get_first_journal(self, partner):

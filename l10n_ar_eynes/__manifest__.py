@@ -65,7 +65,6 @@
         'views/account_payment_order_views.xml',
         'views/account_payment_order_other_payments_views.xml',
         'views/account_move_views.xml',
-        # 'views/user_journal_rel_views.xml',
         'views/account_fiscal_position_views.xml',
         'views/account_tax_views.xml',
         'views/res_document_type_views.xml',
