@@ -21,15 +21,14 @@ class SaleOrder(models.Model):
 
         """
         invoice_vals = super()._prepare_invoice()
-        partner = self.env['res.partner'].browse(invoice_vals['partner_id'])
         invoice_vals.update(
             {
                 'address_shipping_id': self.partner_shipping_id.id,
             }
         )
-        journal = self.env['user.journal.rel'].get_first_journal(partner)
-        if journal:
-            invoice_vals['journal_id'] = journal.id
+        journals = self.env.user.journal_ids
+        if journals:
+            invoice_vals['journal_id'] = journals[0].id
         return invoice_vals
 
     @api.model
@@ -39,6 +38,6 @@ class SaleOrder(models.Model):
             final,
             date=date,
         )
-        invoices = self.env['account.move'].browse(invoice_ids)
-        invoices._onchange_currency_id()
+        for invoice in invoice_ids:
+            invoice._onchange_currency_id()
         return invoice_ids

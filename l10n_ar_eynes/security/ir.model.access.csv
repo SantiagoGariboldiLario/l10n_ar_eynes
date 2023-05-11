@@ -1,5 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_account_link_journal_to_user,user.journal.rel,model_user_journal_rel,account.group_account_invoice,1,1,1,1
+l10n_ar_eynes.access_account_link_journal_to_user,access_user_journal_rel,model_user_journal_rel,base.group_user,1,0,0,0
 l10n_ar_eynes.access_update_journal_period_wizard,access_update_journal_period_wizard,l10n_ar_eynes.model_update_journal_period_wizard,base.group_user,1,1,1,1
 l10n_ar_eynes.access_update_journal_period_wizard_line,access_update_journal_period_wizard_line,l10n_ar_eynes.model_update_journal_period_wizard_line,base.group_user,1,1,1,1
 l10n_ar_eynes.access_res_voucher_type,access_res_voucher_type,l10n_ar_eynes.model_res_voucher_type,base.group_user,1,1,1,1
