@@ -1192,6 +1192,8 @@ class AccountPaymentOrder(models.Model):
             )
             line_total = 0.0
             for vals in move_line_vals:
+                vals['currency_id'] = self.journal_id.currency_id.id
+                vals['amount_currency'] = -10
                 line_total += vals['debit'] - vals['credit']
                 MoveLine.with_context(**ctx).create(vals)
         else:
@@ -1384,9 +1386,10 @@ class AccountPaymentOrder(models.Model):
         current_currency,
         sign,
     ):
-        amount_in_company_currency = (
-            self._convert_paid_amount_in_company_currency(amount)
-        )
+        # amount_in_company_currency = (
+        #     self._convert_paid_amount_in_company_currency(amount)
+        # )
+        amount_in_company_currency = amount
         debit = credit = 0.0
         pl_account_id = journal_id.default_account_id.id
         if self.type in ('purchase', 'payment'):
@@ -1485,7 +1488,6 @@ class AccountPaymentOrder(models.Model):
                         "mode must be equal"
                     )
                 )
-
         return move_lines
 
     def first_move_line_get(self, move_id, company_currency, current_currency):
@@ -1640,9 +1642,7 @@ class AccountPaymentOrder(models.Model):
             ):
                 continue
             sign = line.type == 'debt' and -1 or 1
-            amount = sign * self._convert_amount(
-                line.untax_amount or line.amount
-            )
+            amount = sign * (line.untax_amount or line.amount)
             # currency_rate_difference = 0.0
             if line.amount == line.amount_unreconciled:
                 if not line.move_line_id:
