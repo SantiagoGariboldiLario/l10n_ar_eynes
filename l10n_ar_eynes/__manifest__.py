@@ -36,6 +36,7 @@
         'account',
         'account_statement_import_txt_xlsx',
         'account_reconciliation_widget',
+        'account_financial_report',
     ],
     'data': [
         'data/fiscal_position_data.xml',
