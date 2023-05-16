@@ -26,6 +26,9 @@ class TestAccountPaymentOrder(TestLocAr):
                 'company_id': cls.env.user.company_id.id,
                 'currency_id': cls.env.ref('base.ARS').id,
                 'due_date': fields.Date.to_date('2023-01-01'),
+                'default_account_id': cls.company_data[
+                    'default_account_revenue'
+                ].id,
             }
         )
 
@@ -37,6 +40,9 @@ class TestAccountPaymentOrder(TestLocAr):
                 'company_id': cls.env.user.company_id.id,
                 'currency_id': cls.env.ref('base.ARS').id,
                 'due_date': fields.Date.to_date('2023-01-01'),
+                'default_account_id': cls.company_data[
+                    'default_account_expense'
+                ].id,
             }
         )
 
@@ -45,6 +51,8 @@ class TestAccountPaymentOrder(TestLocAr):
                 'partner_id': cls.partner_a.id,
                 'journal_id': cls.payment_journal.id,
                 'type': 'payment',
+                'company_id': cls.env.user.company_id.id,
+                'date': fields.Date.today(),
             }
         )
 
@@ -53,6 +61,8 @@ class TestAccountPaymentOrder(TestLocAr):
                 'partner_id': cls.partner_b.id,
                 'journal_id': cls.receipt_journal.id,
                 'type': 'receipt',
+                'company_id': cls.env.user.company_id.id,
+                'date': fields.Date.today(),
             }
         )
 
@@ -81,9 +91,10 @@ class TestAccountPaymentOrder(TestLocAr):
                 ],
             }
         )
+        cls.invoice_1.action_post()
 
     def test_gather_income_lines(self):
-        self.invoice_1.action_post()
+        """test for gather_income_lines() method"""
         self.receipt_order.gather_income_lines()
 
         self.assertRecordValues(
