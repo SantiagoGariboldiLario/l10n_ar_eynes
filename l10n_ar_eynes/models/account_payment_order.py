@@ -1232,7 +1232,7 @@ class AccountPaymentOrder(models.Model):
                 'number': name,
             }
         )
-        move_recordset.post()
+        move_recordset.action_post()
         # We automatically reconcile the account move lines.
         for move_lines in rec_list_ids:
             if len(move_lines) >= 2:
