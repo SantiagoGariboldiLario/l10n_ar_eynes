@@ -1,5 +1,6 @@
+import datetime
 import logging
-from datetime import date
+import time
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -363,17 +364,25 @@ class AccountMove(models.Model):
                 self.perception_ids = upd_lst
         return res
 
-    @api.onchange('perception_ids')
-    def _onchange_perception_ids(self):
+    # @api.onchange('perception_ids')
+    # def _onchange_perception_ids(self):
+    #     if self.is_sale_document():
+    #         move_line_model = self.env['account.move.line']
+    #         for invoice in self:
+    #             tax_ids = []
+    #             tax_grouped = invoice.get_taxes_values()
+    #             for _key, tax_val in tax_grouped.items():
+    #                 tax_val.pop('invoice_id')
+    #                 new_perc = move_line_model.create(tax_val).id
+    #                 invoice.line_ids = [(6, 0, tax_ids)]
+
+    @api.onchange('line_ids')
+    def _onchange_line_ids(self):
         if self.is_sale_document():
-            move_line_model = self.env['account.move.line']
-            for invoice in self:
-                tax_ids = []
-                tax_grouped = invoice.get_taxes_values()
-                for _key, tax_val in tax_grouped.items():
-                    tax_val.pop('invoice_id')
-                    tax_ids.append(move_line_model.create(tax_val).id)
-                # invoice.tax_line_ids = [(6, 0, tax_ids)]
+            perc_lines = self.create_perceptions_from_partner(
+                self.partner_id, date=self.invoice_date, invoice=self
+            )
+            self.perception_ids = perc_lines
 
     @api.onchange('currency_id', 'invoice_date')
     def _onchange_currency_id(self):
@@ -626,8 +635,13 @@ class AccountMove(models.Model):
                         lambda voucher_type: int(voucher_type.afip_code)
                         > AFIP_FCE_CODE_START
                     )
+                else:
+                    res = res.filtered(
+                        lambda voucher_type: int(voucher_type.afip_code)
+                        < AFIP_FCE_CODE_START
+                    )
 
-                elif len(res) > 1:
+                if len(res) > 1:
                     _logger.warning(
                         _(
                             "There is more than one voucher type that "
@@ -1073,7 +1087,7 @@ class AccountMove(models.Model):
         res = super().create(vals)
         for move in res:
             if not move.invoice_date:
-                move.write({'invoice_date': date.today()})
+                move.write({'invoice_date': datetime.date.today()})
             if move.is_sale_document() or move.is_purchase_document():
                 if not move.denomination:
                     if move.is_sale_document():
@@ -1190,6 +1204,107 @@ class AccountMove(models.Model):
                 % ', '.join(r[1] for r in res)
             )
 
+    @api.returns('perception.tax.line')
+    @api.model
+    def compute(self, perception_data, **kwargs):
+        # Chequeamos si la Percepcion tiene seteado un state_id, que coincida
+        # con el state_id de la direccion de entrega del partner.
+        # Sino no se realiza la Percepcion
+        partner_model = self.env['res.partner']
+        destination_shipping = self.address_shipping_id or partner_model.browse(
+            self.partner_id.address_get(['delivery']).get('delivery')
+        )
+        source_shipping = self.env.user.company_id.partner_id
+        applicable = self.check_applicable(
+            sit_iibb=perception_data['sit_iibb'],
+            from_padron=perception_data['from_padron'],
+            source_shipping_id=source_shipping,
+            destination_shipping_id=destination_shipping,
+        )
+        if not applicable:
+            return
+
+        # Chequeamos las percepciones a aplicar que matchean
+        # (esto corresponde a una percepcion pero que pueden
+        # existir varios conceptos y/o actividades)
+        perceptions = self._compute_base_perception(perception_data, **kwargs)
+
+        # Creamos las lineas de percepcion
+        new_perception_lines = self.env['perception.tax.line']
+        for concept_id, vals in perceptions.items():
+            # print concept_id, perception_vals
+            # Aplicamos la percepcion por Concepto
+            taxapp = vals['tax_app_id']
+
+            base, amount = taxapp.apply_perception(vals, perception_data)
+
+            if amount == 0.0:
+                continue
+
+            vals['amount'] = amount
+            vals['base'] = base
+
+            # Creamos la percepcion.tax.line
+            perception_line_vals = self._prepare_perception_vals(
+                concept_id,
+                vals,
+                **kwargs,
+            )
+            new_perception_lines += (
+                self.env['perception.tax.line']
+                .with_context(manual=False)
+                .new(perception_line_vals)
+            )
+        return new_perception_lines
+
+    @api.model
+    def create_perceptions_from_partner(self, partner, date=False, **kwargs):
+        # Calculamos cada Percepcion configurada en el Partner
+        partner_perceptions = partner._get_perceptions_to_apply()
+        perc_lines = self.env['perception.tax.line']
+        for partner_perc in partner_perceptions.values():
+            excluded_percent = partner_perc['excluded_percent']
+
+            # Chequeamos las fechas de eximision
+            vdate = date or datetime.date.today()
+
+            date_from = False
+            date_to = False
+            if partner_perc['ex_date_from']:
+                date_from = time.strptime(
+                    partner_perc['ex_date_from'], "%Y-%m-%d"
+                )
+            if partner_perc['ex_date_to']:
+                date_to = time.strptime(partner_perc['ex_date_to'], "%Y-%m-%d")
+
+            # TODO: Chequear cuando solo se llena uno de las dos fechas
+            if (not date_from and not date_to) or (
+                vdate >= date_from and vdate <= date_to
+            ):
+                if excluded_percent > 1.0 or excluded_percent < 0.0:
+                    raise ValidationError(
+                        _(
+                            "Perception Configuration Error!\n"
+                            "Excluded percent configured has to be "
+                            "between 0.0 and 1.0"
+                        )
+                    )
+
+                # Si esta totalmente eximido
+                if excluded_percent == 1.0:
+                    continue
+            else:
+                partner_perc['excluded_percent'] = 0.0
+
+            perc = partner_perc['perception']
+            # TODO: compute no crea percepciones,
+            # por ende  al llamar a _compute_perception_invoice_taxes
+            # no genera ningun ait nuevo
+            res = perc.compute(partner_perc, **kwargs)
+            if res:
+                perc_lines += res
+        return perc_lines
+
     _sql_constraints = [
         (
             'unique_move',
@@ -1231,9 +1346,80 @@ class AccountMoveLine(models.Model):
                 counterpart = list(counterpart)[0:2] + ["..."]
             self.counterpart = ",".join(counterpart)
 
+    def _compute_all_vat_taxes(self):
+        tax_obj = self.env['account.tax']
+        invoice = self.move_id
+        currency = invoice.currency_id.with_context(
+            date=invoice.date_invoice or fields.Date.context_today(invoice)
+        )
+        company_currency = invoice.company_id.currency_id
 
-# class AccountInvoiceTax(models.Model):
-#     _inherit = "account.invoice.tax"
+        result = {}
+        for line in self:
+            result[line.id] = {
+                'price_unit': 0.0,
+                'amount_untaxed': 0.0,
+                'amount_total': 0.0,
+                'amount_no_taxed': 0.0,
+                'amount_exempt': 0.0,
+                'vat_taxes': {},
+            }
 
-#     tax_id = fields.Many2one('account.tax', string='Account Tax', required=True)
-#     is_exempt = fields.Boolean(string='Is Exempt', readonly=True)
+            # Obtenemos los valores de la linea de factura
+            line_taxes = {}
+            taxes = line.tax_ids.compute_all(
+                (line.price_unit * (1 - (line.discount or 0.0) / 100.0)),
+                invoice.currency_id,
+                line.quantity,
+                line.product_id,
+                invoice.partner_id,
+            )
+
+            amount_tax = 0.0
+            amount_base = 0.0
+            amount_exempt = 0.0
+            for tax in taxes['taxes']:
+                res = tax_obj.browse(tax['id'])
+                is_exempt = res.is_exempt
+                tax_group = res.tax_group
+                if not tax_group == 'vat':
+                    continue
+
+                val = {}
+                val['invoice_line_id'] = line.id
+                val['name'] = tax['name']
+                val['amount'] = tax['amount']
+                val['base'] = tax['base']
+                val['base_amount'] = currency.compute(
+                    val['base'], company_currency, round=False
+                )
+                val['tax_amount'] = currency.compute(
+                    val['amount'], company_currency, round=False
+                )
+                val['account_id'] = tax['account_id'] or line.account_id.id
+
+                amount_tax += tax['amount']
+                if is_exempt:
+                    amount_exempt += val['base']
+                else:
+                    amount_base += val['base']
+
+                line_taxes[tax['id']] = val
+
+            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            price_unit = price
+            amount_untaxed = line.price_subtotal
+            amount_total = amount_tax + amount_untaxed
+            amount_no_taxed = amount_untaxed - amount_base - amount_exempt
+            amount_exempt = amount_exempt
+            vat_taxes = line_taxes
+
+            result[line.id]['price_unit'] = price_unit
+            result[line.id]['amount_untaxed'] = amount_untaxed
+            result[line.id]['amount_total'] = amount_total
+            result[line.id]['amount_no_taxed'] = amount_no_taxed
+            result[line.id]['amount_exempt'] = amount_exempt
+            result[line.id]['amount_taxed'] = amount_base
+            result[line.id]['vat_taxes'] = vat_taxes
+
+        return result
