@@ -54,7 +54,7 @@ class AccountTax(models.Model):
             ('other', 'Other'),
         ],
         string='Type',
-        help='Retention type',
+        help='Retention/Perception type',
     )
     vat_application_ids = fields.One2many(
         comodel_name='retention.tax.application',
@@ -86,6 +86,25 @@ class AccountTax(models.Model):
         string='Exempt',
         default=False,
         help="Check this if this Tax represent Tax Exempts",
+    )
+    # PERCEPTION FIELDS:
+    perc_vat_application_ids = fields.One2many(
+        'perception.tax.application',
+        'perception_tax_id',
+        'VAT Tax Application for Perceptions',
+        domain=[('type', '=', 'vat')],
+    )
+    perc_profit_application_ids = fields.One2many(
+        'perception.tax.application',
+        'perception_tax_id',
+        'Profit Tax Application for Perceptions',
+        domain=[('type', '=', 'profit')],
+    )
+    perc_gi_application_ids = fields.One2many(
+        'perception.tax.application',
+        'perception_tax_id',
+        'Gross Income Tax Application for Perceptions',
+        domain=[('type', '=', 'gross_income')],
     )
 
     def get_grouping_key(self, invoice_tax_val):

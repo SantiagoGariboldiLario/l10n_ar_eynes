@@ -87,7 +87,6 @@
         "views/wsfe_view.xml",
         "views/res_company_view.xml",
         "views/perception_view.xml",
-        "views/perception_menuitems.xml",
     ],
     'installable': True,
     'application': True,

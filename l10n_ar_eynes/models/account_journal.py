@@ -88,13 +88,18 @@ class AccountJournal(models.Model):
             'perceptions': lambda recs: recs.write({'type': 'general'}),
         },
     )
+    fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
 
-    # RETENTIONS FIELDS
+    # RETENTIONS AND PERCEPTIONS FIELDS
     tax_id = fields.Many2one(
         comodel_name='account.tax',
         string='Tax',
         domain=[
-            ('tax_group_id.name', 'in', ('Retentions', 'Retenciones')),
+            (
+                'tax_group_id.name',
+                'in',
+                ('Retentions', 'Retenciones', 'Perceptions', 'Percepciones'),
+            ),
             ('active', '=', True),
         ],
     )
@@ -105,7 +110,6 @@ class AccountJournal(models.Model):
     )
     state_id = fields.Many2one(related='tax_id.state_id')
     priority = fields.Integer()
-    fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
 
     @api.depends('type')
     def _compute_default_account_type(self):
@@ -151,16 +155,26 @@ class AccountJournal(models.Model):
         return self.code.strip(denomination)
 
     @api.model
-    def _get_concepts_from_account(self, retention, account):
+    def _get_concepts_from_account(
+        self, account, retention=None, perception=None
+    ):
         company = self._get_company()
-        concepts = account.retention_concept_ids.filtered(
-            lambda c: c.type == retention.tax_id.retention_type
-            and (c.company_id.id == company.id or not c.company_id)
-        )
+        err_title = "Retention Error\n"
+        if retention:
+            concepts = account.retention_concept_ids.filtered(
+                lambda c: c.type == retention.tax_id.retention_type
+                and (c.company_id.id == company.id or not c.company_id)
+            )
+        if perception:
+            concepts = account.perception_concept_ids.filtered(
+                lambda c: c.type == perception.tax_id.retention_type
+                and (c.company_id.id == company.id or not c.company_id)
+            )
+            err_title = "Perception Error\n"
         if not concepts:
             raise ValidationError(
                 _(
-                    "Retention Error\n"
+                    f"{err_title}"
                     f"Account {account.name}[{account.code}] must have "
                     f"an associated concept for {retention.name}. Please configure it!"
                 )
@@ -294,7 +308,7 @@ class AccountJournal(models.Model):
             for ml in mls:
                 # Evitamos la linea de la deuda
                 concepts = self._get_concepts_from_account(
-                    retention, ml.account_id
+                    ml.account_id, retention=retention
                 )
 
                 logging_messages.append(
@@ -447,6 +461,143 @@ class AccountJournal(models.Model):
         for msg in logging_messages:
             _logger.debug(msg)
         return retentions
+
+    def _get_taxapps(self, perception_data, account, **kwargs):
+        tax_app_obj = self.env['perception.tax.application']
+        sit_iibb = perception_data['sit_iibb']
+        activity_id = perception_data['activity_id']
+
+        # Obtenemos la actividad configurada para esta Percepcion en el partner
+        activity = self.env['perception.activity'].browse(activity_id)
+
+        concepts = self._get_concepts_from_account(account, perception=self)
+
+        # Si algun concepto no esta sujeto a percepcion, continuamos
+        no_subject = False
+        for concept in concepts:
+            if concept and concept.no_subject:
+                no_subject = True
+
+        if no_subject:
+            return
+
+        concept_name = ' '.join(map(lambda a: a.name, concepts))
+        activity_name = activity and activity.name or ''
+        concept_ids = concepts and list(map(lambda a: a.id, concepts)) or []
+
+        # Buscamos las taxapps que concuerden
+        tapp_domain = [
+            ('perception_id', '=', self.id),
+            ('concept_id', 'in', concept_ids),
+            ('activity_id', '=', activity_id),
+        ]
+        iibb_domain = []
+
+        if self.type == 'gross_income':
+            iibb_domain.append(
+                ('sit_iibb', '=', sit_iibb.id if sit_iibb else False)
+            )
+        taxapps = tax_app_obj.search(tapp_domain + iibb_domain)
+
+        # Si no se encuentra con la situacion de iibb,
+        # buscamos normalmente, aplica regla general
+        if not taxapps:
+            tapp_domain.append(('sit_iibb', '=', False))
+            taxapps = tax_app_obj.search(tapp_domain)
+
+        if not taxapps:
+            raise ValidationError(
+                _(
+                    "Perception Error!\n"
+                    "There is no configured a Perception Application (%(perc_name)s) "
+                    "that corresponds to\nActivity: %(activity_name)s\n"
+                    "Concept: %(concept_name)s\n for "
+                    "the Account %(acc_name)s",
+                    perc_name=self.name,
+                    activity_name=activity_name,
+                    concept_name=concept_name,
+                    acc_name=account.name,
+                )
+            )
+
+        if len(taxapps) > 1:
+            raise ValidationError(
+                _(
+                    "Perception Error!\n"
+                    "There is more than one Perception Application (%(perc_name)s) "
+                    "that corresponds to\nActivity: %(activity_name)s\n"
+                    "Concept: %(concept_name)s\n for "
+                    "the Account %(acc_name)s",
+                    perc_name=self.name,
+                    activity_name=activity_name,
+                    concept_name=concept_name,
+                    acc_name=account.name,
+                )
+            )
+        return taxapps
+
+    @api.model
+    def _compute_base_perception(self, perception_data, **kwargs):
+        invoice = kwargs.get('invoice', False)
+        if not invoice:
+            return {}
+        percent = perception_data['percent']
+
+        concept_id = False
+
+        # Por cada linea, nos fijamos la configuracion del producto
+        perceptions = {}
+        for line in invoice.invoice_line_ids:
+            taxapps = self._get_taxapps(
+                perception_data, line.account_id, **kwargs
+            )
+            if taxapps is None:
+                continue
+
+            concept_id = taxapps.concept_id.id
+
+            # Obtenemos toda la info contable de la linea de factura
+            # todas las cantidades y los impuestos de IVA aplicados
+            res = line._compute_all_vat_taxes()[line.id]
+
+            # Hacemos el computo de la Percepcion por linea de factura
+            base = taxapps.compute_base(percent, res)
+
+            if base == 0.0:
+                continue
+
+            # Luego vamos agrupando por Concepto (no por actividad)
+            if concept_id in perceptions:
+                perceptions[concept_id]['base'] += base
+                # perceptions[concept_id]['amount'] += amount
+                perceptions[concept_id]['lines'].append(line.id)
+            else:
+                perceptions[concept_id] = {
+                    'base': base,
+                    # 'amount': amount,
+                    'lines': [line.id],
+                    'reg_code': taxapps.reg_code,
+                    'tax_app_id': taxapps,
+                }
+        return perceptions
+
+    def _prepare_perception_vals(self, concept_id, vals, **kwargs):
+        taxapp = vals['tax_app_id']
+        invoice = kwargs.get('invoice', False)
+        return {
+            'name': self.name,
+            'concept_id': concept_id,
+            'invoice_id': invoice.id if invoice else False,
+            'account_id': self.tax_id.account_id.id,
+            'base': vals['base'],
+            'amount': vals['amount'],
+            'manual': False,  # La creamos por sistema
+            'reg_code': vals['reg_code'],
+            'tax_app_id': taxapp.id,
+            'perception_id': self.id,
+            'state_id': self.state_id and self.state_id.id or False,
+            'partner_id': invoice.partner_id.id if invoice else False,
+        }
 
 
 class RetentionError(Exception):

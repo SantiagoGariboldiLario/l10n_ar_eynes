@@ -439,7 +439,13 @@ class ResPartnerPerception(models.Model):
     _rec_name = 'perception_id'
 
     perception_id = fields.Many2one(
-        'perception.perception', 'Perception', required=True
+        'account.journal',
+        'Perception',
+        required=True,
+        domain=lambda self: [
+            ('type', '=', 'perceptions'),
+            ('company_id', '=', self.env.user.company_id.id),
+        ],
     )
     activity_id = fields.Many2one('perception.activity', 'Activity')
     percent = fields.Float('Percent', required=True)
