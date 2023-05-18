@@ -197,7 +197,7 @@
                         colspan="4"
                         context="{'default_partner_id': partner_id}"
                     >
-                        <tree string="Perception Lines">
+                        <tree>
                             <field name="name" />
                             <field name="account_id" />
                             <field name="partner_id" invisible="1" />

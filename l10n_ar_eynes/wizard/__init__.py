@@ -11,3 +11,4 @@ from . import wsfe_massive_sinchronize  # noqa
 from . import wsfe_massive_validation  # noqa
 from . import account_change_currency  # noqa
 from . import sale_make_invoice_advance  # noqa
+from . import account_tax_subjournal  # noqa
