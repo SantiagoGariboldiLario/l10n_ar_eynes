@@ -20,7 +20,7 @@
                             nolabel="1"
                             domain="[('tax_id.type_tax_use','=','sale')]"
                         >
-                            <tree string="Perception">
+                            <tree>
                                 <field name="name" />
                                 <field name="tax_id" />
                                 <field name="state_id" />

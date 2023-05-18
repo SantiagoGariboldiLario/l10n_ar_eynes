@@ -42,7 +42,7 @@
                     <group colspan="4" col="4">
                         <group colspan="4">
                             <field colspan="2" name="perception_ids" nolabel="1">
-                                <tree string="Perceptions to Apply" editable="bottom">
+                                <tree editable="bottom">
                                     <field
                                         name="perception_id"
                                         domain="[('type_tax_use','=','sale')]"

@@ -1,70 +1,67 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
 
-        <record id="account_change_currency_wizard_view" model="ir.ui.view">
-            <field name="name">Change Currency</field>
-            <field name="model">account.change.currency</field>
-            <field name="arch" type="xml">
-                <form string="Invoice Currency">
-                    <h3
-                    >This wizard allows you to change the currency of the invoice by recalculating all amounts</h3>
-                    <group>
-                        <label for="actual_currency_id" />
-                        <div>
-                            <field name="actual_currency_rate" class="oe_inline" /> -
-                            <field name="actual_currency_id" class="oe_inline" />
-                            <field name="actual_currency_preciated" invisible="1" />
-                            <p
-                                attrs="{'invisible': [('actual_currency_preciated', '=', False)]}"
-                            >
-                               <i>Cuidado, la moneda es preciada!.</i>
-                            </p>
-                        </div>
-                    </group>
-
-                    <!-- <div class="btn-group btn-link o_horizontal_separator"> -->
-                    <div class="btn-group o_horizontal_separator">
-
-                        <!-- <label for="arrow-down" string="Change To" style="font-size:20px"/> -->
-                        <p name="arrow-down" class="fa fa-arrow-down" />
+    <record id="account_change_currency_wizard_view" model="ir.ui.view">
+        <field name="name">Change Currency</field>
+        <field name="model">account.change.currency</field>
+        <field name="arch" type="xml">
+            <form string="Invoice Currency">
+                <h3
+                >This wizard allows you to change the currency of the invoice by recalculating all amounts</h3>
+                <group>
+                    <label for="actual_currency_id" />
+                    <div>
+                        <field name="actual_currency_rate" class="oe_inline" /> -
+                        <field name="actual_currency_id" class="oe_inline" />
+                        <field name="actual_currency_preciated" invisible="1" />
+                        <p
+                            attrs="{'invisible': [('actual_currency_preciated', '=', False)]}"
+                        >
+                            <i>Cuidado, la moneda es preciada!.</i>
+                        </p>
                     </div>
+                </group>
 
-                    <group>
-                        <label for="new_currency_id" />
-                        <div>
-                            <field name="new_currency_rate" class="oe_inline" /> -
-                            <field name="new_currency_id" class="oe_inline" />
-                            <field name="new_currency_preciated" invisible="1" />
-                            <p
-                                attrs="{'invisible': [('new_currency_preciated', '=', False)]}"
-                            >
-                               <i
-                                >Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
-                           </p>
-                        </div>
-                    </group>
-                    <footer>
-                        <button
-                            name="change_currency"
-                            string="Change Currency"
-                            type="object"
-                            class="oe_highlight"
-                        />
-                        or
-                        <button string="Cancel" class="oe_link" special="cancel" />
-                    </footer>
-                </form>
-            </field>
-        </record>
+                <!-- <div class="btn-group btn-link o_horizontal_separator"> -->
+                <div class="btn-group o_horizontal_separator">
 
-        <record id="action_account_change_currency" model="ir.actions.act_window">
-            <field name="name">Change Currency</field>
-            <field name="res_model">account.change.currency</field>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="account_change_currency_wizard_view" />
-            <field name="target">new</field>
-        </record>
+                    <!-- <label for="arrow-down" string="Change To" style="font-size:20px"/> -->
+                    <p name="arrow-down" class="fa fa-arrow-down" />
+                </div>
 
-    </data>
+                <group>
+                    <label for="new_currency_id" />
+                    <div>
+                        <field name="new_currency_rate" class="oe_inline" /> -
+                        <field name="new_currency_id" class="oe_inline" />
+                        <field name="new_currency_preciated" invisible="1" />
+                        <p
+                            attrs="{'invisible': [('new_currency_preciated', '=', False)]}"
+                        >
+                            <i
+                            >Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
+                        </p>
+                    </div>
+                </group>
+                <footer>
+                    <button
+                        name="change_currency"
+                        string="Change Currency"
+                        type="object"
+                        class="oe_highlight"
+                    />
+                    or
+                    <button string="Cancel" class="oe_link" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_account_change_currency" model="ir.actions.act_window">
+        <field name="name">Change Currency</field>
+        <field name="res_model">account.change.currency</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="account_change_currency_wizard_view" />
+        <field name="target">new</field>
+    </record>
 </odoo>

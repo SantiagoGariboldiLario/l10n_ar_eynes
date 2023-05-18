@@ -76,7 +76,7 @@
         <field name="model">perception.tax.line</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="Perception Tax Lines">
+            <tree>
                 <field name="reg_code" />
                 <field name="concept_id" />
                 <field name="date" />
@@ -172,7 +172,7 @@
         <field name="model">perception.concept</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="Perception Concepts">
+            <tree>
                 <field name="code" />
                 <field name="type" />
                 <field name="name" />
@@ -216,7 +216,7 @@
         <field name="model">perception.activity</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="Perception Activities" editable="bottom">
+            <tree editable="bottom">
                 <field name="code" />
                 <field name="type" />
                 <field name="name" />
