@@ -2348,10 +2348,13 @@ class AccountPaymentOrderRetentionLine(models.Model):
                     lambda rtml: rtml.move_name != 'draft'
                 ).mapped('total_without_vat')
             )
-            amount = rec.concept_amount
-            rec.month_applied_retentions = (total - amount) * (
-                rec.applied_aliquot / 100
-            )
+            if total == 0:
+                rec.month_applied_retentions = 0
+            else:
+                amount = rec.concept_amount
+                rec.month_applied_retentions = (total - amount) * (
+                    rec.applied_aliquot / 100
+                )
 
     @api.depends('total_month_retention', 'month_applied_retentions')
     def _compute_actual_payment_retention(self):
