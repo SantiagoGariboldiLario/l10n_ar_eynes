@@ -63,7 +63,7 @@
         'wizard/account_tax_subjournal_view.xml',
         'views/res_config_settigs_views.xml',
         'views/res_partner_views.xml',
-        'views/res_currency_rate_view.xml',
+        # 'views/res_currency_rate_view.xml',
         'views/res_currency_view.xml',
         'views/account_journal_views.xml',
         'views/account_payment_order_views.xml',
