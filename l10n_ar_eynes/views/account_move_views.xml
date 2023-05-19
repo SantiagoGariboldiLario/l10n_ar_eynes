@@ -104,14 +104,23 @@
             </field>
 
             <xpath
-                expr="//group[@class='oe_subtotal_footer oe_right']"
-                position="after"
+                expr="//group[@class='oe_invoice_lines_tab']/group[1]"
+                position="replace"
             >
+                <group colspan="4">
+                    <field
+                        name="narration"
+                        placeholder="Terms and Conditions"
+                        class="oe_inline text-break"
+                        nolabel="1"
+                    />
+                </group>
                 <!-- Pensar la idea de moneda secundaria y apartir de ahi decidir cuando se ve -->
 
                 <!-- <group class="oe_subtotal_footer" style="display: inline-block" attrs="{'invisible': [('is_multi_currency','=',False), ('currency_converted', '=', False)]}"> -->
                 <group
-                    class="oe_subtotal_footer"
+                    colspan="4"
+                    class="oe_subtotal_footer oe_right"
                     attrs="{'invisible': ['|',('secondary_currency_id', '=', False), ('is_company_cur','=', True)]}"
                 >
                     <field name="amount_taxed_cur" />
