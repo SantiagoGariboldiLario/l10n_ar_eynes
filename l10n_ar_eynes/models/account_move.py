@@ -27,7 +27,10 @@ class AccountMove(models.Model):
         ],
         string='Denomination',
     )
-    supplier_move_reference = fields.Char(string='Supplier Invoice Reference')
+    supplier_move_reference = fields.Char(
+        string='Supplier Invoice Reference',
+        copy=False,
+    )
     address_shipping_id = fields.Many2one(
         comodel_name='res.partner',
         name='Shipping Address',
