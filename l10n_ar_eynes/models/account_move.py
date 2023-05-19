@@ -219,11 +219,10 @@ class AccountMove(models.Model):
     @api.depends(
         'invoice_line_ids',
         'invoice_line_ids.price_unit',
-        # 'invoice_line_ids.invoice_line_tax_ids',
+        'invoice_line_ids.tax_ids',
         'invoice_line_ids.quantity',
         'invoice_line_ids.discount',
         'currency_rate',
-        # 'tax_line_ids',
     )
     def _compute_amount_all_cur(self):
         Currency = self.env.get('res.currency')
@@ -239,7 +238,10 @@ class AccountMove(models.Model):
             }
 
             secondary_currency = invoice.secondary_currency_id
-            if not secondary_currency:
+            if (
+                not secondary_currency
+                or secondary_currency == invoice.currency_id
+            ):
                 invoice.update(res)
                 continue
 
@@ -249,16 +251,17 @@ class AccountMove(models.Model):
             for line in invoice.invoice_line_ids:
                 res['amount_untaxed_cur'] += line.price_subtotal
 
-            # for line in invoice.tax_line_ids:
-            #     # Para habilitar estos cambios hay que
-            #     # instalar l10n_ar_point_of_sale
-
-            #     if line.tax_id.tax_group == 'vat':
-            #         if line.is_exempt:
-            #             amount_exempt += line.base
-            #         else:
-            #             amount_base += line.base
-            #     res['amount_tax_cur'] += line.amount
+                for tax in line.tax_ids:
+                    if tax.tax_group_id == self.env.ref(
+                        'l10n_ar_eynes.vat_tax_group'
+                    ):
+                        if tax.is_exempt:
+                            amount_exempt += line.amount
+                        else:
+                            amount_base += line.amount
+                    res['amount_tax_cur'] += (
+                        line.price_subtotal * tax.amount * 0.01
+                    )
 
             date = invoice.date or invoice.date_invoice or fields.Date.today()
             company = invoice.company_id
@@ -289,14 +292,16 @@ class AccountMove(models.Model):
             )
             res['amount_taxed_cur'] = amount_base
             res['amount_exempt_cur'] = amount_exempt
+            invoice.update({field: val for field, val in res.items()})
 
-            invoice.amount_total_cur = res['amount_total_cur']
-            invoice.amount_fob_cur = res['amount_fob_cur']
-            invoice.amount_no_taxed_cur = res['amount_no_taxed_cur']
-            invoice.amount_taxed_cur = res['amount_taxed_cur']
-            invoice.amount_exempt_cur = res['amount_exempt_cur']
-            invoice.amount_untaxed_cur = res['amount_untaxed_cur']
-            invoice.amount_tax_cur = res['amount_tax_cur']
+    def compute_invoice_totals(self, company_currency, invoice_move_lines):
+        modify_self = self.with_context(
+            currency1=(self.currency_id, self.currency_rate),
+            currency2=(company_currency, 1),
+        )
+        return super(AccountMove, modify_self).compute_invoice_totals(
+            company_currency, invoice_move_lines
+        )
 
     def _compute_is_company_cur(self):
         for invoice in self:
@@ -402,9 +407,9 @@ class AccountMove(models.Model):
                 curr_rate = currency._get_currency_rate(company, date_invoice)
                 self.is_multi_currency = True
                 if currency.preciated:
-                    self.currency_rate = curr_rate.rate_preciated
+                    self.currency_rate = curr_rate.inverse_company_rate
                 else:
-                    self.currency_rate = curr_rate.rate
+                    self.currency_rate = curr_rate.company_rate
             else:
                 self.is_multi_currency = False
                 self.currency_rate = 1.0
@@ -813,7 +818,7 @@ class AccountMove(models.Model):
                 self.validate_period()
                 if self.check_must_be_fce():
                     self.ensure_fce_values()
-                self.action_aut_cae()
+                # self.action_aut_cae()
                 if not self.payment_reference:
                     pos_num = self.journal_id.get_pos_number()
                     move_num = self.get_highest_pos_sequence()

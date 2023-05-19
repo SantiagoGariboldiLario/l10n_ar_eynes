@@ -22,11 +22,8 @@
                     </div>
                 </group>
 
-                <!-- <div class="btn-group btn-link o_horizontal_separator"> -->
                 <div class="btn-group o_horizontal_separator">
-
-                    <!-- <label for="arrow-down" string="Change To" style="font-size:20px"/> -->
-                    <p name="arrow-down" class="fa fa-arrow-down" />
+                    <p>Change To <i class="fa fa-arrow-down" /></p>
                 </div>
 
                 <group>
