@@ -238,7 +238,10 @@
                     </field>
                 </page>
 
-                <page string="FCRED" attrs="{'invisible': [('local','=', False)]}">
+                <page
+                    string="FCRED"
+                    attrs="{'invisible': [('is_FCE_invoice','=', False)]}"
+                >
                     <group string="Optionals">
                         <field name="optional_ids" nolabel="1">
                             <tree editable="bottom">
