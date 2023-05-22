@@ -598,8 +598,8 @@ class WSFE(AfipWS):
 
     STRINGS = ['MonId']
 
-    @WsApi.check(['DocNro'], reraise=True, sequence=20)
     @staticmethod
+    @WsApi.check(['DocNro'], reraise=True, sequence=20)
     def validate_docnro(val, invoice, DocTipo):
         tin_type = int(DocTipo)
         if tin_type != 99:
@@ -620,8 +620,8 @@ class WSFE(AfipWS):
                 return False
         return True
 
-    @WsApi.check(['CbteDesde'], reraise=True, sequence=20)
     @staticmethod
+    @WsApi.check(['CbteDesde'], reraise=True, sequence=20)
     def validate_invoice_number(val, invoice, invoices, first_of_lot=True):
         if first_of_lot:
             conf = invoice.get_ws_conf()
@@ -700,45 +700,45 @@ class WSFE(AfipWS):
                         )
         return True
 
-    @WsApi.check(NATURALS)
     @staticmethod
+    @WsApi.check(NATURALS)
     def validate_natural_number(val):
         val = int(val)
         if val > 0:
             return True
         return False
 
-    @WsApi.check(POSITIVE_REALS)
     @staticmethod
+    @WsApi.check(POSITIVE_REALS)
     def validate_positive_reals(val):
         if not val or (isinstance(val, float) and val > 0):
             return True
         return False
 
-    @WsApi.check(STRINGS)
     @staticmethod
+    @WsApi.check(STRINGS)
     def validate_strings(val):
         if isinstance(val, str):
             return True
         return False
 
-    @WsApi.check(['Concepto'])
     @staticmethod
+    @WsApi.check(['Concepto'])
     def validate_concept(val):
         if val in [1, 2, 3]:
             return True
         return False
 
-    @WsApi.check(['FchServDesde'])
     @staticmethod
+    @WsApi.check(['FchServDesde'])
     def validate_service_from_date(val, Concepto):
         if Concepto not in [2, 3]:
             return True
         datetime.strptime(val, AFIP_DATE_FORMAT)
         return True
 
-    @WsApi.check(['FchServHasta'])
     @staticmethod
+    @WsApi.check(['FchServHasta'])
     def validate_service_to_date(val, FchServDesde, Concepto):
         if Concepto not in [2, 3]:
             return True
@@ -747,8 +747,8 @@ class WSFE(AfipWS):
             return True
         return False
 
-    @WsApi.check(['FchVtoPago'])
     @staticmethod
+    @WsApi.check(['FchVtoPago'])
     def validate_service_payment_date(val, invoice, Concepto):
         if Concepto not in [2, 3]:
             return True
@@ -764,8 +764,8 @@ class WSFE(AfipWS):
             return True
         return False
 
-    @WsApi.check(['CbteFch'], reraise=True)
     @staticmethod
+    @WsApi.check(['CbteFch'], reraise=True)
     def validate_invoice_date(val, invoice, Concepto):
         if not val:
             return True
@@ -806,8 +806,8 @@ class WSFE(AfipWS):
                 )
         return True
 
-    @WsApi.check(['MonCotiz'])
     @staticmethod
+    @WsApi.check(['MonCotiz'])
     def validate_currency_rate(val, MonId):
         if MonId == 'PES':
             if val == 1:
@@ -817,17 +817,17 @@ class WSFE(AfipWS):
                 return True
         return False
 
-    @WsApi.check(['Tipo', 'Nro'])
     @staticmethod
+    @WsApi.check(['Tipo', 'Nro'])
     def validate_cmps_tipo(val, Tipo):
         return True
 
-    @WsApi.check(['Valor'])
     @staticmethod
+    @WsApi.check(['Valor'])
     def validate_cmps_valor(val, Valor):
         return True
 
-    @WsApi.check(['Alic', 'Desc'])
     @staticmethod
+    @WsApi.check(['Alic', 'Desc'])
     def validate_tributos(val, Alic):
         return True
