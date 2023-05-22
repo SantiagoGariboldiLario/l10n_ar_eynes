@@ -12,18 +12,19 @@ _logger = logging.getLogger(__name__)
 
 
 try:
-    from easywsy import WebService, WSApi
+    from easywsy import WebService, wsapi as WsApi
 except (ImportError, IOError) as e:
 
-    class WSApi:
-        def check(*a, **kw):
-            def func(*a, **kw):
+    class WsApi:
+        @staticmethod
+        def check(*args, **kw):
+            def func(*args, **kw):
                 return None
 
             return func
 
     WebService = object
-    _logger.debug("Cannot import WebService, WSApi from easywsy: \n%s" % repr(e))
+    _logger.info("Cannot import WebService, Wsapi from easywsy: \n%s" % repr(e))
 
 
 class AfipWSError:
@@ -79,7 +80,9 @@ class AfipWS(WebService):
 
     def _validate_errors(self, ws_response, raise_exception=True):
         errors = ws_response.get('errors', [])
-        err_data = ["[%s] %s" % (str(error.code), error.msg) for error in errors]
+        err_data = [
+            "[%s] %s" % (str(error.code), error.msg) for error in errors
+        ]
         msg = ("\n").join(err_data)
 
         if msg and raise_exception:
@@ -88,7 +91,9 @@ class AfipWS(WebService):
 
     def _log_observations(self, ws_response):
         observations = ws_response.get('observations', [])
-        obs_data = ["[%s] %s" % (str(obs.code), obs.msg) for obs in observations]
+        obs_data = [
+            "[%s] %s" % (str(obs.code), obs.msg) for obs in observations
+        ]
         msg = ("\n").join(obs_data)
 
         # Escribimos en el log del cliente web
