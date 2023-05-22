@@ -1,6 +1,6 @@
 # generated from manifests external_dependencies
 # pylint: pointless-statement
-easywsy
-M2Crypto
-pyOpenSSL
-suds-jurko
+easywsy = git+https://gitlab.eynes.com.ar/infra/easywsy.git@master
+M2Crypto = M2Crypto==0.38.0
+pyOpenSSL = pyOpenSSL
+suds-jurko = git+https://gitlab.eynes.com.ar/infra/suds_jurko-0.6.1@master#egg=suds_jurko
