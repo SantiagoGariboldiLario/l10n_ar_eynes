@@ -818,7 +818,7 @@ class AccountMove(models.Model):
                 self.validate_period()
                 if self.check_must_be_fce():
                     self.ensure_fce_values()
-                # self.action_aut_cae()
+                self.action_aut_cae()
                 if not self.payment_reference:
                     pos_num = self.journal_id.get_pos_number()
                     move_num = self.get_highest_pos_sequence()
