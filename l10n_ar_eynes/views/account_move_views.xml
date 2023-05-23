@@ -177,8 +177,15 @@
 
             <xpath expr="//group[@id='header_right_group']" position="inside">
                 <field name="is_FCE_invoice" />
-                <field name="cae" string="CAE" readonly="1" />
-                <field name="cae_due_date" readonly="1" />
+                <field
+                    name="cae"
+                    string="CAE"
+                    attrs="{'readonly': [('move_type','in', ['out_refund', 'out_invoice'])]}"
+                />
+                <field
+                    name="cae_due_date"
+                    attrs="{'readonly': [('move_type','in', ['out_refund', 'out_invoice'])]}"
+                />
             </xpath>
 
             <page name="other_info" position="inside">
@@ -266,7 +273,7 @@
 
                 <page
                     string="Export Invoice"
-                    attrs="{'invisible': [('local','=', True)]}"
+                    attrs="{'invisible': ['|', ('local','=', True), ('move_type','in', ['in_refund', 'in_invoice'])]}"
                 >
                     <group string="Shipping Permissions">
                         <field
@@ -319,7 +326,10 @@
                     </group>
                 </page>
 
-                <page string="WSFE Requests">
+                <page
+                    string="WSFE Requests"
+                    attrs="{'invisible': [('move_type','in', ['in_refund', 'in_invoice'])]}"
+                >
                     <field name="wsfe_request_ids" readonly="1">
                         <tree>
                             <field name="voucher_date" />
