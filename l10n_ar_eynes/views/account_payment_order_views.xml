@@ -1271,7 +1271,10 @@
                                         options="{'currency_field': 'currency_id'}"
                                         attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
                                     />
-                                    <field name="amount" />
+                                    <field
+                                        name="actual_payment_retention"
+                                        string="Amount"
+                                    />
                                     <field
                                         name="amount_currency"
                                         widget="monetary"
