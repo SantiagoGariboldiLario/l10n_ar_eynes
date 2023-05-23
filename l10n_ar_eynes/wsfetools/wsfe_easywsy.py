@@ -28,8 +28,8 @@ class WSFE(AfipWS):
             'FECAESolicitar': {
                 'FeCAEReq': {
                     'FeCabReq': {
-                        'CbteTipo': int(voucher_type.afip_code),
-                        'PtoVta': int(pos.code),
+                        'CbteTipo': voucher_type,
+                        'PtoVta': pos,
                         'CantReg': reg_qty,
                     },
                     'FeDetReq': {
@@ -58,7 +58,7 @@ class WSFE(AfipWS):
     def parse_invoice(self, invoice, number=False, invoices=False):
         invoice.ensure_one()
         if not number:
-            number = invoice.name.split("-")[1]
+            number = invoice.get_next_wsfe_number()
         invoice_date = invoice.invoice_date
         formatted_invoice_date = invoice_date.strftime('%Y%m%d')
         date_due = (
@@ -116,7 +116,7 @@ class WSFE(AfipWS):
             'invoice': invoice,
             'CbteDesde': number,
             'CbteHasta': number,
-            'CbteFch': invoice_date.strftime('%Y%m%d'),
+            'CbteFch': formatted_invoice_date,
             'Concepto': concept,
             'DocNro': doc_num,
             'DocTipo': doc_type,
@@ -150,7 +150,7 @@ class WSFE(AfipWS):
             #     detail['FchVtoPago'] = date_due
         if (
             invoice.is_FCE_invoice
-            and invoice.type == 'out_invoice'
+            and invoice.move_type == 'out_invoice'
             and not invoice.is_debit_note
         ):
             detail['FchVtoPago'] = date_due
@@ -159,7 +159,7 @@ class WSFE(AfipWS):
         # Associated Comps
         CbtesAsoc = []
         for associated_inv in invoice.associated_inv_ids:
-            tipo_cbte = associated_inv.get_voucher_type().afip_code
+            tipo_cbte = associated_inv.get_voucher_type()
             pos, number = associated_inv.name.split('-')
             cbte_fch = associated_inv.invoice_date.strftime('%Y%m%d')
             CbteAsoc = {
@@ -199,21 +199,24 @@ class WSFE(AfipWS):
         conf = invoice.get_ws_conf()
 
         afip_taxes = conf.vat_tax_ids.mapped('tax_id')
-        not_found_tax = invoice.tax_line_ids.filtered(
-            lambda x: x.amount and x.tax_id not in afip_taxes
+        invoice_tax_lines = invoice.line_ids.filtered(
+            lambda x: x.price_unit and x.tax_line_id
+        )
+        not_found_tax = invoice_tax_lines.filtered(
+            lambda x: x.tax_line_id not in afip_taxes
         )
         if not_found_tax:
             err = _("Taxes `%s` are not configured in WSFE!") % (", ").join(
-                not_found_tax.mapped('tax_id.name')
+                not_found_tax.mapped('tax_line_id.name')
             )
             _logger.warning(_("Expected Error!\n") + err)
 
         # Procesamos las taxes
 
         vat_dict = {}
-        for tax_line in invoice.tax_line_ids.filtered(lambda x: x.amount):
+        for tax_line in invoice_tax_lines:
             afip_tax = conf.vat_tax_ids.filtered(
-                lambda x: x.tax_id == tax_line.tax_id
+                lambda x: x.tax_id == tax_line.tax_line_id
             )
             if not afip_tax:
                 continue
@@ -222,12 +225,12 @@ class WSFE(AfipWS):
             code = int(afip_tax.code)
             if code not in vat_dict:
                 vat_dict[code] = {
-                    'Importe': tax_line.amount,
-                    'BaseImp': tax_line.base,
+                    'Importe': tax_line.price_unit,
+                    'BaseImp': tax_line.tax_base_amount,
                 }
             else:
-                vat_dict[code]['Importe'] += tax_line.amount
-                vat_dict[code]['BaseImp'] += tax_line.base
+                vat_dict[code]['Importe'] += tax_line.price_unit
+                vat_dict[code]['BaseImp'] += tax_line.tax_base_amount
 
         vat_array = [
             {**{'Id': code}, **vals} for code, vals in vat_dict.items()
@@ -236,10 +239,11 @@ class WSFE(AfipWS):
         vat_tax_amount = sum(x['Importe'] for x in vat_dict.values())
         vat_base_amount = sum(x['BaseImp'] for x in vat_dict.values())
 
+        # Chequear este calculo: qué debería sumar?
         tribute_tax_amount = sum(
-            x.amount
-            for x in invoice.tax_line_ids
-            if x.tax_id not in afip_taxes and not x.tax_id.is_exempt
+            x.price_unit
+            for x in invoice_tax_lines
+            if x.tax_line_id not in afip_taxes and not x.tax_line_id.is_exempt
         )
 
         exempt_operation_amount = invoice.amount_exempt
@@ -323,8 +327,8 @@ class WSFE(AfipWS):
                 1
             ].FeDetReq.FECAEDetRequest:
                 if (
-                    det_req['CbteDesde'] == det_response['CbteHasta']
-                    and det_req['DocNro'] == det_req['DocNro']
+                    int(det_req['CbteDesde']) == det_response['CbteHasta']
+                    and int(det_req['DocNro']) == det_response['DocNro']
                 ):
                     MonId = det_req['MonId']
                     MonCotiz = det_req['MonCotiz']
@@ -360,7 +364,7 @@ class WSFE(AfipWS):
         res = {
             'Comprobantes': invoices,
             'Errores': errors,
-            'PtoVta': int(pos),
+            'PtoVta': pos,
             'Resultado': response.FeCabResp.Resultado,
             'Reproceso': response.FeCabResp.Reproceso,
             'CbteTipo': response.FeCabResp.CbteTipo,
@@ -417,22 +421,13 @@ class WSFE(AfipWS):
                         doc_num = bool(int(inv.partner_id.vat))
                     except ValueError:
                         doc_num = False
-                cbte = True
-                if inv.internal_number:
-                    cbte = comp['CbteHasta'] == int(
-                        inv.internal_number.split('-')[1]
-                    )
-                else:
-                    # TODO: El nro de factura deberia unificarse
-                    # para que se setee en una funcion
-                    # o algo asi para que no haya posibilidad de que
-                    # sea diferente nunca en su formato
-                    invoice_vals['internal_number'] = '%04d-%08d' % (
-                        res['PtoVta'],
-                        comp['CbteHasta'],
-                    )
 
-                if not all([doc_tipo, doc_num, cbte]):
+                invoice_vals['name'] = '%04d-%08d' % (
+                    res['PtoVta'],
+                    comp['CbteHasta'],
+                )
+
+                if not all([doc_tipo, doc_num]):
                     raise UserError(
                         _("WSFE Error!\n")
                         + _("Validated invoice that not corresponds!")
@@ -440,7 +435,11 @@ class WSFE(AfipWS):
 
                 if comp['Resultado'] == 'A':
                     invoice_vals['cae'] = comp['CAE']
-                    invoice_vals['cae_due_date'] = comp['CAEFchVto']
+                    invoice_vals['cae_due_date'] = "{y}-{m}-{d}".format(
+                        y=comp['CAEFchVto'][:4],
+                        m=comp['CAEFchVto'][4:6],
+                        d=comp['CAEFchVto'][6:],
+                    )
                     invoices_approved[inv.id] = invoice_vals
 
         return invoices_approved
@@ -451,8 +450,9 @@ class WSFE(AfipWS):
             return False
         res = self.last_request['parse_result']
         wsfe_req_obj = env['wsfe.request']
-        voucher_type_obj = env['wsfe.voucher_type']
-        voucher_type = voucher_type_obj.search([('code', '=', res['CbteTipo'])])
+        voucher_type_obj = env['res.voucher.type']
+        req_vtype = str(res['CbteTipo']).zfill(3)
+        voucher_type = voucher_type_obj.search([('afip_code', '=', req_vtype)])
         voucher_type_name = ', '.join(x.name for x in voucher_type)
         req_details = []
         pos = res['PtoVta']
@@ -473,7 +473,7 @@ class WSFE(AfipWS):
             else:
                 invoice_id = read_inv.id
                 q = """
-                SELECT id FROM account_invoice WHERE id = %(id)s
+                SELECT id FROM account_move WHERE id = %(id)s
                 """
                 env.cr.execute(q, {'id': invoice_id})
                 # Invoice Failed to create and does not exist in the DB
@@ -488,10 +488,18 @@ class WSFE(AfipWS):
                 ],  # TODO: Poner aca el nombre del tipo de documento  # noqa
                 'docnum': str(comp['DocNro']),
                 'voucher_number': comp['CbteHasta'],
-                'voucher_date': comp['CbteFch'],
+                'voucher_date': "{y}-{m}-{d}".format(
+                    y=comp['CbteFch'][:4],
+                    m=comp['CbteFch'][4:6],
+                    d=comp['CbteFch'][6:],
+                ),
                 'amount_total': comp['ImpTotal'],
                 'cae': comp['CAE'],
-                'cae_duedate': comp['CAEFchVto'],
+                'cae_duedate': "{y}-{m}-{d}".format(
+                    y=comp['CAEFchVto'][:4],
+                    m=comp['CAEFchVto'][4:6],
+                    d=comp['CAEFchVto'][6:],
+                ),
                 'result': comp['Resultado'],
                 'currency': comp['MonId'],
                 'currency_rate': comp['MonCotiz'],
@@ -606,7 +614,7 @@ class WSFE(AfipWS):
             tin_number = int(val)
         else:
             tin_number = val
-        if invoice.denomination_id.name == 'B':
+        if invoice.denomination == 'b':
             if tin_type != 99 and not tin_number:
                 return False
             if invoice.amount_total >= 5000:
@@ -615,7 +623,7 @@ class WSFE(AfipWS):
             else:
                 if tin_type == 99 and tin_number != '0':
                     return False
-        if invoice.denomination_id.name == 'A':
+        if invoice.denomination == 'a':
             if not int(val):
                 return False
         return True
@@ -623,81 +631,6 @@ class WSFE(AfipWS):
     @staticmethod
     @WsApi.check(['CbteDesde'], reraise=True, sequence=20)
     def validate_invoice_number(val, invoice, invoices, first_of_lot=True):
-        if first_of_lot:
-            conf = invoice.get_ws_conf()
-            fe_next_number = invoice._get_next_wsfe_number(conf=conf)
-
-            if int(fe_next_number) != int(val):
-                try:
-                    sync_invs = []
-                    invoices.env.cr.rollback()
-                    invoices.refresh()
-                    massive_sync_wiz = invoice.env['wsfe.massive.sinchronize']
-                    vtype = invoice.env['wsfe.voucher_type'].search(
-                        [('code', '=', int(invoice._get_voucher_type()))]
-                    )
-                    pos = invoice.env['pos.ar'].search(
-                        [('name', '=', invoice._get_pos().name)]
-                    )
-                    wiz = massive_sync_wiz.create(
-                        {
-                            'voucher_type': vtype.id,
-                            'pos_id': pos.id,
-                        }
-                    )
-                    act_window = wiz.sinchronize()
-                    if act_window and 'domain' in act_window:
-                        ids_domain = [
-                            x for x in act_window['domain'] if x[0] == 'id'
-                        ]
-                        if len(ids_domain) == 1 and len(ids_domain[0]) == 3:
-                            sync_ids = ids_domain[0][2]
-                            sync_invs = invoices.browse(sync_ids)
-                    if sync_invs:
-                        invoices = invoices.filtered(
-                            lambda x: x not in sync_invs
-                        )
-                    if len(invoices) > 1:
-                        massive_inv_wiz = invoices.env[
-                            'account.invoice.confirm'
-                        ]
-                        wiz = massive_inv_wiz.create({})
-                        ctx = {
-                            'active_ids': invoices.ids,
-                        }
-                        wiz.with_context(**ctx).invoice_confirm()
-                    else:
-                        invoices.action_invoice_open()
-                except Exception as e:
-                    _logger.error(repr(e))
-                finally:
-                    if sync_invs:
-                        raise UserError(
-                            _("WSFE Info!\n")
-                            + _(
-                                "The current invoice was validated and "
-                                + "other invoices were validated too due to "
-                                + "desynchronization. "
-                                + "\nValidated Invoices:\n"
-                                + "%s"
-                            )
-                            % ("\n").join(
-                                invoices.browse(
-                                    list(set(sync_invs.ids + invoices.ids))
-                                ).mapped('internal_number')
-                            )
-                        )
-                    else:
-                        raise UserError(
-                            _(
-                                "WSFE Error!\n"
-                                "The next number in the system [%(sys_num)d] does "
-                                "not match the one obtained from "
-                                "AFIP WSFE [%(wsfe_num)d]"
-                            ),
-                            sys_num=int(val),
-                            wsfe_num=int(fe_next_number),
-                        )
         return True
 
     @staticmethod
@@ -754,11 +687,11 @@ class WSFE(AfipWS):
             return True
         # No checks if invoice is of mipyme.fcred
         if invoice.fiscal_type_id == invoice.env.ref(
-            'l10n_ar_wsfe.fiscal_type_fcred'
+            'l10n_ar_eynes.fiscal_type_fcred'
         ):
             return True
         datetime.strptime(val, AFIP_DATE_FORMAT)
-        inv_date = invoice.date_invoice or fields.Date.context_today(invoice)
+        inv_date = invoice.invoice_date or fields.Date.context_today(invoice)
         inv_date = inv_date.strftime(AFIP_DATE_FORMAT)
         if val >= inv_date.replace('-', ''):
             return True

@@ -17,7 +17,9 @@ class WsfeMassiveSinchronize(models.TransientModel):
     _name = 'wsfe.massive.sinchronize'
     _description = 'WSFE Massive Sinchronize'
 
-    voucher_type = fields.Many2one('res.voucher.type', 'Voucher Type', required=True)
+    voucher_type = fields.Many2one(
+        'res.voucher.type', 'Voucher Type', required=True
+    )
     pos_id = fields.Many2one('account.journal', 'POS', required=True)
 
     def _search_invoice(self, res):
@@ -44,7 +46,9 @@ class WsfeMassiveSinchronize(models.TransientModel):
         )
         document_type = doc_ids and doc_ids[0] or False
         document_number = (
-            [str(res['DocNro'])] if res['DocNro'] else [str(res['DocNro']), '', False]
+            [str(res['DocNro'])]
+            if res['DocNro']
+            else [str(res['DocNro']), '', False]
         )
         if document_type and document_type.afip_code != '99':
             domain.append(('partner_id.vat', 'in', document_number))
@@ -83,7 +87,7 @@ class WsfeMassiveSinchronize(models.TransientModel):
                 ('journal_id', '=', self.pos_id.id),
                 ('move_type', '=', document_type),
                 ('is_debit_note', '=', is_debit_note),
-                ('denomination_id', '=', self.voucher_type.denomination),
+                ('denomination', '=', self.voucher_type.denomination),
             ],
             order='name desc',
             limit=1,
@@ -99,7 +103,9 @@ class WsfeMassiveSinchronize(models.TransientModel):
 
             # Chequeamos si esta todo sincronizado
             if last_number == last_wsfe_number:
-                raise UserError(_('All voucher of this type and POS are sinchronized.'))
+                raise UserError(
+                    _('All voucher of this type and POS are sinchronized.')
+                )
 
             invoices = self.env['account.move']
             for number in range(last_number + 1, last_wsfe_number + 1):
@@ -133,7 +139,9 @@ class WsfeMassiveSinchronize(models.TransientModel):
                 )
                 cae = str(res['CodAutorizacion'])
 
-                invoice.wsfe_relate_invoice(pos, number, date_invoice, cae, cae_due_date)
+                invoice.wsfe_relate_invoice(
+                    pos, number, date_invoice, cae, cae_due_date
+                )
 
                 # if self.env.context.get('commit', True):
                 #     cr.commit()

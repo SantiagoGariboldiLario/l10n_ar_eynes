@@ -55,7 +55,10 @@ class WSFEX(AfipWS):
         if not inv.name:
             if not first_num:
                 raise UserError(
-                    _("WSFE Error!\n" "There is no first invoice number declared!")
+                    _(
+                        "WSFE Error!\n"
+                        "There is no first invoice number declared!"
+                    )
                 )
             inv_number = first_num
         else:
@@ -72,12 +75,16 @@ class WSFEX(AfipWS):
 
         cuit_pais = inv.dst_cuit_id and int(inv.dst_cuit_id.code) or 0
         inv_currency_id = inv.currency_id.id
-        curr_codes = currency_code_obj.search([('currency_id', '=', inv_currency_id)])
+        curr_codes = currency_code_obj.search(
+            [('currency_id', '=', inv_currency_id)]
+        )
 
         if curr_codes:
             curr_code = curr_codes[0].code
             curr_rate = (
-                company.currency_id.id == inv_currency_id and 1.0 or inv.currency_rate
+                company.currency_id.id == inv_currency_id
+                and 1.0
+                or inv.currency_rate
             )
         else:
             raise UserError(
@@ -105,7 +112,9 @@ class WSFEX(AfipWS):
             items.append(
                 {
                     'Pro_codigo': i,  # product_code,
-                    'Pro_ds': line.name.encode('ascii', errors='ignore').decode(),
+                    'Pro_ds': line.name.encode(
+                        'ascii', errors='ignore'
+                    ).decode(),
                     'Pro_qty': line.quantity,
                     'Pro_umed': uom_code,
                     'Pro_precio_uni': line.price_unit,
@@ -149,7 +158,7 @@ class WSFEX(AfipWS):
 
         Cmp = {
             self.voucher_type_str: tipo_cbte,
-            'Punto_vta': int(inv.get_pos().name),
+            'Punto_vta': inv.get_pos(),
             'invoice_id': inv.id,
             'Id': Id,
             'Fecha_cbte': formatted_date_invoice,
@@ -157,9 +166,9 @@ class WSFEX(AfipWS):
             'Tipo_expo': inv.export_type_id.code,  # Exportacion de bienes
             'Permiso_existente': shipping_perm,
             'Dst_cmp': inv.dst_country_id.code or 200,
-            'Cliente': inv.partner_id.name.encode('latin-1', errors='ignore').decode(
-                'utf8'
-            ),
+            'Cliente': inv.partner_id.name.encode(
+                'latin-1', errors='ignore'
+            ).decode('utf8'),
             'Domicilio_cliente': inv.partner_id.contact_address.encode(
                 'latin-1', errors='ignore'
             )
@@ -216,13 +225,19 @@ class WSFEX(AfipWS):
         data = self.parse_invoices(invoices, first_number)
         self.auth_decoy()
         self.add(data, no_check='all')
-        if not hasattr(self, 'auth') or not self.auth or self.auth.attrs['Token'] == 'T':
+        if (
+            not hasattr(self, 'auth')
+            or not self.auth
+            or self.auth.attrs['Token'] == 'T'
+        ):
             if not conf:
                 conf = invoices.get_ws_conf()
             token, sign = conf.wsaa_ticket_id.get_token_sign()
             auth = {'Token': token, 'Sign': sign, 'Cuit': conf.cuit}
             self.login('Auth', auth)
-            auth_instance = getattr(self.data.FEXAuthorize, self.auth._element_name)
+            auth_instance = getattr(
+                self.data.FEXAuthorize, self.auth._element_name
+            )
             for k, v in self.auth.attrs.items():
                 setattr(auth_instance, k, v)
         _logger.debug(self.data.FEXAuthorize)
@@ -242,14 +257,16 @@ class WSFEX(AfipWS):
         res = resp_inv_vals.FEXResultAuth
 
         inv = list(self.data.sent_invoices.keys())[0]
-        if not inv.internal_number:
-            invoice_vals['internal_number'] = '%04d-%08d' % (
-                res['Punto_vta'],
-                res['Cbte_nro'],
-            )
+
+        invoice_vals['name'] = '%04d-%08d' % (
+            res['Punto_vta'],
+            res['Cbte_nro'],
+        )
 
         if res['Resultado'] == 'R':
-            raise UserError(_("La factura no fue aprobada, y AFIP no reportó errores"))
+            raise UserError(
+                _("La factura no fue aprobada, y AFIP no reportó errores")
+            )
 
         if res['Resultado'] == 'A':
             invoice_vals['cae'] = res['Cae']
@@ -260,7 +277,10 @@ class WSFEX(AfipWS):
 
     def log_request(self, environment):
         env = environment
-        if not hasattr(self, 'last_request') or 'parse_result' not in self.last_request:
+        if (
+            not hasattr(self, 'last_request')
+            or 'parse_result' not in self.last_request
+        ):
             return False
 
         wsfe_req_obj = env['wsfe.request']
@@ -295,7 +315,9 @@ class WSFEX(AfipWS):
             'currency_rate': sent_req['Moneda_ctz'],
             'observations': ("\n").join(
                 [
-                    ("[%s] %s" % (ev.code, ev.msg)).encode('latin1').decode('utf8')
+                    ("[%s] %s" % (ev.code, ev.msg))
+                    .encode('latin1')
+                    .decode('utf8')
                     for ev in events
                 ]
             ),
@@ -312,7 +334,9 @@ class WSFEX(AfipWS):
 
         errors = ("\n").join(
             [
-                ("[%s] %s" % (err.code, err.msg)).encode('latin1').decode('utf8')
+                ("[%s] %s" % (err.code, err.msg))
+                .encode('latin1')
+                .decode('utf8')
                 for err in errors
             ]
         )
@@ -335,7 +359,9 @@ class WSFEX(AfipWS):
         errors = []
         if 'FEXErr' in result:
             if result.FEXErr.ErrCode != 0:
-                errors = [AfipWSError(result.FEXErr.ErrCode, result.FEXErr.ErrMsg)]
+                errors = [
+                    AfipWSError(result.FEXErr.ErrCode, result.FEXErr.ErrMsg)
+                ]
         return errors
 
     def _get_events(self, result):
@@ -343,7 +369,9 @@ class WSFEX(AfipWS):
         if 'FEXEvents' in result:
             if result.FEXEvents.EventCode != 0:
                 events = [
-                    AfipWSEvent(result.FEXEvents.EventCode, result.FEXEvents.EventMsg)
+                    AfipWSEvent(
+                        result.FEXEvents.EventCode, result.FEXEvents.EventMsg
+                    )
                 ]
         return events
 
