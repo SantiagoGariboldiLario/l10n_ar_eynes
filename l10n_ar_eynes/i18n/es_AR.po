@@ -136,9 +136,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__amount
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__amount
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_concept_line__amount
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_issued_check_line__amount
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__amount
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__concept_amount
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__price
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__amount
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Amount"
 msgstr "Importe"
 
@@ -1149,9 +1152,9 @@ msgstr ""
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_issued_check_action
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__issued_check_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__issued_check_ids
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__issued_check_line_ids
 #: model:ir.ui.menu,name:l10n_ar_eynes.treasury_issued_check_menu
 #: model:ir.ui.menu,name:l10n_ar_eynes.treasury_issued_check_submenu
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_checkbook_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Issued Checks"
@@ -1812,9 +1815,9 @@ msgstr "Retenciones"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_application__perception_tax_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_advance_retention__retention_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__retention_id
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept_line__payment_order_line_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__retention_tax_id
 msgid "Retention"
 msgstr "Retención"
@@ -2078,6 +2081,7 @@ msgstr "Terceros"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_third_party_check_action
+#: model:ir.ui.menu,name:l10n_ar_eynes.treasury_third_party_check_submenu
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Third Party Checks"
 msgstr "Cheques de terceros"
@@ -2930,3 +2934,46 @@ msgstr "report.report_xlsx.move_line_list_subj"
 #: model:ir.model,name:l10n_ar_eynes.model_subjournal_report_taxcode_column
 msgid "subjournal.report.taxcode.column"
 msgstr "subjournal.report.taxcode.column"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__applied_aliquot
+msgid "Aliquot applied"
+msgstr "Alicuota Aplicada"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__total_month_retention
+msgid "Total month retention"
+msgstr "Retención Total del Mes"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__month_applied_retentions
+msgid "Applied retentions this month"
+msgstr "Retenciones realizadas en el mes"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__actual_payment_retention
+msgid "Retention to be made in actual payment"
+msgstr "Retencion a efectuar en Pago Actual"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__date_applied
+msgid "Date Applied"
+msgstr "Fecha Aplicada"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__state_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__state_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__state_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__state_id
+msgid "State/Province"
+msgstr "Estado/Provincia"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_move_line__total_without_vat
+msgid "Total without vat"
+msgstr "Total sin IVA"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__disable_retentions
+msgid "Disable Retentions"
+msgstr "Deshabilitar retenciones automaticas"
