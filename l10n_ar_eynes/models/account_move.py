@@ -696,13 +696,13 @@ class AccountMove(models.Model):
 
     def get_voucher_type(self):
         self.ensure_one()
-        return self.voucher_type_id
+        return int(self.voucher_type_id.afip_code)
 
     def get_pos(self):
         self.ensure_one()
-        return self.journal_id
+        return int(self.journal_id.get_pos_number())
 
-    def _get_next_wsfe_number(self, conf=False):
+    def get_next_wsfe_number(self, conf=False):
         self.ensure_one()
         if not conf:
             conf = self.get_ws_conf()
@@ -710,7 +710,7 @@ class AccountMove(models.Model):
         inv = self
         tipo_cbte = self.get_voucher_type()
         try:
-            pto_vta = int(inv.journal_id.get_pos_number())
+            pto_vta = inv.get_pos()
         except ValueError as value_err:
             err = _(
                 'Error\nEl nombre del punto de venta tiene que ser numerico'
@@ -818,7 +818,7 @@ class AccountMove(models.Model):
                 self.validate_period()
                 if self.check_must_be_fce():
                     self.ensure_fce_values()
-                # self.action_aut_cae()
+                self.action_aut_cae()
                 if not self.payment_reference:
                     pos_num = self.journal_id.get_pos_number()
                     move_num = self.get_highest_pos_sequence()
@@ -916,7 +916,7 @@ class AccountMove(models.Model):
 
             for invoice_id, invoice_vals in invoices_approved.items():
                 invoice = inv_model.browse(invoice_id)
-                invoice.write({**invoice_vals, **{'state': 'open'}})
+                invoice.write({**invoice_vals})
             # Commit the info given by AFIP that was written to the invoice
             # to prevent desynchronizations
             # self.env.cr.commit()
@@ -935,7 +935,7 @@ class AccountMove(models.Model):
             # tengamos una excepcion e igualmente,
             # tenemos que escribir la request
             # Sino al hacer el rollback se pierde hasta el wsfe.request
-            self.env.cr.rollback()
+            # self.env.cr.rollback()
             try:
                 with api.Environment.manage():
                     new_env = api.Environment(new_cr, uid, ctx)
