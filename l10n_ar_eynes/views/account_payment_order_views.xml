@@ -1353,10 +1353,7 @@
                                         name="more_information"
                                         string="More information"
                                     >
-                                        <field
-                                            name="retention_move_line_ids"
-                                            readonly="1"
-                                        >
+                                        <field name="retention_move_line_ids">
                                             <tree>
                                                 <field
                                                     name="payment_order_line_id"
@@ -1366,10 +1363,22 @@
                                                     name="payment_order_reference"
                                                     string="OP reference"
                                                 />
-                                                <field name="move_type" string="Type" />
-                                                <field name="move_id" invisible="1" />
-                                                <field name="move_name" string="Name" />
-                                                <field name="total_without_vat" />
+                                                <!-- <field name="move_id"/> -->
+                                                <field
+                                                    name="move_name"
+                                                    string="Name"
+                                                    force_save="1"
+                                                />
+                                                <field
+                                                    name="move_type"
+                                                    string="Type"
+                                                    force_save="1"
+                                                />
+                                                <field
+                                                    name="total_without_vat"
+                                                    sum="Total"
+                                                    force_save="1"
+                                                />
                                             </tree>
                                         </field>
                                         <field name="retention_move_lines_total" />

@@ -1,4 +1,3 @@
-import json
 import logging
 from pprint import pformat as pf
 
@@ -1103,20 +1102,22 @@ class AccountPaymentOrder(models.Model):
             if po.type != 'payment':
                 return
             if po.disable_retentions:
-                po.retention_ids = False
+                po.retention_ids = [(5, 0, 0)]
                 continue
             if any(
                 self.debt_line_ids.mapped('amount')
                 + self.income_line_ids.mapped('amount')
             ):
-                po.retention_ids = False
+                po.retention_ids = [(5, 0, 0)]
                 vals = po.calculate_retentions()
 
                 _logger.info(f"Retentions to create 1: {pf(vals)}")
                 po.retention_ids = [(0, 0, val) for val in vals]
+                for retention in po.retention_ids:
+                    retention._compute_retention_move_lines()
             else:
                 if not po.amount:
-                    po.retention_ids = False
+                    po.retention_ids = [(5, 0, 0)]
                     continue
                 po.compute_advance_payment_retentions(po.amount)
 
@@ -2206,7 +2207,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         comodel_name='retention.move.line',
         inverse_name='payment_order_line_id',
         string='Retention move lines',
-        compute='_compute_retention_move_lines',
+        readonly=True,
     )
     retention_move_lines_total = fields.Float(
         string='Total',
@@ -2241,55 +2242,50 @@ class AccountPaymentOrderRetentionLine(models.Model):
     )
 
     def _compute_retention_move_lines(self):
-        RetMoveLine = self.env['retention.move.line']
-        for rec in self:
-            rec.clear_retention_lines()
-            ids = rec.create_retention_lines()
-            rec.retention_move_line_ids = RetMoveLine.browse(ids)
-
-    def clear_retention_lines(self):
-        self.env['retention.move.line'].search(
-            [('payment_order_line_id', '=', self.id)]
-        ).unlink()
+        self.retention_move_line_ids = [(5, 0, 0)]
+        self.retention_move_line_ids = [
+            (0, 0, line) for line in self.create_retention_lines()
+        ]
 
     def create_retention_lines(self):
         """This method creates the retention move lines and return the ID's"""
         move_line_ids = []
 
         for move in self.get_current_month_moves():
-            rec = self.retention_move_line_ids.create(
-                self.get_retention_line_vals(move)
-            )
-            if rec:
-                move_line_ids.append(rec.id)
+            move_line_ids.append(self.get_retention_line_vals(move))
         for line in self.payment_order_id.debt_line_ids.filtered(
             lambda debtline: debtline.amount > 0
         ):
-            rec = self.retention_move_line_ids.create(
+            move_type_map = {
+                'in_invoice': 'In Invoice',
+                'out_invoice': 'Out Invoice',
+                'in_refund': 'In Refund',
+                'out_refund': 'Out Refund',
+            }
+            move_line_ids.append(
                 {
-                    'payment_order_line_id': self.id,
+                    # 'payment_order_line_id': self.id,
                     'move_id': line.invoice_id.id,
                     'move_name': 'draft',
-                    'move_type': line.invoice_id.move_type,
-                    'total_without_vat': json.loads(
-                        line.invoice_id.tax_totals_json
-                    )['amount_untaxed'],
+                    'move_type': move_type_map[line.invoice_id.move_type],
+                    'total_without_vat': line.invoice_id.amount_untaxed,
                     'payment_order_reference': self.payment_order_id.number
                     or '',
                 }
             )
-            if rec:
-                move_line_ids.append(rec.id)
         return move_line_ids
 
     def get_current_month_moves(self):
-        return self.env['account.move'].search(
+        return self.env['account.payment.order.line'].search(
             [
-                ('move_type', '!=', 'entry'),
-                ('payment_state', 'in', ('paid', 'partial')),
                 ('partner_id', '=', self.payment_order_id.partner_id.id),
-                ('invoice_date', '>=', self.date.replace(day=1)),
-                ('invoice_date', '<=', self.date + relativedelta(day=31)),
+                ('invoice_id.payment_state', 'in', ('paid', 'partial')),
+                ('invoice_id.invoice_date', '>=', self.date.replace(day=1)),
+                (
+                    'invoice_id.invoice_date',
+                    '<=',
+                    self.date + relativedelta(day=31),
+                ),
             ]
         )
 
@@ -2308,16 +2304,14 @@ class AccountPaymentOrderRetentionLine(models.Model):
             'in_refund': 'In Refund',
             'out_refund': 'Out Refund',
         }
-        total_without_vat = (
-            json.loads(move.tax_totals_json)['amount_untaxed'] or 0.00
-        )
+        invoice = move.invoice_id
         return {
-            'payment_order_line_id': self.id,
-            'move_id': move.id,
-            'move_name': move.name,
-            'move_type': move_type_map[move.move_type],
-            'total_without_vat': total_without_vat,
-            'payment_order_reference': self.payment_order_id.number or '',
+            # 'payment_order_line_id': self.id,
+            'move_id': invoice.id,
+            'move_name': invoice.name,
+            'move_type': move_type_map[invoice.move_type],
+            'total_without_vat': invoice.amount_untaxed,
+            'payment_order_reference': move.payment_order_id.number or '',
         }
 
     @api.depends('retention_move_line_ids')
@@ -2474,6 +2468,7 @@ class RetentionMoveLine(models.Model):
     payment_order_line_id = fields.Many2one(
         comodel_name='account.payment.order.retention.line',
         string='Payment order',
+        ondelete='cascade',
     )
     move_id = fields.Many2one(comodel_name='account.move', string='Move')
     move_type = fields.Char(string='Move type', readonly=True)
