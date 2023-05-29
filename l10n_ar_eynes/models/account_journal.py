@@ -6,17 +6,6 @@ from odoo.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 
 
-class FO:
-    """
-    Fake Object ( ͡º ͜ʖ ͡º)
-    """
-
-    id = False
-
-    def address_get(self):
-        return {}
-
-
 class AccountJournal(models.Model):
     _name = "account.journal"
     _description = "Journal"
@@ -125,6 +114,45 @@ class AccountJournal(models.Model):
     )
     state_id = fields.Many2one(related='tax_id.state_id')
     priority = fields.Integer()
+    sequence_id = fields.Many2one(
+        comodel_name='ir.sequence',
+        string='Sequence',
+        copy=False,
+        help='This field contains the information related to the numbering '
+        'of the journal entries of this journal.',
+    )
+    sequence_number_next = fields.Integer(
+        string='Next Number',
+        help='The next sequence number will be used for the next invoice.',
+        compute='_compute_seq_number_next',
+        inverse='_inverse_seq_number_next',
+    )
+    cn_sequence_id = fields.Many2one(
+        comodel_name='ir.sequence',
+        string='Credit Note Sequence',
+        copy=False,
+        help='This field contains the information related to the numbering '
+        'of the journal entries of this journal.',
+    )
+    cn_sequence_number_next = fields.Integer(
+        string='Credit Note Next Number',
+        help='The next sequence number will be used for the next invoice.',
+        compute='_compute_cn_seq_number_next',
+        inverse='_inverse_cn_seq_number_next',
+    )
+    dn_sequence_id = fields.Many2one(
+        comodel_name='ir.sequence',
+        string='Debit Note Sequence',
+        copy=False,
+        help='This field contains the information related to the numbering '
+        'of the journal entries of this journal.',
+    )
+    dn_sequence_number_next = fields.Integer(
+        string='Debit Note Next Number',
+        help='The next sequence number will be used for the next invoice.',
+        compute='_compute_dn_seq_number_next',
+        inverse='_inverse_dn_seq_number_next',
+    )
 
     @api.depends('type')
     def _compute_default_account_type(self):
@@ -144,6 +172,67 @@ class AccountJournal(models.Model):
             else:
                 journal.default_account_type = False
         return
+
+    @api.depends('sequence_id.use_date_range', 'sequence_id.number_next_actual')
+    def _compute_seq_number_next(self):
+        '''Compute 'sequence_number_next' according to the current sequence in use,
+        an ir.sequence or an ir.sequence.date_range.
+        '''
+        for journal in self:
+            if journal.sequence_id:
+                sequence = journal.sequence_id._get_current_sequence()
+                journal.sequence_number_next = sequence.number_next_actual
+            else:
+                journal.sequence_number_next = 1
+
+    def _inverse_seq_number_next(self):
+        '''Inverse 'sequence_number_next' to edit the current sequence next number.'''
+        for journal in self:
+            if journal.sequence_id and journal.sequence_number_next:
+                sequence = journal.sequence_id._get_current_sequence()
+                sequence.sudo().number_next = journal.sequence_number_next
+
+    @api.depends(
+        'cn_sequence_id.use_date_range', 'cn_sequence_id.number_next_actual'
+    )
+    def _compute_cn_seq_number_next(self):
+        '''Compute 'sequence_number_next' according to the current sequence in use,
+        an ir.sequence or an ir.sequence.date_range.
+        '''
+        for journal in self:
+            if journal.cn_sequence_id:
+                sequence = journal.cn_sequence_id._get_current_sequence()
+                journal.cn_sequence_number_next = sequence.number_next_actual
+            else:
+                journal.cn_sequence_number_next = 1
+
+    def _inverse_cn_seq_number_next(self):
+        '''Inverse 'sequence_number_next' to edit the current sequence next number.'''
+        for journal in self:
+            if journal.cn_sequence_id and journal.cn_sequence_number_next:
+                sequence = journal.cn_sequence_id._get_current_sequence()
+                sequence.sudo().number_next = journal.cn_sequence_number_next
+
+    @api.depends(
+        'dn_sequence_id.use_date_range', 'dn_sequence_id.number_next_actual'
+    )
+    def _compute_dn_seq_number_next(self):
+        '''Compute 'sequence_number_next' according to the current sequence in use,
+        an ir.sequence or an ir.sequence.date_range.
+        '''
+        for journal in self:
+            if journal.dn_sequence_id:
+                sequence = journal.dn_sequence_id._get_current_sequence()
+                journal.dn_sequence_number_next = sequence.number_next_actual
+            else:
+                journal.dn_sequence_number_next = 1
+
+    def _inverse_dn_seq_number_next(self):
+        '''Inverse 'sequence_number_next' to edit the current sequence next number.'''
+        for journal in self:
+            if journal.dn_sequence_id and journal.dn_sequence_number_next:
+                sequence = journal.dn_sequence_id._get_current_sequence()
+                sequence.sudo().number_next = journal.dn_sequence_number_next
 
     @api.constrains('fcred_is_fce_emitter', 'warehouse_id')
     def _check_no_more_than_one_pos_fce_per_company(self):
@@ -168,6 +257,60 @@ class AccountJournal(models.Model):
             self.denomination
         )
         return self.code.strip(denomination)
+
+    @api.model
+    def create(self, vals):
+        res = super().create(vals)
+        if res and res.type == 'sale':
+            sequence_vals = res.create_pos_sequence()
+            res.write(sequence_vals)
+        return res
+
+    def create_pos_sequence(self):
+        "creates a sequence using POS. returns sequence id"
+        sequence_vals = {
+            'sequence_id': {
+                'name': self.name,
+                'number_next_actual': self.sequence_number_next,
+            },
+            'cn_sequence_id': {
+                'name': self.name + _(' CN'),
+                'number_next_actual': self.cn_sequence_number_next,
+            },
+            'dn_sequence_id': {
+                'name': self.name + _(' DN'),
+                'number_next_actual': self.dn_sequence_number_next,
+            },
+        }
+        journal_seq_vals = {}
+        for seq, vals in sequence_vals.items():
+            sequence = self.env['ir.sequence'].create(
+                {
+                    'name': vals['name'],
+                    'implementation': 'no_gap',
+                    'active': True,
+                    'prefix': self.get_pos_number() + '-',
+                    'padding': 8,
+                    'number_next_actual': vals['number_next_actual'],
+                }
+            )
+            journal_seq_vals.update({seq: sequence.id})
+        return journal_seq_vals
+
+    def unlink(self):
+        self.sequence_id.unlink()
+        self.cn_sequence_id.unlink()
+        self.dn_sequence_id.unlink()
+        return super().unlink()
+
+    def get_sequence_from_invoice(self, invoice):
+        "return the sequence needed depending on the invoice type"
+        if invoice.move_type == 'out_refund':
+            return self.cn_sequence_id
+        elif invoice.move_type == 'out_invoice':
+            if invoice.debit_origin_id:
+                return self.dn_sequence_id
+            return self.sequence_id
 
     @api.model
     def _get_concepts_from_account(
