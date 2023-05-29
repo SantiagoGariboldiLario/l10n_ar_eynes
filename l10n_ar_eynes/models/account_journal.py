@@ -266,6 +266,13 @@ class AccountJournal(models.Model):
             res.write(sequence_vals)
         return res
 
+    def _default_outbound_payment_methods(self):
+        res = super()._default_outbound_payment_methods()
+        res -= self.env.ref(
+            'account_check_printing.account_payment_method_check'
+        )
+        return res
+
     def create_pos_sequence(self):
         "creates a sequence using POS. returns sequence id"
         sequence_vals = {
