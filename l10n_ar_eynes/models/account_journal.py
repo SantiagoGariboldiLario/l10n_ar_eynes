@@ -29,6 +29,29 @@ class AccountJournal(models.Model):
     def _get_company(self):
         return self.env.user.company_id
 
+    @api.onchange('type')
+    def _get_tax_id_domain(self):
+        domain = [('active', '=', True)]
+
+        if self.type == 'retentions':
+            domain.append(
+                (
+                    'tax_group_id.name',
+                    'in',
+                    ('Retentions', 'Retenciones'),
+                )
+            )
+        elif self.type == 'perceptions':
+            domain.append(
+                (
+                    'tax_group_id.name',
+                    'in',
+                    ('Perceptions', 'Percepciones'),
+                )
+            )
+
+        return {'domain': {'tax_id': domain}}
+
     code = fields.Char(
         string='POS code',
         size=6,
@@ -94,14 +117,6 @@ class AccountJournal(models.Model):
     tax_id = fields.Many2one(
         comodel_name='account.tax',
         string='Tax',
-        domain=[
-            (
-                'tax_group_id.name',
-                'in',
-                ('Retentions', 'Retenciones', 'Perceptions', 'Percepciones'),
-            ),
-            ('active', '=', True),
-        ],
     )
     type_tax_use = fields.Selection(
         string='Tax Application',
