@@ -82,6 +82,13 @@
             </xpath>
 
             <xpath
+                expr="//field[@name='outbound_payment_method_line_ids']"
+                position="attributes"
+            >
+                <attribute name="readonly">1</attribute>
+            </xpath>
+
+            <xpath
                 expr="//field[@name='outbound_payment_method_line_ids']/tree/field[@name='name']"
                 position="after"
             >
