@@ -820,9 +820,9 @@ class AccountMove(models.Model):
                     self.ensure_fce_values()
                 self.action_aut_cae()
                 if not self.payment_reference:
-                    pos_num = self.journal_id.get_pos_number()
-                    move_num = self.get_highest_pos_sequence()
-                    name = "%s-%s" % (pos_num, move_num)
+                    name = self.journal_id.get_sequence_from_invoice(
+                        self
+                    )._next()
                     self.write({'name': name})
                 self._set_perception_date()
         return super(AccountMove, self).action_post()
