@@ -83,6 +83,13 @@ class AccountMove(models.Model):
     )
     wsfe_request_ids = fields.One2many('wsfe.request.detail', 'name')
     local = fields.Boolean(related='fiscal_position_id.local')
+    fiscal_type = fields.Selection(
+        selection=[
+            ('internal', 'Internal Invoice'),
+            ('electronic', 'Electronic Invoice'),
+        ],
+        default='internal',
+    )
     is_FCE_invoice = fields.Boolean(
         string="Is FCE?",
         default=False,
@@ -341,7 +348,7 @@ class AccountMove(models.Model):
             super(AccountMove, self)._onchange_journal()
             self.denomination = self.journal_id.denomination
 
-    @api.onchange('partner_id')
+    @api.onchange('partner_id', 'fiscal_type')
     def _onchange_partner(self):
         if not self.partner_id:
             return
@@ -353,6 +360,10 @@ class AccountMove(models.Model):
             journals = self.env.user.journal_ids.filtered(
                 lambda j: partner_fiscal_position in j.fiscal_position_ids
             )
+            if self.fiscal_type:
+                journals = journals.filtered(
+                    lambda journal: journal.fiscal_type == self.fiscal_type
+                )
             if journals:
                 self.journal_id = journals[0]
                 self._onchange_journal()
@@ -816,14 +827,18 @@ class AccountMove(models.Model):
             if self.id:
                 self.validate_denomination()
                 self.validate_period()
-                if self.check_must_be_fce():
-                    self.ensure_fce_values()
-                self.action_aut_cae()
-                if not self.payment_reference:
+                if (
+                    not self.payment_reference
+                    and self.journal_id.fiscal_type == 'internal'
+                ):
                     pos_num = self.journal_id.get_pos_number()
                     move_num = self.get_highest_pos_sequence()
                     name = "%s-%s" % (pos_num, move_num)
                     self.write({'name': name})
+                else:
+                    if self.check_must_be_fce():
+                        self.ensure_fce_values()
+                    self.action_aut_cae()
                 self._set_perception_date()
         return super(AccountMove, self).action_post()
 

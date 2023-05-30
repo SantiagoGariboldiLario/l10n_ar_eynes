@@ -82,6 +82,12 @@ class AccountJournal(models.Model):
         column2='fiscal_position_id',
         string='Fiscal Positions',
     )
+    fiscal_type = fields.Selection(
+        selection=[
+            ('internal', 'Internal Invoice'),
+            ('electronic', 'Electronic Invoice'),
+        ]
+    )
     activity_start_date = fields.Date(
         string="Activity Start Date", default=fields.date.today()
     )
