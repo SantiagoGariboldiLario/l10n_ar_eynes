@@ -114,22 +114,10 @@
                 </attribute>
             </xpath>
 
-            <xpath expr="//field[@name='default_account_id'][4]" position="after">
-                <field
-                    name="default_account_id"
-                    string="Default Income Account"
-                    attrs="{
-                        'invisible': [('type', '!=', 'receipt')],
-                    }"
-                />
-                <field
-                    name="default_account_id"
-                    string="Default Expense Account"
-                    attrs="{
-                        'invisible': [('type', '!=', 'payment')],
-                        'required': [('type', '=', 'payment')],
-                    }"
-                />
+            <xpath expr="//field[@name='default_account_id'][4]" position="attributes">
+                <attribute name="invisible">
+                    [('type', 'in', ('payment', 'receipt'))]
+                </attribute>
             </xpath>
 
             <field name="code" position="after">
