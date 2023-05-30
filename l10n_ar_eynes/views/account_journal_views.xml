@@ -104,13 +104,13 @@
 
             <xpath expr="//field[@name='profit_account_id']" position="attributes">
                 <attribute name="attrs">
-                    {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks', 'retentions', 'perceptions'))]}
+                    {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks'))]}
                 </attribute>
             </xpath>
 
             <xpath expr="//field[@name='loss_account_id']" position="attributes">
                 <attribute name="attrs">
-                    {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks', 'retentions', 'perceptions'))]}
+                    {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks'))]}
                 </attribute>
             </xpath>
 
