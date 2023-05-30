@@ -60,6 +60,13 @@
                 <attribute name="required">1</attribute>
             </xpath>
 
+            <xpath expr="//field[@name='payment_reference']" position="after">
+                <field
+                    name="fiscal_type"
+                    attrs="{'required': [('move_type', '=', 'sale')]}"
+                />
+            </xpath>
+
             <div name="journal_div" position="after">
                 <field
                     name="currency_rate"
