@@ -75,6 +75,13 @@
 
             <xpath expr="//field[@name='type']" position="after">
                 <field
+                    name="fiscal_type"
+                    attrs="{
+                        'invisible': [('type', '!=', 'sale')],
+                        'required': [('type', '=', 'sale')]
+                    }"
+                />
+                <field
                     name="fcred_is_fce_emitter"
                     attrs="{'invisible': [('type', '!=', 'sale')]}"
                 />
