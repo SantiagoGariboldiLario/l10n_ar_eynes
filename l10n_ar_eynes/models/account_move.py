@@ -578,11 +578,6 @@ class AccountMove(models.Model):
                     tax_grouped[key]['base'] += val['base']
         return tax_grouped
 
-    def finalize_invoice_move_lines(self, line):
-        for rec in line:
-            rec[2]['currency_rate'] = self.currency_rate
-        return super(AccountMove, self).finalize_invoice_move_lines(line)
-
     @api.onchange(
         'supplier_move_reference',
         'denomination',
@@ -669,6 +664,15 @@ class AccountMove(models.Model):
                     )
                 else:
                     inv.voucher_type_id = res
+
+    @api.onchange('date', 'currency_id', 'currency_rate')
+    def _onchange_currency(self):
+        super()._onchange_currency()
+        if self.is_invoice(include_receipts=True):
+            for line in self._get_lines_onchange_currency():
+                line.currency_rate = self.currency_rate
+                line._onchange_currency()
+        return
 
     @api.depends('invoice_line_ids')
     def _compute_amount_custom(self):
@@ -1328,6 +1332,19 @@ class AccountMove(models.Model):
                 perc_lines += res
         return perc_lines
 
+    def _recompute_tax_lines(
+        self,
+        recompute_tax_base_amount=False,
+        tax_rep_lines_to_recompute=None,
+    ):
+        modify_self = self.with_context(
+            inverse_currency_rate=self.currency_rate
+        )
+        return super(AccountMove, modify_self)._recompute_tax_lines(
+            recompute_tax_base_amount,
+            tax_rep_lines_to_recompute,
+        )
+
     _sql_constraints = [
         (
             'unique_move',
@@ -1446,3 +1463,88 @@ class AccountMoveLine(models.Model):
             result[line.id]['vat_taxes'] = vat_taxes
 
         return result
+
+    def _get_computed_price_unit(self):
+        modify_self = self.with_context(
+            currency_rate=self.move_id.currency_rate
+        )
+        return super(AccountMoveLine, modify_self)._get_computed_price_unit()
+
+    def _get_price_total_and_subtotal(
+        self,
+        price_unit=None,
+        quantity=None,
+        discount=None,
+        currency=None,
+        product=None,
+        partner=None,
+        taxes=None,
+        move_type=None,
+    ):
+        modify_self = self.with_context(
+            currency_rate=self.move_id.currency_rate
+        )
+        res = super(AccountMoveLine, modify_self)._get_price_total_and_subtotal(
+            price_unit=price_unit,
+            quantity=quantity,
+            discount=discount,
+            currency=currency,
+            product=product,
+            partner=partner,
+            taxes=taxes,
+            move_type=move_type,
+        )
+        return res
+
+    def _get_fields_onchange_subtotal(
+        self,
+        price_subtotal=None,
+        move_type=None,
+        currency=None,
+        company=None,
+        date=None,
+    ):
+        modify_self = self.with_context(
+            currency_rate=self.move_id.currency_rate
+        )
+        return super(
+            AccountMoveLine, modify_self
+        )._get_fields_onchange_subtotal(
+            price_subtotal=price_subtotal,
+            move_type=move_type,
+            currency=currency,
+            company=company,
+            date=date,
+        )
+
+    def _get_fields_onchange_balance(
+        self,
+        quantity=None,
+        discount=None,
+        amount_currency=None,
+        move_type=None,
+        currency=None,
+        taxes=None,
+        price_subtotal=None,
+        force_computation=False,
+    ):
+        modify_self = self.with_context(
+            currency_rate=self.move_id.currency_rate
+        )
+        return super(AccountMoveLine, modify_self)._get_fields_onchange_balance(
+            quantity=quantity,
+            discount=discount,
+            amount_currency=amount_currency,
+            move_type=move_type,
+            currency=currency,
+            taxes=taxes,
+            price_subtotal=price_subtotal,
+            force_computation=force_computation,
+        )
+
+    @api.onchange('amount_currency')
+    def _onchange_amount_currency(self):
+        modify_self = self.with_context(
+            inverse_currency_rate=self.move_id.currency_rate
+        )
+        return super(AccountMoveLine, modify_self)._onchange_amount_currency()

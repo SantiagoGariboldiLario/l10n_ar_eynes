@@ -84,7 +84,7 @@ class AccountChangeCurrency(models.TransientModel):
         company = self.env.user.company_id
         curr_rate = self.new_currency_id._get_currency_rate(company, date)
         if self.new_currency_id.preciated:
-            self.new_currency_rate = curr_rate.rate_preciated
+            self.new_currency_rate = curr_rate.inverse_company_rate
         else:
             self.new_currency_rate = curr_rate.rate
 
