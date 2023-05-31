@@ -1837,6 +1837,12 @@ class AccountPaymentOrder(models.Model):
             ) or _('New')
         return super(AccountPaymentOrder, self).create(vals_list=vals_list)
 
+    def is_payment(self):
+        return self.type in ('purchase', 'payment')
+
+    def is_receipt(self):
+        return self.type in ('sale', 'receipt')
+
     _sql_constraints = [
         ("unique_number", "unique(type, number)", _("Number must be unique")),
     ]
@@ -2253,9 +2259,13 @@ class AccountPaymentOrderRetentionLine(models.Model):
 
         for move in self.get_current_month_moves():
             move_line_ids.append(self.get_retention_line_vals(move))
-        for line in self.payment_order_id.debt_line_ids.filtered(
-            lambda debtline: debtline.amount > 0
-        ):
+
+        if self.payment_order_id.is_payment():
+            po_lines = self.payment_order_id.debt_line_ids
+        elif self.payment_order_id.is_receipt():
+            po_lines = self.payment_order_id.income_line_ids
+
+        for line in po_lines.filtered(lambda debtline: debtline.amount > 0):
             move_type_map = {
                 'in_invoice': 'In Invoice',
                 'out_invoice': 'Out Invoice',
