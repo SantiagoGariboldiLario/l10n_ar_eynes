@@ -57,13 +57,21 @@
             </xpath>
 
             <xpath expr="//field[@name='partner_id']" position="attributes">
-                <attribute name="required">1</attribute>
+                <attribute name="attrs">
+                    {
+                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                    }
+                </attribute>
             </xpath>
 
             <xpath expr="//field[@name='payment_reference']" position="after">
                 <field
                     name="fiscal_type"
-                    attrs="{'required': [('move_type', '=', 'sale')]}"
+                    attrs="{
+                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                    }"
                 />
             </xpath>
 
@@ -153,7 +161,7 @@
             >
                 <attribute name="attrs">
                     {
-                        'required': 1,
+                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
                         'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
                     }
                 </attribute>
@@ -166,32 +174,66 @@
                 <field
                     name="denomination"
                     force_save="1"
-                    required="1"
-                    attrs="{'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]}"
+                    attrs="{
+                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                        'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
+                    }"
                 />
                 <field name="aut_cae" />
                 <field name="local" invisible="1" />
                 <field
                     name="export_type_id"
                     widget="selection"
-                    attrs="{'invisible': [('local','=', True)], 'required': [('local','=',False)]}"
+                    attrs="{
+                        'required': [
+                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('local','=',False)
+                        ],
+                        'invisible': [
+                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('local','=', True),
+                            '|',
+                            ('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                        ],
+                    }"
                 />
                 <field
                     name="dst_country_id"
-                    attrs="{'invisible': [('local','=', True)], 'required': [('local','=',False)]}"
+                    attrs="{
+                        'required': [
+                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('local','=',False)
+                        ],
+                        'invisible': [
+                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('local','=', True),
+                            '|',
+                            ('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                        ],
+                    }"
                 />
             </xpath>
 
             <xpath expr="//group[@id='header_right_group']" position="inside">
-                <field name="is_FCE_invoice" />
+                <field
+                    name="is_FCE_invoice"
+                    attrs="{'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]}"
+                />
                 <field
                     name="cae"
                     string="CAE"
-                    attrs="{'readonly': [('move_type','in', ['out_refund', 'out_invoice'])]}"
+                    attrs="{
+                        'readonly': [('move_type','in', ['out_refund', 'out_invoice'])],
+                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
+                    }"
                 />
                 <field
                     name="cae_due_date"
-                    attrs="{'readonly': [('move_type','in', ['out_refund', 'out_invoice'])]}"
+                    attrs="{
+                        'readonly': [('move_type','in', ['out_refund', 'out_invoice'])],
+                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
+                    }"
                 />
             </xpath>
 
@@ -213,7 +255,12 @@
             </page>
 
             <page name="other_info" position="before">
-                <page string="Perceptions">
+                <page
+                    string="Perceptions"
+                    attrs="{
+                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]
+                    }"
+                >
                     <field
                         name="perception_ids"
                         nolabel="1"
@@ -280,7 +327,11 @@
 
                 <page
                     string="Export Invoice"
-                    attrs="{'invisible': ['|', ('local','=', True), ('move_type','in', ['in_refund', 'in_invoice'])]}"
+                    attrs="{'invisible': [
+                        '|',
+                        ('local','=', True),
+                        ('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))
+                        ]}"
                 >
                     <group string="Shipping Permissions">
                         <field
@@ -335,7 +386,7 @@
 
                 <page
                     string="WSFE Requests"
-                    attrs="{'invisible': [('move_type','in', ['in_refund', 'in_invoice'])]}"
+                    attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))]}"
                 >
                     <field name="wsfe_request_ids" readonly="1">
                         <tree>
