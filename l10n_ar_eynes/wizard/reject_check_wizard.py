@@ -1,4 +1,4 @@
-from odoo import fields, models, _
+from odoo import _, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -19,7 +19,9 @@ class RejectIssuedCheckWizard(models.TransientModel):
 
     def action_reject(self):
         """action that rejects the issued check"""
-        check = self.env['account.check'].browse(self.env.context.get('active_id', False))
+        check = self.env['account.check'].browse(
+            self.env.context.get('active_id', False)
+        )
         if check:
             check.write({'reject_date': self.reject_date, 'note': self.note})
             if self.generate_rejection_journal_entry:
@@ -40,7 +42,9 @@ class RejectIssuedCheckWizard(models.TransientModel):
         payment = check.payment_order_id
         journal = self.env.user.company_id.rejected_issued_checks_journal_id
         if not journal:
-            raise ValidationError(_("No journal configured for rejected checks"))
+            raise ValidationError(
+                _("No journal configured for rejected checks")
+            )
 
         def_check_account = (
             self.env['account.check.config']
@@ -86,12 +90,16 @@ class RejectIssuedCheckWizard(models.TransientModel):
                     'journal_id': original_move_data['journal_id'],
                     'currency_id': payment_line.currency_id.id,
                     'analytic_account_id': payment_line.analytic_account_id.id,
-                    'ref': _('Rejected check') + ': ' + (payment_line.name or '/'),
+                    'ref': _('Rejected check')
+                    + ': '
+                    + (payment_line.name or '/'),
                 }
                 AccoutMoveLine.with_context(**ctx).create(inverse_supplier_line)
 
                 inverse_check_line = {
-                    'name': _('Rejected check') + ': ' + (payment_line.name or '/'),
+                    'name': _('Rejected check')
+                    + ': '
+                    + (payment_line.name or '/'),
                     'account_id': def_check_account,
                     'move_id': move.id,
                     'partner_id': payment_line.partner_id.id,
@@ -102,7 +110,9 @@ class RejectIssuedCheckWizard(models.TransientModel):
                     'journal_id': original_move_data['journal_id'],
                     'currency_id': payment_line.currency_id.id,
                     'analytic_account_id': payment_line.analytic_account_id.id,
-                    'ref': _('Rejected check') + ': ' + (payment_line.name or '/'),
+                    'ref': _('Rejected check')
+                    + ': '
+                    + (payment_line.name or '/'),
                 }
                 AccoutMoveLine.with_context(**ctx).create(inverse_check_line)
                 move.post()
@@ -128,7 +138,9 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
         default=_get_journal,
     )
     expense_line_ids = fields.One2many(
-        comodel_name='check.reject.expense', inverse_name='reject_id', string='Expenses'
+        comodel_name='check.reject.expense',
+        inverse_name='reject_id',
+        string='Expenses',
     )
     company_id = fields.Many2one(
         comodel_name='res.company',
@@ -153,7 +165,9 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             )
             if not config:
                 raise ValidationError(
-                    _('ERROR! There is no check configuration for this Company!')
+                    _(
+                        'ERROR! There is no check configuration for this Company!'
+                    )
                 )
 
             inv_account_id = config.receivable_rejected_account_id
@@ -167,14 +181,13 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             )
 
             invoice_vals = {
-                'origin': _('Check : %s') % check.number,
+                'invoice_origin': _('Check : %s') % check.number,
                 'name': name,
                 'move_type': 'out_invoice',
                 'is_debit_note': True,
-                'account_id': inv_account_id.id,
                 'partner_id': partner.id,
                 'journal_id': self.journal_id.id,
-                'fiscal_position': partner.property_account_position_id.id,
+                'fiscal_position_id': partner.property_account_position_id.id,
                 'company_id': self.company_id.id,
             }
 
@@ -194,67 +207,64 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             )
 
             lines.append(
-                (
-                    0,
-                    0,
-                    {
-                        'name': name,
-                        'quantity': 1,
-                        'price_unit': check.amount,
-                        'account_id': account_id,
-                    },
-                )
+                {
+                    'name': name,
+                    'quantity': 1,
+                    'price_unit': check.amount,
+                    'account_id': account_id,
+                }
             )
 
             # Lineas de gastos
             for expense in self.expense_line_ids:
-
                 product = expense.product_id
                 account_id = product.property_account_expense_id
                 if not account_id:
-                    account_id = product.categ_id.property_account_expense_categ_id
+                    account_id = (
+                        product.categ_id.property_account_expense_categ_id
+                    )
                 if not account_id:
                     raise ValidationError(
                         _('Please, fill the expense account in the product.')
                     )
 
                 lines.append(
-                    (
-                        0,
-                        0,
-                        {
-                            'name': expense.product_id.name,
-                            'product_id': expense.product_id.id,
-                            'quantity': 1,
-                            'price_unit': expense.price,
-                            'account_id': account_id.id,
-                            'invoice_line_tax_ids': [
-                                (6, 0, expense.product_id.taxes_id.ids)
-                            ],
-                        },
-                    )
+                    {
+                        'name': expense.product_id.name,
+                        'product_id': expense.product_id.id,
+                        'quantity': 1,
+                        'price_unit': expense.price,
+                        'account_id': account_id.id,
+                        'tax_ids': [(6, 0, expense.product_id.taxes_id.ids)],
+                    }
                 )
-            invoice_vals['invoice_line_ids'] = lines
+
+            invoice_vals['invoice_line_ids'] = [(0, 0, line) for line in lines]
 
             # creamos la nota de debito
             debit_note_id = self.env['account.move'].create(invoice_vals)
             debit_note_id._onchange_partner_id()
 
             # Volvemos a cambiar la cuenta que sobreescribio el onchange
-            debit_note_id.account_id = inv_account_id
+            # debit_note_id.account_id = inv_account_id
             debit_note_id._onchange_invoice_line_ids()
 
         if check.third_party_check_state in ('delivered', 'deposited'):
             # Guardamos la referencia a la nota de debito del rechazo y cambiamos el estado
             check.write(
-                {'third_party_check_state': 'rejected', 'debit_note_id': debit_note_id.id}
+                {
+                    'third_party_check_state': 'rejected',
+                    'debit_note_id': debit_note_id.id,
+                }
             )
 
         form_res = self.env.ref(
             'l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes'
         )
         form_id = form_res and form_res.id or False
-        tree_res = self.env.ref('base.view_move_tree')
+        tree_res = self.env.ref(
+            'l10n_ar_eynes.account_move_view_tree_inherit_l10n_ar_eynes'
+        )
         tree_id = tree_res and tree_res.id or False
 
         return {
