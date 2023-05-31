@@ -58,3 +58,24 @@ class ResCurrency(models.Model):
             domain, limit=1, order='company_id, name DESC'
         )
         return rate_id
+
+    def _convert(self, from_amount, to_currency, company, date, round=True):
+        res = super()._convert(
+            from_amount, to_currency, company, date, round=round
+        )
+        if self._context.get('currency_rate'):
+            old_rate = 1 / self._get_conversion_rate(
+                self, to_currency, company, date
+            )
+            new_rate = self._context.get('currency_rate')
+            res = res * (old_rate / new_rate)
+        if self._context.get('inverse_currency_rate') or self._context.get(
+            'from_taxes'
+        ):
+            old_rate = self._get_conversion_rate(
+                self, to_currency, company, date
+            )
+            new_rate = self._context.get('inverse_currency_rate')
+            res = res * (new_rate / old_rate)
+
+        return to_currency.round(res)
