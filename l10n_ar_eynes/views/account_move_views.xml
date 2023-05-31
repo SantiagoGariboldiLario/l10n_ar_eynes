@@ -111,10 +111,13 @@
 
             <field name="fiscal_position_id" position="after">
                 <field name="currency_converted" invisible="1" />
-                <field name="secondary_currency_id" />
+                <field
+                    name="secondary_currency_id"
+                    attrs="{'invisible': [('is_company_cur', '=', True)]}"
+                />
                 <field
                     name="secondary_currency_rate"
-                    attrs="{'invisible': [('secondary_currency_id', '=', False)]}"
+                    attrs="{'invisible': [('is_company_cur', '=', True)]}"
                 />
             </field>
 
