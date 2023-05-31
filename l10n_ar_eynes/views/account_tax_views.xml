@@ -254,9 +254,7 @@
                                 <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
-                                <field name="aliq_type" required="1" />
                                 <field name="percent" />
-                                <field name="scale_id" />
                                 <field name="type" invisible="1" />
                             </tree>
                             <form string="VAT Tax Application">
@@ -273,15 +271,7 @@
                                     <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
-                                    <field name="aliq_type" required="1" />
-                                    <field
-                                        name="percent"
-                                        attrs="{'invisible':[('aliq_type', '=', 'scale')]}"
-                                    />
-                                    <field
-                                        name="scale_id"
-                                        attrs="{'invisible':[('aliq_type', '=', 'percent')], 'required':[('aliq_type', '=', 'scale')]}"
-                                    />
+                                    <field name="percent" />
                                     <field name="name" />
                                     <field name="reg_code" />
                                     <field name="type" invisible="1" />
@@ -303,9 +293,7 @@
                                 <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
-                                <field name="aliq_type" required="1" />
                                 <field name="percent" />
-                                <field name="scale_id" />
                                 <field name="sit_iibb" />
                                 <field name="type" invisible="1" />
                             </tree>
@@ -323,15 +311,7 @@
                                     <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
-                                    <field name="aliq_type" required="1" />
-                                    <field
-                                        name="percent"
-                                        attrs="{'invisible':[('aliq_type', '=', 'scale')]}"
-                                    />
-                                    <field
-                                        name="scale_id"
-                                        attrs="{'invisible':[('aliq_type', '=', 'percent')], 'required':[('aliq_type', '=', 'scale')]}"
-                                    />
+                                    <field name="percent" />
                                     <field name="name" />
                                     <field name="reg_code" />
                                     <field name="sit_iibb" />
@@ -354,9 +334,7 @@
                                 <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
-                                <field name="aliq_type" required="1" />
                                 <field name="percent" />
-                                <field name="scale_id" />
                                 <field name="type" invisible="1" />
                             </tree>
                             <form string="Profit Tax Application">
@@ -373,15 +351,7 @@
                                     <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
-                                    <field name="aliq_type" required="1" />
-                                    <field
-                                        name="percent"
-                                        attrs="{'invisible':[('aliq_type', '=', 'scale')]}"
-                                    />
-                                    <field
-                                        name="scale_id"
-                                        attrs="{'invisible':[('aliq_type', '=', 'percent')], 'required':[('aliq_type', '=', 'scale')]}"
-                                    />
+                                    <field name="percent" />
                                     <field name="name" />
                                     <field name="reg_code" />
                                     <field name="type" invisible="1" />
