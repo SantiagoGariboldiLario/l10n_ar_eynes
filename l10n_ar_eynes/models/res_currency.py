@@ -59,9 +59,9 @@ class ResCurrency(models.Model):
         )
         return rate_id
 
-    def _convert(self, from_amount, to_currency, company, date, round=True):
+    def _convert(self, from_amount, to_currency, company, date, _round=True):
         res = super()._convert(
-            from_amount, to_currency, company, date, round=round
+            from_amount, to_currency, company, date, round=_round
         )
         if self._context.get('currency_rate'):
             old_rate = 1 / self._get_conversion_rate(
