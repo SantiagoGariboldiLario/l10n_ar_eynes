@@ -623,51 +623,52 @@ class AccountMove(models.Model):
 
     @api.depends('denomination', 'move_type', 'is_debit_note', 'is_FCE_invoice')
     def _compute_voucher_type(self):
-        if self.is_sale_document():
-            voucher_type_obj = self.env['res.voucher.type']
-            res = self.env['res.voucher.type']
+        for inv in self:
+            if inv.is_sale_document():
+                voucher_type_obj = inv.env['res.voucher.type']
+                res = self.env['res.voucher.type']
 
-            inv_type = 'b'
-            if self.move_type.endswith("refund"):
-                inv_type = 'cn'
-            elif self.is_debit_note:
-                inv_type = 'dn'
+                inv_type = 'b'
+                if inv.move_type.endswith("refund"):
+                    inv_type = 'cn'
+                elif inv.is_debit_note:
+                    inv_type = 'dn'
 
-            res = voucher_type_obj.search(
-                [
-                    ('doc_type', '=', inv_type),
-                    ('denomination', '=', self.denomination),
-                ]
-            )
+                res = voucher_type_obj.search(
+                    [
+                        ('doc_type', '=', inv_type),
+                        ('denomination', '=', inv.denomination),
+                    ]
+                )
 
-            if not len(res):
-                _logger.warning(
-                    _(
-                        "There is no voucher type that corresponds "
-                        "to this object"
+                if not len(res):
+                    _logger.warning(
+                        _(
+                            "There is no voucher type that corresponds "
+                            "to this object"
+                        )
                     )
-                )
 
-            if self.is_FCE_invoice:
-                res = res.filtered(
-                    lambda voucher_type: int(voucher_type.afip_code)
-                    > AFIP_FCE_CODE_START
-                )
-            else:
-                res = res.filtered(
-                    lambda voucher_type: int(voucher_type.afip_code)
-                    < AFIP_FCE_CODE_START
-                )
-
-            if len(res) > 1:
-                _logger.warning(
-                    _(
-                        "There is more than one voucher type that "
-                        "corresponds to this object"
+                if inv.is_FCE_invoice:
+                    res = res.filtered(
+                        lambda voucher_type: int(voucher_type.afip_code)
+                        > AFIP_FCE_CODE_START
                     )
-                )
-            else:
-                self.voucher_type_id = res
+                else:
+                    res = res.filtered(
+                        lambda voucher_type: int(voucher_type.afip_code)
+                        < AFIP_FCE_CODE_START
+                    )
+
+                if len(res) > 1:
+                    _logger.warning(
+                        _(
+                            "There is more than one voucher type that "
+                            "corresponds to this object"
+                        )
+                    )
+                else:
+                    inv.voucher_type_id = res
 
     @api.depends('invoice_line_ids')
     def _compute_amount_custom(self):

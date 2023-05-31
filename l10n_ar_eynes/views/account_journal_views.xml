@@ -115,8 +115,8 @@
             </xpath>
 
             <xpath expr="//field[@name='default_account_id'][4]" position="attributes">
-                <attribute name="invisible">
-                    [('type', 'in', ('payment', 'receipt'))]
+                <attribute name="attrs">
+                    {'invisible': [('type', 'in', ('payment', 'receipt'))]}
                 </attribute>
             </xpath>
 
