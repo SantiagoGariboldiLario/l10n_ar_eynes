@@ -14,12 +14,7 @@
             <page name="tax_mapping" position="after">
                 <page name="applied_perceptions" string="Applied Perceptions">
                     <group>
-                        <field
-                            name="perception_ids"
-                            widget="one2many_list"
-                            nolabel="1"
-                            domain="[('tax_id.type_tax_use','=','sale')]"
-                        >
+                        <field name="perception_ids" widget="one2many_list" nolabel="1">
                             <tree>
                                 <field name="name" />
                                 <field name="tax_id" />
@@ -30,11 +25,7 @@
                 </page>
                 <page name="applied_retentions" string="Applied Retentions">
                     <group>
-                        <field
-                            name="retention_ids"
-                            nolabel="1"
-                            domain="[('tax_id.type_tax_use','=','purchase')]"
-                        >
+                        <field name="retention_ids" nolabel="1">
                             <tree>
                                 <field name="name" />
                                 <field name="tax_id" />
