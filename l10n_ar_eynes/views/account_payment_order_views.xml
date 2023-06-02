@@ -96,10 +96,7 @@
                                 placeholder="e.g. Invoice SAJ/0042"
                                 attrs="{'readonly': [('state', 'not in', ('draft'))]}"
                             />
-                            <field
-                                name="disable_retentions"
-                                attrs="{'readonly': [('state', '!=', 'draft')]}"
-                            />
+                            <field name="disable_retentions" invisible="1" />
                             <field
                                 name="company_id"
                                 readonly="1"
@@ -710,7 +707,9 @@
         <field name="name">Account customer payment order</field>
         <field name="res_model">account.payment.order</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'default_type' : 'receipt'}</field>
+        <field name="context">{
+            'default_type' : 'receipt',
+            'default_disable_retentions': True}</field>
         <field
             name="domain"
         >[('journal_id.type', '=', 'receipt'), ('type','=','receipt')]</field>
