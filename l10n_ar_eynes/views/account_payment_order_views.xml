@@ -96,10 +96,7 @@
                                 placeholder="e.g. Invoice SAJ/0042"
                                 attrs="{'readonly': [('state', 'not in', ('draft'))]}"
                             />
-                            <field
-                                name="disable_retentions"
-                                attrs="{'readonly': [('state', '!=', 'draft')]}"
-                            />
+                            <field name="disable_retentions" invisible="1" />
                             <field
                                 name="company_id"
                                 readonly="1"
@@ -618,10 +615,7 @@
                                         options="{'currency_field': 'currency_id'}"
                                         attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
                                     />
-                                    <field
-                                        name="actual_payment_retention"
-                                        string="Amount"
-                                    />
+                                    <field name="amount" string="Amount" />
                                     <field
                                         name="amount_currency"
                                         widget="monetary"
@@ -680,49 +674,6 @@
                                         <field name="account_id" invisible="1" />
                                         </group>
                                     </group>
-
-                                    <group
-                                        name="more_information"
-                                        string="More information"
-                                    >
-                                        <field name="retention_move_line_ids">
-                                            <tree>
-                                                <field
-                                                    name="payment_order_line_id"
-                                                    invisible="1"
-                                                />
-                                                <field
-                                                    name="payment_order_reference"
-                                                    string="OP reference"
-                                                />
-                                                <!-- <field name="move_id"/> -->
-                                                <field
-                                                    name="move_name"
-                                                    string="Name"
-                                                    force_save="1"
-                                                />
-                                                <field
-                                                    name="move_type"
-                                                    string="Type"
-                                                    force_save="1"
-                                                />
-                                                <field
-                                                    name="total_without_vat"
-                                                    sum="Total"
-                                                    force_save="1"
-                                                />
-                                            </tree>
-                                        </field>
-                                        <field name="retention_move_lines_total" />
-                                        <group name="concept" string="Concept">
-                                            <field name="concept_id" />
-                                            <field name="concept_amount" />
-                                            <field name="applied_aliquot" />
-                                            <field name="total_month_retention" />
-                                            <field name="month_applied_retentions" />
-                                            <field name="actual_payment_retention" />
-                                        </group>
-                                    </group>
                                 </form>
                             </field>
                         </page>
@@ -756,7 +707,9 @@
         <field name="name">Account customer payment order</field>
         <field name="res_model">account.payment.order</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'default_type' : 'receipt'}</field>
+        <field name="context">{
+            'default_type' : 'receipt',
+            'default_disable_retentions': True}</field>
         <field
             name="domain"
         >[('journal_id.type', '=', 'receipt'), ('type','=','receipt')]</field>

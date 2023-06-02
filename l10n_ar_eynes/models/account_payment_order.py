@@ -1113,8 +1113,6 @@ class AccountPaymentOrder(models.Model):
 
                 _logger.info(f"Retentions to create 1: {pf(vals)}")
                 po.retention_ids = [(0, 0, val) for val in vals]
-                for retention in po.retention_ids:
-                    retention._compute_retention_move_lines()
             else:
                 if not po.amount:
                     po.retention_ids = [(5, 0, 0)]
@@ -2115,6 +2113,11 @@ class AccountPaymentOrderRetentionLine(models.Model):
     _name = 'account.payment.order.retention.line'
     _description = 'Retention lines in payment order'
 
+    def get_retention_move_lines(self):
+        if self.payment_order_id.disable_retentions:
+            return []
+        return self.create_retention_lines()
+
     name = fields.Char(string='Retention', size=64)
     date = fields.Date(index=True)
     payment_order_id = fields.Many2one(
@@ -2213,6 +2216,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         comodel_name='retention.move.line',
         inverse_name='payment_order_line_id',
         string='Retention move lines',
+        default=get_retention_move_lines,
         readonly=True,
     )
     retention_move_lines_total = fields.Float(
@@ -2247,24 +2251,13 @@ class AccountPaymentOrderRetentionLine(models.Model):
         store=False,
     )
 
-    def _compute_retention_move_lines(self):
-        self.retention_move_line_ids = [(5, 0, 0)]
-        self.retention_move_line_ids = [
-            (0, 0, line) for line in self.create_retention_lines()
-        ]
-
     def create_retention_lines(self):
         """This method creates the retention move lines and return the ID's"""
         move_line_ids = []
-
         for move in self.get_current_month_moves():
             move_line_ids.append(self.get_retention_line_vals(move))
 
-        if self.payment_order_id.is_payment():
-            po_lines = self.payment_order_id.debt_line_ids
-        elif self.payment_order_id.is_receipt():
-            po_lines = self.payment_order_id.income_line_ids
-
+        po_lines = self.payment_order_id.line_ids
         for line in po_lines.filtered(lambda debtline: debtline.amount > 0):
             move_type_map = {
                 'in_invoice': 'In Invoice',
@@ -2273,16 +2266,20 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 'out_refund': 'Out Refund',
             }
             move_line_ids.append(
-                {
-                    # 'payment_order_line_id': self.id,
-                    'move_id': line.invoice_id.id,
-                    'move_name': 'draft',
-                    'move_type': move_type_map[line.invoice_id.move_type],
-                    'total_without_vat': line.invoice_id.amount_untaxed,
-                    'payment_order_reference': self.payment_order_id.number
-                    or '',
-                }
+                self.env['retention.move.line'].create(
+                    {
+                        'payment_order_line_id': self.id,
+                        'move_id': line.invoice_id.id,
+                        'move_name': 'draft',
+                        'move_type': move_type_map[line.invoice_id.move_type],
+                        'total_without_vat': line.invoice_id.amount_untaxed,
+                        'payment_order_reference': self.payment_order_id.number
+                        or '',
+                    }
+                )
             )
+        if move_line_ids:
+            return [rec.id for rec in move_line_ids]
         return move_line_ids
 
     def get_current_month_moves(self):
@@ -2315,14 +2312,16 @@ class AccountPaymentOrderRetentionLine(models.Model):
             'out_refund': 'Out Refund',
         }
         invoice = move.invoice_id
-        return {
-            # 'payment_order_line_id': self.id,
-            'move_id': invoice.id,
-            'move_name': invoice.name,
-            'move_type': move_type_map[invoice.move_type],
-            'total_without_vat': invoice.amount_untaxed,
-            'payment_order_reference': move.payment_order_id.number or '',
-        }
+        return self.env['retention.move.line'].create(
+            {
+                'payment_order_line_id': self.id,
+                'move_id': invoice.id,
+                'move_name': invoice.name,
+                'move_type': move_type_map[invoice.move_type],
+                'total_without_vat': invoice.amount_untaxed,
+                'payment_order_reference': move.payment_order_id.number or '',
+            }
+        )
 
     @api.depends('retention_move_line_ids')
     def _compute_total_retention_move_lines(self):
