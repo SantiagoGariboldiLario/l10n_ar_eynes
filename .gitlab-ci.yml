@@ -8,9 +8,9 @@ lint-flake8:
   tags:
     - deployment
   variables:
-    FOLDER_NAME: 'logs'
-    LOG_NAME: 'flake8.log'
-    CHECKING_FOLDER: '.'
+    FOLDER_NAME: "logs"
+    LOG_NAME: "flake8.log"
+    CHECKING_FOLDER: "."
   before_script:
     - python -m pip install --upgrade pip
     - pip install flake8 pylint-odoo
@@ -31,21 +31,31 @@ lint-pylint:
   tags:
     - deployment
   variables:
-    FOLDER_NAME: 'logs'
-    LOG_NAME_NM: 'pylint-not-mandatory.log'
-    LOG_NAME_MN: 'pylint-mandatory.log'
-    CHECKING_FOLDER: '.'
+    FOLDER_NAME: "logs"
+    LOG_NAME_NM: "pylint-not-mandatory.log"
+    LOG_NAME_MN: "pylint-mandatory.log"
+    CHECKING_FOLDER: "."
   before_script:
     - python -m pip install --upgrade pip
     - pip install pylint-odoo
     - mkdir -p $FOLDER_NAME
   script:
     - echo "Linting code (non-mandatory)..."
-    - pylint --load-plugins=pylint_odoo --rcfile=.pylintrc --exit-zero * | tee -a $FOLDER_NAME/$LOG_NAME_NM 
+    - pylint --load-plugins=pylint_odoo --rcfile=.pylintrc --exit-zero * | tee -a
+      $FOLDER_NAME/$LOG_NAME_NM
     - echo "Linting code (mandatory)..."
-    - pylint --load-plugins=pylint_odoo --rcfile=.pylintrc-mandatory * | tee -a $FOLDER_NAME/$LOG_NAME_MN 
+    - pylint --load-plugins=pylint_odoo --rcfile=.pylintrc-mandatory * | tee -a
+      $FOLDER_NAME/$LOG_NAME_MN
   artifacts:
     when: on_failure
     expire_in: 2 days
     paths:
       - $FOLDER_NAME/
+
+deploy-job: # This job runs in the deploy stage.
+  stage: deploy # It only runs when jobs in the test stage complete successfully.
+  rules:
+    - if: $CI_COMMIT_BRANCH == "15.0-stage"
+  trigger:
+    project: localization/l10n-v15-testing
+    strategy: depend

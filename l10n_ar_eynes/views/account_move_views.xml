@@ -25,6 +25,7 @@
                     <span>Debit Note</span>
                 </span>
             </xpath>
+
             <xpath expr="//sheet/div[hasclass('oe_title')]/h1[1]" position="attributes">
                 <attribute name="attrs">{'invisible': 1}</attribute>
             </xpath>
@@ -56,8 +57,106 @@
             </xpath>
 
             <xpath expr="//field[@name='partner_id']" position="attributes">
-                <attribute name="required">1</attribute>
+                <attribute name="attrs">
+                    {
+                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                    }
+                </attribute>
             </xpath>
+
+            <xpath expr="//field[@name='payment_reference']" position="after">
+                <field
+                    name="fiscal_type"
+                    attrs="{
+                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                    }"
+                />
+            </xpath>
+
+            <div name="journal_div" position="after">
+                <field
+                    name="currency_rate"
+                    placeholder="Currency Rate"
+                    class="oe_inline"
+                    attrs="{'invisible': [('is_company_cur','=', True)]}"
+                />
+                <button
+                    name="%(action_account_change_currency)d"
+                    aria-label="Opened"
+                    type="action"
+                    class="btn-link"
+                    states="draft"
+                    groups="account.group_account_user"
+                >
+                    <i
+                        title="Update Currency: Will convert the amount lines to the new currency set"
+                        class="fa fa-fw fa-refresh"
+                    />
+                </button>
+                <p attrs="{'invisible': [('currency_preciated', '=', False)]}">
+                    <i
+                    >Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
+                </p>
+                <field name="currency_preciated" invisible="1" />
+                <field name="is_company_cur" invisible="1" />
+                <field name="is_multi_currency" invisible="1" />
+                <field
+                    name="company_currency_id"
+                    invisible="1"
+                    string="Company Currency"
+                />
+            </div>
+
+            <field name="fiscal_position_id" position="after">
+                <field name="currency_converted" invisible="1" />
+                <field
+                    name="secondary_currency_id"
+                    attrs="{'invisible': [('is_company_cur', '=', True)]}"
+                />
+                <field
+                    name="secondary_currency_rate"
+                    attrs="{'invisible': [('is_company_cur', '=', True)]}"
+                />
+            </field>
+
+            <xpath
+                expr="//group[@class='oe_invoice_lines_tab']/group[1]"
+                position="replace"
+            >
+                <group colspan="4">
+                    <field
+                        name="narration"
+                        placeholder="Terms and Conditions"
+                        class="oe_inline text-break"
+                        nolabel="1"
+                    />
+                </group>
+                <!-- Pensar la idea de moneda secundaria y apartir de ahi decidir cuando se ve -->
+
+                <!-- <group class="oe_subtotal_footer" style="display: inline-block" attrs="{'invisible': [('is_multi_currency','=',False), ('currency_converted', '=', False)]}"> -->
+                <group
+                    colspan="4"
+                    class="oe_subtotal_footer oe_right"
+                    attrs="{'invisible': ['|',('secondary_currency_id', '=', False), ('is_company_cur','=', True)]}"
+                >
+                    <field name="amount_taxed_cur" />
+                    <field name="amount_no_taxed_cur" />
+                    <field name="amount_exempt_cur" />
+                    <field
+                        name="amount_untaxed_cur"
+                        class="oe_subtotal_footer_separator"
+                    />
+                    <field name="amount_tax_cur" />
+                    <field
+                        name="amount_total_cur"
+                        class="oe_subtotal_footer_separator"
+                    />
+                    <i>- Amounts in Secondary Currency</i>
+                </group>
+            </xpath>
+
 
             <xpath
                 expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']"
@@ -65,11 +164,12 @@
             >
                 <attribute name="attrs">
                     {
-                        'required': 1,
+                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
                         'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
                     }
                 </attribute>
             </xpath>
+
             <xpath
                 expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']"
                 position="after"
@@ -77,26 +177,67 @@
                 <field
                     name="denomination"
                     force_save="1"
-                    required="1"
-                    attrs="{'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]}"
+                    attrs="{
+                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                        'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
+                    }"
                 />
                 <field name="aut_cae" />
                 <field name="local" invisible="1" />
                 <field
                     name="export_type_id"
                     widget="selection"
-                    attrs="{'invisible': [('local','=', True)], 'required': [('local','=',False)]}"
+                    attrs="{
+                        'required': [
+                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('local','=',False)
+                        ],
+                        'invisible': [
+                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('local','=', True),
+                            '|',
+                            ('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                        ],
+                    }"
                 />
                 <field
                     name="dst_country_id"
-                    attrs="{'invisible': [('local','=', True)], 'required': [('local','=',False)]}"
+                    attrs="{
+                        'required': [
+                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('local','=',False)
+                        ],
+                        'invisible': [
+                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('local','=', True),
+                            '|',
+                            ('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                        ],
+                    }"
                 />
             </xpath>
 
             <xpath expr="//group[@id='header_right_group']" position="inside">
-                <field name="is_FCE_invoice" />
-                <field name="cae" string="CAE" readonly="1" />
-                <field name="cae_due_date" readonly="1" />
+                <field
+                    name="is_FCE_invoice"
+                    attrs="{'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]}"
+                />
+                <field
+                    name="cae"
+                    string="CAE"
+                    attrs="{
+                        'readonly': [('move_type','in', ['out_refund', 'out_invoice'])],
+                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
+                    }"
+                />
+                <field
+                    name="cae_due_date"
+                    attrs="{
+                        'readonly': [('move_type','in', ['out_refund', 'out_invoice'])],
+                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
+                    }"
+                />
             </xpath>
 
             <page name="other_info" position="inside">
@@ -115,8 +256,65 @@
                     </field>
                 </group>
             </page>
+
             <page name="other_info" position="before">
-                <page string="FCRED" attrs="{'invisible': [('local','=', False)]}">
+                <page
+                    string="Perceptions"
+                    attrs="{
+                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]
+                    }"
+                >
+                    <field
+                        name="perception_ids"
+                        nolabel="1"
+                        colspan="4"
+                        context="{'default_partner_id': partner_id}"
+                    >
+                        <tree>
+                            <field name="name" />
+                            <field name="account_id" />
+                            <field name="partner_id" invisible="1" />
+                            <field name="date" />
+                            <field name="perception_id" string="Perception Type" />
+                            <field name="concept_id" />
+                            <field name="base" />
+                            <field name="amount" />
+                            <field name="state_id" />
+                        </tree>
+                        <form>
+                            <h1>
+                                <field
+                                    name="perception_id"
+                                    class="oe_inline"
+                                    domain="[('type_tax_use', '=', 'sale')]"
+                                />
+                            </h1>
+                            <group>
+                                <group string="Information" name="info">
+                                    <field name="name" />
+                                    <field name="partner_id" invisible="1" />
+                                    <field name="state_id" />
+                                    <field name="date" />
+                                    <span
+                                        string="Keep date empty if the date is the same as the invoice."
+                                        class="oe_grey"
+                                    />
+                                </group>
+                                <group string="Amounts" name="amount">
+                                    <field name="base" />
+                                    <field name="amount" />
+                                    <field name="account_id" invisible="1" />
+                                    <field name="concept_id" />
+                                </group>
+                            </group>
+                        </form>
+                    </field>
+                </page>
+
+                <page
+                    string="FCRED"
+                    attrs="{'invisible': [('is_FCE_invoice','=', False)]}"
+                >
                     <group string="Optionals">
                         <field name="optional_ids" nolabel="1">
                             <tree editable="bottom">
@@ -129,9 +327,14 @@
                         </field>
                     </group>
                 </page>
+
                 <page
                     string="Export Invoice"
-                    attrs="{'invisible': [('local','=', True)]}"
+                    attrs="{'invisible': [
+                        '|',
+                        ('local','=', True),
+                        ('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))
+                        ]}"
                 >
                     <group string="Shipping Permissions">
                         <field
@@ -183,7 +386,11 @@
                         </field>
                     </group>
                 </page>
-                <page string="WSFE Requests">
+
+                <page
+                    string="WSFE Requests"
+                    attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))]}"
+                >
                     <field name="wsfe_request_ids" readonly="1">
                         <tree>
                             <field name="voucher_date" />
@@ -193,7 +400,21 @@
                         </tree>
                     </field>
                 </page>
+
+
             </page>
+
+            <xpath
+                expr="//field[@name='line_ids']/form/group/field[@name='currency_id']"
+                position="after"
+            >
+                <field
+                    name="currency_rate"
+                    attrs="{'invisible': [('currency_id', '=', False)]}"
+                    groups="base.group_multi_currency"
+                />
+            </xpath>
+
         </field>
     </record>
 
@@ -265,6 +486,24 @@
             [('move_type', '=', 'in_invoice'), ('debit_origin_id','=', False)]
         </field>
     </record>
+
+    <record id="view_account_move_multicurrency_filter" model="ir.ui.view">
+        <field name="name">account.move.multicurrency.select</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter" />
+        <field name="arch" type="xml">
+            <filter name="late" position="after">
+                <separator />
+                <filter
+                    name="multicurrency"
+                    string="MultiCurrency"
+                    domain="[('is_multi_currency','=',True)]"
+                    help="Invoices not in company currency"
+                />
+            </filter>
+        </field>
+    </record>
+
 
     <menuitem
         id="account_invoice_menu_debit_note"

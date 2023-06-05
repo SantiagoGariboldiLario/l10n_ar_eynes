@@ -96,6 +96,7 @@
                                 placeholder="e.g. Invoice SAJ/0042"
                                 attrs="{'readonly': [('state', 'not in', ('draft'))]}"
                             />
+                            <field name="disable_retentions" invisible="1" />
                             <field
                                 name="company_id"
                                 readonly="1"
@@ -577,6 +578,106 @@
                             </field>
                         </page>
 
+                        <page string="Retentions">
+                            <field
+                                name="retention_ids"
+                                force_save="1"
+                                nolabel="1"
+                                attrs="{'readonly': [('disable_retentions', '=', False)]}"
+                            >
+                                <tree>
+                                    <field name="currency_id" invisible="1" />
+                                    <field name="name" invisible="1" />
+                                    <field name="state_id" invisible="1" />
+                                    <field name="date" />
+                                    <field
+                                        name="retention_id"
+                                        string="Retention Type"
+                                    />
+                                    <field name="taxapp_id" invisible="1" />
+                                    <field name="date_applied" />
+                                    <field name="concept_id" />
+                                    <field name="invoice_ref" />
+                                    <field name="invoice_id" invisible="1" />
+                                    <field name="manual" invisible="1" />
+                                    <field name="reg_code" invisible="1" />
+                                    <field name="excluded_percent" invisible="1" />
+                                    <field
+                                        name="exclusion_date_certificate"
+                                        invisible="1"
+                                    />
+                                    <field name="partner_id" invisible="1" />
+                                    <field name="certificate_no" />
+                                    <field name="base" />
+                                    <field
+                                        name="base_currency"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
+                                    />
+                                    <field name="amount" string="Amount" />
+                                    <field
+                                        name="amount_currency"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
+                                    />
+                                    <field name="account_id" invisible="1" />
+                                </tree>
+                                <form>
+                                    <h1>
+                                        <field
+                                            name="name"
+                                            class="oe_inline"
+                                            attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                        />
+                                    </h1>
+                                    <group>
+                                        <group string="Information" name="info">
+                                            <field name="state_id" invisible="1" />
+                                            <field
+                                                name="retention_id"
+                                                domain="[('type_tax_use', '=', 'purchase')]"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                            <field
+                                                name="certificate_no"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                            <field
+                                                name="state_id"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                            <field
+                                                name="date_applied"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                            <field
+                                                name="date"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                            <label
+                                                for="date"
+                                                string="Keep it empty if the date is the same as the voucher."
+                                                class="oe_grey"
+                                            />
+                                        </group>
+                                        <group string="Amounts" name="amount">
+                                            <field
+                                                name="base"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                        <field
+                                                name="amount"
+                                                attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
+                                            />
+                                        <field name="account_id" invisible="1" />
+                                        </group>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+
                     </notebook>
                 </sheet>
             </form>
@@ -606,7 +707,9 @@
         <field name="name">Account customer payment order</field>
         <field name="res_model">account.payment.order</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'default_type' : 'receipt'}</field>
+        <field name="context">{
+            'default_type' : 'receipt',
+            'default_disable_retentions': True}</field>
         <field
             name="domain"
         >[('journal_id.type', '=', 'receipt'), ('type','=','receipt')]</field>
@@ -1271,7 +1374,10 @@
                                         options="{'currency_field': 'currency_id'}"
                                         attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
                                     />
-                                    <field name="amount" />
+                                    <field
+                                        name="actual_payment_retention"
+                                        string="Amount"
+                                    />
                                     <field
                                         name="amount_currency"
                                         widget="monetary"
@@ -1350,10 +1456,7 @@
                                         name="more_information"
                                         string="More information"
                                     >
-                                        <field
-                                            name="retention_move_line_ids"
-                                            readonly="1"
-                                        >
+                                        <field name="retention_move_line_ids">
                                             <tree>
                                                 <field
                                                     name="payment_order_line_id"
@@ -1363,10 +1466,22 @@
                                                     name="payment_order_reference"
                                                     string="OP reference"
                                                 />
-                                                <field name="move_type" string="Type" />
-                                                <field name="move_id" invisible="1" />
-                                                <field name="move_name" string="Name" />
-                                                <field name="total_without_vat" />
+                                                <!-- <field name="move_id"/> -->
+                                                <field
+                                                    name="move_name"
+                                                    string="Name"
+                                                    force_save="1"
+                                                />
+                                                <field
+                                                    name="move_type"
+                                                    string="Type"
+                                                    force_save="1"
+                                                />
+                                                <field
+                                                    name="total_without_vat"
+                                                    sum="Total"
+                                                    force_save="1"
+                                                />
                                             </tree>
                                         </field>
                                         <field name="retention_move_lines_total" />

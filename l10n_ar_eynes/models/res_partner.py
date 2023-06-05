@@ -16,6 +16,15 @@ class ResPartner(models.Model):
             ('company_id', '=', company.id),
         ]
 
+    @api.model
+    def _get_perceptions_domain(self):
+        company = self.env.user.company_id
+        return [
+            '|',
+            ('company_id', '=', False),
+            ('company_id', '=', company.id),
+        ]
+
     retention_activity_id = fields.Many2one(
         comodel_name='retention.activity', string='Activity'
     )
@@ -36,11 +45,61 @@ class ResPartner(models.Model):
     document_type_id = fields.Many2one(
         comodel_name='res.document.type', string='Document type'
     )
-    dst_cuit_id = fields.Many2one(comodel_name='dst.cuit.codes', string='Country CUIT')
+    dst_cuit_id = fields.Many2one(
+        comodel_name='dst.cuit.codes', string='Country CUIT'
+    )
     dst_cuit = fields.Boolean(
         string="Enable DST CUIT", related='document_type_id.dst_cuit'
     )
     fcred_transfer = fields.Char(string='SCA/ADC (FCE)?', default='SCA')
+    perception_ids = fields.One2many(
+        'res.partner.perception',
+        'partner_id',
+        'Defined Perceptions',
+        domain=lambda self: self._get_perceptions_domain(),
+        help="Here you have to configure perception exceptions for this "
+        "partner with this Fiscal Position",
+    )
+    nro_insc_iibb = fields.Char('Number of IIBB Registration', size=15)
+
+    def _get_perceptions_to_apply(self):
+        # Buscamos las percepciones a aplicar segun la posicion fiscal
+        # partner = self.browse(cr, uid, partner_id, context)
+        perceptions = {}
+        for perc in self.property_account_position_id.perception_ids:
+            perception = {
+                'perception': perc,
+                'activity_id': False,
+                'excluded_percent': False,
+                'percent': -1.0,
+                'ex_date_to': False,
+                'ex_date_from': False,
+                'sit_iibb': False,
+                'from_padron': False,
+            }
+
+            perceptions[perc.id] = perception
+
+        # Ahora buscamos a ver si tiene alguna excepcion
+        partner_perceptions = {}
+        for p_perc in self.perception_ids:
+
+            perception = {
+                'perception': p_perc.perception_id,
+                'activity_id': p_perc.activity_id.id,
+                'excluded_percent': p_perc.excluded_percent,
+                'percent': p_perc.percent,
+                'ex_date_to': p_perc.ex_date_to,
+                'ex_date_from': p_perc.ex_date_from,
+                'sit_iibb': p_perc.sit_iibb,
+                'from_padron': p_perc.from_padron,
+            }
+
+            partner_perceptions[p_perc.perception_id.id] = perception
+
+        # Actualizamos el diccionario de retenciones
+        perceptions.update(partner_perceptions)
+        return perceptions
 
     @api.constrains('vat', 'document_type_id')
     def check_vat_duplicated(self):
@@ -60,7 +119,10 @@ class ResPartner(models.Model):
                 res = self.search_count(search_param)
                 if res > 1:
                     raise ValidationError(
-                        _('There is another partner with same ' 'VAT Information')
+                        _(
+                            'There is another partner with same '
+                            'VAT Information'
+                        )
                     )
 
     @api.onchange('document_type_id')
@@ -86,7 +148,11 @@ class ResPartner(models.Model):
         ci_extranjera = self.env.ref('l10n_ar_eynes.document_ci_extranjera')
         pasaporte = self.env.ref('l10n_ar_eynes.document_pasaporte')
         if write:
-            if [x for x in self if x.document_type_id not in [ci_extranjera, pasaporte]]:
+            if [
+                x
+                for x in self
+                if x.document_type_id not in [ci_extranjera, pasaporte]
+            ]:
                 vat = vat.replace('.', '').replace('-', '')
                 if not vat.isdigit():
                     raise ValidationError(_('The Vat only supports numbers.'))
@@ -116,9 +182,9 @@ class ResPartner(models.Model):
                     vat_country = 'ar'
                     vat_number = partner.vat
                 except ValueError:
-                    vat_country, vat_number = partner.vat[:2].lower(), partner.vat[
-                        2:
-                    ].replace(' ', '')
+                    vat_country, vat_number = partner.vat[
+                        :2
+                    ].lower(), partner.vat[2:].replace(' ', '')
             if not partner.document_type_id:
                 return True
             if (
@@ -130,12 +196,16 @@ class ResPartner(models.Model):
                 return True
             check = getattr(partner, 'check_vat_' + vat_country)
             if not check(vat_number):
-                raise ValidationError(_('The Vat does not seems to be correct.'))
+                raise ValidationError(
+                    _('The Vat does not seems to be correct.')
+                )
         return True
 
     @api.model
     def _commercial_fields(self):
-        return super(ResPartner, self)._commercial_fields() + ['document_type_id']
+        return super(ResPartner, self)._commercial_fields() + [
+            'document_type_id'
+        ]
 
     def check_vat_ar(self, vat):
         """
@@ -204,7 +274,9 @@ class ResPartner(models.Model):
             if excluded_percent:
                 if p_ret.ex_date_from and p_ret.ex_date_to:
                     # Exclusion applies if we are into the boundaries
-                    if not (p_ret.ex_date_from <= operation_date <= p_ret.ex_date_to):
+                    if not (
+                        p_ret.ex_date_from <= operation_date <= p_ret.ex_date_to
+                    ):
                         excluded_percent = False
                 elif p_ret.ex_date_from:
                     # Exclusion applies only if we are latter than date_from
@@ -252,10 +324,16 @@ class ResPartnerRetention(models.Model):
     ex_date_from = fields.Date('From date')
     ex_date_to = fields.Date('To date')
     exclusion_certificate = fields.Binary(string='Exclusion Certificate')
-    exclusion_date_certificate = fields.Date(string='Exclusion General Resolution Date')
-    sit_iibb = fields.Many2one(comodel_name='iibb.situation', string='Situation of IIBB')
+    exclusion_date_certificate = fields.Date(
+        string='Exclusion General Resolution Date'
+    )
+    sit_iibb = fields.Many2one(
+        comodel_name='iibb.situation', string='Situation of IIBB'
+    )
     company_id = fields.Many2one(
-        comodel_name='res.company', related='retention_id.company_id', string='Company'
+        comodel_name='res.company',
+        related='retention_id.company_id',
+        string='Company',
     )
     from_padron = fields.Boolean(string="From Padron")
 
@@ -263,7 +341,9 @@ class ResPartnerRetention(models.Model):
         (
             'retention_partner_unique',
             'unique(partner_id, retention_id)',
-            _('There must be only one retention of this type configured for the partner'),
+            _(
+                'There must be only one retention of this type configured for the partner'
+            ),
         )
     ]
 
@@ -297,7 +377,10 @@ class ResPartnerRetention(models.Model):
         for p_ret in self:
             if not (0 <= p_ret.excluded_percent <= 1):
                 raise ValidationError(
-                    _("The Excluded Percent Should be a value " "between 0 and 1")
+                    _(
+                        "The Excluded Percent Should be a value "
+                        "between 0 and 1"
+                    )
                 )
 
 
@@ -348,3 +431,46 @@ class ResDocumentType(models.Model):
         cuil = self.sudo().env.ref('l10n_ar_eynes.document_cuil').name
         dni = self.sudo().env.ref('l10n_ar_eynes.document_dni').name
         return self.sudo().search([('name', 'in', (cuit, cuil, dni))])
+
+
+class ResPartnerPerception(models.Model):
+    _name = "res.partner.perception"
+    _description = "Perception Defined in Partner"
+    _rec_name = 'perception_id'
+
+    perception_id = fields.Many2one(
+        'account.journal',
+        'Perception',
+        required=True,
+        domain=lambda self: [
+            ('type', '=', 'perceptions'),
+            ('company_id', '=', self.env.user.company_id.id),
+        ],
+    )
+    activity_id = fields.Many2one('perception.activity', 'Activity')
+    percent = fields.Float('Percent', required=True)
+    excluded_percent = fields.Float('Percentage of Exclusion')
+    ex_date_from = fields.Date('From date')
+    ex_date_to = fields.Date('To date')
+    exclusion_certificate = fields.Binary(string='Exclusion Certificate')
+    partner_id = fields.Many2one('res.partner', 'Partner')
+    sit_iibb = fields.Many2one(
+        comodel_name='iibb.situation', string='Situation of IIBB'
+    )
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        related='perception_id.company_id',
+        string='Company',
+        store=True,
+    )
+
+    # _sql_constraints = [('perception_partner_unique',
+    #                      'unique(partner_id, perception_id)',
+    #                      'There must be only one perception of this ' +
+    #                      'type configured for the partner')]
+
+    @api.onchange('perception_id')
+    def perception_id_change(self):
+        perception_type = self.perception_id.type
+        domain = [('type', '=', perception_type)]
+        return {'domain': {'activity_id': domain}}

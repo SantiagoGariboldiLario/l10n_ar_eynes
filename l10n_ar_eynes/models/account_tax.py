@@ -32,7 +32,11 @@ class AccountTax(models.Model):
         domain="[('country_id','=', country_id)]",
     )
     applicable_state = fields.Selection(
-        selection=[('dest', 'Destination'), ('source', 'Source'), ('always', 'Always')],
+        selection=[
+            ('dest', 'Destination'),
+            ('source', 'Source'),
+            ('always', 'Always'),
+        ],
         string='Applicable State',
         default='dest',
         help="Indicates if this Perception is applicable when:\n"
@@ -50,7 +54,7 @@ class AccountTax(models.Model):
             ('other', 'Other'),
         ],
         string='Type',
-        help='Retention type',
+        help='Retention/Perception type',
     )
     vat_application_ids = fields.One2many(
         comodel_name='retention.tax.application',
@@ -75,9 +79,44 @@ class AccountTax(models.Model):
     )
     general_resolution = fields.Char('GR Number', required=False, size=64)
     notes = fields.Text('Notes')
-    tax_group_name = fields.Char(string='Tax group name', related='tax_group_id.name')
+    tax_group_name = fields.Char(
+        string='Tax group name', related='tax_group_id.name'
+    )
     is_exempt = fields.Boolean(
         string='Exempt',
         default=False,
         help="Check this if this Tax represent Tax Exempts",
     )
+    # PERCEPTION FIELDS:
+    perc_vat_application_ids = fields.One2many(
+        'perception.tax.application',
+        'perception_tax_id',
+        'VAT Tax Application for Perceptions',
+        domain=[('type', '=', 'vat')],
+    )
+    perc_profit_application_ids = fields.One2many(
+        'perception.tax.application',
+        'perception_tax_id',
+        'Profit Tax Application for Perceptions',
+        domain=[('type', '=', 'profit')],
+    )
+    perc_gi_application_ids = fields.One2many(
+        'perception.tax.application',
+        'perception_tax_id',
+        'Gross Income Tax Application for Perceptions',
+        domain=[('type', '=', 'gross_income')],
+    )
+
+    def get_grouping_key(self, invoice_tax_val):
+        """Returns a string that will be used to group account.move.line
+        sharing the same properties"""
+        self.ensure_one()
+        return (
+            str(invoice_tax_val['tax_id'])
+            + '-'
+            + str(invoice_tax_val['account_id'])
+            + '-'
+            + str(invoice_tax_val['account_analytic_id'])
+            + '-'
+            + str(invoice_tax_val.get('analytic_tag_ids', []))
+        )

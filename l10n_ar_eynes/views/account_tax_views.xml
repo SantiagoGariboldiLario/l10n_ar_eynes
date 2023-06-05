@@ -210,7 +210,7 @@
 
                 <page
                     string="Perceptions"
-                    attrs="{'invisible': [('tax_group_name', '!=', 'Perceptions')]}"
+                    attrs="{'invisible': [('tax_group_name', 'not in', ('Perceptions', 'Percepciones'))]}"
                 >
                     <group>
                         <group string="Jurisdiction Information">
@@ -240,7 +240,7 @@
                         <field name="retention_type" colspan="2" />
                         <separator name="tax_application" />
                         <field
-                            name="vat_application_ids"
+                            name="perc_vat_application_ids"
                             nolabel="1"
                             colspan="4"
                             attrs="{'invisible':[('retention_type','!=','vat')]}"
@@ -254,9 +254,7 @@
                                 <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
-                                <field name="aliq_type" required="1" />
                                 <field name="percent" />
-                                <field name="scale_id" />
                                 <field name="type" invisible="1" />
                             </tree>
                             <form string="VAT Tax Application">
@@ -273,15 +271,7 @@
                                     <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
-                                    <field name="aliq_type" required="1" />
-                                    <field
-                                        name="percent"
-                                        attrs="{'invisible':[('aliq_type', '=', 'scale')]}"
-                                    />
-                                    <field
-                                        name="scale_id"
-                                        attrs="{'invisible':[('aliq_type', '=', 'percent')], 'required':[('aliq_type', '=', 'scale')]}"
-                                    />
+                                    <field name="percent" />
                                     <field name="name" />
                                     <field name="reg_code" />
                                     <field name="type" invisible="1" />
@@ -289,7 +279,7 @@
                             </form>
                         </field>
                         <field
-                            name="gi_application_ids"
+                            name="perc_gi_application_ids"
                             nolabel="1"
                             colspan="4"
                             attrs="{'invisible':[('retention_type','!=','gross_income')]}"
@@ -303,9 +293,7 @@
                                 <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
-                                <field name="aliq_type" required="1" />
                                 <field name="percent" />
-                                <field name="scale_id" />
                                 <field name="sit_iibb" />
                                 <field name="type" invisible="1" />
                             </tree>
@@ -323,15 +311,7 @@
                                     <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
-                                    <field name="aliq_type" required="1" />
-                                    <field
-                                        name="percent"
-                                        attrs="{'invisible':[('aliq_type', '=', 'scale')]}"
-                                    />
-                                    <field
-                                        name="scale_id"
-                                        attrs="{'invisible':[('aliq_type', '=', 'percent')], 'required':[('aliq_type', '=', 'scale')]}"
-                                    />
+                                    <field name="percent" />
                                     <field name="name" />
                                     <field name="reg_code" />
                                     <field name="sit_iibb" />
@@ -340,7 +320,7 @@
                             </form>
                         </field>
                         <field
-                            name="profit_application_ids"
+                            name="perc_profit_application_ids"
                             nolabel="1"
                             colspan="4"
                             attrs="{'invisible':[('retention_type','!=','profit')]}"
@@ -354,9 +334,7 @@
                                 <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
-                                <field name="aliq_type" required="1" />
                                 <field name="percent" />
-                                <field name="scale_id" />
                                 <field name="type" invisible="1" />
                             </tree>
                             <form string="Profit Tax Application">
@@ -373,15 +351,7 @@
                                     <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
-                                    <field name="aliq_type" required="1" />
-                                    <field
-                                        name="percent"
-                                        attrs="{'invisible':[('aliq_type', '=', 'scale')]}"
-                                    />
-                                    <field
-                                        name="scale_id"
-                                        attrs="{'invisible':[('aliq_type', '=', 'percent')], 'required':[('aliq_type', '=', 'scale')]}"
-                                    />
+                                    <field name="percent" />
                                     <field name="name" />
                                     <field name="reg_code" />
                                     <field name="type" invisible="1" />

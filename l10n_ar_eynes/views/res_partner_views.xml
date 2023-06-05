@@ -26,6 +26,10 @@
                 <attribute name="string">NIF</attribute>
             </xpath>
 
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="nro_insc_iibb" />
+            </xpath>
+
             <xpath
                 expr="//field[@name='property_account_position_id']"
                 position="after"
@@ -34,6 +38,27 @@
             </xpath>
 
             <page name="accounting" position="after">
+                <page string="Perceptions">
+                    <group colspan="4" col="4">
+                        <group colspan="4">
+                            <field colspan="2" name="perception_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field
+                                        name="perception_id"
+                                        domain="[('type_tax_use','=','sale')]"
+                                    />
+                                    <field name="activity_id" />
+                                    <field name="percent" />
+                                    <field name="excluded_percent" />
+                                    <field name="ex_date_from" />
+                                    <field name="ex_date_to" />
+                                    <field name="exclusion_certificate" />
+                                    <field name="sit_iibb" />
+                                </tree>
+                            </field>
+                        </group>
+                    </group>
+                </page>
                 <page string="Retentions" name="retentions">
                     <group name="retention_activity" string="Retention activity">
                         <field name="retention_activity_id" />

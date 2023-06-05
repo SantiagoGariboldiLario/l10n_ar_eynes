@@ -138,7 +138,9 @@ class WsfexConfig(models.Model):
         column2='pos_ar_id',
         string='Points of Sale',
     )
-    wsaa_ticket_id = fields.Many2one(comodel_name='wsaa.ta', string='Ticket Access')
+    wsaa_ticket_id = fields.Many2one(
+        comodel_name='wsaa.ta', string='Ticket Access'
+    )
     currency_ids = fields.One2many(
         comodel_name='wsfex.currency.codes',
         inverse_name='wsfex_config_id',
@@ -165,7 +167,9 @@ class WsfexConfig(models.Model):
         string='Incoterms',
     )
     dst_cuit_ids = fields.One2many(
-        comodel_name='dst.cuit.codes', inverse_name='wsfex_config_id', string='DST CUIT'
+        comodel_name='dst.cuit.codes',
+        inverse_name='wsfex_config_id',
+        string='DST CUIT',
     )
     voucher_type_ids = fields.One2many(
         comodel_name='wsfex.res.voucher.type.codes',
@@ -180,7 +184,7 @@ class WsfexConfig(models.Model):
     company_id = fields.Many2one(
         comodel_name='res.company',
         string='Company Name',
-        default=lambda self: self.env['res.users']._get_company(),
+        default=lambda self: self.env.user.company_id,
         required=True,
     )
 
@@ -234,7 +238,10 @@ class WsfexConfig(models.Model):
         without_raise = self.env.context.get('without_raise', False)
         if not company_id and not without_raise:
             raise UserError(
-                _('Company Error!\n' 'There is no company being used by this user')
+                _(
+                    'Company Error!\n'
+                    'There is no company being used by this user'
+                )
             )
 
         ids = self.search([('company_id', '=', company_id)])
@@ -480,7 +487,11 @@ class WsfexConfig(models.Model):
 
             # Si no tengo los codigos de esos Impuestos en la db, los creo
             if not len(res_c):
-                vals = {'code': r.Cbte_Id, 'name': r.Cbte_Ds, 'wsfex_config_id': self.id}
+                vals = {
+                    'code': r.Cbte_Id,
+                    'name': r.Cbte_Ds,
+                    'wsfex_config_id': self.id,
+                }
                 wsfex_param_obj.create(vals)
             # ~ Si los codigos estan en la db los modifico
             else:

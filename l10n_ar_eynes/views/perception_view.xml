@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Search View for perception.tax.line -->
+    <record id="perception_tax_line_view_search" model="ir.ui.view">
+        <field name="name">perception.tax.line.search</field>
+        <field name="model">perception.tax.line</field>
+        <field name="type">search</field>
+        <field name="arch" type="xml">
+            <search string="Perception Tax Lines">
+                <filter
+                    icon="terp-check"
+                    name="applied"
+                    string="Applied"
+                    domain="[('perception_id.type_tax_use', '=', 'sale')]"
+                    help="Perception Applied"
+                />
+                <filter
+                    icon="gtk-cancel"
+                    name="supported"
+                    string="Supported"
+                    domain="[('perception_id.type_tax_use', '=', 'purchase')]"
+                    help="Perception Supported"
+                />
+                <separator orientation="vertical" />
+                <field name="name" />
+                <field name="date" />
+                <field name="concept_id" />
+                <field name="reg_code" />
+                <field name="invoice_id" />
+                <field name="partner_id" />
+                <field name="perception_id" />
+                <field name="state_id" />
+                <field
+                    name="company_id"
+                    groups="base.group_multi_company"
+                    widget="selection"
+                />
+                <group
+                    expand="0"
+                    string="Group By..."
+                    groups="account.group_account_user"
+                >
+                    <filter
+                        name="province"
+                        string="Province"
+                        icon="terp-stock_effects-object-colorize"
+                        domain="[]"
+                        context="{'group_by':'state_id'}"
+                    />
+                    <filter
+                        name="group_date"
+                        string="Date"
+                        icon="terp-go-month"
+                        domain="[]"
+                        context="{'group_by':'date'}"
+                    />
+                    <filter
+                        string="Concept"
+                        name="group_concept"
+                        domain="[]"
+                        context="{'group_by':'concept_id'}"
+                    />
+                    <filter
+                        string="Reg. Code"
+                        name="group_code"
+                        domain="[]"
+                        context="{'group_by':'reg_code'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="perception_tax_line_view_tree" model="ir.ui.view">
+        <field name="name">perception.tax.line.tree</field>
+        <field name="model">perception.tax.line</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="reg_code" />
+                <field name="concept_id" />
+                <field name="date" />
+                <field name="name" />
+                <field name="invoice_id" />
+                <field name="partner_id" />
+                <field name="vat" />
+                <field name="amount" sum="Amount Total" />
+                <field name="base" sum="Base Total" />
+                <field name="state_id" />
+                <field name="company_id" groups="base.group_multi_company" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="perception_tax_line_view_form" model="ir.ui.view">
+        <field name="name">perception.tax.line.form</field>
+        <field name="model">perception.tax.line</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1>
+                        <label for="name" string="Perception Tax Line" />
+                        <field name="name" class="oe_inline" readonly="0" />
+                    </h1>
+                    <group>
+                        <field name="date" />
+                        <field name="partner_id" />
+                        <field name="vat" />
+                        <field name="concept_id" />
+                        <field name="perception_id" invisible="True" />
+                    </group>
+                    <group>
+                        <group>
+                            <field name="amount" sum="Amount Total" />
+                            <field name="base" sum="Base Total" />
+                        </group>
+                        <group>
+                            <field name="state_id" />
+                            <field
+                                name="company_id"
+                                groups="base.group_multi_company"
+                            />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- *********************** -->
+    <!-- * perception Concepts * -->
+    <!-- *********************** -->
+    <record id="view_perception_concept_form" model="ir.ui.view">
+        <field name="name">perception.concept.form</field>
+        <field name="model">perception.concept</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Perception Concept">
+                <group>
+                    <group>
+                        <field name="code" />
+                        <field name="type" />
+                        <field
+                            name="company_id"
+                            groups="base.group_multi_company"
+                            options="{'no_create': True}"
+                        />
+                    </group>
+                    <group>
+                        <field name="name" select="1" />
+                        <field name="no_subject" />
+                    </group>
+                </group>
+                <separator string="Accounts Associated" />
+                <field name="account_ids">
+                    <tree>
+                        <field name="name" />
+                        <field name="code" />
+                        <field name="internal_type" />
+                        <field name="user_type_id" />
+                    </tree>
+                </field>
+                <separator string="Notes" />
+                <field name="notes" colspan="4" nolabel="1" />
+            </form>
+        </field>
+    </record>
+
+    <record id="view_perception_concept_tree" model="ir.ui.view">
+        <field name="name">perception.concept.tree</field>
+        <field name="model">perception.concept</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="code" />
+                <field name="type" />
+                <field name="name" />
+                <field name="no_subject" />
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_perception_concept_tree">
+        <field name="name">Concepts</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">perception.concept</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- ************************ -->
+    <!-- * perception Activities * -->
+    <!-- ************************ -->
+    <record id="view_perception_activity_form" model="ir.ui.view">
+        <field name="name">perception.activity.form</field>
+        <field name="model">perception.activity</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Perception Activity">
+                <field name="code" select="1" />
+                <field name="type" select="1" />
+                <field name="name" select="1" />
+                <field
+                    name="company_id"
+                    groups="base.group_multi_company"
+                    options="{'no_create': True}"
+                />
+                <separator string="Notes" colspan="4" />
+                <field name="notes" colspan="4" nolabel="1" />
+            </form>
+        </field>
+    </record>
+
+    <record id="view_perception_activity_tree" model="ir.ui.view">
+        <field name="name">perception.activity.tree</field>
+        <field name="model">perception.activity</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="code" />
+                <field name="type" />
+                <field name="name" />
+                <field
+                    name="company_id"
+                    groups="base.group_multi_company"
+                    options="{'no_create': True}"
+                />
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_perception_activity_tree">
+        <field name="name">Activities</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">perception.activity</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="perception_tax_line_action_tree" model="ir.actions.act_window">
+        <field name="name">Perception Tax Applied</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">perception.tax.line</field>
+        <field name="view_id" ref="perception_tax_line_view_tree" />
+        <field name="context">
+            {"search_default_applied":1, "use_internal_number": 1}</field>
+        <field name="domain">
+            [('invoice_id.state','in',['open','paid'])]</field>
+        <field name="search_view_id" ref="perception_tax_line_view_search" />
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to create a perception.
+            </p>
+        </field>
+    </record>
+
+    <record
+        id="perception_tax_line_action_tree_supported"
+        model="ir.actions.act_window"
+    >
+        <field name="name">Perception Tax Supported</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">perception.tax.line</field>
+
+        <field name="view_id" ref="perception_tax_line_view_tree" />
+        <field name="context">
+            {"search_default_supported":1, "use_internal_number": 1}</field>
+        <field name="domain">
+            [('invoice_id.state','in',['open','paid'])]</field>
+        <field name="search_view_id" ref="perception_tax_line_view_search" />
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to create a perception.
+            </p>
+        </field>
+    </record>
+</odoo>

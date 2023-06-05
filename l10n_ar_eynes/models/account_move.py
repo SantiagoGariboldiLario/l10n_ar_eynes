@@ -1,5 +1,6 @@
+import datetime
 import logging
-from datetime import date
+import time
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -8,6 +9,7 @@ _logger = logging.getLogger(__name__)
 
 # Constant used to find FCE type:
 AFIP_FCE_CODE_START = 200
+PCODES = {'nacional': '1', 'provincial': '2', 'municipal': '3'}
 
 
 class AccountMove(models.Model):
@@ -25,7 +27,10 @@ class AccountMove(models.Model):
         ],
         string='Denomination',
     )
-    supplier_move_reference = fields.Char(string='Supplier Invoice Reference')
+    supplier_move_reference = fields.Char(
+        string='Supplier Invoice Reference',
+        copy=False,
+    )
     address_shipping_id = fields.Many2one(
         comodel_name='res.partner',
         name='Shipping Address',
@@ -37,6 +42,13 @@ class AccountMove(models.Model):
         string='Debit Note',
         compute='_compute_is_debit_note',
         store=True,
+    )
+    perception_ids = fields.One2many(
+        'perception.tax.line',
+        'invoice_id',
+        string='Perception',
+        readonly=True,
+        states={'draft': [('readonly', False)]},
     )
     aut_cae = fields.Boolean(
         'Autorizar',
@@ -71,19 +83,32 @@ class AccountMove(models.Model):
     )
     wsfe_request_ids = fields.One2many('wsfe.request.detail', 'name')
     local = fields.Boolean(related='fiscal_position_id.local')
+    fiscal_type = fields.Selection(
+        selection=[
+            ('internal', 'Internal Invoice'),
+            ('electronic', 'Electronic Invoice'),
+        ],
+        default='internal',
+    )
     is_FCE_invoice = fields.Boolean(
         string="Is FCE?",
         default=False,
         help="Set True if this invoice must be treated as Electronic Invoice of Credit.",
     )
     amount_no_taxed = fields.Monetary(
-        string='No Taxed', compute='_compute_amount_custom', store=True
+        string='No Taxed',
+        compute='_compute_amount_custom',
+        store=True,
     )
     amount_taxed = fields.Monetary(
-        string='Taxed', compute='_compute_amount_custom', store=True
+        string='Taxed',
+        compute='_compute_amount_custom',
+        store=True,
     )
     amount_exempt = fields.Monetary(
-        string='Except', compute='_compute_amount_custom', store=True
+        string='Except',
+        compute='_compute_amount_custom',
+        store=True,
     )
     # Campos para facturas de exportacion. Aca ninguno es requerido,
     # eso lo hacemos en la vista ya que depende de
@@ -91,13 +116,205 @@ class AccountMove(models.Model):
     export_type_id = fields.Many2one('wsfex.export.type.codes', 'Export Type')
     dst_country_id = fields.Many2one('wsfex.dst.country.codes', 'Dest Country')
     shipping_perm_ids = fields.One2many(
-        'wsfex.shipping.permission', 'invoice_id', 'Shipping Permissions'
+        'wsfex.shipping.permission',
+        'invoice_id',
+        'Shipping Permissions',
     )
     wsfex_request_ids = fields.One2many('wsfex.request.detail', 'invoice_id')
     optional_ids = fields.One2many(
-        'account.move.optional', 'invoice_id', 'Optionals'
+        'account.move.optional',
+        'invoice_id',
+        'Optionals',
     )
     dst_cuit_id = fields.Many2one('dst.cuit.codes', 'Country CUIT')
+    currency_preciated = fields.Boolean(
+        related='currency_id.preciated',
+        string="Currency Preciated",
+        readonly=True,
+    )
+    currency_rate = fields.Float(
+        string='Currency Rate',
+        digits=(12, 6),
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+        default=lambda x: 1.00,
+        help="It is the preciated currency rate of the invoice",
+    )
+    is_multi_currency = fields.Boolean(
+        string='Multi Currency Invoice',
+        default=False,
+        help="""Fields with internal purpose only that depicts
+                if the invoice is a multi currency one or not""",
+    )
+    currency_converted = fields.Boolean(
+        'Invoice Converted',
+        default=False,
+        help="""If this invoice was fill as multicurrency and then
+                converted to local currency, this will be checked""",
+    )
+    secondary_currency_id = fields.Many2one(
+        'res.currency',
+        string='Secondary Currency',
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+        default=lambda x: x.env.user.company_id.currency_id,
+    )
+    secondary_currency_rate = fields.Float(
+        string='Secondary Currency Rate',
+        digits=(12, 6),
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+        default=lambda x: 1.00,
+        help="It is the old currency rate of the last change of currency",
+    )
+    company_currency_id = fields.Many2one(
+        'res.currency',
+        string='Currency',
+        default=lambda x: x.env.user.company_id.currency_id,
+    )
+    amount_exempt_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Amount Exempt',
+    )
+    amount_no_taxed_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='No Taxed',
+    )
+    amount_taxed_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Taxed',
+    )
+    amount_untaxed_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Untaxed',
+    )
+    amount_tax_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Tax',
+    )
+    amount_total_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Total',
+    )
+    amount_fob_cur = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='FOB',
+    )
+    is_company_cur = fields.Boolean(compute='_compute_is_company_cur')
+
+    @api.depends(
+        'invoice_line_ids',
+        'invoice_line_ids.price_unit',
+        'invoice_line_ids.tax_ids',
+        'invoice_line_ids.quantity',
+        'invoice_line_ids.discount',
+        'currency_rate',
+    )
+    def _compute_amount_all_cur(self):
+        Currency = self.env.get('res.currency')
+        for invoice in self:
+            res = {
+                'amount_untaxed_cur': 0.0,
+                'amount_tax_cur': 0.0,
+                'amount_total_cur': 0.0,
+                'amount_fob_cur': 0.0,
+                'amount_taxed_cur': 0.0,
+                'amount_no_taxed_cur': 0.0,
+                'amount_exempt_cur': 0.0,
+            }
+
+            secondary_currency = invoice.secondary_currency_id
+            if (
+                not secondary_currency
+                or secondary_currency == invoice.currency_id
+            ):
+                invoice.update(res)
+                continue
+
+            amount_base = 0.0
+            amount_exempt = 0.0
+
+            for line in invoice.invoice_line_ids:
+                res['amount_untaxed_cur'] += line.price_subtotal
+
+                for tax in line.tax_ids:
+                    if tax.tax_group_id == self.env.ref(
+                        'l10n_ar_eynes.vat_tax_group'
+                    ):
+                        if tax.is_exempt:
+                            amount_exempt += line.amount
+                        else:
+                            amount_base += line.amount
+                    res['amount_tax_cur'] += (
+                        line.price_subtotal * tax.amount * 0.01
+                    )
+
+            date = invoice.date or invoice.date_invoice or fields.Date.today()
+            company = invoice.company_id
+            modify_cur_obj = Currency.with_context(
+                currency1=(invoice.currency_id, invoice.currency_rate),
+                currency2=(secondary_currency, invoice.secondary_currency_rate),
+            )
+            rate = modify_cur_obj._get_conversion_rate(
+                invoice.currency_id, secondary_currency, company, date
+            )
+
+            res['amount_total_cur'] *= rate
+            res['amount_untaxed_cur'] *= rate
+            res['amount_tax_cur'] *= rate
+            amount_base *= rate
+            amount_exempt *= rate
+
+            atc_rounded = secondary_currency.round(res['amount_tax_cur'])
+            atotc_rounded = secondary_currency.round(res['amount_total_cur'])
+            auc_rounded = secondary_currency.round(res['amount_untaxed_cur'])
+            amount_base = secondary_currency.round(amount_base)
+            amount_exempt = secondary_currency.round(amount_exempt)
+
+            res['amount_total_cur'] = atc_rounded + auc_rounded
+            res['amount_fob_cur'] = atotc_rounded
+            res['amount_no_taxed_cur'] = (
+                auc_rounded - amount_base - amount_exempt
+            )
+            res['amount_taxed_cur'] = amount_base
+            res['amount_exempt_cur'] = amount_exempt
+            invoice.update({field: val for field, val in res.items()})
+
+    def compute_invoice_totals(self, company_currency, invoice_move_lines):
+        modify_self = self.with_context(
+            currency1=(self.currency_id, self.currency_rate),
+            currency2=(company_currency, 1),
+        )
+        return super(AccountMove, modify_self).compute_invoice_totals(
+            company_currency, invoice_move_lines
+        )
+
+    def _compute_is_company_cur(self):
+        for invoice in self:
+            invoice.is_company_cur = (
+                invoice.company_currency_id == invoice.currency_id
+            )
 
     @api.depends('debit_origin_id')
     def _compute_is_debit_note(self):
@@ -131,7 +348,7 @@ class AccountMove(models.Model):
             super(AccountMove, self)._onchange_journal()
             self.denomination = self.journal_id.denomination
 
-    @api.onchange('partner_id')
+    @api.onchange('partner_id', 'fiscal_type')
     def _onchange_partner(self):
         if not self.partner_id:
             return
@@ -143,10 +360,223 @@ class AccountMove(models.Model):
             journals = self.env.user.journal_ids.filtered(
                 lambda j: partner_fiscal_position in j.fiscal_position_ids
             )
+            if self.fiscal_type:
+                journals = journals.filtered(
+                    lambda journal: journal.fiscal_type == self.fiscal_type
+                )
             if journals:
                 self.journal_id = journals[0]
                 self._onchange_journal()
                 return {'domain': {'journal_id': [('id', 'in', journals.ids)]}}
+
+    @api.onchange('partner_id', 'company_id')
+    def _onchange_partner_id(self):
+        res = super(AccountMove, self)._onchange_partner_id()
+        if self.is_sale_document():
+            # If partner changes set the partner_id for existent perceptions
+            perception_ids = self.perception_ids.ids
+            if self.partner_id and perception_ids:
+                upd_lst = [
+                    (1, p, {'partner_id': self.partner_id})
+                    for p in perception_ids
+                ]
+                self.perception_ids = upd_lst
+        return res
+
+    # @api.onchange('perception_ids')
+    # def _onchange_perception_ids(self):
+    #     if self.is_sale_document():
+    #         move_line_model = self.env['account.move.line']
+    #         for invoice in self:
+    #             tax_ids = []
+    #             tax_grouped = invoice.get_taxes_values()
+    #             for _key, tax_val in tax_grouped.items():
+    #                 tax_val.pop('invoice_id')
+    #                 new_perc = move_line_model.create(tax_val).id
+    #                 invoice.line_ids = [(6, 0, tax_ids)]
+
+    @api.onchange('line_ids')
+    def _onchange_line_ids(self):
+        if self.is_sale_document():
+            perc_lines = self.create_perceptions_from_partner(
+                self.partner_id, date=self.invoice_date, invoice=self
+            )
+            self.perception_ids = perc_lines
+
+    @api.onchange('currency_id', 'invoice_date')
+    def _onchange_currency_id(self):
+        self._compute_is_company_cur()
+        date_invoice = self.date or self.invoice_date or fields.Date.today()
+        if not self.currency_id:
+            self.is_multi_currency = False
+            # self.currency_rate = 1.0
+        else:
+            company = self.env.user.company_id
+            company_currency = company.currency_id
+            currency = self.currency_id
+            if currency != company_currency:
+                curr_rate = currency._get_currency_rate(company, date_invoice)
+                self.is_multi_currency = True
+                if currency.preciated:
+                    self.currency_rate = curr_rate.inverse_company_rate
+                else:
+                    self.currency_rate = curr_rate.company_rate
+            else:
+                self.is_multi_currency = False
+                self.currency_rate = 1.0
+
+        self._onchange_payment_term_date_invoice()
+        return
+
+    @api.onchange('invoice_payment_term_id', 'invoice_date')
+    def _onchange_payment_term_date_invoice(self):
+        date_invoice = self.invoice_date
+        if not date_invoice:
+            date_invoice = fields.Date.context_today(self)
+        if self.invoice_payment_term_id:
+            pterm = self.invoice_payment_term_id
+            pterm_list = pterm.with_context(
+                currency_id=self.company_id.currency_id.id
+            ).compute(value=1, date_ref=date_invoice)[0]
+            self.invoice_date_due = pterm_list[0]
+        elif self.invoice_date_due and (date_invoice > self.invoice_date_due):
+            self.invoice_date_due = date_invoice
+
+    def _get_refund_common_fields(self):
+        res = super(AccountMove, self)._get_refund_common_fields()
+        res.append('currency_rate')
+        return res
+
+    def get_invoice_amounts_in_company_cur(self):
+        res = {}
+        for inv in self:
+            if inv.is_multi_currency and not inv.currency_converted:
+                res[inv.id] = {
+                    'amount_total': inv.amount_total_cur,
+                    'amount_exempt': inv.amount_exempt_cur,
+                    'amount_no_taxed': inv.amount_no_taxed_cur,
+                    'amount_taxed': inv.amount_taxed_cur,
+                    'amount_untaxed': inv.amount_untaxed_cur,
+                    'amount_tax': inv.amount_tax_cur,
+                    'amount_fob': inv.amount_fob_cur,
+                }
+            else:
+                res[inv.id] = {
+                    'amount_total': inv.amount_total,
+                    'amount_exempt': inv.amount_exempt,
+                    'amount_no_taxed': inv.amount_no_taxed,
+                    'amount_taxed': inv.amount_taxed,
+                    'amount_untaxed': inv.amount_untaxed,
+                    'amount_tax': inv.amount_tax,
+                    # 'amount_fob': inv.amount_fob
+                }
+
+        return res
+
+    def prepare_perception_tax_line_vals(self, tax):
+        # Prepare values to create a perception.tax.line
+        # Tax parameter is the output of perception.tax.line.compute_all().
+        vals = {
+            'invoice_id': self.id,
+            'name': tax['name'],
+            'tax_id': tax['id'],
+            'amount': tax['amount'],
+            'base': tax['base'],
+            'manual': False,
+            'sequence': 10,
+            'is_exempt': False,
+            'account_analytic_id': tax.get('analytic', False),
+            'account_id': tax['account_id'],
+            'analytic_tag_ids': False,
+        }
+        return vals
+
+    def _prepare_tax_line_vals(self, line, tax):
+        """Prepare values to create an account.move.line
+
+        The line parameter is an account.move.line, and the
+        tax parameter is the output of account.tax.compute_all().
+        """
+        vals = {
+            'move_id': self.id,
+            'move_name': tax['name'],
+            'tax_id': tax['id'],
+            'account_id': self.type in ('out_invoice', 'in_invoice')
+            and (tax['account_id'] or line.account_id.id)
+            or (tax['refund_account_id'] or line.account_id.id),
+            'account_analytic_id': tax['analytic']
+            and line.account_analytic_id.id
+            or False,
+            'quantity': 1,
+            'price_unit': tax['amount'],
+            'credit': tax['amount'],
+            'balance': -tax['amount'],
+            'amount_currency': -tax['amount'],
+            'price_subtotal': tax['amount'],
+            'price_total': tax['amount'],
+            'tax_base_amount': tax['base'],
+            'sequence': tax['sequence'],
+            'analytic_tag_ids': tax['analytic']
+            and line.analytic_tag_ids.ids
+            or False,
+        }
+
+        # If the taxes generate moves on the same financial account as the invoice line,
+        # propagate the analytic account from the invoice line to the tax line.
+        # This is necessary in situations were (part of) the taxes cannot be reclaimed,
+        # to ensure the tax move is allocated to the proper analytic account.
+        if (
+            not vals.get('account_analytic_id')
+            and line.account_analytic_id
+            and vals['account_id'] == line.account_id.id
+        ):
+            vals['account_analytic_id'] = line.account_analytic_id.id
+        return vals
+
+    def get_taxes_values(self):
+        tax_grouped = {}
+        round_curr = self.currency_id.round
+        for line in self.invoice_line_ids:
+            if not line.account_id or line.display_type:
+                continue
+            price_unit = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            taxes = line.tax_ids.compute_all(
+                price_unit,
+                self.currency_id,
+                line.quantity,
+                line.product_id,
+                self.partner_id,
+            )['taxes']
+            for tax in taxes:
+                val = self._prepare_tax_line_vals(line, tax)
+                key = (
+                    self.env['account.tax']
+                    .browse(tax['id'])
+                    .get_grouping_key(val)
+                )
+
+                if key not in tax_grouped:
+                    tax_grouped[key] = val
+                    tax_grouped[key]['base'] = round_curr(val['base'])
+                else:
+                    tax_grouped[key]['amount'] += val['amount']
+                    tax_grouped[key]['base'] += round_curr(val['base'])
+        for perception in self.perception_ids:
+            taxes = perception.compute_all(self.currency_id)
+            for tax in taxes:
+                val = self.prepare_perception_tax_line_vals(tax)
+                key = (
+                    self.env['account.tax']
+                    .browse(tax['id'])
+                    .get_grouping_key(val)
+                )
+
+                if key not in tax_grouped:
+                    tax_grouped[key] = val
+                else:
+                    tax_grouped[key]['amount'] += val['amount']
+                    tax_grouped[key]['base'] += val['base']
+        return tax_grouped
 
     @api.onchange(
         'supplier_move_reference',
@@ -188,21 +618,21 @@ class AccountMove(models.Model):
 
     @api.depends('denomination', 'move_type', 'is_debit_note', 'is_FCE_invoice')
     def _compute_voucher_type(self):
-        for rec in self:
-            if rec.is_sale_document():
-                voucher_type_obj = self.env['res.voucher.type']
+        for inv in self:
+            if inv.is_sale_document():
+                voucher_type_obj = inv.env['res.voucher.type']
                 res = self.env['res.voucher.type']
 
                 inv_type = 'b'
-                if rec.move_type.endswith("refund"):
+                if inv.move_type.endswith("refund"):
                     inv_type = 'cn'
-                elif rec.is_debit_note:
+                elif inv.is_debit_note:
                     inv_type = 'dn'
 
                 res = voucher_type_obj.search(
                     [
                         ('doc_type', '=', inv_type),
-                        ('denomination', '=', rec.denomination),
+                        ('denomination', '=', inv.denomination),
                     ]
                 )
 
@@ -214,13 +644,18 @@ class AccountMove(models.Model):
                         )
                     )
 
-                if rec.is_FCE_invoice:
+                if inv.is_FCE_invoice:
                     res = res.filtered(
                         lambda voucher_type: int(voucher_type.afip_code)
                         > AFIP_FCE_CODE_START
                     )
+                else:
+                    res = res.filtered(
+                        lambda voucher_type: int(voucher_type.afip_code)
+                        < AFIP_FCE_CODE_START
+                    )
 
-                elif len(res) > 1:
+                if len(res) > 1:
                     _logger.warning(
                         _(
                             "There is more than one voucher type that "
@@ -228,7 +663,16 @@ class AccountMove(models.Model):
                         )
                     )
                 else:
-                    rec.write({'voucher_type_id': res.id})
+                    inv.voucher_type_id = res
+
+    @api.onchange('date', 'currency_id', 'currency_rate')
+    def _onchange_currency(self):
+        super()._onchange_currency()
+        if self.is_invoice(include_receipts=True):
+            for line in self._get_lines_onchange_currency():
+                line.currency_rate = self.currency_rate
+                line._onchange_currency()
+        return
 
     @api.depends('invoice_line_ids')
     def _compute_amount_custom(self):
@@ -268,13 +712,13 @@ class AccountMove(models.Model):
 
     def get_voucher_type(self):
         self.ensure_one()
-        return self.voucher_type_id
+        return int(self.voucher_type_id.afip_code)
 
     def get_pos(self):
         self.ensure_one()
-        return self.journal_id
+        return int(self.journal_id.get_pos_number())
 
-    def _get_next_wsfe_number(self, conf=False):
+    def get_next_wsfe_number(self, conf=False):
         self.ensure_one()
         if not conf:
             conf = self.get_ws_conf()
@@ -282,7 +726,7 @@ class AccountMove(models.Model):
         inv = self
         tipo_cbte = self.get_voucher_type()
         try:
-            pto_vta = int(inv.journal_id.get_pos_number())
+            pto_vta = inv.get_pos()
         except ValueError as value_err:
             err = _(
                 'Error\nEl nombre del punto de venta tiene que ser numerico'
@@ -376,19 +820,31 @@ class AccountMove(models.Model):
         if pos_ar_id:
             self.journal_id = pos_ar_id
 
+    def _set_perception_date(self):
+        # If not date write the invoice date
+        for p in self.perception_ids:
+            if not p.date:
+                date = self.invoice_date or fields.Date.context_today(self)
+                p.write({'date': date})
+
     def action_post(self):
         if self.is_sale_document():
             if self.id:
                 self.validate_denomination()
                 self.validate_period()
-                if self.check_must_be_fce():
-                    self.ensure_fce_values()
-                self.action_aut_cae()
-                if not self.payment_reference:
+                if (
+                    not self.payment_reference
+                    and self.journal_id.fiscal_type == 'internal'
+                ):
                     pos_num = self.journal_id.get_pos_number()
                     move_num = self.get_highest_pos_sequence()
                     name = "%s-%s" % (pos_num, move_num)
                     self.write({'name': name})
+                else:
+                    if self.check_must_be_fce():
+                        self.ensure_fce_values()
+                    self.action_aut_cae()
+                self._set_perception_date()
         return super(AccountMove, self).action_post()
 
     def validate_period(self):
@@ -438,6 +894,24 @@ class AccountMove(models.Model):
 
     @api.model
     def hook_add_taxes(self, inv, detalle):
+        perc_array = []
+
+        for perception in inv.perception_ids:
+            code = PCODES[perception.perception_id.jurisdiccion]
+            perc = {
+                'Id': code,
+                'BaseImp': perception.base,
+                'Importe': perception.amount,
+                'Alic': 0.0,
+                'Desc': perception.name,
+            }
+            perc_array.append(perc)
+
+        if detalle.get('Tributos'):
+            detalle['Tributos']['Tributo'] += perc_array
+        else:
+            detalle['Tributos'] = {'Tributo': perc_array}
+
         return detalle
 
     def action_aut_cae(self):
@@ -446,8 +920,8 @@ class AccountMove(models.Model):
         return True
 
     def _validate_electronic_invoices(self, first_number=False):
-        if not all(self.mapped('aut_cae')):
-            return True
+        # if not all(self.mapped('aut_cae')):
+        #     return True
 
         # self._sanitize_taxes()
         ws = self.new_ws()
@@ -462,7 +936,7 @@ class AccountMove(models.Model):
 
             for invoice_id, invoice_vals in invoices_approved.items():
                 invoice = inv_model.browse(invoice_id)
-                invoice.write({**invoice_vals, **{'state': 'open'}})
+                invoice.write({**invoice_vals})
             # Commit the info given by AFIP that was written to the invoice
             # to prevent desynchronizations
             # self.env.cr.commit()
@@ -481,7 +955,7 @@ class AccountMove(models.Model):
             # tengamos una excepcion e igualmente,
             # tenemos que escribir la request
             # Sino al hacer el rollback se pierde hasta el wsfe.request
-            self.env.cr.rollback()
+            # self.env.cr.rollback()
             try:
                 with api.Environment.manage():
                     new_env = api.Environment(new_cr, uid, ctx)
@@ -534,10 +1008,10 @@ class AccountMove(models.Model):
 
     def complete_date_invoice(self):
         for inv in self:
-            if not inv.date_invoice:
+            if not inv.invoice_date:
                 inv.write(
                     {
-                        'date_invoice': fields.Date.context_today(self),
+                        'invoice_date': fields.Date.context_today(self),
                     }
                 )
 
@@ -640,7 +1114,7 @@ class AccountMove(models.Model):
         res = super().create(vals)
         for move in res:
             if not move.invoice_date:
-                move.write({'invoice_date': date.today()})
+                move.write({'invoice_date': datetime.date.today()})
             if move.is_sale_document() or move.is_purchase_document():
                 if not move.denomination:
                     if move.is_sale_document():
@@ -757,6 +1231,120 @@ class AccountMove(models.Model):
                 % ', '.join(r[1] for r in res)
             )
 
+    @api.returns('perception.tax.line')
+    @api.model
+    def compute(self, perception_data, **kwargs):
+        # Chequeamos si la Percepcion tiene seteado un state_id, que coincida
+        # con el state_id de la direccion de entrega del partner.
+        # Sino no se realiza la Percepcion
+        partner_model = self.env['res.partner']
+        destination_shipping = self.address_shipping_id or partner_model.browse(
+            self.partner_id.address_get(['delivery']).get('delivery')
+        )
+        source_shipping = self.env.user.company_id.partner_id
+        applicable = self.check_applicable(
+            sit_iibb=perception_data['sit_iibb'],
+            from_padron=perception_data['from_padron'],
+            source_shipping_id=source_shipping,
+            destination_shipping_id=destination_shipping,
+        )
+        if not applicable:
+            return
+
+        # Chequeamos las percepciones a aplicar que matchean
+        # (esto corresponde a una percepcion pero que pueden
+        # existir varios conceptos y/o actividades)
+        perceptions = self._compute_base_perception(perception_data, **kwargs)
+
+        # Creamos las lineas de percepcion
+        new_perception_lines = self.env['perception.tax.line']
+        for concept_id, vals in perceptions.items():
+            # print concept_id, perception_vals
+            # Aplicamos la percepcion por Concepto
+            taxapp = vals['tax_app_id']
+
+            base, amount = taxapp.apply_perception(vals, perception_data)
+
+            if amount == 0.0:
+                continue
+
+            vals['amount'] = amount
+            vals['base'] = base
+
+            # Creamos la percepcion.tax.line
+            perception_line_vals = self._prepare_perception_vals(
+                concept_id,
+                vals,
+                **kwargs,
+            )
+            new_perception_lines += (
+                self.env['perception.tax.line']
+                .with_context(manual=False)
+                .new(perception_line_vals)
+            )
+        return new_perception_lines
+
+    @api.model
+    def create_perceptions_from_partner(self, partner, date=False, **kwargs):
+        # Calculamos cada Percepcion configurada en el Partner
+        partner_perceptions = partner._get_perceptions_to_apply()
+        perc_lines = self.env['perception.tax.line']
+        for partner_perc in partner_perceptions.values():
+            excluded_percent = partner_perc['excluded_percent']
+
+            # Chequeamos las fechas de eximision
+            vdate = date or datetime.date.today()
+
+            date_from = False
+            date_to = False
+            if partner_perc['ex_date_from']:
+                date_from = time.strptime(
+                    partner_perc['ex_date_from'], "%Y-%m-%d"
+                )
+            if partner_perc['ex_date_to']:
+                date_to = time.strptime(partner_perc['ex_date_to'], "%Y-%m-%d")
+
+            # TODO: Chequear cuando solo se llena uno de las dos fechas
+            if (not date_from and not date_to) or (
+                vdate >= date_from and vdate <= date_to
+            ):
+                if excluded_percent > 1.0 or excluded_percent < 0.0:
+                    raise ValidationError(
+                        _(
+                            "Perception Configuration Error!\n"
+                            "Excluded percent configured has to be "
+                            "between 0.0 and 1.0"
+                        )
+                    )
+
+                # Si esta totalmente eximido
+                if excluded_percent == 1.0:
+                    continue
+            else:
+                partner_perc['excluded_percent'] = 0.0
+
+            perc = partner_perc['perception']
+            # TODO: compute no crea percepciones,
+            # por ende  al llamar a _compute_perception_invoice_taxes
+            # no genera ningun ait nuevo
+            res = perc.compute(partner_perc, **kwargs)
+            if res:
+                perc_lines += res
+        return perc_lines
+
+    def _recompute_tax_lines(
+        self,
+        recompute_tax_base_amount=False,
+        tax_rep_lines_to_recompute=None,
+    ):
+        modify_self = self.with_context(
+            inverse_currency_rate=self.currency_rate
+        )
+        return super(AccountMove, modify_self)._recompute_tax_lines(
+            recompute_tax_base_amount,
+            tax_rep_lines_to_recompute,
+        )
+
     _sql_constraints = [
         (
             'unique_move',
@@ -780,6 +1368,12 @@ class AccountMoveLine(models.Model):
         help="Compute the counter part accounts of "
         "this journal item for this journal entry. This can be needed in reports.",
     )
+    currency_rate = fields.Float(
+        'Currency Rate',
+        digits=(12, 6),
+        readonly=False,
+        help="It is the currency rate",
+    )
 
     @api.depends('move_id.line_ids')
     def _compute_counterpart(self):
@@ -791,3 +1385,166 @@ class AccountMoveLine(models.Model):
             if len(counterpart) > 2:
                 counterpart = list(counterpart)[0:2] + ["..."]
             self.counterpart = ",".join(counterpart)
+
+    def _compute_all_vat_taxes(self):
+        tax_obj = self.env['account.tax']
+        invoice = self.move_id
+        currency = invoice.currency_id.with_context(
+            date=invoice.date_invoice or fields.Date.context_today(invoice)
+        )
+        company_currency = invoice.company_id.currency_id
+
+        result = {}
+        for line in self:
+            result[line.id] = {
+                'price_unit': 0.0,
+                'amount_untaxed': 0.0,
+                'amount_total': 0.0,
+                'amount_no_taxed': 0.0,
+                'amount_exempt': 0.0,
+                'vat_taxes': {},
+            }
+
+            # Obtenemos los valores de la linea de factura
+            line_taxes = {}
+            taxes = line.tax_ids.compute_all(
+                (line.price_unit * (1 - (line.discount or 0.0) / 100.0)),
+                invoice.currency_id,
+                line.quantity,
+                line.product_id,
+                invoice.partner_id,
+            )
+
+            amount_tax = 0.0
+            amount_base = 0.0
+            amount_exempt = 0.0
+            for tax in taxes['taxes']:
+                res = tax_obj.browse(tax['id'])
+                is_exempt = res.is_exempt
+                tax_group = res.tax_group
+                if not tax_group == 'vat':
+                    continue
+
+                val = {}
+                val['invoice_line_id'] = line.id
+                val['name'] = tax['name']
+                val['amount'] = tax['amount']
+                val['base'] = tax['base']
+                val['base_amount'] = currency.compute(
+                    val['base'], company_currency, round=False
+                )
+                val['tax_amount'] = currency.compute(
+                    val['amount'], company_currency, round=False
+                )
+                val['account_id'] = tax['account_id'] or line.account_id.id
+
+                amount_tax += tax['amount']
+                if is_exempt:
+                    amount_exempt += val['base']
+                else:
+                    amount_base += val['base']
+
+                line_taxes[tax['id']] = val
+
+            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            price_unit = price
+            amount_untaxed = line.price_subtotal
+            amount_total = amount_tax + amount_untaxed
+            amount_no_taxed = amount_untaxed - amount_base - amount_exempt
+            amount_exempt = amount_exempt
+            vat_taxes = line_taxes
+
+            result[line.id]['price_unit'] = price_unit
+            result[line.id]['amount_untaxed'] = amount_untaxed
+            result[line.id]['amount_total'] = amount_total
+            result[line.id]['amount_no_taxed'] = amount_no_taxed
+            result[line.id]['amount_exempt'] = amount_exempt
+            result[line.id]['amount_taxed'] = amount_base
+            result[line.id]['vat_taxes'] = vat_taxes
+
+        return result
+
+    def _get_computed_price_unit(self):
+        modify_self = self.with_context(
+            currency_rate=self.move_id.currency_rate
+        )
+        return super(AccountMoveLine, modify_self)._get_computed_price_unit()
+
+    def _get_price_total_and_subtotal(
+        self,
+        price_unit=None,
+        quantity=None,
+        discount=None,
+        currency=None,
+        product=None,
+        partner=None,
+        taxes=None,
+        move_type=None,
+    ):
+        modify_self = self.with_context(
+            currency_rate=self.move_id.currency_rate
+        )
+        res = super(AccountMoveLine, modify_self)._get_price_total_and_subtotal(
+            price_unit=price_unit,
+            quantity=quantity,
+            discount=discount,
+            currency=currency,
+            product=product,
+            partner=partner,
+            taxes=taxes,
+            move_type=move_type,
+        )
+        return res
+
+    def _get_fields_onchange_subtotal(
+        self,
+        price_subtotal=None,
+        move_type=None,
+        currency=None,
+        company=None,
+        date=None,
+    ):
+        modify_self = self.with_context(
+            currency_rate=self.move_id.currency_rate
+        )
+        return super(
+            AccountMoveLine, modify_self
+        )._get_fields_onchange_subtotal(
+            price_subtotal=price_subtotal,
+            move_type=move_type,
+            currency=currency,
+            company=company,
+            date=date,
+        )
+
+    def _get_fields_onchange_balance(
+        self,
+        quantity=None,
+        discount=None,
+        amount_currency=None,
+        move_type=None,
+        currency=None,
+        taxes=None,
+        price_subtotal=None,
+        force_computation=False,
+    ):
+        modify_self = self.with_context(
+            currency_rate=self.move_id.currency_rate
+        )
+        return super(AccountMoveLine, modify_self)._get_fields_onchange_balance(
+            quantity=quantity,
+            discount=discount,
+            amount_currency=amount_currency,
+            move_type=move_type,
+            currency=currency,
+            taxes=taxes,
+            price_subtotal=price_subtotal,
+            force_computation=force_computation,
+        )
+
+    @api.onchange('amount_currency')
+    def _onchange_amount_currency(self):
+        modify_self = self.with_context(
+            inverse_currency_rate=self.move_id.currency_rate
+        )
+        return super(AccountMoveLine, modify_self)._onchange_amount_currency()

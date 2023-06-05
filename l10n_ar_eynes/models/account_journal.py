@@ -6,17 +6,6 @@ from odoo.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 
 
-class FO:
-    """
-    Fake Object ( ͡º ͜ʖ ͡º)
-    """
-
-    id = False
-
-    def address_get(self):
-        return {}
-
-
 class AccountJournal(models.Model):
     _name = "account.journal"
     _description = "Journal"
@@ -28,6 +17,29 @@ class AccountJournal(models.Model):
     @api.model
     def _get_company(self):
         return self.env.user.company_id
+
+    @api.onchange('type')
+    def _get_tax_id_domain(self):
+        domain = [('active', '=', True)]
+
+        if self.type == 'retentions':
+            domain.append(
+                (
+                    'tax_group_id.name',
+                    'in',
+                    ('Retentions', 'Retenciones'),
+                )
+            )
+        elif self.type == 'perceptions':
+            domain.append(
+                (
+                    'tax_group_id.name',
+                    'in',
+                    ('Perceptions', 'Percepciones'),
+                )
+            )
+
+        return {'domain': {'tax_id': domain}}
 
     code = fields.Char(
         string='POS code',
@@ -59,6 +71,12 @@ class AccountJournal(models.Model):
         column2='fiscal_position_id',
         string='Fiscal Positions',
     )
+    fiscal_type = fields.Selection(
+        selection=[
+            ('internal', 'Internal Invoice'),
+            ('electronic', 'Electronic Invoice'),
+        ]
+    )
     activity_start_date = fields.Date(
         string="Activity Start Date", default=fields.date.today()
     )
@@ -88,15 +106,12 @@ class AccountJournal(models.Model):
             'perceptions': lambda recs: recs.write({'type': 'general'}),
         },
     )
+    fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
 
-    # RETENTIONS FIELDS
+    # RETENTIONS AND PERCEPTIONS FIELDS
     tax_id = fields.Many2one(
         comodel_name='account.tax',
         string='Tax',
-        domain=[
-            ('tax_group_id.name', 'in', ('Retentions', 'Retenciones')),
-            ('active', '=', True),
-        ],
     )
     type_tax_use = fields.Selection(
         string='Tax Application',
@@ -105,7 +120,45 @@ class AccountJournal(models.Model):
     )
     state_id = fields.Many2one(related='tax_id.state_id')
     priority = fields.Integer()
-    fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
+    sequence_id = fields.Many2one(
+        comodel_name='ir.sequence',
+        string='Sequence',
+        copy=False,
+        help='This field contains the information related to the numbering '
+        'of the journal entries of this journal.',
+    )
+    sequence_number_next = fields.Integer(
+        string='Next Number',
+        help='The next sequence number will be used for the next invoice.',
+        compute='_compute_seq_number_next',
+        inverse='_inverse_seq_number_next',
+    )
+    cn_sequence_id = fields.Many2one(
+        comodel_name='ir.sequence',
+        string='Credit Note Sequence',
+        copy=False,
+        help='This field contains the information related to the numbering '
+        'of the journal entries of this journal.',
+    )
+    cn_sequence_number_next = fields.Integer(
+        string='Credit Note Next Number',
+        help='The next sequence number will be used for the next invoice.',
+        compute='_compute_cn_seq_number_next',
+        inverse='_inverse_cn_seq_number_next',
+    )
+    dn_sequence_id = fields.Many2one(
+        comodel_name='ir.sequence',
+        string='Debit Note Sequence',
+        copy=False,
+        help='This field contains the information related to the numbering '
+        'of the journal entries of this journal.',
+    )
+    dn_sequence_number_next = fields.Integer(
+        string='Debit Note Next Number',
+        help='The next sequence number will be used for the next invoice.',
+        compute='_compute_dn_seq_number_next',
+        inverse='_inverse_dn_seq_number_next',
+    )
 
     @api.depends('type')
     def _compute_default_account_type(self):
@@ -125,6 +178,67 @@ class AccountJournal(models.Model):
             else:
                 journal.default_account_type = False
         return
+
+    @api.depends('sequence_id.use_date_range', 'sequence_id.number_next_actual')
+    def _compute_seq_number_next(self):
+        '''Compute 'sequence_number_next' according to the current sequence in use,
+        an ir.sequence or an ir.sequence.date_range.
+        '''
+        for journal in self:
+            if journal.sequence_id:
+                sequence = journal.sequence_id._get_current_sequence()
+                journal.sequence_number_next = sequence.number_next_actual
+            else:
+                journal.sequence_number_next = 1
+
+    def _inverse_seq_number_next(self):
+        '''Inverse 'sequence_number_next' to edit the current sequence next number.'''
+        for journal in self:
+            if journal.sequence_id and journal.sequence_number_next:
+                sequence = journal.sequence_id._get_current_sequence()
+                sequence.sudo().number_next = journal.sequence_number_next
+
+    @api.depends(
+        'cn_sequence_id.use_date_range', 'cn_sequence_id.number_next_actual'
+    )
+    def _compute_cn_seq_number_next(self):
+        '''Compute 'sequence_number_next' according to the current sequence in use,
+        an ir.sequence or an ir.sequence.date_range.
+        '''
+        for journal in self:
+            if journal.cn_sequence_id:
+                sequence = journal.cn_sequence_id._get_current_sequence()
+                journal.cn_sequence_number_next = sequence.number_next_actual
+            else:
+                journal.cn_sequence_number_next = 1
+
+    def _inverse_cn_seq_number_next(self):
+        '''Inverse 'sequence_number_next' to edit the current sequence next number.'''
+        for journal in self:
+            if journal.cn_sequence_id and journal.cn_sequence_number_next:
+                sequence = journal.cn_sequence_id._get_current_sequence()
+                sequence.sudo().number_next = journal.cn_sequence_number_next
+
+    @api.depends(
+        'dn_sequence_id.use_date_range', 'dn_sequence_id.number_next_actual'
+    )
+    def _compute_dn_seq_number_next(self):
+        '''Compute 'sequence_number_next' according to the current sequence in use,
+        an ir.sequence or an ir.sequence.date_range.
+        '''
+        for journal in self:
+            if journal.dn_sequence_id:
+                sequence = journal.dn_sequence_id._get_current_sequence()
+                journal.dn_sequence_number_next = sequence.number_next_actual
+            else:
+                journal.dn_sequence_number_next = 1
+
+    def _inverse_dn_seq_number_next(self):
+        '''Inverse 'sequence_number_next' to edit the current sequence next number.'''
+        for journal in self:
+            if journal.dn_sequence_id and journal.dn_sequence_number_next:
+                sequence = journal.dn_sequence_id._get_current_sequence()
+                sequence.sudo().number_next = journal.dn_sequence_number_next
 
     @api.constrains('fcred_is_fce_emitter', 'warehouse_id')
     def _check_no_more_than_one_pos_fce_per_company(self):
@@ -151,16 +265,87 @@ class AccountJournal(models.Model):
         return self.code.strip(denomination)
 
     @api.model
-    def _get_concepts_from_account(self, retention, account):
-        company = self._get_company()
-        concepts = account.retention_concept_ids.filtered(
-            lambda c: c.type == retention.tax_id.retention_type
-            and (c.company_id.id == company.id or not c.company_id)
+    def create(self, vals):
+        res = super().create(vals)
+        if res and res.type == 'sale':
+            sequence_vals = res.create_pos_sequence()
+            res.write(sequence_vals)
+        return res
+
+    def _default_outbound_payment_methods(self):
+        res = super()._default_outbound_payment_methods()
+        res -= self.env.ref(
+            'account_check_printing.account_payment_method_check'
         )
+        return res
+
+    def create_pos_sequence(self):
+        "creates a sequence using POS. returns sequence id"
+        sequence_vals = {
+            'sequence_id': {
+                'name': self.name,
+                'number_next_actual': self.sequence_number_next,
+            },
+            'cn_sequence_id': {
+                'name': self.name + _(' CN'),
+                'number_next_actual': self.cn_sequence_number_next,
+            },
+            'dn_sequence_id': {
+                'name': self.name + _(' DN'),
+                'number_next_actual': self.dn_sequence_number_next,
+            },
+        }
+        journal_seq_vals = {}
+        for seq, vals in sequence_vals.items():
+            sequence = self.env['ir.sequence'].create(
+                {
+                    'name': vals['name'],
+                    'implementation': 'no_gap',
+                    'active': True,
+                    'prefix': self.get_pos_number() + '-',
+                    'padding': 8,
+                    'number_next_actual': vals['number_next_actual'],
+                }
+            )
+            journal_seq_vals.update({seq: sequence.id})
+        return journal_seq_vals
+
+    def unlink(self):
+        self.sequence_id.unlink()
+        self.cn_sequence_id.unlink()
+        self.dn_sequence_id.unlink()
+        return super().unlink()
+
+    def get_sequence_from_invoice(self, invoice):
+        "return the sequence needed depending on the invoice type"
+        if invoice.move_type == 'out_refund':
+            return self.cn_sequence_id
+        elif invoice.move_type == 'out_invoice':
+            if invoice.debit_origin_id:
+                return self.dn_sequence_id
+            return self.sequence_id
+
+    @api.model
+    def _get_concepts_from_account(
+        self, account, retention=None, perception=None
+    ):
+        company = self._get_company()
+        err_title = "Retention Error\n"
+        if retention:
+            concepts = account.retention_concept_ids.filtered(
+                lambda c: c.type == retention.tax_id.retention_type
+                and (c.company_id.id == company.id or not c.company_id)
+            )
+        if perception:
+            concepts = account.perception_concept_ids.filtered(
+                lambda c: c.type == perception.tax_id.retention_type
+                and (c.company_id.id == company.id or not c.company_id)
+            )
+            err_title = "Perception Error\n"
         if not concepts:
             raise ValidationError(
                 _(
-                    "Retention Error\n"
+                    f"{err_title}"
                     f"Account {account.name}[{account.code}] must have "
                     f"an associated concept for {retention.name}. Please configure it!"
                 )
@@ -294,7 +479,7 @@ class AccountJournal(models.Model):
             for ml in mls:
                 # Evitamos la linea de la deuda
                 concepts = self._get_concepts_from_account(
-                    retention, ml.account_id
+                    ml.account_id, retention=retention
                 )
 
                 logging_messages.append(
@@ -448,7 +633,142 @@ class AccountJournal(models.Model):
             _logger.debug(msg)
         return retentions
 
-    _sql_constraints = [('code_unique', 'unique(code)', 'code already exists!')]
+    def _get_taxapps(self, perception_data, account, **kwargs):
+        tax_app_obj = self.env['perception.tax.application']
+        sit_iibb = perception_data['sit_iibb']
+        activity_id = perception_data['activity_id']
+
+        # Obtenemos la actividad configurada para esta Percepcion en el partner
+        activity = self.env['perception.activity'].browse(activity_id)
+
+        concepts = self._get_concepts_from_account(account, perception=self)
+
+        # Si algun concepto no esta sujeto a percepcion, continuamos
+        no_subject = False
+        for concept in concepts:
+            if concept and concept.no_subject:
+                no_subject = True
+
+        if no_subject:
+            return
+
+        concept_name = ' '.join(map(lambda a: a.name, concepts))
+        activity_name = activity and activity.name or ''
+        concept_ids = concepts and list(map(lambda a: a.id, concepts)) or []
+
+        # Buscamos las taxapps que concuerden
+        tapp_domain = [
+            ('perception_id', '=', self.id),
+            ('concept_id', 'in', concept_ids),
+            ('activity_id', '=', activity_id),
+        ]
+        iibb_domain = []
+
+        if self.type == 'gross_income':
+            iibb_domain.append(
+                ('sit_iibb', '=', sit_iibb.id if sit_iibb else False)
+            )
+        taxapps = tax_app_obj.search(tapp_domain + iibb_domain)
+
+        # Si no se encuentra con la situacion de iibb,
+        # buscamos normalmente, aplica regla general
+        if not taxapps:
+            tapp_domain.append(('sit_iibb', '=', False))
+            taxapps = tax_app_obj.search(tapp_domain)
+
+        if not taxapps:
+            raise ValidationError(
+                _(
+                    "Perception Error!\n"
+                    "There is no configured a Perception Application (%(perc_name)s) "
+                    "that corresponds to\nActivity: %(activity_name)s\n"
+                    "Concept: %(concept_name)s\n for "
+                    "the Account %(acc_name)s",
+                    perc_name=self.name,
+                    activity_name=activity_name,
+                    concept_name=concept_name,
+                    acc_name=account.name,
+                )
+            )
+
+        if len(taxapps) > 1:
+            raise ValidationError(
+                _(
+                    "Perception Error!\n"
+                    "There is more than one Perception Application (%(perc_name)s) "
+                    "that corresponds to\nActivity: %(activity_name)s\n"
+                    "Concept: %(concept_name)s\n for "
+                    "the Account %(acc_name)s",
+                    perc_name=self.name,
+                    activity_name=activity_name,
+                    concept_name=concept_name,
+                    acc_name=account.name,
+                )
+            )
+        return taxapps
+
+    @api.model
+    def _compute_base_perception(self, perception_data, **kwargs):
+        invoice = kwargs.get('invoice', False)
+        if not invoice:
+            return {}
+        percent = perception_data['percent']
+
+        concept_id = False
+
+        # Por cada linea, nos fijamos la configuracion del producto
+        perceptions = {}
+        for line in invoice.invoice_line_ids:
+            taxapps = self._get_taxapps(
+                perception_data, line.account_id, **kwargs
+            )
+            if taxapps is None:
+                continue
+
+            concept_id = taxapps.concept_id.id
+
+            # Obtenemos toda la info contable de la linea de factura
+            # todas las cantidades y los impuestos de IVA aplicados
+            res = line._compute_all_vat_taxes()[line.id]
+
+            # Hacemos el computo de la Percepcion por linea de factura
+            base = taxapps.compute_base(percent, res)
+
+            if base == 0.0:
+                continue
+
+            # Luego vamos agrupando por Concepto (no por actividad)
+            if concept_id in perceptions:
+                perceptions[concept_id]['base'] += base
+                # perceptions[concept_id]['amount'] += amount
+                perceptions[concept_id]['lines'].append(line.id)
+            else:
+                perceptions[concept_id] = {
+                    'base': base,
+                    # 'amount': amount,
+                    'lines': [line.id],
+                    'reg_code': taxapps.reg_code,
+                    'tax_app_id': taxapps,
+                }
+        return perceptions
+
+    def _prepare_perception_vals(self, concept_id, vals, **kwargs):
+        taxapp = vals['tax_app_id']
+        invoice = kwargs.get('invoice', False)
+        return {
+            'name': self.name,
+            'concept_id': concept_id,
+            'invoice_id': invoice.id if invoice else False,
+            'account_id': self.tax_id.account_id.id,
+            'base': vals['base'],
+            'amount': vals['amount'],
+            'manual': False,  # La creamos por sistema
+            'reg_code': vals['reg_code'],
+            'tax_app_id': taxapp.id,
+            'perception_id': self.id,
+            'state_id': self.state_id and self.state_id.id or False,
+            'partner_id': invoice.partner_id.id if invoice else False,
+        }
 
 
 class RetentionError(Exception):

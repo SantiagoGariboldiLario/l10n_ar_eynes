@@ -3,3 +3,4 @@ from . import wizard
 from . import controllers
 from . import utils
 from . import wsfetools
+from . import report

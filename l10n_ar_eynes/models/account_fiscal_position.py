@@ -34,6 +34,20 @@ class AccountFiscalPosition(models.Model):
         + "belonging to this Fiscal Position. Exceptions to this have to be "
         + "loaded at partner form.",
     )
+    perception_ids = fields.Many2many(
+        comodel_name='account.journal',
+        relation='fiscal_position_perception_rel',
+        column1='position_id',
+        column2='perception_id',
+        string='Perceptions',
+        domain=lambda self: [
+            ('type', '=', 'perceptions'),
+            ('company_id', '=', self.env.user.company_id.id),
+        ],
+        help="These are the perceptions that will be applied to Suppliers "
+        "belonging to this Fiscal Position. Exceptions to this have to be "
+        "loaded at partner form.",
+    )
     local = fields.Boolean(
         string='Local Fiscal Rules',
         default=True,

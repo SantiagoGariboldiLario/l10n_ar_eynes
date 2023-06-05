@@ -74,8 +74,25 @@
             </notebook>
 
             <xpath expr="//field[@name='type']" position="after">
-                <field name="fcred_is_fce_emitter" />
+                <field
+                    name="fiscal_type"
+                    attrs="{
+                        'invisible': [('type', '!=', 'sale')],
+                        'required': [('type', '=', 'sale')]
+                    }"
+                />
+                <field
+                    name="fcred_is_fce_emitter"
+                    attrs="{'invisible': [('type', '!=', 'sale')]}"
+                />
                 <field name="due_date" attrs="{'readonly': [('id', '!=', False)]}" />
+            </xpath>
+
+            <xpath
+                expr="//field[@name='outbound_payment_method_line_ids']"
+                position="attributes"
+            >
+                <attribute name="readonly">1</attribute>
             </xpath>
 
             <xpath
@@ -87,33 +104,105 @@
 
             <xpath expr="//field[@name='profit_account_id']" position="attributes">
                 <attribute name="attrs">
-                    {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks', 'retentions', 'perceptions'))]}
+                    {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks'))]}
                 </attribute>
             </xpath>
 
             <xpath expr="//field[@name='loss_account_id']" position="attributes">
                 <attribute name="attrs">
-                    {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks', 'retentions', 'perceptions'))]}
+                    {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks'))]}
                 </attribute>
             </xpath>
 
-            <xpath expr="//field[@name='default_account_id'][4]" position="after">
-                <field
-                    name="default_account_id"
-                    string="Default Income Account"
-                    attrs="{
-                        'invisible': [('type', '!=', 'receipt')],
-                    }"
-                />
-                <field
-                    name="default_account_id"
-                    string="Default Expense Account"
-                    attrs="{
-                        'invisible': [('type', '!=', 'payment')],
-                        'required': [('type', '=', 'payment')],
-                    }"
-                />
+            <xpath expr="//field[@name='default_account_id'][4]" position="attributes">
+                <attribute name="attrs">
+                    {'invisible': [('type', 'in', ('payment', 'receipt'))]}
+                </attribute>
             </xpath>
+
+            <field name="code" position="after">
+                <label
+                    for="sequence_number_next"
+                    attrs="{
+                        'invisible': [
+                            ('type', 'not in', ('sale', 'receipt', 'payment', 'retentions', 'perceptions'))
+                    ],
+                }"
+                />
+                <div>
+                    <field
+                        name="sequence_number_next"
+                        attrs="{
+                            'invisible': [
+                                ('type', 'not in', ('sale', 'receipt', 'payment', 'retentions', 'perceptions'))
+                            ],
+                        }"
+                        style="padding-right: 1.0em"
+                    />
+                    <field
+                        name="sequence_id"
+                        attrs="{
+                            'invisible': [
+                                '|',
+                                ('id', '=', False),
+                                ('type', 'not in', ('sale', 'receipt', 'payment', 'retentions', 'perceptions'))
+                            ],
+                        }"
+                    />
+                </div>
+
+                <label
+                    for="cn_sequence_number_next"
+                    attrs="{
+                        'invisible': [('type', 'not in', ('sale'))]
+                    }"
+                />
+                <div>
+                    <field
+                        name="cn_sequence_number_next"
+                        attrs="{
+                            'invisible': [('type', 'not in', ('sale'))]
+                        }"
+                        style="padding-right: 1.0em"
+                    />
+                    <field
+                        name="cn_sequence_id"
+                        attrs="{
+                            'invisible': [
+                                '|',
+                                ('id', '=', False),
+                                ('type', 'not in', ('sale'))
+                            ],
+                        }"
+                    />
+                </div>
+
+                <label
+                    for="dn_sequence_number_next"
+                    attrs="{
+                        'invisible': [('type', 'not in', ('sale'))]
+                    }"
+                />
+                <div>
+                    <field
+                        name="dn_sequence_number_next"
+                        attrs="{
+                            'invisible': [('type', 'not in', ('sale'))]
+                        }"
+                        style="padding-right: 1.0em"
+                    />
+                    <field
+                        name="dn_sequence_id"
+                        attrs="{
+                            'invisible': [
+                                '|',
+                                ('id', '=', False),
+                                ('type', 'not in', ('sale'))
+                            ],
+                        }"
+                    />
+                </div>
+            </field>
 
         </field>
     </record>
