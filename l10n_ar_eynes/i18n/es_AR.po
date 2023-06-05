@@ -332,12 +332,12 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
 msgid "Additional Information"
-msgstr ""
+msgstr "Informacion adicional"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
 msgid "Additional Information..."
-msgstr ""
+msgstr "Informacion adicional..."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__name
@@ -354,7 +354,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
 msgid "Adittional Information"
-msgstr ""
+msgstr "Información adicional"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__advance_retention_ids
@@ -705,6 +705,7 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__account_check_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__account_check_id
 msgid "Check Account"
 msgstr "Cuenta de Cheque"
 
@@ -798,6 +799,9 @@ msgid ""
 "Cannot deposit! You cannot deposit check %s                        because "
 "Payment Date is greater than                        Deposit Date."
 msgstr ""
+"¡No se pudo depositar! No se puede depositar el cheque %s                        porque "
+"la fecha de Pago es meyor a la fecha de Depósito."
+
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_load_config__cert_name
@@ -869,18 +873,13 @@ msgstr "Cheque"
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "Check %s can't be accredited!"
-msgstr ""
+msgstr "¡El Cheque %s no puede ser acreditado!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
 #, python-format
 msgid "Check : %s"
 msgstr "Cheque : %s"
-
-#. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__account_check_id
-msgid "Check Account"
-msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_check_config
@@ -1080,7 +1079,7 @@ msgstr "Cuenta de Acreditación"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__clearing
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_issued_check_line__clearing
 msgid "Clearing"
-msgstr ""
+msgstr "Clearing"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.actions.act_window,help:l10n_ar_eynes.perception_tax_line_action_tree
@@ -1654,12 +1653,12 @@ msgstr "Diferido"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__deferred_account_id
 msgid "Deferred Check Account"
-msgstr ""
+msgstr "Cuenta para cheques diferidos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__deferred_journal_id
 msgid "Deferred Check Journal"
-msgstr ""
+msgstr "Diario para cheques diferidos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__perception_ids
@@ -1684,7 +1683,7 @@ msgstr "Denominacion"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_check_deposit_form_view
 msgid "Deposit"
-msgstr ""
+msgstr "Depositar"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_bank_id
@@ -1693,27 +1692,28 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
+#: model:ir.actions.act_window,name:l10n_ar_eynes.deposit_check_action
 msgid "Deposit Check"
-msgstr ""
+msgstr "Depositar cheque"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid "Deposit Check %(check_number)s [%(voucher_number)s]"
-msgstr ""
+msgstr "Depositar cheque %(check_number)s [%(voucher_number)s]"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid "Deposit Check %(check_number)s on %(acc_number)s"
-msgstr ""
+msgstr "Depositar cheque %(check_number)s en %(acc_number)s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid "Deposit Check %s"
-msgstr ""
+msgstr "Depositar cheque %s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_date
@@ -1735,11 +1735,6 @@ msgstr "Asiento de depósito"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_slip
 msgid "Deposit Slip"
 msgstr "Boleta de depósito"
-
-#. module: l10n_ar_eynes
-#: model:ir.actions.act_window,name:l10n_ar_eynes.deposit_check_action
-msgid "Deposit check"
-msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_deposit_check_wizard
@@ -3261,7 +3256,7 @@ msgstr "Adjuntos principales"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__account_id
 msgid "Main Check Account"
-msgstr ""
+msgstr "Cuenta principal para cheques"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_request_form
@@ -3896,7 +3891,7 @@ msgstr "Líneas del metodo de pago"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
 msgid "Payments, Receipts and Debits"
-msgstr ""
+msgstr "Pagos, recibos y débitos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_bank_statement_line__aut_cae
@@ -4258,7 +4253,7 @@ msgstr "Recibo"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__receivable_rejected_account_id
 msgid "Receivable Rejected Check Account"
-msgstr ""
+msgstr "Cuenta para cheques recibidos rechazados"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__receiving_partner_id
@@ -4366,7 +4361,7 @@ msgstr "Rechazado"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__rejected_account_id
 msgid "Rejected Check Account"
-msgstr ""
+msgstr "Cuenta para cheques rechazados"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
@@ -4819,7 +4814,7 @@ msgstr "CUIT del Firmante"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__signatory_account
 msgid "Signatory account"
-msgstr ""
+msgstr "Cuenta del firmante"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_application__sit_iibb
@@ -4863,7 +4858,7 @@ msgstr "Entidad emisora"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__source_payment_order_id
 msgid "Source Payment Order"
-msgstr ""
+msgstr "Órden de pago de origen"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__start_num
@@ -5781,7 +5776,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__voucher_number
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request_detail__voucher_number
 msgid "Voucher Number"
-msgstr ""
+msgstr "Número de voucher"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_massive_sinchronize__voucher_type
