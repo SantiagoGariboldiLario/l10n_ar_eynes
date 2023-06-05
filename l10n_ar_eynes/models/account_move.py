@@ -260,7 +260,8 @@ class AccountMove(models.Model):
 
                 for tax in line.tax_ids:
                     if tax.tax_group_id == self.env.ref(
-                        'l10n_ar_eynes.vat_tax_group'
+                        'l10n_ar_eynes.vat_tax_group',
+                        raise_if_not_found=False,
                     ):
                         if tax.is_exempt:
                             amount_exempt += line.amount
