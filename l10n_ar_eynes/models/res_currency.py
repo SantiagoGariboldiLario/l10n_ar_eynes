@@ -59,9 +59,10 @@ class ResCurrency(models.Model):
         )
         return rate_id
 
-    def _convert(self, from_amount, to_currency, company, date, _round=True):
+    # pylint: disable=redefined-builtin
+    def _convert(self, from_amount, to_currency, company, date, round=True):
         res = super()._convert(
-            from_amount, to_currency, company, date, round=_round
+            from_amount, to_currency, company, date, round=round
         )
         if self._context.get('currency_rate'):
             old_rate = 1 / self._get_conversion_rate(
@@ -79,3 +80,5 @@ class ResCurrency(models.Model):
             res = res * (new_rate / old_rate)
 
         return to_currency.round(res)
+
+    # pylint: enable=redefined-builtin
