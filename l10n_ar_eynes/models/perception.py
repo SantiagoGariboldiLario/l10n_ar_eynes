@@ -42,16 +42,6 @@ class PerceptionTaxLine(models.Model):
         string='Invoice',
         ondelete='cascade',
     )
-    account_id = fields.Many2one(
-        'account.account',
-        string='Tax Account',
-        required=True,
-        domain=[
-            ('type', '<>', 'view'),
-            ('type', '<>', 'income'),
-            ('type', '<>', 'closed'),
-        ],
-    )
     base = fields.Float(
         digits='Account',
     )
@@ -78,7 +68,7 @@ class PerceptionTaxLine(models.Model):
         digits='Account',
     )
     company_id = fields.Many2one(
-        related='account_id.company_id',
+        default=lambda self: self.env.user.company_id.id,
         string='Company',
         store=True,
         readonly=True,
@@ -115,11 +105,10 @@ class PerceptionTaxLine(models.Model):
         if self.perception_id:
             res['domain'] = {
                 'concept_id': [
-                    ('type', '=', self.perception_id.perception_type)
+                    ('type', '=', self.perception_id.tax_id.retention_type)
                 ],
             }
         self.name = self.perception_id.name
-        self.account_id = self.perception_id.tax_id.account_id.id
         self.state_id = self.perception_id.state_id.id
         return res
 
@@ -137,7 +126,6 @@ class PerceptionTaxLine(models.Model):
                 'name': self.name,
                 'amount': self.amount,
                 'base': self.base,
-                'account_id': self.account_id.id,
             }
         )
 

@@ -759,7 +759,6 @@ class AccountJournal(models.Model):
             'name': self.name,
             'concept_id': concept_id,
             'invoice_id': invoice.id if invoice else False,
-            'account_id': self.tax_id.account_id.id,
             'base': vals['base'],
             'amount': vals['amount'],
             'manual': False,  # La creamos por sistema
