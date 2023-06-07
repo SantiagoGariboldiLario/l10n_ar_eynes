@@ -272,7 +272,6 @@
                     >
                         <tree>
                             <field name="name" />
-                            <field name="account_id" />
                             <field name="partner_id" invisible="1" />
                             <field name="date" />
                             <field name="perception_id" string="Perception Type" />
@@ -303,7 +302,6 @@
                                 <group string="Amounts" name="amount">
                                     <field name="base" />
                                     <field name="amount" />
-                                    <field name="account_id" invisible="1" />
                                     <field name="concept_id" />
                                 </group>
                             </group>

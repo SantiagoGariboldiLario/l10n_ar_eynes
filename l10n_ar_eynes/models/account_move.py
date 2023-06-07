@@ -1,6 +1,5 @@
 import datetime
 import logging
-import time
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -395,14 +394,6 @@ class AccountMove(models.Model):
     #                 tax_val.pop('invoice_id')
     #                 new_perc = move_line_model.create(tax_val).id
     #                 invoice.line_ids = [(6, 0, tax_ids)]
-
-    @api.onchange('line_ids')
-    def _onchange_line_ids(self):
-        if self.is_sale_document():
-            perc_lines = self.create_perceptions_from_partner(
-                self.partner_id, date=self.invoice_date, invoice=self
-            )
-            self.perception_ids = perc_lines
 
     @api.onchange('currency_id', 'invoice_date')
     def _onchange_currency_id(self):
@@ -1284,54 +1275,6 @@ class AccountMove(models.Model):
                 .new(perception_line_vals)
             )
         return new_perception_lines
-
-    @api.model
-    def create_perceptions_from_partner(self, partner, date=False, **kwargs):
-        # Calculamos cada Percepcion configurada en el Partner
-        partner_perceptions = partner._get_perceptions_to_apply()
-        perc_lines = self.env['perception.tax.line']
-        for partner_perc in partner_perceptions.values():
-            excluded_percent = partner_perc['excluded_percent']
-
-            # Chequeamos las fechas de eximision
-            vdate = date or datetime.date.today()
-
-            date_from = False
-            date_to = False
-            if partner_perc['ex_date_from']:
-                date_from = time.strptime(
-                    partner_perc['ex_date_from'], "%Y-%m-%d"
-                )
-            if partner_perc['ex_date_to']:
-                date_to = time.strptime(partner_perc['ex_date_to'], "%Y-%m-%d")
-
-            # TODO: Chequear cuando solo se llena uno de las dos fechas
-            if (not date_from and not date_to) or (
-                vdate >= date_from and vdate <= date_to
-            ):
-                if excluded_percent > 1.0 or excluded_percent < 0.0:
-                    raise ValidationError(
-                        _(
-                            "Perception Configuration Error!\n"
-                            "Excluded percent configured has to be "
-                            "between 0.0 and 1.0"
-                        )
-                    )
-
-                # Si esta totalmente eximido
-                if excluded_percent == 1.0:
-                    continue
-            else:
-                partner_perc['excluded_percent'] = 0.0
-
-            perc = partner_perc['perception']
-            # TODO: compute no crea percepciones,
-            # por ende  al llamar a _compute_perception_invoice_taxes
-            # no genera ningun ait nuevo
-            res = perc.compute(partner_perc, **kwargs)
-            if res:
-                perc_lines += res
-        return perc_lines
 
     def _recompute_tax_lines(
         self,
