@@ -184,13 +184,11 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
                 'invoice_origin': _('Check : %s') % check.number,
                 'name': name,
                 'move_type': 'out_invoice',
-                'is_debit_note': True,
                 'partner_id': partner.id,
                 'journal_id': self.journal_id.id,
                 'fiscal_position_id': partner.property_account_position_id.id,
                 'company_id': self.company_id.id,
             }
-
             lines = []
             # Linea del cheque rechazado
             account_id = self.get_account(config, check)
@@ -248,6 +246,9 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             # Volvemos a cambiar la cuenta que sobreescribio el onchange
             # debit_note_id.account_id = inv_account_id
             debit_note_id._onchange_invoice_line_ids()
+
+            # Hay que actualizar el campo 'is_debit_note' porque se computa como False:
+            debit_note_id.write({'is_debit_note': True})
 
         if check.third_party_check_state in ('delivered', 'deposited'):
             # Guardamos la referencia a la nota de debito del rechazo y cambiamos el estado
