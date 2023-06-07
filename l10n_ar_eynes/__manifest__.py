@@ -34,6 +34,7 @@
         'account_check_printing',
         'account_debit_note',
         'account',
+        'report_xlsx',
     ],
     'data': [
         'data/fiscal_position_data.xml',
