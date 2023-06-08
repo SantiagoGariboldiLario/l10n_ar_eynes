@@ -6319,3 +6319,9 @@ msgstr "base imponible"
 #: model:ir.model,name:l10n_ar_eynes.model_account_payment_order_line
 msgid "voucher lines"
 msgstr "lineas de comprobante"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid "There are no payment/receipt journals with this currency."
+msgstr "No existen diarios de recibo/pago con esta divisa."

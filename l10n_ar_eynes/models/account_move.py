@@ -1170,12 +1170,11 @@ class AccountMove(models.Model):
             )
         ]
 
+        _type = 'receipt' if self.is_sale_document() else 'payment'
         po_vals = {
-            'type': 'receipt' if self.is_sale_document() else 'payment',
+            'type': _type,
             'partner_id': self.partner_id.id,
-            'journal_id': self.get_receipt_journal().id
-            if self.is_sale_document()
-            else self.get_payment_journal().id,
+            'journal_id': self.get_payment_order_journal(_type).id,
         }
 
         if self.is_sale_document():
@@ -1184,11 +1183,18 @@ class AccountMove(models.Model):
             po_vals['debt_line_ids'] = po_move_line
         return po_vals
 
-    def get_payment_journal(self):
-        return self.env['account.journal'].search([('type', '=', 'payment')])[0]
-
-    def get_receipt_journal(self):
-        return self.env['account.journal'].search([('type', '=', 'receipt')])[0]
+    def get_payment_order_journal(self, journal_type):
+        journals = self.env['account.journal'].search(
+            [
+                ('type', '=', journal_type),
+                ('currency_id', '=', self.currency_id.id),
+            ]
+        )
+        if not journals:
+            raise ValidationError(
+                _("There are no payment/receipt journals with this currency.")
+            )
+        return journals[0]
 
     @api.constrains('name', 'journal_id', 'state')
     def _check_unique_sequence_number(self):
