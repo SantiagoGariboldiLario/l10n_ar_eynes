@@ -6643,3 +6643,7 @@ msgstr "Cheques de Tercero por Fecha de Emisión"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_check_view_calendar_payment
 msgid "Third Checks by Payment Date"
 msgstr "Cheques de Tercero por Fecha de Pago"
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid "There are no payment/receipt journals with this currency."
+msgstr "No existen diarios de recibo/pago con esta divisa."
