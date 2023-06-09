@@ -5098,6 +5098,13 @@ msgid "The Vat does not seems to be correct."
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__vat_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__vat_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__vat_date
+msgid "Vat Date"
+msgstr "Fecha de IVA"
+
+#. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format

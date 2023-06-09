@@ -430,6 +430,16 @@
                 />
             </xpath>
 
+            <xpath
+                expr="//group[@name='sale_info_group']/field[@name='debit_origin_id']"
+                position="before"
+            >
+                <field
+                    name="vat_date"
+                    attrs="{'readonly': [('state', '!=', 'draft')]}"
+                />
+            </xpath>
+
         </field>
     </record>
 

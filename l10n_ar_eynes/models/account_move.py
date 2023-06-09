@@ -222,6 +222,7 @@ class AccountMove(models.Model):
         string='FOB',
     )
     is_company_cur = fields.Boolean(compute='_compute_is_company_cur')
+    vat_date = fields.Date()
 
     @api.depends(
         'invoice_line_ids',
@@ -674,6 +675,10 @@ class AccountMove(models.Model):
                 line.currency_rate = self.currency_rate
                 line._onchange_currency()
         return
+
+    @api.onchange('invoice_date')
+    def _onchange_invoice_date(self):
+        self.vat_date = self.invoice_date
 
     @api.depends('invoice_line_ids')
     def _compute_amount_custom(self):
