@@ -37,11 +37,7 @@ class AccountMove(models.Model):
         required=False,
         states={'draft': [('readonly', False)]},
     )
-    is_debit_note = fields.Boolean(
-        string='Debit Note',
-        compute='_compute_is_debit_note',
-        store=True,
-    )
+    is_debit_note = fields.Boolean('Debit Note')
     perception_ids = fields.One2many(
         'perception.tax.line',
         'invoice_id',
@@ -68,11 +64,17 @@ class AccountMove(models.Model):
         copy=False,
         help='Fecha de vencimiento del CAE',
     )
-    associated_inv_ids = fields.Many2many(
+    origin_invoice_id = fields.Many2one(
+        comodel_name='account.move',
+        compute='_compute_origin_invoice',
+        inverse='_inverse_origin_invoice',
+        string='Origin Invoice',
+        store=True,
+    )
+    associated_inv_ids = fields.One2many(
         'account.move',
-        'account_invoice_associated_rel',
-        'invoice_id',
-        'refund_debit_id',
+        'origin_invoice_id',
+        readonly=True,
     )
     voucher_type_id = fields.Many2one(
         comodel_name='res.voucher.type',
@@ -316,13 +318,6 @@ class AccountMove(models.Model):
                 invoice.company_currency_id == invoice.currency_id
             )
 
-    @api.depends('debit_origin_id')
-    def _compute_is_debit_note(self):
-        for rec in self:
-            rec.is_debit_note = False
-            if rec.debit_origin_id:
-                rec.is_debit_note = True
-
     def get_highest_pos_sequence(self):
         invoices = self.env['account.move'].search(
             [
@@ -338,6 +333,21 @@ class AccountMove(models.Model):
 
         last_sequence_number = max(invoices.mapped('sequence_number'))
         return str(last_sequence_number + 1).zfill(8)
+
+    @api.depends('reversed_entry_id', 'debit_origin_id')
+    def _compute_origin_invoice(self):
+        for rec in self.filtered(lambda r: r.is_invoice()):
+            if rec.move_type == 'out_refund':
+                rec.origin_invoice_id = rec.reversed_entry_id
+            elif rec.move_type == 'out_invoice' and rec.is_debit_note:
+                rec.origin_invoice_id = rec.debit_origin_id
+
+    def _inverse_origin_invoice(self):
+        for rec in self:
+            if rec.move_type == 'out_refund':
+                rec.reversed_entry_id = rec.origin_invoice_id
+            elif rec.move_type == 'out_invoice' and rec.is_debit_note:
+                rec.debit_origin_id = rec.origin_invoice_id
 
     # ONCHANGE METHODS
     @api.onchange('journal_id', 'partner_id')
@@ -828,9 +838,9 @@ class AccountMove(models.Model):
                     not self.payment_reference
                     and self.journal_id.fiscal_type == 'internal'
                 ):
-                    pos_num = self.journal_id.get_pos_number()
-                    move_num = self.get_highest_pos_sequence()
-                    name = "%s-%s" % (pos_num, move_num)
+                    name = self.journal_id.get_sequence_from_invoice(
+                        self
+                    )._next()
                     self.write({'name': name})
                 else:
                     if self.check_must_be_fce():
@@ -1107,7 +1117,7 @@ class AccountMove(models.Model):
         for move in res:
             if not move.invoice_date:
                 move.write({'invoice_date': datetime.date.today()})
-            if move.is_sale_document() or move.is_purchase_document():
+            if move.is_invoice():
                 if not move.denomination:
                     if move.is_sale_document():
                         denomination = move.journal_id.denomination

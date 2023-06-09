@@ -14,3 +14,8 @@ class AccountDebitNote(models.TransientModel):
         help='If empty, uses the journal of the journal entry to be debited.',
         default=default_journal,
     )
+
+    def _prepare_default_values(self, move):
+        res = super(AccountDebitNote, self)._prepare_default_values(move)
+        res['is_debit_note'] = True
+        return res
