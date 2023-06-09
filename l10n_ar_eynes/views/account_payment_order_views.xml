@@ -1374,10 +1374,7 @@
                                         options="{'currency_field': 'currency_id'}"
                                         attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
                                     />
-                                    <field
-                                        name="actual_payment_retention"
-                                        string="Amount"
-                                    />
+                                    <field name="amount" />
                                     <field
                                         name="amount_currency"
                                         widget="monetary"
@@ -1436,25 +1433,11 @@
                                         <field name="account_id" invisible="1" />
                                         </group>
                                     </group>
-                                    <!-- <group string="Moves Information" name="moves">
-                                        <field name="manual" colspan="1" invisible="1"/>
-                                        <field name="concept_id" colspan="1"
-                                            attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"/>
-                                        <field name="move_line_ids" readonly="1" colspan="4" nolabel="1">
-                                            <separator string="Move Lines"/>
-                                            <tree string="Included Lines">
-                                                <field name="name"/>
-                                                <field name="move_id"/>
-                                                <field name="date"/>
-                                                <field name="date_maturity"/>
-                                                <field name="amount_residual"/>
-                                                <field name="balance"/>
-                                            </tree>
-                                        </field>
-                                    </group> -->
+                                    <field name="retention_type" invisible="1" />
                                     <group
                                         name="more_information"
                                         string="More information"
+                                        attrs="{'invisible': [('retention_type', '!=', 'profit')]}"
                                     >
                                         <field name="retention_move_line_ids">
                                             <tree>
