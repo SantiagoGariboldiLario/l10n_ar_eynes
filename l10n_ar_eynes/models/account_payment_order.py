@@ -1113,6 +1113,8 @@ class AccountPaymentOrder(models.Model):
 
                 _logger.info(f"Retentions to create 1: {pf(vals)}")
                 po.retention_ids = [(0, 0, val) for val in vals]
+                for retention in po.retention_ids:
+                    retention.onchange_actual_payment_retention()
             else:
                 if not po.amount:
                     po.retention_ids = [(5, 0, 0)]
@@ -2113,8 +2115,11 @@ class AccountPaymentOrderRetentionLine(models.Model):
     _name = 'account.payment.order.retention.line'
     _description = 'Retention lines in payment order'
 
-    def get_retention_move_lines(self):
-        if self.payment_order_id.disable_retentions:
+    def default_retention_move_lines(self):
+        if (
+            self.payment_order_id.disable_retentions
+            or not self.is_profit_retention()
+        ):
             return []
         return self.create_retention_lines()
 
@@ -2154,7 +2159,11 @@ class AccountPaymentOrderRetentionLine(models.Model):
         required=True,
         domain=[('type', '=', 'retentions')],
         help="Retention configuration used for this retention tax, where "
-        + "all the configuration resides. Accounts, Tax Codes, etc.",
+        "all the configuration resides. Accounts, Tax Codes, etc.",
+    )
+    retention_type = fields.Selection(
+        string='Retention Type',
+        related='retention_id.tax_id.retention_type',
     )
     base_amount = fields.Float(
         string='Base Code Amount',
@@ -2216,7 +2225,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         comodel_name='retention.move.line',
         inverse_name='payment_order_line_id',
         string='Retention move lines',
-        default=get_retention_move_lines,
+        default=default_retention_move_lines,
         readonly=True,
     )
     retention_move_lines_total = fields.Float(
@@ -2230,10 +2239,14 @@ class AccountPaymentOrderRetentionLine(models.Model):
         related='taxapp_id.concept_id',
     )
     concept_amount = fields.Float(
-        string='Amount', digits='Account', related='taxapp_id.tax_allowance'
+        string='Amount',
+        digits='Account',
+        related='taxapp_id.tax_allowance',
     )
     applied_aliquot = fields.Float(
-        string='Aliquot applied', digits='Account', related='taxapp_id.percent'
+        string='Aliquot applied',
+        digits='Account',
+        related='taxapp_id.percent',
     )
     total_month_retention = fields.Float(
         string='Total month retention',
@@ -2366,6 +2379,16 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 rec.total_month_retention - rec.month_applied_retentions
             )
 
+    @api.depends('amount', 'currency_rate')
+    def _compute_amount_currency(self):
+        for rec in self:
+            rec.amount_currency = rec.amount / rec.currency_rate
+
+    @api.depends('base', 'currency_rate')
+    def _compute_base_currency(self):
+        for rec in self:
+            rec.base_currency = rec.base / rec.currency_rate
+
     @api.onchange('retention_id')
     def onchange_retention_id(self):
         res = {}
@@ -2377,15 +2400,13 @@ class AccountPaymentOrderRetentionLine(models.Model):
             }
         return res
 
-    @api.depends('amount', 'currency_rate')
-    def _compute_amount_currency(self):
-        for rec in self:
-            rec.amount_currency = rec.amount / rec.currency_rate
+    # @api.onchange('actual_payment_retention')
+    def onchange_actual_payment_retention(self):
+        if self.is_profit_retention():
+            self.update({'amount': self.actual_payment_retention})
 
-    @api.depends('base', 'currency_rate')
-    def _compute_base_currency(self):
-        for rec in self:
-            rec.base_currency = rec.base / rec.currency_rate
+    def is_profit_retention(self):
+        return self.retention_type == 'profit'
 
     def create_voucher_move_line(self):
         voucher = self.payment_order_id
