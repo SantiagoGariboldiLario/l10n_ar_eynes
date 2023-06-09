@@ -125,7 +125,11 @@
                 expr="//group[@class='oe_invoice_lines_tab']/group[1]"
                 position="replace"
             >
-                <group colspan="4">
+                <!-- If the invoice has same currency than the company -->
+                <group
+                    colspan="8"
+                    attrs="{'invisible': [('secondary_currency_id', '!=', False), ('is_company_cur','=', False)]}"
+                >
                     <field
                         name="narration"
                         placeholder="Terms and Conditions"
@@ -133,9 +137,20 @@
                         nolabel="1"
                     />
                 </group>
-                <!-- Pensar la idea de moneda secundaria y apartir de ahi decidir cuando se ve -->
 
-                <!-- <group class="oe_subtotal_footer" style="display: inline-block" attrs="{'invisible': [('is_multi_currency','=',False), ('currency_converted', '=', False)]}"> -->
+                <!-- otherwise -->
+                <group
+                    colspan="4"
+                    attrs="{'invisible': ['|',('secondary_currency_id', '=', False), ('is_company_cur','=', True)]}"
+                >
+                    <field
+                        name="narration"
+                        placeholder="Terms and Conditions"
+                        class="oe_inline text-break"
+                        nolabel="1"
+                    />
+                </group>
+
                 <group
                     colspan="4"
                     class="oe_subtotal_footer oe_right"
