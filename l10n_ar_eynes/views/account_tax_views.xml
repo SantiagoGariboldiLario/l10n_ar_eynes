@@ -28,14 +28,20 @@
                                 name="applicable_state"
                                 attrs="{'invisible':[('jurisdiccion','!=','provincial')], 'required':[('jurisdiccion','=','provincial')]}"
                             />
-                            <field name="from_register_ARBA" />
-                            <field name="from_register_AGIP" />
-                        </group>
-                        <group string="Usability Configuration">
                             <field
-                                name="check_sit_iibb"
-                                attrs="{'invisible':[('jurisdiccion','!=','provincial')]}"
+                                name="from_register_ARBA"
+                                attrs="{'invisible': [('jurisdiccion','!=','provincial')]}"
                             />
+                            <field
+                                name="from_register_AGIP"
+                                attrs="{'invisible': [('jurisdiccion','!=','provincial')]}"
+                            />
+                        </group>
+                        <group
+                            string="Usability Configuration"
+                            attrs="{'invisible':[('jurisdiccion','!=','provincial')]}"
+                        >
+                            <field name="check_sit_iibb" />
                             <field name="always_apply_padron" />
                         </group>
                     </group>
