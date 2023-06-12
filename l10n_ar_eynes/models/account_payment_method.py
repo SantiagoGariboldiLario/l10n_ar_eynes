@@ -7,7 +7,10 @@ class AccountPaymentMethod(models.Model):
     @api.model
     def _get_payment_method_information(self):
         res = super()._get_payment_method_information()
-        res['bank_transfers'] = {'mode': 'multi', 'domain': [('type', '=', 'bank')]}
+        res['bank_transfers'] = {
+            'mode': 'multi',
+            'domain': [('type', '=', 'bank')],
+        }
         return res
 
 
@@ -18,8 +21,6 @@ class AccountPaymentMethodLine(models.Model):
     type = fields.Selection(
         selection=[('common', 'Common'), ('deferred', 'Deferred')],
         string='Type',
-        default='common',
-        required=True,
     )
     format = fields.Selection(
         selection=[
@@ -47,7 +48,10 @@ class AccountPaymentMethodLine(models.Model):
         comodel_name='account.check',
         inverse_name='checkbook_id',
         string='Available Checks',
-        domain=[('internal_type', '=', 'issued'), ('issued_check_state', '=', 'draft')],
+        domain=[
+            ('internal_type', '=', 'issued'),
+            ('issued_check_state', '=', 'draft'),
+        ],
     )
     cancelled_issued_check_ids = fields.One2many(
         comodel_name='account.check',
