@@ -46,9 +46,10 @@
                         </group>
                     </group>
 
-                    <group colspan="4" col="6" string="Tax Application">
-                        <field name="retention_type" colspan="2" />
-                        <separator name="tax_application" />
+                    <group string="Tax Application" name="tax_application">
+                        <group colspan="4" col="6">
+                            <field name="retention_type" colspan="2" />
+                        </group>
                         <field
                             name="vat_application_ids"
                             nolabel="1"
