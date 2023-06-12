@@ -21,8 +21,6 @@ class AccountPaymentMethodLine(models.Model):
     type = fields.Selection(
         selection=[('common', 'Common'), ('deferred', 'Deferred')],
         string='Type',
-        default='common',
-        required=True,
     )
     format = fields.Selection(
         selection=[
