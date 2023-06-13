@@ -244,6 +244,11 @@ msgid "Account payment order"
 msgstr "Pagos de Clientes"
 
 #. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_report_account_report_invoice
+msgid "Account report without payment lines"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_supplier_payment_order_action
 msgid "Account supplier payment order"
 msgstr "Pagos a Proveedores"
@@ -425,6 +430,7 @@ msgstr "Siempre aplicar desde el padron"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__price
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__amount
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 msgid "Amount"
 msgstr "Importe"
 
@@ -473,6 +479,7 @@ msgid "Amount in Partner Currency"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Amounts"
@@ -793,6 +800,16 @@ msgid "Cancelled Checks"
 msgstr "Cheques Cancelados"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
+msgid "Cancelled Debit Nore"
+msgstr "Nota de débito cancelada"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
+msgid "Cancelled Invoice"
+msgstr "Factura cancelada"
+
+#. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid ""
@@ -880,6 +897,11 @@ msgstr "¡El Cheque %s no puede ser acreditado!"
 #, python-format
 msgid "Check : %s"
 msgstr "Cheque : %s"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__account_check_id
+msgid "Check Account"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_check_config
@@ -1059,6 +1081,13 @@ msgstr "Chequeras"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Checks"
 msgstr "Cheques"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_move_reversal__refund_method
+msgid ""
+"Choose how you want to credit this invoice. You cannot \"modify\" nor "
+"\"cancel\" if the invoice is already reconciled."
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.certificate_renewal_wizard
@@ -1447,7 +1476,13 @@ msgid "Created on"
 msgstr "Creado en"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move_reversal__refund_method
+msgid "Credit Method"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__res_voucher_type__doc_type__cn
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 msgid "Credit Note"
 msgstr "Nota de Crédito"
 
@@ -1593,6 +1628,11 @@ msgid "Date Processed"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
+msgid "Debit Note"
+msgstr "Nota de débito"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__is_debit_note
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__debit_note_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__is_debit_note
@@ -1735,6 +1775,11 @@ msgstr "Asiento de depósito"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_slip
 msgid "Deposit Slip"
 msgstr "Boleta de depósito"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.deposit_check_action
+msgid "Deposit check"
+msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_deposit_check_wizard
@@ -1956,6 +2001,16 @@ msgstr ""
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__draft
 msgid "Draft"
 msgstr "Borrador"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
+msgid "Draft Debit Note"
+msgstr "Nota de débito borrador"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
+msgid "Draft Invoice"
+msgstr "Factura borrador"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__due_date
@@ -2709,9 +2764,15 @@ msgid "Info OK"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Information"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:account.tax.group,name:l10n_ar_eynes.internal_tax_group
+msgid "Internal"
 msgstr ""
 
 #. module: l10n_ar_eynes
@@ -2738,6 +2799,7 @@ msgstr "Tipo interno"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__invoice_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__invoice_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_shipping_permission__invoice_id
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 #, python-format
 msgid "Invoice"
 msgstr "Factura"
@@ -2985,6 +3047,7 @@ msgid "Keep Open"
 msgstr "Mantener abierto"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Keep it empty if the date is the same as the voucher."
 msgstr ""
@@ -3649,6 +3712,13 @@ msgid "Origin"
 msgstr "Origen"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__origin_invoice_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__origin_invoice_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__origin_invoice_id
+msgid "Origin Invoice"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_original
 msgid "Original Amount"
 msgstr "Monto original"
@@ -3659,6 +3729,7 @@ msgid "Original Amount CCY"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:account.tax.group,name:l10n_ar_eynes.other_tax_group
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__retention_type__other
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__perception_activity__type__other
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__perception_concept__type__other
@@ -4525,6 +4596,8 @@ msgid "Retention Scales"
 msgstr "Escalas de Retenciones"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__retention_type
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Retention Type"
 msgstr "Tipo de Retención"
@@ -4583,6 +4656,7 @@ msgid "Retention will be calculated over this amount."
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_retention_line__retention_type
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_tax__retention_type
 msgid "Retention/Perception type"
 msgstr ""
@@ -4594,6 +4668,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__type__retentions
 #: model:ir.ui.menu,name:l10n_ar_eynes.retentions_menu
 #: model:ir.ui.menu,name:l10n_ar_eynes.taxes_retentions_submenu
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_journal_view_form_inherit_l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_view_tax_form_inherit_l10n_ar_eynes
@@ -5171,6 +5246,12 @@ msgid "There are more than one voucher referenced to check %s."
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid "There are no payment/receipt journals with this currency."
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/retention.py:0
 #, python-format
 msgid ""
@@ -5733,9 +5814,31 @@ msgid "Value"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:account.tax.group,name:l10n_ar_eynes.vat_tax_group
+msgid "Vat"
+msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__vat_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__vat_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__vat_date
+msgid "Vat Date"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_config_form
 msgid "Vat Taxes Mapping"
 msgstr ""
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
+msgid "Vendor Bill"
+msgstr "Factura de proveedor"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
+msgid "Vendor Credit Note"
+msgstr "Nota de crédito de proveedor"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__verification_required
