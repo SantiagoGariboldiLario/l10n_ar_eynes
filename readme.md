@@ -100,3 +100,4 @@ Doodba implementation
     M2Crypto==0.38.0
     pyOpenSSL
     pandas
+    qrcode
