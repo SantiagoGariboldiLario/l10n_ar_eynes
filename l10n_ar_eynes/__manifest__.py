@@ -88,10 +88,11 @@
         "wizard/wsfe_massive_sinchronize_view.xml",
         "views/wsfe_view.xml",
         "views/res_company_view.xml",
+        'views/report_invoice.xml',
     ],
     'installable': True,
     'application': True,
     "external_dependencies": {
-        "python": ["M2Crypto", "OpenSSL", "easywsy", "suds"]
+        "python": ["M2Crypto", "OpenSSL", "easywsy", "suds", "qrcode"]
     },
 }

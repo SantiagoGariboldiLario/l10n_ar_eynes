@@ -1,5 +1,11 @@
+import base64
 import datetime
+import json
 import logging
+import urllib.parse
+from io import BytesIO
+
+import qrcode
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -1309,6 +1315,60 @@ class AccountMove(models.Model):
             recompute_tax_base_amount,
             tax_rep_lines_to_recompute,
         )
+
+    def _generate_qr_afip_url(self):
+        voucher_type = self.get_voucher_type()
+        pos = self.get_pos()
+        date_dt = self.invoice_date.strftime("%Y-%m-%d")
+        invoice_qr_data = {
+            'ver': 1,
+            'fecha': date_dt,
+            'cuit': int(self.partner_id.vat or '0'),
+            'ptoVta': pos,
+            'tipoCmp': voucher_type,
+            'nroCmp': int(self.name.split('-')[1]),
+            'importe': round(self.amount_total, 2),
+            'moneda': str(self.currency_id.name or ''),
+            'ctz': "%.6f" % (self.amount_total),
+            'tipoDocRec': int(
+                self.partner_id.document_type_id.afip_code or '0'
+            ),
+            'nroDocRec': int(self.partner_id.vat or '0'),
+            'tipoCodAut': 'E',
+            'codAut': int(self.cae or '0') or '00000000000000',
+        }
+        data = json.dumps(invoice_qr_data)
+        qr_text = 'https://www.afip.gob.ar/fe/qr/?p=' + base64.b64encode(
+            bytes(data, 'utf-8')
+        ).decode('utf-8')
+        qr_text = urllib.parse.quote(qr_text)
+
+        return qr_text
+
+    def _generate_qr(self, txt=''):
+        qr_code = qrcode.QRCode(version=4, box_size=4, border=1)
+        qr_code.add_data(txt)
+        qr_code.make(fit=True)
+        qr_img = qr_code.make_image()
+        im = qr_img._img.convert("RGB")
+        buffered = BytesIO()
+        im.save(buffered, format="JPEG")
+        img_str = base64.b64encode(buffered.getvalue()).decode('ascii')
+
+        return img_str
+
+    def get_qr_code(self):
+        if not self.cae:
+            return False
+        url = self._generate_qr_afip_url()
+        return self._generate_qr(url)
+
+    def _get_name_invoice_report(self):
+        """This method need to be inherit by the localizations if they want to
+        print a custom invoice report instead of
+        the default one. For example please review the l10n_ar module"""
+        self.ensure_one()
+        return 'l10n_ar_eynes.report_invoice_document'
 
     _sql_constraints = [
         (

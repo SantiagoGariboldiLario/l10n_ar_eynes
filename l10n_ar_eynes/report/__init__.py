@@ -5,3 +5,4 @@
 #
 ##############################################################################
 from . import report_subjournal_xlsx  # noqa
+from . import account_invoice_report  # noqa
