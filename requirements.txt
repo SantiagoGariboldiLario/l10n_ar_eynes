@@ -3,4 +3,5 @@
 easywsy
 M2Crypto
 pyOpenSSL
+qrcode
 suds-jurko
