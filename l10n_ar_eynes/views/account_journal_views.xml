@@ -104,7 +104,10 @@
 
             <xpath expr="//field[@name='profit_account_id']" position="attributes">
                 <attribute name="attrs">
-                    {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks'))]}
+                    {
+                        'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks', 'retentions', 'perceptions'))],
+                        'required': [('type', 'in', ('retentions'))]
+                    }
                 </attribute>
             </xpath>
 
@@ -116,7 +119,7 @@
 
             <xpath expr="//field[@name='default_account_id'][4]" position="attributes">
                 <attribute name="attrs">
-                    {'invisible': [('type', 'in', ('payment', 'receipt'))]}
+                    {'invisible': [('type', 'in', ('payment', 'receipt', 'retentions'))]}
                 </attribute>
             </xpath>
 
