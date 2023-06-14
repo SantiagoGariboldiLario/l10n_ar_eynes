@@ -77,9 +77,12 @@ class AccountMove(models.Model):
         string='Origin Invoice',
         store=True,
     )
-    associated_inv_ids = fields.One2many(
+    associated_inv_ids = fields.Many2many(
         comodel_name='account.move',
-        compute='_compute_associated_inv_ids',
+        relation='inv_associated_inv_rel',
+        column1='invoice_id',
+        column2='associated_invoice_id',
+        string='Assoiciated Invoices',
     )
     voucher_type_id = fields.Many2one(
         comodel_name='res.voucher.type',
@@ -354,16 +357,6 @@ class AccountMove(models.Model):
                 rec.reversed_entry_id = rec.origin_invoice_id
             elif rec.move_type == 'out_invoice' and rec.is_debit_note:
                 rec.debit_origin_id = rec.origin_invoice_id
-
-    @api.depends('origin_invoice_id')
-    def _compute_associated_inv_ids(self):
-        for rec in self.filtered(lambda r: r.is_invoice()):
-            if rec.move_type == 'out_refund':
-                rec.associated_inv_ids = rec.reversed_entry_id
-            elif rec.move_type == 'out_invoice' and rec.is_debit_note:
-                rec.associated_inv_ids = rec.debit_origin_id
-            else:
-                rec.associated_inv_ids = rec.associated_inv_ids
 
     # ONCHANGE METHODS
     @api.onchange('journal_id', 'partner_id')
