@@ -83,6 +83,8 @@ class AccountMove(models.Model):
         column1='invoice_id',
         column2='associated_invoice_id',
         string='Assoiciated Invoices',
+        readonly=True,
+        states={'draft': [('readonly', False)]},
     )
     voucher_type_id = fields.Many2one(
         comodel_name='res.voucher.type',
