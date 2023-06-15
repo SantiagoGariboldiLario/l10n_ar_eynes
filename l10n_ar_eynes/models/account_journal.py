@@ -645,7 +645,7 @@ class AccountJournal(models.Model):
             _logger.debug(msg)
         return retentions
 
-    def _get_taxapps(self, perception_data, account, **kwargs):
+    def _get_taxapps(self, perception_data, account):
         tax_app_obj = self.env['perception.tax.application']
         sit_iibb = perception_data['sit_iibb']
         activity_id = perception_data['activity_id']
@@ -670,7 +670,7 @@ class AccountJournal(models.Model):
 
         # Buscamos las taxapps que concuerden
         tapp_domain = [
-            ('perception_id', '=', self.id),
+            ('perception_tax_id', '=', self.tax_id.id),
             ('concept_id', 'in', concept_ids),
             ('activity_id', '=', activity_id),
         ]
@@ -720,8 +720,7 @@ class AccountJournal(models.Model):
         return taxapps
 
     @api.model
-    def _compute_base_perception(self, perception_data, **kwargs):
-        invoice = kwargs.get('invoice', False)
+    def _compute_base_perception(self, perception_data, invoice):
         if not invoice:
             return {}
         percent = perception_data['percent']
@@ -731,9 +730,7 @@ class AccountJournal(models.Model):
         # Por cada linea, nos fijamos la configuracion del producto
         perceptions = {}
         for line in invoice.invoice_line_ids:
-            taxapps = self._get_taxapps(
-                perception_data, line.account_id, **kwargs
-            )
+            taxapps = self._get_taxapps(perception_data, line.account_id)
             if taxapps is None:
                 continue
 
@@ -764,9 +761,8 @@ class AccountJournal(models.Model):
                 }
         return perceptions
 
-    def _prepare_perception_vals(self, concept_id, vals, **kwargs):
+    def _prepare_perception_vals(self, concept_id, vals, invoice):
         taxapp = vals['tax_app_id']
-        invoice = kwargs.get('invoice', False)
         return {
             'name': self.name,
             'concept_id': concept_id,

@@ -2,6 +2,7 @@ import base64
 import datetime
 import json
 import logging
+import time
 import urllib.parse
 from io import BytesIO
 
@@ -404,17 +405,23 @@ class AccountMove(models.Model):
                 self.perception_ids = upd_lst
         return res
 
-    # @api.onchange('perception_ids')
-    # def _onchange_perception_ids(self):
-    #     if self.is_sale_document():
-    #         move_line_model = self.env['account.move.line']
-    #         for invoice in self:
-    #             tax_ids = []
-    #             tax_grouped = invoice.get_taxes_values()
-    #             for _key, tax_val in tax_grouped.items():
-    #                 tax_val.pop('invoice_id')
-    #                 new_perc = move_line_model.create(tax_val).id
-    #                 invoice.line_ids = [(6, 0, tax_ids)]
+    @api.onchange('perception_ids')
+    def _onchange_perception_ids(self):
+        for invoice in self:
+            move_line_model = self.env['account.move.line']
+            if invoice.is_sale_document():
+                for perception_line in invoice.perception_ids:
+                    new_move_line_vals = self._prepare_tax_line_vals(
+                        perception_line
+                    )
+                    prev_move_line = invoice.line_ids.filtered(
+                        lambda line: line.tax_line_id
+                        == perception_line.perception_id.tax_id
+                    )
+                    if prev_move_line:
+                        self.line_ids -= prev_move_line
+                    move_line_model.new(new_move_line_vals)
+                    invoice._recompute_dynamic_lines()
 
     @api.onchange('currency_id', 'invoice_date')
     def _onchange_currency_id(self):
@@ -486,110 +493,29 @@ class AccountMove(models.Model):
 
         return res
 
-    def prepare_perception_tax_line_vals(self, tax):
-        # Prepare values to create a perception.tax.line
-        # Tax parameter is the output of perception.tax.line.compute_all().
-        vals = {
-            'invoice_id': self.id,
-            'name': tax['name'],
-            'tax_id': tax['id'],
-            'amount': tax['amount'],
-            'base': tax['base'],
-            'manual': False,
-            'sequence': 10,
-            'is_exempt': False,
-            'account_analytic_id': tax.get('analytic', False),
-            'account_id': tax['account_id'],
-            'analytic_tag_ids': False,
-        }
-        return vals
-
-    def _prepare_tax_line_vals(self, line, tax):
+    def _prepare_tax_line_vals(self, perception_line):
         """Prepare values to create an account.move.line
 
-        The line parameter is an account.move.line, and the
-        tax parameter is the output of account.tax.compute_all().
+        The perception_line parameter is an perception.tax.line
         """
+        perception_tax = perception_line.perception_id.tax_id
         vals = {
             'move_id': self.id,
-            'move_name': tax['name'],
-            'tax_id': tax['id'],
-            'account_id': self.type in ('out_invoice', 'in_invoice')
-            and (tax['account_id'] or line.account_id.id)
-            or (tax['refund_account_id'] or line.account_id.id),
-            'account_analytic_id': tax['analytic']
-            and line.account_analytic_id.id
-            or False,
+            'name': perception_line.name,
+            'tax_line_id': perception_tax.id,
+            'account_id': perception_tax.tax_group_id.property_tax_payable_account_id.id,
             'quantity': 1,
-            'price_unit': tax['amount'],
-            'credit': tax['amount'],
-            'balance': -tax['amount'],
-            'amount_currency': -tax['amount'],
-            'price_subtotal': tax['amount'],
-            'price_total': tax['amount'],
-            'tax_base_amount': tax['base'],
-            'sequence': tax['sequence'],
-            'analytic_tag_ids': tax['analytic']
-            and line.analytic_tag_ids.ids
-            or False,
+            'price_unit': perception_line.amount,
+            'credit': perception_line.amount,
+            'balance': -perception_line.amount,
+            'amount_currency': -perception_line.amount,
+            'price_subtotal': perception_line.amount,
+            'price_total': perception_line.amount,
+            'tax_base_amount': perception_line.base,
+            'sequence': perception_tax.tax_group_id.sequence,
+            'exclude_from_invoice_tab': True,
         }
-
-        # If the taxes generate moves on the same financial account as the invoice line,
-        # propagate the analytic account from the invoice line to the tax line.
-        # This is necessary in situations were (part of) the taxes cannot be reclaimed,
-        # to ensure the tax move is allocated to the proper analytic account.
-        if (
-            not vals.get('account_analytic_id')
-            and line.account_analytic_id
-            and vals['account_id'] == line.account_id.id
-        ):
-            vals['account_analytic_id'] = line.account_analytic_id.id
         return vals
-
-    def get_taxes_values(self):
-        tax_grouped = {}
-        round_curr = self.currency_id.round
-        for line in self.invoice_line_ids:
-            if not line.account_id or line.display_type:
-                continue
-            price_unit = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
-            taxes = line.tax_ids.compute_all(
-                price_unit,
-                self.currency_id,
-                line.quantity,
-                line.product_id,
-                self.partner_id,
-            )['taxes']
-            for tax in taxes:
-                val = self._prepare_tax_line_vals(line, tax)
-                key = (
-                    self.env['account.tax']
-                    .browse(tax['id'])
-                    .get_grouping_key(val)
-                )
-
-                if key not in tax_grouped:
-                    tax_grouped[key] = val
-                    tax_grouped[key]['base'] = round_curr(val['base'])
-                else:
-                    tax_grouped[key]['amount'] += val['amount']
-                    tax_grouped[key]['base'] += round_curr(val['base'])
-        for perception in self.perception_ids:
-            taxes = perception.compute_all(self.currency_id)
-            for tax in taxes:
-                val = self.prepare_perception_tax_line_vals(tax)
-                key = (
-                    self.env['account.tax']
-                    .browse(tax['id'])
-                    .get_grouping_key(val)
-                )
-
-                if key not in tax_grouped:
-                    tax_grouped[key] = val
-                else:
-                    tax_grouped[key]['amount'] += val['amount']
-                    tax_grouped[key]['base'] += val['base']
-        return tax_grouped
 
     @api.onchange(
         'supplier_move_reference',
@@ -1254,9 +1180,9 @@ class AccountMove(models.Model):
                 % ', '.join(r[1] for r in res)
             )
 
-    @api.returns('perception.tax.line')
     @api.model
-    def compute(self, perception_data, **kwargs):
+    def compute_perception(self, perception_data):
+        perception_id = perception_data['perception']
         # Chequeamos si la Percepcion tiene seteado un state_id, que coincida
         # con el state_id de la direccion de entrega del partner.
         # Sino no se realiza la Percepcion
@@ -1265,7 +1191,7 @@ class AccountMove(models.Model):
             self.partner_id.address_get(['delivery']).get('delivery')
         )
         source_shipping = self.env.user.company_id.partner_id
-        applicable = self.check_applicable(
+        applicable = perception_id.check_applicable(
             sit_iibb=perception_data['sit_iibb'],
             from_padron=perception_data['from_padron'],
             source_shipping_id=source_shipping,
@@ -1277,12 +1203,13 @@ class AccountMove(models.Model):
         # Chequeamos las percepciones a aplicar que matchean
         # (esto corresponde a una percepcion pero que pueden
         # existir varios conceptos y/o actividades)
-        perceptions = self._compute_base_perception(perception_data, **kwargs)
+        perceptions = perception_id._compute_base_perception(
+            perception_data, self
+        )
 
         # Creamos las lineas de percepcion
         new_perception_lines = self.env['perception.tax.line']
         for concept_id, vals in perceptions.items():
-            # print concept_id, perception_vals
             # Aplicamos la percepcion por Concepto
             taxapp = vals['tax_app_id']
 
@@ -1295,10 +1222,8 @@ class AccountMove(models.Model):
             vals['base'] = base
 
             # Creamos la percepcion.tax.line
-            perception_line_vals = self._prepare_perception_vals(
-                concept_id,
-                vals,
-                **kwargs,
+            perception_line_vals = perception_id._prepare_perception_vals(
+                concept_id, vals, self
             )
             new_perception_lines += (
                 self.env['perception.tax.line']
@@ -1306,6 +1231,54 @@ class AccountMove(models.Model):
                 .new(perception_line_vals)
             )
         return new_perception_lines
+
+    @api.onchange('invoice_line_ids')
+    def compute_perceptions(self):
+        for rec in self:
+            if rec.is_sale_document():
+                new_perception_lines = self.env['perception.tax.line']
+                # Calculamos cada Percepcion configurada en el Partner
+                partner_perceptions = rec.partner_id._get_perceptions_to_apply()
+                for partner_perc in partner_perceptions.values():
+                    excluded_percent = partner_perc['excluded_percent']
+
+                    # Chequeamos las fechas de eximision
+                    vdate = rec.invoice_date or datetime.date.today()
+
+                    date_from = False
+                    date_to = False
+                    if partner_perc['ex_date_from']:
+                        date_from = time.strptime(
+                            partner_perc['ex_date_from'], "%Y-%m-%d"
+                        )
+                    if partner_perc['ex_date_to']:
+                        date_to = time.strptime(
+                            partner_perc['ex_date_to'], "%Y-%m-%d"
+                        )
+
+                    # TODO: Chequear cuando solo se llena uno de las dos fechas
+                    if (not date_from and not date_to) or (
+                        vdate >= date_from and vdate <= date_to
+                    ):
+                        if excluded_percent > 1.0 or excluded_percent < 0.0:
+                            raise ValidationError(
+                                _(
+                                    "Perception Configuration Error!\n"
+                                    + "Excluded percent configured has to be "
+                                    + "between 0.0 and 1.0"
+                                )
+                            )
+
+                        # Si esta totalmente eximido
+                        if excluded_percent == 1.0:
+                            continue
+                    else:
+                        partner_perc['excluded_percent'] = 0.0
+                    new_perception_lines += rec.compute_perception(
+                        perception_data=partner_perc
+                    )
+                rec.perception_ids = new_perception_lines
+                rec._onchange_perception_ids()
 
     def _recompute_tax_lines(
         self,
@@ -1416,10 +1389,9 @@ class AccountMoveLine(models.Model):
             self.counterpart = ",".join(counterpart)
 
     def _compute_all_vat_taxes(self):
-        tax_obj = self.env['account.tax']
         invoice = self.move_id
         currency = invoice.currency_id.with_context(
-            date=invoice.date_invoice or fields.Date.context_today(invoice)
+            date=invoice.invoice_date or fields.Date.context_today(invoice)
         )
         company_currency = invoice.company_id.currency_id
 
@@ -1448,10 +1420,7 @@ class AccountMoveLine(models.Model):
             amount_base = 0.0
             amount_exempt = 0.0
             for tax in taxes['taxes']:
-                res = tax_obj.browse(tax['id'])
-                is_exempt = res.is_exempt
-                tax_group = res.tax_group
-                if not tax_group == 'vat':
+                if not tax['tax_group_name'].lower() == 'vat':
                     continue
 
                 val = {}
@@ -1466,9 +1435,8 @@ class AccountMoveLine(models.Model):
                     val['amount'], company_currency, round=False
                 )
                 val['account_id'] = tax['account_id'] or line.account_id.id
-
                 amount_tax += tax['amount']
-                if is_exempt:
+                if tax['is_exempt']:
                     amount_exempt += val['base']
                 else:
                     amount_base += val['base']
@@ -1476,20 +1444,16 @@ class AccountMoveLine(models.Model):
                 line_taxes[tax['id']] = val
 
             price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
-            price_unit = price
-            amount_untaxed = line.price_subtotal
-            amount_total = amount_tax + amount_untaxed
-            amount_no_taxed = amount_untaxed - amount_base - amount_exempt
-            amount_exempt = amount_exempt
-            vat_taxes = line_taxes
 
-            result[line.id]['price_unit'] = price_unit
-            result[line.id]['amount_untaxed'] = amount_untaxed
-            result[line.id]['amount_total'] = amount_total
-            result[line.id]['amount_no_taxed'] = amount_no_taxed
+            result[line.id]['price_unit'] = price
+            result[line.id]['amount_untaxed'] = line.price_subtotal
+            result[line.id]['amount_total'] = amount_tax + line.price_subtotal
+            result[line.id]['amount_no_taxed'] = (
+                line.price_subtotal - amount_base - amount_exempt
+            )
             result[line.id]['amount_exempt'] = amount_exempt
             result[line.id]['amount_taxed'] = amount_base
-            result[line.id]['vat_taxes'] = vat_taxes
+            result[line.id]['vat_taxes'] = line_taxes
 
         return result
 

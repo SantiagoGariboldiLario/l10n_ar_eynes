@@ -64,7 +64,6 @@ class ResPartner(models.Model):
 
     def _get_perceptions_to_apply(self):
         # Buscamos las percepciones a aplicar segun la posicion fiscal
-        # partner = self.browse(cr, uid, partner_id, context)
         perceptions = {}
         for perc in self.property_account_position_id.perception_ids:
             perception = {
@@ -83,7 +82,6 @@ class ResPartner(models.Model):
         # Ahora buscamos a ver si tiene alguna excepcion
         partner_perceptions = {}
         for p_perc in self.perception_ids:
-
             perception = {
                 'perception': p_perc.perception_id,
                 'activity_id': p_perc.activity_id.id,
@@ -463,6 +461,7 @@ class ResPartnerPerception(models.Model):
         string='Company',
         store=True,
     )
+    from_padron = fields.Boolean(string="From Padron")
 
     # _sql_constraints = [('perception_partner_unique',
     #                      'unique(partner_id, perception_id)',
