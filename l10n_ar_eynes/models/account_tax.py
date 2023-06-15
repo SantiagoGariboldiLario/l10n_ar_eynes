@@ -120,3 +120,36 @@ class AccountTax(models.Model):
             + '-'
             + str(invoice_tax_val.get('analytic_tag_ids', []))
         )
+
+    def compute_all(
+        self,
+        price_unit,
+        currency=None,
+        quantity=1.0,
+        product=None,
+        partner=None,
+        is_refund=False,
+        handle_price_include=True,
+        include_caba_tags=False,
+    ):
+        res = super(AccountTax, self).compute_all(
+            price_unit,
+            currency,
+            quantity,
+            product,
+            partner,
+            is_refund,
+            handle_price_include,
+            include_caba_tags,
+        )
+        for tax in self:
+            res_tax_vals = res.get('taxes', [])
+            for res_tax in res_tax_vals:
+                if tax.id == res_tax['id']:
+                    res_tax.update(
+                        {
+                            'tax_group_name': tax.tax_group_name,
+                            'is_exempt': tax.is_exempt,
+                        }
+                    )
+        return res
