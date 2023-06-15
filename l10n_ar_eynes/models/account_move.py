@@ -1,6 +1,11 @@
+import base64
 import datetime
+import json
 import logging
-import time
+import urllib.parse
+from io import BytesIO
+
+import qrcode
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -38,11 +43,7 @@ class AccountMove(models.Model):
         required=False,
         states={'draft': [('readonly', False)]},
     )
-    is_debit_note = fields.Boolean(
-        string='Debit Note',
-        compute='_compute_is_debit_note',
-        store=True,
-    )
+    is_debit_note = fields.Boolean('Debit Note')
     perception_ids = fields.One2many(
         'perception.tax.line',
         'invoice_id',
@@ -69,11 +70,21 @@ class AccountMove(models.Model):
         copy=False,
         help='Fecha de vencimiento del CAE',
     )
+    origin_invoice_id = fields.Many2one(
+        comodel_name='account.move',
+        compute='_compute_origin_invoice',
+        inverse='_inverse_origin_invoice',
+        string='Origin Invoice',
+        store=True,
+    )
     associated_inv_ids = fields.Many2many(
-        'account.move',
-        'account_invoice_associated_rel',
-        'invoice_id',
-        'refund_debit_id',
+        comodel_name='account.move',
+        relation='inv_associated_inv_rel',
+        column1='invoice_id',
+        column2='associated_invoice_id',
+        string='Assoiciated Invoices',
+        readonly=True,
+        states={'draft': [('readonly', False)]},
     )
     voucher_type_id = fields.Many2one(
         comodel_name='res.voucher.type',
@@ -318,13 +329,6 @@ class AccountMove(models.Model):
                 invoice.company_currency_id == invoice.currency_id
             )
 
-    @api.depends('debit_origin_id')
-    def _compute_is_debit_note(self):
-        for rec in self:
-            rec.is_debit_note = False
-            if rec.debit_origin_id:
-                rec.is_debit_note = True
-
     def get_highest_pos_sequence(self):
         invoices = self.env['account.move'].search(
             [
@@ -340,6 +344,21 @@ class AccountMove(models.Model):
 
         last_sequence_number = max(invoices.mapped('sequence_number'))
         return str(last_sequence_number + 1).zfill(8)
+
+    @api.depends('reversed_entry_id', 'debit_origin_id')
+    def _compute_origin_invoice(self):
+        for rec in self.filtered(lambda r: r.is_invoice()):
+            if rec.move_type == 'out_refund':
+                rec.origin_invoice_id = rec.reversed_entry_id
+            elif rec.move_type == 'out_invoice' and rec.is_debit_note:
+                rec.origin_invoice_id = rec.debit_origin_id
+
+    def _inverse_origin_invoice(self):
+        for rec in self:
+            if rec.move_type == 'out_refund':
+                rec.reversed_entry_id = rec.origin_invoice_id
+            elif rec.move_type == 'out_invoice' and rec.is_debit_note:
+                rec.debit_origin_id = rec.origin_invoice_id
 
     # ONCHANGE METHODS
     @api.onchange('journal_id', 'partner_id')
@@ -396,14 +415,6 @@ class AccountMove(models.Model):
     #                 tax_val.pop('invoice_id')
     #                 new_perc = move_line_model.create(tax_val).id
     #                 invoice.line_ids = [(6, 0, tax_ids)]
-
-    @api.onchange('line_ids')
-    def _onchange_line_ids(self):
-        if self.is_sale_document():
-            perc_lines = self.create_perceptions_from_partner(
-                self.partner_id, date=self.invoice_date, invoice=self
-            )
-            self.perception_ids = perc_lines
 
     @api.onchange('currency_id', 'invoice_date')
     def _onchange_currency_id(self):
@@ -842,9 +853,9 @@ class AccountMove(models.Model):
                     not self.payment_reference
                     and self.journal_id.fiscal_type == 'internal'
                 ):
-                    pos_num = self.journal_id.get_pos_number()
-                    move_num = self.get_highest_pos_sequence()
-                    name = "%s-%s" % (pos_num, move_num)
+                    name = self.journal_id.get_sequence_from_invoice(
+                        self
+                    )._next()
                     self.write({'name': name})
                 else:
                     if self.check_must_be_fce():
@@ -1121,7 +1132,7 @@ class AccountMove(models.Model):
         for move in res:
             if not move.invoice_date:
                 move.write({'invoice_date': datetime.date.today()})
-            if move.is_sale_document() or move.is_purchase_document():
+            if move.is_invoice():
                 if not move.denomination:
                     if move.is_sale_document():
                         denomination = move.journal_id.denomination
@@ -1296,54 +1307,6 @@ class AccountMove(models.Model):
             )
         return new_perception_lines
 
-    @api.model
-    def create_perceptions_from_partner(self, partner, date=False, **kwargs):
-        # Calculamos cada Percepcion configurada en el Partner
-        partner_perceptions = partner._get_perceptions_to_apply()
-        perc_lines = self.env['perception.tax.line']
-        for partner_perc in partner_perceptions.values():
-            excluded_percent = partner_perc['excluded_percent']
-
-            # Chequeamos las fechas de eximision
-            vdate = date or datetime.date.today()
-
-            date_from = False
-            date_to = False
-            if partner_perc['ex_date_from']:
-                date_from = time.strptime(
-                    partner_perc['ex_date_from'], "%Y-%m-%d"
-                )
-            if partner_perc['ex_date_to']:
-                date_to = time.strptime(partner_perc['ex_date_to'], "%Y-%m-%d")
-
-            # TODO: Chequear cuando solo se llena uno de las dos fechas
-            if (not date_from and not date_to) or (
-                vdate >= date_from and vdate <= date_to
-            ):
-                if excluded_percent > 1.0 or excluded_percent < 0.0:
-                    raise ValidationError(
-                        _(
-                            "Perception Configuration Error!\n"
-                            "Excluded percent configured has to be "
-                            "between 0.0 and 1.0"
-                        )
-                    )
-
-                # Si esta totalmente eximido
-                if excluded_percent == 1.0:
-                    continue
-            else:
-                partner_perc['excluded_percent'] = 0.0
-
-            perc = partner_perc['perception']
-            # TODO: compute no crea percepciones,
-            # por ende  al llamar a _compute_perception_invoice_taxes
-            # no genera ningun ait nuevo
-            res = perc.compute(partner_perc, **kwargs)
-            if res:
-                perc_lines += res
-        return perc_lines
-
     def _recompute_tax_lines(
         self,
         recompute_tax_base_amount=False,
@@ -1356,6 +1319,60 @@ class AccountMove(models.Model):
             recompute_tax_base_amount,
             tax_rep_lines_to_recompute,
         )
+
+    def _generate_qr_afip_url(self):
+        voucher_type = self.get_voucher_type()
+        pos = self.get_pos()
+        date_dt = self.invoice_date.strftime("%Y-%m-%d")
+        invoice_qr_data = {
+            'ver': 1,
+            'fecha': date_dt,
+            'cuit': int(self.partner_id.vat or '0'),
+            'ptoVta': pos,
+            'tipoCmp': voucher_type,
+            'nroCmp': int(self.name.split('-')[1]),
+            'importe': round(self.amount_total, 2),
+            'moneda': str(self.currency_id.name or ''),
+            'ctz': "%.6f" % (self.amount_total),
+            'tipoDocRec': int(
+                self.partner_id.document_type_id.afip_code or '0'
+            ),
+            'nroDocRec': int(self.partner_id.vat or '0'),
+            'tipoCodAut': 'E',
+            'codAut': int(self.cae or '0') or '00000000000000',
+        }
+        data = json.dumps(invoice_qr_data)
+        qr_text = 'https://www.afip.gob.ar/fe/qr/?p=' + base64.b64encode(
+            bytes(data, 'utf-8')
+        ).decode('utf-8')
+        qr_text = urllib.parse.quote(qr_text)
+
+        return qr_text
+
+    def _generate_qr(self, txt=''):
+        qr_code = qrcode.QRCode(version=4, box_size=4, border=1)
+        qr_code.add_data(txt)
+        qr_code.make(fit=True)
+        qr_img = qr_code.make_image()
+        im = qr_img._img.convert("RGB")
+        buffered = BytesIO()
+        im.save(buffered, format="JPEG")
+        img_str = base64.b64encode(buffered.getvalue()).decode('ascii')
+
+        return img_str
+
+    def get_qr_code(self):
+        if not self.cae:
+            return False
+        url = self._generate_qr_afip_url()
+        return self._generate_qr(url)
+
+    def _get_name_invoice_report(self):
+        """This method need to be inherit by the localizations if they want to
+        print a custom invoice report instead of
+        the default one. For example please review the l10n_ar module"""
+        self.ensure_one()
+        return 'l10n_ar_eynes.report_invoice_document'
 
     _sql_constraints = [
         (

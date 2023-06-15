@@ -267,7 +267,13 @@ class AccountJournal(models.Model):
     @api.model
     def create(self, vals):
         res = super().create(vals)
-        if res and res.type == 'sale':
+        if res and res.type in (
+            'sale',
+            'receipt',
+            'payment',
+            'retentions',
+            'perceptions',
+        ):
             sequence_vals = res.create_pos_sequence()
             res.write(sequence_vals)
         return res
@@ -286,15 +292,21 @@ class AccountJournal(models.Model):
                 'name': self.name,
                 'number_next_actual': self.sequence_number_next,
             },
-            'cn_sequence_id': {
-                'name': self.name + _(' CN'),
-                'number_next_actual': self.cn_sequence_number_next,
-            },
-            'dn_sequence_id': {
-                'name': self.name + _(' DN'),
-                'number_next_actual': self.dn_sequence_number_next,
-            },
         }
+        if self.type == 'sale':
+            sequence_vals.update(
+                {
+                    'cn_sequence_id': {
+                        'name': self.name + _(' CN'),
+                        'number_next_actual': self.cn_sequence_number_next,
+                    },
+                    'dn_sequence_id': {
+                        'name': self.name + _(' DN'),
+                        'number_next_actual': self.dn_sequence_number_next,
+                    },
+                }
+            )
+
         journal_seq_vals = {}
         for seq, vals in sequence_vals.items():
             sequence = self.env['ir.sequence'].create(
@@ -759,7 +771,6 @@ class AccountJournal(models.Model):
             'name': self.name,
             'concept_id': concept_id,
             'invoice_id': invoice.id if invoice else False,
-            'account_id': self.tax_id.account_id.id,
             'base': vals['base'],
             'amount': vals['amount'],
             'manual': False,  # La creamos por sistema

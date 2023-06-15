@@ -104,7 +104,10 @@
 
             <xpath expr="//field[@name='profit_account_id']" position="attributes">
                 <attribute name="attrs">
-                    {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks'))]}
+                    {
+                        'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks', 'retentions', 'perceptions'))],
+                        'required': [('type', 'in', ('retentions'))]
+                    }
                 </attribute>
             </xpath>
 
@@ -116,7 +119,7 @@
 
             <xpath expr="//field[@name='default_account_id'][4]" position="attributes">
                 <attribute name="attrs">
-                    {'invisible': [('type', 'in', ('payment', 'receipt'))]}
+                    {'invisible': [('type', 'in', ('payment', 'receipt', 'retentions'))]}
                 </attribute>
             </xpath>
 
@@ -125,7 +128,10 @@
                     for="sequence_number_next"
                     attrs="{
                         'invisible': [
-                            ('type', 'not in', ('sale', 'receipt', 'payment', 'retentions', 'perceptions'))
+                            '|',
+                            ('type', 'not in', ('sale')),
+                            ('fiscal_type', 'not in', ('internal')),
+                            ('type', 'not in', ('receipt', 'payment', 'retentions', 'perceptions')),
                     ],
                 }"
                 />
@@ -134,7 +140,10 @@
                         name="sequence_number_next"
                         attrs="{
                             'invisible': [
-                                ('type', 'not in', ('sale', 'receipt', 'payment', 'retentions', 'perceptions'))
+                                '|',
+                                ('type', 'not in', ('sale')),
+                                ('fiscal_type', 'not in', ('internal')),
+                                ('type', 'not in', ('receipt', 'payment', 'retentions', 'perceptions')),
                             ],
                         }"
                         style="padding-right: 1.0em"
@@ -144,8 +153,11 @@
                         attrs="{
                             'invisible': [
                                 '|',
+                                '|',
                                 ('id', '=', False),
-                                ('type', 'not in', ('sale', 'receipt', 'payment', 'retentions', 'perceptions'))
+                                ('type', 'not in', ('receipt', 'payment', 'retentions', 'perceptions')),
+                                ('type', '=', 'sale'),
+                                ('fiscal_type', '!=', 'internal'),
                             ],
                         }"
                     />
@@ -154,14 +166,14 @@
                 <label
                     for="cn_sequence_number_next"
                     attrs="{
-                        'invisible': [('type', 'not in', ('sale'))]
+                        'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
                     }"
                 />
                 <div>
                     <field
                         name="cn_sequence_number_next"
                         attrs="{
-                            'invisible': [('type', 'not in', ('sale'))]
+                            'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
                         }"
                         style="padding-right: 1.0em"
                     />
@@ -170,8 +182,10 @@
                         attrs="{
                             'invisible': [
                                 '|',
+                                '|',
                                 ('id', '=', False),
-                                ('type', 'not in', ('sale'))
+                                ('type', 'not in', ('sale')),
+                                ('fiscal_type', '!=', 'internal')
                             ],
                         }"
                     />
@@ -180,14 +194,14 @@
                 <label
                     for="dn_sequence_number_next"
                     attrs="{
-                        'invisible': [('type', 'not in', ('sale'))]
+                        'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
                     }"
                 />
                 <div>
                     <field
                         name="dn_sequence_number_next"
                         attrs="{
-                            'invisible': [('type', 'not in', ('sale'))]
+                            'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
                         }"
                         style="padding-right: 1.0em"
                     />
@@ -196,8 +210,10 @@
                         attrs="{
                             'invisible': [
                                 '|',
+                                '|',
                                 ('id', '=', False),
-                                ('type', 'not in', ('sale'))
+                                ('type', 'not in', ('sale')),
+                                ('fiscal_type', '!=', 'internal')
                             ],
                         }"
                     />
