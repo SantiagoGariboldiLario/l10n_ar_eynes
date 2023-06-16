@@ -637,7 +637,7 @@
                                             <field name="state_id" invisible="1" />
                                             <field
                                                 name="retention_id"
-                                                domain="[('type_tax_use', '=', 'purchase')]"
+                                                domain="[('type_tax_use', '=', 'sale')]"
                                                 attrs="{'readonly': [('parent.disable_retentions', '=', False)]}"
                                             />
                                             <field
