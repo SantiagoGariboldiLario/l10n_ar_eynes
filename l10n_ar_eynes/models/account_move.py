@@ -1128,10 +1128,14 @@ class AccountMove(models.Model):
             'journal_id': self.get_payment_order_journal(_type).id,
         }
 
+        if self.currency_id != self.company_id.currency_id:
+            po_vals['payment_rate'] = self.currency_rate
+
         if self.is_sale_document():
             po_vals['income_line_ids'] = po_move_line
         else:
             po_vals['debt_line_ids'] = po_move_line
+
         return po_vals
 
     def get_payment_order_journal(self, journal_type):
