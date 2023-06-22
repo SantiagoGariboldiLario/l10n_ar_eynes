@@ -6414,3 +6414,8 @@ msgstr "lineas de comprobante"
 #, python-format
 msgid "There are no payment/receipt journals with this currency."
 msgstr "No existen diarios de recibo/pago con esta divisa."
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__amount_currency
+msgid "Amount in Partner Currency"
+msgstr "Monto en la moneda del cliente"
