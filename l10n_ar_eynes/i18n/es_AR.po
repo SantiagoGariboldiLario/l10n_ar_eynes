@@ -623,11 +623,6 @@ msgid "Bank Branch"
 msgstr "Sucursal Bancaria"
 
 #. module: l10n_ar_eynes
-#: model:account.payment.method,name:l10n_ar_eynes.account_payment_method_transfers
-msgid "Bank Transfers"
-msgstr "Transferencias Bancarias"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__base
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__base
 msgid "Base"
@@ -3750,7 +3745,7 @@ msgstr "Otro pago"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__other_payment
 #: model:ir.ui.menu,name:l10n_ar_eynes.other_payments_menu
 msgid "Other Payments"
-msgstr "Otros pagos"
+msgstr "Otros Pagos"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.other_receipts_action
