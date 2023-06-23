@@ -686,9 +686,7 @@ class WSFE(AfipWS):
         if Concepto not in [2, 3]:
             return True
         # No checks if invoice is of mipyme.fcred
-        if invoice.fiscal_type_id == invoice.env.ref(
-            'l10n_ar_eynes.fiscal_type_fcred'
-        ):
+        if invoice.is_FCE_invoice:
             return True
         datetime.strptime(val, AFIP_DATE_FORMAT)
         inv_date = invoice.invoice_date or fields.Date.context_today(invoice)
