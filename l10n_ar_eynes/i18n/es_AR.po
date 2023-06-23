@@ -127,6 +127,9 @@ msgid ""
 "                    <span>Debit Note</span>\n"
 "                </span>"
 msgstr ""
+"<span class=\"o_form_label\" attrs=\"{'invisible': ['|', ('move_type', '=', 'entry'), ('debit_origin_id', '=', False)]}\">\n"
+"                    <span>Nota de Débito</span>\n"
+"                </span>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
@@ -712,7 +715,6 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__account_check_id
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__account_check_id
 msgid "Check Account"
 msgstr "Cuenta de Cheque"
 
@@ -897,11 +899,6 @@ msgstr "¡El Cheque %s no puede ser acreditado!"
 #, python-format
 msgid "Check : %s"
 msgstr "Cheque : %s"
-
-#. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__account_check_id
-msgid "Check Account"
-msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_check_config
@@ -1479,12 +1476,6 @@ msgstr "Creado en"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move_reversal__refund_method
 msgid "Credit Method"
 msgstr ""
-
-#. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__res_voucher_type__doc_type__cn
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Credit Note"
-msgstr "Nota de Crédito"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__cn_sequence_number_next
@@ -5819,13 +5810,6 @@ msgid "Vat"
 msgstr ""
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__vat_date
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__vat_date
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__vat_date
-msgid "Vat Date"
-msgstr ""
-
-#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_config_form
 msgid "Vat Taxes Mapping"
 msgstr ""
@@ -6435,3 +6419,8 @@ msgstr "lineas de comprobante"
 #, python-format
 msgid "There are no payment/receipt journals with this currency."
 msgstr "No existen diarios de recibo/pago con esta divisa."
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__amount_currency
+msgid "Amount in Partner Currency"
+msgstr "Monto en la moneda del cliente"

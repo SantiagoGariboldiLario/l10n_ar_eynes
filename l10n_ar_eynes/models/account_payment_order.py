@@ -1193,8 +1193,6 @@ class AccountPaymentOrder(models.Model):
             )
             line_total = 0.0
             for vals in move_line_vals:
-                vals['currency_id'] = self.journal_id.currency_id.id
-                vals['amount_currency'] = -10
                 line_total += vals['debit'] - vals['credit']
                 MoveLine.with_context(**ctx).create(vals)
         else:

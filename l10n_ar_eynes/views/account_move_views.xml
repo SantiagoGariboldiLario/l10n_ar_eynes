@@ -300,7 +300,7 @@
                                 <field
                                     name="perception_id"
                                     class="oe_inline"
-                                    domain="[('type_tax_use', '=', 'sale')]"
+                                    domain="[('type', '=', 'perceptions')]"
                                 />
                             </h1>
                             <group>
