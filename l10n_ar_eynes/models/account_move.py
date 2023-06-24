@@ -2,7 +2,6 @@ import base64
 import datetime
 import json
 import logging
-import time
 import urllib.parse
 from io import BytesIO
 
@@ -407,21 +406,25 @@ class AccountMove(models.Model):
 
     @api.onchange('perception_ids')
     def _onchange_perception_ids(self):
-        for invoice in self:
-            move_line_model = self.env['account.move.line']
-            if invoice.is_sale_document():
-                for perception_line in invoice.perception_ids:
-                    new_move_line_vals = self._prepare_tax_line_vals(
-                        perception_line
-                    )
-                    prev_move_line = invoice.line_ids.filtered(
-                        lambda line: line.tax_line_id
-                        == perception_line.perception_id.tax_id
-                    )
-                    if prev_move_line:
-                        self.line_ids -= prev_move_line
-                    move_line_model.new(new_move_line_vals)
-                    invoice._recompute_dynamic_lines()
+        if self.is_sale_document():
+            perceptions_applied = self.env['account.tax']
+            for perception in self.perception_ids:
+                perceptions_applied += perception.perception_id.tax_id
+
+            for line in self.invoice_line_ids:
+                line.tax_ids += perceptions_applied
+
+            self._recompute_tax_lines()
+
+            for perception in self.perception_ids:
+                move_line = self.line_ids.filtered(
+                    lambda line: line.tax_line_id
+                    == perception.perception_id.tax_id
+                )
+                vals = self._prepare_tax_line_vals(perception)
+                move_line.update(vals)
+
+            self._recompute_dynamic_lines()
 
     @api.onchange('currency_id', 'invoice_date')
     def _onchange_currency_id(self):
@@ -500,11 +503,7 @@ class AccountMove(models.Model):
         """
         perception_tax = perception_line.perception_id.tax_id
         vals = {
-            'move_id': self.id,
-            'name': perception_line.name,
-            'tax_line_id': perception_tax.id,
             'account_id': perception_tax.tax_group_id.property_tax_payable_account_id.id,
-            'quantity': 1,
             'price_unit': perception_line.amount,
             'credit': perception_line.amount,
             'balance': -perception_line.amount,
@@ -513,7 +512,6 @@ class AccountMove(models.Model):
             'price_total': perception_line.amount,
             'tax_base_amount': perception_line.base,
             'sequence': perception_tax.tax_group_id.sequence,
-            'exclude_from_invoice_tab': True,
         }
         return vals
 
@@ -840,7 +838,7 @@ class AccountMove(models.Model):
         perc_array = []
 
         for perception in inv.perception_ids:
-            code = PCODES[perception.perception_id.jurisdiccion]
+            code = PCODES[perception.perception_id.tax_id.jurisdiccion]
             perc = {
                 'Id': code,
                 'BaseImp': perception.base,
@@ -1249,16 +1247,18 @@ class AccountMove(models.Model):
                     # Chequeamos las fechas de eximision
                     vdate = rec.invoice_date or datetime.date.today()
 
-                    date_from = False
-                    date_to = False
+                    first_day_of_year = datetime.date.min.replace(
+                        year=datetime.date.today().year
+                    )
+                    last_day_of_year = datetime.date.max.replace(
+                        year=datetime.date.today().year
+                    )
+                    date_from = first_day_of_year
+                    date_to = last_day_of_year
                     if partner_perc['ex_date_from']:
-                        date_from = time.strptime(
-                            partner_perc['ex_date_from'], "%Y-%m-%d"
-                        )
+                        date_from = partner_perc['ex_date_from']
                     if partner_perc['ex_date_to']:
-                        date_to = time.strptime(
-                            partner_perc['ex_date_to'], "%Y-%m-%d"
-                        )
+                        date_to = partner_perc['ex_date_to']
 
                     # TODO: Chequear cuando solo se llena uno de las dos fechas
                     if (not date_from and not date_to) or (
