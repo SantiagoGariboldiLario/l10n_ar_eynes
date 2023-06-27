@@ -411,7 +411,7 @@ msgstr "Importe"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Allocation CCY"
-msgstr ""
+msgstr "Importe en moneda extranjera"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__applicable_state__always
@@ -440,14 +440,14 @@ msgstr "Importe"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_currency
 msgid "Amount CCY"
-msgstr ""
+msgstr "Importe en moneda extranjera"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__amount_currency
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_issued_check_line__amount_currency
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__amount_currency
 msgid "Amount Currency"
-msgstr ""
+msgstr "Importe en moneda extranjera"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_exempt_cur
@@ -455,19 +455,19 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__amount_exempt_cur
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__amount_exempt
 msgid "Amount Exempt"
-msgstr ""
+msgstr "Importe exento"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Amount Original CCY"
-msgstr ""
+msgstr "Importe Orignal en moneda extranjera"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Amount Residual CCY"
-msgstr ""
+msgstr "Importe Restante en moneda extranjera"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request_detail__amount_total
@@ -479,14 +479,14 @@ msgstr "Importe total"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__amount_currency
 msgid "Amount in Partner Currency"
-msgstr ""
+msgstr "Importe en moneda del cliente"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Amounts"
-msgstr ""
+msgstr "Importes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_concept_line__account_analytic_id
@@ -632,7 +632,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__base_amount
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__base_amount
 msgid "Base Code Amount"
-msgstr ""
+msgstr "Monto base"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax_subjournal__base_position
@@ -642,7 +642,7 @@ msgstr "Posición de la columna Base"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__base_currency
 msgid "Base Currency"
-msgstr ""
+msgstr "Divisa base"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.perception_tax_line_view_form
@@ -842,7 +842,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__certificate_no
 msgid "Certificate No."
-msgstr ""
+msgstr "Nro Certificado"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.certificate_renewal_wizard_action
@@ -991,7 +991,7 @@ msgstr "Tildar si no se deben aplicar percepciones para este concepto"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_retention_concept__no_subject
 msgid "Check this if Retention should not be applied for this Concept"
-msgstr ""
+msgstr "Tildar si no se deben aplicar retenciones para este concepto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_perception_tax_application__exclude_tax_allowance
@@ -1022,18 +1022,20 @@ msgid ""
 "Check this if you want to disable automatic calculation of retention on this"
 " payment"
 msgstr ""
+"Tildar si quiere deshabilitar el cálculo automático de retenciones en "
+"este pago"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_issued_check_line__checkbook_id
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_checkbook_view_form
 msgid "Checkbook"
-msgstr ""
+msgstr "Chequera"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_checkbook_wizard.py:0
 #, python-format
 msgid "Checkbook %(name)s %(format)s-%(number)s"
-msgstr ""
+msgstr "Chequera %(name)s %(format)s-%(number)s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__checkbook_id
@@ -1213,6 +1215,8 @@ msgid ""
 "Computed as the difference between the amount stated in the voucher and the "
 "sum of allocation on the voucher lines."
 msgstr ""
+"Calculado como la diferencia entre el monto del comprobante y la "
+"suma de las imputaciones de las línas del comprobante."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__concept_id
@@ -2030,7 +2034,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__date_effective
 msgid "Effective Date"
-msgstr ""
+msgstr "Fecha efectiva"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_optionals__from_date
@@ -2054,12 +2058,12 @@ msgstr "Factura electrónica"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__employee_id
 msgid "Employee"
-msgstr ""
+msgstr "Empleado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__employee_payment
 msgid "Employee Payments"
-msgstr ""
+msgstr "Pagos empleado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__dst_cuit
@@ -2245,7 +2249,7 @@ msgstr "Certificado de Exclusión"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__exclusion_date_certificate
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__exclusion_date_certificate
 msgid "Exclusion General Resolution Date"
-msgstr ""
+msgstr "Fecha de exclusión de Resolución General"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__is_exempt
@@ -2354,6 +2358,8 @@ msgid ""
 "Fields with internal purpose only that depicts if the voucher is a multi "
 "currency one or not"
 msgstr ""
+"Campo con propósito interno que representa si el comprobante es "
+"multi-moneda o no"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax_subjournal__base_position__first
@@ -2401,17 +2407,17 @@ msgstr "Formato"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_optionals__from_afip
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_tax_codes__from_afip
 msgid "From AFIP"
-msgstr ""
+msgstr "Desde AFIP"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__from_register_AGIP
 msgid "From AGIP Register"
-msgstr ""
+msgstr "Desde Registro AGIP"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__from_register_ARBA
 msgid "From ARBA Register"
-msgstr ""
+msgstr "Desde Registro ARBA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__from_padron
@@ -2433,7 +2439,7 @@ msgstr "Completo"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__general_resolution
 msgid "GR Number"
-msgstr ""
+msgstr "Número de Resolucion General"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -2542,7 +2548,7 @@ msgstr "Monto máximo para el Agrupamiento"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__has_message
 msgid "Has Message"
-msgstr ""
+msgstr "Tiene mensaje"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_request_form
@@ -2652,13 +2658,13 @@ msgstr "Situación IIBB"
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_needaction
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_unread
 msgid "If checked, new messages require your attention."
-msgstr ""
+msgstr "Si está tildado, hay nuevos mensajes que requieren su atención."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_has_error
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "Si está tildado, hay mensajes que tienen error de entrega."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_tax__check_sit_iibb
@@ -2755,7 +2761,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Information"
-msgstr ""
+msgstr "Información"
 
 #. module: l10n_ar_eynes
 #: model:account.tax.group,name:l10n_ar_eynes.internal_tax_group
@@ -2905,7 +2911,7 @@ msgstr "Es Factura de Crédito Electrónica (FCE)?"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "Es seguidor"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__issue_date
@@ -3037,7 +3043,7 @@ msgstr "Mantener abierto"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Keep it empty if the date is the same as the voucher."
-msgstr ""
+msgstr "Dejar vacío para usar la misma fecha que el comprobante."
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsaa_config_form
@@ -4510,19 +4516,19 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Residual Amount"
-msgstr ""
+msgstr "Monto restante"
 
 #. module: l10n_ar_eynes
 #: model:res.groups,name:l10n_ar_eynes.group_treasury_responsible
 msgid "Responsible"
-msgstr ""
+msgstr "Responsable"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request__result
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request_detail__result
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__result
 msgid "Result"
-msgstr ""
+msgstr "Resultado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__name
@@ -4536,33 +4542,33 @@ msgstr "Retención"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_activity_form
 msgid "Retention Activity"
-msgstr ""
+msgstr "Actividad"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_concept_form
 msgid "Retention Concept"
-msgstr ""
+msgstr "Concepto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__retention_id
 msgid "Retention Configuration"
-msgstr ""
+msgstr "Configuración de retención"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_res_partner_retention
 msgid "Retention Defined in Partner"
-msgstr ""
+msgstr "Retención definida en la Empresa"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/retention.py:0
 #, python-format
 msgid "Retention Error!\n"
-msgstr ""
+msgstr "Error de Retención"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_retention_activity
 msgid "Retention Gross Income Activity"
-msgstr ""
+msgstr "Actividad de retención de IIBB"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_retention_journals
@@ -4572,12 +4578,12 @@ msgstr "Diarios de retenciones"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_retention_concept
 msgid "Retention Profit Concepts"
-msgstr ""
+msgstr "Concepto de retención de ganancias"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_scale_form
 msgid "Retention Scale"
-msgstr ""
+msgstr "Escala de Retenciones"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_retention_scale
@@ -5019,12 +5025,12 @@ msgstr "Pagos a proveedores"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__receipt_number
 msgid "Supplier Receipt Number"
-msgstr ""
+msgstr "Numero de recibo del proveedor"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.perception_tax_line_view_search
 msgid "Supported"
-msgstr ""
+msgstr "Soportada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_tax
@@ -5066,7 +5072,7 @@ msgstr "Aplicación del impuesto"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__tax_amount
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__tax_amount
 msgid "Tax Code Amount"
-msgstr ""
+msgstr "Monto impuesto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfe_tax_codes
@@ -5194,7 +5200,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_line__move_invoice_id
 msgid "The move of this entry line."
-msgstr ""
+msgstr "El movimiento de este apunte contable."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_afipws_service_name_uniq
@@ -5405,7 +5411,7 @@ msgstr "Cheques de terceros"
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_payment_method_line_unique_checkbook
 #, python-format
 msgid "This checkbook already exists for this journal"
-msgstr ""
+msgstr "Esta chequera ya existe en este diario."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_mode_line__date
@@ -5435,6 +5441,10 @@ msgid ""
 " either choose to keep open this difference on the partner's account, or "
 "reconcile it with the payment(s)"
 msgstr ""
+"Este campo te ayuda a elegir el tratamiento de la eventual "
+"diferencia entre el monto pagado y la suma de los montos imputados. Puede"
+"elegir mantenerl el monto abierto en la cuenta del cliente, o"
+"conciliarlo con el(los) pago(s)"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_line__date_due
@@ -5442,6 +5452,8 @@ msgid ""
 "This field is used for payable and receivable journal entries. You can put "
 "the limit date for the payment of this line."
 msgstr ""
+"Este campo es usado para pagos y recibos. Puede establecer "
+"la fecha límite de pago de esta línea."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -5453,17 +5465,17 @@ msgstr "Este movimiento ya existe para este cliente"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_retention_line__date_applied
 msgid "This is the date of the real application of the retention"
-msgstr ""
+msgstr "Esta es la fecha real de aplicación de la retención"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__date_effective
 msgid "This is the effective date when one give this voucher to the Supplier"
-msgstr ""
+msgstr "Esta es la fecha efectiva en que este comprobante fue dado al cliente"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__receipt_number
 msgid "This is the number of the receipt given by the Supplier"
-msgstr ""
+msgstr "Este es el número de recibo recibido por el cliente"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
@@ -5528,7 +5540,7 @@ msgstr "Importe total"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Total Allocation CCY"
-msgstr ""
+msgstr "Importe total en moneda extranjera"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_checkbook_view_form
@@ -5541,7 +5553,7 @@ msgstr "Monto total"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 msgid "Total CCY"
-msgstr ""
+msgstr "Total en moneda extranjera"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
