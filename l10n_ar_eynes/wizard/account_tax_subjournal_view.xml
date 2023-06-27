@@ -13,7 +13,7 @@
                             <field name="date_from" />
                         </group>
                         <group>
-                            <field name="date_to" />
+                            <field name="date_to" readonly="1" />
                         </group>
                     </group>
                     <notebook>
