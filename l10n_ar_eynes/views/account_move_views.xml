@@ -445,10 +445,6 @@
                     'readonly': [('id', '!=', False)]
                 }"
                 />
-                <field
-                    name="vat_date"
-                    attrs="{'readonly': [('state', '!=', 'draft')]}"
-                />
             </xpath>
 
         </field>
