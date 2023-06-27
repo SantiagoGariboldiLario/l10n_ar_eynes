@@ -272,13 +272,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_concept__account_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__account_ids
 msgid "Accounts"
-msgstr ""
+msgstr "Cuentas"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_perception_concept_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_concept_form
 msgid "Accounts Associated"
-msgstr ""
+msgstr "Cuentas Asociadas"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__accredited
@@ -474,7 +474,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.perception_tax_line_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.perception_tax_line_view_tree
 msgid "Amount Total"
-msgstr ""
+msgstr "Importe total"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__amount_currency
@@ -507,7 +507,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.perception_tax_line_view_search
 msgid "Applied"
-msgstr ""
+msgstr "Aplicadas"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_fiscal_position_form_inherit_l10n_ar_eynes
@@ -546,7 +546,7 @@ msgstr "¿Estas seguro que desea hacer esto?"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "Are you sure you want to generate a new random key?"
-msgstr ""
+msgstr "¿Estas seguro que desea generar una clave aleatoria?"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.journal_configuration_action
@@ -559,12 +559,12 @@ msgstr "Asignar Diarios Contables a Usuarios"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__associated_inv_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__associated_inv_ids
 msgid "Associated Inv"
-msgstr ""
+msgstr "Facturas asociadas"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Associated Invoices"
-msgstr ""
+msgstr "Facturas asociadas"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_attachment_count
@@ -575,7 +575,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_config__service_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsaa_config_form
 msgid "Authorized Services"
-msgstr ""
+msgstr "Servicios autorizados"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__aut_cae
@@ -688,7 +688,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__cae_due_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__cae_duedate
 msgid "CAE Due Date"
-msgstr ""
+msgstr "Fecha de vencimiento de CAE"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__cae
@@ -986,7 +986,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_perception_concept__no_subject
 msgid "Check this if Perception should not be applied for this Concept"
-msgstr ""
+msgstr "Tildar si no se deben aplicar percepciones para este concepto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_retention_concept__no_subject
@@ -997,7 +997,7 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_ar_eynes.field_perception_tax_application__exclude_tax_allowance
 #: model:ir.model.fields,help:l10n_ar_eynes.field_retention_tax_application__exclude_tax_allowance
 msgid "Check this if Tax Allowance should be excluded from calculated Base"
-msgstr ""
+msgstr "Tildar si la Desgravación fiscal debe ser excluida de la base calculada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_bank_statement_line__local
@@ -1240,12 +1240,12 @@ msgstr "Conceptos"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_ta__config_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__config_id
 msgid "Config"
-msgstr ""
+msgstr "Configuracion"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_config_form
 msgid "Config Electronic Invoice"
-msgstr ""
+msgstr "Configuración Factura electrónica"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_res_config_settings
@@ -1690,7 +1690,7 @@ msgstr "Diario para cheques diferidos"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__perception_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__perception_ids
 msgid "Defined Perceptions"
-msgstr ""
+msgstr "Percepciones definidas"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__delivered
@@ -1823,34 +1823,34 @@ msgstr "Descripción"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__dst_country_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_shipping_permission__dst_country_id
 msgid "Dest Country"
-msgstr ""
+msgstr "País destino"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__applicable_state__dest
 msgid "Destination"
-msgstr ""
+msgstr "Destino"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__dest
 msgid "Destiny"
-msgstr ""
+msgstr "Destino"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__destiny_partner_id
 msgid "Destiny Partner"
-msgstr ""
+msgstr "Destinatario"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__detail
 msgid "Detail"
-msgstr ""
+msgstr "Detalle"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request__detail_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_request_form
 msgid "Details"
-msgstr ""
+msgstr "Detalles"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_journal__type_tax_use
@@ -2049,7 +2049,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__fiscal_type__electronic
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_move__fiscal_type__electronic
 msgid "Electronic Invoice"
-msgstr ""
+msgstr "Factura electrónica"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__employee_id
@@ -2233,7 +2233,7 @@ msgstr "Tipo de cambio"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_application__exclude_tax_allowance
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__exclude_tax_allowance
 msgid "Exclude Tax Allowance"
-msgstr ""
+msgstr "Excluir Desgravación fiscal"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_perception__exclusion_certificate
@@ -2306,7 +2306,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__fcred_is_fce_emitter
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__fcred_is_fce_emitter
 msgid "FCE Emitter?"
-msgstr ""
+msgstr "Emisor de Factura de Crédito Electrónica (FCE)?"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__fcred_pos_ar_id
@@ -2547,7 +2547,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_request_form
 msgid "Header"
-msgstr ""
+msgstr "Encabezado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_res_partner__perception_ids
@@ -2556,6 +2556,7 @@ msgid ""
 "Here you have to configure perception exceptions for this partner with this "
 "Fiscal Position"
 msgstr ""
+"En este lugar debe configurar las exenciones de percepciones para este contacto."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_res_partner__retention_ids
@@ -2765,7 +2766,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__fiscal_type__internal
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_move__fiscal_type__internal
 msgid "Internal Invoice"
-msgstr ""
+msgstr "Factura interna"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
@@ -2899,7 +2900,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__is_FCE_invoice
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__is_FCE_invoice
 msgid "Is FCE?"
-msgstr ""
+msgstr "Es Factura de Crédito Electrónica (FCE)?"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_is_follower
@@ -3702,7 +3703,7 @@ msgstr "Origen"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__origin_invoice_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__origin_invoice_id
 msgid "Origin Invoice"
-msgstr ""
+msgstr "Factura originaria"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_original
@@ -3992,33 +3993,33 @@ msgstr "Porcentaje de Exclusión"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_perception__perception_id
 msgid "Perception"
-msgstr ""
+msgstr "Percepcion"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_perception_activity_form
 msgid "Perception Activity"
-msgstr ""
+msgstr "Actividad de la percepción"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.perception_tax_line_menu_applied
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.perception_tax_line_view_search
 msgid "Perception Applied"
-msgstr ""
+msgstr "Percepción aplicada"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_perception_concept_form
 msgid "Perception Concept"
-msgstr ""
+msgstr "Concepto de la percepción"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_perception_concept
 msgid "Perception Concepts"
-msgstr ""
+msgstr "Conceptos de la percepción"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__perception_id
 msgid "Perception Configuration"
-msgstr ""
+msgstr "Configuración de la percepción"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -4041,44 +4042,44 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_perception_journals
 msgid "Perception Journals"
-msgstr ""
+msgstr "Diarios de percepciones"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.perception_tax_line_menu_supported
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.perception_tax_line_view_search
 msgid "Perception Supported"
-msgstr ""
+msgstr "Percepción soportada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_vat_tax__application_id
 msgid "Perception Tax Application"
-msgstr ""
+msgstr "Aplicación de percepción"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.perception_tax_line_action_tree
 msgid "Perception Tax Applied"
-msgstr ""
+msgstr "Percepción aplicada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_perception_tax_line
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.perception_tax_line_view_form
 msgid "Perception Tax Line"
-msgstr ""
+msgstr "Linea de percepción"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.perception_tax_line_view_search
 msgid "Perception Tax Lines"
-msgstr ""
+msgstr "Líneas de percepción"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.perception_tax_line_action_tree_supported
 msgid "Perception Tax Supported"
-msgstr ""
+msgstr "Percepciones soportadas"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Perception Type"
-msgstr ""
+msgstr "Tipo de percepción"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_perception_tax_line__perception_id
@@ -4086,16 +4087,18 @@ msgid ""
 "Perception configuration used for this perception tax, where all the "
 "configuration resides. Accounts, Tax Codes, etc."
 msgstr ""
+"Configuracion usada para esta percepción, donde se encuentran todas "
+"las opciones posibles. Cuentas, Códigos de impuesto, etc."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_perception_tax_application__tax_minimum
 msgid "Perception is performed when the amount thereof exceeds this value."
-msgstr ""
+msgstr "La percepción se aplica cuando el importe supera este valor."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_perception_tax_application__tax_allowance
 msgid "Perception will be calculated over this amount."
-msgstr ""
+msgstr "La percepción se calcula en base a este importe."
 
 #. module: l10n_ar_eynes
 #: model:account.tax.group,name:l10n_ar_eynes.perceptions_tax_group
@@ -4830,6 +4833,7 @@ msgstr ""
 msgid ""
 "Set True if this invoice must be treated as Electronic Invoice of Credit."
 msgstr ""
+"Tildar para tratar esta factura como Factura de Crédito Electrónica (FCE)"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -5037,13 +5041,13 @@ msgstr "Impuesto"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__account_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__account_id
 msgid "Tax Account"
-msgstr ""
+msgstr "Cuenta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_application__tax_allowance
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__tax_allowance
 msgid "Tax Allowance"
-msgstr ""
+msgstr "Desgravación fiscal"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__amount
@@ -5067,12 +5071,12 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfe_tax_codes
 msgid "Tax Codes"
-msgstr ""
+msgstr "Código de impuesto"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_journal_view_form_inherit_l10n_ar_eynes
 msgid "Tax Information"
-msgstr ""
+msgstr "Información del impuesto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_application__tax_minimum
@@ -5151,12 +5155,14 @@ msgid ""
 "The Tax Identification Number. Complete it if the contact is subjected to "
 "government taxes. Used in some legal statements."
 msgstr ""
+"Número de identificación tributaria. Completar si el contacto está sujeto a "
+"impuestos gubernamentales. Es usado para cuestiones legales"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "The Vat does not seems to be correct."
-msgstr ""
+msgstr "El CUIT parece ser incorrecto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__vat_date
@@ -5170,12 +5176,12 @@ msgstr "Fecha de IVA"
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "The Vat only supports numbers."
-msgstr ""
+msgstr "El CUIT solo soporta números"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_wsaa_config_company_uniq
 msgid "The configuration must be unique per company !"
-msgstr ""
+msgstr "La configuración debe ser única por compañía"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -5193,7 +5199,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_afipws_service_name_uniq
 msgid "The name of the service must be unique!"
-msgstr ""
+msgstr "El nombre del servicio debe ser único"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_journal__cn_sequence_number_next
@@ -5205,7 +5211,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_wsaa_ta_company_name_uniq
 msgid "The service must be unique per company!"
-msgstr ""
+msgstr "El sericio debe ser único por compañía"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__payment_rate
@@ -5218,7 +5224,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_perception_tax_application_concept_activity_uniq
 msgid "The tuple of Concept, Activity must be unique per Perception !"
-msgstr ""
+msgstr "La combinación Concepto-Actividad debe ser única por percepción!"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_retention_tax_application_concept_activity_uniq
@@ -5316,6 +5322,8 @@ msgid ""
 "These are the perceptions that will be applied to Suppliers belonging to "
 "this Fiscal Position. Exceptions to this have to be loaded at partner form."
 msgstr ""
+"Estas son las percepciones que serán aplicadas para los clientes que tengan esta "
+"posición fiscal. Las excepciones debe ser cargadas en el formulario del contacto."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_fiscal_position__retention_ids
@@ -5480,12 +5488,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__wsaa_ticket_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__wsaa_ticket_id
 msgid "Ticket Access"
-msgstr ""
+msgstr "Ticket de acceso"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsaa_ta
 msgid "Ticket Access for WSAA"
-msgstr ""
+msgstr "Ticket de acceso para WSAA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_perception__ex_date_to
@@ -5841,12 +5849,12 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request_detail__voucher_date
 msgid "Voucher Date"
-msgstr ""
+msgstr "Fecha factura"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_sinchronize_voucher
 msgid "Voucher Information"
-msgstr ""
+msgstr "Información factura"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__voucher_model
