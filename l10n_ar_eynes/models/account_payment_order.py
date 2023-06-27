@@ -951,6 +951,7 @@ class AccountPaymentOrder(models.Model):
             ('account_id.internal_type', '=', account_type),
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
+            ('move_id.state', '=', 'posted'),
         ]
         # if self.is_multi_currency:
         #     domain += [('currency_id', '=', self.currency_id.id)]
