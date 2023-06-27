@@ -65,6 +65,14 @@
                 </attribute>
             </xpath>
 
+            <xpath expr="//field[@name='partner_bank_id']" position="attributes">
+                <attribute name="attrs">
+                    {
+                        'invisible': [('move_type', 'in', ('in_invoice', 'in_refund'))]
+                    }
+                </attribute>
+            </xpath>
+
             <xpath expr="//field[@name='payment_reference']" position="after">
                 <field
                     name="fiscal_type"
