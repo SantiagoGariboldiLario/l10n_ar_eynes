@@ -69,8 +69,8 @@
                 <field
                     name="fiscal_type"
                     attrs="{
-                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
-                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                        'required': [('move_type', 'in', ('out_invoice', 'out_refund'))],
+                        'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))],
                     }"
                 />
             </xpath>
