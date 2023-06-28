@@ -291,6 +291,13 @@ class AccountJournal(models.Model):
             'sequence_id': {
                 'name': self.name,
                 'number_next_actual': self.sequence_number_next,
+                'implementation': 'no_gap'
+                if self.type == 'sale'
+                else 'standard',
+                'padding': 8 if self.type == 'sale' else 0,
+                'prefix': '%s-' % self.get_pos_number()
+                if self.type == 'sale'
+                else '',
             },
         }
         if self.type == 'sale':
@@ -312,10 +319,10 @@ class AccountJournal(models.Model):
             sequence = self.env['ir.sequence'].create(
                 {
                     'name': vals['name'],
-                    'implementation': 'no_gap',
+                    'implementation': vals.get('implementation', 'no_gap'),
                     'active': True,
-                    'prefix': self.get_pos_number() + '-',
-                    'padding': 8,
+                    'prefix': vals.get('prefix', self.get_pos_number() + '-'),
+                    'padding': vals.get('padding', 8),
                     'number_next_actual': vals['number_next_actual'],
                 }
             )
