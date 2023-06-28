@@ -2445,7 +2445,8 @@ class AccountPaymentOrderRetentionLine(models.Model):
             credit = 0.0
         sign = debit - credit < 0 and -1 or 1
 
-        self.apply_retention_sequence()
+        if voucher.type == 'payment' and not voucher.disable_retentions:
+            self.apply_retention_sequence()
 
         # Create the move line of the retetention
         move_line = {
@@ -2469,14 +2470,9 @@ class AccountPaymentOrderRetentionLine(models.Model):
         return move_line
 
     def apply_retention_sequence(self):
-        sequence_model = self.env['ir.sequence']
         for rtl in self:
-            number = sequence_model.next_by_code('retention.applied')
-            rtl.write(
-                {
-                    'certificate_no': number,
-                }
-            )
+            number = self.retention_id.sequence_id._next()
+            rtl.write({'certificate_no': number})
 
     @api.model
     def get_readeable_name(self):
