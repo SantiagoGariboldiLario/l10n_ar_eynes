@@ -1355,6 +1355,7 @@ class AccountPaymentOrder(models.Model):
                     vals['issue_date'] = self.date
                 check.write(vals)
 
+        self.validate_retentions_sequence()
         for ret in self.retention_ids:
             res = ret.create_voucher_move_line()
             if res:
@@ -1362,10 +1363,22 @@ class AccountPaymentOrder(models.Model):
                 move_lines.append(res)
 
             # Write voucher values in the retention tax line using method
-            # prepare_retention_values()
             ret_vals = self.prepare_retention_values(self)
             ret.write(ret_vals)
         return move_lines
+
+    def validate_retentions_sequence(self):
+        """We validate that every retention has a sequence
+        before so it doesn't modify sequence number
+        """
+        retentions_without_sequence = self.retention_ids.mapped(
+            'retention_id'
+        ).filtered(lambda ret: not ret.sequence_id.id)
+        if retentions_without_sequence:
+            raise ValidationError(
+                _("This journals doesnt have a sequence established:\n%s")
+                % retentions_without_sequence.mapped('name')
+            )
 
     @api.model
     def _convert_paid_amount_in_company_currency(self, amount):
@@ -2392,6 +2405,8 @@ class AccountPaymentOrderRetentionLine(models.Model):
     def onchange_retention_id(self):
         res = {}
         if self.retention_id:
+            self.account_id = self.retention_id.profit_account_id
+            self.name = self.retention_id.name
             res['domain'] = {
                 'concept_id': [
                     ('type', '=', self.retention_id.tax_id.retention_type)
@@ -2470,9 +2485,16 @@ class AccountPaymentOrderRetentionLine(models.Model):
         return move_line
 
     def apply_retention_sequence(self):
-        for rtl in self:
-            number = self.retention_id.sequence_id._next()
-            rtl.write({'certificate_no': number})
+        if not self.retention_id.sequence_id:
+            raise ValidationError(
+                _(
+                    "This journal '%s' does not have a sequence.\n"
+                    "To add one, go to the journal and create a sequence"
+                )
+                % self.retention_id.name
+            )
+        number = self.retention_id.sequence_id._next()
+        self.write({'certificate_no': number})
 
     @api.model
     def get_readeable_name(self):
