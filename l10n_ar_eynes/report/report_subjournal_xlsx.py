@@ -70,7 +70,7 @@ class SubjournalXlsx(models.AbstractModel):
     def get_columns(self, types, obj):
         AccountMove = self.env['account.move']
         AccountTax = self.env['account.tax']
-        invoices = AccountMove.search(self.get_move_domain(obj, types))
+        invoices = AccountMove.search(self.get_move_domain(types, obj))
         tax_ids = set(
             invoices.mapped('line_ids.tax_ids').ids
             + invoices.mapped('line_ids.tax_line_id').ids
