@@ -6,8 +6,10 @@
 ##############################################################################
 import logging
 import time
+from calendar import monthrange
 
-from odoo import fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -63,6 +65,7 @@ class AccountTaxSubjournal(models.TransientModel):
     company_ids = fields.Many2many('res.company', string='Company')
 
     def create_report(self):
+        self.validate_date_from()
         data = {'ids': self.ids}
         data['model'] = 'account.move.line'
         data['form'] = self.read()[0]
@@ -75,3 +78,14 @@ class AccountTaxSubjournal(models.TransientModel):
             'report_file': 'export_subjournal',
             'name': 'Export Subjournal',
         }
+
+    @api.onchange('date_from')
+    def _onchange_date_from(self):
+        end_of_month = monthrange(self.date_from.year, self.date_from.month)[1]
+        self.date_to = self.date_from.replace(day=end_of_month)
+
+    def validate_date_from(self):
+        if self.date_from != self.date_from.replace(day=1):
+            raise ValidationError(
+                _("You should only select the first day of month")
+            )

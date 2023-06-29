@@ -1302,7 +1302,13 @@
                                 name="retention_ids"
                                 force_save="1"
                                 nolabel="1"
-                                attrs="{'readonly': [('disable_retentions', '=', False)]}"
+                                attrs="{
+                                    'readonly': [
+                                        '|',
+                                        ('disable_retentions', '=', False),
+                                        ('state', '!=', 'draft')
+                                    ]
+                                }"
                             >
                                 <tree>
                                     <field name="currency_id" invisible="1" />
@@ -1397,7 +1403,13 @@
                                     <group
                                         name="more_information"
                                         string="More information"
-                                        attrs="{'invisible': [('retention_type', '!=', 'profit')]}"
+                                        attrs="{
+                                            'invisible': [
+                                                '|',
+                                                ('retention_type', '!=', 'profit'),
+                                                ('parent.disable_retentions', '=', True)
+                                            ]
+                                        }"
                                     >
                                         <field name="retention_move_line_ids">
                                             <tree>

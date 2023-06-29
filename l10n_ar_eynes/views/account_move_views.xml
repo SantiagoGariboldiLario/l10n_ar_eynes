@@ -56,6 +56,22 @@
                 </h1>
             </xpath>
 
+            <xpath expr="//group[@id='header_right_group']/div[2]" position="replace">
+                <div
+                    class="d-flex"
+                    attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"
+                >
+                    <field
+                        name="invoice_date_due"
+                        force_save="1"
+                        placeholder="Date"
+                        attrs="{'readonly': [('invoice_payment_term_id', '!=', False)]}"
+                    />
+                    <span class="o_form_label mx-3 oe_edit_only"> or </span>
+                    <field name="invoice_payment_term_id" placeholder="Terms" />
+                </div>
+            </xpath>
+
             <xpath expr="//field[@name='partner_id']" position="attributes">
                 <attribute name="attrs">
                     {
@@ -65,12 +81,20 @@
                 </attribute>
             </xpath>
 
+            <xpath expr="//field[@name='partner_bank_id']" position="attributes">
+                <attribute name="attrs">
+                    {
+                        'invisible': [('move_type', 'in', ('in_invoice', 'in_refund'))]
+                    }
+                </attribute>
+            </xpath>
+
             <xpath expr="//field[@name='payment_reference']" position="after">
                 <field
                     name="fiscal_type"
                     attrs="{
-                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
-                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                        'required': [('move_type', 'in', ('out_invoice', 'out_refund'))],
+                        'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))],
                     }"
                 />
             </xpath>
@@ -444,10 +468,6 @@
                     'required': ['|', ('move_type', '=', 'out_refund'), ('is_debit_note', '=', True)],
                     'readonly': [('id', '!=', False)]
                 }"
-                />
-                <field
-                    name="vat_date"
-                    attrs="{'readonly': [('state', '!=', 'draft')]}"
                 />
             </xpath>
 

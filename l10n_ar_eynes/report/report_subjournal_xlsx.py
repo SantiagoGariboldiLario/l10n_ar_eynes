@@ -59,16 +59,18 @@ class SubjournalXlsx(models.AbstractModel):
             fiscal_type = "NC"
         return '%s %s' % (fiscal_type, denom)
 
+    def get_move_domain(self, types, obj):
+        date = 'date' if obj.based_on == 'purchase' else 'invoice_date'
+        return [
+            ('move_type', 'in', types),
+            (date, '>=', obj.date_from),
+            (date, '<=', obj.date_to),
+        ]
+
     def get_columns(self, types, obj):
         AccountMove = self.env['account.move']
         AccountTax = self.env['account.tax']
-        invoices = AccountMove.search(
-            [
-                ('move_type', 'in', types),
-                ('line_ids.date', '>=', obj.date_from),
-                ('line_ids.date', '<=', obj.date_to),
-            ]
-        )
+        invoices = AccountMove.search(self.get_move_domain(types, obj))
         tax_ids = set(
             invoices.mapped('line_ids.tax_ids').ids
             + invoices.mapped('line_ids.tax_line_id').ids
