@@ -279,7 +279,7 @@ class SubjournalXlsx(models.AbstractModel):
             WHERE i.move_type IN %(inv_type)s
                 AND l.date BETWEEN %(date_from)s AND %(date_to)s
                 AND a.internal_type NOT IN ('payable', 'receivable')
-                AND l.company_id IN %(company_ids)s
+                AND l.company_id = %(company_id)s
         ),
         grouped_invoice AS (
             SELECT invoice_id, ABS(SUM(debit - credit)) AS invoice_total
@@ -358,14 +358,10 @@ class SubjournalXlsx(models.AbstractModel):
         ORDER BY date, pos, invoice_id, invoice_type
         """
         final_consumer = self.env.ref('l10n_ar_eynes.fiscal_position_cf')
-        if obj.company_ids:
-            company_ids = obj.company_ids.ids
-        else:
-            company_ids = self.env['res.company'].search([]).ids
         q_vals = {
             'inv_type': tuple(types),
             'date_from': obj.date_from,
-            'company_ids': tuple(company_ids),
+            'company_id': obj.company_id.id,
             'date_to': obj.date_to,
             'grouped': obj.grouped,
             'grouped_max': obj.grouped_max_amount,
@@ -449,17 +445,38 @@ class SubjournalXlsx(models.AbstractModel):
             if c_taxes[i] > 0:
                 wanted_list.insert(-2, col['name'])
         sheet = workbook.add_worksheet(title)
-        sheet.set_column('A:L', 20)
+        sheet.set_column('A:L', 23)
+        starting_row = 4
+
+        # Writing company, period and type
+        vat_book_type = {
+            'sale': 'LIBRO IVA VENTAS',
+            'purchase': 'LIBRO IVA COMPRAS',
+        }
+        company_data = [
+            ('A1', 'Razon Social', date_format),
+            ('B1', wizard_obj.company_id.name, date_format),
+            ('A2', vat_book_type[wizard_obj.based_on], date_format),
+            ('A3', 'Perido', date_format),
+            ('B3', wizard_obj.date_from.strftime('%m/%Y'), date_format),
+        ]
+        for data in company_data:
+            sheet.write(data[0], data[1], data[2])
+
+        # Writing Headers
         for i, column in enumerate(wanted_list):
-            sheet.write(int2xlscol(i) + '1', column, head_format)
+            sheet.write(int2xlscol(i) + str(starting_row), column, head_format)
         self.set_column(sheet, i)
-        for p, line in enumerate(lines):
-            p += 2
+
+        # Insert values
+        for p, line in enumerate(lines, start=starting_row + 1):
             cell_format = gray_format
             if p % 2:
                 cell_format = date_format
             sheet.write(
-                'A' + str(p), line['date'].strftime('%d/%m/%Y'), cell_format
+                'A' + str(p),
+                line['date'].strftime('%d/%m/%Y'),
+                cell_format,
             )
             sheet.write('B' + str(p), line['company_id'], cell_format)
             sheet.write('C' + str(p), line['partner'], cell_format)
@@ -483,7 +500,7 @@ class SubjournalXlsx(models.AbstractModel):
         nc_formula = '{=SUMIF(G2:G%(last_line)s,"NC *",%(col)s2:%(col)s%(last_line)s)}'  # noqa
         total_formula = '{=SUM(%(col)s2:%(col)s%(last_line)s)}'  # noqa
 
-        last_row_num = len(lines) + 1
+        last_row_num = len(lines) + starting_row
         last_row_char = str(last_row_num)
         fac_row_char = str(last_row_num + 3)
         nc_row_char = str(last_row_num + 4)
