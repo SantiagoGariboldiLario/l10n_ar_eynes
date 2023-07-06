@@ -62,7 +62,11 @@ class AccountTaxSubjournal(models.TransientModel):
         required=True,
         default='first',
     )
-    company_ids = fields.Many2many('res.company', string='Company')
+    company_id = fields.Many2one(
+        'res.company',
+        string='Company',
+        default=lambda self: self.env.user.company_id.id,
+    )
 
     def create_report(self):
         self.validate_date_from()
