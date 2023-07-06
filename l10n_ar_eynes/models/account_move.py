@@ -777,18 +777,15 @@ class AccountMove(models.Model):
             if self.id:
                 self.validate_denomination()
                 self.validate_period()
-                if (
-                    not self.payment_reference
-                    and self.journal_id.fiscal_type == 'internal'
-                ):
+                if self.fiscal_type == 'electronic':
+                    if self.check_must_be_fce():
+                        self.ensure_fce_values()
+                    self.action_aut_cae()
+                elif not self.payment_reference:
                     name = self.journal_id.get_sequence_from_invoice(
                         self
                     )._next()
                     self.write({'name': name})
-                else:
-                    if self.check_must_be_fce():
-                        self.ensure_fce_values()
-                    self.action_aut_cae()
                 self._set_perception_date()
         return super(AccountMove, self).action_post()
 
