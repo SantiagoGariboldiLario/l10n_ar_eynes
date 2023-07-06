@@ -406,7 +406,7 @@ class AccountMove(models.Model):
 
     @api.onchange('perception_ids')
     def _onchange_perception_ids(self):
-        if self.is_sale_document():
+        if self.is_sale_document() or self.is_purchase_document():
             perceptions_applied = self.env['account.tax']
             for perception in self.perception_ids:
                 perceptions_applied += perception.perception_id.tax_id
@@ -502,12 +502,16 @@ class AccountMove(models.Model):
         The perception_line parameter is an perception.tax.line
         """
         perception_tax = perception_line.perception_id.tax_id
+        sign = -1 if self.is_sale_document() else 1
         vals = {
             'account_id': perception_tax.tax_group_id.property_tax_payable_account_id.id,
             'price_unit': perception_line.amount,
-            'credit': perception_line.amount,
-            'balance': -perception_line.amount,
-            'amount_currency': -perception_line.amount,
+            'credit': perception_line.amount if self.is_sale_document() else 0,
+            'debit': perception_line.amount
+            if self.is_purchase_document()
+            else 0,
+            'balance': sign * perception_line.amount,
+            'amount_currency': sign * perception_line.amount,
             'price_subtotal': perception_line.amount,
             'price_total': perception_line.amount,
             'tax_base_amount': perception_line.base,
