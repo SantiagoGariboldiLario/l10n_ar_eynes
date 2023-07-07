@@ -1201,7 +1201,7 @@ class AccountMove(models.Model):
             destination_shipping_id=destination_shipping,
         )
         if not applicable:
-            return
+            return None
 
         # Chequeamos las percepciones a aplicar que matchean
         # (esto corresponde a una percepcion pero que pueden
@@ -1279,9 +1279,11 @@ class AccountMove(models.Model):
                             continue
                     else:
                         partner_perc['excluded_percent'] = 0.0
-                    new_perception_lines += rec.compute_perception(
+                    new_perception = rec.compute_perception(
                         perception_data=partner_perc
                     )
+                    if new_perception:
+                        new_perception_lines += new_perception
                 rec.perception_ids = new_perception_lines
                 rec._onchange_perception_ids()
 
