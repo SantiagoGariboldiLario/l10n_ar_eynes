@@ -380,7 +380,7 @@ class AccountJournal(models.Model):
     ):
         self.ensure_one()
 
-        partner_model = self.env['res.partner']
+        Partner = self.env['res.partner']
         tax_id = self.tax_id
 
         if not tax_id.state_id:
@@ -407,11 +407,11 @@ class AccountJournal(models.Model):
         retention_state = tax_id.state_id.id
 
         if tax_id.applicable_state == 'dest':
-            partner_state = partner_model.browse(
+            partner_state = Partner.browse(
                 destination_shipping_id.address_get(['delivery']).get(
                     'delivery'
                 )
-            ).id
+            ).state_id.id
             if not partner_state:
                 raise RetentionError(
                     _(
@@ -423,10 +423,10 @@ class AccountJournal(models.Model):
         elif tax_id.applicable_state == 'source':
             user = self.env.user
             partner = user.company_id.partner_id
-            partner_state = partner_model.browse(
+            partner_state = Partner.browse(
                 source_shipping_id.address_get(['delivery']).get('delivery')
                 or partner.address_get(['delivery']).get('delivery')
-            ).id
+            ).state_id.id
 
             if not partner_state:
                 raise RetentionError(
@@ -679,8 +679,9 @@ class AccountJournal(models.Model):
         tapp_domain = [
             ('perception_tax_id', '=', self.tax_id.id),
             ('concept_id', 'in', concept_ids),
-            ('activity_id', '=', activity_id),
         ]
+        if activity:
+            tapp_domain.append(('activity_id', '=', activity and activity.id))
         iibb_domain = []
 
         if self.type == 'gross_income':
