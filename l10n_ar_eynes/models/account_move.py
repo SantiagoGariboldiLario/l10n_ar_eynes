@@ -529,16 +529,23 @@ class AccountMove(models.Model):
         The perception_line parameter is an perception.tax.line
         """
         perception_tax = perception_line.perception_id.tax_id
-        sign = -1 if self.is_sale_document() else 1
+        sign = -1 if self.move_type in ('out_invoice', 'in_refund') else 1
+
+        amount_currency = sign * perception_line.amount
+        if not self.is_company_cur:
+            amount_currency = amount_currency / self.currency_rate
+
         vals = {
             'account_id': perception_tax.tax_group_id.property_tax_payable_account_id.id,
             'price_unit': perception_line.amount,
-            'credit': perception_line.amount if self.is_sale_document() else 0,
+            'credit': perception_line.amount
+            if self.move_type in ('out_invoice', 'in_refund')
+            else 0,
             'debit': perception_line.amount
-            if self.is_purchase_document()
+            if self.move_type not in ('out_invoice', 'in_refund')
             else 0,
             'balance': sign * perception_line.amount,
-            'amount_currency': sign * perception_line.amount,
+            'amount_currency': amount_currency,
             'price_subtotal': perception_line.amount,
             'price_total': perception_line.amount,
             'tax_base_amount': perception_line.base,
