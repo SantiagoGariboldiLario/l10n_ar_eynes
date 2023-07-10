@@ -32,6 +32,10 @@ class AccountMove(models.Model):
         ],
         string='Denomination',
     )
+    internal_number = fields.Char(
+        string='Internal Number',
+        copy=False,
+    )
     supplier_move_reference = fields.Char(
         string='Supplier Invoice Reference',
         copy=False,
@@ -781,11 +785,8 @@ class AccountMove(models.Model):
                     if self.check_must_be_fce():
                         self.ensure_fce_values()
                     self.action_aut_cae()
-                elif not self.payment_reference:
-                    name = self.journal_id.get_sequence_from_invoice(
-                        self
-                    )._next()
-                    self.write({'name': name})
+                else:
+                    self.set_name_from_internal_number()
                 self._set_perception_date()
         return super(AccountMove, self).action_post()
 
@@ -812,6 +813,20 @@ class AccountMove(models.Model):
             raise ValidationError(
                 _("Invoice must have a denomination configured")
             )
+
+    def set_name_from_internal_number(self):
+        if not self.posted_before:
+            internal_number = self.journal_id.get_sequence_from_invoice(
+                self
+            )._next()
+            self.write(
+                {
+                    'name': internal_number,
+                    'internal_number': internal_number,
+                }
+            )
+        else:
+            self.write({'name': self.internal_number})
 
     def action_post_from_massive(self, first_number):
         for rec in self:
@@ -1182,6 +1197,36 @@ class AccountMove(models.Model):
                 )
                 % ', '.join(r[1] for r in res)
             )
+
+    def _get_move_display_name(self, show_ref=False):
+        '''Helper to get the display name of an invoice depending of its type.
+        :param show_ref:    A flag indicating of the display name must
+        include or not the journal entry reference.
+        :return:            A string representing the invoice.
+        '''
+        self.ensure_one()
+        name = ''
+        if self.state == 'draft':
+            name += {
+                'out_invoice': _('Draft Invoice'),
+                'out_refund': _('Draft Credit Note'),
+                'in_invoice': _('Draft Bill'),
+                'in_refund': _('Draft Vendor Credit Note'),
+                'out_receipt': _('Draft Sales Receipt'),
+                'in_receipt': _('Draft Purchase Receipt'),
+                'entry': _('Draft Entry'),
+            }[self.move_type]
+            name += ' '
+        if not self.internal_number:
+            name += '(* %s)' % str(self.id)
+        else:
+            name += self.name
+        return name + (
+            show_ref
+            and self.ref
+            and ' (%s%s)' % (self.ref[:50], '...' if len(self.ref) > 50 else '')
+            or ''
+        )
 
     @api.model
     def compute_perception(self, perception_data):
