@@ -294,9 +294,9 @@ class AccountMove(models.Model):
                         raise_if_not_found=False,
                     ):
                         if tax.is_exempt:
-                            amount_exempt += line.amount
+                            amount_exempt += tax.amount
                         else:
-                            amount_base += line.amount
+                            amount_base += tax.amount
                     res['amount_tax_cur'] += (
                         line.price_subtotal * tax.amount * 0.01
                     )
