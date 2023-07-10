@@ -32,6 +32,10 @@ class AccountMove(models.Model):
         ],
         string='Denomination',
     )
+    internal_number = fields.Char(
+        string='Internal Number',
+        copy=False,
+    )
     supplier_move_reference = fields.Char(
         string='Supplier Invoice Reference',
         copy=False,
@@ -218,6 +222,13 @@ class AccountMove(models.Model):
         currency_field="secondary_currency_id",
         string='Tax',
     )
+    amount_perception_curr = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Perceptions',
+    )
     amount_total_cur = fields.Monetary(
         compute='_compute_amount_all_cur',
         store=True,
@@ -242,6 +253,7 @@ class AccountMove(models.Model):
         'invoice_line_ids.quantity',
         'invoice_line_ids.discount',
         'currency_rate',
+        'perception_ids',
     )
     def _compute_amount_all_cur(self):
         Currency = self.env.get('res.currency')
@@ -249,6 +261,7 @@ class AccountMove(models.Model):
             res = {
                 'amount_untaxed_cur': 0.0,
                 'amount_tax_cur': 0.0,
+                'amount_perception_curr': 0.0,
                 'amount_total_cur': 0.0,
                 'amount_fob_cur': 0.0,
                 'amount_taxed_cur': 0.0,
@@ -272,13 +285,18 @@ class AccountMove(models.Model):
 
                 for tax in line.tax_ids:
                     if tax.tax_group_id == self.env.ref(
+                        'l10n_ar_eynes.perceptions_tax_group',
+                        raise_if_not_found=False,
+                    ):
+                        continue
+                    if tax.tax_group_id == self.env.ref(
                         'l10n_ar_eynes.vat_tax_group',
                         raise_if_not_found=False,
                     ):
                         if tax.is_exempt:
-                            amount_exempt += line.amount
+                            amount_exempt += tax.amount
                         else:
-                            amount_base += line.amount
+                            amount_base += tax.amount
                     res['amount_tax_cur'] += (
                         line.price_subtotal * tax.amount * 0.01
                     )
@@ -290,22 +308,31 @@ class AccountMove(models.Model):
                 currency2=(secondary_currency, invoice.secondary_currency_rate),
             )
             rate = modify_cur_obj._get_conversion_rate(
-                invoice.currency_id, secondary_currency, company, date
+                invoice.currency_id,
+                secondary_currency,
+                company,
+                date,
             )
 
             res['amount_total_cur'] *= rate
             res['amount_untaxed_cur'] *= rate
             res['amount_tax_cur'] *= rate
+            res['amount_perception_curr'] = sum(
+                invoice.perception_ids.mapped('amount')
+            )
             amount_base *= rate
             amount_exempt *= rate
 
             atc_rounded = secondary_currency.round(res['amount_tax_cur'])
             atotc_rounded = secondary_currency.round(res['amount_total_cur'])
             auc_rounded = secondary_currency.round(res['amount_untaxed_cur'])
+            perc_rounded = secondary_currency.round(
+                res['amount_perception_curr']
+            )
             amount_base = secondary_currency.round(amount_base)
             amount_exempt = secondary_currency.round(amount_exempt)
 
-            res['amount_total_cur'] = atc_rounded + auc_rounded
+            res['amount_total_cur'] = atc_rounded + auc_rounded + perc_rounded
             res['amount_fob_cur'] = atotc_rounded
             res['amount_no_taxed_cur'] = (
                 auc_rounded - amount_base - amount_exempt
@@ -502,16 +529,23 @@ class AccountMove(models.Model):
         The perception_line parameter is an perception.tax.line
         """
         perception_tax = perception_line.perception_id.tax_id
-        sign = -1 if self.is_sale_document() else 1
+        sign = -1 if self.move_type in ('out_invoice', 'in_refund') else 1
+
+        amount_currency = sign * perception_line.amount
+        if not self.is_company_cur:
+            amount_currency = amount_currency / self.currency_rate
+
         vals = {
             'account_id': perception_tax.tax_group_id.property_tax_payable_account_id.id,
             'price_unit': perception_line.amount,
-            'credit': perception_line.amount if self.is_sale_document() else 0,
+            'credit': perception_line.amount
+            if self.move_type in ('out_invoice', 'in_refund')
+            else 0,
             'debit': perception_line.amount
-            if self.is_purchase_document()
+            if self.move_type not in ('out_invoice', 'in_refund')
             else 0,
             'balance': sign * perception_line.amount,
-            'amount_currency': sign * perception_line.amount,
+            'amount_currency': amount_currency,
             'price_subtotal': perception_line.amount,
             'price_total': perception_line.amount,
             'tax_base_amount': perception_line.base,
@@ -781,11 +815,8 @@ class AccountMove(models.Model):
                     if self.check_must_be_fce():
                         self.ensure_fce_values()
                     self.action_aut_cae()
-                elif not self.payment_reference:
-                    name = self.journal_id.get_sequence_from_invoice(
-                        self
-                    )._next()
-                    self.write({'name': name})
+                else:
+                    self.set_name_from_internal_number()
                 self._set_perception_date()
         return super(AccountMove, self).action_post()
 
@@ -812,6 +843,20 @@ class AccountMove(models.Model):
             raise ValidationError(
                 _("Invoice must have a denomination configured")
             )
+
+    def set_name_from_internal_number(self):
+        if not self.posted_before:
+            internal_number = self.journal_id.get_sequence_from_invoice(
+                self
+            )._next()
+            self.write(
+                {
+                    'name': internal_number,
+                    'internal_number': internal_number,
+                }
+            )
+        else:
+            self.write({'name': self.internal_number})
 
     def action_post_from_massive(self, first_number):
         for rec in self:
@@ -1182,6 +1227,36 @@ class AccountMove(models.Model):
                 )
                 % ', '.join(r[1] for r in res)
             )
+
+    def _get_move_display_name(self, show_ref=False):
+        '''Helper to get the display name of an invoice depending of its type.
+        :param show_ref:    A flag indicating of the display name must
+        include or not the journal entry reference.
+        :return:            A string representing the invoice.
+        '''
+        self.ensure_one()
+        name = ''
+        if self.state == 'draft':
+            name += {
+                'out_invoice': _('Draft Invoice'),
+                'out_refund': _('Draft Credit Note'),
+                'in_invoice': _('Draft Bill'),
+                'in_refund': _('Draft Vendor Credit Note'),
+                'out_receipt': _('Draft Sales Receipt'),
+                'in_receipt': _('Draft Purchase Receipt'),
+                'entry': _('Draft Entry'),
+            }[self.move_type]
+            name += ' '
+        if not self.internal_number:
+            name += '(* %s)' % str(self.id)
+        else:
+            name += self.name
+        return name + (
+            show_ref
+            and self.ref
+            and ' (%s%s)' % (self.ref[:50], '...' if len(self.ref) > 50 else '')
+            or ''
+        )
 
     @api.model
     def compute_perception(self, perception_data):

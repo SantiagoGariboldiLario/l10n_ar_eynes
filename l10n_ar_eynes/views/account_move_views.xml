@@ -188,6 +188,7 @@
                         class="oe_subtotal_footer_separator"
                     />
                     <field name="amount_tax_cur" />
+                    <field name="amount_perception_curr" />
                     <field
                         name="amount_total_cur"
                         class="oe_subtotal_footer_separator"
