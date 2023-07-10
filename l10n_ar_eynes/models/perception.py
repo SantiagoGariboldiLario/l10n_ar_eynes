@@ -348,9 +348,10 @@ class PerceptionTaxApplication(models.Model):
 
         # TODO: De acuerdo al calculation_base,
         # llamamos a la funcion correspondiente
-        if tax_application.calculation_base == 'proportional_vat':
-            base = line_vals['amount_taxed']
-        elif tax_application.calculation_base == 'amount_taxed':
+        if tax_application.calculation_base in (
+            'proportional_vat',
+            'amount_taxed',
+        ):
             base = line_vals['amount_taxed']
         elif tax_application.calculation_base == 'amount_total':
             base = line_vals['amount_total']
