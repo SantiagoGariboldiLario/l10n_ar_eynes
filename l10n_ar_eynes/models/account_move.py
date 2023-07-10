@@ -222,6 +222,13 @@ class AccountMove(models.Model):
         currency_field="secondary_currency_id",
         string='Tax',
     )
+    amount_perception_curr = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Perceptions',
+    )
     amount_total_cur = fields.Monetary(
         compute='_compute_amount_all_cur',
         store=True,
@@ -246,6 +253,7 @@ class AccountMove(models.Model):
         'invoice_line_ids.quantity',
         'invoice_line_ids.discount',
         'currency_rate',
+        'perception_ids',
     )
     def _compute_amount_all_cur(self):
         Currency = self.env.get('res.currency')
@@ -253,6 +261,7 @@ class AccountMove(models.Model):
             res = {
                 'amount_untaxed_cur': 0.0,
                 'amount_tax_cur': 0.0,
+                'amount_perception_curr': 0.0,
                 'amount_total_cur': 0.0,
                 'amount_fob_cur': 0.0,
                 'amount_taxed_cur': 0.0,
@@ -276,6 +285,11 @@ class AccountMove(models.Model):
 
                 for tax in line.tax_ids:
                     if tax.tax_group_id == self.env.ref(
+                        'l10n_ar_eynes.perceptions_tax_group',
+                        raise_if_not_found=False,
+                    ):
+                        continue
+                    if tax.tax_group_id == self.env.ref(
                         'l10n_ar_eynes.vat_tax_group',
                         raise_if_not_found=False,
                     ):
@@ -294,22 +308,31 @@ class AccountMove(models.Model):
                 currency2=(secondary_currency, invoice.secondary_currency_rate),
             )
             rate = modify_cur_obj._get_conversion_rate(
-                invoice.currency_id, secondary_currency, company, date
+                invoice.currency_id,
+                secondary_currency,
+                company,
+                date,
             )
 
             res['amount_total_cur'] *= rate
             res['amount_untaxed_cur'] *= rate
             res['amount_tax_cur'] *= rate
+            res['amount_perception_curr'] = sum(
+                invoice.perception_ids.mapped('amount')
+            )
             amount_base *= rate
             amount_exempt *= rate
 
             atc_rounded = secondary_currency.round(res['amount_tax_cur'])
             atotc_rounded = secondary_currency.round(res['amount_total_cur'])
             auc_rounded = secondary_currency.round(res['amount_untaxed_cur'])
+            perc_rounded = secondary_currency.round(
+                res['amount_perception_curr']
+            )
             amount_base = secondary_currency.round(amount_base)
             amount_exempt = secondary_currency.round(amount_exempt)
 
-            res['amount_total_cur'] = atc_rounded + auc_rounded
+            res['amount_total_cur'] = atc_rounded + auc_rounded + perc_rounded
             res['amount_fob_cur'] = atotc_rounded
             res['amount_no_taxed_cur'] = (
                 auc_rounded - amount_base - amount_exempt
