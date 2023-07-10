@@ -222,6 +222,13 @@ class AccountMove(models.Model):
         currency_field="secondary_currency_id",
         string='Tax',
     )
+    amount_perception_curr = fields.Monetary(
+        compute='_compute_amount_all_cur',
+        store=True,
+        readonly=True,
+        currency_field="secondary_currency_id",
+        string='Perceptions',
+    )
     amount_total_cur = fields.Monetary(
         compute='_compute_amount_all_cur',
         store=True,
@@ -246,6 +253,7 @@ class AccountMove(models.Model):
         'invoice_line_ids.quantity',
         'invoice_line_ids.discount',
         'currency_rate',
+        'perception_ids',
     )
     def _compute_amount_all_cur(self):
         Currency = self.env.get('res.currency')
@@ -253,6 +261,7 @@ class AccountMove(models.Model):
             res = {
                 'amount_untaxed_cur': 0.0,
                 'amount_tax_cur': 0.0,
+                'amount_perception_curr': 0.0,
                 'amount_total_cur': 0.0,
                 'amount_fob_cur': 0.0,
                 'amount_taxed_cur': 0.0,
@@ -276,6 +285,11 @@ class AccountMove(models.Model):
 
                 for tax in line.tax_ids:
                     if tax.tax_group_id == self.env.ref(
+                        'l10n_ar_eynes.perceptions_tax_group',
+                        raise_if_not_found=False,
+                    ):
+                        continue
+                    if tax.tax_group_id == self.env.ref(
                         'l10n_ar_eynes.vat_tax_group',
                         raise_if_not_found=False,
                     ):
@@ -294,22 +308,31 @@ class AccountMove(models.Model):
                 currency2=(secondary_currency, invoice.secondary_currency_rate),
             )
             rate = modify_cur_obj._get_conversion_rate(
-                invoice.currency_id, secondary_currency, company, date
+                invoice.currency_id,
+                secondary_currency,
+                company,
+                date,
             )
 
             res['amount_total_cur'] *= rate
             res['amount_untaxed_cur'] *= rate
             res['amount_tax_cur'] *= rate
+            res['amount_perception_curr'] = sum(
+                invoice.perception_ids.mapped('amount')
+            )
             amount_base *= rate
             amount_exempt *= rate
 
             atc_rounded = secondary_currency.round(res['amount_tax_cur'])
             atotc_rounded = secondary_currency.round(res['amount_total_cur'])
             auc_rounded = secondary_currency.round(res['amount_untaxed_cur'])
+            perc_rounded = secondary_currency.round(
+                res['amount_perception_curr']
+            )
             amount_base = secondary_currency.round(amount_base)
             amount_exempt = secondary_currency.round(amount_exempt)
 
-            res['amount_total_cur'] = atc_rounded + auc_rounded
+            res['amount_total_cur'] = atc_rounded + auc_rounded + perc_rounded
             res['amount_fob_cur'] = atotc_rounded
             res['amount_no_taxed_cur'] = (
                 auc_rounded - amount_base - amount_exempt
@@ -506,16 +529,23 @@ class AccountMove(models.Model):
         The perception_line parameter is an perception.tax.line
         """
         perception_tax = perception_line.perception_id.tax_id
-        sign = -1 if self.is_sale_document() else 1
+        sign = -1 if self.move_type in ('out_invoice', 'in_refund') else 1
+
+        amount_currency = sign * perception_line.amount
+        if not self.is_company_cur:
+            amount_currency = amount_currency / self.currency_rate
+
         vals = {
             'account_id': perception_tax.tax_group_id.property_tax_payable_account_id.id,
             'price_unit': perception_line.amount,
-            'credit': perception_line.amount if self.is_sale_document() else 0,
+            'credit': perception_line.amount
+            if self.move_type in ('out_invoice', 'in_refund')
+            else 0,
             'debit': perception_line.amount
-            if self.is_purchase_document()
+            if self.move_type not in ('out_invoice', 'in_refund')
             else 0,
             'balance': sign * perception_line.amount,
-            'amount_currency': sign * perception_line.amount,
+            'amount_currency': amount_currency,
             'price_subtotal': perception_line.amount,
             'price_total': perception_line.amount,
             'tax_base_amount': perception_line.base,
