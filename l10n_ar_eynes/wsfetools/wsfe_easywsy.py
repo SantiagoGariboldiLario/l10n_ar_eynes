@@ -226,11 +226,18 @@ class WSFE(AfipWS):
             if code not in vat_dict:
                 vat_dict[code] = {
                     'Importe': tax_line.price_unit,
-                    'BaseImp': tax_line.tax_base_amount,
+                    'BaseImp': tax_line.tax_base_amount / invoice.currency_rate
+                    if not invoice.is_company_cur
+                    else tax_line.tax_base_amount,
                 }
             else:
                 vat_dict[code]['Importe'] += tax_line.price_unit
-                vat_dict[code]['BaseImp'] += tax_line.tax_base_amount
+                if invoice.is_company_cur:
+                    vat_dict[code]['BaseImp'] += tax_line.tax_base_amount
+                else:
+                    vat_dict[code]['BaseImp'] += (
+                        tax_line.tax_base_amount / invoice.currency_rate
+                    )
 
         vat_array = [
             {**{'Id': code}, **vals} for code, vals in vat_dict.items()
