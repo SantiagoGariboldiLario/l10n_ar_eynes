@@ -441,15 +441,16 @@ class AccountMove(models.Model):
             for line in self.invoice_line_ids:
                 line.tax_ids += perceptions_applied
 
-            self._recompute_tax_lines()
+            if not self.env.context.get('is_reverse'):
+                self._recompute_tax_lines()
 
-            for perception in self.perception_ids:
-                move_line = self.line_ids.filtered(
-                    lambda line: line.tax_line_id
-                    == perception.perception_id.tax_id
-                )
-                vals = self._prepare_tax_line_vals(perception)
-                move_line.update(vals)
+                for perception in self.perception_ids:
+                    move_line = self.line_ids.filtered(
+                        lambda line: line.tax_line_id
+                        == perception.perception_id.tax_id
+                    )
+                    vals = self._prepare_tax_line_vals(perception)
+                    move_line.update(vals)
 
             self._recompute_dynamic_lines()
 
@@ -531,13 +532,13 @@ class AccountMove(models.Model):
         perception_tax = perception_line.perception_id.tax_id
         sign = -1 if self.move_type in ('out_invoice', 'in_refund') else 1
 
-        amount_currency = sign * perception_line.amount
+        amount_currency = perception_line.amount
         if not self.is_company_cur:
             amount_currency = amount_currency / self.currency_rate
 
         vals = {
             'account_id': perception_tax.tax_group_id.property_tax_payable_account_id.id,
-            'price_unit': perception_line.amount,
+            'price_unit': amount_currency,
             'credit': perception_line.amount
             if self.move_type in ('out_invoice', 'in_refund')
             else 0,
@@ -545,9 +546,9 @@ class AccountMove(models.Model):
             if self.move_type not in ('out_invoice', 'in_refund')
             else 0,
             'balance': sign * perception_line.amount,
-            'amount_currency': amount_currency,
-            'price_subtotal': perception_line.amount,
-            'price_total': perception_line.amount,
+            'amount_currency': sign * amount_currency,
+            'price_subtotal': amount_currency,
+            'price_total': amount_currency,
             'tax_base_amount': perception_line.base,
             'sequence': perception_tax.tax_group_id.sequence,
         }
