@@ -1315,6 +1315,43 @@ class AccountMove(models.Model):
             )
         return new_perception_lines
 
+    def _reverse_move_vals(self, default_values, cancel=True):
+        vals = super(AccountMove, self)._reverse_move_vals(
+            default_values, cancel=cancel
+        )
+
+        perceptions = []
+        for p in self.perception_ids:
+            perceptions.append(
+                (
+                    0,
+                    0,
+                    {
+                        'amount': p.amount,
+                        'base': p.base,
+                        'base_amount': p.base_amount,
+                        'concept_id': p.concept_id.id,
+                        'manual': p.manual,
+                        'name': p.name,
+                        'partner_id': p.partner_id.id,
+                        'perception_id': p.perception_id.id,
+                        'reg_code': p.reg_code,
+                        'state_id': p.state_id.id,
+                        'tax_amount': p.tax_amount,
+                        'tax_app_id': p.tax_app_id.id,
+                        'vat': p.vat,
+                    },
+                )
+            )
+        vals.update(
+            {
+                # 'address_shipping_id': self.address_shipping_id.id,
+                'perception_ids': perceptions,
+            }
+        )
+
+        return vals
+
     @api.onchange('invoice_line_ids')
     def compute_perceptions(self):
         for rec in self:
