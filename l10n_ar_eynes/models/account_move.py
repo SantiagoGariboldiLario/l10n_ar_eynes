@@ -888,10 +888,10 @@ class AccountMove(models.Model):
             code = PCODES[perception.perception_id.tax_id.jurisdiccion]
             perc = {
                 'Id': code,
-                'BaseImp': perception.base / inv.currency_rate
+                'BaseImp': round(perception.base / inv.currency_rate, 2)
                 if not inv.is_company_cur
                 else perception.base,
-                'Importe': perception.amount / inv.currency_rate
+                'Importe': round(perception.amount / inv.currency_rate, 2)
                 if not inv.is_company_cur
                 else perception.amount,
                 'Alic': 0.0,
