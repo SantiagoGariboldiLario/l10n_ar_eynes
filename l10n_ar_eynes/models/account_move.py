@@ -74,13 +74,6 @@ class AccountMove(models.Model):
         copy=False,
         help='Fecha de vencimiento del CAE',
     )
-    origin_invoice_id = fields.Many2one(
-        comodel_name='account.move',
-        compute='_compute_origin_invoice',
-        inverse='_inverse_origin_invoice',
-        string='Origin Invoice',
-        store=True,
-    )
     associated_inv_ids = fields.Many2many(
         comodel_name='account.move',
         relation='inv_associated_inv_rel',
@@ -371,21 +364,6 @@ class AccountMove(models.Model):
 
         last_sequence_number = max(invoices.mapped('sequence_number'))
         return str(last_sequence_number + 1).zfill(8)
-
-    @api.depends('reversed_entry_id', 'debit_origin_id')
-    def _compute_origin_invoice(self):
-        for rec in self.filtered(lambda r: r.is_invoice()):
-            if rec.move_type == 'out_refund':
-                rec.origin_invoice_id = rec.reversed_entry_id
-            elif rec.move_type == 'out_invoice' and rec.is_debit_note:
-                rec.origin_invoice_id = rec.debit_origin_id
-
-    def _inverse_origin_invoice(self):
-        for rec in self:
-            if rec.move_type == 'out_refund':
-                rec.reversed_entry_id = rec.origin_invoice_id
-            elif rec.move_type == 'out_invoice' and rec.is_debit_note:
-                rec.debit_origin_id = rec.origin_invoice_id
 
     # ONCHANGE METHODS
     @api.onchange('journal_id', 'partner_id')
