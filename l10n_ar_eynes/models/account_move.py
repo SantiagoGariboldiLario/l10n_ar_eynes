@@ -74,13 +74,6 @@ class AccountMove(models.Model):
         copy=False,
         help='Fecha de vencimiento del CAE',
     )
-    origin_invoice_id = fields.Many2one(
-        comodel_name='account.move',
-        compute='_compute_origin_invoice',
-        inverse='_inverse_origin_invoice',
-        string='Origin Invoice',
-        store=True,
-    )
     associated_inv_ids = fields.Many2many(
         comodel_name='account.move',
         relation='inv_associated_inv_rel',
@@ -372,21 +365,6 @@ class AccountMove(models.Model):
         last_sequence_number = max(invoices.mapped('sequence_number'))
         return str(last_sequence_number + 1).zfill(8)
 
-    @api.depends('reversed_entry_id', 'debit_origin_id')
-    def _compute_origin_invoice(self):
-        for rec in self.filtered(lambda r: r.is_invoice()):
-            if rec.move_type == 'out_refund':
-                rec.origin_invoice_id = rec.reversed_entry_id
-            elif rec.move_type == 'out_invoice' and rec.is_debit_note:
-                rec.origin_invoice_id = rec.debit_origin_id
-
-    def _inverse_origin_invoice(self):
-        for rec in self:
-            if rec.move_type == 'out_refund':
-                rec.reversed_entry_id = rec.origin_invoice_id
-            elif rec.move_type == 'out_invoice' and rec.is_debit_note:
-                rec.debit_origin_id = rec.origin_invoice_id
-
     # ONCHANGE METHODS
     @api.onchange('journal_id', 'partner_id')
     def _onchange_journal(self):
@@ -441,15 +419,16 @@ class AccountMove(models.Model):
             for line in self.invoice_line_ids:
                 line.tax_ids += perceptions_applied
 
-            self._recompute_tax_lines()
+            if not self.env.context.get('is_reverse'):
+                self._recompute_tax_lines()
 
-            for perception in self.perception_ids:
-                move_line = self.line_ids.filtered(
-                    lambda line: line.tax_line_id
-                    == perception.perception_id.tax_id
-                )
-                vals = self._prepare_tax_line_vals(perception)
-                move_line.update(vals)
+                for perception in self.perception_ids:
+                    move_line = self.line_ids.filtered(
+                        lambda line: line.tax_line_id
+                        == perception.perception_id.tax_id
+                    )
+                    vals = self._prepare_tax_line_vals(perception)
+                    move_line.update(vals)
 
             self._recompute_dynamic_lines()
 
@@ -531,13 +510,13 @@ class AccountMove(models.Model):
         perception_tax = perception_line.perception_id.tax_id
         sign = -1 if self.move_type in ('out_invoice', 'in_refund') else 1
 
-        amount_currency = sign * perception_line.amount
+        amount_currency = perception_line.amount
         if not self.is_company_cur:
             amount_currency = amount_currency / self.currency_rate
 
         vals = {
             'account_id': perception_tax.tax_group_id.property_tax_payable_account_id.id,
-            'price_unit': perception_line.amount,
+            'price_unit': amount_currency,
             'credit': perception_line.amount
             if self.move_type in ('out_invoice', 'in_refund')
             else 0,
@@ -545,9 +524,9 @@ class AccountMove(models.Model):
             if self.move_type not in ('out_invoice', 'in_refund')
             else 0,
             'balance': sign * perception_line.amount,
-            'amount_currency': amount_currency,
-            'price_subtotal': perception_line.amount,
-            'price_total': perception_line.amount,
+            'amount_currency': sign * amount_currency,
+            'price_subtotal': amount_currency,
+            'price_total': amount_currency,
             'tax_base_amount': perception_line.base,
             'sequence': perception_tax.tax_group_id.sequence,
         }
@@ -887,8 +866,12 @@ class AccountMove(models.Model):
             code = PCODES[perception.perception_id.tax_id.jurisdiccion]
             perc = {
                 'Id': code,
-                'BaseImp': perception.base,
-                'Importe': perception.amount,
+                'BaseImp': round(perception.base / inv.currency_rate, 2)
+                if not inv.is_company_cur
+                else perception.base,
+                'Importe': round(perception.amount / inv.currency_rate, 2)
+                if not inv.is_company_cur
+                else perception.amount,
                 'Alic': 0.0,
                 'Desc': perception.name,
             }
@@ -1247,7 +1230,7 @@ class AccountMove(models.Model):
                 'entry': _('Draft Entry'),
             }[self.move_type]
             name += ' '
-        if not self.internal_number:
+        if self.is_sale_document() and not self.internal_number:
             name += '(* %s)' % str(self.id)
         else:
             name += self.name
@@ -1309,6 +1292,43 @@ class AccountMove(models.Model):
                 .new(perception_line_vals)
             )
         return new_perception_lines
+
+    def _reverse_move_vals(self, default_values, cancel=True):
+        vals = super(AccountMove, self)._reverse_move_vals(
+            default_values, cancel=cancel
+        )
+
+        perceptions = []
+        for p in self.perception_ids:
+            perceptions.append(
+                (
+                    0,
+                    0,
+                    {
+                        'amount': p.amount,
+                        'base': p.base,
+                        'base_amount': p.base_amount,
+                        'concept_id': p.concept_id.id,
+                        'manual': p.manual,
+                        'name': p.name,
+                        'partner_id': p.partner_id.id,
+                        'perception_id': p.perception_id.id,
+                        'reg_code': p.reg_code,
+                        'state_id': p.state_id.id,
+                        'tax_amount': p.tax_amount,
+                        'tax_app_id': p.tax_app_id.id,
+                        'vat': p.vat,
+                    },
+                )
+            )
+        vals.update(
+            {
+                # 'address_shipping_id': self.address_shipping_id.id,
+                'perception_ids': perceptions,
+            }
+        )
+
+        return vals
 
     @api.onchange('invoice_line_ids')
     def compute_perceptions(self):

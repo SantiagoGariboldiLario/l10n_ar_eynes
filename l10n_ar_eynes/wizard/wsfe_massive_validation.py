@@ -17,7 +17,10 @@ class ValidateAccountMove(models.TransientModel):
         inv_obj = self.env['account.move']
 
         invoices = inv_obj.browse(self.env.context['active_ids'])
-        invoices = invoices.filtered(lambda inv: inv.is_sale_document())
+        invoices = invoices.filtered(
+            lambda inv: inv.is_sale_document()
+            and inv.fiscal_type == 'electronic'
+        )
 
         if invoices:
             invoices = invoices.sorted(key=lambda x: x.create_date)
@@ -60,7 +63,7 @@ class ValidateAccountMove(models.TransientModel):
                 )
 
             # Preparamos el lote de facturas para la AFIP
-            next_system_number = invoices[0].get_highest_pos_sequence()
+            next_system_number = invoices[0].get_next_wsfe_number()
 
             request_log = invoices.action_post_from_massive(
                 first_number=next_system_number
