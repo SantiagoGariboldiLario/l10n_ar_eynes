@@ -1252,7 +1252,7 @@ class AccountMove(models.Model):
                 'entry': _('Draft Entry'),
             }[self.move_type]
             name += ' '
-        if not self.internal_number:
+        if self.is_sale_document() and not self.internal_number:
             name += '(* %s)' % str(self.id)
         else:
             name += self.name
