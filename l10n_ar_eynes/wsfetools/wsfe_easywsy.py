@@ -44,7 +44,7 @@ class WSFE(AfipWS):
         nn = False
         for inv_index, inv in enumerate(invoices):
             if first_number:
-                nn = first_number + inv_index
+                nn = int(first_number) + inv_index
             inv_data = self.parse_invoice(inv, number=nn, invoices=invoices)
             inv_data['first_of_lot'] = False
             if (first_number and nn == first_number) or len(invoices) == 1:
