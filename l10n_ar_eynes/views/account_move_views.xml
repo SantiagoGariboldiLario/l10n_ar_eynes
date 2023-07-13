@@ -453,25 +453,6 @@
                 />
             </xpath>
 
-            <xpath
-                expr="//group[@name='sale_info_group']/field[@name='debit_origin_id']"
-                position="before"
-            >
-                <field name="is_debit_note" invisible="1" />
-                <field
-                    name="origin_invoice_id"
-                    domain="[
-                        ('move_type', '=', 'out_invoice'),
-                        ('state', '=', 'posted')
-                    ]"
-                    attrs="{
-                    'invisible': [('move_type', '!=', 'out_refund'), ('is_debit_note', '=', False)],
-                    'required': ['|', ('move_type', '=', 'out_refund'), ('is_debit_note', '=', True)],
-                    'readonly': [('id', '!=', False)]
-                }"
-                />
-            </xpath>
-
         </field>
     </record>
 
