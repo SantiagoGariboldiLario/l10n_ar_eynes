@@ -47,7 +47,7 @@ class AccountMove(models.Model):
         required=False,
         states={'draft': [('readonly', False)]},
     )
-    is_debit_note = fields.Boolean('Debit Note')
+    is_debit_note = fields.Boolean('Debit Note', default=False)
     perception_ids = fields.One2many(
         'perception.tax.line',
         'invoice_id',
