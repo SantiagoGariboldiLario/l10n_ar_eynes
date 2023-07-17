@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="retention_certificate_qweb">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-foreach="o.retention_ids" t-as="r">
+                    <table style="width:100%">
+                        <!-- *-* *-* TITLE *-* *-* -->
+                        <tr>
+                            <td colspan="2" style="text-align:center;padding:9px;">
+                                <t
+                                    t-set="title"
+                                    t-value="'CONSTANCIA DE RETENCION - {}'.format(r.retention_id.name)"
+                                />
+                                <strong t-esc="title" style="font-size:30px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="text-align:center;padding:9px;">
+                                <strong
+                                    style="font-size:30px;"
+                                >Nro. de Constancia: </strong>
+                                <t t-set="certificate_no" t-value="r.certificate_no" />
+                                <span t-esc="certificate_no" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td
+                                colspan="2"
+                                style="border-bottom:solid 1px;padding:9px;"
+                            >
+                            </td>
+                        </tr>
+                        <!-- *-* *-* RUBRO I *-* *-* -->
+                        <tr>
+                            <td style="width:50%;padding:9px;">
+                                <strong
+                                    style="font-size:21px;"
+                                >RUBRO I: AGENTE DE RETENCION</strong>
+                            </td>
+                            <td style="padding:9px;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:50%;padding:9px;">
+                                <strong style="font-size:21px;">Agente: </strong>
+                                <t t-set="agent" t-value="o.company_id.name" />
+                                <span t-esc="agent" style="font-size:21px;" />
+                            </td>
+                            <td style="padding:9px;">
+                                <strong style="font-size:21px;">C.U.I.T.: </strong>
+                                <t t-set="vat" t-value="o.company_id.vat" />
+                                <span t-esc="vat" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:50%;padding:9px;">
+                                <strong style="font-size:21px;">Direccion: </strong>
+                                <t t-set="street" t-value="o.company_id.street" />
+                                <span t-esc="street" style="font-size:21px;" />
+                            </td>
+                            <td style="padding:9px;">
+                                <strong style="font-size:21px;">Telefono: </strong>
+                                <t t-set="vat" t-value="o.company_id.phone" />
+                                <span t-esc="vat" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:50%;padding:9px;">
+                                <strong style="font-size:21px;">Localidad: </strong>
+                                <t t-set="city" t-value="o.company_id.city" />
+                                <span t-esc="city" style="font-size:21px;" />
+                                <span>   -   </span>
+                                <strong style="font-size:21px;">C.P.: </strong>
+                                <t t-set="zip_code" t-value="o.company_id.zip" />
+                                <span t-esc="zip_code" style="font-size:21px;" />
+                            </td>
+                            <td style="padding:9px;">
+                                <strong style="font-size:21px;">Provincia: </strong>
+                                <t t-set="state" t-value="o.company_id.state_id.name" />
+                                <span t-esc="state" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:50%;padding:9px;">
+                                <strong style="font-size:21px;">Nro Agente: </strong>
+                                <t
+                                    t-set="agent_nro"
+                                    t-value="o.company_id.partner_id.nro_insc_iibb"
+                                />
+                                <span t-esc="agent_nro" style="font-size:21px;" />
+                            </td>
+                            <td style="padding:9px;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td
+                                colspan="2"
+                                style="border-bottom:solid 1px;padding:9px;"
+                            >
+                            </td>
+                        </tr>
+                        <!-- *-* *-* RUBRO II *-* *-* -->
+                        <tr>
+                            <td style="width:50%;padding:9px;">
+                                <strong
+                                    style="font-size:21px;"
+                                >RUBRO II: IDENTIFICACION DEL CONTRIBUYENTE</strong>
+                            </td>
+                            <td style="padding:9px;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:50%;padding:9px;">
+                                <strong style="font-size:21px;">Denominacion: </strong>
+                                <t t-set="partner" t-value="o.partner_id.name" />
+                                <span t-esc="partner" style="font-size:21px;" />
+                            </td>
+                            <td style="padding:9px;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:50%;padding:9px;">
+                                <strong style="font-size:21px;">Direccion: </strong>
+                                <t
+                                    t-set="partner_street"
+                                    t-value="o.partner_id.street"
+                                />
+                                <span t-esc="partner_street" style="font-size:21px;" />
+                            </td>
+                            <td style="padding:9px;">
+                                <strong style="font-size:21px;">Telefono: </strong>
+                                <t t-set="partner_vat" t-value="o.partner_id.phone" />
+                                <span t-esc="partner_vat" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:50%;padding:9px;">
+                                <strong style="font-size:21px;">Localidad: </strong>
+                                <t t-set="partner_city" t-value="o.partner_id.city" />
+                                <span t-esc="partner_city" style="font-size:21px;" />
+                                <span>   -   </span>
+                                <strong style="font-size:21px;">C.P.: </strong>
+                                <t
+                                    t-set="partner_zip_code"
+                                    t-value="o.partner_id.zip"
+                                />
+                                <span
+                                    t-esc="partner_zip_code"
+                                    style="font-size:21px;"
+                                />
+                            </td>
+                            <td style="padding:9px;">
+                                <strong style="font-size:21px;">Provincia: </strong>
+                                <t
+                                    t-set="partner_state"
+                                    t-value="o.partner_id.state_id.name"
+                                />
+                                <span t-esc="partner_state" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:50%;padding:9px;">
+                                <strong style="font-size:21px;">Nro II.BB.: </strong>
+                                <t
+                                    t-set="partner_agent_nro"
+                                    t-value="o.partner_id.nro_insc_iibb"
+                                />
+                                <span
+                                    t-esc="partner_agent_nro"
+                                    style="font-size:21px;"
+                                />
+                            </td>
+                            <td style="padding:9px;">
+                                <strong style="font-size:21px;">C.U.I.T.: </strong>
+                                <t t-set="partner_vat" t-value="o.partner_id.vat" />
+                                <span t-esc="partner_vat" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td
+                                colspan="2"
+                                style="border-bottom:solid 1px;padding:9px;"
+                            >
+                            </td>
+                        </tr>
+                        <!-- *-* *-* RUBRO III *-* *-* -->
+                        <tr>
+                            <td style="width:50%;padding:9px;">
+                                <strong
+                                    style="font-size:21px;"
+                                >RUBRO III: DETALLE DE EL/LOS MONTO/S RETENIDO/S</strong>
+                            </td>
+                            <td style="padding:9px;">
+                            </td>
+                        </tr>
+                    </table>
+                    <table style="width:100%">
+                        <tr>
+                            <td style="width:25%;text-align:center;padding:9px;">
+                                <strong
+                                    style="font-size:21px;"
+                                >Monto Base Imponible</strong>
+                            </td>
+                            <td style="width:25%;text-align:center;padding:9px;">
+                                <strong style="font-size:21px;">Alicuota</strong>
+                            </td>
+                            <td style="width:25%;text-align:center;padding:9px;">
+                                <strong
+                                    style="font-size:21px;"
+                                >Impuesto Ret./Perc.</strong>
+                            </td>
+                            <td style="text-align:center;padding:9px;">
+                                <strong
+                                    style="font-size:21px;"
+                                >Fecha de acreditacion</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:25%;text-align:center;padding:9px;">
+                                <t t-set="base" t-value="r.base" />
+                                <span t-esc="base" style="font-size:21px;" />
+                            </td>
+                            <td style="width:25%;text-align:center;padding:9px;">
+                                <t
+                                    t-set="applied_aliquot"
+                                    t-value="r.applied_aliquot"
+                                />
+                                <span t-esc="applied_aliquot" style="font-size:21px;" />
+                            </td>
+                            <td style="width:25%;text-align:center;padding:9px;">
+                                <t t-set="amount" t-value="r.amount" />
+                                <span t-esc="amount" style="font-size:21px;" />
+                            </td>
+                            <td style="text-align:center;padding:9px;">
+                                <t t-set="date" t-value="r.date" />
+                                <span t-esc="date" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td
+                                colspan="4"
+                                style="border-bottom:solid 1px;padding:9px;"
+                            >
+                            </td>
+                        </tr>
+                    </table>
+                    <table style="width:100%">
+                        <tr>
+                            <td style="padding:9px;">
+                                <strong
+                                    style="font-size:21px;"
+                                >Total Retenido: </strong>
+                                <span t-esc="amount" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;">
+                                <strong
+                                    style="font-size:21px;"
+                                >A informarse en la DD.JJ. del periodo: </strong>
+                                <t t-set="month" t-value="str(r.date).split('-')[1]" />
+                                <t t-set="year" t-value="str(r.date).split('-')[0]" />
+                                <t
+                                    t-set="period"
+                                    t-value="'{}/{}'.format(month, year)"
+                                />
+                                <span t-esc="period" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;">
+                                <strong style="font-size:21px;">Expedida en: </strong>
+                                <span t-esc="date" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;">
+                                <strong
+                                    style="font-size:21px;"
+                                >Comprobante asociado: </strong>
+                                <t t-set="voucher" t-value="o.number" />
+                                <span t-esc="voucher" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                    </table>
+                    <table style="width:100%;margin-top:250px;">
+                        <tr>
+                            <td rowspan="2" style="width:70%;padding:9px;">
+                            </td>
+                            <td style="padding:9px;border-bottom:1px dotted;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;padding:9px;">
+                                <span style="font-size:21px;">Firma y aclaracion</span>
+                            </td>
+                        </tr>
+                    </table>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="retention_certificate_paperformat" model="report.paperformat">
+        <field name="name">Retention certificate paperformat</field>
+        <field name="default" eval="True" />
+        <field name="format">custom</field>
+        <field name="page_height">297</field>
+        <field name="page_width">210</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">12</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">10</field>
+        <field name="dpi">110</field>
+    </record>
+
+    <record id="action_print_retention_certificate_qweb" model="ir.actions.report">
+        <field name="name">Retention Certificate</field>
+        <field name="model">account.payment.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ar_eynes.retention_certificate_qweb</field>
+        <field name="report_file">l10n_ar_eynes.retention_certificate_qweb</field>
+        <field name="paperformat_id" ref="retention_certificate_paperformat" />
+        <field
+            name="binding_model_id"
+            ref="l10n_ar_eynes.model_account_payment_order"
+        />
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
