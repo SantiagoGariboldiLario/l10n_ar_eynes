@@ -13,7 +13,7 @@ _logger = logging.getLogger(__name__)
 class AccountPaymentOrder(models.Model):
     _name = 'account.payment.order'
     _description = 'Account payment order'
-    _inherit = ['mail.thread']
+    _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin']
     _rec_name = 'number'
     _order = 'date DESC'
 
