@@ -290,7 +290,7 @@ class AccountMove(models.Model):
                             amount_exempt += tax.amount
                         else:
                             amount_base += tax.amount
-                    res['amount_tax_cur'] += (
+                    res['amount_tax_cur'] += invoice.currency_id.round(
                         line.price_subtotal * tax.amount * 0.01
                     )
 
@@ -310,8 +310,8 @@ class AccountMove(models.Model):
             res['amount_total_cur'] *= rate
             res['amount_untaxed_cur'] *= rate
             res['amount_tax_cur'] *= rate
-            res['amount_perception_curr'] = sum(
-                invoice.perception_ids.mapped('amount')
+            res['amount_perception_curr'] = invoice.currency_id.round(
+                sum(invoice.perception_ids.mapped('amount'))
             )
             amount_base *= rate
             amount_exempt *= rate
