@@ -340,7 +340,7 @@ class AccountJournal(models.Model):
         if invoice.move_type == 'out_refund':
             return self.cn_sequence_id
         elif invoice.move_type == 'out_invoice':
-            if invoice.debit_origin_id:
+            if invoice.debit_origin_id or invoice.is_debit_note:
                 return self.dn_sequence_id
             return self.sequence_id
 

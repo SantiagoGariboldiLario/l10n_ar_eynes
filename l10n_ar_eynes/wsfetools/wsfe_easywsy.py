@@ -429,7 +429,7 @@ class WSFE(AfipWS):
                     except ValueError:
                         doc_num = False
 
-                invoice_vals['name'] = '%04d-%08d' % (
+                invoice_vals['internal_number'] = '%04d-%08d' % (
                     res['PtoVta'],
                     comp['CbteHasta'],
                 )
@@ -464,7 +464,6 @@ class WSFE(AfipWS):
         req_details = []
         pos = res['PtoVta']
         for _index, comp in enumerate(res['Comprobantes']):
-
             # Esto es para fixear un bug que al hacer un refund,
             # si fallaba algo con la AFIP
             # se hace el rollback por lo tanto el refund que se estaba
