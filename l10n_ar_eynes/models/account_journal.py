@@ -340,7 +340,7 @@ class AccountJournal(models.Model):
         if invoice.move_type == 'out_refund':
             return self.cn_sequence_id
         elif invoice.move_type == 'out_invoice':
-            if invoice.debit_origin_id:
+            if invoice.debit_origin_id or invoice.is_debit_note:
                 return self.dn_sequence_id
             return self.sequence_id
 
@@ -362,11 +362,16 @@ class AccountJournal(models.Model):
             )
             err_title = "Perception Error\n"
         if not concepts:
+            tax_name = ''
+            if retention:
+                tax_name = retention.name
+            if perception:
+                tax_name = perception.name
             raise ValidationError(
                 _(
                     f"{err_title}"
                     f"Account {account.name}[{account.code}] must have "
-                    f"an associated concept for {retention.name}. Please configure it!"
+                    f"an associated concept for {tax_name}. Please configure it!"
                 )
             )
         return concepts
