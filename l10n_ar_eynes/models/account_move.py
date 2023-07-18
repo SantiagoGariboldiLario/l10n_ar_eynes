@@ -239,6 +239,20 @@ class AccountMove(models.Model):
     is_company_cur = fields.Boolean(compute='_compute_is_company_cur')
     vat_date = fields.Date()
 
+    @api.depends('supplier_move_reference')
+    def _compute_name(self):
+        invoices = self.filtered(lambda move: move.is_invoice())
+        for invoice in invoices:
+            if invoice.is_sale_document():
+                if invoice.state == 'draft':
+                    invoice.name = '/'
+                else:
+                    invoice.name = invoice.internal_number
+            else:
+                invoice.name = invoice.supplier_move_reference
+        not_invoices = self - invoices
+        return super(AccountMove, not_invoices)._compute_name()
+
     @api.depends(
         'invoice_line_ids',
         'invoice_line_ids.price_unit',
@@ -559,7 +573,6 @@ class AccountMove(models.Model):
         self.supplier_move_reference = (
             pos_code.zfill(4) + '-' + move_code.zfill(8)
         )
-        self.name = self.supplier_move_reference
 
     @api.onchange('fiscal_position_id', 'partner_id')
     def _onchange_fiscal_position(self):
@@ -795,7 +808,14 @@ class AccountMove(models.Model):
                         self.ensure_fce_values()
                     self.action_aut_cae()
                 else:
-                    self.set_name_from_internal_number()
+                    if not self.posted_before:
+                        self.write(
+                            {
+                                'internal_number': self.journal_id.get_sequence_from_invoice(
+                                    self
+                                )._next()
+                            }
+                        )
                 self._set_perception_date()
         return super(AccountMove, self).action_post()
 
@@ -822,20 +842,6 @@ class AccountMove(models.Model):
             raise ValidationError(
                 _("Invoice must have a denomination configured")
             )
-
-    def set_name_from_internal_number(self):
-        if not self.posted_before:
-            internal_number = self.journal_id.get_sequence_from_invoice(
-                self
-            )._next()
-            self.write(
-                {
-                    'name': internal_number,
-                    'internal_number': internal_number,
-                }
-            )
-        else:
-            self.write({'name': self.internal_number})
 
     def action_post_from_massive(self, first_number):
         for rec in self:
@@ -1197,6 +1203,7 @@ class AccountMove(models.Model):
                 AND move2.move_type = move.move_type
                 AND move2.is_debit_note = move.is_debit_note
                 AND move2.id != move.id
+                AND move2.partner_id = move.partner_id
             WHERE move.id IN %s AND move2.state = 'posted'
         ''',
             [tuple(moves.ids)],
@@ -1210,36 +1217,6 @@ class AccountMove(models.Model):
                 )
                 % ', '.join(r[1] for r in res)
             )
-
-    def _get_move_display_name(self, show_ref=False):
-        '''Helper to get the display name of an invoice depending of its type.
-        :param show_ref:    A flag indicating of the display name must
-        include or not the journal entry reference.
-        :return:            A string representing the invoice.
-        '''
-        self.ensure_one()
-        name = ''
-        if self.state == 'draft':
-            name += {
-                'out_invoice': _('Draft Invoice'),
-                'out_refund': _('Draft Credit Note'),
-                'in_invoice': _('Draft Bill'),
-                'in_refund': _('Draft Vendor Credit Note'),
-                'out_receipt': _('Draft Sales Receipt'),
-                'in_receipt': _('Draft Purchase Receipt'),
-                'entry': _('Draft Entry'),
-            }[self.move_type]
-            name += ' '
-        if self.is_sale_document() and not self.internal_number:
-            name += '(* %s)' % str(self.id)
-        else:
-            name += self.name
-        return name + (
-            show_ref
-            and self.ref
-            and ' (%s%s)' % (self.ref[:50], '...' if len(self.ref) > 50 else '')
-            or ''
-        )
 
     @api.model
     def compute_perception(self, perception_data):
