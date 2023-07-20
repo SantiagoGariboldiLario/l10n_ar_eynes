@@ -61,24 +61,21 @@ class ResCurrency(models.Model):
 
     # pylint: disable=redefined-builtin
     def _convert(self, from_amount, to_currency, company, date, round=True):
-        res = super()._convert(
-            from_amount, to_currency, company, date, round=round
-        )
-        if self._context.get('currency_rate'):
-            old_rate = 1 / self._get_conversion_rate(
-                self, to_currency, company, date
+        if (
+            self._context.get('currency_rate')
+            and self._context.get('currency_rate') != 0
+        ):
+            return to_currency.round(
+                from_amount / self._context.get('currency_rate')
             )
-            new_rate = self._context.get('currency_rate')
-            res = res * (old_rate / new_rate)
         if self._context.get('inverse_currency_rate') or self._context.get(
             'from_taxes'
         ):
-            old_rate = self._get_conversion_rate(
-                self, to_currency, company, date
+            return to_currency.round(
+                from_amount * self._context.get('inverse_currency_rate')
             )
-            new_rate = self._context.get('inverse_currency_rate')
-            res = res * (new_rate / old_rate)
-
-        return to_currency.round(res)
+        return super()._convert(
+            from_amount, to_currency, company, date, round=round
+        )
 
     # pylint: enable=redefined-builtin

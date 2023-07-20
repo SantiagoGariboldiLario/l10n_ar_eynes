@@ -638,7 +638,9 @@ class AccountMove(models.Model):
         if self.is_invoice(include_receipts=True):
             for line in self._get_lines_onchange_currency():
                 line.currency_rate = self.currency_rate
+                line._onchange_product_id()
                 line._onchange_currency()
+            self.compute_perceptions()
         return
 
     @api.onchange('invoice_date')
@@ -1577,7 +1579,7 @@ class AccountMoveLine(models.Model):
         date=None,
     ):
         modify_self = self.with_context(
-            currency_rate=self.move_id.currency_rate
+            inverse_currency_rate=self.move_id.currency_rate
         )
         return super(
             AccountMoveLine, modify_self
