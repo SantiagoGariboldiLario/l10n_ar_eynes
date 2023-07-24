@@ -326,6 +326,7 @@ class AccountMove(models.Model):
             res['amount_tax_cur'] *= rate
             res['amount_perception_curr'] = invoice.currency_id.round(
                 sum(invoice.perception_ids.mapped('amount'))
+                * invoice.currency_rate
             )
             amount_base *= rate
             amount_exempt *= rate
@@ -523,28 +524,26 @@ class AccountMove(models.Model):
         """
         perception_tax = perception_line.perception_id.tax_id
         sign = -1 if self.move_type in ('out_invoice', 'in_refund') else 1
-
-        amount_currency = perception_line.amount
+        line_amount = amount_currency = perception_line.amount
         if not self.is_company_cur:
-            amount_currency = amount_currency / self.currency_rate
+            line_amount = line_amount * self.currency_rate
 
-        vals = {
+        return {
             'account_id': perception_tax.tax_group_id.property_tax_payable_account_id.id,
-            'price_unit': amount_currency,
-            'credit': perception_line.amount
+            'price_unit': line_amount,
+            'credit': line_amount
             if self.move_type in ('out_invoice', 'in_refund')
             else 0,
-            'debit': perception_line.amount
+            'debit': line_amount
             if self.move_type not in ('out_invoice', 'in_refund')
             else 0,
-            'balance': sign * perception_line.amount,
+            'balance': sign * line_amount,
             'amount_currency': sign * amount_currency,
-            'price_subtotal': amount_currency,
-            'price_total': amount_currency,
+            'price_subtotal': line_amount,
+            'price_total': line_amount,
             'tax_base_amount': perception_line.base,
             'sequence': perception_tax.tax_group_id.sequence,
         }
-        return vals
 
     @api.onchange(
         'supplier_move_reference',
