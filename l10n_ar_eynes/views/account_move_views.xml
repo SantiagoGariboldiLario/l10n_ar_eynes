@@ -318,6 +318,14 @@
                             <field name="concept_id" />
                             <field name="base" />
                             <field name="amount" />
+                            <field
+                                name="base_secondary_currency"
+                                attrs="{'column_invisible':[('parent.is_company_cur','=',True)]}"
+                            />
+                            <field
+                                name="amount_secondary_currency"
+                                attrs="{'column_invisible':[('parent.is_company_cur','=',True)]}"
+                            />
                             <field name="state_id" />
                         </tree>
                         <form>
