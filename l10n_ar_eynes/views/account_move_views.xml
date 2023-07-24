@@ -93,6 +93,7 @@
                 <field
                     name="fiscal_type"
                     attrs="{
+                        'readonly': [('state', '!=', 'draft')],
                         'required': [('move_type', 'in', ('out_invoice', 'out_refund'))],
                         'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))],
                     }"

@@ -6444,3 +6444,13 @@ msgstr "Base en moenda secundaria"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__amount_secondary_currency
 msgid "Amount in secondary currency"
 msgstr "Importe en moenda secundaria"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid ""
+"Could not match any user available journals with fiscal position '%(fiscal_pos)s' and fiscal type '%(fiscal_type)s'\n"
+"Please check if there are any journals with this parameters in users > preferences > available journals"
+msgstr ""
+"No se encontrar diarios disponibles en el usuario con posicion fiscal '%(fiscal_pos)s' y tipo fiscal '%(fiscal_type)s'\n"
+"Por favor, revisar si existen diarios disponibles con estos paramentros en usuarios > preferencias > diarios disponibles"

@@ -400,15 +400,28 @@ class AccountMove(models.Model):
             )
             journals = self.env.user.journal_ids.filtered(
                 lambda j: partner_fiscal_position in j.fiscal_position_ids
+                and j.fiscal_type == self.fiscal_type
             )
-            if self.fiscal_type:
-                journals = journals.filtered(
-                    lambda journal: journal.fiscal_type == self.fiscal_type
-                )
-            if journals:
-                self.journal_id = journals[0]
+            if not journals:
+                self.journal_id = False
                 self._onchange_journal()
-                return {'domain': {'journal_id': [('id', 'in', journals.ids)]}}
+                return {
+                    'warning': {
+                        'title': _('Journal not found'),
+                        'message': _(
+                            "Could not match any user available journals with fiscal position "
+                            "'%(fiscal_pos)s' and fiscal type '%(fiscal_type)s'\n"
+                            "Please check if there are any journals with this parameters "
+                            "in users > preferences > available journals",
+                            fiscal_pos=partner_fiscal_position.name,
+                            fiscal_type=self.fiscal_type,
+                        ),
+                    },
+                    'domain': {'journal_id': [('id', 'in', [])]},
+                }
+            self.journal_id = journals[0]
+            self._onchange_journal()
+            return {'domain': {'journal_id': [('id', 'in', journals.ids)]}}
 
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
