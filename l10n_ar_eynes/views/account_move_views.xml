@@ -93,6 +93,7 @@
                 <field
                     name="fiscal_type"
                     attrs="{
+                        'readonly': [('state', '!=', 'draft')],
                         'required': [('move_type', 'in', ('out_invoice', 'out_refund'))],
                         'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))],
                     }"
@@ -318,6 +319,14 @@
                             <field name="concept_id" />
                             <field name="base" />
                             <field name="amount" />
+                            <field
+                                name="base_secondary_currency"
+                                attrs="{'column_invisible':[('parent.is_company_cur','=',True)]}"
+                            />
+                            <field
+                                name="amount_secondary_currency"
+                                attrs="{'column_invisible':[('parent.is_company_cur','=',True)]}"
+                            />
                             <field name="state_id" />
                         </tree>
                         <form>

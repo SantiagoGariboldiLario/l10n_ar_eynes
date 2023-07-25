@@ -48,6 +48,16 @@ class PerceptionTaxLine(models.Model):
     amount = fields.Float(
         digits='Account',
     )
+    base_secondary_currency = fields.Float(
+        string='Base in secondary currency',
+        digits='Account',
+        compute='_compute_base_amount_second_cur',
+    )
+    amount_secondary_currency = fields.Float(
+        string='Amount in secondary currency',
+        digits='Account',
+        compute='_compute_base_amount_second_cur',
+    )
     perception_id = fields.Many2one(
         'account.journal',
         string='Perception Configuration',
@@ -98,6 +108,15 @@ class PerceptionTaxLine(models.Model):
         'perception.tax.application', 'Tax Application'
     )
     concept_id = fields.Many2one('perception.concept', 'Concept')
+
+    def _compute_base_amount_second_cur(self):
+        for rec in self:
+            rec.base_secondary_currency = 0
+            rec.amount_secondary_currency = 0
+            if not rec.invoice_id.is_company_cur:
+                currency_rate = rec.invoice_id.currency_rate
+                rec.base_secondary_currency = rec.base * currency_rate
+                rec.amount_secondary_currency = rec.amount * currency_rate
 
     @api.onchange('perception_id')
     def _onchange_perception(self):

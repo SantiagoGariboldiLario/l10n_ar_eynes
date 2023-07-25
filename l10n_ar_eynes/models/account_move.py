@@ -326,6 +326,7 @@ class AccountMove(models.Model):
             res['amount_tax_cur'] *= rate
             res['amount_perception_curr'] = invoice.currency_id.round(
                 sum(invoice.perception_ids.mapped('amount'))
+                * invoice.currency_rate
             )
             amount_base *= rate
             amount_exempt *= rate
@@ -399,15 +400,28 @@ class AccountMove(models.Model):
             )
             journals = self.env.user.journal_ids.filtered(
                 lambda j: partner_fiscal_position in j.fiscal_position_ids
+                and j.fiscal_type == self.fiscal_type
             )
-            if self.fiscal_type:
-                journals = journals.filtered(
-                    lambda journal: journal.fiscal_type == self.fiscal_type
-                )
-            if journals:
-                self.journal_id = journals[0]
+            if not journals:
+                self.journal_id = False
                 self._onchange_journal()
-                return {'domain': {'journal_id': [('id', 'in', journals.ids)]}}
+                return {
+                    'warning': {
+                        'title': _('Journal not found'),
+                        'message': _(
+                            "Could not match any user available journals with fiscal position "
+                            "'%(fiscal_pos)s' and fiscal type '%(fiscal_type)s'\n"
+                            "Please check if there are any journals with this parameters "
+                            "in users > preferences > available journals",
+                            fiscal_pos=partner_fiscal_position.name,
+                            fiscal_type=self.fiscal_type,
+                        ),
+                    },
+                    'domain': {'journal_id': [('id', 'in', [])]},
+                }
+            self.journal_id = journals[0]
+            self._onchange_journal()
+            return {'domain': {'journal_id': [('id', 'in', journals.ids)]}}
 
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
@@ -523,28 +537,26 @@ class AccountMove(models.Model):
         """
         perception_tax = perception_line.perception_id.tax_id
         sign = -1 if self.move_type in ('out_invoice', 'in_refund') else 1
-
-        amount_currency = perception_line.amount
+        line_amount = amount_currency = perception_line.amount
         if not self.is_company_cur:
-            amount_currency = amount_currency / self.currency_rate
+            line_amount = line_amount * self.currency_rate
 
-        vals = {
+        return {
             'account_id': perception_tax.tax_group_id.property_tax_payable_account_id.id,
-            'price_unit': amount_currency,
-            'credit': perception_line.amount
+            'price_unit': line_amount,
+            'credit': line_amount
             if self.move_type in ('out_invoice', 'in_refund')
             else 0,
-            'debit': perception_line.amount
+            'debit': line_amount
             if self.move_type not in ('out_invoice', 'in_refund')
             else 0,
-            'balance': sign * perception_line.amount,
+            'balance': sign * line_amount,
             'amount_currency': sign * amount_currency,
-            'price_subtotal': amount_currency,
-            'price_total': amount_currency,
+            'price_subtotal': line_amount,
+            'price_total': line_amount,
             'tax_base_amount': perception_line.base,
             'sequence': perception_tax.tax_group_id.sequence,
         }
-        return vals
 
     @api.onchange(
         'supplier_move_reference',

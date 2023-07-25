@@ -931,6 +931,7 @@ class AccountPaymentOrder(models.Model):
             ('account_id.internal_type', '=', account_type),
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
+            ('move_id.state', '=', 'posted'),
         ]
         # if self.is_multi_currency:
         #     domain += [('currency_id', '=', self.currency_id.id)]
@@ -1801,7 +1802,7 @@ class AccountPaymentOrder(models.Model):
             if payment.move_id:
                 payment.move_id.line_ids.remove_move_reconcile()
                 payment.move_id.button_cancel()
-                payment.move_id.unlink()
+                payment.move_id.with_context(force_delete=True).unlink()
         self.write(
             {
                 'state': 'cancel',

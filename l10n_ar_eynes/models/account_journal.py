@@ -758,9 +758,6 @@ class AccountJournal(models.Model):
 
             if base == 0.0:
                 continue
-            # Modificamos la base para que se calcule con el cambio de divisa
-            if not invoice.is_company_cur:
-                base = base * invoice.currency_rate
 
             # Luego vamos agrupando por Concepto (no por actividad)
             if concept_id in perceptions:
