@@ -31,6 +31,8 @@
         'purchase',
         'contacts',
         'hr',
+        'uom',
+        'delivery',
         'account_check_printing',
         'account_debit_note',
         'account',
@@ -38,6 +40,8 @@
         'popup_messages',
     ],
     'data': [
+        'security/cot_security.xml',
+        'security/delivery_cot_security.xml',
         'data/fiscal_position_data.xml',
         'data/account_taxes_data.xml',
         'data/res_document_type_data.xml',
