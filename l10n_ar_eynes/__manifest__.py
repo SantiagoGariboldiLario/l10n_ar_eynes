@@ -84,7 +84,10 @@
         'views/reason_rejected_check_views.xml',
         'views/retention_views.xml',
         "views/perception_view.xml",
+        "views/product_views.xml",
         'views/res_users_views.xml',
+        'views/res_company_views.xml',
+        'views/res_country_state_views.xml',
         'views/account_checkbook_views.xml',
         'wizard/create_checkbook_wizard_view.xml',
         'views/treasury_menuitems.xml',
@@ -111,6 +114,14 @@
     'installable': True,
     'application': True,
     "external_dependencies": {
-        "python": ["M2Crypto", "OpenSSL", "easywsy", "suds", "qrcode"]
+        "python": [
+            "M2Crypto",
+            "OpenSSL",
+            "easywsy",
+            "suds",
+            "qrcode",
+            "pysimplesoap",
+            "future",
+        ]
     },
 }

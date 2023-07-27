@@ -16,7 +16,7 @@ class ResConfigSettings(models.TransientModel):
     cot_url = fields.Char(string="COT URL")
     group_check_cot = fields.Boolean(
         string="Enable Web Service",
-        implied_group="l10n_ar_delivery_cot.group_check_cot",
+        implied_group="l10n_ar_eynes.group_check_cot",
     )
 
     def set_values(self):

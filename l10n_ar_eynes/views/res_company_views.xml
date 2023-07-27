@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="res_company_view_form_inherit_l10n_ar_eynes" model="ir.ui.view">
+        <field name="name">res.company.view.form.inherit</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+            <field name="street2" position="after">
+                <field name="num" placeholder="Number" attrs="{'readonly': False}" />
+            </field>
+            <field name="city" position="before">
+                <field name="floor" placeholder="Floor" attrs="{'readonly': False}" />
+                <field name="door" placeholder="Door" attrs="{'readonly': False}" />
+                <field
+                    name="apartment"
+                    placeholder="Apartment"
+                    attrs="{'readonly': False}"
+                />
+            </field>
+        </field>
+    </record>
+
+</odoo>
