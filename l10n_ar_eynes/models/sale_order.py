@@ -7,7 +7,7 @@
 
 import logging
 
-from odoo import api, models
+from odoo import _, api, exceptions, models
 
 _logger = logging.getLogger(__name__)
 
@@ -26,9 +26,20 @@ class SaleOrder(models.Model):
                 'address_shipping_id': self.partner_shipping_id.id,
             }
         )
-        journals = self.env.user.journal_ids
-        if journals:
-            invoice_vals['journal_id'] = journals[0].id
+        journals = self.env.user.journal_ids.filtered(
+            lambda j: self.fiscal_position_id in j.fiscal_position_ids
+        )
+        if not journals:
+            raise exceptions.ValidationError(
+                _(
+                    "Could not match any user available journals with fiscal position "
+                    "'%(fiscal_pos)s'\n"
+                    "Please check if there are any journals with this parameters "
+                    "in users > preferences > available journals",
+                    fiscal_pos=self.fiscal_position_id.name,
+                )
+            )
+        invoice_vals['journal_id'] = journals[0].id
         return invoice_vals
 
     @api.model
