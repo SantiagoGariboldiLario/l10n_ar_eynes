@@ -13,3 +13,4 @@ from . import account_change_currency  # noqa
 from . import sale_make_invoice_advance  # noqa
 from . import account_tax_subjournal  # noqa
 from . import account_move_reversal  # noqa
+from . import create_sicore_file
