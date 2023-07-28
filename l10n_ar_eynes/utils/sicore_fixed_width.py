@@ -41,11 +41,11 @@ def moneyfmt(
     result = []
     digits = list(map(str, digits))
     digits_total = 0
-    build, next = result.append, digits.pop
+    build, next_d = result.append, digits.pop
     if sign:
         build(trailneg)
     for _i in range(places):
-        build(next() if digits else '0')
+        build(next_d() if digits else '0')
         digits_total += 1
     build(dp)
     if not digits:
@@ -53,7 +53,7 @@ def moneyfmt(
         digits_total += 1
     i = 0
     while digits:
-        build(next())
+        build(next_d())
         digits_total += 1
         i += 1
         if i == 3 and digits:
