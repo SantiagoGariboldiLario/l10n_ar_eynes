@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_sicore_generated_files_tree" model="ir.ui.view">
+        <field name="name">sicore.generated.files.tree</field>
+        <field name="model">sicore.generated.files</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree string="Sicore generated files" create="false" edit="false">
+                <field name="code" />
+                <field name="period_start" />
+                <field name="period_end" />
+                <field name="presentation_date" />
+                <field name="attachment_id" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_sicore_generated_files" model="ir.actions.act_window">
+        <field name="name">Sicore generated files</field>
+        <field name="res_model">sicore.generated.files</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem
+        id="menu_action_sicore_generated_files"
+        name="Sicore generated files"
+        action="action_sicore_generated_files"
+        parent="menu_taxes_reports"
+    />
+
+    <record id="view_sicore_config_tree" model="ir.ui.view">
+        <field name="name">sicore.config.tree</field>
+        <field name="model">sicore.config</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree string="Configuration">
+                <field name="name" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_sicore_config_form" model="ir.ui.view">
+        <field name="name">sicore.config.form</field>
+        <field name="model">sicore.config</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Sicore Configuration">
+                <sheet>
+                    <h1>
+                        <field name="name" />
+                    </h1>
+                    <notebook>
+                        <page string="Fiscal Positions">
+                            <field name="fiscal_position_ids">
+                                <tree string="Fiscal Positions">
+                                    <field name="fiscal_position" />
+                                    <field name="code" />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sicore_config" model="ir.actions.act_window">
+        <field name="name">Sicore Configuration</field>
+        <field name="res_model">sicore.config</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_action_sicore_config"
+        name="Sicore Configuration"
+        action="action_sicore_config"
+        parent="account.menu_finance_configuration"
+    />
+</odoo>
