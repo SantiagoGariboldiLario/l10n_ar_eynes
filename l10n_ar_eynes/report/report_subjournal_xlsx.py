@@ -62,6 +62,7 @@ class SubjournalXlsx(models.AbstractModel):
     def get_move_domain(self, types, obj):
         date = 'date' if obj.based_on == 'purchase' else 'invoice_date'
         return [
+            ('state', '=', 'posted'),
             ('move_type', 'in', types),
             (date, '>=', obj.date_from),
             (date, '<=', obj.date_to),
@@ -277,6 +278,7 @@ class SubjournalXlsx(models.AbstractModel):
             INNER JOIN res_company lc
             ON i.company_id = lc.id
             WHERE i.move_type IN %(inv_type)s
+                AND i.state = 'posted'
                 AND l.date BETWEEN %(date_from)s AND %(date_to)s
                 AND a.internal_type NOT IN ('payable', 'receivable')
                 AND l.company_id = %(company_id)s
