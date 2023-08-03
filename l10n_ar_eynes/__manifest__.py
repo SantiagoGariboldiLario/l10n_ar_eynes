@@ -60,6 +60,7 @@
         # 'wizard/accredit_check_wizard_view.xml',
         'report/move_line_list_xls.xml',
         'report/retention_certificate.xml',
+        'report/payment_order.xml',
         'wizard/account_tax_subjournal_view.xml',
         'views/res_config_settigs_views.xml',
         'views/res_partner_views.xml',
