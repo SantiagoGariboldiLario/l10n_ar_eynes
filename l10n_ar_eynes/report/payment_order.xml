@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="payment_order">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <div
+                        id="header"
+                        style="position: relative; width: 800px; height: 220px; border: 2px solid black; margin: 40px auto;"
+                    >
+                        <div
+                            style="position: absolute; top: 0; left: 400px; right: 0; bottom: 0; font-size: 3em;"
+                        >
+                            X
+                        </div>
+                        <div
+                            style="float:left; margin-right: 10px; margin-left: 10px; margin-top: 10px; width: 40%;text-align:left;font-size: small;"
+                        >
+                            <t t-if="o.company_id.logo">
+                                <img
+                                    style="width: 100px;"
+                                    alt="logo"
+                                    t-att-src="image_data_uri(o.company_id.logo)"
+                                />
+                            </t>
+                            <p> <t t-esc="o.company_id.name" /> </p>
+                            CUIT: <t t-esc="o.company_id.vat" />
+                            <br />
+                            <t t-set="street" t-esc="o.company_id.street" />
+                            <br />
+                            Web: <t t-esc="o.company_id.website" />
+                            <br />
+                            Tel.: <t t-esc="o.company_id.phone" />
+                        </div>
+                        <div
+                            style="float:right; margin-right: 10px; width: 40%;text-align:right;font-size: medium;"
+                        >
+                            <h2>Recibo</h2>
+                            Nº <t t-esc="o.number" />
+                            <br />
+                            Fecha comprobante: <t t-esc="o.date" />
+                            <br />
+                            Cliente: <t t-esc="o.partner_id.name" />
+                            <br />
+                            CUIT: <t t-esc="o.partner_id.vat" />
+                        </div>
+                    </div>
+                    <div
+                        id="content"
+                        style="width: 800px; height: 600px; margin: 40px auto;"
+                    >
+                        <div id="invoices">
+                            <h3>Facturas / Notas de Débito</h3>
+                            <table class="table-bordered" width="100%">
+                                <thead>
+                                    <tr
+                                        style="background: black; color: white; text-align: left;"
+                                    >
+                                        <th>
+                                            <strong>Comprobante</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Fecha</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Venc.</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Total</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Saldo Inicial</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Saldo Final</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Abonado</strong>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.income_line_ids" t-as="line">
+                                        <td>
+                                            <span t-field="line.invoice_id.name" />
+                                        </td>
+                                        <td>
+                                            <span t-field="line.date_original" />
+                                        </td>
+                                        <td>
+                                            <span t-field="line.date_due" />
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span
+                                                t-field="line.amount"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span
+                                                t-field="line.amount_unreconciled"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span
+                                                t-esc="line.amount - line.amount_unreconciled"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span
+                                                t-field="line.amount_original"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" style="text-align: right;">
+                                            <strong
+                                            >Total Abonado en Facturas / Notas de Débito: <span
+                                                    t-esc="sum(line.amount for line in o.income_line_ids)"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                /></strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="payments">
+                            <h3>Pagos</h3>
+                            <table class="table-bordered" width="100%">
+                                <thead>
+                                    <tr
+                                        style="background: black; color: white; text-align: left;"
+                                    >
+                                        <th>
+                                            <strong>Medios de pago</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Fecha de pago</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Descripción</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Monto</strong>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.payment_mode_line_ids" t-as="line">
+                                        <td>
+                                            <span t-field="line.payment_mode_id.name" />
+                                        </td>
+                                        <td>
+                                            <span t-field="line.date" />
+                                        </td>
+                                        <td>
+                                            <span t-field="line.name" />
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span
+                                                t-field="line.amount"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" style="text-align: right;">
+                                            <strong>Total Medios de Pago: <span
+                                                    t-esc="sum(line.amount for line in o.payment_mode_line_ids)"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                /></strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h3>Cheque de terceros</h3>
+                            <table class="table-bordered" width="100%">
+                                <thead>
+                                    <tr
+                                        style="background: black; color: white; text-align: left;"
+                                    >
+                                        <th>
+                                            <strong>Número</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Fecha de emisión</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Fecha de pago</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Banco</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Monto</strong>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        t-foreach="o.third_party_check_receipt_ids"
+                                        t-as="line"
+                                    >
+                                        <td>
+                                            <span t-field="line.number" />
+                                        </td>
+                                        <td>
+                                            <span t-field="line.issue_date" />
+                                        </td>
+                                        <td>
+                                            <span t-field="line.payment_date" />
+                                        </td>
+                                        <td>
+                                            <span t-field="line.bank_id.name" />
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span
+                                                t-field="line.amount"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" style="text-align: right;">
+                                            <strong>Total Cheques de Terceros: <span
+                                                    t-esc="sum(line.amount for line in o.third_party_check_receipt_ids)"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                /></strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="retentions">
+                            <h3>Retenciones</h3>
+                            <table class="table-bordered" width="100%">
+                                <thead>
+                                    <tr
+                                        style="background: black; color: white; text-align: left;"
+                                    >
+                                        <th>
+                                            <strong>Retención</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Fecha</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Certificado</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Base</strong>
+                                        </th>
+                                        <th>
+                                            <strong>Importe retenido</strong>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.retention_ids" t-as="line">
+                                        <td>
+                                            <span t-field="line.retention_id.name" />
+                                        </td>
+                                        <td>
+                                            <span t-field="line.date" />
+                                        </td>
+                                        <td>
+                                            <span t-field="line.certificate_no" />
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span
+                                                t-field="line.base"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span
+                                                t-field="line.amount"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" style="text-align: right;">
+                                            <strong>Total Retenciones: <span
+                                                    t-esc="sum(line.amount for line in o.retention_ids)"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                /></strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="width: 250px; height: 100px; margin: auto;" />
+                        <div
+                            id="signature"
+                            style="width: 800px; height: 242px; border: 2px solid black; margin: 40px auto;"
+                        >
+                            <tr>
+                                <td
+                                    colspan="3"
+                                    style="border: 1.5px solid black; width: 800px; height: 134px;"
+                                >
+                                    <div
+                                        style="color: black; background-color: white; text-align: right; margin-top: 5px;margin-right: 5px"
+                                    >
+                                        <strong>Total cobrado: <t
+                                                t-esc="sum(line.amount for line in o.income_line_ids)"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            /></strong>
+                                    </div>
+                                    <div style="height: 75px;" />
+                                    <div
+                                        style="border-top: 1px solid black; width: 350px; margin: 40px auto"
+                                    />
+                                    <div style="text-align: center;">
+                                        Firma y Aclaracion
+                                    </div>
+                                    <div
+                                        style="text-align: center; font-size: 8pt; padding-left: 4px; padding-right: 4px; margin-top: 30px;"
+                                    >
+                                        COMPROBANTE NO VALIDO COMO FACTURA. ESTE DOCUMENTO CARECE DE VALIDEZ SI NO SE ENCUENTRA DEBIDAMENTE FIRMADO
+                                    </div>
+                                </td>
+                            </tr>
+                        </div>
+                        <div
+                            class="footer text-center"
+                            style="margin:0px; padding:0px;font-size:12px;"
+                        >
+                            <div class="pagination" style="text-align: right;">
+                                <t t-esc="o.company_id.email" /> - Página
+                                <span class="page" />/<span class="topage" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="paperformat_pdf_op_report" model="report.paperformat">
+        <field name="name">Report</field>
+        <field name="default" eval="False" />
+        <field name="format">A4</field>
+        <field name="page_width">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">12</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_right">10</field>
+        <field name="margin_left">10</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">15</field>
+        <field name="dpi">90</field>
+    </record>
+
+
+    <record id="action_print_payment_order_qweb" model="ir.actions.report">
+        <field name="name">RECIBO</field>
+        <field name="model">account.payment.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ar_eynes.payment_order</field>
+        <field name="report_file">l10n_ar_eynes.payment_order</field>
+        <field name="paperformat_id" ref="paperformat_pdf_op_report" />
+        <field
+            name="binding_model_id"
+            ref="l10n_ar_eynes.model_account_payment_order"
+        />
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
