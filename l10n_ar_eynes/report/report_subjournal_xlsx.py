@@ -279,7 +279,7 @@ class SubjournalXlsx(models.AbstractModel):
             ON i.company_id = lc.id
             WHERE i.move_type IN %(inv_type)s
                 AND i.state = 'posted'
-                AND l.date BETWEEN %(date_from)s AND %(date_to)s
+                AND i.invoice_date BETWEEN %(date_from)s AND %(date_to)s
                 AND a.internal_type NOT IN ('payable', 'receivable')
                 AND l.company_id = %(company_id)s
         ),
