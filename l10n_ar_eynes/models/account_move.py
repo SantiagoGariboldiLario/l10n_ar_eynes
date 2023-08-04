@@ -541,8 +541,10 @@ class AccountMove(models.Model):
         if not self.is_company_cur:
             line_amount = line_amount * self.currency_rate
 
+        is_refund = self.move_type in ('out_refund', 'in_refund')
+        account = perception_tax.get_perception_account(is_refund)
         return {
-            'account_id': perception_tax.tax_group_id.property_tax_payable_account_id.id,
+            'account_id': account.id,
             'price_unit': line_amount,
             'credit': line_amount
             if self.move_type in ('out_invoice', 'in_refund')
