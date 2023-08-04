@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import _, exceptions, fields, models
 
 
 class AccountTax(models.Model):
@@ -153,3 +153,22 @@ class AccountTax(models.Model):
                         }
                     )
         return res
+
+    def get_perception_account(self, is_refund):
+        tax_repartition_lines = (
+            is_refund
+            and self.refund_repartition_line_ids
+            or self.invoice_repartition_line_ids
+        ).filtered(lambda x: x.repartition_type == 'tax')
+
+        if not tax_repartition_lines:
+            raise exceptions.ValidationError(
+                _("No tax repartition lines where found")
+            )
+
+        if len(tax_repartition_lines) != 1:
+            raise exceptions.ValidationError(
+                _("There should only be one repartition line")
+            )
+
+        return tax_repartition_lines[0].account_id
