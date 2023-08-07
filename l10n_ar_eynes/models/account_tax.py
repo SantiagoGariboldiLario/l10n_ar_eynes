@@ -172,3 +172,23 @@ class AccountTax(models.Model):
             )
 
         return tax_repartition_lines[0].account_id
+
+    def get_retention_account(self):
+        tax_repartition_lines = self.invoice_repartition_line_ids.filtered(
+            lambda x: x.repartition_type == 'tax' and x.account_id
+        )
+        if not tax_repartition_lines:
+            raise exceptions.ValidationError(
+                _(
+                    "No tax repartition lines account where found for '%(ret_name)s'\n"
+                    "Add one on Taxes > '%(ret_name)s' > Invoice Repartition Lines",
+                    ret_name=self.name,
+                )
+            )
+
+        if len(tax_repartition_lines) != 1:
+            raise exceptions.ValidationError(
+                _("There should only be one repartition line for '%s'")
+                % self.name
+            )
+        return tax_repartition_lines[0].account_id
