@@ -1483,6 +1483,7 @@ class AccountPaymentOrder(models.Model):
         amount_credit = 0.0
         amount_debit = 0.0
         for line in move_lines:
+            _logger.info(f"line created: {pf(line)}")
             amount_credit += line['credit']
             amount_debit += line['debit']
 
@@ -1498,6 +1499,14 @@ class AccountPaymentOrder(models.Model):
             if round(amount_credit, 3) != round(total_credit, 3) or round(
                 amount_debit, 3
             ) != round(total_debit, 3):
+                _logger.info(
+                    f'amount credit:{round(amount_credit, 3)} | '
+                    f'total credit:{round(total_credit, 3)}'
+                )
+                _logger.info(
+                    f'amount debit:{round(amount_debit, 3)} | '
+                    f'total debit:{round(total_debit, 3)}'
+                )
                 raise UserError(
                     _(
                         "Voucher Error!\n"
@@ -2443,10 +2452,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         company_currency = voucher.company_id.currency_id.id
         current_currency = self.currency_id.id
 
-        tax_amount_in_company_currency = (
-            voucher._convert_paid_amount_in_company_currency(retention.amount)
-        )
-
+        tax_amount_in_company_currency = retention.amount
         debit = credit = 0.0
 
         retention.write(retention_vals)
