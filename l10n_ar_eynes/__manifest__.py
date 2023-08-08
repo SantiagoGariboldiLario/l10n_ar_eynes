@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.0.3.5',
+    'version': '15.0.0.3.6',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -50,6 +50,7 @@
         "data/ir_cron.xml",
         "data/perception_data.xml",
         "data/res_groups_data.xml",
+        "data/sicore_data.xml",
         'security/ir.model.access.csv',
         'security/account_security.xml',
         'security/perception_ir_rule.xml',
@@ -59,6 +60,7 @@
         # 'wizard/accredit_check_wizard_view.xml',
         'report/move_line_list_xls.xml',
         'report/retention_certificate.xml',
+        'report/payment_order.xml',
         'wizard/account_tax_subjournal_view.xml',
         'views/res_config_settigs_views.xml',
         'views/res_partner_views.xml',
@@ -87,6 +89,8 @@
         'views/certificate_request_view.xml',
         "wizard/wsfe_sinchronize_voucher_view.xml",
         "wizard/wsfe_massive_sinchronize_view.xml",
+        "wizard/create_sicore_file.xml",
+        'views/sicore_config_view.xml',
         "views/wsfe_view.xml",
         "views/res_company_view.xml",
         'views/report_invoice.xml',

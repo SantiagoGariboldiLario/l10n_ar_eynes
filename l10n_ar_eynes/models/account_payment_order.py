@@ -684,7 +684,11 @@ class AccountPaymentOrder(models.Model):
         for (_ret, concept, invoice), vals in all_concepts.items():
             taxapp = vals['taxapp']
             base, amount = taxapp.apply_retention(
-                move_line.partner_id, percent, excluded_percent, vals, self.date
+                move_line.partner_id,
+                percent,
+                excluded_percent,
+                vals,
+                self.date,
             )
             all_concepts[key]['amount'] = amount
 
@@ -700,7 +704,7 @@ class AccountPaymentOrder(models.Model):
                 'invoice_id': invoice and invoice.id,
                 'invoice_ref': invoice and invoice.name_get()[0][1],
                 'date': self.date,
-                'account_id': retention.profit_account_id.id,
+                'account_id': retention.tax_id.get_retention_account().id,
                 'base': base,
                 'amount': amount,
                 'manual': False,  # La creamos por sistema
@@ -712,7 +716,7 @@ class AccountPaymentOrder(models.Model):
                 'excluded_percent': excluded_percent,
                 'exclusion_date_certificate': exclusion_date_certificate,
             }
-
+            _logger.info(f'retention created: {pf(retention_line_vals)}')
             res.append(retention_line_vals)
         return res
 
@@ -1113,7 +1117,6 @@ class AccountPaymentOrder(models.Model):
                 po.retention_ids = [(5, 0, 0)]
                 vals = po.calculate_retentions()
 
-                _logger.info(f"Retentions to create 1: {pf(vals)}")
                 po.retention_ids = [(0, 0, val) for val in vals]
                 for retention in po.retention_ids:
                     retention.onchange_actual_payment_retention()
@@ -1480,6 +1483,7 @@ class AccountPaymentOrder(models.Model):
         amount_credit = 0.0
         amount_debit = 0.0
         for line in move_lines:
+            _logger.info(f"line created: {pf(line)}")
             amount_credit += line['credit']
             amount_debit += line['debit']
 
@@ -1495,6 +1499,14 @@ class AccountPaymentOrder(models.Model):
             if round(amount_credit, 3) != round(total_credit, 3) or round(
                 amount_debit, 3
             ) != round(total_debit, 3):
+                _logger.info(
+                    f'amount credit:{round(amount_credit, 3)} | '
+                    f'total credit:{round(total_credit, 3)}'
+                )
+                _logger.info(
+                    f'amount debit:{round(amount_debit, 3)} | '
+                    f'total debit:{round(total_debit, 3)}'
+                )
                 raise UserError(
                     _(
                         "Voucher Error!\n"
@@ -2406,7 +2418,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
     def onchange_retention_id(self):
         res = {}
         if self.retention_id:
-            self.account_id = self.retention_id.profit_account_id
+            self.account_id = self.retention_id.tax_id.get_retention_account()
             self.name = self.retention_id.name
             res['domain'] = {
                 'concept_id': [
@@ -2440,10 +2452,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         company_currency = voucher.company_id.currency_id.id
         current_currency = self.currency_id.id
 
-        tax_amount_in_company_currency = (
-            voucher._convert_paid_amount_in_company_currency(retention.amount)
-        )
-
+        tax_amount_in_company_currency = retention.amount
         debit = credit = 0.0
 
         retention.write(retention_vals)

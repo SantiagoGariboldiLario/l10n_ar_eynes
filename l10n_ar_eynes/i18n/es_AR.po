@@ -6454,3 +6454,19 @@ msgid ""
 msgstr ""
 "No se encontrar diarios disponibles en el usuario con posicion fiscal '%(fiscal_pos)s' y tipo fiscal '%(fiscal_type)s'\n"
 "Por favor, revisar si existen diarios disponibles con estos paramentros en usuarios > preferencias > diarios disponibles"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_tax.py:0
+#, python-format
+msgid ""
+"No tax repartition lines account where found for '%(ret_name)s'\n"
+"Add one on Taxes > '%(ret_name)s' > Invoice Repartition Lines"
+msgstr ""
+"No se encotnraron lineas de distribucion de facturas para '%(ret_name)s'\n"
+"agregar en Impuestos > '%(ret_name)s' > Distribución de facturas"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_tax.py:0
+#, python-format
+msgid "There should only be one repartition line for '%s'"
+msgstr "Deberia haber solo una linea de distribucion de facturas para '%s'"

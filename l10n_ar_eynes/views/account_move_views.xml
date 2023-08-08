@@ -283,7 +283,11 @@
 
             <page name="other_info" position="inside">
                 <group string="Associated Invoices">
-                    <field name="associated_inv_ids" nolabel="1">
+                    <field
+                        name="associated_inv_ids"
+                        nolabel="1"
+                        domain="[('state', '=', 'posted')]"
+                    >
                         <tree>
                             <field name="partner_id" groups="base.group_user" />
                             <field name="date" />

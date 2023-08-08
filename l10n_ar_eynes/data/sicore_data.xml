@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data noupdate="1">
+        <record id="sicore_config_default" model="sicore.config" forcecreate="0">
+            <field name="name">Default</field>
+        </record>
+
+        <record
+            id="sicore_fiscal_position_ri"
+            model="sicore.fiscal.position"
+            forcecreate="0"
+        >
+            <field name="fiscal_position" ref="l10n_ar_eynes.fiscal_position_ri" />
+            <field name="code">1</field>
+            <field name="config_id" ref="sicore_config_default" />
+        </record>
+
+        <record
+            id="sicore_fiscal_position_mono"
+            model="sicore.fiscal.position"
+            forcecreate="0"
+        >
+            <field name="fiscal_position" ref="l10n_ar_eynes.fiscal_position_rem" />
+            <field name="code">4</field>
+            <field name="config_id" ref="sicore_config_default" />
+        </record>
+
+        <record
+            id="sicore_fiscal_position_exempt"
+            model="sicore.fiscal.position"
+            forcecreate="0"
+        >
+            <field name="fiscal_position" ref="l10n_ar_eynes.fiscal_position_se" />
+            <field name="code">3</field>
+            <field name="config_id" ref="sicore_config_default" />
+        </record>
+
+    </data>
+</odoo>
