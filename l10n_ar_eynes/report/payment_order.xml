@@ -45,7 +45,12 @@
                             <br />
                             Fecha comprobante: <t t-esc="o.date" />
                             <br />
-                            Cliente: <t t-esc="o.partner_id.name" />
+                            <t t-if="o.type == 'receipt' or o.type == 'sale'">
+                                Cliente: <t t-esc="o.partner_id.name" />
+                            </t>
+                            <t t-else="">
+                                Proveedor: <t t-esc="o.partner_id.name" />
+                            </t>
                             <br />
                             CUIT: <t t-esc="o.partner_id.vat" />
                         </div>
