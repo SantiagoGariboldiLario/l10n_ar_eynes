@@ -270,7 +270,6 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
 
         return {
             'name': _('Invoice'),
-            'view_type': 'form',
             'view_mode': 'form,tree',
             'res_model': 'account.move',
             'res_id': debit_note_id.id,

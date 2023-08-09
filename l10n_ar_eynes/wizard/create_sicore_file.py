@@ -350,7 +350,6 @@ class CreateSicoreFiles(models.TransientModel):
             form_id = self.env.ref('l10n_ar_eynes.view_create_sicore_files').id
             res = {
                 'name': _('Sicore'),
-                'view_type': 'form',
                 'view_mode': 'form',
                 'views': [
                     (form_id, 'form'),
@@ -586,7 +585,6 @@ class CreateSicoreFiles(models.TransientModel):
             form_id = self.env.ref('l10n_ar_eynes.view_create_sicore_files').id
             res = {
                 'name': _('Sicore'),
-                'view_type': 'form',
                 'view_mode': 'form',
                 'views': [
                     (form_id, 'form'),
