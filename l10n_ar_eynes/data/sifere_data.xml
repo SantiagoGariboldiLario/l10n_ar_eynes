@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="sifere_config_default" model="sifere.config" forcecreate="0">
+        <field name="name">Default</field>
+    </record>
+
+    <record id="sifere_jurisdiction_caba" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_c" />
+        <field name="code">901</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_ba" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_b" />
+        <field name="code">902</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+
+    <record id="sifere_jurisdiction_X" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_x" />
+        <field name="code">904</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_S" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_s" />
+        <field name="code">921</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_M" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_m" />
+        <field name="code">913</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_T" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_t" />
+        <field name="code">924</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_E" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_e" />
+        <field name="code">908</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_A" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_a" />
+        <field name="code">917</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_N" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_n" />
+        <field name="code">914</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_H" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_h" />
+        <field name="code">906</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_W" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_w" />
+        <field name="code">905</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_G" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_g" />
+        <field name="code">922</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_Y" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_y" />
+        <field name="code">910</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_J" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_j" />
+        <field name="code">918</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_R" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_r" />
+        <field name="code">916</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_P" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_p" />
+        <field name="code">909</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_Q" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_q" />
+        <field name="code">915</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_U" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_u" />
+        <field name="code">907</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_D" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_d" />
+        <field name="code">919</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_K" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_k" />
+        <field name="code">903</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_F" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_f" />
+        <field name="code">912</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_L" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_l" />
+        <field name="code">911</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_Z" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_z" />
+        <field name="code">920</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record id="sifere_jurisdiction_V" model="sifere.jurisdiction" forcecreate="0">
+        <field name="state" ref="base.state_ar_v" />
+        <field name="code">923</field>
+        <field name="config_id" ref="sifere_config_default" />
+    </record>
+
+    <record model='report.exporter' id='sifere_ret_exporter' forcecreate="True">
+        <field name="codename">sifere_ret</field>
+        <field name="name">SIFERE RET</field>
+    </record>
+
+    <record model='report.exporter' id='sifere_per_exporter' forcecreate="True">
+        <field name="codename">sifere_per</field>
+        <field name="name">SIFERE PER</field>
+    </record>
+
+    <!-- DISABLING DEFAULT MENUS FROM BASE_REPORT_EXPORTER USING WIZARD INSTEAD -->
+    <!-- <record id="base_report_exporter.menu_rfg_sifere_ret_main" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+    <record id="base_report_exporter.menu_rfg_sifere_per_main" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record> -->
+
+</odoo>

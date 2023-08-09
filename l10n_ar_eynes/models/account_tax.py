@@ -11,6 +11,7 @@ class AccountTax(models.Model):
         help="If checked, when IIBB situation is Multilateral, "
         + "this perception is always applicable",
     )
+    is_bank_settlement = fields.Boolean('Is Bank Settlement')
     always_apply_padron = fields.Boolean(
         'Always Apply from Padron',
         default=False,

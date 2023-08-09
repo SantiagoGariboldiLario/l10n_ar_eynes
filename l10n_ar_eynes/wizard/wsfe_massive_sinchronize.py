@@ -151,7 +151,6 @@ class WsfeMassiveSinchronize(models.TransientModel):
                     'name': _('Updated Invoices'),
                     'type': 'ir.actions.act_window',
                     'res_model': 'account.move',
-                    'view_type': 'form',
                     'view_mode': 'tree,form',
                     'target': 'current',
                     'domain': [('id', 'in', invoices.ids)],

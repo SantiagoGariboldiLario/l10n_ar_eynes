@@ -43,6 +43,7 @@
                         >
                             <field name="check_sit_iibb" />
                             <field name="always_apply_padron" />
+                            <field name="is_bank_settlement" />
                         </group>
                     </group>
 
@@ -239,6 +240,7 @@
                                 name="check_sit_iibb"
                                 attrs="{'invisible':[('jurisdiccion','!=','provincial')]}"
                             />
+                            <field name="is_bank_settlement" />
                             <field name="always_apply_padron" />
                         </group>
                     </group>
