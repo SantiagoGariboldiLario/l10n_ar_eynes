@@ -655,11 +655,13 @@ class AccountMove(models.Model):
                 line._onchange_product_id()
                 line._onchange_currency()
             self.compute_perceptions()
-        return
+        return True
 
     @api.onchange('invoice_date')
     def _onchange_invoice_date(self):
+        super()._onchange_invoice_date()
         self.vat_date = self.invoice_date
+        return True
 
     @api.depends('invoice_line_ids')
     def _compute_amount_custom(self):
