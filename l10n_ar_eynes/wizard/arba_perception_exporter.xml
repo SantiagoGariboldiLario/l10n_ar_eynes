@@ -1,0 +1,42 @@
+<odoo>
+    <record id="arba_perception_exporter_wizard_view" model="ir.ui.view">
+        <field name="name">arba.perception.exporter.wizard.view</field>
+        <field name="model">arba.perception.exporter.wizard</field>
+        <field name="arch" type="xml">
+        <form string="Export ARBA Perceptions">
+            <span>
+                This wizard allows you to create export ARBA IIBB Perceptions. The generated files
+                will be attached to the corresponding period
+            </span>
+            <group>
+                <field name="date_from" />
+                <field name="date_to" />
+            </group>
+            <footer>
+                <button
+                        name="create_file"
+                        type="object"
+                        string="Create File"
+                        class="oe_highlight"
+                    />
+                or
+                <button string="Cancel" special="cancel" class="oe_link" />
+            </footer>
+        </form>
+        </field>
+    </record>
+
+    <record id="action_create_arba_perception_file" model="ir.actions.act_window">
+        <field name="name">Export ARBA Perceptions</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">arba.perception.exporter.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        parent="menu_arba"
+        id="menu_arba_perception_report"
+        action="action_create_arba_perception_file"
+    />
+</odoo>

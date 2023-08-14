@@ -46,6 +46,7 @@ class AccountTax(models.Model):
         "* Always",
     )
     from_register_ARBA = fields.Boolean('From ARBA Register')
+    inform_arba = fields.Boolean('Inform ARBA?')
     from_register_AGIP = fields.Boolean('From AGIP Register')
     retention_type = fields.Selection(
         selection=[

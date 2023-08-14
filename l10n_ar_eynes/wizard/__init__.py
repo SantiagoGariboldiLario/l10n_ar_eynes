@@ -16,3 +16,5 @@ from . import account_move_reversal  # noqa
 from . import report_exporter
 from . import create_sicore_file
 from . import create_sifere_file
+from . import arba_retention_exporter
+from . import arba_perception_exporter
