@@ -105,7 +105,6 @@
         'views/sicore_config_view.xml',
         'views/sifere_config_view.xml',
         "views/wsfe_view.xml",
-        "views/res_company_view.xml",
         'views/report_invoice.xml',
         'views/arba_exporter.xml',
         'wizard/arba_retention_exporter.xml',

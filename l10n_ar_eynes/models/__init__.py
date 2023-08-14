@@ -5,7 +5,6 @@ from . import account_move  # noqa
 from . import account_payment_method  # noqa
 from . import account_payment_order  # noqa
 from . import account_tax  # noqa
-from . import company  # noqa
 from . import iibb_situation  # noqa
 from . import product  # noqa
 from . import reason_rejected_check  # noqa

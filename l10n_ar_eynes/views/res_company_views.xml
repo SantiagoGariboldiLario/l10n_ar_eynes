@@ -18,6 +18,15 @@
                     attrs="{'readonly': False}"
                 />
             </field>
+            <xpath expr="//field[@name='sequence']" position="after">
+                <field name="fcred_cbu_emitter" />
+                <field name="fcred_minimum_amount" />
+                <field name="fcred_is_fce_emitter" />
+                <field
+                    name="fcred_pos_ar_id"
+                    attrs="{'required': [('fcred_is_fce_emitter','=', True)]}"
+                />
+            </xpath>
         </field>
     </record>
 
