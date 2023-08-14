@@ -593,20 +593,20 @@ class StockPicking(models.Model):
     voucher = fields.Char("Voucher", readonly=True, copy=False)
     cot_date = fields.Datetime("Cot Date", readonly=True, copy=False)
     is_origin = fields.Boolean("Delivey an origin", help="Delivery Origin")
-    cot_date_transfer = fields.Date(
-        related="route_id.date",
-        string="Date of Transfer",
-        help="Date of Transport Depature",
-    )
+    # cot_date_transfer = fields.Date(
+    #     related="route_id.date",
+    #     string="Date of Transfer",
+    #     help="Date of Transport Depature",
+    # )
     express_id = fields.Many2one("res.partner", "Express", readonly=True)
-    truck_license_plate = fields.Char(
-        related="route_id.scale_entry_id.truck_id.name",
-        string="Truck License Plate",
-    )
-    trailer_license_plate = fields.Char(
-        related="route_id.scale_entry_id.trailer_id.name",
-        string="Trailer License Plate",
-    )
+    # truck_license_plate = fields.Char(
+    #     related="route_id.scale_entry_id.truck_id.name",
+    #     string="Truck License Plate",
+    # )
+    # trailer_license_plate = fields.Char(
+    #     related="route_id.scale_entry_id.trailer_id.name",
+    #     string="Trailer License Plate",
+    # )
     dimension = fields.Float("Dimension")
     pick_type = fields.Selection(
         string="Type",

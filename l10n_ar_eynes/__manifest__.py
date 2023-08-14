@@ -95,6 +95,7 @@
         'wizard/update_journal_period_view.xml',
         "wizard/wsaa_config_renewal.xml",
         'views/wsaa_view.xml',
+        'views/stock_picking_view.xml',
         'views/certificate_request_view.xml',
         "wizard/wsfe_sinchronize_voucher_view.xml",
         "wizard/wsfe_massive_sinchronize_view.xml",
