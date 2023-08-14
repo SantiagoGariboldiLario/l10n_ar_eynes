@@ -936,11 +936,8 @@ class AccountPaymentOrder(models.Model):
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
             ('move_id.state', '=', 'posted'),
+            ('currency_id', '=', self.currency_id.id),
         ]
-        # if self.is_multi_currency:
-        #     domain += [('currency_id', '=', self.currency_id.id)]
-        # else:
-        #     domain += [('currency_id', 'in', (self.currency_id.id, False))]
 
         moves = self.env['account.move.line'].search(domain)
         lines = self._prepare_income_debt_lines('income', moves)
@@ -2310,7 +2307,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
                         'move_id': line.invoice_id.id,
                         'move_name': 'draft',
                         'move_type': move_type_map[line.invoice_id.move_type],
-                        'total_without_vat': line.invoice_id.amount_untaxed,
+                        'total_without_vat': line.amount,
                         'payment_order_reference': self.payment_order_id.number
                         or '',
                     }
@@ -2357,7 +2354,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 'move_id': invoice.id,
                 'move_name': invoice.name,
                 'move_type': move_type_map[invoice.move_type],
-                'total_without_vat': invoice.amount_untaxed,
+                'total_without_vat': move.amount,
                 'payment_order_reference': move.payment_order_id.number or '',
             }
         )
