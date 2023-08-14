@@ -2323,6 +2323,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
     def get_current_month_moves(self):
         return self.env['account.payment.order.line'].search(
             [
+                ('payment_order_id.state', '=', 'posted'),
                 ('partner_id', '=', self.payment_order_id.partner_id.id),
                 ('invoice_id.payment_state', 'in', ('paid', 'partial')),
                 ('invoice_id.invoice_date', '>=', self.date.replace(day=1)),
@@ -2377,23 +2378,26 @@ class AccountPaymentOrderRetentionLine(models.Model):
         for rec in self:
             total = rec.retention_move_lines_total
             amount = rec.concept_amount
-            rec.total_month_retention = (total - amount) * (
-                rec.applied_aliquot / 100
-            )
+            total_month_retention = 0
+            if total > amount:
+                total_month_retention = (total - amount) * (
+                    rec.applied_aliquot / 100
+                )
+            rec.total_month_retention = total_month_retention
 
     @api.depends('retention_move_line_ids', 'applied_aliquot')
     def _compute_month_applied_retentions(self):
         for rec in self:
+            concept_amount = rec.concept_amount
             total = sum(
                 rec.retention_move_line_ids.filtered(
                     lambda rtml: rtml.move_name != 'draft'
                 ).mapped('total_without_vat')
             )
-            if total == 0:
+            if total == 0 or total < concept_amount:
                 rec.month_applied_retentions = 0
             else:
-                amount = rec.concept_amount
-                rec.month_applied_retentions = (total - amount) * (
+                rec.month_applied_retentions = (total - concept_amount) * (
                     rec.applied_aliquot / 100
                 )
 
