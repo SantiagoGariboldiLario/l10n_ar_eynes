@@ -4109,7 +4109,10 @@ msgstr "La percepción se calcula en base a este importe."
 #. module: l10n_ar_eynes
 #: model:account.tax.group,name:l10n_ar_eynes.perceptions_tax_group
 #: model:account.tax.group,name:l10n_ar_eynes.tax_group_perceptions
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_perception_curr
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_fiscal_position__perception_ids
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__amount_perception_curr
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__amount_perception_curr
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__type__perceptions
 #: model:ir.ui.menu,name:l10n_ar_eynes.perceptions_menu
 #: model:ir.ui.menu,name:l10n_ar_eynes.taxes_perceptions_menu
@@ -6470,3 +6473,37 @@ msgstr ""
 #, python-format
 msgid "There should only be one repartition line for '%s'"
 msgstr "Deberia haber solo una linea de distribucion de facturas para '%s'"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_untaxed_cur
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__amount_untaxed_cur
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__amount_untaxed_cur
+msgid "Untaxed"
+msgstr "Importe libre de impuestos"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
+msgid "<i>- Amounts in Secondary Currency</i>"
+msgstr "<i>- Importes en segunda divisa</i>"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_taxed
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_taxed_cur
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__amount_taxed
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__amount_taxed_cur
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__amount_taxed
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__amount_taxed_cur
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__amount_taxed
+msgid "Taxed"
+msgstr "Gravado"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_no_taxed
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_no_taxed_cur
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__amount_no_taxed
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__amount_no_taxed_cur
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__amount_no_taxed
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__amount_no_taxed_cur
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__amount_no_taxed
+msgid "No Taxed"
+msgstr "Sin impuestos"
