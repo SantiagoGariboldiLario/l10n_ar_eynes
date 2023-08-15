@@ -4,7 +4,8 @@
 "Aplicativo Visual (Front-end) Remito Electrónico (COT) ARBA"
 
 # flake8: noqa
-# pylint: disable=deprecated-module,  reportMissingImports, reportMissingModuleSource
+# pylint: disable=deprecated-module,
+# pyright: reportMissingImports=false, reportMissingModuleSource=false, reportUndefinedVariable=false
 
 from __future__ import with_statement
 
