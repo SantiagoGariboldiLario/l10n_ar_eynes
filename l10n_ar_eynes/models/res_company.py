@@ -50,6 +50,13 @@ class ResCompany(models.Model):
         related="partner_id.apartment",
         store=True,
     )
+    cot_user = fields.Char(string="COT User (NIF)")
+    cot_pass = fields.Char(string="COT Password")
+    cot_url = fields.Char(string="COT URL")
+    group_check_cot = fields.Boolean(
+        string="Enable Web Service",
+        implied_group="l10n_ar_eynes.group_check_cot",
+    )
 
 
 class AfipBigCompany(models.Model):
