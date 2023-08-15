@@ -6540,6 +6540,8 @@ msgstr "Gravado"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__amount_no_taxed
 msgid "No Taxed"
 msgstr "Sin impuestos"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_country_state__cot_code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_uom_uom__cot_code
 #: model:ir.model.fields,help:l10n_ar_eynes.field_stock_picking__cot
