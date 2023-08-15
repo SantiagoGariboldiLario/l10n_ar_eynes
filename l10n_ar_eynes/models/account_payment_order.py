@@ -2307,7 +2307,9 @@ class AccountPaymentOrderRetentionLine(models.Model):
                         'move_id': line.invoice_id.id,
                         'move_name': 'draft',
                         'move_type': move_type_map[line.invoice_id.move_type],
-                        'total_without_vat': line.amount,
+                        'total_without_vat': line.invoice_id.amount_untaxed
+                        if line.invoice_id.is_company_cur
+                        else line.invoice_id.amount_untaxed_cur,
                         'payment_order_reference': self.payment_order_id.number
                         or '',
                     }
@@ -2354,7 +2356,9 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 'move_id': invoice.id,
                 'move_name': invoice.name,
                 'move_type': move_type_map[invoice.move_type],
-                'total_without_vat': move.amount,
+                'total_without_vat': invoice.amount_untaxed
+                if invoice.is_company_cur
+                else invoice.amount_untaxed_cur,
                 'payment_order_reference': move.payment_order_id.number or '',
             }
         )
