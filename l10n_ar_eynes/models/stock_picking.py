@@ -18,6 +18,8 @@ from ..lib import cot
 
 _logger = logging.getLogger(__name__)
 
+# flake8: noqa
+
 
 class StockPicking(models.Model):
     _inherit = "stock.picking"
@@ -93,7 +95,7 @@ class StockPicking(models.Model):
             if sequence:
                 return "091" + sequence.group(1) + sequence.group(2)
         except BaseException:
-            raise ValidationError from None(
+            raise ValidationError(
                 _("COT Error\n- Invalid sequence: %s") % (self.name)
             )
 
@@ -560,21 +562,15 @@ class StockPicking(models.Model):
 
     def _get_cot_user(self):
         # Obtenemos el user (CUIT) del COT
-        config_obj = self.env["ir.config_parameter"].sudo()
-        cot_user = config_obj.get_param("cot_user", default="CUIT")
-        return cot_user
+        return self.company_id.cot_user
 
     def _get_cot_pass(self):
         # Obtenemos la password del cot
-        config_obj = self.env["ir.config_parameter"].sudo()
-        cot_pass = config_obj.get_param("cot_pass", default="Password")
-        return cot_pass
+        return self.company_id.cot_pass
 
     def _get_cot_url(self):
         # Obtenemos la url para enviar el remito
-        config_obj = self.env["ir.config_parameter"].sudo()
-        cot_url = config_obj.get_param("cot_url", default="http://arba.gov.ar/")
-        return cot_url
+        return self.company_id.cot_url
 
     @api.onchange("carrier_id")
     def onchange_carrier(self):
