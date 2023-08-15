@@ -1,64 +1,65 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-        <!-- SICORE Files Generation -->
+    <!-- SICORE Files Generation -->
 
-        <record id="view_create_sicore_files" model="ir.ui.view">
-            <field name="name">sicore.files.generation</field>
-            <field name="model">create.sicore.files</field>
-            <field name="arch" type="xml">
-                <form string="Credit Card Settlement Parameters">
-                    <separator colspan="4" />
-                    <group string="This wizard allows you to export a file for SICORE.">
-                        <group>
-                            <field name="period_start" />
-                            <field name="period_end" />
-                            <field name="rrhh_ret_profit_code" />
-                            <field name="presentation_date" />
-                        </group>
+    <record id="view_create_sicore_files" model="ir.ui.view">
+        <field name="name">sicore.files.generation</field>
+        <field name="model">create.sicore.files</field>
+        <field name="arch" type="xml">
+            <form string="Credit Card Settlement Parameters">
+                <separator colspan="4" />
+                <group string="This wizard allows you to export a file for SICORE.">
+                    <group>
+                        <field name="period_start" />
+                        <field name="period_end" />
+                        <field name="rrhh_ret_profit_code" />
+                        <field name="presentation_date" />
                     </group>
-                    <separator string="Validation Errors" colspan="4" />
-                    <field name="notes" nolabel="1" colspan="4" />
-                    <footer>
-                        <button special="cancel" string="Cancel" />
-                        <button
+                </group>
+                <separator string="Validation Errors" colspan="4" />
+                <field name="notes" nolabel="1" colspan="4" />
+                <footer>
+                    <button special="cancel" string="Cancel" />
+                    <button
                         name="create_files"
                         string="Generate"
                         colspan="1"
                         type="object"
                         class="oe_highlight"
                     />
-                        <button
+                    <button
                         name="create_files_rrhh"
                         string="Generate (RRHH)"
                         colspan="1"
                         type="object"
                         class="oe_highlight"
                     />
-                    </footer>
-                </form>
-            </field>
-        </record>
+                </footer>
+            </form>
+        </field>
+    </record>
 
-        <record id="action_generate_sicore_files" model="ir.actions.act_window">
-            <field name="name">SICORE Files Generation</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">create.sicore.files</field>
-            <field name="view_mode">form</field>
-            <field name="target">new</field>
-        </record>
+    <record id="action_generate_sicore_files" model="ir.actions.act_window">
+        <field name="name">SICORE Files Generation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">create.sicore.files</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
 
-        <menuitem
+    <menuitem
         parent="account.menu_finance_reports"
         id="menu_taxes_reports"
         name="Taxes"
         groups="account.group_account_user"
     />
 
-        <menuitem
-        parent="menu_taxes_reports"
+    <menuitem parent="menu_taxes_reports" id="menu_sicore" name="SICORE" sequence="1" />
+
+    <menuitem
+        parent="menu_sicore"
         id="menu_sicore_report"
         action="action_generate_sicore_files"
-        sequence="1"
     />
 </odoo>

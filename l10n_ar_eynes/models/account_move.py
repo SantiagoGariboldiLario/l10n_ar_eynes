@@ -652,14 +652,16 @@ class AccountMove(models.Model):
         if self.is_invoice(include_receipts=True):
             for line in self._get_lines_onchange_currency():
                 line.currency_rate = self.currency_rate
-                line._onchange_product_id()
+                line.price_unit = line._get_computed_price_unit()
                 line._onchange_currency()
             self.compute_perceptions()
         return
 
     @api.onchange('invoice_date')
     def _onchange_invoice_date(self):
+        super()._onchange_invoice_date()
         self.vat_date = self.invoice_date
+        return
 
     @api.depends('invoice_line_ids')
     def _compute_amount_custom(self):

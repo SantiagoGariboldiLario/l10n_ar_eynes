@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+
+        <!-- TREE SIFERE REPORTS -->
+        <record id="report_files_sifere" model="ir.actions.act_window">
+            <field name="name">SIFERE - Generated Reports</field>
+            <field name="res_model">report.files</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('exporter_codename', 'ilike', '%sifere%')]</field>
+            <field name="context">{}</field>
+        </record>
+
+        <!-- WIZARD VIEW -->
+        <record id="wizard_create_sifere_files" model="ir.ui.view">
+            <field name="name">SIFERE File Generation</field>
+            <field name="model">create.sifere.files</field>
+            <field name="arch" type="xml">
+                <form>
+                    <h4
+                    >Esta ventana te permite generar los reportes de SIFERE para un periodo determinado"</h4>
+                    <separator colspan="4" />
+                    <group>
+                        <field name="period_start" />
+                        <field name="period_end" />
+                    </group>
+                    <footer>
+                        <button
+                            name="create_files"
+                            string="Generar"
+                            type="object"
+                            class="btn-primary"
+                        />
+                        <button
+                            special="cancel"
+                            string="Cancelar"
+                            class="btn-default"
+                        />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="wizard_create_sifere_files_action" model="ir.actions.act_window">
+            <field name="name">SIFERE File Generation</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">create.sifere.files</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- MENU ITEMS -->
+        <menuitem
+            id="menu_parent_exporters_sifere"
+            name="SIFERE"
+            parent="menu_taxes_reports"
+            sequence="2"
+        />
+
+        <menuitem
+            name="Create SIFERE Reports"
+            parent="menu_parent_exporters_sifere"
+            action="wizard_create_sifere_files_action"
+            id="menu_sifere_export"
+        />
+
+        <menuitem
+            name="View SIFERE Reports"
+            parent="menu_parent_exporters_sifere"
+            action="report_files_sifere"
+            id="menu_sifere_reports"
+        />
+
+    </data>
+</odoo>

@@ -72,7 +72,6 @@ class ValidateAccountMove(models.TransientModel):
             return {
                 'name': _('WSFE Request'),
                 'res_id': request_log.id,
-                'view_type': 'form',
                 'view_mode': 'form',
                 'res_model': 'wsfe.request',
                 'type': 'ir.actions.act_window',

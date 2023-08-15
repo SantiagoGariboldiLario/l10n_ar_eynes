@@ -936,11 +936,8 @@ class AccountPaymentOrder(models.Model):
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
             ('move_id.state', '=', 'posted'),
+            ('currency_id', '=', self.currency_id.id),
         ]
-        # if self.is_multi_currency:
-        #     domain += [('currency_id', '=', self.currency_id.id)]
-        # else:
-        #     domain += [('currency_id', 'in', (self.currency_id.id, False))]
 
         moves = self.env['account.move.line'].search(domain)
         lines = self._prepare_income_debt_lines('income', moves)
@@ -2303,14 +2300,28 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 'in_refund': 'In Refund',
                 'out_refund': 'Out Refund',
             }
+            invoice = line.invoice_id
+            if invoice.is_company_cur:
+                total_without_vat = (
+                    line.amount / invoice.amount_total * invoice.amount_untaxed
+                )
+            else:
+                total_without_vat = (
+                    (line.amount / line.payment_order_id.payment_rate)
+                    / invoice.amount_total
+                    * (
+                        invoice.amount_untaxed
+                        * line.payment_order_id.payment_rate
+                    )
+                )
             move_line_ids.append(
                 self.env['retention.move.line'].create(
                     {
                         'payment_order_line_id': self.id,
-                        'move_id': line.invoice_id.id,
+                        'move_id': invoice.id,
                         'move_name': 'draft',
-                        'move_type': move_type_map[line.invoice_id.move_type],
-                        'total_without_vat': line.invoice_id.amount_untaxed,
+                        'move_type': move_type_map[invoice.move_type],
+                        'total_without_vat': total_without_vat,
                         'payment_order_reference': self.payment_order_id.number
                         or '',
                     }
@@ -2323,6 +2334,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
     def get_current_month_moves(self):
         return self.env['account.payment.order.line'].search(
             [
+                ('payment_order_id.state', '=', 'posted'),
                 ('partner_id', '=', self.payment_order_id.partner_id.id),
                 ('invoice_id.payment_state', 'in', ('paid', 'partial')),
                 ('invoice_id.invoice_date', '>=', self.date.replace(day=1)),
@@ -2350,13 +2362,23 @@ class AccountPaymentOrderRetentionLine(models.Model):
             'out_refund': 'Out Refund',
         }
         invoice = move.invoice_id
+        if invoice.is_company_cur:
+            total_without_vat = (
+                move.amount / invoice.amount_total * invoice.amount_untaxed
+            )
+        else:
+            total_without_vat = (
+                (move.amount / move.payment_order_id.payment_rate)
+                / invoice.amount_total
+                * (invoice.amount_untaxed * move.payment_order_id.payment_rate)
+            )
         return self.env['retention.move.line'].create(
             {
                 'payment_order_line_id': self.id,
                 'move_id': invoice.id,
                 'move_name': invoice.name,
                 'move_type': move_type_map[invoice.move_type],
-                'total_without_vat': invoice.amount_untaxed,
+                'total_without_vat': total_without_vat,
                 'payment_order_reference': move.payment_order_id.number or '',
             }
         )
@@ -2377,23 +2399,26 @@ class AccountPaymentOrderRetentionLine(models.Model):
         for rec in self:
             total = rec.retention_move_lines_total
             amount = rec.concept_amount
-            rec.total_month_retention = (total - amount) * (
-                rec.applied_aliquot / 100
-            )
+            total_month_retention = 0
+            if total > amount:
+                total_month_retention = (total - amount) * (
+                    rec.applied_aliquot / 100
+                )
+            rec.total_month_retention = total_month_retention
 
     @api.depends('retention_move_line_ids', 'applied_aliquot')
     def _compute_month_applied_retentions(self):
         for rec in self:
+            concept_amount = rec.concept_amount
             total = sum(
                 rec.retention_move_line_ids.filtered(
                     lambda rtml: rtml.move_name != 'draft'
                 ).mapped('total_without_vat')
             )
-            if total == 0:
+            if total == 0 or total < concept_amount:
                 rec.month_applied_retentions = 0
             else:
-                amount = rec.concept_amount
-                rec.month_applied_retentions = (total - amount) * (
+                rec.month_applied_retentions = (total - concept_amount) * (
                     rec.applied_aliquot / 100
                 )
 
