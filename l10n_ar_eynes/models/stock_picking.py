@@ -592,7 +592,7 @@ class StockPicking(models.Model):
     picking_supplier = fields.Char("Picking Supplier", size=100)
     voucher = fields.Char("Voucher", readonly=True, copy=False)
     cot_date = fields.Datetime("Cot Date", readonly=True, copy=False)
-    is_origin = fields.Boolean("Delivey an origin", help="Delivery Origin")
+    is_origin = fields.Boolean("Delivery origin", help="Delivery Origin")
     # cot_date_transfer = fields.Date(
     #     related="route_id.date",
     #     string="Date of Transfer",

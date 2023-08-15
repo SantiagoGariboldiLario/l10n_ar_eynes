@@ -53,23 +53,24 @@ class SaleOrder(models.Model):
 
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
-        carrier_license_id = False
-        trailer_license_id = False
+        # carrier_license_id = False
+        # trailer_license_id = False
 
         if self.carrier_id:
-            partner = self.carrier_id
-            carrier_license_ids = partner.license_plate_ids
-            trailer_license_ids = partner.trailer_license_plate_ids
+            # TODO: Decide how to add this fields to the partner
+            # partner = self.carrier_id
+            # carrier_license_ids = partner.license_plate_ids
+            # trailer_license_ids = partner.trailer_license_plate_ids
 
-            if carrier_license_ids:
-                carrier_license_id = carrier_license_ids[0].id
-            if trailer_license_ids:
-                trailer_license_id = trailer_license_ids[0].id
+            # if carrier_license_ids:
+            #     carrier_license_id = carrier_license_ids[0].id
+            # if trailer_license_ids:
+            #     trailer_license_id = trailer_license_ids[0].id
 
             self.picking_ids.write(
                 {
-                    "license_plate_id": carrier_license_id,
-                    "trailer_license_plate_id": trailer_license_id,
+                    # "license_plate_id": carrier_license_id,
+                    # "trailer_license_plate_id": trailer_license_id,
                     "carrier_id": self.carrier_id.id,
                 }
             )
