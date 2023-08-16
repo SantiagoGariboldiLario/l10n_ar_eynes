@@ -235,9 +235,10 @@
                             ('local','=',False)
                         ],
                         'invisible': [
+                            '|',
+                            '&amp;',
                             ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
                             ('local','=', True),
-                            '|',
                             ('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
                         ],
                     }"
@@ -250,9 +251,10 @@
                             ('local','=',False)
                         ],
                         'invisible': [
+                            '|',
+                            '&amp;',
                             ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
                             ('local','=', True),
-                            '|',
                             ('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
                         ],
                     }"
