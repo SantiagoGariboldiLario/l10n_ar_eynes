@@ -16,13 +16,46 @@ class ResCompany(models.Model):
         string='Rejected issued checks journal',
     )
     fcred_cbu_emitter = fields.Char(string='CBU (FCE)')
-    fcred_minimum_amount = fields.Float(string='Monto Minimo (FCE)', default=195698)
+    fcred_minimum_amount = fields.Float(
+        string='Monto Minimo (FCE)',
+        default=195698,
+    )
     fcred_transfer = fields.Char(string='SCA/ADC (FCE)?', default='SCA')
     fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
     fcred_pos_ar_id = fields.Many2one(
         'account.journal',
         string='FCE Pos',
         domain="[('fcred_is_fce_emitter', '=', True)]",
+    )
+    door = fields.Char(
+        string="Door",
+        related="partner_id.door",
+        size=3,
+        store=True,
+    )
+    floor = fields.Char(
+        string="Floor",
+        related="partner_id.floor",
+        size=3,
+        store=True,
+    )
+    num = fields.Char(
+        string="Number",
+        related="partner_id.floor",
+        size=5,
+        store=True,
+    )
+    apartment = fields.Char(
+        string="Apartment",
+        related="partner_id.apartment",
+        store=True,
+    )
+    cot_user = fields.Char(string="COT User (NIF)")
+    cot_pass = fields.Char(string="COT Password")
+    cot_url = fields.Char(string="COT URL")
+    group_check_cot = fields.Boolean(
+        string="Enable Web Service",
+        implied_group="l10n_ar_eynes.group_check_cot",
     )
 
 
@@ -38,7 +71,7 @@ class AfipBigCompany(models.Model):
         Retrieves all the cuits from AFIP endpoint
         """
         REQ = requests.post(
-            'https://servicioscf.afip.gob.ar/FCEServicioConsulta/api/fceconsulta.aspx/getGrandesEmpresas'
+            'https://servicioscf.afip.gob.ar/FCEServicioConsulta/api/fceconsulta.aspx/getGrandesEmpresas'  # noqa
         )
         raw_response = REQ.text
         list_of_cuit = re.findall('Cuit..([0-9]*)', raw_response)
@@ -55,6 +88,7 @@ class AfipBigCompany(models.Model):
         for cuit in big_companies:
             ss.create({'cuit': cuit})
         _logger.info(
-            '[afip.big.company] has retrieved the following companies from afip and updated the local table'
+            '[afip.big.company] has retrieved the '
+            'following companies from afip and updated the local table'
         )
         _logger.info(big_companies)

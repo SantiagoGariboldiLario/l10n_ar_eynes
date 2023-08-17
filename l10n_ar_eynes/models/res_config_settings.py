@@ -1,4 +1,4 @@
-from odoo import fields, models, api
+from odoo import api, fields, models
 
 
 class ResConfigSettings(models.TransientModel):
@@ -11,9 +11,31 @@ class ResConfigSettings(models.TransientModel):
         domain="[('company_id', '=', company_id)]",
         string='Rejected issued checks journal',
     )
+    cot_user = fields.Char(
+        related='company_id.cot_user',
+        string="COT User (NIF)",
+        readonly=False,
+    )
+    cot_pass = fields.Char(
+        related='company_id.cot_pass',
+        string="COT Password",
+        readonly=False,
+    )
+    cot_url = fields.Char(
+        related='company_id.cot_url',
+        string="COT URL",
+        readonly=False,
+    )
+    group_check_cot = fields.Boolean(
+        related='company_id.group_check_cot',
+        string="Enable Web Service",
+        readonly=False,
+        implied_group="l10n_ar_eynes.group_check_cot",
+    )
 
     def set_values(self):
-        return super(ResConfigSettings, self).set_values()
+        res = super(ResConfigSettings, self).set_values()
+        return res
 
     @api.model
     def get_values(self):

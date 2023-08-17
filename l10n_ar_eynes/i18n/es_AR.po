@@ -1121,12 +1121,17 @@ msgid "Click to register a receipt."
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_generated_files__code
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_cot_nomenclature__code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_dst_cuit_codes__code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_activity__code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_concept__code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_reason_rejected_check__code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_activity__code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__code
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_fiscal_position__code
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_generated_files__code
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_sifere_jurisdiction__code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_optionals__code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_tax_codes__code
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_currency_codes__code
@@ -1888,8 +1893,14 @@ msgstr "Deshabilitar retenciones automaticas"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax_subjournal__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_afip_big_company__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_afipws_service__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_generated_files__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_perception_exporter_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_retention_exporter_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_cot_nomenclature__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_sicore_files__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_sifere_files__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_dst_cuit_codes__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_iibb_situation__display_name
@@ -1901,6 +1912,10 @@ msgstr "Deshabilitar retenciones automaticas"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_reason_rejected_check__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_issued_check_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_exporter__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files_error__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files_generator__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_advance_retention__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_perception__display_name
@@ -1913,6 +1928,11 @@ msgstr "Deshabilitar retenciones automaticas"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale_line__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_vat_tax__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_config__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_fiscal_position__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_generated_files__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_sifere_config__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_sifere_jurisdiction__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard_line__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_user_journal_rel__display_name
@@ -3424,10 +3444,15 @@ msgid "Nacional"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_cot_nomenclature__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_iibb_situation__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_exporter__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale_line__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_config__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_sifere_config__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__name
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax_subjournal__sort_by__name
@@ -3550,10 +3575,15 @@ msgstr "Notas"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__number
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__number
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__num
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__num
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__num
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__voucher_number
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__voucher_number
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_company_view_form_inherit_l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
 msgid "Number"
 msgstr "Número"
 
@@ -5606,9 +5636,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_concept__type
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_application__type
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_reason_rejected_check__type
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files_error__type
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_activity__type
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__type
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__type
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__pick_type
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "Type"
 msgstr "Tipo"
@@ -5856,10 +5888,11 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_concept_line__payment_order_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__voucher
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request_detail__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__invoice_id
 msgid "Voucher"
-msgstr ""
+msgstr "comprobante"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request_detail__voucher_date
@@ -6507,3 +6540,148 @@ msgstr "Gravado"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__amount_no_taxed
 msgid "No Taxed"
 msgstr "Sin impuestos"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_country_state__cot_code
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_uom_uom__cot_code
+#: model:ir.model.fields,help:l10n_ar_eynes.field_stock_picking__cot
+msgid "COT Code"
+msgstr "Código COT"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__cot
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.stock_picking_view_form_inherit_l10n_ar_eynes
+msgid "COT"
+msgstr "COT"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.con_nomenclature_action
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_product_product__cot_nomenclature_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_product_template__cot_nomenclature_id
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_cot_nomenclature
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.cot_product_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.cot_product_view_tree
+msgid "COT Nomenclature"
+msgstr "Nomenclatura COT"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_config_settings__cot_pass
+msgid "COT Password"
+msgstr "Contraseña COT"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_config_settings__cot_url
+msgid "COT URL"
+msgstr "URL COT"
+
+#. module: l10n_ar_eynes
+#: model:ir.module.category,name:l10n_ar_eynes.module_category_cot_user
+#: model:res.groups,name:l10n_ar_eynes.group_cot_user
+msgid "COT User"
+msgstr "Usuario COT"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_config_settings__cot_user
+msgid "COT User (NIF)"
+msgstr "Usuario COT (CUIT)"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_country_state__cot_valid
+msgid "COT Valid"
+msgstr "COT válido"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__dom_partner_id
+msgid "Carrier Partner"
+msgstr "Transportista"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__cot_date
+msgid "Cot Date"
+msgstr "Fecha COT"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__declared_value
+#: model:ir.model.fields,help:l10n_ar_eynes.field_stock_picking__declared_value
+msgid "Declared Value"
+msgstr "Valor Declarado"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_stock_picking__is_origin
+msgid "Delivery Origin"
+msgstr "Origen de envío"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__dimension
+msgid "Dimension"
+msgstr "Tamaño"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__door
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__door
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__door
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_company_view_form_inherit_l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
+msgid "Door"
+msgstr "Puerta"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.stock_picking_view_form_inherit_l10n_ar_eynes
+msgid "Generate COT"
+msgstr "Generar COT"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_fiscal_position__is_final_consumer
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_fiscal_position_form_inherit_l10n_ar_eynes
+msgid "Is Final Consumer"
+msgstr "Es consumidor final"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__picking_supplier
+msgid "Picking Supplier"
+msgstr "Proveedor de recolección"
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_product_template
+msgid "Product Template"
+msgstr "Plantilla de producto"
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_uom_uom
+msgid "Product Unit of Measure"
+msgstr "Unidad de medida del producto"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__express_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__express_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__express_id
+msgid "Express"
+msgstr "Expreso"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__floor
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__floor
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__floor
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_company_view_form_inherit_l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
+msgid "Floor"
+msgstr "Piso"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__apartment
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__apartment
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__apartment
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_company_view_form_inherit_l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
+msgid "Apartment"
+msgstr "Departamento"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.stock_picking_view_form_inherit_l10n_ar_eynes
+msgid "COT Information"
+msgstr "Información de COT"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__is_origin
+msgid "Delivery origin"
+msgstr "Origen de envío"

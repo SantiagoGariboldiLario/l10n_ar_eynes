@@ -31,6 +31,8 @@
         'purchase',
         'contacts',
         'hr',
+        'uom',
+        'delivery',
         'account_check_printing',
         'account_debit_note',
         'account',
@@ -38,6 +40,8 @@
         'popup_messages',
     ],
     'data': [
+        'security/cot_security.xml',
+        'security/delivery_cot_security.xml',
         'data/fiscal_position_data.xml',
         'data/account_taxes_data.xml',
         'data/res_document_type_data.xml',
@@ -80,7 +84,10 @@
         'views/reason_rejected_check_views.xml',
         'views/retention_views.xml',
         "views/perception_view.xml",
+        "views/product_views.xml",
         'views/res_users_views.xml',
+        'views/res_company_views.xml',
+        'views/res_country_state_views.xml',
         'views/account_checkbook_views.xml',
         'wizard/create_checkbook_wizard_view.xml',
         'views/treasury_menuitems.xml',
@@ -88,6 +95,7 @@
         'wizard/update_journal_period_view.xml',
         "wizard/wsaa_config_renewal.xml",
         'views/wsaa_view.xml',
+        'views/stock_picking_view.xml',
         'views/certificate_request_view.xml',
         "wizard/wsfe_sinchronize_voucher_view.xml",
         "wizard/wsfe_massive_sinchronize_view.xml",
@@ -98,7 +106,6 @@
         'views/sicore_config_view.xml',
         'views/sifere_config_view.xml',
         "views/wsfe_view.xml",
-        "views/res_company_view.xml",
         'views/report_invoice.xml',
         'views/arba_exporter.xml',
         'wizard/arba_retention_exporter.xml',
@@ -107,6 +114,14 @@
     'installable': True,
     'application': True,
     "external_dependencies": {
-        "python": ["M2Crypto", "OpenSSL", "easywsy", "suds", "qrcode"]
+        "python": [
+            "M2Crypto",
+            "OpenSSL",
+            "easywsy",
+            "suds",
+            "qrcode",
+            "pysimplesoap",
+            "future",
+        ]
     },
 }

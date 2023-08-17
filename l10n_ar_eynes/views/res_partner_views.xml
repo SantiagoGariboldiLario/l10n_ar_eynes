@@ -7,6 +7,18 @@
         <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
 
+            <field name="street2" position="after">
+                <field name="num" placeholder="Number" />
+            </field>
+            <field name="city" position="before">
+                <field name="floor" placeholder="Floor" />
+                <field name="door" placeholder="Door" />
+                <field name="apartment" placeholder="Apartment" />
+            </field>
+            <group name="sale" position="inside">
+                <field name="express_id" domain="[('supplier_rank', '>', 0)]" />
+            </group>
+
             <xpath expr="//field[@name='vat']" position="before">
                 <field name="dst_cuit" invisible="1" />
                 <field

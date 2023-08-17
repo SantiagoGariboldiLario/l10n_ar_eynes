@@ -29,6 +29,24 @@
                 </div>
             </xpath>
 
+            <xpath expr="//div[@id='production_lot_info']" position="after">
+                <h2>ARBA Account Data</h2>
+                <group>
+                    <group>
+                        <field name="cot_user" class="oe_inline" />
+                    </group>
+                    <group>
+                        <field name="cot_pass" class="oe_inline" />
+                    </group>
+                    <group>
+                        <field name="cot_url" class="oe_inline" />
+                    </group>
+                    <group>
+                        <field name="group_check_cot" class="oe_inline" />
+                    </group>
+                </group>
+            </xpath>
+
         </field>
     </record>
 
