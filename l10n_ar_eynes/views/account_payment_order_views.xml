@@ -377,6 +377,7 @@
                                     decoration-muted="amount == 0"
                                     decoration-success="amount == amount_unreconciled"
                                 >
+                                    <field name="type" invisible="1" />
                                     <field name="move_invoice_id" invisible="1" />
                                     <field name="original_currency_id" invisible="1" />
                                     <field name="state" invisible="1" />
@@ -980,6 +981,7 @@
                                     decoration-muted="amount == 0"
                                     decoration-success="amount == amount_unreconciled"
                                 >
+                                    <field name="type" invisible="1" />
                                     <field name="move_invoice_id" invisible="1" />
                                     <field name="state" invisible="1" />
                                     <field
