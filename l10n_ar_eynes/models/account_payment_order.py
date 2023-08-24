@@ -452,7 +452,7 @@ class AccountPaymentOrder(models.Model):
                     _(
                         f"Retention {advance_ret.retention_id.name} "
                         "is not configured for Partner "
-                        f"Fiscal Position {self.partner_id.account_fiscal_position_id.name}"
+                        f"Fiscal Position {self.partner_id.property_account_position_id.name}"
                     )
                 )
             taxapp = tax_app_obj.search(
