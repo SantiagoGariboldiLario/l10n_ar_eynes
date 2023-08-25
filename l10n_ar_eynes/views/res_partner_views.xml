@@ -51,49 +51,43 @@
 
             <page name="accounting" position="after">
                 <page string="Perceptions">
-                    <group colspan="4" col="4">
-                        <group colspan="4">
-                            <field colspan="2" name="perception_ids" nolabel="1">
-                                <tree editable="bottom">
-                                    <field
-                                        name="perception_id"
-                                        domain="[('type_tax_use','=','sale')]"
-                                    />
-                                    <field name="activity_id" />
-                                    <field name="percent" />
-                                    <field name="excluded_percent" />
-                                    <field name="ex_date_from" />
-                                    <field name="ex_date_to" />
-                                    <field name="exclusion_certificate" />
-                                    <field name="sit_iibb" />
-                                </tree>
-                            </field>
-                        </group>
-                    </group>
+                    <field name="perception_ids" nolabel="1">
+                        <tree editable="bottom">
+                            <field
+                                name="perception_id"
+                                domain="[('type_tax_use','=','sale')]"
+                            />
+                            <field name="activity_id" />
+                            <field name="percent" />
+                            <field name="excluded_percent" />
+                            <field name="ex_date_from" />
+                            <field name="ex_date_to" />
+                            <field name="exclusion_certificate" />
+                            <field name="sit_iibb" />
+                        </tree>
+                    </field>
                 </page>
                 <page string="Retentions" name="retentions">
                     <group name="retention_activity" string="Retention activity">
                         <field name="retention_activity_id" />
                     </group>
-                    <group string="Partner Retentions">
-                        <field name="retention_ids" nolabel="1">
-                            <tree editable="bottom">
-                                <field
-                                    name="retention_id"
-                                    domain="[('type_tax_use','=','purchase')]"
-                                />
-                                <field name="percent" />
-                                <field name="excluded_percent" />
-                                <field name="ex_date_from" />
-                                <field name="ex_date_to" />
-                                <field name="exclusion_certificate" />
-                                <field name="exclusion_date_certificate" />
-                                <field name="sit_iibb" />
-                                <field name="from_padron" readonly="True" />
-                                <field name="company_id" invisible="1" />
-                            </tree>
-                        </field>
-                    </group>
+                    <field name="retention_ids" nolabel="1">
+                        <tree editable="bottom">
+                            <field
+                                name="retention_id"
+                                domain="[('type_tax_use','=','purchase')]"
+                            />
+                            <field name="percent" />
+                            <field name="excluded_percent" />
+                            <field name="ex_date_from" />
+                            <field name="ex_date_to" />
+                            <field name="exclusion_certificate" />
+                            <field name="exclusion_date_certificate" />
+                            <field name="sit_iibb" />
+                            <field name="from_padron" readonly="True" />
+                            <field name="company_id" invisible="1" />
+                        </tree>
+                    </field>
                     <group
                         string="Advance Payment Retentions"
                         attrs="{'invisible': [('supplier_rank', '=', 0)]}"
