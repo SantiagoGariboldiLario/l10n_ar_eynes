@@ -515,6 +515,8 @@ msgid "Applied Perceptions"
 msgstr "Percepciones aplicadas"
 
 #. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.applied_retentions_action
+#: model:ir.ui.menu,name:l10n_ar_eynes.applied_retentions_menu
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_fiscal_position_form_inherit_l10n_ar_eynes
 msgid "Applied Retentions"
 msgstr "Retenciones aplicadas"
@@ -6685,3 +6687,9 @@ msgstr "Información de COT"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__is_origin
 msgid "Delivery origin"
 msgstr "Origen de envío"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.supported_retentions_action
+#: model:ir.ui.menu,name:l10n_ar_eynes.supported_retentions_menu
+msgid "Supported Retentions"
+msgstr "Retenciones soportadas"
