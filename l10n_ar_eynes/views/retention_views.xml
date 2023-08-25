@@ -167,4 +167,48 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <!-- ************************ -->
+    <!-- * Retention Payment Order Lines * -->
+    <!-- ************************ -->
+
+    <record id="account_payment_order_retention_line_view_tree" model="ir.ui.view">
+        <field name="name">account.payment.order.retention.line.view.tree</field>
+        <field name="model">account.payment.order.retention.line</field>
+        <field name="arch" type="xml">
+            <tree string="">
+                <field name="date" />
+                <field name="date_applied" />
+                <field name="reg_code" />
+                <field name="name" />
+                <field name="partner_id" />
+                <field name="vat" />
+                <field name="certificate_no" />
+                <field name="voucher_number" />
+                <field name="concept_id" />
+                <field name="invoice_id" />
+                <field name="base" sum="Base Total" />
+                <field name="amount" sum="Amount Total" />
+                <field name="unlinkable" />
+                <field name="state_id" />
+                <field name="company_id" groups="base.group_multi_company" />
+                <field name="account_id" invisible="1" />
+                <field name="payment_order_id" invisible="1" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="supported_retentions_action" model="ir.actions.act_window">
+        <field name="name">Supported Retentions</field>
+        <field name="res_model">account.payment.order.retention.line</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('retention_id.type_tax_use', '=', 'sale')]</field>
+    </record>
+
+    <record id="applied_retentions_action" model="ir.actions.act_window">
+        <field name="name">Applied Retentions</field>
+        <field name="res_model">account.payment.order.retention.line</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('retention_id.type_tax_use', '=', 'purchase')]</field>
+    </record>
+
 </odoo>
