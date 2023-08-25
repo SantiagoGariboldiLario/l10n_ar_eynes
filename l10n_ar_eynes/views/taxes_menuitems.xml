@@ -61,6 +61,18 @@
             action="action_retention_scale"
             sequence="4"
         />
+        <menuitem
+            id="applied_retentions_menu"
+            name="Applied Retentions"
+            action="applied_retentions_action"
+            sequence="5"
+        />
+        <menuitem
+            id="supported_retentions_menu"
+            name="Supported Retentions"
+            action="supported_retentions_action"
+            sequence="6"
+        />
     </menuitem>
 
     <menuitem
