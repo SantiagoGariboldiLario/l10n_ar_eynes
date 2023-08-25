@@ -361,16 +361,19 @@ class ResPartnerRetention(models.Model):
             if not p_retention.retention_id or not ret_activity:
                 continue
             ret_tax = p_retention.retention_id.tax_id
-            ret_lines = {
-                'vat': ret_tax.vat_application_ids,
-                'gross_income': ret_tax.gi_application_ids,
-                'profit': ret_tax.profit_application_ids,
-            }
-            p_retention.percent = (
-                ret_lines[ret_tax.retention_type]
-                .filtered(lambda retline: retline.activity_id == ret_activity)
-                .percent
-            )
+            if ret_tax:
+                ret_lines = {
+                    'vat': ret_tax.vat_application_ids,
+                    'gross_income': ret_tax.gi_application_ids,
+                    'profit': ret_tax.profit_application_ids,
+                }
+                p_retention.percent = (
+                    ret_lines[ret_tax.retention_type]
+                    .filtered(
+                        lambda retline: retline.activity_id == ret_activity
+                    )
+                    .percent
+                )
 
     @api.constrains('excluded_percent')
     def _check_excluded_percent(self):
