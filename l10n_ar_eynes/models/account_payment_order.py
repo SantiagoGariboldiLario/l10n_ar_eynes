@@ -1002,7 +1002,7 @@ class AccountPaymentOrder(models.Model):
 
     def recompute_payment_lines(self, onchange_attr):
         MoveLine = self.env['account.move.line']
-        currency_obj = self.env['res.currency']
+        Currency = self.env['res.currency']
 
         ttype = self.env.context.get('type', 'bank')
         total_credit = total_debit = 0.0
@@ -1070,11 +1070,9 @@ class AccountPaymentOrder(models.Model):
                 if line.amount_residual_currency == self.amount:
                     move_lines_found.append(line.id)
                     break
-                line_residual = currency_obj.compute(
-                    company_currency,
-                    self.currency_id,
-                    abs(line.amount_residual),
-                )
+                line_residual = Currency.with_context(
+                    currency_rate=self.payment_rate
+                ).compute(abs(line.amount_residual), self.currency_id)
 
                 total_credit += line.credit and line_residual or 0.0
                 total_debit += line.debit and line_residual or 0.0
