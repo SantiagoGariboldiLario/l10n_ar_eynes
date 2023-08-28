@@ -26,18 +26,28 @@ class WsfeSinchronizeCoucher(models.TransientModel):
         )
         return wsfe_conf_model.get_config()
 
-    voucher_type = fields.Many2one('res.voucher.type', 'Voucher Type', required=True)
+    voucher_type = fields.Many2one(
+        'res.voucher.type', 'Voucher Type', required=True
+    )
     pos_id = fields.Many2one('account.journal', 'POS', required=True)
-    config_id = fields.Many2one('wsfe.config', 'Config', default=_get_def_config)
+    config_id = fields.Many2one(
+        'wsfe.config', 'Config', default=_get_def_config
+    )
     voucher_number = fields.Integer('Number', required=True)
-    document_type = fields.Many2one('res.document.type', 'Document Type', readonly=True)
+    document_type = fields.Many2one(
+        'res.document.type', 'Document Type', readonly=True
+    )
     document_number = fields.Char('Document Number', readonly=True)
     date_invoice = fields.Date('Date Invoice', readonly=False)
     amount_total = fields.Float(digits='Account', string="Total", readonly=True)
-    amount_no_taxed = fields.Float(digits='Account', string="No Taxed", readonly=True)
+    amount_no_taxed = fields.Float(
+        digits='Account', string="No Taxed", readonly=True
+    )
     amount_taxed = fields.Float(digits='Account', string="Taxed", readonly=True)
     amount_tax = fields.Float(digits='Account', string="Tax", readonly=True)
-    amount_exempt = fields.Float(digits='Account', string="Amount Exempt", readonly=True)
+    amount_exempt = fields.Float(
+        digits='Account', string="Amount Exempt", readonly=True
+    )
     cae = fields.Char('CAE', size=32, required=False, readonly=False)
     cae_due_date = fields.Date('CAE Due Date', readonly=False)
     date_process = fields.Datetime('Date Processed', readonly=True)
@@ -79,10 +89,12 @@ class WsfeSinchronizeCoucher(models.TransientModel):
         document_type = doc_ids and doc_ids[0] or False
 
         di = time.strftime(
-            DEFAULT_SERVER_DATE_FORMAT, time.strptime(str(res['CbteFch']), '%Y%m%d')
+            DEFAULT_SERVER_DATE_FORMAT,
+            time.strptime(str(res['CbteFch']), '%Y%m%d'),
         )
         dd = time.strftime(
-            DEFAULT_SERVER_DATE_FORMAT, time.strptime(str(res['FchVto']), '%Y%m%d')
+            DEFAULT_SERVER_DATE_FORMAT,
+            time.strptime(str(res['FchVto']), '%Y%m%d'),
         )
         dpr = time.strftime(
             DEFAULT_SERVER_DATETIME_FORMAT,
@@ -112,11 +124,11 @@ class WsfeSinchronizeCoucher(models.TransientModel):
             doc_number = [self.document_number]
 
         domain = [
-            ('amount_total', '=', self.amount_total),
-            ('amount_exempt', '=', self.amount_exempt),
-            ('amount_taxed', '=', self.amount_taxed),
-            ('amount_no_taxed', '=', self.amount_no_taxed),
-            ('state', 'in', ('draft')),
+            # ('amount_total', '=', self.amount_total),
+            # ('amount_exempt', '=', self.amount_exempt),
+            # ('amount_taxed', '=', self.amount_taxed),
+            # ('amount_no_taxed', '=', self.amount_no_taxed),
+            ('state', '=', 'draft'),
         ]
 
         if document_type and document_type.afip_code != '99':
@@ -133,7 +145,9 @@ class WsfeSinchronizeCoucher(models.TransientModel):
         invoice = self.invoice_id
 
         if not self.infook:
-            raise UserError(_("WSFE Error!\n" "Sinchronize process is not correct!"))
+            raise UserError(
+                _("WSFE Error!\n" "Sinchronize process is not correct!")
+            )
 
         pos = int(self.pos_id.code)
         number = self.voucher_number
