@@ -732,7 +732,7 @@ class AccountMove(models.Model):
         last_invoice = self.env['account.move'].search(
             [
                 ('journal_id', '=', self.journal_id.id),
-                ('state', 'in', ['open', 'paid', 'cancel']),
+                ('state', 'in', ['posted', 'paid', 'cancel']),
                 ('move_type', '=', self.move_type),
                 ('is_debit_note', '=', self.is_debit_note),
                 ('is_FCE_invoice', '=', self.is_FCE_invoice),
@@ -963,16 +963,22 @@ class AccountMove(models.Model):
                 _logger.info('Success in logging afip request')
         return logs
 
+    @api.depends('restrict_mode_hash_table', 'state', 'cae')
+    def _compute_show_reset_to_draft_button(self):
+        super(AccountMove, self)._compute_show_reset_to_draft_button()
+        for move in self:
+            move.show_reset_to_draft_button = False if move.cae else True
+        return
+
     def wsfe_relate_invoice(self, pos, number, date_invoice, cae, cae_due_date):
         for inv in self:
             name = '%04d-%08d' % (pos, number)
             invoice_vals = {
                 'name': name,
-                'payment_reference': name,
+                'internal_number': name,
                 'invoice_date': date_invoice,
                 'cae': cae,
                 'cae_due_date': cae_due_date,
-                'state': 'open',
             }
 
             # Escribimos los campos necesarios de la factura
