@@ -54,3 +54,4 @@ class AccountFiscalPosition(models.Model):
         help='Check this if it corresponds to apply local fiscal rules, '
         'like invoice number validation, etc.',
     )
+    is_final_consumer = fields.Boolean("Is Final Consumer")

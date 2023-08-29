@@ -61,6 +61,11 @@ class ResPartner(models.Model):
         "partner with this Fiscal Position",
     )
     nro_insc_iibb = fields.Char('Number of IIBB Registration', size=15)
+    door = fields.Char(string="Door", size=3)
+    floor = fields.Char(string="Floor", size=3)
+    num = fields.Char(string="Number", size=5)
+    apartment = fields.Char(string="Apartment", size=4)
+    express_id = fields.Many2one("res.partner", string="Express")
 
     def _get_perceptions_to_apply(self):
         # Buscamos las percepciones a aplicar segun la posicion fiscal
@@ -238,13 +243,11 @@ class ResPartner(models.Model):
         if var3 == 10:
             var3 = 9
         if var3 == int(vat[10]):
-
             return True
 
         return False
 
     def _get_retentions_to_apply(self, operation_date):
-
         # Buscamos las retenciones a aplicar segun la posicion fiscal
         retentions = {}
         for ret in self.property_account_position_id.retention_ids:
@@ -354,21 +357,23 @@ class ResPartnerRetention(models.Model):
     )
     def _compute_retention_percent(self):
         for p_retention in self:
-
             ret_activity = p_retention.partner_id.retention_activity_id
             if not p_retention.retention_id or not ret_activity:
                 continue
             ret_tax = p_retention.retention_id.tax_id
-            ret_lines = {
-                'vat': ret_tax.vat_application_ids,
-                'gross_income': ret_tax.gi_application_ids,
-                'profit': ret_tax.profit_application_ids,
-            }
-            p_retention.percent = (
-                ret_lines[ret_tax.retention_type]
-                .filtered(lambda retline: retline.activity_id == ret_activity)
-                .percent
-            )
+            if ret_tax:
+                ret_lines = {
+                    'vat': ret_tax.vat_application_ids,
+                    'gross_income': ret_tax.gi_application_ids,
+                    'profit': ret_tax.profit_application_ids,
+                }
+                p_retention.percent = (
+                    ret_lines[ret_tax.retention_type]
+                    .filtered(
+                        lambda retline: retline.activity_id == ret_activity
+                    )
+                    .percent
+                )
 
     @api.constrains('excluded_percent')
     def _check_excluded_percent(self):

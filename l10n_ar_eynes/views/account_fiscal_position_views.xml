@@ -6,6 +6,11 @@
         <field name="model">account.fiscal.position</field>
         <field name="inherit_id" ref="account.view_account_position_form" />
         <field name="arch" type="xml">
+            <xpath expr="//group" position="before">
+                <label for="is_final_consumer" string="Is Final Consumer" />
+                <field name="is_final_consumer" />
+            </xpath>
+
             <xpath expr="//field[@name='name']" position="after">
                 <field name="supplier_denomination" />
                 <field name="afip_code" />

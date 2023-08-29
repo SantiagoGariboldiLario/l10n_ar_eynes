@@ -22,9 +22,7 @@ class SaleOrder(models.Model):
         """
         invoice_vals = super()._prepare_invoice()
         invoice_vals.update(
-            {
-                'address_shipping_id': self.partner_shipping_id.id,
-            }
+            {'address_shipping_id': self.partner_shipping_id.id}
         )
         journals = self.env.user.journal_ids.filtered(
             lambda j: self.fiscal_position_id in j.fiscal_position_ids
@@ -52,3 +50,28 @@ class SaleOrder(models.Model):
         for invoice in invoice_ids:
             invoice._onchange_currency_id()
         return invoice_ids
+
+    def action_confirm(self):
+        res = super(SaleOrder, self).action_confirm()
+        # carrier_license_id = False
+        # trailer_license_id = False
+
+        if self.carrier_id:
+            # TODO: Decide how to add this fields to the partner
+            # partner = self.carrier_id
+            # carrier_license_ids = partner.license_plate_ids
+            # trailer_license_ids = partner.trailer_license_plate_ids
+
+            # if carrier_license_ids:
+            #     carrier_license_id = carrier_license_ids[0].id
+            # if trailer_license_ids:
+            #     trailer_license_id = trailer_license_ids[0].id
+
+            self.picking_ids.write(
+                {
+                    # "license_plate_id": carrier_license_id,
+                    # "trailer_license_plate_id": trailer_license_id,
+                    "carrier_id": self.carrier_id.id,
+                }
+            )
+        return res

@@ -1,7 +1,9 @@
 # generated from manifests external_dependencies
 # pylint: disable=pointless-statement
 easywsy
+future
 M2Crypto
 pyOpenSSL
+pysimplesoap
 qrcode
 suds-jurko

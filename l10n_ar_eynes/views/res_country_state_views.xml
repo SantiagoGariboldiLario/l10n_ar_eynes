@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="country_state_view_form_inherit_l10n_ar_eynes" model="ir.ui.view">
+        <field name="name">country.state.view.form.inherit</field>
+        <field name="model">res.country.state</field>
+        <field name="inherit_id" ref="base.view_country_state_form" />
+        <field name="arch" type="xml">
+            <field name="code" position="after">
+                <field name="cot_code" />
+                <field name="cot_valid" />
+            </field>
+        </field>
+    </record>
+
+</odoo>

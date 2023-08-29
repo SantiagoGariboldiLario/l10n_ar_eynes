@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="stock_picking_view_form_inherit_l10n_ar_eynes" model="ir.ui.view">
+        <field name="name">stock.picking.view.form.inherit.</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='scheduled_date']" position="after">
+                <field
+                    name="cot_date"
+                    attrs="{'invisible' : ['|',('voucher','=', False),('pick_type','!=','outgoing')]}"
+                />
+                <field name="pick_type" invisible="False" />
+            </xpath>
+            <field name="carrier_id" readonly="1" />
+            <field name="partner_id" invisible="False" />
+            <field name="origin" position="after">
+                <field
+                    name="is_origin"
+                    attrs="{'readonly' : [('voucher','!=', False)]}"
+                />
+            </field>
+            <xpath expr="/form/header/field[@name='state']" position="before">
+                <button
+                    name="do_cot_file"
+                    type="object"
+                    string="Generate COT"
+                    class="oe_highlight"
+                    attrs="{
+                        'invisible': [
+                            '|',
+                            '|',
+                            '|',
+                            ('pick_type', '!=', 'outgoing'),
+                            ('state', '!=', 'done'),
+                            ('voucher', '!=', False),
+                            ('carrier_id', '=', False),
+                        ]
+                    }"
+                    groups="l10n_ar_eynes.group_check_cot"
+                />
+            </xpath>
+            <xpath expr="/form/sheet/notebook/page[@name='extra']" position="after">
+                <page
+                    string="COT"
+                    attrs="{'invisible': [('picking_type_code', '=', 'production')]}"
+                >
+                    <group col="2" colspan="2" string="COT Information">
+                        <group>
+                            <field
+                                name="declared_value"
+                                attrs="{'readonly': [('voucher','!=', False)]}"
+                            />
+                            <field
+                                name="dimension"
+                                attrs="{'readonly': [('voucher','!=', False)]}"
+                            />
+                        </group>
+                        <group>
+                            <field name="carrier_id" readonly="1" />
+                            <field
+                                name="express_id"
+                                attrs="{'invisible': [('voucher','=', False)], 'readonly': True}"
+                            />
+                            <field name="dom_partner_id" invisible="True" />
+                            <field name="cot" readonly="1" />
+                            <field
+                                name="voucher"
+                                groups="l10n_ar_eynes.group_check_cot"
+                                attrs="{'invisible': [('pick_type','!=','outgoing')]}"
+                            />
+                            <!-- Solo sirve con WS -->
+                        </group>
+                    </group>
+                    <group>
+                        <field
+                            name="note"
+                            placeholder="Add an internal note..."
+                            class="oe_inline"
+                        />
+                    </group>
+                </page>
+            </xpath>
+            <field name="note" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+        </field>
+    </record>
+</odoo>
