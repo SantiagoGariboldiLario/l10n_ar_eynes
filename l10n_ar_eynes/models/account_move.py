@@ -963,12 +963,12 @@ class AccountMove(models.Model):
                 _logger.info('Success in logging afip request')
         return logs
 
-    @api.depends('restrict_mode_hash_table', 'state', 'cae')
-    def _compute_show_reset_to_draft_button(self):
-        super(AccountMove, self)._compute_show_reset_to_draft_button()
-        for move in self:
-            move.show_reset_to_draft_button = False if move.cae else True
-        return
+    # @api.depends('restrict_mode_hash_table', 'state', 'cae')
+    # def _compute_show_reset_to_draft_button(self):
+    #     super(AccountMove, self)._compute_show_reset_to_draft_button()
+    #     for move in self:
+    #         move.show_reset_to_draft_button = False if move.cae else True
+    #     return
 
     def wsfe_relate_invoice(self, pos, number, date_invoice, cae, cae_due_date):
         for inv in self:
