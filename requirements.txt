@@ -1,5 +1,5 @@
 # generated from manifests external_dependencies
-# pylint: pointless-statement
+# pylint: disable=pointless-statement
 easywsy
 future
 M2Crypto
