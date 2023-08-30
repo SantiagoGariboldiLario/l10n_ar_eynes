@@ -1,0 +1,856 @@
+##############################################################################
+#
+#    OpenERP, Open Source Management Solution
+#    Copyright (C) 2012-2013 E-MIPS Electronica e Informatica
+#               All Rights Reserved (<http://www.e-mips.com.ar>).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+##############################################################################
+
+import binascii
+import codecs
+import logging
+import tempfile
+import time
+from decimal import Decimal
+
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
+
+from ..utils.arciba_fixed_width_dicts import HEAD_LINES, HEAD_LINES_NC
+from ..utils.sicore_fixed_width import FixedWidth, moneyfmt
+
+logger = logging.getLogger(__name__)
+
+
+class CreateArcibaFiles(models.TransientModel):
+    _name = 'create.arciba.files'
+    _description = 'Wizard Create e-arciba Files'
+
+    period_start = fields.Date('Date start')
+    period_end = fields.Date('Date end')
+    notes = fields.Text('Notes')
+
+    @api.model
+    def _get_partner_document_type_code(self, partner):
+        document_type_name = partner.document_type_id.name
+        dict_types = {'CUIT': 3, 'CUIL': 2, 'CDI': 1}
+        code_document_type = dict_types.get(document_type_name, False)
+        if not code_document_type:
+            ValidationError(
+                _('Definition not found for document_type_name: %(doc_type)s'),
+                doc_type=document_type_name,
+            )
+        return code_document_type
+
+    @api.model
+    def _get_partner_iibb_code(self, iibb):
+        dict_types = {
+            'Local': 1,
+            'Convenio Multilateral': 2,
+            'No Inscripto': 4,
+            'Régimen Simpligicado': 5,
+        }
+        code_iibb = dict_types.get(iibb, False)
+        return code_iibb
+
+    @api.model
+    def _get_partner_fiscal_position_code(self, inv):
+        fiscal_position_name = inv.fiscal_position_id.name
+        dict_types = {
+            'RI': 1,
+            'Responsable Inscripto': 1,
+            'Responsable inscripto': 1,
+            'Exento': 3,
+            'Monotributo': 4,
+            'Exterior': 0,
+        }
+        code_fiscal_position = dict_types.get(fiscal_position_name, False)
+        assert code_fiscal_position is not False, (
+            'Definition not found for fiscal_position_name: %s'
+            % fiscal_position_name
+        )
+        return code_fiscal_position
+
+    def generate_fw_file(self, data_lst):
+        self.ensure_one()
+        generated_files_model = self.env['arciba.generated.files']
+        fixed_width = FixedWidth(HEAD_LINES)
+        head_regs = []
+
+        for line in data_lst:
+            # Apendeamos el registro
+            fixed_width.update(**line)
+            head_regs.append(fixed_width.line)
+
+        head_filename = tempfile.mkstemp(suffix='.arciba')[1]
+        f = codecs.open(head_filename, "w", "latin-1")
+
+        for r in head_regs:
+            r2 = [a for a in r]
+            try:
+                f.write(''.join(r2))
+            except Exception as e:
+                raise e
+            f.write('\r\n')
+
+        f.close()
+
+        f = codecs.open(head_filename, "r", "latin-1")
+
+        name = 'eARCIBA_%s.txt' % self.period_start
+        generated_file_rec = generated_files_model.create(
+            {
+                'code': name,
+                'period_start': self.period_start,
+                'period_end': self.period_end,
+            }
+        )
+
+        data_attach = {
+            'name': name,
+            'datas': binascii.b2a_base64(f.read().encode('latin-1')),
+            'datas_fname': name,
+            'res_model': 'arciba.generated.files',
+            'res_id': generated_file_rec.id,
+        }
+        doc = self.env['ir.attachment'].create(data_attach)
+        generated_file_rec.write({'attachment_id': data_attach.id})
+
+        close_window = {'type': 'ir.actions.act_window_close'}
+        download_file = {
+            'type': "ir.actions.act_url",
+            'url': '/web/binary/download_document?model=ir.attachment'
+            '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
+            'target': "self",
+            'no_destroy': False,
+        }
+
+        res = {
+            'type': 'ir.actions.act_multi',
+            'actions': [
+                close_window,
+                download_file,
+            ],
+        }
+        f.close()
+        return res
+
+    def _get_invoice_iva_total(self, invoice):
+        """
+        Expects an invoice and return total amount of iva tax
+        """
+        iva_amount = 0
+        for i in invoice.invoice_line_ids:
+            res = i._compute_all_vat_taxes()
+            amount_total = res[i.id]['amount_total']
+            amount_taxed = res[i.id]['amount_taxed']
+            if amount_total < amount_taxed:
+                ValidationError(
+                    _(
+                        'Amount total must be greater than '
+                        'amount taxed on Invoice ID %(inv_id)s'
+                    ),
+                    inv_id=invoice.id,
+                )
+            iva_partial = amount_total - amount_taxed
+            iva_amount += iva_partial
+        return iva_amount
+
+    @api.model
+    def _get_ret_data(self, retention_ids):
+        """
+        Iterates on retentions and retrieve data to compose the txt.
+        """
+        ret_obj = self.env['account.payment.order.retention.line']
+        res = []
+        errors = []
+        for ret in ret_obj.browse(retention_ids):
+            inv = ret.invoice_id
+            if not inv:
+                errors.append(
+                    _(
+                        'rtl #%(ret_id)s: Unable to get associated invoice (%(ret_name)s)'
+                    ),
+                    ret_id=ret.id,
+                    ret_name=ret.name,
+                )
+                continue
+
+            # Ret Date
+            date_val = time.strptime(
+                str(ret.date), '%Y-%m-%d'
+            )  # String(YYYY-MM-DD)->Datetime
+            date_val = time.strftime(
+                '%d/%m/%Y', date_val
+            )  # Datetime->String: dd/mm/yyyy
+
+            # Inv date
+            date_inv = time.strptime(
+                str(inv.invoice_date), '%Y-%m-%d'
+            )  # String(YYYY-MM-DD)->Datetime
+            date_inv = time.strftime(
+                '%d/%m/%Y', date_inv
+            )  # Datetime->String: dd/mm/yyyy
+
+            # Denomination
+            denomination_name = inv.denomination
+
+            # Internal number
+            internal_number = inv.internal_number.replace('-', '')
+
+            # Nro Cert
+            nro_cert_propio = ret.certificate_no or '0000000000000000'
+
+            # Invoice total
+            inv_amount_total = inv.amount_total
+
+            # Type of document partner
+            nro_doc_retenido = (
+                inv.partner_id.vat.replace('-', '')
+                if inv.partner_id.vat
+                else '00000000000'
+            )
+            tipo_doc_retenido = self._get_partner_document_type_code(
+                inv.partner_id
+            )
+
+            # Untaxed amount
+            amount_untaxed = inv.amount_untaxed
+
+            # Ret / Per applied
+            ret_per_applied = ret.amount
+
+            # Ret / Per base
+            base_amount = ret.base
+
+            # Alicuota
+            percentage = (ret_per_applied / float(base_amount)) * 100
+            if percentage < 0 or percentage > 99.99:
+                errors.append(
+                    _(
+                        'rtl #%(ret_id)s: Percentage cannot be negative or '
+                        'more than 99.99 (%(ret_name)s) (Invoice ID %(inv_id)s)'
+                    ),
+                    ret_id=ret.id,
+                    ret_name=ret.name,
+                    inv_id=inv.id,
+                )
+                continue
+
+            # Iva Amount
+            inv_iva_amount = 0.0
+            if denomination_name in ('A', 'M'):
+                inv_iva_amount = self._get_invoice_iva_total(inv)
+
+            # Partner Data
+            pos_fiscal_retenido = self._get_partner_fiscal_position_code(inv)
+            razon_social_retenido = (
+                (inv.partner_id.name).replace('ñ', 'n').replace('Ñ', 'N')
+            )
+
+            # IIBB
+            ppids = ret.partner_id.retention_ids
+            ret_partner = ppids.filtered(
+                lambda x: x.retention_id == ret.retention_id
+            )
+            ret_partner = (
+                ret_partner[0] if len(ret_partner) > 1 else ret_partner
+            )
+            sit_iibb = self._get_partner_iibb_code(ret_partner.sit_iibb.name)
+            if not sit_iibb:
+                errors.append(
+                    _(
+                        'rtl #%(ret_id)s: IIBB Situation cannot be empty'
+                        ' (%(ret_name)s) (Partner %(part_name)s)'
+                    ),
+                    ret_id=ret.id,
+                    ret_name=ret.name,
+                    part_name=razon_social_retenido,
+                )
+
+            nro_insc_iibb = inv.partner_id.nro_insc_iibb or '00000000000'
+
+            line = {
+                'type': 1,  # Retention
+                'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
+                'fecha': date_val,
+                'tipo_comp_origen_retenc': "03",  # Account Voucher (We pay to supplier)
+                'letra_comprobante': denomination_name,
+                'numero_comprobante': internal_number,
+                'fecha_comprobante': date_inv,
+                'monto_comprobante': moneyfmt(
+                    Decimal(inv_amount_total), places=2, ndigits=13, dp=','
+                ),
+                'nro_cert_propio': str(nro_cert_propio),
+                'tipo_doc_retenido': tipo_doc_retenido,
+                'nro_doc_retenido': nro_doc_retenido,
+                'sit_iibb_retenido': sit_iibb,
+                'nro_insc_iibb_retenido': nro_insc_iibb,
+                'pos_fiscal_retenido': pos_fiscal_retenido,
+                'razon_social_retenido': razon_social_retenido,
+                'importe_otros_conceptos': moneyfmt(
+                    Decimal(amount_untaxed), places=2, ndigits=13, dp=','
+                ),
+                'importe_iva': moneyfmt(
+                    Decimal(inv_iva_amount), places=2, ndigits=13, dp=','
+                ),
+                'monto_sujeto_a_ret_per': moneyfmt(
+                    Decimal(base_amount), places=2, ndigits=13, dp=','
+                ),
+                'alicuota': moneyfmt(
+                    Decimal(percentage), places=2, ndigits=4, dp=','
+                ),
+                'ret_per_aplicada': moneyfmt(
+                    Decimal(ret_per_applied), places=2, ndigits=13, dp=','
+                ),
+                'monto_total_ret_per': moneyfmt(
+                    Decimal(ret_per_applied), places=2, ndigits=13, dp=','
+                ),
+            }
+            res.append(line)
+        if not errors:
+            return None, res
+        else:
+            return 1, errors
+
+    @api.model
+    def _get_perc_data(self, perc_ids):
+        """
+        Iterates over invoices looking for perceptions and retrieve neccesary data
+        as a dict.
+        """
+        perc_obj = self.env['perception.tax.line']
+        res = []
+        errors = []
+        for perc in perc_obj.browse(perc_ids):
+            inv = perc.invoice_id
+            if not inv:
+                errors.append(
+                    _(
+                        'ptl #%(per_id)s: Unable to get associated invoice (%(inv_id)s)'
+                    ),
+                    per_id=perc.id,
+                    inv_id=inv.id,
+                )
+                continue
+
+            # Date
+            date_val = time.strptime(
+                str(perc.date), '%Y-%m-%d'
+            )  # String(YYYY-MM-DD)->Datetime
+            date_val = time.strftime(
+                '%d/%m/%Y', date_val
+            )  # Datetime->String: dd/mm/yyyy
+
+            # Date invoice
+            date_inv = time.strptime(
+                str(inv.invoice_date), '%Y-%m-%d'
+            )  # String(YYYY-MM-DD)->Datetime
+            date_inv = time.strftime(
+                '%d/%m/%Y', date_inv
+            )  # Datetime->String: dd/mm/yyyy
+
+            # Denomination
+            denomination_name = inv.denomination
+
+            # Internal number
+            internal_number = inv.internal_number.replace('-', '')
+
+            # Invoice total
+            inv_amount_total = inv.amount_total
+
+            # Type of document partner
+            nro_doc_retenido = (
+                inv.partner_id.vat.replace('-', '')
+                if inv.partner_id.vat
+                else '00000000000'
+            )
+            tipo_doc_retenido = self._get_partner_document_type_code(
+                inv.partner_id
+            )
+
+            # Untaxed amount
+            amount_untaxed = inv.amount_untaxed
+
+            # Ret / Per applied
+            ret_per_applied = perc.amount
+
+            # Ret / Per base
+            base_amount = perc.base
+
+            # Alicuota
+            percentage = (ret_per_applied / float(base_amount)) * 100
+            if percentage < 0 or percentage > 99.99:
+                errors.append(
+                    _(
+                        'ptl #%(per_id)s: Percentage cannot be negative or '
+                        'more than 99.99 (%(per_name)s) (Invoice ID %(inv_id)s)'
+                    ),
+                    per_id=perc.id,
+                    per_name=perc.name,
+                    inv_id=inv.id,
+                )
+                continue
+
+            # Iva Amount
+            inv_iva_amount = 0.0
+            if denomination_name in ('A', 'M'):
+                inv_iva_amount = self._get_invoice_iva_total(inv)
+
+            # Partner Data
+            pos_fiscal_retenido = self._get_partner_fiscal_position_code(inv)
+            razon_social_retenido = (
+                (inv.partner_id.name).replace('ñ', 'n').replace('Ñ', 'N')
+            )
+
+            # IIBB
+            ppids = perc.partner_id.perception_ids
+            perc_partner = ppids.filtered(
+                lambda x: x.perception_id == perc.perception_id
+            )
+            perc_partner = (
+                perc_partner[0] if len(perc_partner) > 1 else perc_partner
+            )
+            sit_iibb = self._get_partner_iibb_code(perc_partner.sit_iibb.name)
+            if not sit_iibb:
+                errors.append(
+                    _(
+                        'ptl #%(per_id)s: IIBB Situation cannot be'
+                        ' empty (%(per_name)s) (Partner %(part_name)s)'
+                    ),
+                    per_id=perc.id,
+                    per_name=perc.name,
+                    part_name=razon_social_retenido,
+                )
+
+            nro_insc_iibb = inv.partner_id.nro_insc_iibb or '00000000000'
+
+            line = {
+                'type': 2,  # Perception
+                'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
+                'fecha': date_val,
+                'tipo_comp_origen_retenc': "01",  # Invoice
+                'letra_comprobante': denomination_name,
+                'numero_comprobante': internal_number,
+                'fecha_comprobante': date_inv,
+                'monto_comprobante': moneyfmt(
+                    Decimal(inv_amount_total), places=2, ndigits=13, dp=','
+                ),
+                'nro_cert_propio': '',  # In perceptions this field is blank
+                'tipo_doc_retenido': tipo_doc_retenido,
+                'nro_doc_retenido': nro_doc_retenido,
+                'sit_iibb_retenido': sit_iibb,
+                'nro_insc_iibb_retenido': nro_insc_iibb,
+                'pos_fiscal_retenido': pos_fiscal_retenido,
+                'razon_social_retenido': razon_social_retenido,
+                'importe_otros_conceptos': moneyfmt(
+                    Decimal(amount_untaxed), places=2, ndigits=13, dp=','
+                ),
+                'importe_iva': moneyfmt(
+                    Decimal(inv_iva_amount), places=2, ndigits=13, dp=','
+                ),
+                'monto_sujeto_a_ret_per': moneyfmt(
+                    Decimal(base_amount), places=2, ndigits=13, dp=','
+                ),
+                'alicuota': moneyfmt(
+                    Decimal(percentage), places=2, ndigits=4, dp=','
+                ),
+                'ret_per_aplicada': moneyfmt(
+                    Decimal(ret_per_applied), places=2, ndigits=13, dp=','
+                ),
+                'monto_total_ret_per': moneyfmt(
+                    Decimal(ret_per_applied), places=2, ndigits=13, dp=','
+                ),
+            }
+            res.append(line)
+
+        if not errors:
+            return None, res
+        else:
+            return 1, errors
+
+    def create_files(self):
+        """
+        Entrypoint to exporter
+        """
+        errors = ''
+        cr = self.env.cr
+        # Buscamos las perception_tax_line del periodo pedido
+        # ordenados segun lo escrito en documento tecnico agip
+        # El archivo de importación debe estar ordenado por fecha de percepcion
+
+        perception_query = """
+            SELECT p.id
+            FROM perception_tax_line p
+            JOIN account_move i ON p.invoice_id = i.id
+            JOIN account_journal per ON p.perception_id = per.id
+            JOIN account_tax at ON per.tax_id=at.id
+            WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
+            AND i.state in %(state)s
+            AND at.inform_arciba=True
+            AND at.type_tax_use LIKE 'sale'  -- Only perceptions applied
+            AND i.move_type IN ('out_invoice')  -- Not including refunds(NC)
+            ORDER BY p.date """
+
+        query_vals = {
+            'period_start': self.period_start,
+            'period_end': self.period_end,
+            'state': ('open', 'paid'),
+        }
+        cr.execute(perception_query, query_vals)
+        res = cr.fetchall()
+        try:
+            assert (
+                len(res) > 0
+            ), 'Expected at least 1 perception_tax_line, got %s' % len(res)
+        except BaseException:
+            perception_errors = False
+            perception_vals = []
+            logger.warning('No perceptions to export')
+        else:
+            perception_ids = [perception_ids[0] for perception_ids in res]
+            perception_errors, perception_vals = self._get_perc_data(
+                perception_ids
+            )
+
+        if perception_errors:
+            errors += _('Perception File Errors\n================\n')
+            errors += '\n'.join(perception_vals)
+            errors += '\n\n\n'
+
+        # Buscamos las retention_tax_line del periodo pedido
+        # ordenados segun lo escrito en documento tecnico agip
+        # El archivo de importación debe estar ordenado por fecha de retención
+
+        retention_query = """
+            SELECT p.id
+            FROM account_payment_order_retention_line p
+            JOIN account_move i ON p.invoice_id = i.id
+            JOIN account_journal ret ON p.retention_id = ret.id
+            JOIN account_tax at ON ret.tax_id=at.id
+            WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
+            AND i.state in %(state)s
+            AND at.inform_arciba=True
+            AND at.type_tax_use LIKE 'purchase'  -- Only retentions applied
+            AND i.move_type IN ('in_invoice')  -- Not including refunds(NC)
+            ORDER BY p.date
+        """
+
+        cr.execute(retention_query, query_vals)
+        res = cr.fetchall()
+
+        try:
+            assert (
+                len(res) > 0
+            ), 'Expected at least 1 retention_tax_line, got %s' % len(res)
+        except BaseException:
+            retention_errors = False
+            retention_vals = []
+            logger.warning('No retentions to export')
+        else:
+            retention_ids = [retention_ids[0] for retention_ids in res]
+            retention_errors, retention_vals = self._get_ret_data(retention_ids)
+
+        if retention_errors:
+            errors += _('Retention File Errors\n================\n')
+            errors += '\n'.join(retention_vals)
+
+        if errors:
+            self.write({'notes': errors})
+            ir_model_data = self.env['ir.model.data']
+            form_res = ir_model_data.get_object_reference(
+                'l10n_ar_arciba', 'view_create_arciba_files'
+            )
+            form_id = form_res and form_res[1] or False
+            res = {
+                'name': _('Arciba'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'views': [
+                    (form_id, 'form'),
+                ],
+                'res_model': 'create.arciba.files',
+                'res_id': self.id,
+                'view_id': form_id,
+                'type': 'ir.actions.act_window',
+                'target': 'new',
+            }
+        else:
+            data_lst = retention_vals + perception_vals
+            data_lst_sorted = sorted(data_lst, key=lambda x: x['fecha'])
+            if data_lst:
+                res = self.generate_fw_file(data_lst_sorted)
+            else:
+                raise ValidationError(
+                    _(
+                        "No perceptions/retentions from %(start)s to %(end)s to inform eArciba."
+                    ),
+                    start=self.period_start,
+                    end=self.period_end,
+                )
+        return res
+
+
+class CreateArcibaNcFile(models.TransientModel):
+    _name = 'create.arciba.nc.file'
+    _description = 'Wizard Create e-ARCIBA NC File'
+
+    period_start = fields.Date('Date start')
+    period_end = fields.Date('Date end')
+    notes = fields.Text('Notes')
+
+    @api.model
+    def _get_inv_data(self, perc_ids):
+        """
+        Iterates over invoices looking for perceptions and retrieve neccesary data
+        as a dict.
+        """
+        perc_obj = self.env['perception.tax.line']
+        res = []
+        errors = []
+        for perc in perc_obj.browse(perc_ids):
+            inv = perc.invoice_id
+            if not inv:
+                errors.append(
+                    _(
+                        'ptl #%(per_id)s: Unable to get associated invoice (%(per_name)s)'
+                    ),
+                    per_id=perc.id,
+                    per_name=perc.name,
+                )
+                continue
+
+            # Date
+            date_val = time.strptime(
+                str(perc.date), '%Y-%m-%d'
+            )  # String(YYYY-MM-DD)->Datetime
+            date_val = time.strftime(
+                '%d/%m/%Y', date_val
+            )  # Datetime->String: dd/mm/yyyy
+
+            # Date invoice
+            date_inv = time.strptime(
+                str(inv.invoice_date), '%Y-%m-%d'
+            )  # String(YYYY-MM-DD)->Datetime
+            date_inv = time.strftime(
+                '%d/%m/%Y', date_inv
+            )  # Datetime->String: dd/mm/yyyy
+
+            # Denomination
+            denomination_name = inv.denomination
+
+            # Internal number
+            internal_number = inv.internal_number.replace('-', '')
+
+            # Invoice total
+            inv_amount_total = inv.amount_total
+
+            # Type of document partner
+            nro_doc_retenido = inv.partner_id.vat.replace('-', '')
+
+            # Ret / Per applied
+            ret_per_applied = perc.amount
+
+            # Ret / Per base
+            base_amount = perc.base
+
+            # Alicuota
+            percentage = (ret_per_applied / float(base_amount)) * 100
+            if percentage < 0 or percentage > 99.99:
+                errors.append(
+                    _(
+                        'ptl #%(per_id)s: Percentage cannot be negative or'
+                        ' more than 99.99 (%(per_name)s) (Invoice ID %(inv_id)s)'
+                    ),
+                    per_id=perc.id,
+                    per_name=perc.name,
+                    inv_id=inv.id,
+                )
+                continue
+
+            # Out Inv Interval Number
+            out_inv_internal_number = inv.origin.replace('-', '')
+
+            line = {
+                'type': 2,  # Perception
+                'nro_nc': internal_number,
+                'fecha_nc': date_inv,
+                'monto_nc': moneyfmt(
+                    Decimal(inv_amount_total), places=2, ndigits=13, dp=','
+                ),
+                'nro_cert_propio': '',  # In perceptions this field is blank
+                'tipo_comp_origen_retenc': "01",  # Invoice
+                'letra_comprobante': denomination_name,
+                'nro_comprobante': out_inv_internal_number[:1],
+                'nro_doc_retenido': nro_doc_retenido,
+                'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
+                'fecha_ret_per': date_val,
+                'ret_per_a_deducir': moneyfmt(
+                    Decimal(ret_per_applied), places=2, ndigits=13, dp=','
+                ),
+                'alicuota': moneyfmt(
+                    Decimal(percentage), places=2, ndigits=4, dp=','
+                ),
+            }
+            res.append(line)
+
+        if not errors:
+            return None, res
+        else:
+            return 1, errors
+
+    def generate_fw_file(self, data_lst):
+        self.ensure_one()
+        generated_files_model = self.env['arciba.generated.files']
+        fixed_width = FixedWidth(HEAD_LINES_NC)
+        head_regs = []
+
+        for line in data_lst:
+            # Apendeamos el registro
+            fixed_width.update(**line)
+            head_regs.append(fixed_width.line)
+
+        head_filename = tempfile.mkstemp(suffix='.arciba')[1]
+        f = codecs.open(head_filename, "w", "latin-1")
+        for r in head_regs:
+            r2 = [a for a in r]
+            try:
+                f.write(''.join(r2))
+            except Exception as e:
+                raise e
+            f.write('\r\n')
+
+        f.close()
+        f = open(head_filename, 'r', "latin-1")
+
+        name = 'eARCIBA_NC_%s.txt' % self.period_start
+        generated_file_rec = generated_files_model.create(
+            {
+                'code': name,
+                'period_start': self.period_start,
+                'period_end': self.period_end,
+            }
+        )
+
+        data_attach = {
+            'name': name,
+            'datas': binascii.b2a_base64(f.read().encode('latin-1')),
+            'datas_fname': name,
+            'res_model': 'arciba.generated.files',
+            'res_id': generated_file_rec.id,
+        }
+        doc = self.env['ir.attachment'].create(data_attach)
+        generated_file_rec.write({'attachment_id': data_attach.id})
+
+        close_window = {'type': 'ir.actions.act_window_close'}
+        download_file = {
+            'type': "ir.actions.act_url",
+            'url': '/web/binary/download_document?model=ir.attachment'
+            '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
+            'target': "self",
+            'no_destroy': False,
+        }
+
+        res = {
+            'type': 'ir.actions.act_multi',
+            'actions': [
+                close_window,
+                download_file,
+            ],
+        }
+        return res
+
+    def create_files(self):
+        """
+        Entrypoint to exporter
+        """
+        errors = ''
+        cr = self.env.cr
+
+        # Buscamos las perception_tax_line del periodo pedido
+        # ordenados segun lo escrito en documento tecnico agip
+        # El archivo de importación debe estar ordenado por fecha de percepcion
+
+        perception_query = """
+            SELECT p.id
+            FROM perception_tax_line p
+            JOIN account_move i ON p.invoice_id = i.id
+            JOIN account_journal per ON p.perception_id = per.id
+            JOIN account_tax at ON per.tax_id=at.id
+            WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
+            AND i.state in %(state)s
+            AND at.inform_arciba=True
+            AND at.type_tax_use LIKE 'sale'  -- Only perceptions applied
+            AND i.move_type IN ('out_refund')  -- Only including refunds(NC)
+            ORDER BY p.date """
+
+        query_vals = {
+            'period_start': self.period_start,
+            'period_end': self.period_end,
+            'state': ('open', 'paid'),
+        }
+
+        cr.execute(perception_query, query_vals)
+        res = cr.fetchall()
+        try:
+            assert (
+                len(res) > 0
+            ), 'Expected at least 1 perception_tax_line, got %s' % len(res)
+        except BaseException:
+            perception_errors = False
+            perception_vals = []
+            logger.warning('No perceptions to export')
+        else:
+            inv_ids = [inv_id[0] for inv_id in res]  # Fixed list
+            perception_errors, perception_vals = self._get_inv_data(inv_ids)
+
+        if perception_errors:
+            errors += _('Perception File Errors\n================\n')
+            errors += '\n'.join(perception_vals)
+            errors += '\n\n\n'
+
+        if errors:
+            self.write({'notes': errors})
+            ir_model_data = self.env['ir.model.data']
+            form_res = ir_model_data.get_object_reference(
+                'l10n_ar_arciba', 'view_create_arciba_nc_file'
+            )
+            form_id = form_res and form_res[1] or False
+            res = {
+                'name': _('Arciba'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'views': [
+                    (form_id, 'form'),
+                ],
+                'res_model': 'create.arciba.nc.file',
+                'res_id': self.id,
+                'view_id': form_id,
+                'type': 'ir.actions.act_window',
+                'target': 'new',
+            }
+        else:
+            if perception_vals:
+                res = self.generate_fw_file(perception_vals)
+            else:
+                raise ValidationError(
+                    _(
+                        "No perceptions/retentions from %(start)s to %(end)s to inform eArciba."
+                    ),
+                    start=self.period_start,
+                    end=self.period_end,
+                )
+        return res

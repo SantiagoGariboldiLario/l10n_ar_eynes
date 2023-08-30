@@ -45,6 +45,7 @@
                             <field name="always_apply_padron" />
                             <field name="is_bank_settlement" />
                             <field name="inform_arba" />
+                            <field name="inform_arciba" />
                         </group>
                     </group>
 
@@ -244,6 +245,7 @@
                             <field name="is_bank_settlement" />
                             <field name="always_apply_padron" />
                             <field name="inform_arba" />
+                            <field name="inform_arciba" />
                         </group>
                     </group>
 

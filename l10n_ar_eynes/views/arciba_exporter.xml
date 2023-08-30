@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_arciba_generated_files_tree" model="ir.ui.view">
+        <field name="name">arciba.generated.files.tree</field>
+        <field name="model">arciba.generated.files</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree string="ArciBA generated files" create="false" edit="false">
+                <field name="code" />
+                <field name="date_from" />
+                <field name="date_to" />
+                <field name="attachment_id" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_arciba_generated_files" model="ir.actions.act_window">
+        <field name="name">ArciBA generated files</field>
+        <field name="res_model">arciba.generated.files</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem parent="menu_taxes_reports" id="menu_arciba" name="ARCIBA" sequence="4" />
+
+    <menuitem
+        id="menu_action_arba_generated_files"
+        name="ArciBA generated files"
+        action="action_arciba_generated_files"
+        parent="menu_arciba"
+    />
+</odoo>
