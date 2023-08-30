@@ -78,6 +78,7 @@ class PerceptionTaxLine(models.Model):
         digits='Account',
     )
     company_id = fields.Many2one(
+        'res.company',
         default=lambda self: self.env.user.company_id.id,
         string='Company',
         store=True,

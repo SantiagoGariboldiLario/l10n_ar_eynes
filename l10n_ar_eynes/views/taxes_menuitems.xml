@@ -89,12 +89,12 @@
         <menuitem
             id="perception_tax_line_menu_applied"
             name="Perception Applied"
-            action="perception_tax_line_action_tree"
+            action="applied_perceptions_action"
         />
         <menuitem
             id="perception_tax_line_menu_supported"
             name="Perception Supported"
-            action="perception_tax_line_action_tree_supported"
+            action="supported_perceptions_action"
         />
         <menuitem
             id="perception_concepts_menu"
