@@ -62,6 +62,14 @@ Doodba implementation
         merges:
             - origin 15.0
         target: origin 15.0
+    ./otros/popup_messages:
+      defaults:
+        depth: $DEPTH_DEFAULT
+      remotes:
+        origin: https://gitlab.eynes.com.ar/otros/popup_messages.git
+      target: origin 15.0
+      merges:
+        - origin 15.0
 
 ### Add this to addons.yaml:
 
@@ -80,6 +88,8 @@ Doodba implementation
     OCA/server-ux:
         - "*"
     OCA/web:
+        - "*"
+    otros:
         - "*"
 
 ## Other dependencies
@@ -101,3 +111,5 @@ Doodba implementation
     pyOpenSSL
     pandas
     qrcode
+    pysimplesoap
+    future
