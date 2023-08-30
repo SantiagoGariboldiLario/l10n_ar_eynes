@@ -47,6 +47,10 @@ class AccountTax(models.Model):
     )
     from_register_ARBA = fields.Boolean('From ARBA Register')
     inform_arba = fields.Boolean('Inform ARBA?')
+    inform_arciba = fields.Boolean(
+        'Inform arciba?',
+        help="Check if you want this perception to be informed to arciba authorities",
+    )
     from_register_AGIP = fields.Boolean('From AGIP Register')
     retention_type = fields.Selection(
         selection=[

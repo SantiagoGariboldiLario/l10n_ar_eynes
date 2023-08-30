@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+  <!--  e-Arciba Files Generation -->
+
+    <record id="view_create_arciba_files" model="ir.ui.view">
+      <field name="name">e-ARCIBA File Generation</field>
+      <field name="model">create.arciba.files</field>
+      <field name="arch" type="xml">
+        <form string="E-Arciba Exporter">
+          <separator
+                    string="This wizard allows you to export a file for arciba."
+                    colspan="4"
+                />
+          <group>
+            <field name="period_start" />
+            <field name="period_end" />
+          </group>
+          <separator string="Validation Errors" colspan="4" />
+          <field name="notes" nolabel="1" colspan="4" />
+          <footer>
+            <button
+                        name="create_files"
+                        string="Generate"
+                        colspan="1"
+                        type="object"
+                        class="oe_highlight"
+                    />
+            <button special="cancel" string="Cancel" />
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_generate_arciba_files" model="ir.actions.act_window">
+        <field name="name">e-ARCIBA Files Generation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">create.arciba.files</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!--  e-Arciba(NC) Files Generation -->
+
+    <record id="view_create_arciba_nc_file" model="ir.ui.view">
+      <field name="name">e-ARCIBA NC File Generation</field>
+      <field name="model">create.arciba.nc.file</field>
+      <field name="arch" type="xml">
+        <form string="E-Arciba NC Exporter">
+          <separator
+                    string="This wizard allows you to export a file for arciba."
+                    colspan="4"
+                />
+          <group>
+            <field name="period_start" />
+            <field name="period_end" />
+          </group>
+          <separator string="Validation Errors" colspan="4" />
+          <field name="notes" nolabel="1" colspan="4" />
+          <footer>
+            <button
+                        name="create_files"
+                        string="Generate"
+                        colspan="1"
+                        type="object"
+                        class="oe_highlight"
+                    />
+            <button special="cancel" string="Cancel" />
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_generate_arciba_nc_files" model="ir.actions.act_window">
+        <field name="name">e-ARCIBA NC File Generation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">create.arciba.nc.file</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        parent="menu_taxes_reports"
+        id="menu_arciba"
+        name="e-ARCIBA"
+        sequence="4"
+    />
+
+    <menuitem
+        parent="menu_arciba"
+        id="menu_arciba_report"
+        action="action_generate_arciba_files"
+    />
+
+    <menuitem
+        parent="menu_arciba"
+        id="menu_arciba_nc_report"
+        action="action_generate_arciba_nc_files"
+    />
+</odoo>
