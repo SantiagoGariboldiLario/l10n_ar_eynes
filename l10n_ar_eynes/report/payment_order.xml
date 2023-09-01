@@ -18,7 +18,7 @@
                         >
                             <t t-if="o.company_id.logo">
                                 <img
-                                    style="width: 100px;"
+                                    style="width: 75px; height: 75px"
                                     alt="logo"
                                     t-att-src="image_data_uri(o.company_id.logo)"
                                 />
@@ -43,7 +43,7 @@
                             </t>
                             Nº <t t-esc="o.number" />
                             <br />
-                            Fecha comprobante: <t t-esc="o.date" />
+                            Fecha comprobante: <t t-esc="o.date.strftime('%d-%m-%Y')" />
                             <br />
                             <t t-if="o.type == 'receipt' or o.type == 'sale'">
                                 Cliente: <t t-esc="o.partner_id.name" />
@@ -59,13 +59,15 @@
                         id="content"
                         style="width: 800px; height: 600px; margin: 40px auto;"
                     >
+                    <t t-if="o.income_line_ids">
+
                         <div id="invoices">
                             <h3>Facturas / Notas de Débito</h3>
                             <table class="table-bordered" width="100%">
                                 <thead>
                                     <tr
-                                        style="background: black; color: white; text-align: left;"
-                                    >
+                                            style="background: black; color: white; text-align: left;"
+                                        >
                                         <th>
                                             <strong>Comprobante</strong>
                                         </th>
@@ -104,36 +106,36 @@
                                             </td>
                                             <td style="text-align: right;">
                                                 <span
-                                                    t-field="line.amount"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                        t-field="line.amount"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
                                             </td>
                                             <td style="text-align: right;">
                                                 <span
-                                                    t-field="line.amount_unreconciled"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                        t-field="line.amount_unreconciled"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
                                             </td>
                                             <td style="text-align: right;">
                                                 <span
-                                                    t-esc="line.amount - line.amount_unreconciled"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                        t-esc="line.amount - line.amount_unreconciled"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
                                             </td>
                                             <td style="text-align: right;">
                                                 <span
-                                                    t-field="line.amount_original"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                        t-field="line.amount_original"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
                                             </td>
                                         </tr>
                                         <tr>
                                             <td colspan="7" style="text-align: right;">
                                                 <strong
-                                                >Total Abonado en Facturas / Notas de Débito: <span
-                                                        t-esc="sum(line.amount for line in o.income_line_ids)"
-                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                    /></strong>
+                                                    >Total Abonado en Facturas / Notas de Débito: <span
+                                                            t-esc="sum(line.amount for line in o.income_line_ids)"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        /></strong>
                                             </td>
                                         </tr>
                                     </t>
@@ -150,49 +152,55 @@
                                             </td>
                                             <td style="text-align: right;">
                                                 <span
-                                                    t-field="line.amount"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                        t-field="line.amount"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
                                             </td>
                                             <td style="text-align: right;">
                                                 <span
-                                                    t-field="line.amount_unreconciled"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                        t-field="line.amount_unreconciled"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
                                             </td>
                                             <td style="text-align: right;">
                                                 <span
-                                                    t-esc="line.amount - line.amount_unreconciled"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                        t-esc="line.amount - line.amount_unreconciled"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
                                             </td>
                                             <td style="text-align: right;">
                                                 <span
-                                                    t-field="line.amount_original"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                        t-field="line.amount_original"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
                                             </td>
                                         </tr>
                                         <tr>
                                             <td colspan="7" style="text-align: right;">
                                                 <strong
-                                                >Total Abonado en Facturas / Notas de Débito: <span
-                                                        t-esc="sum(line.amount for line in o.debt_line_ids)"
-                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                    /></strong>
+                                                    >Total Abonado en Facturas / Notas de Débito: <span
+                                                            t-esc="sum(line.amount for line in o.debt_line_ids)"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        /></strong>
                                             </td>
                                         </tr>
                                     </t>
                                 </tbody>
                             </table>
                         </div>
+                    </t>
+
+
+
                         <div id="payments">
+
                             <h3>Pagos</h3>
+                            <t t-if="o.payment_mode_line_ids">
                             <table class="table-bordered" width="100%">
                                 <thead>
                                     <tr
-                                        style="background: black; color: white; text-align: left;"
-                                    >
+                                            style="background: black; color: white; text-align: left;"
+                                        >
                                         <th>
                                             <strong>Medios de pago</strong>
                                         </th>
@@ -220,21 +228,22 @@
                                         </td>
                                         <td style="text-align: right;">
                                             <span
-                                                t-field="line.amount"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                            />
+                                                    t-field="line.amount"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
                                         </td>
                                     </tr>
                                     <tr>
                                         <td colspan="7" style="text-align: right;">
                                             <strong>Total Medios de Pago: <span
-                                                    t-esc="sum(line.amount for line in o.payment_mode_line_ids)"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                /></strong>
+                                                        t-esc="sum(line.amount for line in o.payment_mode_line_ids)"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    /></strong>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </t>
                             <t t-if="o.type == 'purchase' or o.type == 'payment'">
                                 <h3>Cheques Propios</h3>
                                 <table class="table-bordered" width="100%">
@@ -291,12 +300,16 @@
                                     </tbody>
                                 </table>
                             </t>
+                        <t
+                                t-if="o.third_party_check_receipt_ids or o.third_party_check_ids"
+                            >
+
                             <h3>Cheque de terceros</h3>
                             <table class="table-bordered" width="100%">
                                 <thead>
                                     <tr
-                                        style="background: black; color: white; text-align: left;"
-                                    >
+                                            style="background: black; color: white; text-align: left;"
+                                        >
                                         <th>
                                             <strong>Número</strong>
                                         </th>
@@ -317,9 +330,9 @@
                                 <tbody>
                                     <t t-if="o.type == 'receipt' or o.type == 'sale'">
                                         <tr
-                                            t-foreach="o.third_party_check_receipt_ids"
-                                            t-as="line"
-                                        >
+                                                t-foreach="o.third_party_check_receipt_ids"
+                                                t-as="line"
+                                            >
                                             <td>
                                                 <span t-field="line.number" />
                                             </td>
@@ -334,25 +347,25 @@
                                             </td>
                                             <td style="text-align: right;">
                                                 <span
-                                                    t-field="line.amount"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                        t-field="line.amount"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
                                             </td>
                                         </tr>
                                         <tr>
                                             <td colspan="7" style="text-align: right;">
                                                 <strong>Total Cheques de Terceros: <span
-                                                        t-esc="sum(line.amount for line in o.third_party_check_receipt_ids)"
-                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                    /></strong>
+                                                            t-esc="sum(line.amount for line in o.third_party_check_receipt_ids)"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        /></strong>
                                             </td>
                                         </tr>
                                     </t>
                                     <t t-else="">
                                         <tr
-                                            t-foreach="o.third_party_check_ids"
-                                            t-as="line"
-                                        >
+                                                t-foreach="o.third_party_check_ids"
+                                                t-as="line"
+                                            >
                                             <td>
                                                 <span t-field="line.number" />
                                             </td>
@@ -367,30 +380,34 @@
                                             </td>
                                             <td style="text-align: right;">
                                                 <span
-                                                    t-field="line.amount"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                        t-field="line.amount"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
                                             </td>
                                         </tr>
                                         <tr>
                                             <td colspan="7" style="text-align: right;">
                                                 <strong>Total Cheques de Terceros: <span
-                                                        t-esc="sum(line.amount for line in o.third_party_check_ids)"
-                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                    /></strong>
+                                                            t-esc="sum(line.amount for line in o.third_party_check_ids)"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        /></strong>
                                             </td>
                                         </tr>
                                     </t>
                                 </tbody>
                             </table>
+                        </t>
                         </div>
+                    <t t-if="o.retention_ids">
+
+
                         <div id="retentions">
                             <h3>Retenciones</h3>
                             <table class="table-bordered" width="100%">
                                 <thead>
                                     <tr
-                                        style="background: black; color: white; text-align: left;"
-                                    >
+                                            style="background: black; color: white; text-align: left;"
+                                        >
                                         <th>
                                             <strong>Retención</strong>
                                         </th>
@@ -421,28 +438,29 @@
                                         </td>
                                         <td style="text-align: right;">
                                             <span
-                                                t-field="line.base"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                            />
+                                                    t-field="line.base"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
                                         </td>
                                         <td style="text-align: right;">
                                             <span
-                                                t-field="line.amount"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                            />
+                                                    t-field="line.amount"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
                                         </td>
                                     </tr>
                                     <tr>
                                         <td colspan="7" style="text-align: right;">
                                             <strong>Total Retenciones: <span
-                                                    t-esc="sum(line.amount for line in o.retention_ids)"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                /></strong>
+                                                        t-esc="sum(line.amount for line in o.retention_ids)"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    /></strong>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
+                    </t>
                         <div style="width: 250px; height: 50px; margin: auto;" />
                         <div
                             id="signature"
@@ -459,8 +477,8 @@
                                         <t
                                             t-if="o.type == 'receipt' or o.type == 'sale'"
                                         >
-                                            <strong>Total cobrado: <t
-                                                    t-esc="sum(line.amount for line in o.income_line_ids)"
+                                            <strong>Total cobrado:  <t
+                                                    t-esc="o.amount"
                                                     t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                 /></strong>
                                         </t>
