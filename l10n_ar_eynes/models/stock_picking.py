@@ -50,8 +50,9 @@ class StockPicking(models.Model):
         return qty
 
     def button_validate(self):
+        res = super(StockPicking, self).button_validate()
         self.write({"declared_value": self._get_declared_value()})
-        return super(StockPicking, self).button_validate()
+        return res
 
     def is_refund(self):
         usage_origin = self.location_id.usage
