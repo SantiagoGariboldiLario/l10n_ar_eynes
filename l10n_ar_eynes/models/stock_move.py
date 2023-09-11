@@ -15,8 +15,10 @@ _logger = logging.getLogger(__name__)
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    def _action_confirm(self):
-        res = super(StockMove, self)._action_confirm()
+    def _action_confirm(self, merge=True, merge_into=False):
+        res = super(StockMove, self)._action_confirm(
+            merge=merge, merge_into=merge_into
+        )
 
         picking = self.picking_id
         if picking.carrier_id:
