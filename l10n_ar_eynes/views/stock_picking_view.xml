@@ -43,7 +43,11 @@
             <xpath expr="/form/sheet/notebook/page[@name='extra']" position="after">
                 <page
                     string="COT"
-                    attrs="{'invisible': [('picking_type_code', '=', 'production')]}"
+                    attrs="{'invisible': [
+                        '|',
+                        ('picking_type_code', '=', 'production'),
+                        ('picking_type_code', '=', 'incoming'),
+                        ]}"
                 >
                     <group col="2" colspan="2" string="COT Information">
                         <group>
