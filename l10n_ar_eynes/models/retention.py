@@ -1,8 +1,10 @@
-from odoo import fields, models, api, _
-from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DSDF
-from odoo.exceptions import ValidationError
 from datetime import datetime
+
 from dateutil.relativedelta import relativedelta as relatived
+
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DSDF
 
 
 class AccountAccount(models.Model):
@@ -94,7 +96,9 @@ class RetentionVatTax(models.Model):
 
     tax_id = fields.Many2one('account.tax', 'VAT Tax', required=True)
     application_id = fields.Many2one(
-        comodel_name='retention.tax.application', string='Application', required=True
+        comodel_name='retention.tax.application',
+        string='Application',
+        required=True,
     )
     rate = fields.Float(
         string='Rate',
@@ -109,7 +113,9 @@ class RetentionScale(models.Model):
 
     name = fields.Char('Name', required=True, size=64)
     line_ids = fields.One2many(
-        comodel_name='retention.scale.line', inverse_name='scale_id', string='Scale Lines'
+        comodel_name='retention.scale.line',
+        inverse_name='scale_id',
+        string='Scale Lines',
     )
 
 
@@ -144,7 +150,8 @@ class RetentionTaxApplication(models.Model):
     exclude_tax_allowance = fields.Boolean(
         string='Exclude Tax Allowance',
         default=False,
-        help="Check this if Tax Allowance should be excluded " + "from calculated Base",
+        help="Check this if Tax Allowance should be excluded "
+        + "from calculated Base",
     )
     calculation_base = fields.Selection(
         selection=[
@@ -167,7 +174,8 @@ class RetentionTaxApplication(models.Model):
     tax_minimum = fields.Float(
         'Tax Minimum',
         digits='Account',
-        help="Retention is performed when the amount thereof " + "exceeds this value.",
+        help="Retention is performed when the amount thereof "
+        + "exceeds this value.",
     )
     aliq_type = fields.Selection(
         selection=[('percent', 'Percent'), ('scale', 'Scale')],
@@ -198,6 +206,12 @@ class RetentionTaxApplication(models.Model):
         ],
         string='Situation of IIBB',
     )
+    company_id = fields.Many2one(
+        comodel_name="res.company",
+        default=lambda self: self._default_company_id(),
+        readonly=True,
+        required=True,
+    )
 
     _sql_constraints = [
         (
@@ -206,6 +220,9 @@ class RetentionTaxApplication(models.Model):
             'The tuple of Concept, Activity must be unique per Retention !',
         ),
     ]
+
+    def _default_company_id(self):
+        return self.env.company.id
 
     def _compute_proportional_vat(self, percent, line_vals):
         vat_tax = {}
@@ -340,7 +357,9 @@ class RetentionTaxApplication(models.Model):
                 or not po.retention_ids
             ):
                 continue
-            extra_untaxed_amount += po.amount - sum(po.retention_ids.mapped('amount'))
+            extra_untaxed_amount += po.amount - sum(
+                po.retention_ids.mapped('amount')
+            )
         return extra_untaxed_amount
 
     def get_period_base_amount(self, partner, concept, po_date=False):
@@ -358,13 +377,17 @@ class RetentionTaxApplication(models.Model):
             ('payment_order_id.state', 'in', ['posted']),
         ]
 
-        ret_lines = retention_line_model.search(domain, order="date desc, id desc")
+        ret_lines = retention_line_model.search(
+            domain, order="date desc, id desc"
+        )
 
-        base = sum([ret.base for ret in ret_lines])
-        amount = sum([ret.amount for ret in ret_lines])
+        base = sum(ret.base for ret in ret_lines)
+        amount = sum(ret.amount for ret in ret_lines)
         return base, amount
 
-    def apply_retention(self, partner, percent, excluded_percent, vals, po_date):
+    def apply_retention(
+        self, partner, percent, excluded_percent, vals, po_date
+    ):
         # Si la alicuota que esta en la ficha del partner es negativa,
         # se toma la de la regla que se aplica.
         # Si es 0.0, se toma ese valor, 0.0.
@@ -378,7 +401,10 @@ class RetentionTaxApplication(models.Model):
         period_payment_amount = 0.0
         base = vals['base']
         to_pay = vals['to_pay']
-        if self.calculation_base in ['payment_amount', 'payment_amount_untaxed']:
+        if self.calculation_base in [
+            'payment_amount',
+            'payment_amount_untaxed',
+        ]:
             base = to_pay
         if self.retention_tax_id.retention_type == 'profit':
             period_base, period_amount = self.get_period_base_amount(
