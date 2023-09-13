@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import fields, models
 
 
 class ResDocumentType(models.Model):
@@ -13,4 +13,12 @@ class ResDocumentType(models.Model):
     check_duplicated = fields.Boolean(
         string="Check Duplicated", required=True, default=False
     )
-    dst_cuit = fields.Boolean(string="Enable DST CUIT", required=True, default=False)
+    dst_cuit = fields.Boolean(
+        string="Enable DST CUIT", required=True, default=False
+    )
+
+    def get_website_sale_documents(self, mode='billing'):
+        cuit = self.sudo().env.ref('l10n_ar_eynes.document_cuit').name
+        cuil = self.sudo().env.ref('l10n_ar_eynes.document_cuil').name
+        dni = self.sudo().env.ref('l10n_ar_eynes.document_dni').name
+        return self.sudo().search([('name', 'in', (cuit, cuil, dni))])

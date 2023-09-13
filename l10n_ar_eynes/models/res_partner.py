@@ -419,23 +419,6 @@ class DstCuitCodes(models.Model):
     wsfex_config_id = fields.Many2one('wsfex.config')
 
 
-class ResDocumentType(models.Model):
-    _name = "res.document.type"
-    _description = 'Document type'
-
-    name = fields.Char(string='Document type', size=40)
-    afip_code = fields.Char(string='Afip code', size=10)
-    verification_required = fields.Boolean(string='Verification required')
-    check_duplicated = fields.Boolean(string="Check Duplicated")
-    dst_cuit = fields.Boolean(string="Enable DST CUIT")
-
-    def get_website_sale_documents(self, mode='billing'):
-        cuit = self.sudo().env.ref('l10n_ar_eynes.document_cuit').name
-        cuil = self.sudo().env.ref('l10n_ar_eynes.document_cuil').name
-        dni = self.sudo().env.ref('l10n_ar_eynes.document_dni').name
-        return self.sudo().search([('name', 'in', (cuit, cuil, dni))])
-
-
 class ResPartnerPerception(models.Model):
     _name = "res.partner.perception"
     _description = "Perception Defined in Partner"
