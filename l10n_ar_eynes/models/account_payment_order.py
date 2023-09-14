@@ -457,7 +457,8 @@ class AccountPaymentOrder(models.Model):
                 )
             taxapp = tax_app_obj.search(
                 [
-                    ('retention_id', '=', advance_ret.retention_id.id),
+                    # ('retention_tax_id', '=', advance_ret.retention_id.id),
+                    # TODO check if need to use this field in the domain
                     ('concept_id', '=', advance_ret.concept_id.id),
                     ('company_id', '=', self.company_id.id),
                 ]

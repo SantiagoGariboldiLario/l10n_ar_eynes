@@ -78,11 +78,10 @@ class PerceptionTaxLine(models.Model):
         digits='Account',
     )
     company_id = fields.Many2one(
-        'res.company',
-        default=lambda self: self.env.user.company_id.id,
-        string='Company',
-        store=True,
+        comodel_name="res.company",
+        default=lambda self: self._default_company_id(),
         readonly=True,
+        required=True,
     )
     partner_id = fields.Many2one(
         'res.partner',
@@ -109,6 +108,9 @@ class PerceptionTaxLine(models.Model):
         'perception.tax.application', 'Tax Application'
     )
     concept_id = fields.Many2one('perception.concept', 'Concept')
+
+    def _default_company_id(self):
+        return self.env.company.id
 
     def _compute_base_amount_second_cur(self):
         for rec in self:
