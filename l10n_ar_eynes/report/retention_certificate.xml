@@ -218,7 +218,7 @@
                         </tr>
                         <tr>
                             <td style="width:25%;text-align:center;padding:9px;">
-                                <t t-set="base" t-value="r.base" />
+                                <t t-set="base" t-value="r.base - r.concept_amount" />
                                 <span t-esc="base" style="font-size:21px;" />
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
