@@ -51,7 +51,10 @@
                                     <field name="name" readonly="True" />
                                     <field name="from_date" readonly="True" />
                                     <field name="to_date" readonly="True" />
-                                    <field name="tax_id" />
+                                    <field
+                                        name="tax_id"
+                                        domain="[('type_tax_use', '=', 'sale')]"
+                                    />
                                     <field name="from_afip" readonly="True" />
                                 </tree>
                                 <form string="Vat Taxes Mapping">
