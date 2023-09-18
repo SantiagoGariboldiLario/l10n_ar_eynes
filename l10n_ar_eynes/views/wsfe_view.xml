@@ -35,7 +35,7 @@
                                 name="point_of_sale_ids"
                                 nolabel="1"
                                 options="{'no_create_edit': True, 'no_quick_create': True}"
-                                domain="[('type', '=', 'sale')]"
+                                domain="[('type', '=', 'sale'), ('fiscal_type', '=', 'electronic')]"
                             >
                                 <tree editable="bottom">
                                     <field name="name" readonly="True" />
