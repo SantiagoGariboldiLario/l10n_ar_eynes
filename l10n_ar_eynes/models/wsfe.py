@@ -65,7 +65,10 @@ class WsfeConfig(models.Model):
         'Points of Sale',
     )
     vat_tax_ids = fields.One2many(
-        'wsfe.tax.codes', 'wsfe_config_id', 'Taxes', domain=[('from_afip', '=', True)]
+        'wsfe.tax.codes',
+        'wsfe_config_id',
+        'Taxes',
+        domain=[('from_afip', '=', True)],
     )
     exempt_operations_tax_ids = fields.One2many(
         'wsfe.tax.codes',
@@ -75,10 +78,15 @@ class WsfeConfig(models.Model):
     )
     wsaa_ticket_id = fields.Many2one('wsaa.ta', 'Ticket Access')
     company_id = fields.Many2one('res.company', 'Company Name', required=True)
-    services_date_difference = fields.Integer('Services and Products', default=10)
+    services_date_difference = fields.Integer(
+        'Services and Products', default=10
+    )
     products_date_difference = fields.Integer('Products', default=5)
     optional_ids = fields.One2many(
-        'wsfe.optionals', 'wsfe_config_id', 'Optionals', domain=[('from_afip', '=', True)]
+        'wsfe.optionals',
+        'wsfe_config_id',
+        'Optionals',
+        domain=[('from_afip', '=', True)],
     )
 
     @api.model
@@ -117,7 +125,10 @@ class WsfeConfig(models.Model):
         no_raise = self.env.context.get('without_raise', False)
         if not company_id and not no_raise:
             raise UserError(
-                _('Company Error!\n' 'There is no company being used by this user')
+                _(
+                    'Company Error!\n'
+                    'There is no company being used by this user'
+                )
             )
 
         ids = self.search([('company_id', '=', company_id)])
@@ -145,7 +156,9 @@ class WsfeConfig(models.Model):
                 err_var_name = 'Msg'
                 err_var_code = 'Code'
             errors = [getattr(error, err_var_name) for error in err_array]
-            err_codes = [str(getattr(error, err_var_code)) for error in err_array]
+            err_codes = [
+                str(getattr(error, err_var_code)) for error in err_array
+            ]
             msg = ' '.join(errors)
             msg = msg + ' Codigo/s Error:' + ' '.join(err_codes)
 
@@ -196,10 +209,12 @@ class WsfeConfig(models.Model):
             raise UserError(_("Error fetching voucher from AFIP!"))
         return response.ResultGet
 
-    def read_tax(self):
+    def get_afip_tables(self):
         self.ensure_one()
         if not self.cuit:
-            raise UserError(_("Please configure the company VAT before get Taxes!"))
+            raise UserError(
+                _("Please configure the company VAT before get Taxes!")
+            )
         wsfe_tax_model = self.env['wsfe.tax.codes']
         wsfe_optionals_obj = self.env['wsfe.optionals']
 

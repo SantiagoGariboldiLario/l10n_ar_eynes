@@ -21,6 +21,14 @@
                         <field name="url" select="1" />
                         <field name="homologation" />
                     </group>
+                    <group>
+                        <button
+                            name="get_afip_tables"
+                            class="oe_highlight"
+                            string="Get AFIP tables"
+                            type="object"
+                        />
+                    </group>
                     <notebook colspan="4">
                         <page string="Points Of Sale">
                             <field
@@ -59,15 +67,6 @@
                                     />
                                 </form>
                             </field>
-                            <group colspan="4" col="4">
-                                <separator string="" colspan="3" />
-                                <button
-                                    name="read_tax"
-                                    class="oe_highlight"
-                                    string="Update VAT Taxes"
-                                    type="object"
-                                />
-                            </group>
                             <field
                                 name="exempt_operations_tax_ids"
                                 context="{'default_exempt_operations': True}"
