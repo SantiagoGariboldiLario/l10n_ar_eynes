@@ -706,7 +706,7 @@ class WSFE(AfipWS):
     def validate_invoice_date(val, invoice, Concepto):
         if not val:
             return True
-        if invoice.cae:
+        if invoice.state == 'posted':
             return True
         val_date = datetime.strptime(val, AFIP_DATE_FORMAT)
         last_invoiced_date = invoice.get_last_date_invoice()
