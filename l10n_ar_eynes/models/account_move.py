@@ -1049,7 +1049,6 @@ class AccountMove(models.Model):
         # ^- Raise if trying to validate invoice of != companies
         ctx['company_id'] = company.id
 
-        ctx.setdefault('without_raise', True)
         wsfe_conf = wsfe_conf_obj.with_context(**ctx).get_config()
         wsfex_conf = wsfex_conf_obj.with_context(**ctx).get_config()
 
@@ -1079,13 +1078,12 @@ class AccountMove(models.Model):
 
         if confs_list:
             confs_obj = confs_list[0]
-        elif not ctx['without_raise']:
+        else:
             err = (
                 _("There is no configuration for this " "POS %s") % pos_ar.name
             )
             raise UserError(_("WSFE Error\n") + err)
-        else:
-            confs_obj = False
+
         return confs_obj
 
     def get_currency_code(self):
