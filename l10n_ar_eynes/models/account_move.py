@@ -398,9 +398,8 @@ class AccountMove(models.Model):
             partner_fiscal_position = (
                 self.partner_id.property_account_position_id
             )
-            journals = self.env.user.journal_ids.filtered(
-                lambda j: partner_fiscal_position in j.fiscal_position_ids
-                and j.fiscal_type == self.fiscal_type
+            journals = self.env.user.get_journals_by_fiscal_position(
+                partner_fiscal_position, self.fiscal_type
             )
             if not journals:
                 self.journal_id = False

@@ -592,9 +592,9 @@ msgid "Available Checks"
 msgstr "Cheques Disponibles"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__journal_ids
-msgid "Available Journals"
-msgstr "Diarios Disponibles"
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__journal_rel_ids
+msgid "Available Point of Sales Journals"
+msgstr "Diarios de Punto de Venta Disponibles"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form

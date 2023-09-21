@@ -19,7 +19,6 @@ from . import res_partner  # noqa
 from . import res_users  # noqa
 from . import res_voucher_type  # noqa
 from . import retention  # noqa
-from . import user_journal_rel  # noqa
 from . import sale_order  # noqa
 from . import stock_move  # noqa
 from . import stock_picking  # noqa

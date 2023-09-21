@@ -24,8 +24,8 @@ class SaleOrder(models.Model):
         invoice_vals.update(
             {'address_shipping_id': self.partner_shipping_id.id}
         )
-        journals = self.env.user.journal_ids.filtered(
-            lambda j: self.fiscal_position_id in j.fiscal_position_ids
+        journals = self.env.user.get_journals_by_fiscal_position(
+            self.fiscal_position_id, 'internal'
         )
         if not journals:
             raise exceptions.ValidationError(
