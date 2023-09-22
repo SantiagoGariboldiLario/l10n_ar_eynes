@@ -34,3 +34,4 @@ from . import sicore
 from . import sifere
 from . import arba_exporter
 from . import arciba_exporter
+from . import sequence_mixin
