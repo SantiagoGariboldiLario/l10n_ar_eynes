@@ -441,7 +441,9 @@ class AccountMove(models.Model):
         """
         Update tax information based on perceptions.
         """
-        tax_group_perception = self.env.ref('l10n_ar_eynes.perceptions_tax_group')
+        tax_group_perception = self.env.ref(
+            'l10n_ar_eynes.perceptions_tax_group'
+        )
 
         if self.is_sale_document() or self.is_purchase_document():
             perceptions_applied = self.env['account.tax']
@@ -449,13 +451,21 @@ class AccountMove(models.Model):
                 perceptions_applied += perception.perception_id.tax_id
 
             for line in self.invoice_line_ids:
-                line.tax_ids = (line.tax_ids - line.tax_ids.filtered(lambda tax: tax.tax_group_id == tax_group_perception)) | perceptions_applied
+                line.tax_ids = (
+                    line.tax_ids
+                    - line.tax_ids.filtered(
+                        lambda tax: tax.tax_group_id == tax_group_perception
+                    )
+                ) | perceptions_applied
 
             if not self.env.context.get('is_reverse'):
                 self._recompute_tax_lines()
 
                 for perception in self.perception_ids:
-                    move_line = self.line_ids.filtered(lambda line: line.tax_line_id == perception.perception_id.tax_id)
+                    move_line = self.line_ids.filtered(
+                        lambda line: line.tax_line_id
+                        == perception.perception_id.tax_id
+                    )
                     vals = self._prepare_tax_line_vals(perception)
                     move_line.update(vals)
 
@@ -1453,7 +1463,7 @@ class AccountMove(models.Model):
         (
             'unique_move',
             'unique(partner_id, supplier_move_reference, is_debit_note)',
-            _('This invoice reference already exists for this supplier'),
+            _('This invoice was already entered.'),
         ),
     ]
 

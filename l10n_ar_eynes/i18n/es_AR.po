@@ -5494,8 +5494,8 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_move_unique_move
 #, python-format
-msgid "This invoice reference already exists for this supplier"
-msgstr "Este movimiento ya existe para este cliente"
+msgid "This invoice was already entered"
+msgstr "Esta factura ya fue ingresada."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_retention_line__date_applied
