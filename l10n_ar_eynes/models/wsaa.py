@@ -1,32 +1,53 @@
 ##############################################################################
-#   Copyright (c) 2023 Eynes/E-MIPS (www.eynes.com.ar)
+#
+#   Copyright (c) 2022-2023 Eynes SRL  (Eynes - Ingenieria del software)
 #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+#
 ##############################################################################
 
-from datetime import datetime, timedelta
+import hashlib
+import logging
+import os
+import re
+from datetime import datetime
 
-import pytz
+from pyafipws.wsaa import WSAA
 
-from odoo import SUPERUSER_ID, api, fields, models
+from odoo import _, api, fields, models, tools
+from odoo.exceptions import UserError
 
-from ..utils.wsaa_suds import WSAA as wsaa
+_logger = logging.getLogger(__name__)
+
+
+def clean_url(url):
+    """Delete whitespaces and endlines."""
+    return re.sub(r'\s+', '', url)
+
+
+def parse_response_date(date_str):
+    """Convert Date format from xml response to Datetime to be saved on Odoo field."""
+    exptime_iso = date_str[0 : (date_str.rfind('.') + 4)]
+    return datetime.strptime(exptime_iso, '%Y-%m-%dT%H:%M:%S.%f')
 
 
 class WSAAConfig(models.Model):
     _name = "wsaa.config"
     _description = "Configuration for WSAA"
 
-    name = fields.Char('Description', size=255)
     certificate = fields.Text('Certificate', readonly=True)
-    key = fields.Text('Private Key', readonly=True)
-    url = fields.Char('URL for WSAA', size=60, required=True)
     company_id = fields.Many2one(
         'res.company',
         'Company Name',
         required=True,
         default=lambda self: self.env.user.company_id.id,
     )
-    service_ids = fields.One2many('wsaa.ta', 'config_id', string="Authorized Services")
+    homologation = fields.Boolean(default=True)
+    key = fields.Text('Private Key', readonly=True)
+    name = fields.Char('Description', size=255)
+    url = fields.Char('URL for WSAA', compute='_compute_url')
+    service_ids = fields.One2many(
+        'wsaa.ta', 'config_id', string="Authorized Services"
+    )
 
     _sql_constraints = [
         (
@@ -35,6 +56,13 @@ class WSAAConfig(models.Model):
             'The configuration must be unique per company !',
         )
     ]
+
+    @api.depends('homologation')
+    def _compute_url(self):
+        url_prod = clean_url(self.env.ref('l10n_ar_eynes.url_prod_wsaa').value)
+        url_homo = clean_url(self.env.ref('l10n_ar_eynes.url_homo_wsaa').value)
+        for rec in self:
+            rec.url = url_homo if rec.homologation else url_prod
 
     def download_file(self):
         self.ensure_one()
@@ -62,11 +90,15 @@ class AfipWsService(models.Model):
     _name = "afipws.service"
     _description = "WS Services"
 
-    name = fields.Char('Service Name', size=16, required=True)
     description = fields.Text('Description')
+    name = fields.Char('Service Name', size=16, required=True)
 
     _sql_constraints = [
-        ('name_uniq', 'unique (name)', 'The name of the service must be unique!')
+        (
+            'name_uniq',
+            'unique (name)',
+            'The name of the service must be unique!',
+        )
     ]
 
 
@@ -74,12 +106,12 @@ class WSAATa(models.Model):
     _name = "wsaa.ta"
     _description = "Ticket Access for WSAA"
 
-    name = fields.Many2one('afipws.service', 'Service')
-    token = fields.Text('Token', readonly=True)
-    sign = fields.Text('Sign', readonly=True)
-    expiration_time = fields.Char('Expiration Time', size=256)
-    config_id = fields.Many2one('wsaa.config')
     company_id = fields.Many2one('res.company', 'Company Name')
+    config_id = fields.Many2one('wsaa.config')
+    expiration_time = fields.Char('Expiration Time', size=256)
+    name = fields.Many2one('afipws.service', 'Service')
+    sign = fields.Text('Sign', readonly=True)
+    token = fields.Text('Token', readonly=True)
 
     _sql_constraints = [
         (
@@ -89,54 +121,99 @@ class WSAATa(models.Model):
         )
     ]
 
-    @api.model
-    def _renew_ticket(self):
-        wsaa_config = self.config_id
-        service = self.name.name
-        user = self.env['res.users'].sudo().browse(SUPERUSER_ID)
-        if user.partner_id.tz:
-            tz = pytz.timezone(user.partner_id.tz)
-        else:
-            tz = pytz.utc
-        _wsaa = wsaa(
-            wsaa_config.certificate, wsaa_config.key, wsaa_config.url, service, tz
+    def is_expired(self):
+        if not self.expiration_time:
+            return True
+        expiration_time = datetime.strptime(
+            self.expiration_time, '%Y-%m-%d %H:%M:%S.%f'
         )
-        _wsaa.get_token_and_sign(wsaa_config.certificate, wsaa_config.key)
-
-        vals = {
-            'token': _wsaa.token,
-            'sign': _wsaa.sign,
-            'expiration_time': _wsaa.expiration_time.strftime('%Y-%m-%d %H:%M:%S'),
-        }
-        return vals
+        return datetime.now() > expiration_time
 
     def get_token_sign(self):
+        """
+        Handle AFIP WSAA connection and authentication.
+        Returns:
+            - sign: str
+            - token: str
+        """
+        CERTIFICATE = self.config_id.certificate
+        DEFAULT_TTL = 60 * 60 * 6  # 6 hours
+        FILESTORE_PATH = tools.config.filestore(self.env.cr.dbname)
+        FORCE = self._context.get('force_renew', False)
+        HOMOLOGATION = self.config_id.homologation
+        KEY = self.config_id.key
+        SERVICE = self.name.name
         ticket = self
-        force = self._context.get('force_renew', False)
+        URL = self.config_id.url
 
-        if not force:
-            if ticket.expiration_time:
-                expiration_time = datetime.strptime(
-                    ticket.expiration_time, '%Y-%m-%d %H:%M:%S'
+        # create AFIP webservice authentication helper instance:
+        wsaa = WSAA()
+        wsaa.HOMO = HOMOLOGATION
+        # raise python exceptions on any failure
+        wsaa.LanzarExcepciones = True
+        # Change dir to have read/write permissions
+        wsaa.InstallDir = FILESTORE_PATH
+
+        _logger.info("Checking AFIP authentication...")
+        try:
+            fn = (
+                "%s.xml"
+                % hashlib.md5(
+                    (SERVICE + CERTIFICATE + KEY).encode("utf-8")
+                ).hexdigest()
+            )
+
+            fn = os.path.join(FILESTORE_PATH, "cache", fn)
+
+            if not os.path.exists(fn) or ticket.is_expired() or FORCE:
+                _logger.info(
+                    "Access Ticket outdated or do not exists. Creating Access Request Ticket"
                 )
-                # Primero chequemos si tenemos ya un ticket expirado
-                # Si ahora+10 minutos es mayor al momento de expiracion
-                # debemos renovar el ticket.
-                if datetime.now() + timedelta(minutes=10) < expiration_time:
-                    return ticket.token, ticket.sign
+                tra = wsaa.CreateTRA(service=SERVICE, ttl=DEFAULT_TTL)
+                _logger.info("Encrypting Access Ticket")
+                cms = wsaa.SignTRA(tra, CERTIFICATE, KEY)
+                _logger.info("Connecting to WebService...")
+                wsaa.Conectar(wsdl=URL)
+                _logger.info("Login...")
+                ta = wsaa.LoginCMS(cms)
+                if not ta:
+                    _logger.error("Unable to reach Ticket Access.")
+                    raise RuntimeError()
+                _logger.info(
+                    "Ticket Access acquired. Saving data on filestore."
+                )
+                open(fn, "w").write(ta)
 
-        # service = ticket.name.name
-        # vals = self._renew_ticket(ticket.config_id, service)
+                # analyze the access ticket xml and extract the relevant fields
+                wsaa.AnalizarXml(xml=ta)
+                token = wsaa.ObtenerTagXml("token")
+                sign = wsaa.ObtenerTagXml("sign")
+                expirationTime = wsaa.ObtenerTagXml("expirationTime")
+                # write the access ticket for further consumption
+                ticket.write(
+                    {
+                        "expiration_time": parse_response_date(expirationTime),
+                        "token": token,
+                        "sign": sign,
+                    }
+                )
+        except Exception as e:
+            token = sign = None
+            if wsaa.Excepcion:
+                # get the exception already parsed by the helper
+                err_msg = wsaa.Excepcion
+                _logger.error("WSAA Error.", err_msg)
+            else:
+                err_msg = str(e)
+                _logger.error("Internal Error.", err_msg)
+            raise UserError(
+                _("Could not connect. This is the what we received: %s")
+                % (err_msg)
+            ) from e
 
-        vals = self._renew_ticket()
-        with api.Environment.manage():
-            new_cr = self.pool.cursor()
-            new_env = api.Environment(new_cr, self.env.user.id, self.env.context)
-            new_env['wsaa.ta'].browse(self.id).write(vals)
-            new_cr.commit()
-            new_cr.close()
-        return vals['token'], vals['sign']
+        return ticket.token, ticket.sign
 
     def action_renew(self):
+        """This method is called from button at WSAA, to force the creation of a new TA."""
         self.with_context(force_renew=True).get_token_sign()
         return True

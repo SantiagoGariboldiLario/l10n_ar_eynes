@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.0.4.2',
+    'version': '15.0.1.0.0',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -42,6 +42,7 @@
     'data': [
         'security/cot_security.xml',
         'security/delivery_cot_security.xml',
+        "data/ir_config_parameter.xml",
         'data/fiscal_position_data.xml',
         'data/account_taxes_data.xml',
         'data/res_document_type_data.xml',
@@ -51,7 +52,7 @@
         'data/iibb_situation_data.xml',
         'data/dst_cuit_codes_data.xml',
         'data/ir_sequence_data.xml',
-        "data/wsfe_data.xml",
+        "data/afip_ws.xml",
         "data/ir_cron.xml",
         "data/perception_data.xml",
         "data/res_groups_data.xml",
@@ -122,7 +123,9 @@
             "easywsy",
             "suds",
             "qrcode",
-            "pysimplesoap",
+            "git+https://github.com/pysimplesoap/pysimplesoap.git@py311",
+            "pyafipws@https://github.com/reingart/pyafipws/archive/main.zip",
+            "httplib2",
             "future",
         ]
     },

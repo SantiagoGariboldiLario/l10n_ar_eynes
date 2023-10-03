@@ -19,7 +19,6 @@
                         <field name="company_id" select="1" />
                         <field name="cuit" select="1" />
                         <field name="url" select="1" />
-                        <field name="homologation" />
                     </group>
                     <group>
                         <button
@@ -128,7 +127,6 @@
                 <field name="company_id" select="1" />
                 <field name="cuit" select="1" />
                 <field name="url" select="1" />
-                <field name="homologation" />
             </tree>
         </field>
     </record>

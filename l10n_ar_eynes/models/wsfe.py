@@ -50,12 +50,27 @@ class WsfeConfig(models.Model):
     _webservice_class = WSFE
 
     name = fields.Char('Name', size=64, required=True)
+    company_id = fields.Many2one('res.company', 'Company Name', required=True)
     cuit = fields.Char(related='company_id.partner_id.vat', string='Cuit')
-    url = fields.Char('URL for WSFE', size=60, required=True)
-    homologation = fields.Boolean(
-        'Homologation',
-        help="If true, there will be some validations that are disabled, "
-        + "for example, invoice number correlativeness",
+    url = fields.Char('URL for WSFE', compute="_compute_url")
+    config_id = fields.Many2one('wsaa.config')
+    wsaa_ticket_id = fields.Many2one('wsaa.ta', 'Ticket Access')
+
+    services_date_difference = fields.Integer(
+        'Services and Products',
+        default=10,
+        help="""
+        This is the maximum date range that an invoice can be created before
+        or after the validation date.
+        """,
+    )
+    products_date_difference = fields.Integer(
+        'Products',
+        default=5,
+        help="""
+        This is the maximum date range that an invoice can be created before
+        or after the validation date.
+        """,
     )
     point_of_sale_ids = fields.Many2many(
         'account.journal',
@@ -76,12 +91,6 @@ class WsfeConfig(models.Model):
         'Taxes of Exempt Operations',
         domain=[('from_afip', '=', False), ('exempt_operations', '=', True)],
     )
-    wsaa_ticket_id = fields.Many2one('wsaa.ta', 'Ticket Access')
-    company_id = fields.Many2one('res.company', 'Company Name', required=True)
-    services_date_difference = fields.Integer(
-        'Services and Products', default=10
-    )
-    products_date_difference = fields.Integer('Products', default=5)
     optional_ids = fields.One2many(
         'wsfe.optionals',
         'wsfe_config_id',
@@ -89,27 +98,50 @@ class WsfeConfig(models.Model):
         domain=[('from_afip', '=', True)],
     )
 
+    @api.depends('config_id', 'config_id.homologation')
+    def _compute_url(self):
+        url_prod = self.env.ref('l10n_ar_eynes.url_prod_wsfe').value
+        url_homo = self.env.ref('l10n_ar_eynes.url_homo_wsfe').value
+        for rec in self:
+            rec.url = url_homo if rec.config_id.homologation else url_prod
+
     @api.model
     def create(self, vals):
+        WSAATa = self.env['wsaa.ta']
+        WSAAConfig = self.env['wsaa.config']
+        service = self.env.ref('l10n_ar_eynes.afipws_service_wsfe')
 
-        # Creamos tambien un TA para este servcio y esta compania
-        ta_obj = self.env['wsaa.ta']
-        wsaa_obj = self.env['wsaa.config']
-        service_obj = self.env['afipws.service']
-
-        # Buscamos primero el wsaa que corresponde a esta compania
-        # porque hay que recordar que son unicos por compania
-        wsaa = wsaa_obj.search([('company_id', '=', vals['company_id'])])
-        service = service_obj.search([('name', '=', 'wsfe')])
+        # WSAA are unique per company. Search the WSAA for current company:
+        wsaa = WSAAConfig.search([('company_id', '=', vals['company_id'])])
         if wsaa:
+            # Create a TA for this service and company:
             ta_vals = {
                 'name': service.id,
                 'company_id': vals['company_id'],
                 'config_id': wsaa.id,
             }
+            ta = WSAATa.create(ta_vals)
 
-            ta = ta_obj.create(ta_vals)
-            vals['wsaa_ticket_id'] = ta.id
+            vals.update(
+                {
+                    'wsaa_ticket_id': ta.id,
+                    'config_id': wsaa.id,
+                }
+            )
+        else:
+            # If not WSAA configuration has found, we need to alert user to do it.
+            company_name = (
+                self.env['res.company'].browse(vals['company_id']).name
+            )
+            raise UserError(
+                _(
+                    """
+                        Current company %(company_name)s doesn't have WSAA configured.
+                        Please, go to Configuration --> WSAA configuration
+                    """,
+                    company_name=company_name,
+                )
+            )
 
         return super(WsfeConfig, self).create(vals)
 

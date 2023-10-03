@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+
+    <!-- WSAA: AFIP Autentication -->
+    <record id="url_prod_wsaa" model="ir.config_parameter">
+        <field name="key">wsaa_prod</field>
+        <field name="value">
+            https://wsaa.afip.gov.ar/ws/services/LoginCms
+        </field>
+    </record>
+
+    <record id="url_homo_wsaa" model="ir.config_parameter">
+        <field name="key">wsaa_homo</field>
+        <field name="value">
+            https://wsaahomo.afip.gov.ar/ws/services/LoginCms
+        </field>
+    </record>
+
+    <!-- WSFE: Electronic Invoice -->
+    <record id="url_prod_wsfe" model="ir.config_parameter">
+        <field name="key">wsfe_prod</field>
+        <field name="value">
+            https://servicios1.afip.gov.ar/wsfev1/service.asmx
+        </field>
+    </record>
+
+    <record id="url_homo_wsfe" model="ir.config_parameter">
+        <field name="key">wsfe_homo</field>
+        <field name="value">
+            https://wswhomo.afip.gov.ar/wsfev1/service.asmx
+        </field>
+    </record>
+
+    <!-- WSFEX: Electronic Exportation Invoice -->
+    <record id="url_prod_wsfex" model="ir.config_parameter">
+        <field name="key">wsfex_prod</field>
+        <field name="value">
+            https://servicios1.afip.gov.ar/wsfexv1/service.asmx
+        </field>
+    </record>
+
+    <record id="url_homo_wsfex" model="ir.config_parameter">
+        <field name="key">wsfex_homo</field>
+        <field name="value">
+            https://wswhomo.afip.gov.ar/wsfexv1/service.asmx
+        </field>
+    </record>
+
+</odoo>

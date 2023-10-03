@@ -3,14 +3,16 @@
 
     <record id="afipws_service_wsfe" model="afipws.service">
         <field name="name">wsfe</field>
-        <field name="description">Web Service de Factura Electrónica</field>
+        <field name="description">
+            Web Service de Factura Electrónica
+        </field>
     </record>
 
     <record id="afipws_service_wsfex" model="afipws.service">
         <field name="name">wsfex</field>
-        <field
-            name="description"
-        >Web Service de Factura Electrónica de Exportación</field>
+        <field name="description">
+            Web Service de Factura Electrónica de Exportación
+        </field>
     </record>
 
 </odoo>

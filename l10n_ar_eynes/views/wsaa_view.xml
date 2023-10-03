@@ -15,8 +15,9 @@
         <field name="type">tree</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="company_id" select="1" />
-                <field name="url" select="1" />
+                <field name="company_id" />
+                <field name="url" />
+                <field name="homologation" />
             </tree>
         </field>
     </record>
@@ -29,11 +30,19 @@
         <field name="arch" type="xml">
             <form version="7.0">
                 <sheet>
-                    <h1>WSAA Config</h1>
+                    <h1>WSAA Configuration</h1>
                     <group>
-                        <field name="name" select="1" />
-                        <field name="company_id" select="1" />
-                        <field name="url" select="1" />
+                        <field name="name" />
+                        <field name="company_id" />
+                        <field name="homologation" />
+                        <field name="url" />
+                        <span
+                            class="text-danger"
+                            attrs="{'invisible': [('homologation', '=', True)]}"
+                        >
+                            Homologation server disable. All AFIP requests will be sent to the real AFIP server.
+                            Be sure that you are on Production server.
+                        </span>
                     </group>
                     <notebook colspan="4">
                         <page string="Authorized Services">
