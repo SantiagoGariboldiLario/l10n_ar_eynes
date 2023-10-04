@@ -5,9 +5,7 @@
 #
 ##############################################################################
 
-import hashlib
 import logging
-import os
 import re
 from datetime import datetime
 
@@ -137,7 +135,7 @@ class WSAATa(models.Model):
             - token: str
         """
         CERTIFICATE = self.config_id.certificate
-        DEFAULT_TTL = 60 * 60 * 6  # 6 hours
+        DEFAULT_TTL = 60 * 60 * 12  # 12 hours (see WSAA documentation)
         FILESTORE_PATH = tools.config.filestore(self.env.cr.dbname)
         FORCE = self._context.get('force_renew', False)
         HOMOLOGATION = self.config_id.homologation
@@ -155,17 +153,8 @@ class WSAATa(models.Model):
         wsaa.InstallDir = FILESTORE_PATH
 
         _logger.info("Checking AFIP authentication...")
-        try:
-            fn = (
-                "%s.xml"
-                % hashlib.md5(
-                    (SERVICE + CERTIFICATE + KEY).encode("utf-8")
-                ).hexdigest()
-            )
-
-            fn = os.path.join(FILESTORE_PATH, "cache", fn)
-
-            if not os.path.exists(fn) or ticket.is_expired() or FORCE:
+        if ticket.is_expired() or FORCE:
+            try:
                 _logger.info(
                     "Access Ticket outdated or do not exists. Creating Access Request Ticket"
                 )
@@ -179,17 +168,13 @@ class WSAATa(models.Model):
                 if not ta:
                     _logger.error("Unable to reach Ticket Access.")
                     raise RuntimeError()
-                _logger.info(
-                    "Ticket Access acquired. Saving data on filestore."
-                )
-                open(fn, "w").write(ta)
-
+                _logger.info("Ticket Access acquired. Saving data.")
                 # analyze the access ticket xml and extract the relevant fields
                 wsaa.AnalizarXml(xml=ta)
                 token = wsaa.ObtenerTagXml("token")
                 sign = wsaa.ObtenerTagXml("sign")
                 expirationTime = wsaa.ObtenerTagXml("expirationTime")
-                # write the access ticket for further consumption
+                # write the access ticket data
                 ticket.write(
                     {
                         "expiration_time": parse_response_date(expirationTime),
@@ -197,19 +182,19 @@ class WSAATa(models.Model):
                         "sign": sign,
                     }
                 )
-        except Exception as e:
-            token = sign = None
-            if wsaa.Excepcion:
-                # get the exception already parsed by the helper
-                err_msg = wsaa.Excepcion
-                _logger.error("WSAA Error.", err_msg)
-            else:
-                err_msg = str(e)
-                _logger.error("Internal Error.", err_msg)
-            raise UserError(
-                _("Could not connect. This is the what we received: %s")
-                % (err_msg)
-            ) from e
+            except Exception as e:
+                token = sign = None
+                if wsaa.Excepcion:
+                    # get the exception already parsed by the helper
+                    err_msg = wsaa.Excepcion
+                    _logger.error("WSAA Error.", err_msg)
+                else:
+                    err_msg = str(e)
+                    _logger.error("Internal Error.", err_msg)
+                raise UserError(
+                    _("Could not connect. This is the what we received: %s")
+                    % (err_msg)
+                ) from e
 
         return ticket.token, ticket.sign
 

@@ -2,10 +2,8 @@
 # pylint: pointless-statement
 easywsy
 future
-git+https://github.com/pysimplesoap/pysimplesoap.git@py311
 httplib2
 M2Crypto
-pyafipws@https://github.com/reingart/pyafipws/archive/main.zip
 pyOpenSSL
 qrcode
 suds-jurko

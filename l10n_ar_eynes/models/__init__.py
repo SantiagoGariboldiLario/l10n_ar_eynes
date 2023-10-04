@@ -25,6 +25,7 @@ from . import stock_picking  # noqa
 from . import certificate_request  # noqa
 from . import wsaa  # noqa
 from . import account_move_optionals  # noqa
+from . import ws  # noqa
 from . import wsfe  # noqa
 from . import wsfex  # noqa
 from . import wsfe_request  # noqa
