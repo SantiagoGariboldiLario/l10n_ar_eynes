@@ -102,4 +102,404 @@
         <field name="type">vat</field>
     </record>
 
+        <record id="iva_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IVA sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIVAS</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iva_perceptions_s' />
+        </record>
+
+        <record id="iva_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IVA efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIVAE</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iva_perceptions_e' />
+        </record>
+
+        <record id="iibb_arba_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB ARBA Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISARB</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_arba_perceptions_s' />
+        </record>
+
+        <record id="iibb_caba_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB CABA Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISCAB</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_caba_perceptions_s' />
+        </record>
+
+        <record id="iibb_catamarca_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB CATAMARCA Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISCAT</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_catamarca_perceptions_s' />
+        </record>
+
+        <record id="iibb_chaco_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB CHACO Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISCHA</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_chaco_perceptions_s' />
+        </record>
+
+        <record id="iibb_chubut_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB CHUBUT Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISCHU</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_chubut_perceptions_s' />
+        </record>
+
+        <record id="iibb_cordoba_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB CORDOBA Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISCOR</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_cordoba_perceptions_s' />
+        </record>
+
+        <record id="iibb_corrientes_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB CORRIENTES Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISCRR</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_corrientes_perceptions_s' />
+        </record>
+
+        <record id="iibb_entre_rios_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB ENTRE RIOS Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISENT</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_entre_rios_perceptions_s' />
+        </record>
+
+        <record id="iibb_formosa_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB FORMOSA Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISFOR</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_formosa_perceptions_s' />
+        </record>
+
+        <record id="iibb_jujuy_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB JUJUY Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISJUJ</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_jujuy_perceptions_s' />
+        </record>
+
+        <record id="iibb_la_pampa_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB LA PAMPA Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISLAP</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_la_pampa_perceptions_s' />
+        </record>
+
+        <record id="iibb_la_rioja_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB LA RIOJA Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISLAR</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_la_rioja_perceptions_s' />
+        </record>
+
+        <record id="iibb_mendoza_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB MENDOZA Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISMEN</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_mendoza_perceptions_s' />
+        </record>
+
+        <record id="iibb_misiones_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB MISIONES Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISMIS</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_misiones_perceptions_s' />
+        </record>
+
+        <record id="iibb_neuquen_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB NEUQUEN Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISNEU</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_neuquen_perceptions_s' />
+        </record>
+
+        <record id="iibb_rio_negro_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB RIO NEGRO Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISRIO</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_rio_negro_perceptions_s' />
+        </record>
+
+        <record id="iibb_salta_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB SALTA Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISSAL</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_salta_perceptions_s' />
+        </record>
+
+        <record id="iibb_san_juan_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB SAN JUAN Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISSAJ</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_san_juan_perceptions_s' />
+        </record>
+
+        <record id="iibb_san_luis_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB SAN LUIS Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISSAD</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_san_luis_perceptions_s' />
+        </record>
+
+        <record id="iibb_santa_cruz_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB SANTA CRUZ Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISSAC</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_santa_cruz_perceptions_s' />
+        </record>
+
+        <record id="iibb_santafe_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB SANTA FE Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISSAF</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_santafe_perceptions_s' />
+        </record>
+
+        <record id="iibb_santiago_del_estero_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB SANTIAGO DEL ESTERO Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISSAE</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_santiago_del_estero_perceptions_s' />
+        </record>
+
+        <record id="iibb_tierra_del_fuego_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB TIERRA DEL FUEGO Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISTIE</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_tierra_del_fuego_perceptions_s' />
+        </record>
+
+        <record id="iibb_tucuman_perceptions_s" model="account.journal">
+            <field name="name">Percepciones IIBB TUCUMAN Sufridas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PISTUC</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_tucuman_perceptions_s' />
+        </record>
+
+        <record id="iibb_arba_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB ARBA Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIEARB</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_arba_perceptions_e' />
+        </record>
+
+        <record id="iibb_caba_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB CABA Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIECAB</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_caba_perceptions_e' />
+        </record>
+
+        <record id="iibb_catamarca_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB CATAMARCA Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIECAT</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_catamarca_perceptions_e' />
+        </record>
+
+        <record id="iibb_chaco_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB CHACO Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIECHA</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_chaco_perceptions_e' />
+        </record>
+
+        <record id="iibb_chubut_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB CHUBUT Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIECHU</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_chubut_perceptions_e' />
+        </record>
+
+        <record id="iibb_cordoba_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB CORDOBA Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIECOR</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_cordoba_perceptions_e' />
+        </record>
+
+        <record id="iibb_corrientes_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB CORRIENTES Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIECRR</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_corrientes_perceptions_e' />
+        </record>
+
+        <record id="iibb_entre_rios_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB ENTRE RIOS Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIEENT</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_entre_rios_perceptions_e' />
+        </record>
+
+        <record id="iibb_formosa_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB FORMOSA Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIEFOR</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_formosa_perceptions_e' />
+        </record>
+
+        <record id="iibb_jujuy_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB JUJUY Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIEJUJ</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_jujuy_perceptions_e' />
+        </record>
+
+        <record id="iibb_la_pampa_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB LA PAMPA Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIELAP</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_la_pampa_perceptions_e' />
+        </record>
+
+        <record id="iibb_la_rioja_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB LA RIOJA Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIELAR</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_la_rioja_perceptions_e' />
+        </record>
+
+        <record id="iibb_mendoza_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB MENDOZA Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIEMEN</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_mendoza_perceptions_e' />
+        </record>
+
+        <record id="iibb_misiones_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB MISIONES Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIEMIS</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_misiones_perceptions_e' />
+        </record>
+
+        <record id="iibb_neuquen_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB NEUQUEN Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIENEU</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_neuquen_perceptions_e' />
+        </record>
+
+        <record id="iibb_rio_negro_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB RIO NEGRO Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIERIO</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_rio_negro_perceptions_e' />
+        </record>
+
+        <record id="iibb_salta_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB SALTA Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIESAL</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_salta_perceptions_e' />
+        </record>
+
+        <record id="iibb_san_juan_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB SAN JUAN Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIESAJ</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_san_juan_perceptions_e' />
+        </record>
+
+        <record id="iibb_san_luis_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB SAN LUIS Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIESAD</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_san_luis_perceptions_e' />
+        </record>
+
+        <record id="iibb_santa_cruz_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB SANTA CRUZ Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIESAC</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_santa_cruz_perceptions_e' />
+        </record>
+
+        <record id="iibb_santafe_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB SANTA FE Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIESAF</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_santafe_perceptions_e' />
+        </record>
+
+        <record id="iibb_santiago_del_estero_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB SANTIAGO DEL ESTERO Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIESAE</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_santiago_del_estero_perceptions_e' />
+        </record>
+
+        <record id="iibb_tierra_del_fuego_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB TIERRA DEL FUEGO Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIETIE</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_tierra_del_fuego_perceptions_e' />
+        </record>
+
+        <record id="iibb_tucuman_perceptions_e" model="account.journal">
+            <field name="name">Percepciones IIBB TUCUMAN Efectuadas</field>
+            <field name="type">perceptions</field>
+            <field name="code">PIETUC</field>
+            <field name="active">FALSE</field>
+            <field name="tax_id" ref='tax_iibb_tucuman_perceptions_e' />
+        </record>
+
 </odoo>

@@ -358,9 +358,18 @@ class ResPartnerRetention(models.Model):
     def _compute_retention_percent(self):
         for p_retention in self:
             ret_activity = p_retention.partner_id.retention_activity_id
+            ret_tax = p_retention.retention_id.tax_id
+            ret_tax_type = ret_tax.retention_type
+            if not ret_tax_type:
+                raise ValidationError(
+                    _(
+                        "Please configure retention_type in the "
+                        "account.tax [%s]." % ret_tax.name
+                    )
+                )
             if not p_retention.retention_id or not ret_activity:
                 continue
-            ret_tax = p_retention.retention_id.tax_id
+
             if ret_tax:
                 ret_lines = {
                     'vat': ret_tax.vat_application_ids,
@@ -368,7 +377,7 @@ class ResPartnerRetention(models.Model):
                     'profit': ret_tax.profit_application_ids,
                 }
                 p_retention.percent = (
-                    ret_lines[ret_tax.retention_type]
+                    ret_lines[ret_tax_type]
                     .filtered(
                         lambda retline: retline.activity_id == ret_activity
                     )
@@ -461,3 +470,4 @@ class ResPartnerPerception(models.Model):
         perception_type = self.perception_id.type
         domain = [('type', '=', perception_type)]
         return {'domain': {'activity_id': domain}}
+

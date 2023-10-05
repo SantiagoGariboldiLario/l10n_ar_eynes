@@ -57,6 +57,7 @@ class AccountTax(models.Model):
             ('vat', 'VAT'),
             ('gross_income', 'Gross Income'),
             ('profit', 'Profit'),
+            ('suss', 'SUSS'),
             ('other', 'Other'),
         ],
         string='Type',

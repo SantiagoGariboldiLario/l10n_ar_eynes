@@ -20,13 +20,14 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.0.4.2',
+    'version': '15.0.0.5.0',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
     'category': 'Accounting/Accounting',
     'depends': [
         'sale',
+        'base',
         'stock',
         'purchase',
         'contacts',
@@ -42,6 +43,7 @@
     'data': [
         'security/cot_security.xml',
         'security/delivery_cot_security.xml',
+        'data/account_taxes_data.xml',
         'data/fiscal_position_data.xml',
         'data/account_taxes_data.xml',
         'data/res_document_type_data.xml',
@@ -54,6 +56,7 @@
         "data/wsfe_data.xml",
         "data/ir_cron.xml",
         "data/perception_data.xml",
+        "data/retention_data.xml",
         "data/res_groups_data.xml",
         "data/sicore_data.xml",
         "data/sifere_data.xml",
