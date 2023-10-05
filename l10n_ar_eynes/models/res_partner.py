@@ -364,8 +364,9 @@ class ResPartnerRetention(models.Model):
                 raise ValidationError(
                     _(
                         "Please configure retention_type in the "
-                        "account.tax [%s]." % ret_tax.name
+                        "account.tax [%s]."
                     )
+                    % ret_tax.name
                 )
             if not p_retention.retention_id or not ret_activity:
                 continue
@@ -470,4 +471,3 @@ class ResPartnerPerception(models.Model):
         perception_type = self.perception_id.type
         domain = [('type', '=', perception_type)]
         return {'domain': {'activity_id': domain}}
-

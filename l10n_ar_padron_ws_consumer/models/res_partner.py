@@ -33,7 +33,8 @@ class ResPartnerPerception(models.Model):
             'perception_partner_unique_period',
             'unique(partner_id, perception_id, period)',
             _(
-                'There must be only one perception of this type configured for the partner in the same period'
+                'There must be only one perception of this type configured '
+                'for the partner in the same period'
             ),
         )
     ]
@@ -50,7 +51,8 @@ class ResPartnerRetention(models.Model):
             'retention_partner_unique_period',
             'unique(partner_id, retention_id, period)',
             _(
-                'There must be only one retention of this type configured for the partner in the same period'
+                'There must be only one retention of this type '
+                'configured for the partner in the same period'
             ),
         )
     ]
@@ -77,8 +79,8 @@ class ResPartner(models.Model):
             try:
                 if self.check_vat_ar(vat):
                     res.append(vat)
-            except:
-                pass
+            except BaseException:
+                _logger.info('Ignoring vat')
         return res
 
     def _get_padron_values(
@@ -380,12 +382,20 @@ class ResPartner(models.Model):
         _logger.debug('Deleting OLD padron')
 
         query = """
-            DELETE FROM res_partner_perception WHERE period <= date_trunc('month', now()) - interval '6 months';
-            DELETE FROM res_partner_retention WHERE period <= date_trunc('month', now()) - interval '6 months';
+            DELETE FROM res_partner_perception WHERE
+                period <= date_trunc('month', now()) - interval '6 months';
+            DELETE FROM res_partner_retention WHERE
+                period <= date_trunc('month', now()) - interval '6 months';
         """
         self.env.cr.execute(query)
 
-    def do_update_from_padron(self, padron_name=[], padron_type=[]):
+    def do_update_from_padron(self, padron_name=None, padron_type=None):
+        if padron_name is None:
+            padron_name = []
+
+        if padron_type is None:
+            padron_type = []
+
         self._cleanup_old_padron_values()
 
         _logger.info('Update Padron')
