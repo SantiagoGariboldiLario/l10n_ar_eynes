@@ -27,21 +27,26 @@
                         >
                             <tree editable="bottom">
                                 <field name="name" readonly="True" />
-                                <field name="priority" readonly="True" />
+                                <field name="to_date" readonly="True" />
+                                <field name="blocked" readonly="True" />
+                                <field name="journal_id" />
+                                <field name="priority" />
+                                <field name="from_afip" readonly="True" />
                             </tree>
                         </field>
                     </page>
                     <page string="VAT Taxes">
-                        <field name="vat_tax_ids" nolabel="1">
+                        <field
+                            name="vat_tax_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
                             <tree editable="bottom">
                                 <field name="code" readonly="True" />
                                 <field name="name" readonly="True" />
                                 <field name="from_date" readonly="True" />
                                 <field name="to_date" readonly="True" />
-                                <field
-                                    name="tax_id"
-                                    domain="[('type_tax_use', '=', 'sale'), ('tax_group_id.name', 'ilike', 'vat')]"
-                                />
+                                <field name="tax_id" />
                                 <field name="from_afip" readonly="True" />
                             </tree>
                         </field>
@@ -55,25 +60,33 @@
                                 <field name="tax_id" />
                                 <field name="exempt_operations" invisible="1" />
                             </tree>
-                            <form string="Exempt Operations Taxes Mapping">
-                                <field name="name" />
-                                <field name="tax_id" />
-                                <field name="from_afip" invisible="1" />
-                                <field
-                                    name="exempt_operations"
-                                    attrs="{'readonly': [('from_afip', '=', True)]}"
-                                />
-                            </form>
                         </field>
                     </page>
 
                     <page string="Optionals">
                         <field name="optional_ids" nolabel="1">
-                            <tree readonly="1">
+                            <tree readonly="True">
                                 <field name="code" />
                                 <field name="name" />
-                                <field name="to_date" />
                                 <field name="from_date" />
+                                <field name="to_date" />
+                                <field name="from_afip" />
+                            </tree>
+                        </field>
+                    </page>
+
+                    <page string="Currencies">
+                        <field
+                            name="currency_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="bottom">
+                                <field name="code" readonly="True" />
+                                <field name="name" readonly="True" />
+                                <field name="from_date" readonly="True" />
+                                <field name="to_date" readonly="True" />
+                                <field name="currency_id" />
                                 <field name="from_afip" readonly="True" />
                             </tree>
                         </field>
@@ -81,8 +94,8 @@
 
                     <page string="Validations">
                         <group col="6" string="Invoice Date Difference from Today">
-                        <field name="services_date_difference" />
-                        <field name="products_date_difference" />
+                            <field name="services_date_difference" />
+                            <field name="products_date_difference" />
                         </group>
                     </page>
                 </notebook>

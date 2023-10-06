@@ -1,47 +1,131 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <!-- ***********************-->
-    <!-- * WSFEX Configuration *-->
-    <!-- ***********************-->
-    <!-- Form View for wsfex.config -->
+    <!-- * Add button and AFIP tables to WSFE form view * -->
     <record id="view_wsfex_config_form" model="ir.ui.view">
+        <field name="name">wsfex.config.form</field>
+        <field name="model">wsfex.config</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="l10n_ar_eynes.view_wsfe_config_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='principal']" position="after">
+                <group name="extra">
+                    <button
+                        name="get_afip_tables"
+                        class="oe_highlight"
+                        string="Get AFIP tables"
+                        type="object"
+                        attrs="{'invisible': [('url', '=', False)]}"
+                    />
+                </group>
+
+                <notebook colspan="4">
+                    <page string="Points Of Sale">
+                        <field
+                            name="point_of_sale_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="bottom">
+                                <field name="name" readonly="True" />
+                                <field name="to_date" readonly="True" />
+                                <field name="blocked" readonly="True" />
+                                <field name="journal_id" />
+                                <field name="priority" />
+                                <field name="from_afip" readonly="True" />
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="VAT Taxes">
+                        <field
+                            name="vat_tax_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="bottom">
+                                <field name="code" readonly="True" />
+                                <field name="name" readonly="True" />
+                                <field name="from_date" readonly="True" />
+                                <field name="to_date" readonly="True" />
+                                <field name="tax_id" />
+                                <field name="from_afip" readonly="True" />
+                            </tree>
+                        </field>
+                        <field
+                            name="exempt_operations_tax_ids"
+                            context="{'default_exempt_operations': True}"
+                            nolabel="1"
+                        >
+                            <tree editable="bottom">
+                                <field name="name" />
+                                <field name="tax_id" />
+                                <field name="exempt_operations" invisible="1" />
+                            </tree>
+                        </field>
+                    </page>
+
+                    <page string="Optionals">
+                        <field name="optional_ids" nolabel="1">
+                            <tree readonly="True">
+                                <field name="code" />
+                                <field name="name" />
+                                <field name="from_date" />
+                                <field name="to_date" />
+                                <field name="from_afip" />
+                            </tree>
+                        </field>
+                    </page>
+
+                    <page string="Currencies">
+                        <field
+                            name="currency_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="bottom">
+                                <field name="code" readonly="True" />
+                                <field name="name" readonly="True" />
+                                <field name="from_date" readonly="True" />
+                                <field name="to_date" readonly="True" />
+                                <field name="currency_id" />
+                                <field name="from_afip" readonly="True" />
+                            </tree>
+                        </field>
+                    </page>
+
+                    <page string="Validations">
+                        <group col="6" string="Invoice Date Difference from Today">
+                            <field name="services_date_difference" />
+                            <field name="products_date_difference" />
+                        </group>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+
+    <!--Window Action for wsfex.config-->
+    <record id="action_wsfex_config" model="ir.actions.act_window">
+        <field name="name">WSFEX Config</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">wsfex.config</field>
+        <field name="view_mode">tree</field>
+        <field
+            name="view_ids"
+            eval="[
+        (5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('view_ws_config_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('view_wsfex_config_form')})
+        ]"
+        />
+    </record>
+
+    <!-- <record id="view_wsfex_config_form" model="ir.ui.view">
         <field name="name">wsfex.config.form</field>
         <field name="model">wsfex.config</field>
         <field name="type">form</field>
         <field name="arch" type="xml">
             <form string="Config WSFEX" version="7.0">
                 <sheet>
-                    <h1>
-                        <field name="name" />
-                    </h1>
-                    <group>
-                        <field name="company_id" />
-                        <field name="cuit" />
-                        <field name="url" />
-                        <field name="homologation" />
-                    </group>
-                    <notebook colspan="4">
-                        <page string="Points Of Sale">
-                            <field name="point_of_sale_ids" nolabel="1" />
-                        </page>
-                        <page string="Currencies">
-                            <field name="currency_ids" nolabel="1">
-                                <tree editable="top">
-                                    <field name="name" readonly="1" />
-                                    <field name="code" readonly="1" />
-                                    <field name="currency_id" />
-                                </tree>
-                            </field>
-                            <div class="oe_right oe_button_box" name="import_buttons">
-                                <button
-                                    name="get_wsfex_currencies"
-                                    class="oe_highlight"
-                                    type="object"
-                                    string="Get Currencies"
-                                    groups="account.group_account_user"
-                                />
-                            </div>
-                        </page>
                         <page string="Units of Measure">
                             <field name="uom_ids" nolabel="1">
                                 <tree editable="top">
@@ -173,179 +257,5 @@
                 </sheet>
             </form>
         </field>
-    </record>
-
-    <!-- Tree View for electronic_invoice_config -->
-    <record id="view_wsfex_config_tree" model="ir.ui.view">
-        <field name="name">wsfex.config.tree</field>
-        <field name="model">wsfex.config</field>
-        <field name="type">tree</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name="name" />
-                <field name="company_id" />
-                <field name="cuit" />
-                <field name="url" />
-                <field name="homologation" />
-            </tree>
-        </field>
-    </record>
-
-    <!--Window Action para wsfex_config-->
-    <record id="action_wsfex_config" model="ir.actions.act_window">
-        <field name="name">WSFEX Config</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">wsfex.config</field>
-        <field name="view_mode">tree,form</field>
-    </record>
-
-    <!-- ***************** -->
-    <!-- * Voucher Types * -->
-    <!-- ***************** -->
-    <!-- Form View for res_voucher_type -->
-    <record id="view_wsfe_voucher_type_form" model="ir.ui.view">
-        <field name="name">res.voucher.type.form</field>
-        <field name="model">res.voucher.type</field>
-        <field name="type">form</field>
-        <field name="arch" type="xml">
-            <form string="Voucher Types">
-                <sheet>
-                    <group>
-                        <field name="name" />
-                        <field name="afip_code" />
-                        <field name="voucher_model" />
-                        <field name="doc_type" />
-                        <field name="denomination" />
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
-    <!-- Tree View for voucher type -->
-    <record id="view_wsfe_voucher_type_tree" model="ir.ui.view">
-        <field name="name">res.voucher.type.tree</field>
-        <field name="model">res.voucher.type</field>
-        <field name="type">tree</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name="name" />
-                <field name="afip_code" />
-                <field name="voucher_model" />
-                <field name="doc_type" />
-                <field name="denomination" />
-            </tree>
-        </field>
-    </record>
-
-    <!--Window Action para Voucher Types-->
-    <record id="action_wsfe_voucher_type_tree" model="ir.actions.act_window">
-        <field name="name">Voucher Types</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">res.voucher.type</field>
-        <field name="view_mode">tree,form</field>
-    </record>
-
-    <!-- ***************** -->
-    <!-- * Voucher Types * -->
-    <!-- ***************** -->
-    <!-- Form View for WSFE Request -->
-    <record id="view_wsfe_request_form" model="ir.ui.view">
-        <field name="name">wsfe.request.form</field>
-        <field name="model">wsfe.request</field>
-        <field name="type">form</field>
-        <field name="arch" type="xml">
-            <form string="WSFE Request" create="false" edit="false" delete="false">
-                <sheet>
-                    <h1>WSFE Request</h1>
-                    <group col="4" colspan="6">
-                        <separator colspan="6" string="Header" />
-                        <field name="date_request" />
-                        <field name="pos_ar" />
-                        <field name="voucher_type" />
-                        <field name="nregs" />
-                        <field name="result" />
-                        <field name="reprocess" />
-                        <field name="name" colspan="4" />
-                    </group>
-                    <notebook colspan="4">
-                        <page string="Request Details">
-                            <separator string="Details" colspan="4" />
-                            <field name="detail_ids" colspan="4" nolabel="1">
-                                <tree>
-                                    <field name="name" />
-                                    <field name="doctype" />
-                                    <field name="docnum" />
-                                    <field name="voucher_date" />
-                                    <field name="voucher_number" />
-                                    <field name="amount_total" />
-                                    <field name="currency" />
-                                    <field name="currency_rate" />
-                                    <field name="cae" />
-                                    <field name="result" />
-                                </tree>
-                                <form>
-                                    <group colspan="4" col="6">
-                                        <group colspan="4" col="4">
-                                            <separator
-                                                string="Main Information"
-                                                colspan="4"
-                                            />
-                                            <field name="voucher_date" />
-                                            <field name="voucher_number" />
-                                            <field name="name" />
-                                            <field name="concept" />
-                                            <field name="amount_total" />
-                                            <field name="result" />
-                                        </group>
-                                        <group colspan="2">
-                                            <field name="doctype" />
-                                            <field name="docnum" />
-                                            <field name="cae" />
-                                            <field name="cae_duedate" />
-                                            <field name="currency" />
-                                            <field name="currency_rate" />
-                                        </group>
-                                    </group>
-                                    <separator string="Observations" colspan="4" />
-                                    <field
-                                        name="observations"
-                                        nolabel="1"
-                                        colspan="4"
-                                    />
-                                </form>
-                            </field>
-                        </page>
-                        <page string="Other Information">
-                            <separator string="Errors" colspan="4" />
-                            <field name="errors" colspan="4" nolabel="1" />
-                        </page>
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
-    <!-- Tree View for WSFE Request -->
-    <record id="view_wsfe_request_tree" model="ir.ui.view">
-        <field name="name">wsfe.request.tree</field>
-        <field name="model">wsfe.request</field>
-        <field name="type">tree</field>
-        <field name="arch" type="xml">
-            <tree create="false" delete="false">
-                <field name="date_request" />
-                <field name="pos_ar" />
-                <field name="voucher_type" />
-                <field name="nregs" />
-                <field name="result" />
-            </tree>
-        </field>
-    </record>
-
-    <record id="action_wsfe_request_tree" model="ir.actions.act_window">
-        <field name="name">WSFE Request</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">wsfe.request</field>
-        <field name="view_mode">tree,form</field>
-    </record>
+    </record> -->
 </odoo>

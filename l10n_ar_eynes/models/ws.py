@@ -11,6 +11,38 @@ from odoo.exceptions import UserError, ValidationError
 _logger = logging.getLogger(__name__)
 
 
+class WsfexCurrencyCodes(models.Model):
+    _name = "ws.currency.codes"
+    _description = "WS Currency Codes"
+    _order = 'code'
+
+    code = fields.Char('Code', required=True, size=4)
+    currency_id = fields.Many2one(
+        comodel_name='res.currency', string="Odoo Currency"
+    )
+    from_afip = fields.Boolean('From AFIP')
+    from_date = fields.Date('Effective From')
+    name = fields.Char('Desc', required=True, size=64)
+    to_date = fields.Date('Effect Until')
+    wsfe_config_id = fields.Many2one(
+        comodel_name='wsfe.config', string='WebService WSFE'
+    )
+    wsfex_config_id = fields.Many2one(
+        comodel_name='wsfex.config', string='WebService WSFEX'
+    )
+
+    @api.constrains('wsfe_config_id', 'wsfex_config_id')
+    def _check_only_one_ws_associated(self):
+        if self.wsfe_config_id and self.wsfex_config_id:
+            raise ValidationError(
+                _(
+                    """
+                    This table must be related with only one Webservice.
+                    """
+                )
+            )
+
+
 class WsOptionals(models.Model):
     _name = "ws.optionals"
     _description = "Optionals"
@@ -20,8 +52,12 @@ class WsOptionals(models.Model):
     from_date = fields.Date('Effective From')
     name = fields.Char('Desc', required=True, size=64)
     to_date = fields.Date('Effect Until')
-    wsfe_config_id = fields.Many2one('wsfe.config', 'WebService WSFE')
-    wsfex_config_id = fields.Many2one('wsfex.config', 'WebService WSFEX')
+    wsfe_config_id = fields.Many2one(
+        comodel_name='wsfe.config', string='WebService WSFE'
+    )
+    wsfex_config_id = fields.Many2one(
+        comodel_name='wsfex.config', string='WebService WSFEX'
+    )
 
     @api.constrains('wsfe_config_id', 'wsfex_config_id')
     def _check_only_one_ws_associated(self):
@@ -40,13 +76,22 @@ class WsPOS(models.Model):
     _description = "POS"
 
     code = fields.Char('Code', required=False, size=4)
+    blocked = fields.Boolean()
     from_afip = fields.Boolean('From AFIP')
-    from_date = fields.Date('Effective From')
+    journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        domain=[('type', '=', 'sale')],
+        string='Odoo POS',
+    )
     name = fields.Char('Desc', required=True, size=64)
     priority = fields.Integer()
     to_date = fields.Date('Effect Until')
-    wsfe_config_id = fields.Many2one('wsfe.config', 'WebService WSFE')
-    wsfex_config_id = fields.Many2one('wsfex.config', 'WebService WSFEX')
+    wsfe_config_id = fields.Many2one(
+        comodel_name='wsfe.config', string='WebService WSFE'
+    )
+    wsfex_config_id = fields.Many2one(
+        comodel_name='wsfex.config', string='WebService WSFEX'
+    )
 
     @api.constrains('wsfe_config_id', 'wsfex_config_id')
     def _check_only_one_ws_associated(self):
@@ -66,7 +111,7 @@ class WsTaxCodes(models.Model):
 
     code = fields.Char('Code', required=False, size=4)
     exempt_operations = fields.Boolean(
-        'Exempt Operations',
+        string='Exempt Operations',
         help='Check it if this VAT Tax corresponds to vat tax exempts '
         + 'operations, such as to sell books, milk, etc. The taxes with this '
         + 'checked, will be reported to AFIP as  exempt operations '
@@ -75,10 +120,21 @@ class WsTaxCodes(models.Model):
     from_afip = fields.Boolean('From AFIP')
     from_date = fields.Date('Effective From')
     name = fields.Char('Desc', required=True, size=64)
-    tax_id = fields.Many2one('account.tax', 'Account Tax')
+    tax_id = fields.Many2one(
+        comodel_name='account.tax',
+        string='Odoo Account Tax',
+        domain=[
+            ('type_tax_use', '=', 'sale'),
+            ('tax_group_id.name', 'ilike', 'vat'),
+        ],
+    )
     to_date = fields.Date('Effect Until')
-    wsfe_config_id = fields.Many2one('wsfe.config', 'WebService WSFE')
-    wsfex_config_id = fields.Many2one('wsfex.config', 'WebService WSFEX')
+    wsfe_config_id = fields.Many2one(
+        comodel_name='wsfe.config', string='WebService WSFE'
+    )
+    wsfex_config_id = fields.Many2one(
+        comodel_name='wsfex.config', string='WebService WSFEX'
+    )
 
     @api.constrains('wsfe_config_id', 'wsfex_config_id')
     def _check_only_one_ws_associated(self):
