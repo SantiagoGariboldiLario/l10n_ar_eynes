@@ -116,6 +116,9 @@
         'wizard/arba_perception_exporter.xml',
         "wizard/create_arciba_file.xml",
     ],
+    'demo': [
+        'demo/account_account_demo.xml',
+    ],
     'installable': True,
     'application': True,
     "external_dependencies": {
