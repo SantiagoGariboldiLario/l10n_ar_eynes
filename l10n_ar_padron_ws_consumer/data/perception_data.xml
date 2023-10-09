@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <data>
+
+        <record id="l10n_ar_eynes.iibb_arba_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_b' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_caba_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_c' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_catamarca_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_k' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_chaco_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_h' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_chubut_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_u' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_cordoba_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_x' />
+        </record>
+
+        <record
+            id="l10n_ar_eynes.iibb_corrientes_perceptions_s"
+            model="account.journal"
+        >
+            <field name="padron_state_id" ref='base.state_ar_w' />
+        </record>
+
+        <record
+            id="l10n_ar_eynes.iibb_entre_rios_perceptions_s"
+            model="account.journal"
+        >
+            <field name="padron_state_id" ref='base.state_ar_e' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_formosa_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_p' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_jujuy_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_y' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_la_pampa_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_l' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_la_rioja_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_f' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_mendoza_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_m' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_misiones_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_n' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_neuquen_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_q' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_rio_negro_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_r' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_salta_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_a' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_san_juan_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_j' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_san_luis_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_d' />
+        </record>
+
+        <record
+            id="l10n_ar_eynes.iibb_santa_cruz_perceptions_s"
+            model="account.journal"
+        >
+            <field name="padron_state_id" ref='base.state_ar_z' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_santafe_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_s' />
+        </record>
+
+        <record
+            id="l10n_ar_eynes.iibb_santiago_del_estero_perceptions_s"
+            model="account.journal"
+        >
+            <field name="padron_state_id" ref='base.state_ar_g' />
+        </record>
+
+        <record
+            id="l10n_ar_eynes.iibb_tierra_del_fuego_perceptions_s"
+            model="account.journal"
+        >
+            <field name="padron_state_id" ref='base.state_ar_v' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_tucuman_perceptions_s" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_t' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_arba_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_b' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_caba_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_c' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_catamarca_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_k' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_chaco_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_h' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_chubut_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_u' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_cordoba_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_x' />
+        </record>
+
+        <record
+            id="l10n_ar_eynes.iibb_corrientes_perceptions_e"
+            model="account.journal"
+        >
+            <field name="padron_state_id" ref='base.state_ar_w' />
+        </record>
+
+        <record
+            id="l10n_ar_eynes.iibb_entre_rios_perceptions_e"
+            model="account.journal"
+        >
+            <field name="padron_state_id" ref='base.state_ar_e' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_formosa_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_p' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_jujuy_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_y' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_la_pampa_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_l' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_la_rioja_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_f' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_mendoza_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_m' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_misiones_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_n' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_neuquen_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_q' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_rio_negro_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_r' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_salta_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_a' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_san_juan_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_j' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_san_luis_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_d' />
+        </record>
+
+        <record
+            id="l10n_ar_eynes.iibb_santa_cruz_perceptions_e"
+            model="account.journal"
+        >
+            <field name="padron_state_id" ref='base.state_ar_z' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_santafe_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_s' />
+        </record>
+
+        <record
+            id="l10n_ar_eynes.iibb_santiago_del_estero_perceptions_e"
+            model="account.journal"
+        >
+            <field name="padron_state_id" ref='base.state_ar_g' />
+        </record>
+
+        <record
+            id="l10n_ar_eynes.iibb_tierra_del_fuego_perceptions_e"
+            model="account.journal"
+        >
+            <field name="padron_state_id" ref='base.state_ar_v' />
+        </record>
+
+        <record id="l10n_ar_eynes.iibb_tucuman_perceptions_e" model="account.journal">
+            <field name="padron_state_id" ref='base.state_ar_t' />
+        </record>
+
+    </data>
+</odoo>

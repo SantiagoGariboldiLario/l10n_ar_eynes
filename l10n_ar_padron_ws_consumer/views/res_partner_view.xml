@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="l10n_ar_eynes_inherit_l10n_ar_padron" model="ir.ui.view">
+        <field name="name">l10n.ar.eynes.inherit.l10n.ar.padron</field>
+        <field name="model">res.partner</field>
+        <field
+            name="inherit_id"
+            ref="l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes"
+        />
+        <field name="arch" type="xml">
+
+            <xpath
+                expr="//field[@name='perception_ids']/tree/field[@name='percent']"
+                position="before"
+            >
+                <field name="coeficient" />
+                <field name="coeficient_percent" />
+                <field name="risk" />
+                <field name="period" widget='month_year_format' />
+            </xpath>
+
+            <xpath
+                expr="//field[@name='retention_ids']/tree/field[@name='percent']"
+                position="before"
+            >
+                <field name="period" widget='month_year_format' />
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="action_server_fetch_values_from_partner" model="ir.actions.server">
+        <field name="name">Fetch values from Padron</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="model_res_partner" />
+        <field name="binding_model_id" ref="model_res_partner" />
+        <field name="state">code</field>
+        <field name="code">records.do_update_from_padron()</field>
+    </record>
+
+</odoo>

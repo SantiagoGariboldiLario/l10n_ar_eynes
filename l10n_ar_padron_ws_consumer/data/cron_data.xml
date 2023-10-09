@@ -1,0 +1,14 @@
+<odoo noupdate="1">
+
+    <record id="ir_cron_update_partners_from_padron" model="ir.cron">
+        <field name="name">Update Partners from Padron</field>
+        <field name="model_id" ref="model_res_partner" />
+        <field name="state">code</field>
+        <field name="code">model.do_update_from_padron()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active">False</field>
+    </record>
+
+</odoo>
