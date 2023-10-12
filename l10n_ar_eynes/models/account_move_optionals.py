@@ -8,8 +8,8 @@ from odoo import fields, models
 
 class AccountMoveOptional(models.Model):
     _name = "account.move.optional"
-    _description = 'WSFE Invoice Optional'
+    _description = 'Invoice Optional Line'
 
     invoice_id = fields.Many2one('account.move', 'Invoice')
-    optional_id = fields.Many2one('wsfe.optionals', 'Optional')
+    optional_id = fields.Many2one('ws.optionals', 'Optional')
     value = fields.Char('Value', size=255)

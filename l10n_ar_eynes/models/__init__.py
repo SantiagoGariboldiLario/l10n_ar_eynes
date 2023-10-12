@@ -2,6 +2,7 @@ from . import account_check  # noqa
 from . import account_fiscal_position  # noqa
 from . import account_journal  # noqa
 from . import account_move  # noqa
+from . import account_move_line
 from . import account_payment_method  # noqa
 from . import account_payment_order  # noqa
 from . import account_tax  # noqa

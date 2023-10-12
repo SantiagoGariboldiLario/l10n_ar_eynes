@@ -5,7 +5,7 @@
         <field name="name">wsfex.config.form</field>
         <field name="model">wsfex.config</field>
         <field name="type">form</field>
-        <field name="inherit_id" ref="l10n_ar_eynes.view_wsfe_config_form" />
+        <field name="inherit_id" ref="l10n_ar_eynes.view_ws_config_form" />
         <field name="arch" type="xml">
             <xpath expr="//group[@name='principal']" position="after">
                 <group name="extra">
@@ -32,45 +32,6 @@
                                 <field name="journal_id" />
                                 <field name="priority" />
                                 <field name="from_afip" readonly="True" />
-                            </tree>
-                        </field>
-                    </page>
-                    <page string="VAT Taxes">
-                        <field
-                            name="vat_tax_ids"
-                            nolabel="1"
-                            options="{'no_create_edit': True, 'no_quick_create': True}"
-                        >
-                            <tree editable="bottom">
-                                <field name="code" readonly="True" />
-                                <field name="name" readonly="True" />
-                                <field name="from_date" readonly="True" />
-                                <field name="to_date" readonly="True" />
-                                <field name="tax_id" />
-                                <field name="from_afip" readonly="True" />
-                            </tree>
-                        </field>
-                        <field
-                            name="exempt_operations_tax_ids"
-                            context="{'default_exempt_operations': True}"
-                            nolabel="1"
-                        >
-                            <tree editable="bottom">
-                                <field name="name" />
-                                <field name="tax_id" />
-                                <field name="exempt_operations" invisible="1" />
-                            </tree>
-                        </field>
-                    </page>
-
-                    <page string="Optionals">
-                        <field name="optional_ids" nolabel="1">
-                            <tree readonly="True">
-                                <field name="code" />
-                                <field name="name" />
-                                <field name="from_date" />
-                                <field name="to_date" />
-                                <field name="from_afip" />
                             </tree>
                         </field>
                     </page>

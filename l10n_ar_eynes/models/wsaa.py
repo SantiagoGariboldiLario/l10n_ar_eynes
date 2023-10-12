@@ -182,6 +182,7 @@ class WSAATa(models.Model):
                         "sign": sign,
                     }
                 )
+                self.env.cr.commit()  # pylint: disable=invalid-commit
             except Exception as e:
                 token = sign = None
                 if wsaa.Excepcion:

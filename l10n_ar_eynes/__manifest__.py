@@ -38,6 +38,7 @@
         'account',
         'report_xlsx',
         'popup_messages',
+        'web_domain_field',  # To handle dynamic domains
     ],
     'data': [
         'security/cot_security.xml',
@@ -61,7 +62,7 @@
         'security/ir.model.access.csv',
         'security/account_security.xml',
         'security/perception_ir_rule.xml',
-        'views/menuitems.xml',
+        'views/menuitems_AFIP.xml',
         'wizard/deposit_check_wizard_view.xml',
         'wizard/reject_check_wizard_view.xml',
         'wizard/account_change_currency_wizard_view.xml',
@@ -100,6 +101,7 @@
         'views/ws_views.xml',
         "views/wsfe_views.xml",
         "views/wsfex_views.xml",
+        'views/ws_request_views.xml',
         'views/stock_picking_view.xml',
         'views/certificate_request_view.xml',
         "wizard/wsfe_sinchronize_voucher_view.xml",
@@ -128,6 +130,8 @@
             "qrcode",
             "httplib2",
             "future",
+            "pysimplesoap",
+            "pyafipws",
         ]
     },
 }

@@ -3,12 +3,18 @@
 #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 ##############################################################################
 
+import logging
 from datetime import datetime
 
 from pyafipws.wsfev1 import WSFEv1
+from pysimplesoap.client import SoapFault
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+from ..wsfetools.wsfe_helper import WSFEParser
+
+_logger = logging.getLogger(__name__)
 
 SEPARATOR = ";"
 
@@ -227,38 +233,228 @@ class WsfeConfig(models.Model):
 
         return True
 
-    def get_last_voucher(self, pos, voucher_type):
+    def _check_vat_taxes_configured(self, invoice_vat_lines):
         self.ensure_one()
-        ws = self.ws_auth()
-        result = ws.CompUltimoAutorizado(voucher_type, pos)
-        # print(result)
-        # """
-        # if "Errors" in ret:
-        #     errores = ret["Errors"]
-        #     for error in errores:
-        #         self.Errores.append(
-        #             "%s: %s"
-        #             % (
-        #                 error["Err"]["Code"],
-        #                 error["Err"]["Msg"],
-        #             )
-        #         )
-        #     self.ErrCode = " ".join([str(error["Err"]["Code"]) for error in errores])
-        #     self.ErrMsg = "\n".join(self.Errores)
-        # if "Events" in ret:
-        #     events = ret["Events"]
-        #     self.Eventos = [
-        #         "%s: %s" % (evt["Evt"]["Code"], evt["Evt"]["Msg"]) for evt in events
-        #     ]
-        # """
-        return result
+        afip_taxes = self.vat_tax_ids.mapped('tax_id')
+
+        not_found_tax = invoice_vat_lines.filtered(
+            lambda x: x.tax_line_id not in afip_taxes
+        )
+        if not_found_tax:
+            raise UserError(
+                _("Taxes `%s` are not configured in WSFE!")
+                % (", ").join(not_found_tax.mapped('tax_line_id.name'))
+            )
+
+    def _get_vat_array(self, invoice):
+        vat_tax_group = self.env.ref('l10n_ar_eynes.vat_tax_group')
+        invoice_vat_lines = invoice.line_ids.filtered(
+            lambda x: x.price_unit
+            and x.tax_line_id
+            and x.tax_group_id == vat_tax_group
+        )
+
+        self._check_vat_taxes_configured(invoice_vat_lines)
+
+        return invoice_vat_lines
+
+    def _get_next_number(self, ws, tipo_cbte, pto_vta):
+        _logger.info(
+            "Checking last voucher informed to AFIP - Type: %s, POS: %s"
+            % (tipo_cbte, pto_vta)
+        )
+        last_voucher_number = ws.CompUltimoAutorizado(tipo_cbte, pto_vta)
+        helper = WSFEParser()
+        helper.parse_errors(ws, "get the last voucher informed")
+        return int(last_voucher_number) + 1
 
     def get_voucher_info(self, pos, voucher_type, number):
         self.ensure_one()
         ws = self.ws_auth()
-        result = ws.CompConsultar(voucher_type, pos, number)
-        # print(result)
-        return result
-        # if not hasattr(response, 'ResultGet'):
-        #     raise UserError(_("Error fetching voucher from AFIP!"))
-        # return response.ResultGet
+        cae = ws.CompConsultar(voucher_type, pos, number)
+        helper = WSFEParser()
+        helper.parse_errors(ws, "get voucher info")
+        return cae
+
+    def _set_invoice_in_ws(self, ws, invoice):
+        _logger.info("Parsing data from invoice ID: %s" % invoice.id)
+        helper = WSFEParser()
+        data = helper.parse_invoice(invoice)
+        vat_lines = self._get_vat_array(invoice)
+        vat_data = helper.parse_vat_lines(invoice, vat_lines, self.vat_tax_ids)
+        tribute_data = helper.parse_taxes_not_vat(invoice)
+        associated_data = helper.parse_associated_voucher(invoice)
+        opcionals_data = helper.parse_optionals(invoice)
+
+        number = self._get_next_number(ws, data['CbteTipo'], data['PtoVta'])
+
+        _logger.info("Creating pyafipws invoice")
+        ws.CrearFactura(
+            tipo_cbte=data['CbteTipo'],
+            punto_vta=data['PtoVta'],
+            fecha_cbte=data['CbteFch'],
+            concepto=data['Concepto'],
+            tipo_doc=data['DocTipo'],
+            nro_doc=data['DocNro'],
+            fecha_venc_pago=data['FchVtoPago'],
+            moneda_id=data['MonId'],
+            moneda_ctz=data['MonCotiz'],
+            fecha_serv_desde=data['FchServDesde'],
+            fecha_serv_hasta=data['FchServHasta'],
+            cbt_desde=number,
+            cbt_hasta=number,
+            imp_total=data['total_amount'],
+            imp_tot_conc=data['no_taxed_amount'],
+            imp_neto=vat_data['base_vat_amount'],
+            imp_iva=vat_data['total_vat_amount'],
+            imp_trib=tribute_data['tribute_total'],
+            imp_op_ex=data['exempt_amount'],
+        )
+        _logger.info("Adding vat info")
+        for vat_id in vat_data['vat_dict'].keys():
+            ws.AgregarIva(
+                iva_id=vat_id,
+                base_imp=vat_data['vat_dict'][vat_id]['BaseImp'],
+                importe=vat_data['vat_dict'][vat_id]['Importe'],
+            )
+        _logger.info("Adding tributes info")
+        for other_tax in tribute_data['perc_array']:
+            ws.AgregarTributo(
+                tributo_id=other_tax['Id'],
+                desc=other_tax['Desc'],
+                base_imp=other_tax['BaseImp'],
+                alic=other_tax['Alic'],
+                importe=other_tax['Importe'],
+            )
+        _logger.info("Adding associated invoices info")
+        for cbte_asoc in associated_data:
+            ws.AgregarCmpAsoc(
+                tipo=cbte_asoc['Tipo'],
+                pto_vta=cbte_asoc['PtoVta'],
+                nro=cbte_asoc['Nro'],
+                cuit=cbte_asoc['Cuit'],
+                fecha=cbte_asoc['CbteFch'],
+            )
+        _logger.info("Adding optionals info")
+        for opt in opcionals_data:
+            ws.AgregarOpcional(
+                opcional_id=opt['Code'],
+                valor=opt['Valor'],
+            )
+
+    def send_invoices_to_afip(self, invoices):
+        self.ensure_one()
+        if not self.cuit:
+            raise UserError(_("Please configure the company VAT!"))
+
+        ws = self.ws_auth()
+
+        WsRequest = self.env['ws.request']
+        WsRequestDetail = self.env['ws.request.detail']
+        request = WsRequest.create({'date_request': fields.Datetime.today()})
+        qty_processed = 0
+        for invoice in invoices:
+            # validator.validate_invoice(invoice)
+            self._set_invoice_in_ws(ws, invoice)
+
+            _logger.info("Trying to push Inovice data to AFIP...")
+            error_msg = ""
+            try:
+                qty_processed += 1
+                ws.CAESolicitar()
+            except SoapFault as soap_fault:
+                error_msg = "%s: %s" % (
+                    soap_fault.faultcode,
+                    soap_fault.faultstring,
+                )
+                _logger.error("SOAP Error.", error_msg)
+            except Exception as e:
+                if ws.Excepcion:
+                    error_msg = ws.Excepcion
+                    _logger.error("WSFE Error.", error_msg)
+                else:
+                    error_msg = str(e)
+                    _logger.error("Internal Error.", error_msg)
+            if error_msg:
+                WsRequestDetail.create(
+                    {
+                        'invoice_id': invoice.id,
+                        'result': 'E',
+                        'errors': error_msg,
+                        'request_id': request.id,
+                    }
+                )
+                _logger.info("Request details saved.")
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+                raise UserError(
+                    _("Error trying to validate Electronic Invoice: %s")
+                    % (error_msg)
+                )
+
+            if ws.Resultado == "R":
+                _logger.warning("AFIP Validation Error. Invoice not approved.")
+                WsRequestDetail.create(
+                    {
+                        'invoice_id': invoice.id,
+                        'result': 'E',
+                        'errors': error_msg,
+                        'request_id': request.id,
+                    }
+                )
+                _logger.info("Request details saved.")
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+                raise UserError(
+                    _(
+                        """
+                        Error trying to validate Electronic Invoice: %s
+                        Please, check WS Request generated. You will find the result of
+                        current transaction there.
+                        """
+                    )
+                    % (invoice.id)
+                )
+
+            else:
+                _logger.info("Mission accomplished!")
+                WsRequestDetail.create(
+                    {
+                        'invoice_id': invoice.id,
+                        'request_id': request.id,
+                        'result': ws.Resultado,
+                        'errors': ws.ErrMsg or "",
+                        'observations': ws.Obs or "",
+                        'events': ws.ErrMsg or "",
+                        'cae': ws.CAE or "",
+                        'cae_due_date': ws.Vencimiento
+                        and datetime.strptime(ws.Vencimiento, "%Y%m%d").date()
+                        or False,
+                    }
+                )
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+                _logger.info("Request details saved.")
+
+                inv_name = "%s-%s" % (
+                    str(ws.PuntoVenta).zfill(5),
+                    str(ws.CbteNro).zfill(8),
+                )
+                inv_vals = {
+                    'cae': ws.CAE,
+                    'cae_due_date': datetime.strptime(
+                        ws.Vencimiento, "%Y%m%d"
+                    ).date(),
+                    'internal_number': inv_name,
+                    'name': inv_name,
+                    'invoice_date': datetime.strptime(
+                        ws.FechaCbte, "%Y%m%d"
+                    ).date(),
+                }
+                invoice.write(inv_vals)
+                _logger.info(
+                    "CAE: %s. Result: %s\n UPDATED invoice fields: %s"
+                    % (ws.CAE, ws.Resultado, inv_vals)
+                )
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+
+        _logger.info("Transaction with AFIP finished.")
+
+        return True

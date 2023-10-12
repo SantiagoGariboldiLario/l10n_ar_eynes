@@ -11,7 +11,7 @@ from odoo.exceptions import UserError, ValidationError
 _logger = logging.getLogger(__name__)
 
 
-class WsfexCurrencyCodes(models.Model):
+class WsCurrencyCodes(models.Model):
     _name = "ws.currency.codes"
     _description = "WS Currency Codes"
     _order = 'code'
@@ -255,8 +255,8 @@ class WsConfig(models.Model):
                 )
             )
 
-        ids = self.search([('company_id', '=', company_id)])
-        if not ids:
+        config = self.search([('company_id', '=', company_id)])
+        if not config:
             service = self._get_webservice()
             raise UserError(
                 _(
@@ -268,7 +268,7 @@ class WsConfig(models.Model):
                 )
             )
 
-        return ids
+        return config
 
     def ws_auth(self):
         token, sign = self.wsaa_ticket_id.get_token_sign()

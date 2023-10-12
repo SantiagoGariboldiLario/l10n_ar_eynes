@@ -39,7 +39,7 @@
     <menuitem
         id="wsfe_massive_sinchronize"
         name="Massive Sinchronize"
-        parent="l10n_ar_eynes.base_afipws"
+        parent="base_afipws_config"
         sequence="40"
         action="action_wsfe_massive_sinchronize"
     />

@@ -4,6 +4,8 @@ easywsy
 future
 httplib2
 M2Crypto
+pyafipws
 pyOpenSSL
+pysimplesoap
 qrcode
 suds-jurko

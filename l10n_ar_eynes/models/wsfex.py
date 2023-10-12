@@ -5,7 +5,8 @@
 
 from pyafipws.wsfexv1 import WSFEXv1
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class AccountIncoterms(models.Model):
@@ -168,3 +169,28 @@ class WsfexConfig(models.Model):
 
     def _get_webservice(self):
         return self.env.ref('l10n_ar_eynes.afipws_service_wsfex')
+
+    def get_afip_tables(self):
+        self.ensure_one()
+        if not self.cuit:
+            raise UserError(_("Please configure the company VAT!"))
+
+        # ws = self.ws_auth()
+
+        # error_msg = self._get_currency_tables(ws)
+        # error_msg += self._get_optionals_tables(ws)
+        # error_msg += self._get_pos_tables(ws)
+        # error_msg += self._get_vat_tables(ws)
+
+        # if error_msg:
+        #     raise UserError(
+        #         _(
+        #             """
+        #             Error with Webservice
+        #             %(error_msg)s
+        #             """,
+        #             error_msg=error_msg,
+        #         )
+        #     )
+
+        return True
