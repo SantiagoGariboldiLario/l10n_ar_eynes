@@ -459,10 +459,10 @@ class AccountJournal(models.Model):
             at: tax_mls.filtered(lambda ml: ml.tax_line_id == at)
             for at in [at for at in tax_mls.mapped('tax_line_id')]
         }
-        concept_lines = {
-            at: taxed_mls.filtered(lambda ml: at in ml.tax_ids)
-            for at in [at for at in taxed_mls.mapped('tax_ids')]
-        }
+        # concept_lines = {
+        #     at: taxed_mls.filtered(lambda ml: at in ml.tax_ids)
+        #     for at in [at for at in taxed_mls.mapped('tax_ids')]
+        # }
 
         result = {
             'amount_untaxed': amount_untaxed,
@@ -502,16 +502,14 @@ class AccountJournal(models.Model):
 
         mls = parsed_move.get("concept_lines")
 
-        #for _tax_id, mls in parsed_move['concept_lines'].items():
+        # for _tax_id, mls in parsed_move['concept_lines'].items():
         for ml in mls:
             # Evitamos la linea de la deuda
             concepts = self._get_concepts_from_account(
                 ml.account_id, retention=retention
             )
 
-            logging_messages.append(
-                f"Linea: {ml.name} [{ml.account_id.name}]"
-            )
+            logging_messages.append(f"Linea: {ml.name} [{ml.account_id.name}]")
 
             # Si el concepto no esta sujeto a retencion, continuamos
             no_subject = False
