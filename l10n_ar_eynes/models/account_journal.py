@@ -459,17 +459,17 @@ class AccountJournal(models.Model):
             at: tax_mls.filtered(lambda ml: ml.tax_line_id == at)
             for at in [at for at in tax_mls.mapped('tax_line_id')]
         }
-        concept_lines = {
-            at: taxed_mls.filtered(lambda ml: at in ml.tax_ids)
-            for at in [at for at in taxed_mls.mapped('tax_ids')]
-        }
+        # concept_lines = {
+        #     at: taxed_mls.filtered(lambda ml: at in ml.tax_ids)
+        #     for at in [at for at in taxed_mls.mapped('tax_ids')]
+        # }
 
         result = {
             'amount_untaxed': amount_untaxed,
             'amount_tax': amount_tax,
             'amount_no_taxed': amount_no_taxed,
             'amount_total': amount_total,
-            'concept_lines': concept_lines,
+            'concept_lines': taxed_mls,
             'tax_lines': tax_lines,
         }
         return result
@@ -499,157 +499,158 @@ class AccountJournal(models.Model):
         logging_messages.append(
             "Parseando lineas del asiento: %s [%s]" % (move.name, move.ref)
         )
-        for _tax_id, mls in parsed_move['concept_lines'].items():
-            for ml in mls:
-                # Evitamos la linea de la deuda
-                concepts = self._get_concepts_from_account(
-                    ml.account_id, retention=retention
+
+        mls = parsed_move.get("concept_lines")
+
+        # for _tax_id, mls in parsed_move['concept_lines'].items():
+        for ml in mls:
+            # Evitamos la linea de la deuda
+            concepts = self._get_concepts_from_account(
+                ml.account_id, retention=retention
+            )
+
+            logging_messages.append(f"Linea: {ml.name} [{ml.account_id.name}]")
+
+            # Si el concepto no esta sujeto a retencion, continuamos
+            no_subject = False
+            for concept in concepts:
+                if concept and concept.no_subject:
+                    logging_messages.append(
+                        f"Concepto no sujeto a Retencion: {concept.name}"
+                    )
+                    no_subject = True
+
+            if no_subject:
+                continue
+
+            concept_name = (" ").join([c.name for c in concepts])
+            activity_name = activity and activity.name or ''
+
+            # Buscamos las taxapps que concuerden
+            tapp_domain = [
+                ('retention_tax_id', '=', retention.tax_id.id),
+                ('concept_id', 'in', concepts.ids),
+            ]
+            if activity:
+                tapp_domain.append(
+                    ('activity_id', '=', activity and activity.id)
+                )
+            iibb_domain = []
+            if retention.type == 'gross_income':
+                iibb_domain.append(
+                    ('sit_iibb', '=', sit_iibb.id if sit_iibb else False)
+                )
+            taxapps = tax_app_obj.search(tapp_domain + iibb_domain)
+
+            # Si no se encuentra con la situacion de iibb,
+            # buscamos normalmente, aplica regla general
+            if not taxapps:
+                tapp_domain.append(('sit_iibb', '=', False))
+                taxapps = tax_app_obj.search(tapp_domain)
+
+            if not taxapps:
+                raise ValidationError(
+                    _(
+                        "Retention Error!\n"
+                        "There is no configured a Retention Application "
+                        f"({retention.name}) that corresponds to\n"
+                        "Activity: {activity_name} \n"
+                        f"Concept: {concept_name}\n"
+                        f"for the Account {ml.account_id.name}"
+                    )
                 )
 
-                logging_messages.append(
-                    f"Linea: {ml.name} [{ml.account_id.name}]"
+            if len(taxapps) > 1:
+                raise ValidationError(
+                    _(
+                        "Retention Error!\n"
+                        "There is more than one Retention Application "
+                        f"({retention.name}) configured that corresponds to\n"
+                        f"Activity: {activity_name}\nConcept: {concept_name}\n"
+                        f"for the Account {ml.account_id.name}"
+                    )
                 )
 
-                # Si el concepto no esta sujeto a retencion, continuamos
-                no_subject = False
-                for concept in concepts:
-                    if concept and concept.no_subject:
-                        logging_messages.append(
-                            f"Concepto no sujeto a Retencion: {concept.name}"
-                        )
-                        no_subject = True
+            # Si ya retuvimos y esta calculado sobre
+            # el montos de la factura, continuamos,
+            # pero si esta calculado sobre el monto del pago
+            # no retornamos porque se retiene sobre lo que se va pagando
+            # asi que tenemos que tener en cuenta
+            # facturas con pagos parciales
+            taxapp = taxapps
+            logging_messages.append(
+                "Tax Application: [id: %s ; reg_code: %s] %s"
+                % (taxapp.id, taxapp.reg_code, taxapp.concept_id.name)
+            )
+            if taxapp.calculation_base not in [
+                'payment_amount',
+                'payment_amount_untaxed',
+            ] and len(prev_ret_ids):
+                continue
 
-                if no_subject:
-                    continue
+            # Obtenemos toda la info contable de la linea de factura
+            # todas las cantidades y los impuestos de IVA aplicados
+            # OJO: Solo los de IVA y de cada linea en particular.
+            # Esto no nos trae
+            # ninguna informacion con respecto a Percepciones
 
-                concept_name = (" ").join([c.name for c in concepts])
-                activity_name = activity and activity.name or ''
+            # Hacemos el computo de la Retencion por linea de factura
+            base = ml.credit or ml.debit
+            logging_messages.append(f"Base tomada: {base}")
+            if line_type == 'income':
+                base *= -1
 
-                # Buscamos las taxapps que concuerden
-                tapp_domain = [
-                    ('retention_tax_id', '=', retention.tax_id.id),
-                    ('concept_id', 'in', concepts.ids),
-                ]
-                if activity:
-                    tapp_domain.append(
-                        ('activity_id', '=', activity and activity.id)
-                    )
-                iibb_domain = []
-                if retention.type == 'gross_income':
-                    iibb_domain.append(
-                        ('sit_iibb', '=', sit_iibb.id if sit_iibb else False)
-                    )
-                taxapps = tax_app_obj.search(tapp_domain + iibb_domain)
+            # Luego vamos agrupando por Concepto y
+            # Factura (no por actividad)
+            # TODO: Deberiamos tener alguna configuracion
+            # para agrupar o no por factura tambien
+            invoice = ml.move_id or False
 
-                # Si no se encuentra con la situacion de iibb,
-                # buscamos normalmente, aplica regla general
-                if not taxapps:
-                    tapp_domain.append(('sit_iibb', '=', False))
-                    taxapps = tax_app_obj.search(tapp_domain)
+            concept = taxapp.concept_id
+            if taxapp.calculation_base in [
+                'payment_amount',
+                'payment_amount_untaxed',
+            ]:
+                key = (concept, False)
+            else:
+                key = (concept, invoice)
 
-                if not taxapps:
-                    raise ValidationError(
-                        _(
-                            "Retention Error!\n"
-                            "There is no configured a Retention Application "
-                            f"({retention.name}) that corresponds to\n"
-                            "Activity: {activity_name} \n"
-                            f"Concept: {concept_name}\n"
-                            f"for the Account {ml.account_id.name}"
-                        )
-                    )
-
-                if len(taxapps) > 1:
-                    raise ValidationError(
-                        _(
-                            "Retention Error!\n"
-                            "There is more than one Retention Application "
-                            f"({retention.name}) configured that corresponds to\n"
-                            f"Activity: {activity_name}\nConcept: {concept_name}\n"
-                            f"for the Account {ml.account_id.name}"
-                        )
-                    )
-
-                # Si ya retuvimos y esta calculado sobre
-                # el montos de la factura, continuamos,
-                # pero si esta calculado sobre el monto del pago
-                # no retornamos porque se retiene sobre lo que se va pagando
-                # asi que tenemos que tener en cuenta
-                # facturas con pagos parciales
-                taxapp = taxapps
-                logging_messages.append(
-                    "Tax Application: [id: %s ; reg_code: %s] %s"
-                    % (taxapp.id, taxapp.reg_code, taxapp.concept_id.name)
+            base_to_pay = round(base / factor_to_pay, 2)
+            base_unrec = round(base / factor_unrec, 2)
+            retentions.setdefault(
+                key,
+                {
+                    'base': 0.0,
+                    'base_to_pay': 0.0,
+                    'base_unrec': 0.0,
+                    'taxapp': taxapp,
+                    'lines': self.env['account.move.line'],
+                },
+            )
+            retentions[key]['base'] += base
+            retentions[key]['base_to_pay'] += base_to_pay
+            retentions[key]['base_unrec'] += base_unrec
+            retentions[key]['lines'] += ml
+            logging_messages.append(
+                (
+                    "Agregando a la key %s ==> Base: %f Base "
+                    + "To Pay: %f Base Unrec: %f"
                 )
-                if taxapp.calculation_base not in [
-                    'payment_amount',
-                    'payment_amount_untaxed',
-                ] and len(prev_ret_ids):
-                    continue
+                % (key, base, base_to_pay, base_unrec)
+            )
 
-                # Obtenemos toda la info contable de la linea de factura
-                # todas las cantidades y los impuestos de IVA aplicados
-                # OJO: Solo los de IVA y de cada linea en particular.
-                # Esto no nos trae
-                # ninguna informacion con respecto a Percepciones
-
-                # Hacemos el computo de la Retencion por linea de factura
-                base = ml.credit or ml.debit
-                logging_messages.append(f"Base tomada: {base}")
-                if line_type == 'income':
-                    base *= -1
-
-                # Luego vamos agrupando por Concepto y
-                # Factura (no por actividad)
-                # TODO: Deberiamos tener alguna configuracion
-                # para agrupar o no por factura tambien
-                invoice = ml.move_id or False
-
-                concept = taxapp.concept_id
-                if taxapp.calculation_base in [
-                    'payment_amount',
-                    'payment_amount_untaxed',
-                ]:
-                    key = (concept, False)
-                else:
-                    key = (concept, invoice)
-
-                base_to_pay = round(base / factor_to_pay, 2)
-                base_unrec = round(base / factor_unrec, 2)
-                retentions.setdefault(
+            logging_messages.append(
+                (
+                    "Subtotales %s ==> Base: %f Base To Pay: "
+                    + "%f Base Unrec: %f"
+                )
+                % (
                     key,
-                    {
-                        'base': 0.0,
-                        'base_to_pay': 0.0,
-                        'base_unrec': 0.0,
-                        'taxapp': taxapp,
-                        'lines': self.env['account.move.line'],
-                    },
+                    retentions[key]['base'],
+                    retentions[key]['base_to_pay'],
+                    retentions[key]['base_unrec'],
                 )
-                retentions[key]['base'] += base
-                retentions[key]['base_to_pay'] += base_to_pay
-                retentions[key]['base_unrec'] += base_unrec
-                retentions[key]['lines'] += ml
-                logging_messages.append(
-                    (
-                        "Agregando a la key %s ==> Base: %f Base "
-                        + "To Pay: %f Base Unrec: %f"
-                    )
-                    % (key, base, base_to_pay, base_unrec)
-                )
-
-                logging_messages.append(
-                    (
-                        "Subtotales %s ==> Base: %f Base To Pay: "
-                        + "%f Base Unrec: %f"
-                    )
-                    % (
-                        key,
-                        retentions[key]['base'],
-                        retentions[key]['base_to_pay'],
-                        retentions[key]['base_unrec'],
-                    )
-                )
+            )
 
         # Mensajes de logging
         _logger.debug("\n\nLogging messages: ")
