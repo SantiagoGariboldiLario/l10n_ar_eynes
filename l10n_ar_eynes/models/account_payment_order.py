@@ -554,7 +554,6 @@ class AccountPaymentOrder(models.Model):
             if excluded_percent == 1.0:
                 continue
 
-            ret = partner_ret.get('retention')
             res = self.calculate_single_retention(partner_ret)
 
             # Generamos la key
@@ -1103,24 +1102,19 @@ class AccountPaymentOrder(models.Model):
         for po in self:
             if po.type != 'payment':
                 return
-            if po.disable_retentions:
-                po.retention_ids = [(5, 0, 0)]
-                continue
-            if any(
-                self.debt_line_ids.mapped('amount')
-                + self.income_line_ids.mapped('amount')
-            ):
-                po.retention_ids = [(5, 0, 0)]
-                vals = po.calculate_retentions()
 
-                po.retention_ids = [(0, 0, val) for val in vals]
-                for retention in po.retention_ids:
-                    retention.onchange_actual_payment_retention()
-            else:
-                if not po.amount:
-                    po.retention_ids = [(5, 0, 0)]
-                    continue
-                po.compute_advance_payment_retentions(po.amount)
+            po.retention_ids = [(5, 0, 0)]
+
+            if not po.disable_retentions:
+                if any(
+                    self.debt_line_ids.mapped('amount')
+                    + self.income_line_ids.mapped('amount')
+                ):
+                    vals = po.calculate_retentions()
+                    po.retention_ids = [(0, 0, val) for val in vals]
+                else:
+                    if po.amount:
+                        po.compute_advance_payment_retentions(po.amount)
 
     def proforma_voucher(self):
         self.ensure_one()
