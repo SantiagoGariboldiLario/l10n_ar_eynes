@@ -562,7 +562,6 @@ class AccountPaymentOrder(models.Model):
                 key = (
                     ret['retention_id'],
                     ret['concept_id'],
-                    ret['invoice_ref'],
                 )
                 if key not in retentions:
                     retentions[key] = ret
@@ -659,9 +658,9 @@ class AccountPaymentOrder(models.Model):
                 logging_messages=logging_messages,
             )
 
-            for (concept, invoice), vals in retentions.items():
+            for (concept, _invoice), vals in retentions.items():
                 # Agrupamos por concepto y factura
-                key = (retention.id, concept, invoice)
+                key = (retention.id, concept)
                 all_concepts.setdefault(
                     key,
                     {
@@ -682,7 +681,7 @@ class AccountPaymentOrder(models.Model):
 
         # Ahora que tenemos las bases agrupadas por concepto
         # aplicamos el calculo de la retencion
-        for (_ret, concept, invoice), vals in all_concepts.items():
+        for (_ret, concept), vals in all_concepts.items():
             taxapp = vals['taxapp']
             base, amount = taxapp.apply_retention(
                 move_line.partner_id,
@@ -702,8 +701,6 @@ class AccountPaymentOrder(models.Model):
                 'name': retention.name,
                 'move_line_ids': [(6, 0, all_concepts[key]['move_lines'].ids)],
                 'concept_id': concept.id,
-                'invoice_id': invoice and invoice.id,
-                'invoice_ref': invoice and invoice.name_get()[0][1],
                 'date': self.date,
                 'account_id': retention.tax_id.get_retention_account().id,
                 'base': base,
