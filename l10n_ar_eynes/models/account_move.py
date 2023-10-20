@@ -31,6 +31,7 @@ class AccountMove(models.Model):
             ("not_defined", "Not Defined"),
         ],
         string='Denomination',
+        compute='_compute_move_denomination',
     )
     internal_number = fields.Char(
         string='Internal Number',
@@ -253,6 +254,30 @@ class AccountMove(models.Model):
         not_invoices = self - invoices
         return super(AccountMove, not_invoices)._compute_name()
 
+    @api.depends('partner_id', 'journal_id')
+    def _compute_move_denomination(self):
+        for move in self:
+            denomination = 'not_defined'
+            if move.is_invoice():
+                if move.is_sale_document() and move.journal_id:
+                    denomination = move.journal_id.denomination
+                elif move.is_purchase_document() and move.partner_id:
+                    if not move.fiscal_position_id:
+                        _logger.warning(
+                            "You must configure a Fiscal Position for this Partner %s"
+                            % move.partner_id.name
+                        )
+                    else:
+                        denomination = (
+                            move.fiscal_position_id.supplier_denomination
+                        )
+                        if not denomination:
+                            _logger.warning(
+                                "You must configure a Denomination for this Fiscal Position %s"
+                                % move.fiscal_position_id.name
+                            )
+            move.denomination = denomination
+
     @api.depends(
         'invoice_line_ids',
         'invoice_line_ids.price_unit',
@@ -380,15 +405,6 @@ class AccountMove(models.Model):
         last_sequence_number = max(invoices.mapped('sequence_number'))
         return str(last_sequence_number + 1).zfill(8)
 
-    # ONCHANGE METHODS
-    @api.onchange('journal_id', 'partner_id')
-    def _onchange_journal(self):
-        if not self.partner_id:
-            return
-        if self.journal_id.type == 'sale':
-            super(AccountMove, self)._onchange_journal()
-            self.denomination = self.journal_id.denomination
-
     @api.onchange('partner_id', 'fiscal_type')
     def _onchange_partner(self):
         if not self.partner_id:
@@ -422,7 +438,7 @@ class AccountMove(models.Model):
             self._onchange_journal()
             return {'domain': {'journal_id': [('id', 'in', journals.ids)]}}
 
-    @api.onchange('partner_id', 'company_id')
+    @api.onchange('partner_id')
     def _onchange_partner_id(self):
         res = super(AccountMove, self)._onchange_partner_id()
         if self.is_sale_document():
@@ -598,15 +614,6 @@ class AccountMove(models.Model):
         self.supplier_move_reference = (
             pos_code.zfill(4) + '-' + move_code.zfill(8)
         )
-
-    @api.onchange('fiscal_position_id', 'partner_id')
-    def _onchange_fiscal_position(self):
-        fiscal_position = (
-            self.fiscal_position_id
-            or self.partner_id.property_account_position_id
-        )
-        if self.is_purchase_document():
-            self.denomination = fiscal_position.supplier_denomination
 
     @api.depends('denomination', 'move_type', 'is_debit_note', 'is_FCE_invoice')
     def _compute_voucher_type(self):
