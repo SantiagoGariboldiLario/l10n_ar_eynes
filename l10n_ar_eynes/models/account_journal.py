@@ -653,9 +653,9 @@ class AccountJournal(models.Model):
             )
 
         # Mensajes de logging
-        _logger.debug("\n\nLogging messages: ")
+        _logger.info("\n\nLogging messages: ")
         for msg in logging_messages:
-            _logger.debug(msg)
+            _logger.info(msg)
         return retentions
 
     def _get_taxapps(self, perception_data, account):

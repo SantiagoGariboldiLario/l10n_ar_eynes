@@ -272,11 +272,10 @@ class RetentionTaxApplication(models.Model):
         return date_start, date_finish
 
     def get_period_partner_payments(self, partner, concept, po_date=False):
-
+        AccountPaymentOrder = self.env['account.payment.order']
+        AccountPaymentOrderLine = self.env['account.payment.order.line']
         date_start, date_finish = self._get_month_date_span_from_date(po_date)
-        payment_order_model = self.env['account.payment.order']
-        payment_order_line_model = self.env['account.payment.order.line']
-        prev_pos = payment_order_model.search(
+        prev_pos = AccountPaymentOrder.search(
             [
                 ('partner_id', '=', partner.id),
                 ('state', '=', 'posted'),
@@ -307,14 +306,14 @@ class RetentionTaxApplication(models.Model):
                 ('payment_order_id', 'in', prev_pos.ids),
                 ('move_line_id', 'in', amls_w_tax.ids),
             ]
-            pol_todo = payment_order_line_model.search(domain)
+            pol_todo = AccountPaymentOrderLine.search(domain)
             amount = ml.credit or ml.debit
             factor = 0.0
             for pol in pol_todo:
                 factor += pol.amount / pol.amount_original
 
             if factor:
-                amount = amount * round(factor, 3)
+                amount = round(amount * factor, 2)
             #            if pol_todo:
             #                factor = pol_todo.amount / pol_todo.amount_original
             #                amount = amount * factor
@@ -330,14 +329,14 @@ class RetentionTaxApplication(models.Model):
                 ('payment_order_id', 'in', prev_pos.ids),
                 ('move_line_id', 'in', amls_w_tax.ids),
             ]
-            pol_todo = payment_order_line_model.search(domain)
+            pol_todo = AccountPaymentOrderLine.search(domain)
             amount = ml.credit or ml.debit
             factor = 0.0
             for pol in pol_todo:
                 factor += pol.amount / pol.amount_original
 
             if factor:
-                amount = amount * round(factor, 3)
+                amount = round(amount * factor, 2)
             income_untax_mls_ok.append(amount)
         untaxed_debt = sum(debt_untax_mls_ok)
         untaxed_inc = sum(income_untax_mls_ok)
@@ -406,6 +405,8 @@ class RetentionTaxApplication(models.Model):
             'payment_amount_untaxed',
         ]:
             base = to_pay
+
+        payment_order_base = base
         if self.retention_tax_id.retention_type == 'profit':
             period_base, period_amount = self.get_period_base_amount(
                 partner, self.concept_id, po_date
@@ -413,23 +414,23 @@ class RetentionTaxApplication(models.Model):
             period_payment_amount = self.get_period_partner_payments(
                 partner, self.concept_id, po_date
             )
-
             # Si tenemos pagos anteriores de este concepto,
             # los sumamos a la base y al ser de ganancias,
             # tenemos que usar la cantidad a pagar neto de Impuestos
             base = to_pay + period_payment_amount
+            payment_order_base = to_pay
 
         # Puede darse el caso en que FAC-NC quede en 0.0 y
         # realizaba una division por cero
         if round(base, 2) == 0.0:
-            return 0.0, 0.0
+            return 0.0, 0.0, 0.0
 
         # Agregamos el signo de la base si es que viene de una NC
         sign_base = base / abs(base)
         base = abs(base)
 
         if base < self.tax_allowance:
-            return 0.0, 0.0
+            return 0.0, 0.0, 0.0
 
         # if self.exclude_tax_allowance:
         #     base -= self.tax_allowance
@@ -453,7 +454,7 @@ class RetentionTaxApplication(models.Model):
 
         # Chequeamos contra el minimo a percibir
         if amount < self.tax_minimum:
-            return 0.0, 0.0
+            return 0.0, 0.0, 0.0
 
         # Chequeamos que la cantidad a retener no sea negativa
         if amount < 0:
@@ -466,9 +467,13 @@ class RetentionTaxApplication(models.Model):
                 % self.retention_tax_id.name
             )
         elif amount == 0.0:
-            return 0.0, 0.0
+            return 0.0, 0.0, 0.0
 
         # Aplicamos el porcentaje de eximision si es que lo hay
         amount *= 1 - excluded_percent
 
-        return base * sign_base, amount * sign_base
+        return (
+            base * sign_base,
+            amount * sign_base,
+            payment_order_base * sign_base,
+        )
