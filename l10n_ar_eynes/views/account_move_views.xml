@@ -8,10 +8,7 @@
         <field name="inherit_id" ref="account.view_move_form" />
         <field name="arch" type="xml">
 
-            <xpath
-                expr="//sheet/div[hasclass('oe_title')]/span[hasclass('o_form_label')]"
-                position="replace"
-            >
+            <xpath expr="//sheet/div[hasclass('oe_title')]/span[hasclass('o_form_label')]" position="replace">
                 <span
                     class="o_form_label"
                     attrs="{'invisible': ['|', ('move_type', '=', 'entry'), ('debit_origin_id', '!=', False)]}"
@@ -32,7 +29,14 @@
 
             <xpath expr="//h1[hasclass('mt0')]" position="replace">
                 <h1 class="mt0">
-                    <field name="denomination" force_save="1" readonly="1" />
+                    <field
+                        name="denomination"
+                        force_save="1"
+                        readonly="1"
+                        attrs="{
+                            'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                        }"
+                    />
                     <field
                         name="name"
                         class="oe_inline"
@@ -121,35 +125,24 @@
                     />
                 </button>
                 <p attrs="{'invisible': [('currency_preciated', '=', False)]}">
-                    <i
-                    >Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
+                    <i>Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
                 </p>
                 <field name="currency_preciated" invisible="1" />
                 <field name="is_company_cur" invisible="1" />
                 <field name="is_multi_currency" invisible="1" />
-                <field
-                    name="company_currency_id"
-                    invisible="1"
-                    string="Company Currency"
-                />
+                <field name="company_currency_id" invisible="1" string="Company Currency" />
             </div>
 
             <field name="fiscal_position_id" position="after">
                 <field name="currency_converted" invisible="1" />
-                <field
-                    name="secondary_currency_id"
-                    attrs="{'invisible': [('is_company_cur', '=', True)]}"
-                />
+                <field name="secondary_currency_id" attrs="{'invisible': [('is_company_cur', '=', True)]}" />
                 <field
                     name="secondary_currency_rate"
                     attrs="{'invisible': [('is_company_cur', '=', True)]}"
                 />
             </field>
 
-            <xpath
-                expr="//group[@class='oe_invoice_lines_tab']/group[1]"
-                position="replace"
-            >
+            <xpath expr="//group[@class='oe_invoice_lines_tab']/group[1]" position="replace">
                 <!-- If the invoice has same currency than the company -->
                 <group
                     colspan="8"
@@ -184,16 +177,10 @@
                     <field name="amount_taxed_cur" />
                     <field name="amount_no_taxed_cur" />
                     <field name="amount_exempt_cur" />
-                    <field
-                        name="amount_untaxed_cur"
-                        class="oe_subtotal_footer_separator"
-                    />
+                    <field name="amount_untaxed_cur" class="oe_subtotal_footer_separator" />
                     <field name="amount_tax_cur" />
                     <field name="amount_perception_curr" />
-                    <field
-                        name="amount_total_cur"
-                        class="oe_subtotal_footer_separator"
-                    />
+                    <field name="amount_total_cur" class="oe_subtotal_footer_separator" />
                     <i>- Amounts in Secondary Currency</i>
                 </group>
             </xpath>
@@ -285,11 +272,7 @@
 
             <page name="other_info" position="inside">
                 <group string="Associated Invoices">
-                    <field
-                        name="associated_inv_ids"
-                        nolabel="1"
-                        domain="[('state', '=', 'posted')]"
-                    >
+                    <field name="associated_inv_ids" nolabel="1" domain="[('state', '=', 'posted')]">
                         <tree>
                             <field name="partner_id" groups="base.group_user" />
                             <field name="date" />
@@ -364,10 +347,7 @@
                     </field>
                 </page>
 
-                <page
-                    string="FCRED"
-                    attrs="{'invisible': [('is_FCE_invoice','=', False)]}"
-                >
+                <page string="FCRED" attrs="{'invisible': [('is_FCE_invoice','=', False)]}">
                     <group string="Optionals">
                         <field name="optional_ids" nolabel="1">
                             <tree editable="bottom">
@@ -390,11 +370,7 @@
                         ]}"
                 >
                     <group string="Shipping Permissions">
-                        <field
-                            name="shipping_perm_ids"
-                            nolabel="1"
-                            widget="one2many_list"
-                        >
+                        <field name="shipping_perm_ids" nolabel="1" widget="one2many_list">
                             <tree editable="bottom">
                                 <field name="name" />
                                 <field name="dst_country_id" />
@@ -457,10 +433,7 @@
 
             </page>
 
-            <xpath
-                expr="//field[@name='line_ids']/form/group/field[@name='currency_id']"
-                position="after"
-            >
+            <xpath expr="//field[@name='line_ids']/form/group/field[@name='currency_id']" position="after">
                 <field
                     name="currency_rate"
                     attrs="{'invisible': [('currency_id', '=', False)]}"
@@ -487,9 +460,7 @@
         <field name="res_model">account.move</field>
         <field name="view_mode">tree,form</field>
         <field eval="False" name="view_id" />
-        <field
-            name="domain"
-        >[('move_type','=','out_invoice'), ('is_debit_note','=', True)]</field>
+        <field name="domain">[('move_type','=','out_invoice'), ('is_debit_note','=', True)]</field>
         <field name="context">{
             'default_move_type':'out_invoice',
             'move_type': 'out_invoice',
@@ -502,17 +473,12 @@
         >With Customer Debit Notes you can manage the debit notes for your customers. A debit note is a document that increases the value of the debt or account balance, either by an error in billing, interest for late payment, or any other circumstance that means the increase in the balance of an account.</field>
     </record>
 
-    <record
-        id="account_invoice_action_debit_note_supplier"
-        model="ir.actions.act_window"
-    >
+    <record id="account_invoice_action_debit_note_supplier" model="ir.actions.act_window">
         <field name="name">Supplier Debit Notes</field>
         <field name="res_model">account.move</field>
         <field name="view_mode">tree,form</field>
         <field eval="False" name="view_id" />
-        <field
-            name="domain"
-        >[('move_type','=','in_invoice'), ('is_debit_note','=', True)]</field>
+        <field name="domain">[('move_type','=','in_invoice'), ('is_debit_note','=', True)]</field>
         <field name="context">{
             'default_move_type':'in_invoice',
             'move_type': 'in_invoice',
@@ -520,9 +486,7 @@
             'default_is_debit_note': True
         }</field>
         <field name="search_view_id" ref="account.view_account_invoice_filter" />
-        <field
-            name="help"
-        >With Supplier Debit Notes you can manage the debit notes for your suppliers.
+        <field name="help">With Supplier Debit Notes you can manage the debit notes for your suppliers.
         A debit note is a document that increases the value of the debt or account balance, either by an error in billing, interest for late payment, or any other circumstance that means the increase in the balance of an account.</field>
     </record>
 
