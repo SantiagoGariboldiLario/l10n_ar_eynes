@@ -1395,7 +1395,7 @@ class AccountPaymentOrder(models.Model):
         # )
         amount_in_company_currency = amount
         debit = credit = 0.0
-        pl_account_id = journal_id.default_account_id.id
+        pl_account_id = journal_id.suspense_account_id.id
         if self.type in ('purchase', 'payment'):
             credit = amount_in_company_currency
         elif self.type in ('sale', 'receipt'):
