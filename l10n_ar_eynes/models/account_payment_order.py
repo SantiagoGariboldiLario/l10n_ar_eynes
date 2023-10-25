@@ -554,7 +554,6 @@ class AccountPaymentOrder(models.Model):
             if excluded_percent == 1.0:
                 continue
 
-            ret = partner_ret.get('retention')
             res = self.calculate_single_retention(partner_ret)
 
             # Generamos la key
@@ -562,7 +561,6 @@ class AccountPaymentOrder(models.Model):
                 key = (
                     ret['retention_id'],
                     ret['concept_id'],
-                    ret['invoice_ref'],
                 )
                 if key not in retentions:
                     retentions[key] = ret
@@ -659,9 +657,9 @@ class AccountPaymentOrder(models.Model):
                 logging_messages=logging_messages,
             )
 
-            for (concept, invoice), vals in retentions.items():
+            for (concept, _invoice), vals in retentions.items():
                 # Agrupamos por concepto y factura
-                key = (retention.id, concept, invoice)
+                key = (retention.id, concept)
                 all_concepts.setdefault(
                     key,
                     {
@@ -682,7 +680,7 @@ class AccountPaymentOrder(models.Model):
 
         # Ahora que tenemos las bases agrupadas por concepto
         # aplicamos el calculo de la retencion
-        for (_ret, concept, invoice), vals in all_concepts.items():
+        for (_ret, concept), vals in all_concepts.items():
             taxapp = vals['taxapp']
             base, amount = taxapp.apply_retention(
                 move_line.partner_id,
@@ -702,8 +700,6 @@ class AccountPaymentOrder(models.Model):
                 'name': retention.name,
                 'move_line_ids': [(6, 0, all_concepts[key]['move_lines'].ids)],
                 'concept_id': concept.id,
-                'invoice_id': invoice and invoice.id,
-                'invoice_ref': invoice and invoice.name_get()[0][1],
                 'date': self.date,
                 'account_id': retention.tax_id.get_retention_account().id,
                 'base': base,
@@ -1103,24 +1099,19 @@ class AccountPaymentOrder(models.Model):
         for po in self:
             if po.type != 'payment':
                 return
-            if po.disable_retentions:
-                po.retention_ids = [(5, 0, 0)]
-                continue
-            if any(
-                self.debt_line_ids.mapped('amount')
-                + self.income_line_ids.mapped('amount')
-            ):
-                po.retention_ids = [(5, 0, 0)]
-                vals = po.calculate_retentions()
 
-                po.retention_ids = [(0, 0, val) for val in vals]
-                for retention in po.retention_ids:
-                    retention.onchange_actual_payment_retention()
-            else:
-                if not po.amount:
-                    po.retention_ids = [(5, 0, 0)]
-                    continue
-                po.compute_advance_payment_retentions(po.amount)
+            po.retention_ids = [(5, 0, 0)]
+
+            if not po.disable_retentions:
+                if any(
+                    self.debt_line_ids.mapped('amount')
+                    + self.income_line_ids.mapped('amount')
+                ):
+                    vals = po.calculate_retentions()
+                    po.retention_ids = [(0, 0, val) for val in vals]
+                else:
+                    if po.amount:
+                        po.compute_advance_payment_retentions(po.amount)
 
     def proforma_voucher(self):
         self.ensure_one()
@@ -1404,7 +1395,7 @@ class AccountPaymentOrder(models.Model):
         # )
         amount_in_company_currency = amount
         debit = credit = 0.0
-        pl_account_id = journal_id.default_account_id.id
+        pl_account_id = journal_id.suspense_account_id.id
         if self.type in ('purchase', 'payment'):
             credit = amount_in_company_currency
         elif self.type in ('sale', 'receipt'):
