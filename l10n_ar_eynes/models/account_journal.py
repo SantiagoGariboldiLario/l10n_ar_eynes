@@ -41,6 +41,11 @@ class AccountJournal(models.Model):
 
         return {'domain': {'tax_id': domain}}
 
+    afip_code = fields.Char(
+        string='AFIP retention code',
+        size=6,
+        default='',
+    )
     code = fields.Char(
         string='POS code',
         size=6,

@@ -15,10 +15,33 @@
         </field>
     </record>
 
+    <record id="view_sicore_generated_files_form" model="ir.ui.view">
+        <field name="name">sicore.generated.files.form</field>
+        <field name="model">sicore.generated.files</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Sicore generated files" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <field name="code" />
+                        <field name="period_start" />
+                        <field name="period_end" />
+                        <field name="presentation_date" />
+                        <label for="datas" string="Generated File" />
+                        <div class="oe_inline">
+                            <field name="datas" class="pr-3" />
+                            <field name="attachment_id" />
+                        </div>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <record id="action_sicore_generated_files" model="ir.actions.act_window">
         <field name="name">Sicore generated files</field>
         <field name="res_model">sicore.generated.files</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">tree,form</field>
     </record>
 
     <menuitem

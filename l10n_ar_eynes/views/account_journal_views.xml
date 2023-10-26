@@ -7,17 +7,10 @@
         <field name="arch" type="xml">
 
             <notebook position="inside">
-                <page
-                    name="pos_info"
-                    string="POS information"
-                    attrs="{'invisible': [('type','!=','sale')]}"
-                >
+                <page name="pos_info" string="POS information" attrs="{'invisible': [('type','!=','sale')]}">
                     <group>
                         <group>
-                            <field
-                                name="denomination"
-                                attrs="{'required':[('type','=','sale')]}"
-                            />
+                            <field name="denomination" attrs="{'required':[('type','=','sale')]}" />
                             <field
                                 name="fiscal_position_id"
                                 attrs="{'required':[('type','=','sale')]}"
@@ -30,14 +23,8 @@
                             />
                         </group>
                         <group>
-                            <field
-                                name="activity_start_date"
-                                attrs="{'required':[('type','=','sale')]}"
-                            />
-                            <field
-                                name="warehouse_id"
-                                attrs="{'required':[('type','=','sale')]}"
-                            />
+                            <field name="activity_start_date" attrs="{'required':[('type','=','sale')]}" />
+                            <field name="warehouse_id" attrs="{'required':[('type','=','sale')]}" />
                         </group>
                     </group>
                 </page>
@@ -48,11 +35,7 @@
                     attrs="{'invisible': [('type','!=','perceptions')]}"
                 >
                     <group string="Tax Information">
-                        <field
-                            name="tax_id"
-                            select="1"
-                            attrs="{'required':[('type', '=', 'perceptions')]}"
-                        />
+                        <field name="tax_id" select="1" attrs="{'required':[('type', '=', 'perceptions')]}" />
                         <field name="type_tax_use" select="1" />
                     </group>
                 </page>
@@ -63,11 +46,7 @@
                     attrs="{'invisible': [('type','!=','retentions')]}"
                 >
                     <group string="Tax Information">
-                        <field
-                            name="tax_id"
-                            select="1"
-                            attrs="{'required':[('type', '=', 'retentions')]}"
-                        />
+                        <field name="tax_id" select="1" attrs="{'required':[('type', '=', 'retentions')]}" />
                         <field name="type_tax_use" select="1" />
                     </group>
                 </page>
@@ -81,17 +60,11 @@
                         'required': [('type', '=', 'sale')]
                     }"
                 />
-                <field
-                    name="fcred_is_fce_emitter"
-                    attrs="{'invisible': [('type', '!=', 'sale')]}"
-                />
+                <field name="fcred_is_fce_emitter" attrs="{'invisible': [('type', '!=', 'sale')]}" />
                 <field name="due_date" attrs="{'readonly': [('id', '!=', False)]}" />
             </xpath>
 
-            <xpath
-                expr="//field[@name='outbound_payment_method_line_ids']"
-                position="attributes"
-            >
+            <xpath expr="//field[@name='outbound_payment_method_line_ids']" position="attributes">
                 <attribute name="readonly">1</attribute>
             </xpath>
 
@@ -124,6 +97,7 @@
             </xpath>
 
             <field name="code" position="after">
+                <field name="afip_code" attrs="{'invisible': [('type', '!=', 'retentions')]}" />
                 <label
                     for="sequence_number_next"
                     attrs="{

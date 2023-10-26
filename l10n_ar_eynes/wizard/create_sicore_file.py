@@ -50,7 +50,6 @@ class CreateSicoreFiles(models.TransientModel):
 
     @api.model
     def _parse_move_lines(self, move):
-
         tax_lines = {}
         concept_lines = {}
 
@@ -129,26 +128,21 @@ class CreateSicoreFiles(models.TransientModel):
 
     @api.model
     def _generate_retention_file(self, retention_ids):
-        generated_files_model = self.env['sicore.generated.files']
-        retention_tax_line_obj = self.env[
-            'account.payment.order.retention.line'
-        ]
         head_file_errors = []
         head_regs = []
         fixed_width = FixedWidth(HEAD_LINES)
 
-        for tax_line in retention_tax_line_obj.browse(retention_ids):
+        for tax_line in self.env['account.payment.order.retention.line'].browse(
+            retention_ids
+        ):
             line_ident = 'Retention Tax Line #%s of Voucher #%s (%s)' % (
                 tax_line.id,
-                tax_line.voucher_id,
-                tax_line.voucher_id.reference,
+                tax_line.payment_order_id,
+                tax_line.payment_order_id.reference,
             )
             _logger.info(line_ident)
-            date_voucher = time.strptime(
-                tax_line.voucher_id.date, '%Y-%m-%d'
-            )  # String(YYYY-MM-DD)->Datetime
-            date_voucher = time.strftime(
-                '%d/%m/%Y', date_voucher
+            date_voucher = tax_line.payment_order_id.date.strftime(
+                '%d/%m/%Y'
             )  # Datetime->String: dd/mm/yyyy
             tipo_doc_retenido = str(
                 tax_line.partner_id.document_type_id.afip_code
@@ -156,10 +150,8 @@ class CreateSicoreFiles(models.TransientModel):
             nro_doc_retenido = tax_line.partner_id.vat
 
             # First search in number then in reference
-            m = re.search(r'.*(\d{4}-\d{8})$', tax_line.voucher_id.number or '')
-            m2 = re.search(
-                r'.*(\d{4}-\d{8})$', tax_line.voucher_id.reference or ''
-            )
+            m = tax_line.payment_order_id.number or ''
+            m2 = tax_line.payment_order_id.reference or ''
             if not m and not m2:
                 err = (
                     '%s: Número de comprobante mal formado. Deberia ser XXXX-XXXXXXXX'
@@ -169,20 +161,16 @@ class CreateSicoreFiles(models.TransientModel):
                 continue
             else:
                 if m:
-                    internal_number = int(m.group(1).replace('-', ''))
+                    internal_number = int(m.replace('OP-', ''))
                 if m2:
-                    internal_number = int(m2.group(1).replace('-', ''))
+                    internal_number = int(m2.replace('-', ''))
 
-            date_emited = time.strptime(tax_line.date, '%Y-%m-%d')
-            date_emited = time.strftime('%d/%m/%Y', date_emited)
+            date_emited = tax_line.date.strftime('%d/%m/%Y')
 
             exclusion_date_certificate = tax_line.exclusion_date_certificate
             if exclusion_date_certificate:
-                exclusion_date_certificate = time.strptime(
-                    exclusion_date_certificate, '%Y-%m-%d'
-                )
-                exclusion_date_certificate = time.strftime(
-                    '%d/%m/%Y', exclusion_date_certificate
+                exclusion_date_certificate = (
+                    exclusion_date_certificate.strftime('%d/%m/%Y')
                 )
             else:
                 exclusion_date_certificate = ''
@@ -215,14 +203,17 @@ class CreateSicoreFiles(models.TransientModel):
                 #   (Accounting->Configuration->Retentions->Tax Application {0}->Reg.Code)"""
                 #   .format(tax_line.tax_app_id.name)
                 # )
-            codigo_impuesto = tax_line.retention_id.code
+            codigo_impuesto = (
+                int(tax_line.retention_id.afip_code)
+                if tax_line.retention_id.afip_code
+                else 0
+            )
             if not codigo_impuesto:
                 raise UserError(
                     _(
-                        """Error
-                        code(afip_code) not found.
-                        HINT: Add code to retention
-                        (Accounting->Configuration->Taxes->Retentions->{}->AFIP Code)
+                        """
+                        Error: Add field 'afip code' to retention
+                        (Accounting->Configuration->Retentions->{}->AFIP Code)
                         """
                     ).format(tax_line.retention_id.name)
                 )
@@ -284,7 +275,7 @@ class CreateSicoreFiles(models.TransientModel):
         f = open(head_filename, 'r')
 
         name = 'SICORE_RET_%s.txt' % self.period_start
-        generated_file_rec = generated_files_model.create(
+        generated_file_rec = self.env['sicore.generated.files'].create(
             {
                 'code': name,
                 'period_start': self.period_start,
@@ -293,15 +284,17 @@ class CreateSicoreFiles(models.TransientModel):
             }
         )
         data = f.read()
+        if isinstance(data, str):
+            data = data.encode('ascii', 'replace')
         data_attach = {
             'name': name,
             'datas': binascii.b2a_base64(data),
-            'datas_fname': name,
+            'store_fname': name,
             'res_model': 'sicore.generated.files',
             'res_id': generated_file_rec.id,
         }
-        self.env['ir.attachment'].create(data_attach)
-        generated_file_rec.write({'attachment_id': data_attach.id})
+        new_attachment = self.env['ir.attachment'].create(data_attach)
+        generated_file_rec.write({'attachment_id': new_attachment.id})
         f.close()
 
         return []
@@ -382,8 +375,6 @@ class CreateSicoreFiles(models.TransientModel):
 
     @api.model
     def _generate_retention_file_rrhh(self, res):
-        generated_files_model = self.env['sicore.generated.files']
-
         head_file_errors = []
         head_regs = []
         head_regs_padron = []
@@ -476,7 +467,7 @@ class CreateSicoreFiles(models.TransientModel):
         f = open(head_filename, 'rb')
 
         name = 'SICORE_RET_RRHH_%s.txt' % self.period_start
-        generated_file_rec = generated_files_model.create(
+        generated_file_rec = self.env['sicore.generated.files'].create(
             {
                 'code': name,
                 'period_start': self.period_start,
@@ -513,7 +504,7 @@ class CreateSicoreFiles(models.TransientModel):
         f = open(head_filename, 'rb')
 
         name = 'SICORE_RET_RRHH_P_%s.txt' % self.period_start
-        generated_file_rec = generated_files_model.create(
+        generated_file_rec = self.env['sicore.generated.files'].create(
             {
                 'code': name,
                 'period_start': self.period_start,
