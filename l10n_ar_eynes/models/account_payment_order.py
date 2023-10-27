@@ -682,7 +682,7 @@ class AccountPaymentOrder(models.Model):
         # aplicamos el calculo de la retencion
         for (_ret, concept), vals in all_concepts.items():
             taxapp = vals['taxapp']
-            base, amount = taxapp.apply_retention(
+            base, amount, payment_order_base = taxapp.apply_retention(
                 move_line.partner_id,
                 percent,
                 excluded_percent,
@@ -704,6 +704,7 @@ class AccountPaymentOrder(models.Model):
                 'account_id': retention.tax_id.get_retention_account().id,
                 'base': base,
                 'amount': amount,
+                'base_amount': payment_order_base,
                 'manual': False,  # La creamos por sistema
                 'retention_id': retention.id,
                 'certificate_no': '',
@@ -1101,6 +1102,7 @@ class AccountPaymentOrder(models.Model):
                 return
 
             po.retention_ids = [(5, 0, 0)]
+            po._onchange_retentions()
 
             if not po.disable_retentions:
                 if any(
@@ -2441,11 +2443,6 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 ],
             }
         return res
-
-    # @api.onchange('actual_payment_retention')
-    def onchange_actual_payment_retention(self):
-        if self.is_profit_retention():
-            self.update({'amount': self.actual_payment_retention})
 
     def is_profit_retention(self):
         return self.retention_type == 'profit'
