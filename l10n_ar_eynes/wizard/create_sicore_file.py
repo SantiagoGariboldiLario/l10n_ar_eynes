@@ -310,9 +310,9 @@ class CreateSicoreFiles(models.TransientModel):
             "FROM account_payment_order_retention_line r "
             "JOIN account_journal ret ON r.retention_id = ret.id "
             "JOIN account_tax at ON ret.tax_id=at.id "
-            "JOIN account_payment_order av ON av.name=r.voucher_number "
+            "JOIN account_payment_order av ON av.id=r.payment_order_id "
             "WHERE r.date BETWEEN %(date_from)s AND %(date_to)s "
-            "AND ret.type in ('vat','profit') AND at.type_tax_use='purchase' "
+            "AND at.retention_type in ('vat','profit') AND at.type_tax_use='purchase' "
             "AND av.state ~ 'posted' ORDER BY r.date"
         )
 

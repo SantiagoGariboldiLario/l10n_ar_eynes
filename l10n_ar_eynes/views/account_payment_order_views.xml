@@ -27,17 +27,8 @@
                         states="posted"
                         confirm="Are you sure to unreconcile and cancel this record ?"
                     />
-                    <button
-                        name="action_cancel_draft"
-                        type="object"
-                        states="cancel"
-                        string="Set to Draft"
-                    />
-                    <button
-                        name="action_clean_lines"
-                        string="Limpiar imputaciones"
-                        type="object"
-                    />
+                    <button name="action_cancel_draft" type="object" states="cancel" string="Set to Draft" />
+                    <button name="action_clean_lines" string="Limpiar imputaciones" type="object" />
                     <field
                         name="state"
                         widget="statusbar"
@@ -80,10 +71,7 @@
                             />
                         </group>
                         <group>
-                            <field
-                                name="date"
-                                attrs="{'readonly': [('state', 'not in', ('draft'))]}"
-                            />
+                            <field name="date" attrs="{'readonly': [('state', 'not in', ('draft'))]}" />
                             <field
                                 name="reference"
                                 string="Payment Ref"
@@ -97,11 +85,7 @@
                                 attrs="{'readonly': [('state', 'not in', ('draft'))]}"
                             />
                             <field name="disable_retentions" invisible="1" />
-                            <field
-                                name="company_id"
-                                readonly="1"
-                                groups="base.group_multi_company"
-                            />
+                            <field name="company_id" readonly="1" groups="base.group_multi_company" />
                             <field
                                 name="account_id"
                                 widget="selection"
@@ -114,15 +98,9 @@
                                 invisible="1"
                                 attrs="{'readonly': [('state', 'not in', ('draft'))]}"
                             />
-                            <field
-                                name="currency_id"
-                                attrs="{'readonly': True}"
-                                force_save="True"
-                            />
+                            <field name="currency_id" attrs="{'readonly': True}" force_save="True" />
 
-                            <div
-                                attrs="{'invisible':[('is_multi_currency','=',False)]}"
-                            >
+                            <div attrs="{'invisible':[('is_multi_currency','=',False)]}">
                                     <field name="is_multi_currency" invisible="1" />
                                     <field
                                     name="payment_rate"
@@ -138,11 +116,7 @@
                                     groups="base.group_multi_currency"
                                 />
                                     <!-- <field name="currency_help_label" colspan="2" nolabel="1" class="oe_grey"/> -->
-                                    <field
-                                    name="paid_amount_in_company_currency"
-                                    colspan="4"
-                                    invisible="1"
-                                />
+                                    <field name="paid_amount_in_company_currency" colspan="4" invisible="1" />
                             </div>
                         </group>
                         <group col="2">
@@ -197,11 +171,7 @@
                                     <field name="date" />
                                     <field name="payment_order_id" invisible="1" />
                                     <field name="name" invisible="0" />
-                                    <field
-                                        name="company_currency"
-                                        invisible="1"
-                                        readonly="1"
-                                    />
+                                    <field name="company_currency" invisible="1" readonly="1" />
                                     <field
                                         name="amount"
                                         sum="Total"
@@ -236,11 +206,7 @@
                                     Gather Lines
                                 </button>
                             </div>
-                            <field
-                                name="invoice_ids"
-                                widget="many2many_tags"
-                                invisible="1"
-                            />
+                            <field name="invoice_ids" widget="many2many_tags" invisible="1" />
                             <label
                                 for="income_line_ids"
                                 invisible="context.get('line_type', False)"
@@ -288,16 +254,8 @@
                                         readonly="True"
                                         force_save="True"
                                     />
-                                    <field
-                                        name="date_original"
-                                        readonly="1"
-                                        force_save="True"
-                                    />
-                                    <field
-                                        name="date_due"
-                                        readonly="1"
-                                        force_save="True"
-                                    />
+                                    <field name="date_original" readonly="1" force_save="True" />
+                                    <field name="date_due" readonly="1" force_save="True" />
                                     <field name="currency_id" invisible="1" />
                                     <field name="original_currency_id" invisible="1" />
                                     <field
@@ -348,11 +306,7 @@
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
                                         groups="base.group_multi_currency"
                                     />
-                                    <field
-                                        string="Full"
-                                        name="reconcile"
-                                        class="reconcile_bullseye"
-                                    />
+                                    <field string="Full" name="reconcile" class="reconcile_bullseye" />
                                 </tree>
                             </field>
                             <div class="oe_button_box" name="button_box">
@@ -392,11 +346,7 @@
                                         'readonly': [('move_line_id', '!=', False)]}"
                                         options="{'no_quick_create': True, 'no_create_edit': True}"
                                     />
-                                    <field
-                                        name="ref"
-                                        attrs="{'readonly': True}"
-                                        force_save="True"
-                                    />
+                                    <field name="ref" attrs="{'readonly': True}" force_save="True" />
                                     <field
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
@@ -411,16 +361,8 @@
                                         readonly="1"
                                         force_save="True"
                                     />
-                                    <field
-                                        name="date_original"
-                                        readonly="1"
-                                        force_save="True"
-                                    />
-                                    <field
-                                        name="date_due"
-                                        readonly="1"
-                                        force_save="True"
-                                    />
+                                    <field name="date_original" readonly="1" force_save="True" />
+                                    <field name="date_due" readonly="1" force_save="True" />
                                     <field name="currency_id" invisible="1" />
                                     <field
                                         name="amount_original"
@@ -437,12 +379,7 @@
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
                                     />
-                                    <field
-                                        name="reconcile"
-                                        readonly="1"
-                                        force_save="True"
-                                        invisible="1"
-                                    />
+                                    <field name="reconcile" readonly="1" force_save="True" invisible="1" />
                                     <field
                                         name="amount"
                                         sum="Total Allocation"
@@ -475,11 +412,7 @@
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
                                         groups="base.group_multi_currency"
                                     />
-                                    <field
-                                        string="Full"
-                                        name="reconcile"
-                                        class="reconcile_bullseye"
-                                    />
+                                    <field string="Full" name="reconcile" class="reconcile_bullseye" />
                                 </tree>
                             </field>
                             <group col="3">
@@ -516,10 +449,7 @@
                                     <field name="source_partner_id" invisible="1" />
                                     <group>
                                         <group>
-                                            <field
-                                                name="source_payment_order_id"
-                                                invisible="1"
-                                            />
+                                            <field name="source_payment_order_id" invisible="1" />
                                             <field name="journal_id" />
                                             <field name="internal_type" invisible="1" />
                                             <field name="number" />
@@ -543,10 +473,7 @@
                                             <field name="signatory_account" />
                                         </group>
                                     </group>
-                                    <field
-                                        name="third_party_check_state"
-                                        invisible="1"
-                                    />
+                                    <field name="third_party_check_state" invisible="1" />
                                 </form>
                             </field>
                         </page>
@@ -571,10 +498,7 @@
                                     <field name="debit" />
                                     <field name="credit" />
                                     <field name="amount_currency" />
-                                    <field
-                                        name="currency_id"
-                                        groups="base.group_multi_currency"
-                                    />
+                                    <field name="currency_id" groups="base.group_multi_currency" />
                                 </tree>
                             </field>
                         </page>
@@ -591,10 +515,7 @@
                                     <field name="name" invisible="1" />
                                     <field name="state_id" invisible="1" />
                                     <field name="date" />
-                                    <field
-                                        name="retention_id"
-                                        string="Retention Type"
-                                    />
+                                    <field name="retention_id" string="Retention Type" />
                                     <field name="taxapp_id" invisible="1" />
                                     <field name="date_applied" />
                                     <field name="concept_id" />
@@ -603,13 +524,11 @@
                                     <field name="manual" invisible="1" />
                                     <field name="reg_code" invisible="1" />
                                     <field name="excluded_percent" invisible="1" />
-                                    <field
-                                        name="exclusion_date_certificate"
-                                        invisible="1"
-                                    />
+                                    <field name="exclusion_date_certificate" invisible="1" />
                                     <field name="partner_id" invisible="1" />
                                     <field name="certificate_no" />
                                     <field name="base" />
+                                    <field name="base_amount" />
                                     <field
                                         name="base_currency"
                                         widget="monetary"
@@ -684,11 +603,7 @@
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers" />
                     <field name="activity_ids" widget="mail_activity" />
-                    <field
-                        name="message_ids"
-                        widget="mail_thread"
-                        options="{'display_log_button': True}"
-                    />
+                    <field name="message_ids" widget="mail_thread" options="{'display_log_button': True}" />
                 </div>
 
             </form>
@@ -699,10 +614,7 @@
         <field name="name">account.payment.order.view.tree</field>
         <field name="model">account.payment.order</field>
         <field name="arch" type="xml">
-            <tree
-                decoration-info="state == 'draft'"
-                decoration-muted="state  == 'cancel'"
-            >
+            <tree decoration-info="state == 'draft'" decoration-muted="state  == 'cancel'">
                 <field name="date" />
                 <field name="number" />
                 <field name="name" />
@@ -721,9 +633,7 @@
         <field name="context">{
             'default_type' : 'receipt',
             'default_disable_retentions': True}</field>
-        <field
-            name="domain"
-        >[('journal_id.type', '=', 'receipt'), ('type','=','receipt')]</field>
+        <field name="domain">[('journal_id.type', '=', 'receipt'), ('type','=','receipt')]</field>
         <field
             name="view_ids"
             eval="[(5, 0, 0),
@@ -822,10 +732,7 @@
                             />
                         </group>
                         <group>
-                            <field
-                                name="date"
-                                invisible="context.get('line_type', False)"
-                            />
+                            <field name="date" invisible="context.get('line_type', False)" />
                             <field
                                 name="reference"
                                 invisible="context.get('line_type', False)"
@@ -844,16 +751,9 @@
                                 name="disable_retentions"
                                 attrs="{'readonly': [('state', '!=', 'draft')]}"
                             />
-                            <field
-                                name="company_id"
-                                widget="selection"
-                                groups="base.group_multi_company"
-                            />
+                            <field name="company_id" widget="selection" groups="base.group_multi_company" />
                         </group>
-                        <group
-                            col="2"
-                            attrs="{'invisible':[('is_multi_currency','=',False)]}"
-                        >
+                        <group col="2" attrs="{'invisible':[('is_multi_currency','=',False)]}">
                             <separator string="Currency Options" colspan="2" />
                             <field name="is_multi_currency" invisible="1" />
                             <label for="payment_rate" colspan="1" />
@@ -872,11 +772,7 @@
                                 />
                             </div>
                             <!-- <field name="currency_help_label" colspan="2" nolabel="1" class="oe_grey"/> -->
-                            <field
-                                name="paid_amount_in_company_currency"
-                                colspan="2"
-                                invisible="1"
-                            />
+                            <field name="paid_amount_in_company_currency" colspan="2" invisible="1" />
                         </group>
                         <group col="2">
                             <separator string="Payment Options" colspan="2" />
@@ -923,11 +819,7 @@
                                     <field name="date" />
                                     <field name="payment_order_id" invisible="1" />
                                     <field name="name" invisible="0" />
-                                    <field
-                                        name="company_currency"
-                                        invisible="1"
-                                        readonly="1"
-                                    />
+                                    <field name="company_currency" invisible="1" readonly="1" />
                                     <field
                                         name="amount"
                                         sum="Total"
@@ -951,11 +843,7 @@
                                     />
                                 </tree>
                             </field>
-                            <field
-                                name="invoice_ids"
-                                widget="many2many_tags"
-                                invisible="1"
-                            />
+                            <field name="invoice_ids" widget="many2many_tags" invisible="1" />
                             <div class="oe_button_box" name="button_box">
                                 <button
                                     name="gather_debt_lines"
@@ -1016,16 +904,8 @@
                                         readonly="True"
                                         force_save="True"
                                     />
-                                    <field
-                                        name="date_original"
-                                        readonly="1"
-                                        force_save="True"
-                                    />
-                                    <field
-                                        name="date_due"
-                                        readonly="1"
-                                        force_save="True"
-                                    />
+                                    <field name="date_original" readonly="1" force_save="True" />
+                                    <field name="date_due" readonly="1" force_save="True" />
                                     <field name="currency_id" invisible="1" />
                                     <field name="original_currency_id" invisible="1" />
                                     <field
@@ -1076,11 +956,7 @@
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
                                         groups="base.group_multi_currency"
                                     />
-                                    <field
-                                        string="Full"
-                                        name="reconcile"
-                                        class="reconcile_bullseye"
-                                    />
+                                    <field string="Full" name="reconcile" class="reconcile_bullseye" />
                                 </tree>
                             </field>
                             <div class="oe_button_box" name="button_box">
@@ -1120,11 +996,7 @@
                                             'readonly': [('move_line_id', '!=', False)]}"
                                         options="{'no_quick_create': True, 'no_create_edit': True}"
                                     />
-                                    <field
-                                        name="ref"
-                                        attrs="{'readonly': True}"
-                                        force_save="True"
-                                    />
+                                    <field name="ref" attrs="{'readonly': True}" force_save="True" />
                                     <field
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
@@ -1139,16 +1011,8 @@
                                         readonly="1"
                                         force_save="True"
                                     />
-                                    <field
-                                        name="date_original"
-                                        readonly="1"
-                                        force_save="True"
-                                    />
-                                    <field
-                                        name="date_due"
-                                        readonly="1"
-                                        force_save="True"
-                                    />
+                                    <field name="date_original" readonly="1" force_save="True" />
+                                    <field name="date_due" readonly="1" force_save="True" />
                                     <field name="currency_id" invisible="1" />
                                     <field name="original_currency_id" invisible="1" />
                                     <field
@@ -1166,12 +1030,7 @@
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
                                     />
-                                    <field
-                                        name="reconcile"
-                                        readonly="1"
-                                        force_save="True"
-                                        invisible="1"
-                                    />
+                                    <field name="reconcile" readonly="1" force_save="True" invisible="1" />
                                     <field
                                         name="amount"
                                         sum="Total Allocation"
@@ -1204,11 +1063,7 @@
                                         attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
                                         groups="base.group_multi_currency"
                                     />
-                                    <field
-                                        string="Full"
-                                        name="reconcile"
-                                        class="reconcile_bullseye"
-                                    />
+                                    <field string="Full" name="reconcile" class="reconcile_bullseye" />
                                 </tree>
                             </field>
                             <group>
@@ -1301,10 +1156,7 @@
                                         attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
                                         sum="Total Amount"
                                     />
-                                    <field
-                                        name="third_party_check_state"
-                                        invisible="1"
-                                    />
+                                    <field name="third_party_check_state" invisible="1" />
                                 </tree>
                             </field>
                         </page>
@@ -1327,10 +1179,7 @@
                                     <field name="name" invisible="1" />
                                     <field name="state_id" invisible="1" />
                                     <field name="date" />
-                                    <field
-                                        name="retention_id"
-                                        string="Retention Type"
-                                    />
+                                    <field name="retention_id" string="Retention Type" />
                                     <field name="taxapp_id" invisible="1" />
                                     <field name="date_applied" />
                                     <field name="concept_id" />
@@ -1339,13 +1188,11 @@
                                     <field name="manual" invisible="1" />
                                     <field name="reg_code" invisible="1" />
                                     <field name="excluded_percent" invisible="1" />
-                                    <field
-                                        name="exclusion_date_certificate"
-                                        invisible="1"
-                                    />
+                                    <field name="exclusion_date_certificate" invisible="1" />
                                     <field name="partner_id" invisible="1" />
                                     <field name="certificate_no" />
                                     <field name="base" />
+                                    <field name="base_amount" />
                                     <field
                                         name="base_currency"
                                         widget="monetary"
@@ -1425,30 +1272,12 @@
                                     >
                                         <field name="retention_move_line_ids">
                                             <tree>
-                                                <field
-                                                    name="payment_order_line_id"
-                                                    invisible="1"
-                                                />
-                                                <field
-                                                    name="payment_order_reference"
-                                                    string="OP reference"
-                                                />
+                                                <field name="payment_order_line_id" invisible="1" />
+                                                <field name="payment_order_reference" string="OP reference" />
                                                 <!-- <field name="move_id"/> -->
-                                                <field
-                                                    name="move_name"
-                                                    string="Name"
-                                                    force_save="1"
-                                                />
-                                                <field
-                                                    name="move_type"
-                                                    string="Type"
-                                                    force_save="1"
-                                                />
-                                                <field
-                                                    name="total_without_vat"
-                                                    sum="Total"
-                                                    force_save="1"
-                                                />
+                                                <field name="move_name" string="Name" force_save="1" />
+                                                <field name="move_type" string="Type" force_save="1" />
+                                                <field name="total_without_vat" sum="Total" force_save="1" />
                                             </tree>
                                         </field>
                                         <field name="retention_move_lines_total" />
@@ -1485,14 +1314,8 @@
                                     <field name="name" />
                                     <field name="debit" />
                                     <field name="credit" />
-                                    <field
-                                        name="amount_currency"
-                                        groups="base.group_multi_currency"
-                                    />
-                                    <field
-                                        name="currency_id"
-                                        groups="base.group_multi_currency"
-                                    />
+                                    <field name="amount_currency" groups="base.group_multi_currency" />
+                                    <field name="currency_id" groups="base.group_multi_currency" />
                                 </tree>
                             </field>
                         </page>
@@ -1501,11 +1324,7 @@
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers" />
                     <field name="activity_ids" widget="mail_activity" />
-                    <field
-                        name="message_ids"
-                        widget="mail_thread"
-                        options="{'display_log_button': True}"
-                    />
+                    <field name="message_ids" widget="mail_thread" options="{'display_log_button': True}" />
                 </div>
             </form>
         </field>
@@ -1516,9 +1335,7 @@
         <field name="res_model">account.payment.order</field>
         <field name="context">{'default_type' : 'payment'}</field>
         <field name="view_mode">tree,form</field>
-        <field
-            name="domain"
-        >[('journal_id.type', '=', 'payment'), ('type','=','payment')]</field>
+        <field name="domain">[('journal_id.type', '=', 'payment'), ('type','=','payment')]</field>
         <field
             name="view_ids"
             eval="[(5, 0, 0),

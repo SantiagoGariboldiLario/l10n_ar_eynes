@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="retention_certificate_qweb">
         <t t-call="web.html_container">
+            <html>
+                <head>
+                    <meta charset="utf-8" />
+                </head>
+            </html>
             <t t-foreach="docs" t-as="o">
                 <t t-foreach="o.retention_ids" t-as="r">
                     <table style="width:100%">
@@ -70,7 +75,7 @@
                                 <strong style="font-size:21px;">Localidad: </strong>
                                 <t t-set="city" t-value="o.company_id.city" />
                                 <span t-esc="city" style="font-size:21px;" />
-                                <span>   -   </span>
+                                <span> - </span>
                                 <strong style="font-size:21px;">C.P.: </strong>
                                 <t t-set="zip_code" t-value="o.company_id.zip" />
                                 <span t-esc="zip_code" style="font-size:21px;" />
@@ -105,7 +110,8 @@
                             <td style="width:50%;padding:9px;">
                                 <strong
                                     style="font-size:21px;"
-                                >RUBRO II: IDENTIFICACION DEL CONTRIBUYENTE</strong>
+                                >RUBRO II: IDENTIFICACION DEL
+                                    CONTRIBUYENTE</strong>
                             </td>
                             <td style="padding:9px;">
                             </td>
@@ -139,7 +145,7 @@
                                 <strong style="font-size:21px;">Localidad: </strong>
                                 <t t-set="partner_city" t-value="o.partner_id.city" />
                                 <span t-esc="partner_city" style="font-size:21px;" />
-                                <span>   -   </span>
+                                <span> - </span>
                                 <strong style="font-size:21px;">C.P.: </strong>
                                 <t
                                     t-set="partner_zip_code"
@@ -189,7 +195,8 @@
                             <td style="width:50%;padding:9px;">
                                 <strong
                                     style="font-size:21px;"
-                                >RUBRO III: DETALLE DE EL/LOS MONTO/S RETENIDO/S</strong>
+                                >RUBRO III: DETALLE DE EL/LOS MONTO/S
+                                    RETENIDO/S</strong>
                             </td>
                             <td style="padding:9px;">
                             </td>

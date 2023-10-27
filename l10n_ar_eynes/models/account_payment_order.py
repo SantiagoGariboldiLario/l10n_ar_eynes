@@ -545,11 +545,18 @@ class AccountPaymentOrder(models.Model):
 
     def calculate_retentions(self):
         self.ensure_one()
-        retentions = {}
         # Computamos todas las retenciones para el voucher
         partner_retentions = self.partner_id._get_retentions_to_apply(self.date)
 
+        retentions = {}
         for partner_ret in list(partner_retentions.values()):
+            retention = partner_ret.get('retention')
+            if not retention.tax_id.active:
+                _logger.info(
+                    "Skipping %s because its account.tax is inactive"
+                    % retention.name
+                )
+                continue
             excluded_percent = partner_ret.get('excluded_percent')
             if excluded_percent == 1.0:
                 continue
@@ -577,7 +584,7 @@ class AccountPaymentOrder(models.Model):
 
     def calculate_single_retention(self, retention_data):
         self.ensure_one()
-        partner_model = self.env['res.partner']
+        ResPartner = self.env['res.partner']
         retention = retention_data.get('retention')
         activity = retention_data.get('activity_id')
         percent = retention_data.get('percent')
@@ -610,7 +617,7 @@ class AccountPaymentOrder(models.Model):
             invoice = po_line.move_invoice_id
             destination_shipping = (
                 invoice.address_shipping_id
-                or partner_model.browse(
+                or ResPartner.browse(
                     invoice.partner_id.address_get(['delivery']).get('delivery')
                 )
             )
@@ -682,7 +689,7 @@ class AccountPaymentOrder(models.Model):
         # aplicamos el calculo de la retencion
         for (_ret, concept), vals in all_concepts.items():
             taxapp = vals['taxapp']
-            base, amount = taxapp.apply_retention(
+            base, amount, payment_order_base = taxapp.apply_retention(
                 move_line.partner_id,
                 percent,
                 excluded_percent,
@@ -704,6 +711,7 @@ class AccountPaymentOrder(models.Model):
                 'account_id': retention.tax_id.get_retention_account().id,
                 'base': base,
                 'amount': amount,
+                'base_amount': payment_order_base,
                 'manual': False,  # La creamos por sistema
                 'retention_id': retention.id,
                 'certificate_no': '',
@@ -718,35 +726,41 @@ class AccountPaymentOrder(models.Model):
         return res
 
     def _check_previous_retentions(self, retention, move_line=False):
-        sql = """
-        SELECT rl.id FROM account_journal r
-        JOIN account_payment_order_retention_line rl ON r.id=rl.retention_id
-        JOIN retention_line_move_line_rel rv ON rv.retention_line_id=rl.id
-        JOIN account_move_line ml ON ml.id=rv.move_line_id
-        JOIN account_payment_order po ON po.id=rl.payment_order_id
-        JOIN account_payment_order_line pol
-            ON pol.move_line_id=ml.id
-            AND pol.payment_order_id=po.id
-        JOIN account_move mv ON mv.id=ml.move_id
-        WHERE r.id=%(ret_id)s AND po.state='posted'
-            AND (r.company_id = %(company_id)s OR r.company_id IS NULL)
-        """
+        # sql = """
+        # SELECT rl.id FROM account_journal r
+        # JOIN account_payment_order_retention_line rl ON r.id=rl.retention_id
+        # JOIN retention_line_move_line_rel rv ON rv.retention_line_id=rl.id
+        # JOIN account_move_line ml ON ml.id=rv.move_line_id
+        # JOIN account_payment_order po ON po.id=rl.payment_order_id
+        # JOIN account_payment_order_line pol
+        #     ON pol.move_line_id=ml.id
+        #     AND pol.payment_order_id=po.id
+        # JOIN account_move mv ON mv.id=ml.move_id
+        # WHERE r.id=%(ret_id)s AND po.state='posted'
+        #     AND (r.company_id = %(company_id)s OR r.company_id IS NULL)
+        # """
 
-        company = self.default_company()
+        # company = self.default_company()
 
-        q_params = {
-            'ret_id': retention.id,
-            'company_id': company.id,
-        }
-        if move_line:
-            q_params['move_line_id'] = move_line.id
-            sql += " AND ml.id=%(move_line_id)s"
+        # q_params = {
+        #     'ret_id': retention.id,
+        #     'company_id': company.id,
+        # }
+        # if move_line:
+        #     q_params['move_line_id'] = move_line.id
+        #     sql += " AND ml.id=%(move_line_id)s"
 
-        self.env.cr.execute(sql, q_params)
-        res = self.env.cr.fetchall()
+        # self.env.cr.execute(sql, q_params)
+        # res = self.env.cr.fetchall()
 
-        line_ids = [r[0] for r in res]
-        return line_ids
+        # line_ids = [r[0] for r in res]
+        PaymentOrderLine = self.env['account.payment.order.line']
+
+        payment_order_lines = PaymentOrderLine.search(
+            [('move_line_id', '=', move_line.id)]
+        ).filtered(lambda line: line.payment_order_id.state == 'posted')
+
+        return payment_order_lines.ids
 
     def action_clean_lines(self):
         """reset income and debt lines"""
@@ -1101,6 +1115,7 @@ class AccountPaymentOrder(models.Model):
                 return
 
             po.retention_ids = [(5, 0, 0)]
+            po._onchange_retentions()
 
             if not po.disable_retentions:
                 if any(
@@ -2441,11 +2456,6 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 ],
             }
         return res
-
-    # @api.onchange('actual_payment_retention')
-    def onchange_actual_payment_retention(self):
-        if self.is_profit_retention():
-            self.update({'amount': self.actual_payment_retention})
 
     def is_profit_retention(self):
         return self.retention_type == 'profit'
