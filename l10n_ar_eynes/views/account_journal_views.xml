@@ -93,6 +93,7 @@
             </xpath>
 
             <field name="code" position="after">
+                <field name="afip_code" attrs="{'invisible': [('type', '!=', 'retentions')]}" />
                 <label
                     for="sequence_number_next"
                     attrs="{
