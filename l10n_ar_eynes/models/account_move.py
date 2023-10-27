@@ -32,6 +32,7 @@ class AccountMove(models.Model):
         ],
         string='Denomination',
         compute='_compute_move_denomination',
+        store=True,
     )
     internal_number = fields.Char(
         string='Internal Number',
