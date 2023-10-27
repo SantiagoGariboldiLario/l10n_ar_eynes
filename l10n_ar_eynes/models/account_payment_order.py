@@ -545,11 +545,18 @@ class AccountPaymentOrder(models.Model):
 
     def calculate_retentions(self):
         self.ensure_one()
-        retentions = {}
         # Computamos todas las retenciones para el voucher
         partner_retentions = self.partner_id._get_retentions_to_apply(self.date)
 
+        retentions = {}
         for partner_ret in list(partner_retentions.values()):
+            retention = partner_ret.get('retention')
+            if not retention.tax_id.active:
+                _logger.info(
+                    "Skipping %s because its account.tax is inactive"
+                    % retention.name
+                )
+                continue
             excluded_percent = partner_ret.get('excluded_percent')
             if excluded_percent == 1.0:
                 continue
@@ -577,7 +584,7 @@ class AccountPaymentOrder(models.Model):
 
     def calculate_single_retention(self, retention_data):
         self.ensure_one()
-        partner_model = self.env['res.partner']
+        ResPartner = self.env['res.partner']
         retention = retention_data.get('retention')
         activity = retention_data.get('activity_id')
         percent = retention_data.get('percent')
@@ -610,7 +617,7 @@ class AccountPaymentOrder(models.Model):
             invoice = po_line.move_invoice_id
             destination_shipping = (
                 invoice.address_shipping_id
-                or partner_model.browse(
+                or ResPartner.browse(
                     invoice.partner_id.address_get(['delivery']).get('delivery')
                 )
             )
