@@ -432,10 +432,8 @@ class RetentionTaxApplication(models.Model):
         if base < self.tax_allowance:
             return 0.0, 0.0, 0.0
 
-        # if self.exclude_tax_allowance:
-        #     base -= self.tax_allowance
-        # Deshabilitamos la funcionalidad del booleano. Debe descontarse siempre.
-        base -= self.tax_allowance
+        if self.exclude_tax_allowance:
+            base -= self.tax_allowance
 
         if self.calculation_base == 'proportional_vat':
             # TODO: Chequear que esta funcion funcione correctamente

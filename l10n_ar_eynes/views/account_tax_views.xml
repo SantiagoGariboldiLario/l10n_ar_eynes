@@ -65,7 +65,7 @@
                                 <field name="concept_id" />
                                 <field name="activity_id" />
                                 <field name="tax_allowance" />
-                                <!-- <field name="exclude_tax_allowance" /> -->
+                                <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
                                 <field name="aliq_type" required="1" />
@@ -78,7 +78,7 @@
                                     <field name="concept_id" domain="[('type', '=', 'vat')]" />
                                     <field name="activity_id" domain="[('type', '=', 'vat')]" />
                                     <field name="tax_allowance" />
-                                    <!-- <field name="exclude_tax_allowance" /> -->
+                                    <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
                                     <field name="aliq_type" required="1" />
@@ -108,7 +108,7 @@
                                 <field name="concept_id" />
                                 <field name="activity_id" />
                                 <field name="tax_allowance" />
-                                <!-- <field name="exclude_tax_allowance" /> -->
+                                <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
                                 <field name="aliq_type" required="1" />
@@ -122,7 +122,7 @@
                                     <field name="concept_id" domain="[('type', '=', 'gross_income')]" />
                                     <field name="activity_id" domain="[('type', '=', 'gross_income')]" />
                                     <field name="tax_allowance" />
-                                    <!-- <field name="exclude_tax_allowance" /> -->
+                                    <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
                                     <field name="aliq_type" required="1" />
@@ -153,7 +153,7 @@
                                 <field name="concept_id" />
                                 <field name="activity_id" />
                                 <field name="tax_allowance" />
-                                <!-- <field name="exclude_tax_allowance" /> -->
+                                <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
                                 <field name="aliq_type" required="1" />
@@ -166,7 +166,7 @@
                                     <field name="concept_id" domain="[('type', '=', 'profit')]" />
                                     <field name="activity_id" domain="[('type', '=', 'profit')]" />
                                     <field name="tax_allowance" />
-                                    <!-- <field name="exclude_tax_allowance" /> -->
+                                    <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
                                     <field name="aliq_type" required="1" />
@@ -243,7 +243,7 @@
                                 <field name="concept_id" />
                                 <field name="activity_id" />
                                 <field name="tax_allowance" />
-                                <!-- <field name="exclude_tax_allowance" /> -->
+                                <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
                                 <field name="percent" />
@@ -254,7 +254,7 @@
                                     <field name="concept_id" domain="[('type', '=', 'vat')]" />
                                     <field name="activity_id" domain="[('type', '=', 'vat')]" />
                                     <field name="tax_allowance" />
-                                    <!-- <field name="exclude_tax_allowance" /> -->
+                                    <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
                                     <field name="percent" />
@@ -276,7 +276,7 @@
                                 <field name="concept_id" />
                                 <field name="activity_id" />
                                 <field name="tax_allowance" />
-                                <!-- <field name="exclude_tax_allowance" /> -->
+                                <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
                                 <field name="percent" />
@@ -288,7 +288,7 @@
                                     <field name="concept_id" domain="[('type', '=', 'gross_income')]" />
                                     <field name="activity_id" domain="[('type', '=', 'gross_income')]" />
                                     <field name="tax_allowance" />
-                                    <!-- <field name="exclude_tax_allowance" /> -->
+                                    <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
                                     <field name="percent" />
@@ -311,7 +311,7 @@
                                 <field name="concept_id" />
                                 <field name="activity_id" />
                                 <field name="tax_allowance" />
-                                <!-- <field name="exclude_tax_allowance" /> -->
+                                <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
                                 <field name="percent" />
@@ -322,7 +322,7 @@
                                     <field name="concept_id" domain="[('type', '=', 'profit')]" />
                                     <field name="activity_id" domain="[('type', '=', 'profit')]" />
                                     <field name="tax_allowance" />
-                                    <!-- <field name="exclude_tax_allowance" /> -->
+                                    <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
                                     <field name="percent" />
