@@ -2413,7 +2413,8 @@ class AccountPaymentOrderRetentionLine(models.Model):
             concept_amount = rec.concept_amount
             total = sum(
                 rec.retention_move_line_ids.filtered(
-                    lambda rtml: rtml.move_name != 'draft'
+                    lambda rtml: rtml.payment_order_reference
+                    != rec.payment_order_id.number
                 ).mapped('total_without_vat')
             )
             if total == 0 or total < concept_amount:
