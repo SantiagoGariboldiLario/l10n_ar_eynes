@@ -5231,6 +5231,8 @@ msgid ""
 "The journal does not have a period established\n"
 "Please add a period in: accounting/journals/update journals periods"
 msgstr ""
+"El diario no tiene un período definido.\n"
+"Por favor, añada un período en: facturación/diarios/actualizar período de diarios."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_line__move_invoice_id
@@ -5299,18 +5301,20 @@ msgid ""
 "There is another Invoice with a most recent date [%s] for the same Point of "
 "Sale and Denomination."
 msgstr ""
+"Ya hay otra Factura con una fecha más reciente [%s] para el mismo Punto de "
+"Venta y Denominación."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "There is another partner with same VAT Information"
-msgstr ""
+msgstr "Ya existe otro contacto con el mismo VAT"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #, python-format
 msgid "There is more than one configuration with this POS %s"
-msgstr ""
+msgstr "Hay más de una configuración con el POS %s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -5328,7 +5332,7 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #, python-format
 msgid "There is no configuration for this POS %s"
-msgstr ""
+msgstr "No hay configuración para el POS %s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
@@ -6016,6 +6020,8 @@ msgid ""
 "WSFE Error!\n"
 "Currency has to be configured correctly in WSFEX Configuration."
 msgstr ""
+"WSFE Error!\n"
+"La divisa (currency) debe ser configurada correctamente en WSFEX Configuration."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/wsfe_sinchronize_voucher.py:0
@@ -6024,6 +6030,8 @@ msgid ""
 "WSFE Error!\n"
 "Sinchronize process is not correct!"
 msgstr ""
+"WSFE Error!\n"
+"Sincronización de proceso no es correcto!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wsfetools/wsfex_easywsy.py:0
@@ -6032,6 +6040,8 @@ msgid ""
 "WSFE Error!\n"
 "There is no first invoice number declared!"
 msgstr ""
+"WSFE Error!\n"
+"No hay un primer número de facturación declarado!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/wsfe_massive_validation.py:0
@@ -6040,6 +6050,8 @@ msgid ""
 "WSFE Error!\n"
 "You are trying to validate several invoices but not all of them are in 'draft' state"
 msgstr ""
+"WSFE Error!\n"
+"Está intentando validar varias facturas, pero no todas ellas están en estado 'borrador'"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/wsfe_massive_validation.py:0
@@ -6048,6 +6060,8 @@ msgid ""
 "WSFE Error!\n"
 "You are trying to validate several invoices but not all of them are the same type. For example, all Customer Invoices or all Customer Refund"
 msgstr ""
+"WSFE Error!\n"
+"Está intentando validar varias facturas, pero no todas ellas son del mismo tipo."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/wsfe_massive_validation.py:0
@@ -6056,6 +6070,8 @@ msgid ""
 "WSFE Error!\n"
 "You are trying to validate several invoices but not all of them belongs to the same point of sale"
 msgstr ""
+"WSFE Error!\n"
+"Está intentando validar varias facturas, pero no todas ellas pertenecen al mismo punto de venta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_move_optional
