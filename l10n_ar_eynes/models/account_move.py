@@ -984,8 +984,11 @@ class AccountMove(models.Model):
 
     @api.depends('restrict_mode_hash_table', 'state', 'cae')
     def _compute_show_reset_to_draft_button(self):
-        super(AccountMove, self)._compute_show_reset_to_draft_button()
-        for move in self:
+        sale_invoices = self.filtered(lambda move: move.is_sale_document())
+        super(
+            AccountMove, self - sale_invoices
+        )._compute_show_reset_to_draft_button()
+        for move in sale_invoices:
             move.show_reset_to_draft_button = False if move.cae else True
         return
 
