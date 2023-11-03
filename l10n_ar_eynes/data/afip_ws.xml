@@ -15,4 +15,11 @@
         </field>
     </record>
 
+    <record id="afipws_service_ws_padron" model="afipws.service">
+        <field name="name">ws_sr_constancia_inscripcion</field>
+        <field name="description">
+            Web Service de Padrón
+        </field>
+    </record>
+
 </odoo>

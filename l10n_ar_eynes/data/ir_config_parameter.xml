@@ -46,4 +46,18 @@
         </field>
     </record>
 
+    <record id="url_prod_padron" model="ir.config_parameter">
+        <field name="key">ws_padron_prod</field>
+        <field name="value">
+            https://aws.afip.gov.ar/sr-padron/webservices/personaServiceA5?wsdl
+        </field>
+    </record>
+
+    <record id="url_homo_padron" model="ir.config_parameter">
+        <field name="key">ws_padron_homo</field>
+        <field name="value">
+            https://awshomo.afip.gov.ar/sr-padron/webservices/personaServiceA5?wsdl
+        </field>
+    </record>
+
 </odoo>

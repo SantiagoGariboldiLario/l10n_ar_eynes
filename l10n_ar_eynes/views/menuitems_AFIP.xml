@@ -13,8 +13,16 @@
         id="wsaa_config_menu"
         name="WSAA Configuration"
         parent="base_afipws_config"
-        sequence="1"
+        sequence="0"
         action="action_wsaa_config_tree"
+    />
+
+    <menuitem
+        id="ws_padron_config_menu"
+        name="WSPADRON Configuration"
+        parent="base_afipws_config"
+        sequence="1"
+        action="action_ws_padron_config"
     />
 
     <menuitem

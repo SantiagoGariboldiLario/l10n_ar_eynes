@@ -37,3 +37,4 @@ from . import sifere
 from . import arba_exporter
 from . import arciba_exporter
 from . import sequence_mixin
+from . import ws_padron  # noqa

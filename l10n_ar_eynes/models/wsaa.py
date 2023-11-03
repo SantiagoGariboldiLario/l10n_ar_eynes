@@ -89,7 +89,7 @@ class AfipWsService(models.Model):
     _description = "WS Services"
 
     description = fields.Text('Description')
-    name = fields.Char('Service Name', size=16, required=True)
+    name = fields.Char('Service Name', size=30, required=True)
 
     _sql_constraints = [
         (
