@@ -34,6 +34,21 @@ class AccountMove(models.Model):
         compute='_compute_move_denomination',
         store=True,
     )
+    iva_digital_operation_code = fields.Selection(
+        [
+            ('A', 'No Alcanzado'),
+            ('NC', 'No corresponde'),
+            ('C', 'Operac. Canje'),
+            ('D', 'Devol. IVA Turistas Extr.'),
+            ('E', 'Operaciones Exentas'),
+            ('N', 'No gravado'),
+            ('T', 'Reintegro Decreto 1043/2016'),
+            ('X', 'Import. / Export. al Exterior'),
+            ('Z', 'Import. / Export. a Zona Franca'),
+        ],
+        'Operation Code',
+        default='NC',
+    )
     internal_number = fields.Char(
         string='Internal Number',
         copy=False,
