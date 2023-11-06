@@ -451,7 +451,7 @@ class RetentionTaxApplication(models.Model):
             amount -= period_amount
 
         # Chequeamos contra el minimo a percibir
-        if amount < self.tax_minimum:
+        if amount < self.tax_minimum and period_amount == 0.0:
             return 0.0, 0.0, 0.0
 
         # Chequeamos que la cantidad a retener no sea negativa
