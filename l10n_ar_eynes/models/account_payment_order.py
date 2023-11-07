@@ -2294,98 +2294,94 @@ class AccountPaymentOrderRetentionLine(models.Model):
     def create_retention_lines(self):
         """This method creates the retention move lines and return the ID's"""
         move_line_ids = []
-        for move in self.get_current_month_moves():
-            move_line_ids.append(self.get_retention_line_vals(move))
 
-        po_lines = self.payment_order_id.line_ids
-        for line in po_lines.filtered(lambda debtline: debtline.amount > 0):
-            move_type_map = {
-                'in_invoice': 'In Invoice',
-                'out_invoice': 'Out Invoice',
-                'in_refund': 'In Refund',
-                'out_refund': 'Out Refund',
-            }
-            invoice = line.invoice_id
-            if invoice.is_company_cur:
-                total_without_vat = (
-                    line.amount / invoice.amount_total * invoice.amount_untaxed
-                )
-            else:
-                total_without_vat = (
-                    (line.amount / line.payment_order_id.payment_rate)
-                    / invoice.amount_total
-                    * (
-                        invoice.amount_untaxed
-                        * line.payment_order_id.payment_rate
+        payment_orders = self.get_current_month_moves()
+        retention_line = self.env[
+            'account.payment.order.retention.line'
+        ].search(
+            [
+                ('payment_order_id', 'in', payment_orders.ids),
+                ('concept_id', '=', self.concept_id.id),
+            ]
+        )
+        retention_move_lines = self.env['retention.move.line']
+        if retention_line:
+            retention_move_lines = retention_move_lines.search(
+                [('payment_order_line_id', '=', retention_line.id)]
+            )
+            for rml in retention_move_lines:
+                move_line_ids.append(
+                    self.env['retention.move.line'].create(
+                        {
+                            'payment_order_line_id': self.id,
+                            'move_id': rml.move_id.id,
+                            'move_type': rml.move_type,
+                            'total_without_vat': rml.total_without_vat,
+                            'payment_order_reference': rml.payment_order_reference,
+                        }
                     )
                 )
-            move_line_ids.append(
-                self.env['retention.move.line'].create(
-                    {
-                        'payment_order_line_id': self.id,
-                        'move_id': invoice.id,
-                        'move_name': 'draft',
-                        'move_type': move_type_map[invoice.move_type],
-                        'total_without_vat': total_without_vat,
-                        'payment_order_reference': self.payment_order_id.number
-                        or '',
-                    }
-                )
+
+        po_lines = self.payment_order_id.line_ids.filtered(
+            lambda debtline: debtline.amount > 0
+        )
+        for line in po_lines:
+            match_concept = line.invoice_id.invoice_line_ids.filtered(
+                lambda line: line.account_id in self.concept_id.account_ids
             )
+            if match_concept:
+                move_type_map = {
+                    'in_invoice': 'In Invoice',
+                    'out_invoice': 'Out Invoice',
+                    'in_refund': 'In Refund',
+                    'out_refund': 'Out Refund',
+                }
+                invoice = line.invoice_id
+                if invoice.is_company_cur:
+                    total_without_vat = (
+                        line.amount
+                        / invoice.amount_total
+                        * invoice.amount_untaxed
+                    )
+                else:
+                    total_without_vat = (
+                        (line.amount / line.payment_order_id.payment_rate)
+                        / invoice.amount_total
+                        * (
+                            invoice.amount_untaxed
+                            * line.payment_order_id.payment_rate
+                        )
+                    )
+                move_line_ids.append(
+                    self.env['retention.move.line'].create(
+                        {
+                            'payment_order_line_id': self.id,
+                            'move_id': invoice.id,
+                            'move_type': move_type_map[invoice.move_type],
+                            'total_without_vat': total_without_vat,
+                            'payment_order_reference': self.payment_order_id.number
+                            or '',
+                        }
+                    )
+                )
         if move_line_ids:
             return [rec.id for rec in move_line_ids]
         return move_line_ids
 
     def get_current_month_moves(self):
-        return self.env['account.payment.order.line'].search(
+        return self.env['account.payment.order'].search(
             [
-                ('payment_order_id.state', '=', 'posted'),
+                ('state', '=', 'posted'),
                 ('partner_id', '=', self.payment_order_id.partner_id.id),
-                ('invoice_id.payment_state', 'in', ('paid', 'partial')),
-                ('invoice_id.invoice_date', '>=', self.date.replace(day=1)),
+                ('date', '>=', self.date.replace(day=1)),
                 (
-                    'invoice_id.invoice_date',
+                    'date',
                     '<=',
-                    self.date + relativedelta(day=31),
+                    self.date.replace(day=1) + relativedelta(day=31),
                 ),
-            ]
-        )
-
-    def get_retention_line_vals(self, move):
-        """Return move line values to insert into retention lines o2m
-
-        Args:
-            move (account.move): Invoices which values are taken
-
-        Returns:
-            dict: Dictionary with values to insert
-        """
-        move_type_map = {
-            'in_invoice': 'In Invoice',
-            'out_invoice': 'Out Invoice',
-            'in_refund': 'In Refund',
-            'out_refund': 'Out Refund',
-        }
-        invoice = move.invoice_id
-        if invoice.is_company_cur:
-            total_without_vat = (
-                move.amount / invoice.amount_total * invoice.amount_untaxed
-            )
-        else:
-            total_without_vat = (
-                (move.amount / move.payment_order_id.payment_rate)
-                / invoice.amount_total
-                * (invoice.amount_untaxed * move.payment_order_id.payment_rate)
-            )
-        return self.env['retention.move.line'].create(
-            {
-                'payment_order_line_id': self.id,
-                'move_id': invoice.id,
-                'move_name': invoice.name,
-                'move_type': move_type_map[invoice.move_type],
-                'total_without_vat': total_without_vat,
-                'payment_order_reference': move.payment_order_id.number or '',
-            }
+            ],
+            order='date desc',
+            limit=1,
         )
 
     @api.depends('retention_move_line_ids')
@@ -2417,7 +2413,8 @@ class AccountPaymentOrderRetentionLine(models.Model):
             concept_amount = rec.concept_amount
             total = sum(
                 rec.retention_move_line_ids.filtered(
-                    lambda rtml: rtml.move_name != 'draft'
+                    lambda rtml: rtml.payment_order_reference
+                    != rec.payment_order_id.number
                 ).mapped('total_without_vat')
             )
             if total == 0 or total < concept_amount:
@@ -2554,7 +2551,9 @@ class RetentionMoveLine(models.Model):
     )
     move_id = fields.Many2one(comodel_name='account.move', string='Move')
     move_type = fields.Char(string='Move type', readonly=True)
-    move_name = fields.Char(string='Move name', readonly=True)
+    move_name = fields.Char(
+        string='Move name', readonly=True, related='move_id.name'
+    )
     total_without_vat = fields.Float(string='Total without vat', readonly=True)
     payment_order_reference = fields.Char(string="Payment order", readonly=True)
 
