@@ -476,15 +476,9 @@ class AccountMove(models.Model):
                 ) | perceptions_applied
 
             if not self.env.context.get('is_reverse'):
-                self._recompute_tax_lines()
-
-                for perception in self.perception_ids:
-                    move_line = self.line_ids.filtered(
-                        lambda line: line.tax_line_id
-                        == perception.perception_id.tax_id
-                    )
-                    vals = self._prepare_tax_line_vals(perception)
-                    move_line.update(vals)
+                self.with_context(
+                    override_perceptions=True
+                )._recompute_tax_lines()
 
             self._recompute_dynamic_lines()
 
@@ -1401,6 +1395,7 @@ class AccountMove(models.Model):
                     if new_perception:
                         new_perception_lines += new_perception
                 rec.perception_ids = new_perception_lines
+            if rec.is_sale_document() or rec.is_purchase_document():
                 rec._onchange_perception_ids()
 
     def _recompute_tax_lines(
@@ -1411,10 +1406,21 @@ class AccountMove(models.Model):
         modify_self = self.with_context(
             inverse_currency_rate=self.currency_rate
         )
-        return super(AccountMove, modify_self)._recompute_tax_lines(
+        super(AccountMove, modify_self)._recompute_tax_lines(
             recompute_tax_base_amount,
             tax_rep_lines_to_recompute,
         )
+        if self.is_purchase_document() or self.env.context.get(
+            'override_perceptions', False
+        ):
+            for perception in self.perception_ids:
+                move_line = self.line_ids.filtered(
+                    lambda line: line.tax_line_id
+                    == perception.perception_id.tax_id
+                )
+                vals = self._prepare_tax_line_vals(perception)
+                move_line.update(vals)
+        return
 
     def _generate_qr_afip_url(self):
         voucher_type = self.get_voucher_type()
