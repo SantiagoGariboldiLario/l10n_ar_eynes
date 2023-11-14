@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="action_ws_padron_config" model="ir.actions.act_window">
+        <field name="name">WSPADRON Config</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ws.padron.config</field>
+        <field name="view_mode">tree,form</field>
+        <field
+            name="view_ids"
+            eval="[
+        (5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('view_ws_config_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('view_ws_config_form')})
+        ]"
+        />
+    </record>
+
+</odoo>

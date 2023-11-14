@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- **************************** AFIP WEBSERVICES **************************** -->
+    <!-- ROOT AFIP Configuration Menuitem -->
+    <menuitem
+        id="base_afipws_config"
+        name="AFIP WebServices"
+        parent="account.menu_finance_configuration"
+    />
+
+    <!-- 1st LEVEL -->
+    <menuitem
+        id="wsaa_config_menu"
+        name="WSAA Configuration"
+        parent="base_afipws_config"
+        sequence="0"
+        action="action_wsaa_config_tree"
+    />
+
+    <menuitem
+        id="ws_padron_config_menu"
+        name="WSPADRON Configuration"
+        parent="base_afipws_config"
+        sequence="1"
+        action="action_ws_padron_config"
+    />
+
+    <menuitem
+        id="wsfe_config_menu"
+        name="WSFE Configuration"
+        parent="base_afipws_config"
+        sequence="2"
+        action="action_wsfe_config"
+    />
+
+    <menuitem
+        id="wsfex_config_menu"
+        name="WSFEX Configuration"
+        parent="base_afipws_config"
+        sequence="3"
+        action="action_wsfex_config"
+    />
+
+    <menuitem
+        id="wsaa_certificate_request_menu"
+        name="Certificate Requests"
+        parent="base_afipws_config"
+        sequence="4"
+        action="action_wsaa_certificate_request"
+    />
+
+    <!-- ROOT AFIP Reports Menuitem -->
+    <menuitem
+        id="base_afipws_reports"
+        name="AFIP WebServices"
+        parent="account.menu_finance_reports"
+    />
+
+    <!-- 1st LEVEL -->
+    <menuitem
+        id="ws_request_menu"
+        name="WS Request"
+        parent="base_afipws_reports"
+        sequence="1"
+        action="action_ws_request_tree"
+    />
+
+
+    <!-- TODO: ver si dejamos esto acá y que sequence le damos -->
+    <!-- <menuitem
+        id="voucher_type_menu"
+        name="Voucher Types"
+        parent="base_afipws"
+        sequence="30"
+        action="action_wsfe_voucher_type_tree"
+    /> -->
+</odoo>

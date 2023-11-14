@@ -2,7 +2,9 @@
 # pylint: pointless-statement
 easywsy
 future
+httplib2
 M2Crypto
+pyafipws
 pyOpenSSL
 pysimplesoap
 qrcode

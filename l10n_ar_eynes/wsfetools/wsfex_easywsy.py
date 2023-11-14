@@ -4,13 +4,12 @@
 ##############################################################################
 
 import logging
-import time
 from datetime import datetime
 
 from odoo import _
 from odoo.exceptions import UserError
 
-from ..wsfetools.ws_afip import AfipWS, AfipWSError, AfipWSEvent
+from ..wsfetools.ws_afip import AfipWS
 
 _logger = logging.getLogger(__name__)
 
@@ -245,138 +244,3 @@ class WSFEX(AfipWS):
         parsed_res = self.parse_response(response, raise_exception=False)
         approved = self.parse_invoices_response(parsed_res)
         return approved
-
-    def parse_invoices_response(self, response):
-        approved_invoices = {}
-        invoice_vals = {}
-
-        self._validate_errors(response, raise_exception=True)
-
-        resp_inv_vals = response['response']
-        self.last_request['parse_result'] = resp_inv_vals
-        res = resp_inv_vals.FEXResultAuth
-
-        inv = list(self.data.sent_invoices.keys())[0]
-
-        invoice_vals['name'] = '%04d-%08d' % (
-            res['Punto_vta'],
-            res['Cbte_nro'],
-        )
-
-        if res['Resultado'] == 'R':
-            raise UserError(
-                _("La factura no fue aprobada, y AFIP no reportó errores")
-            )
-
-        if res['Resultado'] == 'A':
-            invoice_vals['cae'] = res['Cae']
-            invoice_vals['cae_due_date'] = res['Fch_venc_Cae']
-            approved_invoices[inv.id] = invoice_vals
-
-        return approved_invoices
-
-    def log_request(self, environment):
-        env = environment
-        if (
-            not hasattr(self, 'last_request')
-            or 'parse_result' not in self.last_request
-        ):
-            return False
-
-        wsfe_req_obj = env['wsfe.request']
-        voucher_type_obj = env['wsfe.voucher_type']
-
-        response = self.last_request['parse_result']
-        res = response.FEXResultAuth
-        inv = list(self.data.sent_invoices.keys())[0]
-        voucher_type = voucher_type_obj.search(
-            [('code', '=', res[self.voucher_resp_str])]
-        )
-        voucher_type_name = voucher_type.name
-        req_details = []
-        pos = res['Punto_vta']
-
-        sent_req = self.data.FEXAuthorize.Cmp
-
-        events = self._get_events(response)
-
-        det = {
-            'name': inv.id,
-            'concept': str(sent_req['Tipo_expo']),
-            'doctype': sent_req['Dst_cmp'],
-            'docnum': str(sent_req['Cuit_pais_cliente']),
-            'voucher_number': res['Cbte_nro'],
-            'voucher_date': res['Fch_cbte'],
-            'amount_total': sent_req['Imp_total'],
-            'cae': res['Cae'],
-            'cae_duedate': res['Fch_venc_Cae'],
-            'result': res['Resultado'],
-            'currency': sent_req['Moneda_Id'],
-            'currency_rate': sent_req['Moneda_ctz'],
-            'observations': ("\n").join(
-                [
-                    ("[%s] %s" % (ev.code, ev.msg))
-                    .encode('latin1')
-                    .decode('utf8')
-                    for ev in events
-                ]
-            ),
-        }
-
-        req_details.append((0, 0, det))
-
-        # Chequeamos el reproceso
-        reprocess = False
-        if res['Reproceso'] == 'S':
-            reprocess = True
-
-        errors = self._get_errors(response)
-
-        errors = ("\n").join(
-            [
-                ("[%s] %s" % (err.code, err.msg))
-                .encode('latin1')
-                .decode('utf8')
-                for err in errors
-            ]
-        )
-        vals = {
-            'voucher_type': voucher_type_name,
-            'nregs': 1,
-            'pos_ar': '%04d' % pos,
-            'date_request': time.strftime('%Y-%m-%d %H:%M:%S'),
-            'result': res['Resultado'],
-            'reprocess': reprocess,
-            'errors': errors,
-            'detail_ids': req_details,
-        }
-
-        return wsfe_req_obj.create(vals)
-
-    ###############################################################################
-
-    def _get_errors(self, result):
-        errors = []
-        if 'FEXErr' in result:
-            if result.FEXErr.ErrCode != 0:
-                errors = [
-                    AfipWSError(result.FEXErr.ErrCode, result.FEXErr.ErrMsg)
-                ]
-        return errors
-
-    def _get_events(self, result):
-        events = []
-        if 'FEXEvents' in result:
-            if result.FEXEvents.EventCode != 0:
-                events = [
-                    AfipWSEvent(
-                        result.FEXEvents.EventCode, result.FEXEvents.EventMsg
-                    )
-                ]
-        return events
-
-    ###############################################################################
-
-    NATURALS = ['Cbte_nro', 'Id']
-
-    # TODO Validations
