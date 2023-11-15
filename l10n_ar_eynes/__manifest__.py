@@ -43,7 +43,6 @@
     'data': [
         'security/cot_security.xml',
         'security/delivery_cot_security.xml',
-        'data/account_taxes_data.xml',
         'data/fiscal_position_data.xml',
         'data/account_tax_group_data.xml',
         'data/account_taxes_data.xml',
