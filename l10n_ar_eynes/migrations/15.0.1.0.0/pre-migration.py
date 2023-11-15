@@ -80,6 +80,21 @@ def rename_wsfe_optionals(cr):
     return True
 
 
+def rename_wsfe_request_seq(cr):
+    try:
+        cr.execute(
+            """
+            ALTER TABLE wsfe_request_detail_id_seq
+            RENAME TO ws_request_detail_id_seq;
+            ALTER TABLE wsfe_request_id_seq
+            RENAME TO ws_request_id_seq;
+            """
+        )
+    except psycopg2.ProgrammingError:
+        cr.rollback()
+    return True
+
+
 def delete_wsfex_request_detail_model(cr):
     try:
         cr.execute(
@@ -177,6 +192,7 @@ def migrate(cr, version):
     copy_wsfe_request_detail_to_ws_request_detail(cr)
     _logger.info("""Rename WS models from WSFE and WSFEX...""")
     rename_wsfe_optionals(cr)
+    rename_wsfe_request_seq(cr)
     _logger.info("""Deleting WSFE models...""")
     delete_wsfex_request_detail_model(cr)
     delete_wsfe_request_model(cr)

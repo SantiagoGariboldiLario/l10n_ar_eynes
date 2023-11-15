@@ -354,7 +354,6 @@ class WsfeConfig(models.Model):
         request = WsRequest.create({'date_request': fields.Datetime.today()})
         qty_processed = 0
         for invoice in invoices:
-            # validator.validate_invoice(invoice)
             self._set_invoice_in_ws(ws, invoice)
 
             _logger.info("Trying to push Inovice data to AFIP...")
@@ -390,7 +389,9 @@ class WsfeConfig(models.Model):
                     _("Error trying to validate Electronic Invoice: %s")
                     % (error_msg)
                 )
-
+            error_msg = '\n'.join(err for err in ws.Errores)
+            events_msg = '\n'.join(evn for evn in ws.Eventos)
+            obs_msg = '\n'.join(obs for obs in ws.Observaciones)
             if ws.Resultado == "R":
                 _logger.warning("AFIP Validation Error. Invoice not approved.")
                 WsRequestDetail.create(
@@ -398,6 +399,8 @@ class WsfeConfig(models.Model):
                         'invoice_id': invoice.id,
                         'result': 'E',
                         'errors': error_msg,
+                        'events': events_msg,
+                        'observations': obs_msg,
                         'request_id': request.id,
                     }
                 )
@@ -421,9 +424,9 @@ class WsfeConfig(models.Model):
                         'invoice_id': invoice.id,
                         'request_id': request.id,
                         'result': ws.Resultado,
-                        'errors': ws.ErrMsg or "",
-                        'observations': ws.Obs or "",
-                        'events': ws.ErrMsg or "",
+                        'errors': error_msg,
+                        'events': events_msg,
+                        'observations': obs_msg,
                         'cae': ws.CAE or "",
                         'cae_due_date': ws.Vencimiento
                         and datetime.strptime(ws.Vencimiento, "%Y%m%d").date()

@@ -44,7 +44,15 @@ class WSFEParser(WSParser):
         comprobante
         """
         date_due = False
-        if (concept in [2, 3] and not date_due) or invoice.is_FCE_invoice:
+        voucher_type_FCEA = invoice.env.ref(
+            'l10n_ar_eynes.factura_credito_electronica_a'
+        )
+        voucher_type_FCEB = invoice.env.ref(
+            'l10n_ar_eynes.factura_credito_electronica_b'
+        )
+        if (concept in [2, 3] and not date_due) or (
+            invoice.voucher_type_id in [voucher_type_FCEA, voucher_type_FCEB]
+        ):
             date_due = (
                 invoice.invoice_date_due
                 and self._convert_date_to_AFIP_format(invoice.invoice_date_due)

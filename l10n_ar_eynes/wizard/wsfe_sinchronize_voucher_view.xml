@@ -13,7 +13,8 @@
                         <field name="voucher_number" />
                     </group>
                     <group>
-                        <field name="pos_id" />
+                        <field name="pos_id_domain" />
+                        <field name="pos_id" domain="pos_id_domain" />
                     </group>
                 </group>
                 <group string="Voucher Information">
@@ -46,12 +47,7 @@
                     <field name="invoice_id" />
                 </group>
                 <footer>
-                    <button
-                        name="relate_invoice"
-                        string="Relate"
-                        type="object"
-                        class="oe_highlight"
-                    />
+                    <button name="relate_invoice" string="Relate" type="object" class="oe_highlight" />
                     or
                     <button class="oe_link" special="cancel" string="Cancel" />
                 </footer>

@@ -248,6 +248,10 @@
                     attrs="{'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]}"
                 />
                 <field
+                    name="voucher_type_id"
+                    attrs="{'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]}"
+                />
+                <field
                     name="cae"
                     string="CAE"
                     attrs="{
@@ -266,7 +270,11 @@
 
             <page name="other_info" position="inside">
                 <group string="Associated Invoices">
-                    <field name="associated_inv_ids" nolabel="1" domain="[('state', '=', 'posted')]">
+                    <field
+                        name="associated_inv_ids"
+                        nolabel="1"
+                        domain="[('state', '=', 'posted'), ('partner_id', '=', partner_id)]"
+                    >
                         <tree>
                             <field name="partner_id" groups="base.group_user" />
                             <field name="date" />
@@ -345,6 +353,7 @@
                     <group string="Optionals">
                         <field name="optional_ids" nolabel="1">
                             <tree editable="bottom">
+                                <field name="code" />
                                 <field
                                     name="optional_id"
                                     options="{'no_create': True, 'no_create_edit':True, 'no_open':True}"

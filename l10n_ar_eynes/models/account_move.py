@@ -33,11 +33,6 @@ class AccountMove(models.Model):
         compute='_compute_move_denomination',
         store=True,
     )
-    journal_id_domain = fields.Char(
-        compute="_compute_journal_id_domain",
-        readonly=True,
-        store=False,
-    )
     internal_number = fields.Char(
         string='Internal Number',
         copy=False,
@@ -383,40 +378,6 @@ class AccountMove(models.Model):
             res['amount_exempt_cur'] = amount_exempt
             invoice.update({field: val for field, val in res.items()})
 
-    @api.depends('partner_id', 'partner_id.property_account_position_id')
-    def _compute_suitable_journal_ids(self):
-        invoices = self.filtered(
-            lambda move: move.is_sale_document() and move.state == 'draft'
-        )
-        for inv in invoices:
-            journals = self.env['account.journal']
-            if inv.partner_id:
-                partner_fiscal_position = (
-                    inv.partner_id.property_account_position_id
-                )
-                journals = self.env.user.get_journals_by_fiscal_position(
-                    partner_fiscal_position
-                )
-                if not journals:
-                    inv.suitable_journal_ids = journals
-                    raise UserError(
-                        _(
-                            """
-                            Journal not found!
-                            Could not match any user available journals with fiscal position
-                            '%(fiscal_pos)s'
-                            Please check if there are any journals with this parameters
-                            in users > preferences > available journals
-                            """,
-                            fiscal_pos=partner_fiscal_position.name,
-                        )
-                    )
-                inv.journal_id = journals[0]
-            inv.suitable_journal_ids = journals
-        return super(
-            AccountMove, (self - invoices)
-        )._compute_suitable_journal_ids()
-
     @api.depends('journal_id')
     def _compute_fiscal_type(self):
         invoices = self.filtered(lambda move: move.is_sale_document())
@@ -467,7 +428,7 @@ class AccountMove(models.Model):
                 self.partner_id.property_account_position_id
             )
             journals = self.env.user.get_journals_by_fiscal_position(
-                partner_fiscal_position, self.fiscal_type
+                partner_fiscal_position
             )
             if not journals:
                 self.journal_id = False
@@ -1221,10 +1182,10 @@ class AccountMove(models.Model):
         ctx['company_id'] = company.id
 
         wsfe_conf = WSFEConfig.with_context(**ctx).get_config()
-        wsfex_conf = WSFEXConfig.with_context(**ctx).get_config()
 
         if local_list[0]:
             return wsfe_conf
+        wsfex_conf = WSFEXConfig.with_context(**ctx).get_config()
         return wsfex_conf
 
     def _check_must_be_fce(self):
@@ -1245,6 +1206,17 @@ class AccountMove(models.Model):
                     'The Invoice ID: %s must be of type FCRED' % self.id
                 )
                 return True
+        if self.associated_inv_ids:
+            associated_type = self.associated_inv_ids.mapped('is_FCE_invoice')
+            if len(associated_type) > 1:
+                raise UserError(
+                    _(
+                        """
+                        You can't associate FCE and non-FCE invoices to the same voucher.
+                        """
+                    )
+                )
+            return associated_type[0]
         return False
 
     def _ensure_fce_values(self):
@@ -1253,10 +1225,20 @@ class AccountMove(models.Model):
         """
         # Ensure Fiscal Type FCE
         self.is_FCE_invoice = True
-        conf = self.get_ws_conf()
+        self._compute_voucher_type()
+        conf = self._get_ws_conf()
         set_optionals = True
         if self.is_debit_note or self.move_type == 'out_refund':
             set_optionals = False
+            if not self.optional_ids.filtered(lambda opt: opt.code == '22'):
+                raise UserError(
+                    _(
+                        """
+                        You must inform optional with code '22' for this type of voucher.
+                        Possible value: 'S' or 'N'
+                        """
+                    )
+                )
         # Optionals
         if not self.optional_ids and set_optionals:
             WSOptionals = self.env['ws.optionals']
@@ -1271,8 +1253,28 @@ class AccountMove(models.Model):
             for aio in aio_todo:
                 if aio.code == '2101':
                     value = self.company_id.fcred_cbu_emitter
+                    if not value:
+                        raise UserError(
+                            _(
+                                """
+                                You need yo configure a CBU for FCE. Go to Settings --> Companies,
+                                select %(name)s
+                                and complete "CBU (FCE)" field.
+                                """
+                            ),
+                            name=self.company_id.name,
+                        )
                 if aio.code == '27':
                     value = self.partner_id.fcred_transfer
+                    if not value:
+                        raise UserError(
+                            _(
+                                """
+                                You need to configure the "SCA/ADC (FCE)?" field for this partner %(name)s.
+                                """
+                            ),
+                            name=self.partner_id.name,
+                        )
                 dd = {
                     'optional_id': aio.id,
                     'value': value,
