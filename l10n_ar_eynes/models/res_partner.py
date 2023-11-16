@@ -338,15 +338,15 @@ class ResPartnerRetention(models.Model):
     )
     from_padron = fields.Boolean(string="From Padron")
 
-    _sql_constraints = [
-        (
-            'retention_partner_unique',
-            'unique(partner_id, retention_id)',
-            _(
-                'There must be only one retention of this type configured for the partner'
-            ),
-        )
-    ]
+    # _sql_constraints = [
+    #     (
+    #         'retention_partner_unique',
+    #         'unique(partner_id, retention_id)',
+    #         _(
+    #             'There must be only one retention of this type configured for the partner'
+    #         ),
+    #     )
+    # ]
 
     @api.depends(
         'retention_id',
