@@ -14,16 +14,23 @@ class ValidateAccountMove(models.TransientModel):
     )
 
     def validate_move(self):
-        inv_obj = self.env['account.move']
+        AccountMove = self.env['account.move']
 
-        invoices = inv_obj.browse(self.env.context['active_ids'])
-        invoices = invoices.filtered(
-            lambda inv: inv.is_sale_document()
-            and inv.fiscal_type == 'electronic'
+        moves = AccountMove.browse(self.env.context['active_ids'])
+        sale_invoices = moves.filtered(lambda inv: inv.is_sale_document())
+        electronic_invoices = sale_invoices.filtered(
+            lambda inv: inv.fiscal_type == 'electronic'
         )
+        internal_invoices = sale_invoices - electronic_invoices
 
-        if invoices:
-            invoices = invoices.sorted(key=lambda x: x.create_date)
+        if electronic_invoices and internal_invoices:
+            raise UserError(
+                _(
+                    "You can't validate Electronic and Internal invoices at the same time."
+                )
+            )
+        if electronic_invoices:
+            invoices = electronic_invoices.sorted(key=lambda x: x.create_date)
 
             # La condicion para que se pueda validar un lote de
             # facturas electronicas es que deben ser del mismo Punto de Venta,
@@ -77,4 +84,14 @@ class ValidateAccountMove(models.TransientModel):
                 'type': 'ir.actions.act_window',
             }
         else:
-            return super(ValidateAccountMove, self).validate_move()
+            action = super(ValidateAccountMove, self).validate_move()
+            for inv in internal_invoices:
+                inv.write(
+                    {
+                        'internal_number': inv.journal_id.get_sequence_from_invoice(
+                            inv
+                        )._next()
+                    }
+                )
+            internal_invoices._compute_name()
+            return action
