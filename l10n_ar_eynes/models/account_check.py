@@ -617,9 +617,10 @@ class AccountCheck(models.Model):
         company_currency = voucher.company_id.currency_id.id
         current_currency = self.currency_id.id
 
-        amount_in_company_currency = (
-            voucher._convert_paid_amount_in_company_currency(self.amount)
-        )
+        # amount_in_company_currency = (
+        #     voucher._convert_paid_amount_in_company_currency(self.amount)
+        # )
+        amount_in_company_currency = (self.amount)
 
         debit = credit = 0.0
         if voucher.type in ('purchase', 'payment'):
