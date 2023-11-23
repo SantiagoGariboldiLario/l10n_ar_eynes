@@ -22,8 +22,7 @@
 #
 ##############################################################################
 
-from odoo import fields, models, api, _
-from odoo.exceptions import Warning
+from odoo import fields, models, _
 
 
 class CancelPickingDone(models.TransientModel):
@@ -36,7 +35,6 @@ class CancelPickingDone(models.TransientModel):
     def create_returns(self):
 
         pick_obj = self.env['stock.picking']
-        move_obj = self.env['stock.move']
 
         # Obtenemos el picking
         new_picks = []
