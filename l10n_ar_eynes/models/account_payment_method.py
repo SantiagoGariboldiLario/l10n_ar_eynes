@@ -19,7 +19,9 @@ class AccountPaymentMethodLine(models.Model):
 
     number = fields.Integer('Number')
     type = fields.Selection(
-        selection=[('common', 'Common'), ('deferred', 'Deferred')],
+        selection=[
+            ('common', 'Common'),
+            ('deferred', 'Deferred')],
         string='Type',
     )
     format = fields.Selection(
@@ -65,7 +67,7 @@ class AccountPaymentMethodLine(models.Model):
     issued_check_ids = fields.One2many(
         comodel_name='account.check',
         inverse_name='checkbook_id',
-        string='Issued Checks',
+        string='Issued Checks1',
         domain=[
             ('internal_type', '=', 'issued'),
             ('issued_check_state', 'not in', ('draft', 'cancelled')),

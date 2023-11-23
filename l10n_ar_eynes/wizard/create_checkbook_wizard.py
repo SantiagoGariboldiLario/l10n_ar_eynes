@@ -57,28 +57,26 @@ class CreateCheckbookWizard(models.TransientModel):
             )
         ]
 
-        if self.checkbook_format != 'echeq':
-            self.check_range()
+        self.check_range()
 
-        if self.checkbook_format != 'echeq':
-            start_numer = int(self.start_num)
-            end_number = int(self.end_num)
+        start_numer = int(self.start_num)
+        end_number = int(self.end_num)
 
-            for i in range(start_numer, end_number + 1):
-                self.env['account.check'].create(
-                    {
-                        'number': str(i).zfill(8),
-                        'journal_id': self.journal_id.id,
-                        'bank_id': self.journal_id.bank_id.id,
-                        'checkbook_id': self.env['account.payment.method.line']
-                        .search([('name', '=', payment_method_name)])
-                        .id,
-                        'checkbook_format': self.checkbook_format,
-                        'internal_type': 'issued',
-                        'issued_check_state': 'draft',
-                        'type': self.type,
-                    }
-                )
+        for i in range(start_numer, end_number + 1):
+            self.env['account.check'].create(
+                {
+                    'number': str(i).zfill(8),
+                    'journal_id': self.journal_id.id,
+                    'bank_id': self.journal_id.bank_id.id,
+                    'checkbook_id': self.env['account.payment.method.line']
+                    .search([('name', '=', payment_method_name)])
+                    .id,
+                    'checkbook_format': self.checkbook_format,
+                    'internal_type': 'issued',
+                    'issued_check_state': 'draft',
+                    'type': self.type,
+                }
+            )
 
         return {'type': 'ir.actions.client', 'tag': 'reload'}
 
