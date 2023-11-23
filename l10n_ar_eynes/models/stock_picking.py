@@ -24,6 +24,25 @@ _logger = logging.getLogger(__name__)
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
+    renum_pick_id = fields.Many2one('stock.picking', string='Renumerated', help="Reference to the new picking created for renumerate this one. You cannot delete pickings if it is done, so it is cancelled and a new one is created, corrected and renumerated")
+    name_original = fields.Char(string=_("Original picking number"))
+
+    def _action_done(self):
+        res = super(StockPicking, self)._action_done()
+        picking_ids = self.env.context.get('button_validate_picking_ids', [])
+
+        for picking_id in picking_ids:
+            picking = self.env['stock.picking'].browse(picking_id)
+            seq_transfer_id = picking.picking_type_id.sequence_transfer_id
+            sequence_id = seq_transfer_id.id
+
+            if seq_transfer_id.code:
+                picking.write({'name_original': picking.name})
+                name = self.env['ir.sequence'].browse(sequence_id).next_by_id()
+                picking.write({'name': name})
+
+        return res
+
     def _get_declared_value(self):
         Currency = self.env["res.currency"]
 
