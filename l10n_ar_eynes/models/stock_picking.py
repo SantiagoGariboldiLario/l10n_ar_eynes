@@ -25,7 +25,7 @@ class StockPicking(models.Model):
     _inherit = "stock.picking"
 
     renum_pick_id = fields.Many2one('stock.picking', string='Renumerated', help="Reference to the new picking created for renumerate this one. You cannot delete pickings if it is done, so it is cancelled and a new one is created, corrected and renumerated")
-    name_original = fields.Char(string=_("Original picking number"))
+    name_original = fields.Char(string='Original picking number')
 
     def _action_done(self):
         res = super(StockPicking, self)._action_done()

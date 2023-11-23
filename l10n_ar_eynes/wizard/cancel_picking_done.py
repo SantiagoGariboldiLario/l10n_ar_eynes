@@ -25,26 +25,32 @@
 from odoo import fields, models, api, _
 from odoo.exceptions import Warning
 
+
 class CancelPickingDone(models.TransientModel):
     _name = 'cancel.picking.done'
 
     reason = fields.Text(string='Reason of cancellation')
-    next_action = fields.Selection([('renumerate', 'Cancel & Create draft'), ('cancel', 'Cancel only')], string='Next Action', required=True)
+    next_action = fields.Selection([('renumerate', 'Cancel & Create draft'),
+                                   ('cancel', 'Cancel only')], string='Next Action', required=True)
 
     def create_returns(self):
-        
+
         pick_obj = self.env['stock.picking']
         move_obj = self.env['stock.move']
 
         # Obtenemos el picking
         new_picks = []
-        for pick in pick_obj.search([('id','=',self._context.get('active_id', False))]):
-            
+        for pick in pick_obj.search([('id', '=', self._context.get('active_id', False))]):
+
             # Renumerate...clone pick
             pick_vals = {}
             if self.next_action == 'renumerate':
-                new_pick = pick.copy() 
-                note = _('%s\nPick renumerated from %s. %s') % (pick.note or '', pick.name, self.reason or '')
+                new_pick = pick.copy()
+                note = _('%(note)s\nPick renumerated from %(name)s. %(reason)s') % {
+                    'note': pick.note or '',
+                    'name': pick.name,
+                    'reason': self.reason or ''
+                }
                 new_pick.write({'note': note, 'origin': pick.name})
                 new_picks.append(new_pick.id)
                 pick_vals['renum_pick_id'] = new_pick.id
@@ -53,10 +59,9 @@ class CancelPickingDone(models.TransientModel):
             moves_to_cancel = [m for m in pick.move_lines]
             pick_vals['state'] = 'cancel'
             pick.write(pick_vals)
-            a = [move.write({'state': 'cancel'}) for move in moves_to_cancel]
-        
+            for move in moves_to_cancel:
+                move.write({'state': 'cancel'})
         form = self.env.ref('stock.view_picking_form')
-        
         if new_picks:
             if len(new_picks) == 1:
                 return {
