@@ -248,11 +248,10 @@ class AccountMove(models.Model):
     def _compute_name(self):
         invoices = self.filtered(lambda move: move.is_invoice())
         for invoice in invoices:
-            if invoice.is_sale_document():
-                if invoice.state == 'draft':
-                    invoice.name = '/'
-                else:
-                    invoice.name = invoice.internal_number
+            if invoice.state == 'draft':
+                invoice.name = '/'
+            elif invoice.is_sale_document():
+                invoice.name = invoice.internal_number
             else:
                 invoice.name = invoice.supplier_move_reference
         not_invoices = self - invoices

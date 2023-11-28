@@ -405,6 +405,8 @@ class AccountJournal(models.Model):
 
         Partner = self.env['res.partner']
         tax_id = self.tax_id
+        if not tax_id.active:
+            return False
 
         if not tax_id.state_id:
             return True

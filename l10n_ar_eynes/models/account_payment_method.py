@@ -19,7 +19,9 @@ class AccountPaymentMethodLine(models.Model):
 
     number = fields.Integer('Number')
     type = fields.Selection(
-        selection=[('common', 'Common'), ('deferred', 'Deferred')],
+        selection=[
+            ('common', 'Common'),
+            ('deferred', 'Deferred')],
         string='Type',
     )
     format = fields.Selection(

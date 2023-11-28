@@ -48,9 +48,7 @@
         <field name="res_model">account.check.config</field>
         <field name="view_mode">tree,form</field>
     </record>
-
-
-
+    
     <!-- ISSUED CHECK FORM VIEW-->
     <record id="account_issued_check_view_form" model="ir.ui.view">
         <field name="name">account.issued.check.view.form</field>
