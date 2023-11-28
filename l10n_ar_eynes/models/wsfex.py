@@ -3,10 +3,20 @@
 #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 ##############################################################################
 
+import logging
+from datetime import datetime
+
+from pyafipws.wsfexv1 import WSFEXv1
+from pysimplesoap.client import SoapFault
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
-from ..wsfetools.wsfex_easywsy import WSFEX
+from ..wsfetools.wsfex_helper import WSFEXParser
+
+_logger = logging.getLogger(__name__)
+
+SEPARATOR = ";"
 
 
 class AccountIncoterms(models.Model):
@@ -34,17 +44,6 @@ class WsfexShippingPermission(models.Model):
     dst_country_id = fields.Many2one(
         'wsfex.dst.country.codes', 'Dest Country', required=True
     )
-
-
-class WsfexCurrencyCodes(models.Model):
-    _name = "wsfex.currency.codes"
-    _description = "WSFEX Currency Codes"
-    _order = 'code'
-
-    code = fields.Char('Code', required=True, size=4)
-    name = fields.Char('Desc', required=True, size=64)
-    currency_id = fields.Many2one('res.currency', string="Odoo Currency")
-    wsfex_config_id = fields.Many2one('wsfex.config')
 
 
 class WsfexUomCodes(models.Model):
@@ -103,425 +102,426 @@ class WsfexExportTypeCodes(models.Model):
     wsfex_config_id = fields.Many2one('wsfex.config')
 
 
-class WsfexVoucherTypeCodes(models.Model):
-    _name = "wsfex.res.voucher.type.codes"
-    _description = "WSFEX Voucher Type Codes"
-    _order = 'code'
-
-    code = fields.Integer('Code', required=True)
-    name = fields.Char('Desc', required=True, size=64)
-    voucher_type_id = fields.Many2one(
-        comodel_name='res.voucher.type', string="Odoo Voucher Type"
-    )
-    wsfex_config_id = fields.Many2one('wsfex.config')
-
-
 class WsfexConfig(models.Model):
     _name = "wsfex.config"
+    _inherit = "ws.config"
     _description = "Configuration for WSFEX"
 
-    _webservice_class = WSFEX
+    _webservice_class = WSFEXv1
 
-    name = fields.Char('Name', size=64, required=True)
-    cuit = fields.Char(related='company_id.partner_id.vat', string='Cuit')
-    url = fields.Char('URL for WSFEX', size=60, required=True)
-    homologation = fields.Boolean(
-        comodel_name='Homologation',
-        default=False,
-        help="If true, there will be some validations that are \
-        disabled, for example, invoice number correlativeness",
-    )
-    point_of_sale_ids = fields.Many2many(
-        comodel_name='account.journal',
-        relation='pos_ar_wsfex_rel',
-        column1='wsfex_config_id',
-        column2='pos_ar_id',
-        string='Points of Sale',
-    )
-    wsaa_ticket_id = fields.Many2one(
-        comodel_name='wsaa.ta', string='Ticket Access'
-    )
     currency_ids = fields.One2many(
-        comodel_name='wsfex.currency.codes',
+        comodel_name='ws.currency.codes',
         inverse_name='wsfex_config_id',
         string='Currencies',
-    )
-    uom_ids = fields.One2many(
-        comodel_name='wsfex.uom.codes',
-        inverse_name='wsfex_config_id',
-        string='Units of Measure',
-    )
-    lang_ids = fields.One2many(
-        comodel_name='wsfex.lang.codes',
-        inverse_name='wsfex_config_id',
-        string='Languages',
+        domain=[('from_afip', '=', True)],
     )
     country_ids = fields.One2many(
         comodel_name='wsfex.dst.country.codes',
         inverse_name='wsfex_config_id',
         string='Countries',
     )
-    incoterms_ids = fields.One2many(
-        comodel_name='wsfex.incoterms.codes',
-        inverse_name='wsfex_config_id',
-        string='Incoterms',
-    )
-    dst_cuit_ids = fields.One2many(
-        comodel_name='dst.cuit.codes',
-        inverse_name='wsfex_config_id',
-        string='DST CUIT',
-    )
-    voucher_type_ids = fields.One2many(
-        comodel_name='wsfex.res.voucher.type.codes',
-        inverse_name='wsfex_config_id',
-        string='Voucher Type',
-    )
     export_type_ids = fields.One2many(
         comodel_name='wsfex.export.type.codes',
         inverse_name='wsfex_config_id',
         string='Export Type',
     )
-    company_id = fields.Many2one(
-        comodel_name='res.company',
-        string='Company Name',
-        default=lambda self: self.env.user.company_id,
-        required=True,
+    incoterms_ids = fields.One2many(
+        comodel_name='wsfex.incoterms.codes',
+        inverse_name='wsfex_config_id',
+        string='Incoterms',
+    )
+    lang_ids = fields.One2many(
+        comodel_name='wsfex.lang.codes',
+        inverse_name='wsfex_config_id',
+        string='Languages',
+    )
+    point_of_sale_ids = fields.One2many(
+        comodel_name='ws.pos',
+        inverse_name='wsfex_config_id',
+        string='POS',
+        domain=[('from_afip', '=', True)],
+    )
+    uom_ids = fields.One2many(
+        comodel_name='wsfex.uom.codes',
+        inverse_name='wsfex_config_id',
+        string='Units of Measure',
     )
 
-    @property
-    def voucher_type_str(self):
-        if self.homologation:
-            vt_str = 'Cbte_Tipo'
-        else:
-            vt_str = 'Tipo_Cbte'
-        return vt_str
+    @api.depends('config_id', 'config_id.homologation')
+    def _compute_url(self):
+        url_prod = self.env.ref('l10n_ar_eynes.url_prod_wsfex').value
+        url_homo = self.env.ref('l10n_ar_eynes.url_homo_wsfex').value
+        for rec in self:
+            rec.url = url_homo if rec.config_id.homologation else url_prod
 
-    def ws_auth(self):
-        # TODO This block is repeated, should persist only in WSAA, I think
-        token, sign = self.wsaa_ticket_id.get_token_sign()
-        auth = {'Token': token, 'Sign': sign, 'Cuit': self.cuit}
-        ws = self._webservice_class(self.url)
-        ws.login('Auth', auth)
-        return ws
-
-    @api.model
-    def create(self, vals):
-        # Creamos tambien un TA para este servcio y esta compania
-        ta_obj = self.env['wsaa.ta']
-        wsaa_obj = self.env['wsaa.config']
-        service_obj = self.env['afipws.service']
-
-        # Buscamos primero el wsaa que corresponde a esta compania
-        # porque hay que recordar que son unicos por compania
-        wsaa = wsaa_obj.search([('company_id', '=', vals['company_id'])])
-        service = service_obj.search([('name', '=', 'wsfex')])
-        if wsaa:
-            ta_vals = {
-                'name': service.id,
-                'company_id': vals['company_id'],
-                'config_id': wsaa.id,
-            }
-
-            ta = ta_obj.create(ta_vals)
-            vals['wsaa_ticket_id'] = ta.id
-
-        return super(WsfexConfig, self).create(vals)
+    def _get_webservice(self):
+        return self.env.ref('l10n_ar_eynes.afipws_service_wsfex')
 
     def unlink(self):
-        for wsfex_conf in self:
-            wsfex_conf.wsaa_ticket_id.unlink()
-        res = super(WsfexConfig, self).unlink()
-        return res
+        self.env['ws.currency.codes'].search(
+            [('wsfex_config_id', '=', self.id)]
+        ).unlink()
+        self.env['wsfex.dst.country.codes'].search(
+            [('wsfex_config_id', '=', self.id)]
+        ).unlink()
+        self.env['wsfex.export.type.codes'].search(
+            [('wsfex_config_id', '=', self.id)]
+        ).unlink()
+        self.env['wsfex.incoterms.codes'].search(
+            [('wsfex_config_id', '=', self.id)]
+        ).unlink()
+        self.env['wsfex.lang.codes'].search(
+            [('wsfex_config_id', '=', self.id)]
+        ).unlink()
+        self.env['ws.pos'].search([('wsfex_config_id', '=', self.id)]).unlink()
+        self.env['wsfex.uom.codes'].search(
+            [('wsfex_config_id', '=', self.id)]
+        ).unlink()
+        self.env['wsfex.res.voucher.type.codes'].search(
+            [('wsfex_config_id', '=', self.id)]
+        ).unlink()
+        return super(WsfexConfig, self).unlink()
 
-    def get_config(self):
-        company_id = self.env.context.get('company_id')
-        without_raise = self.env.context.get('without_raise', False)
-        if not company_id and not without_raise:
-            raise UserError(
-                _(
-                    'Company Error!\n'
-                    'There is no company being used by this user'
-                )
+    def _get_currency_tables(self, ws):
+        WsCurrencyCodes = self.env['ws.currency.codes']
+        result = ws.GetParamMon(sep=SEPARATOR)
+        error_msg = self._create_records_from_afip_result(
+            ws, result, WsCurrencyCodes
+        )
+        if error_msg:
+            error_msg = 'Error getting Currency tables. Response:\n' + error_msg
+        return error_msg
+
+    def _get_countries_tables(self, ws):
+        WsfexCountries = self.env['wsfex.dst.country.codes']
+        result = ws.GetParamDstPais(sep=SEPARATOR)
+        error_msg = self._create_records_from_afip_result_no_date(
+            ws=ws, result=result, model_to_create=WsfexCountries
+        )
+        if error_msg:
+            error_msg = (
+                'Error getting Countries tables. Response:\n' + error_msg
             )
+        return error_msg
 
-        ids = self.search([('company_id', '=', company_id)])
-        if not ids and not without_raise:
-            raise UserError(
-                _(
-                    'WSFEX Config Error!\n'
-                    'There is no WSFEX configuration set to this company'
-                )
+    def _get_lang_tables(self, ws):
+        WsfexLang = self.env['wsfex.lang.codes']
+        result = ws.GetParamIdiomas(sep=SEPARATOR)
+        error_msg = self._create_records_from_afip_result(ws, result, WsfexLang)
+        if error_msg:
+            error_msg = (
+                'Error getting Languages tables. Response:\n' + error_msg
             )
+        return error_msg
 
-        return ids
+    def _get_export_type_tables(self, ws):
+        WsfexExportType = self.env['wsfex.export.type.codes']
+        result = ws.GetParamTipoExpo(sep=SEPARATOR)
+        error_msg = self._create_records_from_afip_result(
+            ws, result, WsfexExportType
+        )
+        if error_msg:
+            error_msg = (
+                'Error getting Export Type tables. Response:\n' + error_msg
+            )
+        return error_msg
 
-    def fexgetparam_method(self, method_ext):
+    def _get_UOM_tables(self, ws):
+        WsfexUOM = self.env['wsfex.uom.codes']
+        result = ws.GetParamUMed(sep=SEPARATOR)
+        error_msg = self._create_records_from_afip_result(ws, result, WsfexUOM)
+        if error_msg:
+            error_msg = 'Error getting UOM tables. Response:\n' + error_msg
+        return error_msg
+
+    def _get_incoterms_tables(self, ws):
+        WsfexIncoterms = self.env['wsfex.incoterms.codes']
+        result = ws.GetParamIncoterms(sep=SEPARATOR)
+        error_msg = self._create_records_from_afip_result(
+            ws, result, WsfexIncoterms
+        )
+        if error_msg:
+            error_msg = (
+                'Error getting Incoterms tables. Response:\n' + error_msg
+            )
+        return error_msg
+
+    def _get_pos_tables(self, ws):
+        WsPos = self.env['ws.pos']
+        helper = WSFEXParser()
+        result = ws.GetParamPtosVenta(sep=SEPARATOR)
+        vals_list = []
+        for vat_data in result:
+            code, name, blocked, to_date = vat_data.split(SEPARATOR)
+            blocked = blocked.split(":")[1]
+            to_date = to_date.split(":")[1]
+            vals = {
+                'code': code,
+                'name': name,
+                'blocked': False if blocked == 'N' else True,
+                'to_date': helper.clean_result_date(to_date),
+                'from_afip': True,
+            }
+            record = WsPos.search(
+                [
+                    ('code', '=', code),
+                    ('wsfex_config_id', '=', self.id),
+                ]
+            )
+            if not record:
+                vals.update(
+                    {
+                        'wsfex_config_id': self.id,
+                    }
+                )
+                vals_list.append(vals)
+            else:
+                record.write(vals)
+        WsPos.create(vals_list)
+        error_msg = helper.parse_errors(ws)
+        if len(result) == 0:
+            error_msg = (
+                _("Error: this company doesn't have POS for this Webservice.\n")
+                + error_msg
+            )
+        if error_msg:
+            error_msg = 'Error getting POS tables. Response:\n' + error_msg
+        return error_msg
+
+    def get_afip_tables(self):
         self.ensure_one()
-        method_name = 'FEXGetPARAM_%s' % method_ext
+        if not self.cuit:
+            raise UserError(_("Please configure the company VAT!"))
+
         ws = self.ws_auth()
 
-        data = {
-            method_name: {},
-        }
-        ws.add(data)
-        response = ws.request(method_name)
-        res = ws.parse_response(response)
-        del ws
-        return res['response'].FEXResultGet[0]
+        error_msg = self._get_pos_tables(ws)
+        error_msg += self._get_currency_tables(ws)
+        error_msg += self._get_countries_tables(ws)
+        error_msg += self._get_lang_tables(ws)
+        error_msg += self._get_export_type_tables(ws)
+        error_msg += self._get_UOM_tables(ws)
+        error_msg += self._get_incoterms_tables(ws)
 
-    def get_wsfex_currencies(self):
-        self.ensure_one()
-        res = self.fexgetparam_method('MON')
-
-        wsfex_cur_obj = self.env['wsfex.currency.codes']
-
-        # Armo un lista con los codigos de los Impuestos
-        for r in res:
-            res_c = wsfex_cur_obj.search([('code', '=', r.Mon_Id)])
-
-            # Si no tengo los codigos de esos Impuestos en la db, los creo
-            if not len(res_c):
-                wsfex_cur_obj.create(
-                    {
-                        'code': r.Mon_Id,
-                        'name': r.Mon_Ds,
-                        'wsfex_config_id': self.id,
-                    }
+        if error_msg:
+            raise UserError(
+                _(
+                    """
+                    Error with Webservice
+                    %(error_msg)s
+                    """,
+                    error_msg=error_msg,
                 )
-            # Si los codigos estan en la db los modifico
-            else:
-                res_c.write(
-                    {
-                        'name': r.Mon_Ds,
-                        'wsfex_config_id': self.id,
-                    }
-                )
+            )
 
         return True
 
-    def get_wsfex_uoms(self):
+    def _get_next_id(self, ws):
+        _logger.info("Checking last ID informed to AFIP")
+        last_id = ws.GetLastID()
+        helper = WSFEXParser()
+        helper.parse_errors_raise(ws, _("get the last ID informed"))
+        return int(last_id) + 1
+
+    def _get_next_number(self, ws, tipo_cbte, pto_vta):
+        _logger.info(
+            "Checking last voucher informed to AFIP - Type: %s, POS: %s"
+            % (tipo_cbte, pto_vta)
+        )
+        last_voucher_number = ws.GetLastCMP(tipo_cbte, pto_vta)
+        helper = WSFEXParser()
+        helper.parse_errors_raise(ws, _("get the last voucher informed"))
+        return int(last_voucher_number) + 1
+
+    def _set_invoice_in_ws(self, ws, invoice):
+        _logger.info("Parsing data from invoice ID: %s" % invoice.id)
+        helper = WSFEXParser()
+        data = helper.parse_invoice(invoice)
+        items = helper.parse_items(invoice)
+        associated_vouchers = helper.parse_associated_voucher(invoice)
+        permissions = helper.parse_permissions(invoice)
+
+        number = self._get_next_number(ws, data['CbteTipo'], data['PtoVta'])
+
+        incoterms = ''
+        incoterms_desc = None
+        inv_incoterms = self.env['wsfex.incoterms.codes'].search(
+            [
+                ('incoterms_id', '=', invoice.invoice_incoterm_id.id),
+                ('wsfex_config_id', '=', self.id),
+            ]
+        )
+        if inv_incoterms:
+            incoterms = inv_incoterms.code
+            incoterms_desc = inv_incoterms.name
+
+        _logger.info("Creating pyafipws invoice")
+        ws.CrearFactura(
+            tipo_cbte=data['CbteTipo'],
+            punto_vta=data['PtoVta'],
+            cbte_nro=number,
+            fecha_cbte=data['CbteFch'],
+            imp_total=data['total_amount'],
+            tipo_expo=data['expo_type'],
+            permiso_existente=data['exist_perm'],
+            pais_dst_cmp=data['pais_dst'],
+            nombre_cliente=data['partner_name'],
+            cuit_pais_cliente=data['cuit_pais'],
+            domicilio_cliente=data['partner_address'],
+            id_impositivo=data['DocNro'],
+            moneda_id=data['MonId'],
+            moneda_ctz=data['MonCotiz'],
+            # obs_comerciales="",
+            # obs_generales="",
+            # forma_pago="",
+            idioma_cbte=data['lang'],
+            incoterms=incoterms,
+            incoterms_ds=incoterms_desc,
+            fecha_pago=data['FchVtoPago'],
+        )
+        _logger.info("Adding item info")
+        for item in items:
+            ws.AgregarItem(
+                codigo=item['Pro_codigo'],
+                ds=item['Pro_ds'],
+                qty=item['Pro_qty'],
+                umed=item['Pro_umed'],
+                precio=item['Pro_precio_uni'],
+                importe=item['Pro_total_item'],
+                bonif=item['Pro_bonificacion'],
+            )
+        _logger.info("Adding permission info")
+        for permission in permissions:
+            ws.AgregarPermiso(
+                id_permiso=permission['id'],
+                dst_merc=permission['dest'],
+            )
+        _logger.info("Adding associated invoices info")
+        for cbte_asoc in associated_vouchers:
+            ws.AgregarCmpAsoc(
+                cbte_tipo=cbte_asoc['Tipo'],
+                cbte_punto_vta=cbte_asoc['PtoVta'],
+                cbte_nro=cbte_asoc['Nro'],
+                cbte_cuit=cbte_asoc['Cuit'],
+            )
+
+    def send_invoices_to_afip(self, invoices):
         self.ensure_one()
-        res = self.fexgetparam_method('UMed')
+        if not self.cuit:
+            raise UserError(_("Please configure the company VAT!"))
 
-        wsfex_uom_obj = self.env['wsfex.uom.codes']
+        ws = self.ws_auth()
 
-        # Armo un lista con los codigos de los Impuestos
-        for r in res:
-            # El servicio de AFIP me devuelve dentro de la lista
-            # unos valores None
-            if not r:
-                continue
-            res_c = wsfex_uom_obj.search([('code', '=', r.Umed_Id)])
+        WsRequest = self.env['ws.request']
+        WsRequestDetail = self.env['ws.request.detail']
+        request = WsRequest.create({'date_request': fields.Datetime.today()})
+        qty_processed = 0
+        for invoice in invoices:
+            self._set_invoice_in_ws(ws, invoice)
 
-            # Si no tengo los codigos de esos Impuestos en la db, los creo
-            if not len(res_c):
-                wsfex_uom_obj.create(
+            _logger.info("Trying to push Inovice data to AFIP...")
+            error_msg = ""
+            try:
+                qty_processed += 1
+                afip_id = self._get_next_id(ws)
+                ws.Authorize(afip_id)
+            except SoapFault as soap_fault:
+                error_msg = "%s: %s" % (
+                    soap_fault.faultcode,
+                    soap_fault.faultstring,
+                )
+                _logger.error("SOAP Error.", error_msg)
+            except Exception as e:
+                if ws.Excepcion:
+                    error_msg = ws.Excepcion
+                    _logger.error("WSFE Error.", error_msg)
+                else:
+                    error_msg = str(e)
+                    _logger.error("Internal Error.", error_msg)
+            if error_msg:
+                WsRequestDetail.create(
                     {
-                        'code': r.Umed_Id,
-                        'name': r.Umed_Ds,
-                        'wsfex_config_id': self.id,
+                        'invoice_id': invoice.id,
+                        'result': 'E',
+                        'errors': error_msg,
+                        'request_id': request.id,
                     }
                 )
-            # Si los codigos estan en la db los modifico
-            else:
-                res_c.write({'name': r.Umed_Ds, 'wsfex_config_id': self.id})
-
-        return True
-
-    def get_wsfex_langs(self):
-        self.ensure_one()
-        res = self.fexgetparam_method('Idiomas')
-
-        wsfex_param_obj = self.env['wsfex.lang.codes']
-
-        # Armo un lista con los codigos de los Impuestos
-        for r in res:
-            # El servicio de AFIP me devuelve dentro de la lista
-            # unos valores None
-            if not r:
-                continue
-            res_c = wsfex_param_obj.search([('code', '=', r.Idi_Id)])
-
-            # Si no tengo los codigos de esos Impuestos en la db, los creo
-            if not len(res_c):
-                wsfex_param_obj.create(
+                _logger.info("Request details saved.")
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+                raise UserError(
+                    _("Error trying to validate Electronic Invoice: %s")
+                    % (error_msg)
+                )
+            error_msg = '\n'.join(err for err in ws.Errores)
+            events_msg = '\n'.join(evn for evn in ws.Eventos)
+            obs_msg = '\n'.join(obs for obs in ws.Observaciones)
+            if ws.Resultado == "R":
+                _logger.warning("AFIP Validation Error. Invoice not approved.")
+                WsRequestDetail.create(
                     {
-                        'code': r.Idi_Id,
-                        'name': r.Idi_Ds,
-                        'wsfex_config_id': self.id,
+                        'invoice_id': invoice.id,
+                        'result': 'E',
+                        'errors': error_msg,
+                        'events': events_msg,
+                        'observations': obs_msg,
+                        'request_id': request.id,
                     }
                 )
-            # Si los codigos estan en la db los modifico
+                _logger.info("Request details saved.")
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+                raise UserError(
+                    _(
+                        """
+                        Error trying to validate Electronic Invoice: %s
+                        Please, check WS Request generated. You will find the result of
+                        current transaction there.
+                        """
+                    )
+                    % (invoice.id)
+                )
+
             else:
-                res_c.write({'name': r.Idi_Ds, 'wsfex_config_id': self.id})
-
-        return True
-
-    def get_wsfex_export_types(self):
-        self.ensure_one()
-        res = self.fexgetparam_method('Tipo_Expo')
-
-        wsfex_param_obj = self.env['wsfex.export.type.codes']
-
-        # Armo un lista con los codigos de los Impuestos
-        for r in res:
-            # El servicio de AFIP me devuelve dentro de la lista
-            # unos valores None
-            if not r:
-                continue
-            res_c = wsfex_param_obj.search([('code', '=', r.Tex_Id)])
-
-            # Si no tengo los codigos de esos Impuestos en la db, los creo
-            if not len(res_c):
-                wsfex_param_obj.create(
+                _logger.info("Mission accomplished!")
+                WsRequestDetail.create(
                     {
-                        'code': r.Tex_Id,
-                        'name': r.Tex_Ds,
-                        'wsfex_config_id': self.id,
+                        'invoice_id': invoice.id,
+                        'request_id': request.id,
+                        'result': ws.Resultado,
+                        'errors': error_msg,
+                        'events': events_msg,
+                        'observations': obs_msg,
+                        'cae': ws.CAE or "",
+                        'cae_due_date': ws.Vencimiento
+                        and datetime.strptime(ws.Vencimiento, "%Y%m%d").date()
+                        or False,
                     }
                 )
-            # Si los codigos estan en la db los modifico
-            else:
-                res_c.write({'name': r.Tex_Ds, 'wsfex_config_id': self.id})
-        return True
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+                _logger.info("Request details saved.")
 
-    def get_wsfex_countries(self):
-        self.ensure_one()
-        res = self.fexgetparam_method('DST_pais')
-
-        wsfex_param_obj = self.env['wsfex.dst.country.codes']
-
-        # Armo un lista con los codigos de los Impuestos
-        for r in res:
-            # El servicio de AFIP me devuelve dentro de la lista
-            # unos valores None
-            if not r:
-                continue
-            res_c = wsfex_param_obj.search([('code', '=', r.DST_Codigo)])
-
-            # Si no tengo los codigos de esos Impuestos en la db, los creo
-            if not len(res_c):
-                wsfex_param_obj.create(
-                    {
-                        'code': r.DST_Codigo,
-                        'name': r.DST_Ds,
-                        'wsfex_config_id': self.id,
-                    }
+                inv_name = "%s-%s" % (
+                    str(ws.PuntoVenta).zfill(5),
+                    str(ws.CbteNro).zfill(8),
                 )
-            # Si los codigos estan en la db los modifico
-            else:
-                res_c.write({'name': r.DST_Ds, 'wsfex_config_id': self.id})
-
-        return True
-
-    def get_wsfex_incoterms(self):
-        self.ensure_one()
-        res = self.fexgetparam_method('Incoterms')
-
-        wsfex_param_obj = self.env['wsfex.incoterms.codes']
-
-        # Armo un lista con los codigos de los Impuestos
-        for r in res:
-            # El servicio de AFIP me devuelve dentro de la lista
-            # unos valores None
-            if not r:
-                continue
-            res_c = wsfex_param_obj.search([('code', '=', r.Inc_Id)])
-
-            # Si no tengo los codigos de esos Impuestos en la db, los creo
-            if not len(res_c):
-                wsfex_param_obj.create(
-                    {
-                        'code': r.Inc_Id,
-                        'name': r.Inc_Ds,
-                        'wsfex_config_id': self.id,
-                    }
-                )
-            # Si los codigos estan en la db los modifico
-            else:
-                res_c.write({'name': r.Inc_Ds, 'wsfex_config_id': self.id})
-
-        return True
-
-    def get_wsfex_dst_cuits(self):
-        self.ensure_one()
-        res = self.fexgetparam_method('DST_CUIT')
-
-        param_obj = self.env['dst.cuit.codes']
-
-        # Armo un lista con los codigos de los Impuestos
-        for r in res:
-            # El servicio de AFIP me devuelve dentro de la lista
-            # unos valores None
-            if not r:
-                continue
-            res_c = param_obj.search([('code', '=', r.DST_CUIT)])
-
-            # Si no tengo los codigos de esos Impuestos en la db, los creo
-            if not len(res_c):
-                param_obj.create(
-                    {
-                        'code': r.DST_CUIT,
-                        'name': r.DST_Ds,
-                        'wsfex_config_id': self.id,
-                    }
-                )
-            # Si los codigos estan en la db los modifico
-            else:
-                res_c.write({'name': r.DST_Ds, 'wsfex_config_id': self.id})
-
-        return True
-
-    def get_wsfex_voucher_types(self):
-        self.ensure_one()
-        res = self.fexgetparam_method(self.voucher_type_str)
-
-        wsfex_param_obj = self.env['wsfex.voucher.type.codes']
-        # Armo un lista con los codigos de los Impuestos
-        for r in res:
-            # El servicio de AFIP me devuelve dentro de la lista
-            # unos valores None
-            if not r:
-                continue
-            res_c = wsfex_param_obj.search([('code', '=', r.Cbte_Id)])
-
-            # Si no tengo los codigos de esos Impuestos en la db, los creo
-            if not len(res_c):
-                vals = {
-                    'code': r.Cbte_Id,
-                    'name': r.Cbte_Ds,
-                    'wsfex_config_id': self.id,
+                inv_vals = {
+                    'cae': ws.CAE,
+                    'cae_due_date': datetime.strptime(
+                        ws.Vencimiento, "%Y%m%d"
+                    ).date(),
+                    'internal_number': inv_name,
+                    'name': inv_name,
+                    'invoice_date': datetime.strptime(
+                        ws.FechaCbte, "%Y%m%d"
+                    ).date(),
                 }
-                wsfex_param_obj.create(vals)
-            # ~ Si los codigos estan en la db los modifico
-            else:
-                vals = {'name': r.Cbte_Ds, 'wsfex_config_id': self.id}
-                res_c.write(vals)
+                invoice.write(inv_vals)
+                _logger.info(
+                    "CAE: %s. Result: %s\n UPDATED invoice fields: %s"
+                    % (ws.CAE, ws.Resultado, inv_vals)
+                )
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+
+        _logger.info("Transaction with AFIP finished.")
 
         return True
-
-    def get_last_voucher(self, pos, voucher_type):
-        self.ensure_one()
-        ws = self.ws_auth()
-
-        token, sign = self.wsaa_ticket_id.get_token_sign()
-        client = ws.client
-        cls_lastCMP = client.factory.create('ClsFEX_LastCMP')
-        cls_lastCMP.Token = token
-        cls_lastCMP.Sign = sign
-        cls_lastCMP.Cuit = self.cuit
-        cls_lastCMP.Pto_venta = pos
-        cls_lastCMP.Cbte_Tipo = voucher_type
-
-        result = client.service.FEXGetLast_CMP(cls_lastCMP)
-        if 'FEXResult_LastCMP' in result:
-            last = result.FEXResult_LastCMP.Cbte_nro
-        else:
-            UserError(
-                _(
-                    'FEXResult_LastCMP error'
-                    'FEXResult_LastCMP is not in the response from AFIP'
-                )
-            )
-
-        return last

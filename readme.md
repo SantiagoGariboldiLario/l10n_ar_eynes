@@ -38,7 +38,7 @@ Doodba implementation
         merges:
             - origin 15.0
         target: origin 15.0
-            ./OCA/server-ux:
+    ./OCA/server-ux:
         remotes:
             origin: https://github.com/OCA/server-ux.git
         merges:

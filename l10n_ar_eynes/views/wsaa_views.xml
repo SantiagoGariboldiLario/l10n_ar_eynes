@@ -1,27 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
-    <!-- Menuitems principales -->
-    <menuitem
-        id="base_afipws"
-        name="AFIP WebServices"
-        parent="account.menu_finance_configuration"
-    />
-
-    <!-- Tree View for wsaa_config -->
     <record id="view_wsaa_config_tree" model="ir.ui.view">
         <field name="name">wsaa.config.tree</field>
         <field name="model">wsaa.config</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="company_id" select="1" />
-                <field name="url" select="1" />
+                <field name="company_id" />
+                <field name="url" />
+                <field name="homologation" />
             </tree>
         </field>
     </record>
 
-    <!-- Form View for wsaa_config -->
     <record id="view_wsaa_config_form" model="ir.ui.view">
         <field name="name">wsaa.config.form</field>
         <field name="model">wsaa.config</field>
@@ -29,11 +20,19 @@
         <field name="arch" type="xml">
             <form version="7.0">
                 <sheet>
-                    <h1>WSAA Config</h1>
+                    <h1>WSAA Configuration</h1>
                     <group>
-                        <field name="name" select="1" />
-                        <field name="company_id" select="1" />
-                        <field name="url" select="1" />
+                        <field name="name" />
+                        <field name="company_id" />
+                        <field name="homologation" />
+                        <field name="url" />
+                        <span
+                            class="text-danger"
+                            attrs="{'invisible': [('homologation', '=', True)]}"
+                        >
+                            Homologation server disable. All AFIP requests will be sent to the real AFIP server.
+                            Be sure that you are on Production server.
+                        </span>
                     </group>
                     <notebook colspan="4">
                         <page string="Authorized Services">
@@ -122,20 +121,10 @@
         </field>
     </record>
 
-    <!--Window Action para wsaa_config -->
     <record id="action_wsaa_config_tree" model="ir.actions.act_window">
         <field name="name">WSAA Config</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">wsaa.config</field>
         <field name="view_mode">tree,form</field>
     </record>
-
-    <menuitem
-        id="wsaa_config_menu"
-        name="WSAA Configuration"
-        parent="base_afipws"
-        sequence="20"
-        action="action_wsaa_config_tree"
-    />
-
 </odoo>

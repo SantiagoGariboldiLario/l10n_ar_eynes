@@ -3,309 +3,414 @@
 #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 ##############################################################################
 
+import logging
 from datetime import datetime
+
+from pyafipws.wsfev1 import WSFEv1
+from pysimplesoap.client import SoapFault
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
-from ..wsfetools.wsfe_easywsy import WSFE
+from ..wsfetools.wsfe_helper import WSFEParser
 
+_logger = logging.getLogger(__name__)
 
-class WsfeOptionals(models.Model):
-    _name = "wsfe.optionals"
-    _description = "WSFE Optionals"
-
-    code = fields.Char('Code', required=False, size=4)
-    name = fields.Char('Desc', required=True, size=64)
-    to_date = fields.Date('Effect Until')
-    from_date = fields.Date('Effective From')
-    from_afip = fields.Boolean('From AFIP')
-    wsfe_config_id = fields.Many2one('wsfe.config', 'WSFE Configuration')
-
-
-class WsfeTaxCodes(models.Model):
-    _name = "wsfe.tax.codes"
-    _description = "Tax Codes"
-
-    code = fields.Char('Code', required=False, size=4)
-    name = fields.Char('Desc', required=True, size=64)
-    to_date = fields.Date('Effect Until')
-    from_date = fields.Date('Effective From')
-    tax_id = fields.Many2one('account.tax', 'Account Tax')
-    wsfe_config_id = fields.Many2one('wsfe.config', 'WSFE Configuration')
-    from_afip = fields.Boolean('From AFIP')
-    exempt_operations = fields.Boolean(
-        'Exempt Operations',
-        help='Check it if this VAT Tax corresponds to vat tax exempts '
-        + 'operations, such as to sell books, milk, etc. The taxes with this '
-        + 'checked, will be reported to AFIP as  exempt operations '
-        + '(base amount) without VAT applied on this',
-    )
+SEPARATOR = ";"
 
 
 class WsfeConfig(models.Model):
     _name = "wsfe.config"
+    _inherit = "ws.config"
     _description = "Configuration for WSFE"
 
-    _webservice_class = WSFE
+    _webservice_class = WSFEv1
 
-    name = fields.Char('Name', size=64, required=True)
-    cuit = fields.Char(related='company_id.partner_id.vat', string='Cuit')
-    url = fields.Char('URL for WSFE', size=60, required=True)
-    homologation = fields.Boolean(
-        'Homologation',
-        help="If true, there will be some validations that are disabled, "
-        + "for example, invoice number correlativeness",
-    )
-    point_of_sale_ids = fields.Many2many(
-        'account.journal',
-        'pos_ar_wsfe_rel',
-        'wsfe_config_id',
-        'pos_ar_id',
-        'Points of Sale',
-    )
-    vat_tax_ids = fields.One2many(
-        'wsfe.tax.codes',
-        'wsfe_config_id',
-        'Taxes',
+    currency_ids = fields.One2many(
+        comodel_name='ws.currency.codes',
+        inverse_name='wsfe_config_id',
+        string='Currencies',
         domain=[('from_afip', '=', True)],
     )
     exempt_operations_tax_ids = fields.One2many(
-        'wsfe.tax.codes',
-        'wsfe_config_id',
-        'Taxes of Exempt Operations',
+        comodel_name='ws.tax.codes',
+        inverse_name='wsfe_config_id',
+        string='Taxes of Exempt Operations',
         domain=[('from_afip', '=', False), ('exempt_operations', '=', True)],
     )
-    wsaa_ticket_id = fields.Many2one('wsaa.ta', 'Ticket Access')
-    company_id = fields.Many2one('res.company', 'Company Name', required=True)
-    services_date_difference = fields.Integer(
-        'Services and Products', default=10
-    )
-    products_date_difference = fields.Integer('Products', default=5)
     optional_ids = fields.One2many(
-        'wsfe.optionals',
-        'wsfe_config_id',
-        'Optionals',
+        comodel_name='ws.optionals',
+        inverse_name='wsfe_config_id',
+        string='Optionals',
+        domain=[('from_afip', '=', True)],
+    )
+    point_of_sale_ids = fields.One2many(
+        comodel_name='ws.pos',
+        inverse_name='wsfe_config_id',
+        string='POS',
+        domain=[('from_afip', '=', True)],
+    )
+    vat_tax_ids = fields.One2many(
+        comodel_name='ws.tax.codes',
+        inverse_name='wsfe_config_id',
+        string='Taxes',
         domain=[('from_afip', '=', True)],
     )
 
-    @api.model
-    def create(self, vals):
+    @api.depends('config_id', 'config_id.homologation')
+    def _compute_url(self):
+        url_prod = self.env.ref('l10n_ar_eynes.url_prod_wsfe').value
+        url_homo = self.env.ref('l10n_ar_eynes.url_homo_wsfe').value
+        for rec in self:
+            rec.url = url_homo if rec.config_id.homologation else url_prod
 
-        # Creamos tambien un TA para este servcio y esta compania
-        ta_obj = self.env['wsaa.ta']
-        wsaa_obj = self.env['wsaa.config']
-        service_obj = self.env['afipws.service']
-
-        # Buscamos primero el wsaa que corresponde a esta compania
-        # porque hay que recordar que son unicos por compania
-        wsaa = wsaa_obj.search([('company_id', '=', vals['company_id'])])
-        service = service_obj.search([('name', '=', 'wsfe')])
-        if wsaa:
-            ta_vals = {
-                'name': service.id,
-                'company_id': vals['company_id'],
-                'config_id': wsaa.id,
-            }
-
-            ta = ta_obj.create(ta_vals)
-            vals['wsaa_ticket_id'] = ta.id
-
-        return super(WsfeConfig, self).create(vals)
+    def _get_webservice(self):
+        return self.env.ref('l10n_ar_eynes.afipws_service_wsfe')
 
     def unlink(self):
-        for wsfe_conf in self:
-            wsfe_conf.wsaa_ticket_id.unlink()
-        res = super(WsfeConfig, self).unlink()
-        return res
+        self.env['ws.currency.codes'].search(
+            [('wsfe_config_id', '=', self.id)]
+        ).unlink()
+        self.env['ws.optionals'].search(
+            [('wsfe_config_id', '=', self.id)]
+        ).unlink()
+        self.env['ws.pos'].search([('wsfe_config_id', '=', self.id)]).unlink()
+        self.env['ws.tax.codes'].search(
+            [('wsfe_config_id', '=', self.id)]
+        ).unlink()
+        return super(WsfeConfig, self).unlink()
 
-    @api.model
-    def get_config(self):
-        company_id = self.env.context.get('company_id')
-        no_raise = self.env.context.get('without_raise', False)
-        if not company_id and not no_raise:
-            raise UserError(
-                _(
-                    'Company Error!\n'
-                    'There is no company being used by this user'
-                )
+    def _get_currency_tables(self, ws):
+        WsCurrencyCodes = self.env['ws.currency.codes']
+        result = ws.ParamGetTiposMonedas(sep=SEPARATOR)
+        error_msg = self._create_records_from_afip_result(
+            ws=ws, result=result, model_to_create=WsCurrencyCodes
+        )
+        if error_msg:
+            error_msg = 'Error getting Currency tables. Response:\n' + error_msg
+        return error_msg
+
+    def _get_vat_tables(self, ws):
+        WsTaxCodes = self.env['ws.tax.codes']
+        result = ws.ParamGetTiposIva(sep=SEPARATOR)
+        error_msg = self._create_records_from_afip_result(
+            ws=ws, result=result, model_to_create=WsTaxCodes
+        )
+        if error_msg:
+            error_msg = 'Error getting Vat tables. Response:\n' + error_msg
+        return error_msg
+
+    def _get_optionals_tables(self, ws):
+        WsOptionals = self.env['ws.optionals']
+        result = ws.ParamGetTiposOpcional(sep=SEPARATOR)
+        error_msg = self._create_records_from_afip_result(
+            ws=ws, result=result, model_to_create=WsOptionals
+        )
+        if error_msg:
+            error_msg = (
+                'Error getting Optionals tables. Response:\n' + error_msg
+            )
+        return error_msg
+
+    def _get_pos_tables(self, ws):
+        WsPos = self.env['ws.pos']
+        result = ws.ParamGetPtosVenta(sep=SEPARATOR)
+        error_msg = ''
+        if ws.Excepcion or ws.ErrMsg or ws.Obs:
+            error_msg += _(
+                """
+                %(excep)s
+                %(err)s
+                %(obs)s
+                """,
+                excep=ws.Excepcion,
+                err=ws.ErrMsg,
+                obs=ws.Obs,
             )
 
-        ids = self.search([('company_id', '=', company_id)])
-        if not ids and not no_raise:
-            raise UserError(
-                _(
-                    'WSFE Config Error!\n'
-                    'There is no WSFE configuration set to this company'
-                )
+        vals_list = []
+        for vat_data in result:
+            helper = WSFEParser()
+            code, name, blocked, to_date = vat_data.split(SEPARATOR)
+            blocked = blocked.split(":")[1]
+            to_date = to_date.split(":")[1]
+            vals = {
+                'code': code,
+                'name': name,
+                'blocked': False if blocked == 'N' else True,
+                'to_date': helper.clean_result_date(to_date),
+                'from_afip': True,
+            }
+            record = WsPos.search(
+                [
+                    ('code', '=', code),
+                    ('wsfe_config_id', '=', self.id),
+                ]
             )
-
-        return ids
-
-    @api.model
-    def check_errors(self, res, raise_exception=True):
-        msg = ''
-        if 'errors' in res or 'Errors' in res:
-            res_err = res['errors'] if 'errors' in res else res['Errors']
-            if isinstance(res_err, list):
-                err_array = res_err
-                err_var_name = 'msg'
-                err_var_code = 'code'
-            elif 'Err' in res_err and isinstance(res_err.Err, list):
-                err_array = res_err.Err
-                err_var_name = 'Msg'
-                err_var_code = 'Code'
-            errors = [getattr(error, err_var_name) for error in err_array]
-            err_codes = [
-                str(getattr(error, err_var_code)) for error in err_array
-            ]
-            msg = ' '.join(errors)
-            msg = msg + ' Codigo/s Error:' + ' '.join(err_codes)
-
-            if msg != '' and raise_exception:
-                raise UserError(_('WSFE Error!\n') + msg)
-
-        return msg
-
-    def ws_auth(self):
-        # TODO This block is repeated, should persist only in WSAA, I think
-        token, sign = self.wsaa_ticket_id.get_token_sign()
-        auth = {'Token': token, 'Sign': sign, 'Cuit': self.cuit}
-        ws = self._webservice_class(self.url)
-        ws.login('Auth', auth)
-        return ws
-
-    def get_last_voucher(self, pos, voucher_type):
-        self.ensure_one()
-        ws = self.ws_auth()
-        data = {
-            'FECompUltimoAutorizado': {
-                'CbteTipo': voucher_type,
-                'PtoVta': pos,
-            }
-        }
-        ws.add(data)
-        response = ws.request('FECompUltimoAutorizado')
-        res = ws.parse_response(response)
-        del ws
-        last = res['response'].CbteNro
-        return last
-
-    def get_voucher_info(self, pos, voucher_type, number):
-        self.ensure_one()
-        ws = self.ws_auth()
-        data = {
-            'FECompConsultar': {
-                'FeCompConsReq': {
-                    'CbteTipo': voucher_type,
-                    'CbteNro': number,
-                    'PtoVta': pos,
-                }
-            }
-        }
-        ws.add(data)
-        response = ws.request('FECompConsultar')
-        if not hasattr(response, 'ResultGet'):
-            raise UserError(_("Error fetching voucher from AFIP!"))
-        return response.ResultGet
+            if not record:
+                vals.update(
+                    {
+                        'wsfe_config_id': self.id,
+                    }
+                )
+                vals_list.append(vals)
+            else:
+                record.write(vals)
+        WsPos.create(vals_list)
+        if error_msg:
+            error_msg = 'Error getting POS tables. Response:\n' + error_msg
+        return error_msg
 
     def get_afip_tables(self):
         self.ensure_one()
         if not self.cuit:
+            raise UserError(_("Please configure the company VAT!"))
+
+        ws = self.ws_auth()
+
+        error_msg = self._get_currency_tables(ws)
+        error_msg += self._get_optionals_tables(ws)
+        error_msg += self._get_pos_tables(ws)
+        error_msg += self._get_vat_tables(ws)
+
+        if error_msg:
             raise UserError(
-                _("Please configure the company VAT before get Taxes!")
+                _(
+                    """
+                    Error with Webservice
+                    %(error_msg)s
+                    """,
+                    error_msg=error_msg,
+                )
             )
-        wsfe_tax_model = self.env['wsfe.tax.codes']
-        wsfe_optionals_obj = self.env['wsfe.optionals']
+
+        return True
+
+    def _check_vat_taxes_configured(self, invoice_vat_lines):
+        self.ensure_one()
+        afip_taxes = self.vat_tax_ids.mapped('tax_id')
+
+        not_found_tax = invoice_vat_lines.filtered(
+            lambda x: x.tax_line_id not in afip_taxes
+        )
+        if not_found_tax:
+            raise UserError(
+                _("Taxes `%s` are not configured in WSFE!")
+                % (", ").join(not_found_tax.mapped('tax_line_id.name'))
+            )
+
+    def _get_vat_array(self, invoice):
+        vat_tax_group = self.env.ref('l10n_ar_eynes.vat_tax_group')
+        invoice_vat_lines = invoice.line_ids.filtered(
+            lambda x: x.price_unit
+            and x.tax_line_id
+            and x.tax_group_id == vat_tax_group
+        )
+
+        self._check_vat_taxes_configured(invoice_vat_lines)
+
+        return invoice_vat_lines
+
+    def _get_next_number(self, ws, tipo_cbte, pto_vta):
+        _logger.info(
+            "Checking last voucher informed to AFIP - Type: %s, POS: %s"
+            % (tipo_cbte, pto_vta)
+        )
+        last_voucher_number = ws.CompUltimoAutorizado(tipo_cbte, pto_vta)
+        helper = WSFEParser()
+        helper.parse_errors_raise(ws, _("get the last voucher informed"))
+        return int(last_voucher_number) + 1
+
+    def get_voucher_info(self, pos, voucher_type, number):
+        self.ensure_one()
+        ws = self.ws_auth()
+        cae = ws.CompConsultar(voucher_type, pos, number)
+        helper = WSFEParser()
+        helper.parse_errors_raise(ws, _("get voucher info"))
+        return cae
+
+    def _set_invoice_in_ws(self, ws, invoice):
+        _logger.info("Parsing data from invoice ID: %s" % invoice.id)
+        helper = WSFEParser()
+        data = helper.parse_invoice(invoice)
+        vat_lines = self._get_vat_array(invoice)
+        vat_data = helper.parse_vat_lines(invoice, vat_lines, self.vat_tax_ids)
+        tribute_data = helper.parse_taxes_not_vat(invoice)
+        associated_data = helper.parse_associated_voucher(invoice)
+        opcionals_data = helper.parse_optionals(invoice)
+
+        number = self._get_next_number(ws, data['CbteTipo'], data['PtoVta'])
+
+        _logger.info("Creating pyafipws invoice")
+        ws.CrearFactura(
+            tipo_cbte=data['CbteTipo'],
+            punto_vta=data['PtoVta'],
+            fecha_cbte=data['CbteFch'],
+            concepto=data['Concepto'],
+            tipo_doc=data['DocTipo'],
+            nro_doc=data['DocNro'],
+            fecha_venc_pago=data['FchVtoPago'],
+            moneda_id=data['MonId'],
+            moneda_ctz=data['MonCotiz'],
+            fecha_serv_desde=data['FchServDesde'],
+            fecha_serv_hasta=data['FchServHasta'],
+            cbt_desde=number,
+            cbt_hasta=number,
+            imp_total=data['total_amount'],
+            imp_tot_conc=data['no_taxed_amount'],
+            imp_neto=vat_data['base_vat_amount'],
+            imp_iva=vat_data['total_vat_amount'],
+            imp_trib=tribute_data['tribute_total'],
+            imp_op_ex=data['exempt_amount'],
+        )
+        _logger.info("Adding vat info")
+        for vat_id in vat_data['vat_dict'].keys():
+            ws.AgregarIva(
+                iva_id=vat_id,
+                base_imp=vat_data['vat_dict'][vat_id]['BaseImp'],
+                importe=vat_data['vat_dict'][vat_id]['Importe'],
+            )
+        _logger.info("Adding tributes info")
+        for other_tax in tribute_data['perc_array']:
+            ws.AgregarTributo(
+                tributo_id=other_tax['Id'],
+                desc=other_tax['Desc'],
+                base_imp=other_tax['BaseImp'],
+                alic=other_tax['Alic'],
+                importe=other_tax['Importe'],
+            )
+        _logger.info("Adding associated invoices info")
+        for cbte_asoc in associated_data:
+            ws.AgregarCmpAsoc(
+                tipo=cbte_asoc['Tipo'],
+                pto_vta=cbte_asoc['PtoVta'],
+                nro=cbte_asoc['Nro'],
+                cuit=cbte_asoc['Cuit'],
+                fecha=cbte_asoc['CbteFch'],
+            )
+        _logger.info("Adding optionals info")
+        for opt in opcionals_data:
+            ws.AgregarOpcional(
+                opcional_id=opt['Code'],
+                valor=opt['Valor'],
+            )
+
+    def send_invoices_to_afip(self, invoices):
+        self.ensure_one()
+        if not self.cuit:
+            raise UserError(_("Please configure the company VAT!"))
 
         ws = self.ws_auth()
-        data = {'FEParamGetTiposIva': {}}
-        ws.add(data, no_check="all")
-        response = ws.request('FEParamGetTiposIva')
-        err = self.check_errors(response, raise_exception=False)
-        if err:
-            raise UserError(_("Error reading Taxes!\n") + err)
-        for tax in response[0][0]:
-            fd = datetime.strptime(tax.FchDesde, '%Y%m%d')
+
+        WsRequest = self.env['ws.request']
+        WsRequestDetail = self.env['ws.request.detail']
+        request = WsRequest.create({'date_request': fields.Datetime.today()})
+        qty_processed = 0
+        for invoice in invoices:
+            self._set_invoice_in_ws(ws, invoice)
+
+            _logger.info("Trying to push Inovice data to AFIP...")
+            error_msg = ""
             try:
-                td = datetime.strptime(tax.FchHasta, '%Y%m%d')
-            except ValueError:
-                td = False
-            vals = {
-                'code': tax.Id,
-                'name': tax.Desc,
-                'to_date': td,
-                'from_date': fd,
-                'wsfe_config_id': self.id,
-                'from_afip': True,
-            }
-
-            # Si no existe el impuesto en la DB, lo creamos de acuerdo a AFIP
-            tax = wsfe_tax_model.search(
-                [
-                    ('code', '=', tax.Id),
-                    ('wsfe_config_id', '=', self.id),
-                ]
-            )
-            if not tax:
-                wsfe_tax_model.create(vals)
-
-            # Si los codigos estan en la db los modifico
-            else:
-                tax.write(vals)
-
-        # now optionals
-        ws = self.ws_auth()
-        data = {'FEParamGetTiposOpcional': {}}
-        ws.add(data, no_check="all")
-        response = ws.request('FEParamGetTiposOpcional')
-        err = self.check_errors(response, raise_exception=False)
-        if err:
-            raise UserError(_("Error reading Taxes!\n") + err)
-        for r in response[0][0]:
-            res_c = wsfe_optionals_obj.search(
-                [
-                    ('code', '=', r.Id),
-                    ('wsfe_config_id', '=', self.id),
-                ]
-            )
-
-            # ~ Si tengo no los codigos de esos Opcionales en la db, los creo
-            if not len(res_c):
-                fd = datetime.strptime(r.FchDesde, '%Y%m%d')
-                try:
-                    td = datetime.strptime(r.FchHasta, '%Y%m%d')
-                except ValueError:
-                    td = False
-
-                wsfe_optionals_obj.create(
+                qty_processed += 1
+                ws.CAESolicitar()
+            except SoapFault as soap_fault:
+                error_msg = "%s: %s" % (
+                    soap_fault.faultcode,
+                    soap_fault.faultstring,
+                )
+                _logger.error("SOAP Error.", error_msg)
+            except Exception as e:
+                if ws.Excepcion:
+                    error_msg = ws.Excepcion
+                    _logger.error("WSFE Error.", error_msg)
+                else:
+                    error_msg = str(e)
+                    _logger.error("Internal Error.", error_msg)
+            if error_msg:
+                WsRequestDetail.create(
                     {
-                        'code': r.Id,
-                        'name': r.Desc,
-                        'to_date': td,
-                        'from_date': fd,
-                        'wsfe_config_id': self.id,
-                        'from_afip': True,
+                        'invoice_id': invoice.id,
+                        'result': 'E',
+                        'errors': error_msg,
+                        'request_id': request.id,
                     }
                 )
-            # ~ Si los codigos estan en la db los modifico
-            else:
-                fd = datetime.strptime(r.FchDesde, '%Y%m%d')
-                # 'NULL' ?? viene asi de fe_param_get_tipos_iva():
-                try:
-                    td = datetime.strptime(r.FchHasta, '%Y%m%d')
-                except ValueError:
-                    td = False
-
-                res_c.write(
+                _logger.info("Request details saved.")
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+                raise UserError(
+                    _("Error trying to validate Electronic Invoice: %s")
+                    % (error_msg)
+                )
+            error_msg = '\n'.join(err for err in ws.Errores)
+            events_msg = '\n'.join(evn for evn in ws.Eventos)
+            obs_msg = '\n'.join(obs for obs in ws.Observaciones)
+            if ws.Resultado == "R":
+                _logger.warning("AFIP Validation Error. Invoice not approved.")
+                WsRequestDetail.create(
                     {
-                        'code': r.Id,
-                        'name': r.Desc,
-                        'to_date': td,
-                        'from_date': fd,
-                        'wsfe_config_id': self.id,
-                        'from_afip': True,
+                        'invoice_id': invoice.id,
+                        'result': 'E',
+                        'errors': error_msg,
+                        'events': events_msg,
+                        'observations': obs_msg,
+                        'request_id': request.id,
                     }
                 )
+                _logger.info("Request details saved.")
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+                raise UserError(
+                    _(
+                        """
+                        Error trying to validate Electronic Invoice: %s
+                        Please, check WS Request generated. You will find the result of
+                        current transaction there.
+                        """
+                    )
+                    % (invoice.id)
+                )
+
+            else:
+                _logger.info("Mission accomplished!")
+                WsRequestDetail.create(
+                    {
+                        'invoice_id': invoice.id,
+                        'request_id': request.id,
+                        'result': ws.Resultado,
+                        'errors': error_msg,
+                        'events': events_msg,
+                        'observations': obs_msg,
+                        'cae': ws.CAE or "",
+                        'cae_due_date': ws.Vencimiento
+                        and datetime.strptime(ws.Vencimiento, "%Y%m%d").date()
+                        or False,
+                    }
+                )
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+                _logger.info("Request details saved.")
+
+                inv_name = "%s-%s" % (
+                    str(ws.PuntoVenta).zfill(5),
+                    str(ws.CbteNro).zfill(8),
+                )
+                inv_vals = {
+                    'cae': ws.CAE,
+                    'cae_due_date': datetime.strptime(
+                        ws.Vencimiento, "%Y%m%d"
+                    ).date(),
+                    'internal_number': inv_name,
+                    'name': inv_name,
+                    'invoice_date': datetime.strptime(
+                        ws.FechaCbte, "%Y%m%d"
+                    ).date(),
+                }
+                invoice.write(inv_vals)
+                _logger.info(
+                    "CAE: %s. Result: %s\n UPDATED invoice fields: %s"
+                    % (ws.CAE, ws.Resultado, inv_vals)
+                )
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+
+        _logger.info("Transaction with AFIP finished.")
 
         return True
