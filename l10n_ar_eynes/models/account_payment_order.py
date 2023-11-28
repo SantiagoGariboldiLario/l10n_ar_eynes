@@ -2671,6 +2671,13 @@ class AccountPaymentOrderIssuedCheckLine(models.Model):
         string='Amount Currency',
     )
 
+    @api.onchange('checkbook_id')
+    def _onchange_checkbook_id(self):
+        if not self.checkbook_id:
+            return
+        self.checkbook_format = self.checkbook_id.format
+        self.type = self.checkbook_id.type
+
     @api.onchange('issue_date')
     def _onchange_issue_date(self):
         if not self.issue_date:

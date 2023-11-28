@@ -15,17 +15,17 @@
                             <field name="number" />
                         </group>
                     </group>
-                    <group attrs="{'invisible' : [('checkbook_format', '=', 'echeq')]}">
+                    <group>
                         <group>
                             <field
                                 name="start_num"
-                                attrs="{'required' : [('checkbook_format', '!=', 'echeq')]}"
+                                required="1"
                             />
                         </group>
                         <group>
                             <field
                                 name="end_num"
-                                attrs="{'required' : [('checkbook_format', '!=', 'echeq')]}"
+                                required="1"                                
                             />
                         </group>
                     </group>
@@ -36,10 +36,7 @@
                         <group>
                             <field
                                 name="type"
-                                attrs="{
-                                    'invisible': [('checkbook_format','!=', 'physical')],
-                                    'required': [('checkbook_format','=', 'physical')],
-                                }"
+                                required="1"
                             />
                         </group>
                     </group>
