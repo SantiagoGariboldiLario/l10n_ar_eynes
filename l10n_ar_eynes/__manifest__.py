@@ -135,8 +135,6 @@
         "python": [
             "M2Crypto",
             "OpenSSL",
-            "easywsy",
-            "suds",
             "qrcode",
             "httplib2",
             "future",
