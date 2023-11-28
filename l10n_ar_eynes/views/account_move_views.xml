@@ -243,13 +243,15 @@
             </xpath>
 
             <xpath expr="//group[@id='header_right_group']" position="inside">
-                <field
-                    name="is_FCE_invoice"
-                    attrs="{'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]}"
-                />
+                <field name="is_FCE_invoice" invisible="True" />
                 <field
                     name="voucher_type_id"
-                    attrs="{'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]}"
+                    attrs="{
+                        'readonly': [('move_type','in', ['out_refund', 'out_invoice']),
+                            ('fiscal_type','=', 'electronic')],
+                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
+                    }"
+                    widget="selection"
                 />
                 <field
                     name="cae"

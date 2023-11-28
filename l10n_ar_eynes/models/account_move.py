@@ -533,6 +533,20 @@ class AccountMove(models.Model):
         elif self.invoice_date_due and (date_invoice > self.invoice_date_due):
             self.invoice_date_due = date_invoice
 
+    @api.onchange('voucher_type_id')
+    def _onchange_voucher_type_id(self):
+        if (
+            (
+                self.is_purchase_document()
+                or (self.is_sale_document() and self.fiscal_type == 'internal')
+            )
+            and self.voucher_type_id
+            and int(self.voucher_type_id.afip_code) > AFIP_FCE_CODE_START
+        ):
+            self.is_FCE_invoice = True
+        else:
+            self.is_FCE_invoice = False
+
     def _get_refund_common_fields(self):
         res = super(AccountMove, self)._get_refund_common_fields()
         res.append('currency_rate')
@@ -622,7 +636,7 @@ class AccountMove(models.Model):
             pos_code.zfill(4) + '-' + move_code.zfill(8)
         )
 
-    @api.depends('denomination', 'move_type', 'is_debit_note', 'is_FCE_invoice')
+    @api.depends('denomination', 'move_type', 'is_debit_note')
     def _compute_voucher_type(self):
         for inv in self:
             if inv.is_sale_document():

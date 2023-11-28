@@ -19,12 +19,6 @@ _logger = logging.getLogger(__name__)
 SEPARATOR = ";"
 
 
-def clean_result_date(date):
-    if date == 'NULL':
-        return False
-    return datetime.strptime(date, '%Y%m%d')
-
-
 class WsfeConfig(models.Model):
     _name = "wsfe.config"
     _inherit = "ws.config"
@@ -86,48 +80,6 @@ class WsfeConfig(models.Model):
         ).unlink()
         return super(WsfeConfig, self).unlink()
 
-    def _create_records_from_afip_result(self, ws, result, model_to_create):
-        error_msg = ''
-        if ws.Excepcion or ws.ErrMsg or ws.Obs:
-            error_msg += _(
-                """
-                %(excep)s
-                %(err)s
-                %(obs)s
-                """,
-                excep=ws.Excepcion,
-                err=ws.ErrMsg,
-                obs=ws.Obs,
-            )
-
-        vals_list = []
-        for vat_data in result:
-            code, name, from_date, to_date = vat_data.split(SEPARATOR)
-            vals = {
-                'code': code,
-                'name': name,
-                'from_date': clean_result_date(from_date),
-                'to_date': clean_result_date(to_date),
-                'from_afip': True,
-            }
-            record = model_to_create.search(
-                [
-                    ('code', '=', code),
-                    ('wsfe_config_id', '=', self.id),
-                ]
-            )
-            if not record:
-                vals.update(
-                    {
-                        'wsfe_config_id': self.id,
-                    }
-                )
-                vals_list.append(vals)
-            else:
-                record.write(vals)
-        model_to_create.create(vals_list)
-        return error_msg
-
     def _get_currency_tables(self, ws):
         WsCurrencyCodes = self.env['ws.currency.codes']
         result = ws.ParamGetTiposMonedas(sep=SEPARATOR)
@@ -178,6 +130,7 @@ class WsfeConfig(models.Model):
 
         vals_list = []
         for vat_data in result:
+            helper = WSFEParser()
             code, name, blocked, to_date = vat_data.split(SEPARATOR)
             blocked = blocked.split(":")[1]
             to_date = to_date.split(":")[1]
@@ -185,7 +138,7 @@ class WsfeConfig(models.Model):
                 'code': code,
                 'name': name,
                 'blocked': False if blocked == 'N' else True,
-                'to_date': clean_result_date(to_date),
+                'to_date': helper.clean_result_date(to_date),
                 'from_afip': True,
             }
             record = WsPos.search(
@@ -265,7 +218,7 @@ class WsfeConfig(models.Model):
         )
         last_voucher_number = ws.CompUltimoAutorizado(tipo_cbte, pto_vta)
         helper = WSFEParser()
-        helper.parse_errors(ws, "get the last voucher informed")
+        helper.parse_errors_raise(ws, _("get the last voucher informed"))
         return int(last_voucher_number) + 1
 
     def get_voucher_info(self, pos, voucher_type, number):
@@ -273,7 +226,7 @@ class WsfeConfig(models.Model):
         ws = self.ws_auth()
         cae = ws.CompConsultar(voucher_type, pos, number)
         helper = WSFEParser()
-        helper.parse_errors(ws, "get voucher info")
+        helper.parse_errors_raise(ws, _("get voucher info"))
         return cae
 
     def _set_invoice_in_ws(self, ws, invoice):

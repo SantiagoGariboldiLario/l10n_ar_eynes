@@ -8,7 +8,11 @@ import logging
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError, ValidationError
 
+from ..wsfetools.wsfex_helper import WSParser
+
 _logger = logging.getLogger(__name__)
+
+SEPARATOR = ";"
 
 
 class WsCurrencyCodes(models.Model):
@@ -290,3 +294,81 @@ class WsConfig(models.Model):
         ws.Sign = sign
 
         return ws
+
+    # TO GET TABLES
+    def _create_records_from_afip_result_no_date(
+        self, ws, result, model_to_create
+    ):
+        helper = WSParser()
+        vals_list = []
+        for vat_data in result:
+            _id, code, name, _void = vat_data.split(SEPARATOR)
+            vals = {
+                'code': code,
+                'name': name,
+            }
+            record = model_to_create.search(
+                [
+                    ('code', '=', code),
+                    ('wsfex_config_id', '=', self.id),
+                ]
+            )
+            if not record:
+                vals.update(
+                    {
+                        'wsfex_config_id': self.id,
+                    }
+                )
+                vals_list.append(vals)
+            else:
+                record.write(vals)
+        model_to_create.create(vals_list)
+        return helper.parse_errors(ws)
+
+    def _create_records_from_afip_result(self, ws, result, model_to_create):
+        helper = WSParser()
+        vals_list = []
+        for vat_data in result:
+            _id, code, name, from_date, to_date, _void = vat_data.split(
+                SEPARATOR
+            )
+            vals = {
+                'code': code,
+                'name': name,
+            }
+            if getattr(model_to_create, 'from_date', None):
+                vals.update(
+                    {
+                        'from_date': helper.clean_result_date(from_date),
+                    }
+                )
+            if getattr(model_to_create, 'to_date', None):
+                vals.update(
+                    {
+                        'to_date': helper.clean_result_date(to_date),
+                    }
+                )
+            if getattr(model_to_create, 'from_afip', None):
+                vals.update(
+                    {
+                        'from_afip': True,
+                    }
+                )
+
+            record = model_to_create.search(
+                [
+                    ('code', '=', code),
+                    ('wsfex_config_id', '=', self.id),
+                ]
+            )
+            if not record:
+                vals.update(
+                    {
+                        'wsfex_config_id': self.id,
+                    }
+                )
+                vals_list.append(vals)
+            else:
+                record.write(vals)
+        model_to_create.create(vals_list)
+        return helper.parse_errors(ws)

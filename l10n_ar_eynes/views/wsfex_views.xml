@@ -53,6 +53,84 @@
                         </field>
                     </page>
 
+                    <page string="Units of Measure">
+                        <field
+                            name="uom_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                                <field name="uom_id" />
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Countries">
+                        <field
+                            name="country_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                                <field name="country_id" />
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Languages">
+                        <field
+                            name="lang_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                                <field name="lang_id" />
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Export Type">
+                        <field
+                            name="export_type_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Incoterms">
+                        <field
+                            name="incoterms_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                                <field name="incoterms_id" />
+                            </tree>
+                        </field>
+                    </page>
+
+                    <!-- <page string="DST CUIT">
+                        <field
+                            name="dst_cuit_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                            </tree>
+                        </field>
+                    </page> -->
+
                     <page string="Validations">
                         <group col="6" string="Invoice Date Difference from Today">
                             <field name="services_date_difference" />
@@ -79,144 +157,4 @@
         ]"
         />
     </record>
-
-    <!-- <record id="view_wsfex_config_form" model="ir.ui.view">
-        <field name="name">wsfex.config.form</field>
-        <field name="model">wsfex.config</field>
-        <field name="type">form</field>
-        <field name="arch" type="xml">
-            <form string="Config WSFEX" version="7.0">
-                <sheet>
-                        <page string="Units of Measure">
-                            <field name="uom_ids" nolabel="1">
-                                <tree editable="top">
-                                    <field name="name" readonly="1" />
-                                    <field name="code" readonly="1" />
-                                    <field name="uom_id" />
-                                </tree>
-                            </field>
-                            <div class="oe_right oe_button_box" name="import_buttons">
-                                <button
-                                    name="get_wsfex_uoms"
-                                    class="oe_highlight"
-                                    type="object"
-                                    string="Get Units of Measure"
-                                    groups="account.group_account_user"
-                                />
-                            </div>
-                        </page>
-                        <page string="Countries">
-                            <field name="country_ids" nolabel="1">
-                                <tree editable="top">
-                                    <field name="name" readonly="1" />
-                                    <field name="code" readonly="1" />
-                                    <field name="country_id" />
-                                </tree>
-                            </field>
-                            <div class="oe_right oe_button_box" name="import_buttons">
-                                <button
-                                    name="get_wsfex_countries"
-                                    class="oe_highlight"
-                                    type="object"
-                                    string="Get Countries"
-                                    groups="account.group_account_user"
-                                />
-                            </div>
-                        </page>
-                        <page string="Languages">
-                            <field name="lang_ids" nolabel="1">
-                                <tree editable="top">
-                                    <field name="name" readonly="1" />
-                                    <field name="code" readonly="1" />
-                                    <field name="lang_id" />
-                                </tree>
-                            </field>
-                            <div class="oe_right oe_button_box" name="import_buttons">
-                                <button
-                                    name="get_wsfex_langs"
-                                    class="oe_highlight"
-                                    type="object"
-                                    string="Get Languages"
-                                    groups="account.group_account_user"
-                                />
-                            </div>
-                        </page>
-                        <page string="Export Type">
-                            <field name="export_type_ids" nolabel="1">
-                                <tree editable="top">
-                                    <field name="name" readonly="1" />
-                                    <field name="code" readonly="1" />
-                                </tree>
-                            </field>
-                            <div class="oe_right oe_button_box" name="import_buttons">
-                                <button
-                                    name="get_wsfex_export_types"
-                                    class="oe_highlight"
-                                    type="object"
-                                    string="Get Export Types"
-                                    groups="account.group_account_user"
-                                />
-                            </div>
-                        </page>
-                        <page string="Incoterms">
-                            <field name="incoterms_ids" nolabel="1">
-                                <tree editable="top">
-                                    <field name="name" readonly="1" />
-                                    <field name="code" readonly="1" />
-                                    <field name="incoterms_id" />
-                                </tree>
-                            </field>
-                            <div class="oe_right oe_button_box" name="import_buttons">
-                                <button
-                                    name="get_wsfex_incoterms"
-                                    class="oe_highlight"
-                                    type="object"
-                                    string="Get Incoterms"
-                                    groups="account.group_account_user"
-                                />
-                            </div>
-                        </page>
-
-                        <page string="DST CUIT">
-                            <field name="dst_cuit_ids" nolabel="1">
-                                <tree editable="top">
-                                    <field name="name" readonly="1" />
-                                    <field name="code" readonly="1" />
-                                </tree>
-                            </field>
-                            <div class="oe_right oe_button_box" name="import_buttons">
-                                <button
-                                    name="get_wsfex_dst_cuits"
-                                    class="oe_highlight"
-                                    type="object"
-                                    string="Get DST CUIT"
-                                    groups="account.group_account_user"
-                                />
-                            </div>
-                        </page>
-
-                        <page string="Voucher Types">
-                            <field name="voucher_type_ids" nolabel="1">
-                                <tree editable="top">
-                                    <field name="name" readonly="1" />
-                                    <field name="code" readonly="1" />
-                                    <field name="voucher_type_id" />
-                                </tree>
-                            </field>
-                            <div class="oe_right oe_button_box" name="import_buttons">
-                                <button
-                                    name="get_wsfex_voucher_types"
-                                    class="oe_highlight"
-                                    type="object"
-                                    string="Get Voucher Type"
-                                    groups="account.group_account_user"
-                                />
-                            </div>
-                        </page>
-
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record> -->
 </odoo>
