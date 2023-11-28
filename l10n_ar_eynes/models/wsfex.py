@@ -177,9 +177,6 @@ class WsfexConfig(models.Model):
         self.env['wsfex.uom.codes'].search(
             [('wsfex_config_id', '=', self.id)]
         ).unlink()
-        self.env['wsfex.res.voucher.type.codes'].search(
-            [('wsfex_config_id', '=', self.id)]
-        ).unlink()
         return super(WsfexConfig, self).unlink()
 
     def _get_currency_tables(self, ws):
