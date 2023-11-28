@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
     <record id="account_move_view_form_inherit_l10n_ar_eynes" model="ir.ui.view">
@@ -8,7 +8,8 @@
         <field name="inherit_id" ref="account.view_move_form" />
         <field name="arch" type="xml">
 
-            <xpath expr="//sheet/div[hasclass('oe_title')]/span[hasclass('o_form_label')]" position="replace">
+            <xpath expr="//sheet/div[hasclass('oe_title')]/span[hasclass('o_form_label')]"
+                position="replace">
                 <span
                     class="o_form_label"
                     attrs="{'invisible': ['|', ('move_type', '=', 'entry'), ('debit_origin_id', '!=', False)]}"
@@ -79,8 +80,10 @@
             <xpath expr="//field[@name='partner_id']" position="attributes">
                 <attribute name="attrs">
                     {
-                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
-                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
+                    'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice',
+                    'out_refund'))],
+                    'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice',
+                    'out_refund'))],
                     }
                 </attribute>
             </xpath>
@@ -88,7 +91,7 @@
             <xpath expr="//field[@name='partner_bank_id']" position="attributes">
                 <attribute name="attrs">
                     {
-                        'invisible': [('move_type', 'in', ('in_invoice', 'in_refund'))]
+                    'invisible': [('move_type', 'in', ('in_invoice', 'in_refund'))]
                     }
                 </attribute>
             </xpath>
@@ -135,7 +138,8 @@
 
             <field name="fiscal_position_id" position="after">
                 <field name="currency_converted" invisible="1" />
-                <field name="secondary_currency_id" attrs="{'invisible': [('is_company_cur', '=', True)]}" />
+                <field name="secondary_currency_id"
+                    attrs="{'invisible': [('is_company_cur', '=', True)]}" />
                 <field
                     name="secondary_currency_rate"
                     attrs="{'invisible': [('is_company_cur', '=', True)]}"
@@ -192,8 +196,9 @@
             >
                 <attribute name="attrs">
                     {
-                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
-                        'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
+                    'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice',
+                    'out_refund'))],
+                    'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
                     }
                 </attribute>
             </xpath>
@@ -433,7 +438,8 @@
 
             </page>
 
-            <xpath expr="//field[@name='line_ids']/form/group/field[@name='currency_id']" position="after">
+            <xpath expr="//field[@name='line_ids']/form/group/field[@name='currency_id']"
+                position="after">
                 <field
                     name="currency_rate"
                     attrs="{'invisible': [('currency_id', '=', False)]}"
@@ -466,11 +472,14 @@
             'move_type': 'out_invoice',
             'journal_type': 'sale',
             'default_is_debit_note': True
-        }</field>
+            }</field>
         <field name="search_view_id" ref="account.view_account_invoice_filter" />
         <field
             name="help"
-        >With Customer Debit Notes you can manage the debit notes for your customers. A debit note is a document that increases the value of the debt or account balance, either by an error in billing, interest for late payment, or any other circumstance that means the increase in the balance of an account.</field>
+        >With Customer Debit Notes you can manage the debit notes for your customers.
+            A debit note is a document that increases the value of the debt or account balance,
+            either by an error in billing, interest for late payment, or any other circumstance that
+            means the increase in the balance of an account.</field>
     </record>
 
     <record id="account_invoice_action_debit_note_supplier" model="ir.actions.act_window">
@@ -484,10 +493,13 @@
             'move_type': 'in_invoice',
             'journal_type': 'purchase',
             'default_is_debit_note': True
-        }</field>
+            }</field>
         <field name="search_view_id" ref="account.view_account_invoice_filter" />
-        <field name="help">With Supplier Debit Notes you can manage the debit notes for your suppliers.
-        A debit note is a document that increases the value of the debt or account balance, either by an error in billing, interest for late payment, or any other circumstance that means the increase in the balance of an account.</field>
+        <field name="help">With Supplier Debit Notes you can manage the debit notes for your
+            suppliers.
+            A debit note is a document that increases the value of the debt or account balance,
+            either by an error in billing, interest for late payment, or any other circumstance that
+            means the increase in the balance of an account.</field>
     </record>
 
     <record id="account.action_move_out_invoice_type" model="ir.actions.act_window">
@@ -495,6 +507,11 @@
         <field name="domain">
             [('move_type','=','out_invoice'), ('is_debit_note','=', False)]
         </field>
+    </record>
+
+    <record id="account.menu_action_move_out_receipt_type" model="ir.ui.menu">
+        <field name="name">Receipts</field>
+        <field name="active" eval="False" />
     </record>
 
     <record id="account.action_move_in_invoice_type" model="ir.actions.act_window">
