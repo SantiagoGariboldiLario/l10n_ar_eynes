@@ -179,6 +179,83 @@ class WsfexConfig(models.Model):
         ).unlink()
         return super(WsfexConfig, self).unlink()
 
+    def _create_records_from_afip_result_no_date(
+        self, ws, result, model_to_create
+    ):
+        helper = WSFEXParser()
+        vals_list = []
+        for vat_data in result:
+            _id, code, name, _void = vat_data.split(SEPARATOR)
+            vals = {
+                'code': code,
+                'name': name,
+            }
+            record = model_to_create.search(
+                [
+                    ('code', '=', code),
+                    ('wsfex_config_id', '=', self.id),
+                ]
+            )
+            if not record:
+                vals.update(
+                    {
+                        'wsfex_config_id': self.id,
+                    }
+                )
+                vals_list.append(vals)
+            else:
+                record.write(vals)
+        model_to_create.create(vals_list)
+        return helper.parse_errors(ws)
+
+    def _create_records_from_afip_result(self, ws, result, model_to_create):
+        helper = WSFEXParser()
+        vals_list = []
+        for vat_data in result:
+            _id, code, name, from_date, to_date, _void = vat_data.split(
+                SEPARATOR
+            )
+            vals = {
+                'code': code,
+                'name': name,
+            }
+            if hasattr(model_to_create, 'from_date'):
+                vals.update(
+                    {
+                        'from_date': helper.clean_result_date(from_date),
+                    }
+                )
+            if hasattr(model_to_create, 'to_date'):
+                vals.update(
+                    {
+                        'to_date': helper.clean_result_date(to_date),
+                    }
+                )
+            if hasattr(model_to_create, 'from_afip'):
+                vals.update(
+                    {
+                        'from_afip': True,
+                    }
+                )
+
+            record = model_to_create.search(
+                [
+                    ('code', '=', code),
+                    ('wsfex_config_id', '=', self.id),
+                ]
+            )
+            if not record:
+                vals.update(
+                    {
+                        'wsfex_config_id': self.id,
+                    }
+                )
+                vals_list.append(vals)
+            else:
+                record.write(vals)
+        model_to_create.create(vals_list)
+        return helper.parse_errors(ws)
+
     def _get_currency_tables(self, ws):
         WsCurrencyCodes = self.env['ws.currency.codes']
         result = ws.GetParamMon(sep=SEPARATOR)
@@ -292,7 +369,7 @@ class WsfexConfig(models.Model):
 
         ws = self.ws_auth()
 
-        error_msg = self._get_pos_tables(ws)
+        error_msg = ''  # self._get_pos_tables(ws)
         error_msg += self._get_currency_tables(ws)
         error_msg += self._get_countries_tables(ws)
         error_msg += self._get_lang_tables(ws)
