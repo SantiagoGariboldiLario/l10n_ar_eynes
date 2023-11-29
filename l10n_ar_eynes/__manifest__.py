@@ -115,6 +115,7 @@
         'wizard/arba_retention_exporter.xml',
         'wizard/arba_perception_exporter.xml',
         "wizard/create_arciba_file.xml",
+        "report/account_move_report.xml",
     ],
     'installable': True,
     'application': True,
