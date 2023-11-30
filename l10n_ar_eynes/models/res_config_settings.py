@@ -33,11 +33,24 @@ class ResConfigSettings(models.TransientModel):
         implied_group="l10n_ar_eynes.group_check_cot",
     )
 
+    case_convertion = fields.Selection(
+        [
+            ('title', 'Titlecase'),
+            ('lower', 'Lowercase'),
+            ('upper', 'Uppercase'),
+            ('capitalize', 'Capitalize'),
+        ],
+        help="Converts fetched text to specific case.",
+        required=True,
+        default='title',
+        config_parameter='l10n_ar_eynes.case_convertion',
+    )
+
     def set_values(self):
-        res = super(ResConfigSettings, self).set_values()
+        res = super().set_values()
         return res
 
     @api.model
     def get_values(self):
-        res = super(ResConfigSettings, self).get_values()
+        res = super().get_values()
         return res

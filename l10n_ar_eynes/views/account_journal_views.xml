@@ -86,12 +86,6 @@
                 </attribute>
             </xpath>
 
-            <xpath expr="//field[@name='default_account_id'][4]" position="attributes">
-                <attribute name="attrs">
-                    {'invisible': [('type', 'in', ('payment', 'receipt', 'retentions'))]}
-                </attribute>
-            </xpath>
-
             <field name="code" position="after">
                 <field name="afip_code" attrs="{'invisible': [('type', '!=', 'retentions')]}" />
                 <label

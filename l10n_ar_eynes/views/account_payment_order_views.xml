@@ -1072,6 +1072,7 @@
                                 </group>
                             </group>
                         </page>
+
                         <page string="Checks">
                             <label for="issued_check_line_ids" />
                             <field name="issued_check_line_ids" nolabel="1" colspan="4">
@@ -1100,12 +1101,30 @@
                                             />
                                             <field
                                                 name="issued_check_id"
+                                                options="{
+                                                    'no_create_edit': True,
+                                                    'no_create':True,
+                                                    'no_open':True,
+                                                }"
                                                 domain="[
                                                     ('internal_type', '=', 'issued'),
                                                     ('issued_check_state', '=', 'draft'),
                                                     ('checkbook_id', '=', checkbook_id),
                                                     ('payment_order_id', '=', False)
                                                 ]"
+                                                context="{
+                                                    'default_internal_type': 'issued',
+                                                    'default_checkbook_id': checkbook_id,
+                                                    'default_journal_id': journal_id,
+                                                    'default_amount': amount,
+                                                    'default_issue_date': issue_date,
+                                                    'default_crossed': crossed,
+                                                    'default_signatory': signatory,
+                                                    'default_checkbook_format': checkbook_format,
+                                                    'default_clearing': clearing,
+                                                    'default_origin': origin,
+                                                    'default_not_order': not_order,
+                                                }"
                                             />
                                             <field name="type" />
                                             <field name="checkbook_format" />
@@ -1115,7 +1134,7 @@
                                             <field name="issue_date" />
                                             <field
                                                 name="payment_date"
-                                                attrs="{'invisible': [('type', '=', 'common')],'required': [('type', '=', 'postdated')]}"
+                                                attrs="{'invisible': [('type', '=', 'common')]}"
                                             />
                                             <field name="clearing" />
                                             <field name="signatory" />

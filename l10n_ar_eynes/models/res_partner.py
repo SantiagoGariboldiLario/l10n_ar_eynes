@@ -1,7 +1,9 @@
-# from datetime import datetime as dt
+import logging
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class ResPartner(models.Model):
@@ -66,6 +68,108 @@ class ResPartner(models.Model):
     num = fields.Char(string="Number", size=5)
     apartment = fields.Char(string="Apartment", size=4)
     express_id = fields.Many2one("res.partner", string="Express")
+    last_update_from_afip = fields.Date()
+
+    def parse_afip_values(self, values):
+
+        state = self.env["res.country.state"].search(
+            [
+                ("name", "ilike", values.provincia),
+                ("country_id.code", "=", "AR"),
+            ],
+            limit=1,
+        )
+
+        if values.cat_iva == 1:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_ri"
+            ).id
+        elif values.cat_iva == 2:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_rni"
+            ).id
+        elif values.cat_iva == 3:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_nr"
+            ).id
+        elif values.cat_iva == 4:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_se"
+            ).id
+        elif values.cat_iva == 5:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_cf"
+            ).id
+        elif values.cat_iva == 6:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_rem"
+            ).id
+        elif values.cat_iva == 7:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_snc"
+            ).id
+        elif values.cat_iva == 8:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_pe"
+            ).id
+        elif values.cat_iva == 9:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_ce"
+            ).id
+        elif values.cat_iva == 10:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_lib"
+            ).id
+        elif values.cat_iva == 11:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_ri_ap"
+            ).id
+        elif values.cat_iva == 12:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_pce"
+            ).id
+        elif values.cat_iva == 13:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_ms"
+            ).id
+        elif values.cat_iva == 14:
+            fiscal_position_id = self.env.ref(
+                "l10n_ar_eynes.fiscal_position_pces"
+            ).id
+
+        vals = {
+            "name": values.denominacion,
+            "street": values.direccion,
+            "city": values.localidad,
+            "zip": values.cod_postal,
+            "country_id": self.env.ref("base.ar").id,
+            "property_account_position_id": fiscal_position_id or False,
+            "state_id": state.id or None,
+            "last_update_from_afip": fields.Date.today(),
+        }
+        return vals
+
+    def _get_ws_conf(self):
+        WsPadronConfig = self.env['ws.padron.config']
+        ctx = self.env.context.copy()
+        ctx['company_id'] = self.env.user.company_id.id
+        ws_padron_conf = WsPadronConfig.with_context(**ctx).get_config()
+        return ws_padron_conf
+
+    def get_data_from_padron_afip(self):
+        self.ensure_one()
+        cuit = self.vat
+        if not cuit:
+            return
+        ws_conf = self._get_ws_conf()
+        ws = ws_conf.ws_auth()
+        try:
+            ws.Conectar()
+            ws.Consultar(cuit)
+        except Exception as e:
+            raise UserError(f'ERROR: {ws.ErrMsg}') from e
+        values = self.parse_afip_values(ws)
+        return values
 
     def _get_perceptions_to_apply(self):
         # Buscamos las percepciones a aplicar segun la posicion fiscal
@@ -338,15 +442,15 @@ class ResPartnerRetention(models.Model):
     )
     from_padron = fields.Boolean(string="From Padron")
 
-    _sql_constraints = [
-        (
-            'retention_partner_unique',
-            'unique(partner_id, retention_id)',
-            _(
-                'There must be only one retention of this type configured for the partner'
-            ),
-        )
-    ]
+    # _sql_constraints = [
+    #     (
+    #         'retention_partner_unique',
+    #         'unique(partner_id, retention_id)',
+    #         _(
+    #             'There must be only one retention of this type configured for the partner'
+    #         ),
+    #     )
+    # ]
 
     @api.depends(
         'retention_id',

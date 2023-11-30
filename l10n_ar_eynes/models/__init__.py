@@ -2,6 +2,7 @@ from . import account_check  # noqa
 from . import account_fiscal_position  # noqa
 from . import account_journal  # noqa
 from . import account_move  # noqa
+from . import account_move_line
 from . import account_payment_method  # noqa
 from . import account_payment_order  # noqa
 from . import account_tax  # noqa
@@ -25,6 +26,7 @@ from . import stock_picking  # noqa
 from . import certificate_request  # noqa
 from . import wsaa  # noqa
 from . import account_move_optionals  # noqa
+from . import ws  # noqa
 from . import wsfe  # noqa
 from . import wsfex  # noqa
 from . import wsfe_request  # noqa
@@ -36,3 +38,4 @@ from . import arba_exporter
 from . import arciba_exporter
 from . import sequence_mixin
 from . import libro_iva_generated_files
+from . import ws_padron  # noqa
