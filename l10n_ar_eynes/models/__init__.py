@@ -38,4 +38,5 @@ from . import sifere
 from . import arba_exporter
 from . import arciba_exporter
 from . import sequence_mixin
+from . import libro_iva_generated_files
 from . import ws_padron  # noqa
