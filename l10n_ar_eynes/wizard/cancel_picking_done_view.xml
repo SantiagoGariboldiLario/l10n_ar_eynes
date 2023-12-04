@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="act_stock_cancel_done_picking" model="ir.actions.act_window">
+        <field name="name">Cancel &amp; Renumerate</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cancel.picking.done</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_type">action</field>
+        <field name="binding_model_id" ref="model_stock_picking"/>
+    </record>
+
+
+
+    <record id="view_cancel_picking_done_form" model="ir.ui.view">
+        <field name="name">Cancel &amp; Renumerate</field>
+        <field name="model">cancel.picking.done</field>
+        <field name="arch" type="xml">
+            <form string="Cancel &amp; Renumerate">
+                <group string="You can cancel actual delivery and create a new one with same data to deliver correct products. New one will be renumerated.">
+                    <group id="group_reaseon">
+                        <field name="reason"/>
+                        <field name="next_action" />
+                    </group>
+                    <footer>
+                        <button name="create_returns" string="Confirm" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </group>
+            </form>
+        </field>
+    </record>
+        
+</odoo>
