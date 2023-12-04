@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="stock_picking_view_form_inherit_l10n_ar_eynes" model="ir.ui.view">
         <field name="name">stock.picking.view.form.inherit.</field>
@@ -70,7 +70,7 @@
                             />
                         </group>
                         <group>
-                            <field name="carrier_id" readonly="1" />
+                            <field name="carrier_id" attrs="{'readonly': [('state','=','done')]}" />
                             <field
                                 name="express_id"
                                 attrs="{'invisible': [('voucher','=', False)], 'readonly': True}"
