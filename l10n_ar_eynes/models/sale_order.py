@@ -25,7 +25,7 @@ class SaleOrder(models.Model):
             {'address_shipping_id': self.partner_shipping_id.id}
         )
         journals = self.env.user.get_journals_by_fiscal_position(
-            self.fiscal_position_id, 'internal'
+            self.fiscal_position_id
         )
         if not journals:
             raise exceptions.ValidationError(

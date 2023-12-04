@@ -47,6 +47,30 @@
                 </group>
             </xpath>
 
+            <xpath expr="//div[@id='contacts_settings']" position="inside">
+                <div id="afip_case_text">
+                    <div
+                        class='row mt16 o_settings_container afip_case_text'
+                        name="afip_case_text"
+                    >
+                        <div class="col-12 col-lg-6 o_setting_box" id="afip_case_text">
+
+                            <div class='o_setting_right_pane'>
+                                <div class="o_form_label">
+                                    AFIP Text Case
+                                </div>
+                                <div class="text-muted">
+                                    Select the defaul text case to use when fetch values from PADRON
+                                </div>
+                                <div class="o_setting_left_pane">
+                                    <field name="case_convertion" class="oe_inline" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+
         </field>
     </record>
 

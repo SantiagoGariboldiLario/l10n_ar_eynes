@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="action_partner_update_from_afip" model="ir.actions.act_window">
+        <field name="name">Fetch Partner Information from AFIP</field>
+        <field name="res_model">res.partner.afip.padron.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="base.model_res_partner" />
+        <field name="binding_view_types">form</field>
+    </record>
+
+    <record id="fetch_partner_information_from_afip" model="ir.actions.server">
+        <field name="name">Fetch Partners Information from AFIP</field>
+        <field name="model_id" ref="model_res_partner_afip_padron_wizard" />
+        <field name="binding_model_id" ref="base.model_res_partner" />
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_wizard()</field>
+    </record>
+
+    <record id="view_base_partner_update_from_padron_form" model="ir.ui.view">
+        <field name="name">res.partner.afip.padron.wizard.form</field>
+        <field name="model">res.partner.afip.padron.wizard</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="multi_step_wizard.multi_step_wizard_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//footer" position="before">
+
+                <group
+                    attrs="{'invisible': [('state', 'not in', ('mass_configuration'))]}"
+                >
+                    <label
+                        for="field_to_update_ids"
+                        string="Fields to Update"
+                        class="o_light_label"
+                    />
+                    <field
+                        name="field_to_update_ids"
+                        options="{'no_create': True}"
+                        widget="many2many_tags"
+                        nolabel="1"
+                    />
+                    <field name="case_convertion" />
+                </group>
+
+                <group
+                    attrs="{'invisible': [('state', '!=', 'single_update')]}"
+                    col="1"
+                >
+                    <h1>
+                        <field name="partner_id" options="{'no_open': True}" />
+                    </h1>
+                    <span>
+                        <field name="field_ids" nolabel="1">
+                            <tree create="false" editable="top">
+                                <field name="field" />
+                                <field attrs="{'readonly':True}" name="old_value" />
+                                <field name="new_value" />
+                                <field invisible="1" name="new_value_id" />
+                            </tree>
+                        </field>
+                    </span>
+                </group>
+
+                <div name="final" attrs="{'invisible': [('state', '!=', 'final')]}">
+                    <h3>Partners updated.</h3>
+                </div>
+
+            </xpath>
+
+            <xpath expr="//footer/div/button[@name='open_next']" position="attributes">
+                <attribute name="string">Skip Partner</attribute>
+                <attribute name="class">btn btn-default oe_link</attribute>
+                <attribute
+                    name="attrs"
+                >{"invisible": [('state', '!=', 'single_update')]}</attribute>
+            </xpath>
+
+            <xpath expr="//footer/div/button[@name='open_next']" position="before">
+                <button
+                    attrs="{'invisible': [('state', '!=', 'single_update')]}"
+                    class="btn-primary"
+                    name="update_selected"
+                    string="Update selected partner"
+                    type="object"
+                />
+            </xpath>
+
+            <xpath expr="//footer/div/button[@name='open_next']" position="after">
+                    <button
+                    attrs="{'invisible': [('state', '!=', 'mass_configuration')]}"
+                    class="oe_highlight"
+                    name="open_next"
+                    string="Update one by one"
+                    type="object"
+                />
+
+                    <button
+                    attrs="{'invisible': [('state', '!=', 'mass_configuration')]}"
+                    class="btn btn-default oe_link"
+                    confirm="Are you sure you want update all partners automatically?"
+                    name="update_partners_automatically"
+                    string="Update all together"
+                    type="object"
+                />
+            </xpath>
+
+        </field>
+    </record>
+
+
+</odoo>

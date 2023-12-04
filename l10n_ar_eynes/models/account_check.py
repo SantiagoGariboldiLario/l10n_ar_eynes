@@ -77,7 +77,6 @@ class AccountCheck(models.Model):
     checkbook_format = fields.Selection(
         selection=[
             ('physical', 'Physical'),
-            ('virtual', 'Virtual'),
             ('echeq', 'Echeq'),
         ],
         string='Format',
