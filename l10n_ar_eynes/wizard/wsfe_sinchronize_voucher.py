@@ -3,6 +3,7 @@
 #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 ##############################################################################
 
+import json
 import time
 
 from odoo import _, api, fields, models
@@ -30,6 +31,7 @@ class WsfeSinchronizeCoucher(models.TransientModel):
         'res.voucher.type', 'Voucher Type', required=True
     )
     pos_id = fields.Many2one('account.journal', 'POS', required=True)
+    pos_id_domain = fields.Char(compute='_compute_pos_id_domain')
     config_id = fields.Many2one(
         'wsfe.config', 'Config', default=_get_def_config
     )
@@ -54,21 +56,14 @@ class WsfeSinchronizeCoucher(models.TransientModel):
     infook = fields.Boolean('Info OK', default=False)
     invoice_id = fields.Many2one('account.move', 'Invoice')
 
-    @api.onchange('config_id', 'voucher_type')
-    def change_pos(self):
-        pos_model = self.env['account.journal']
-        wsfe_conf = self.config_id
-        ids = [p.id for p in wsfe_conf.point_of_sale_ids]
-        denomination = self.voucher_type.denomination or False
-        domain = [('id', 'in', ids), ('denomination', '=', denomination)]
-        pos_ids = pos_model.search(domain)
-        if len(pos_ids) == 1:
-            self.pos_id = pos_ids[0]
-        return {
-            'domain': {
-                'pos_id': domain,
-            }
-        }
+    @api.depends('config_id', 'voucher_type')
+    def _compute_pos_id_domain(self):
+        for rec in self:
+            wsfe_conf = rec.config_id
+            ids = [p.id for p in wsfe_conf.point_of_sale_ids]
+            rec.voucher_type.denomination or False
+            domain = [('id', 'in', ids)]
+            rec.pos_id_domain = json.dumps(domain)
 
     @api.onchange('voucher_number')
     def change_voucher_number(self):

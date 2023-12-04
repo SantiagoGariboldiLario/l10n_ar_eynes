@@ -231,12 +231,4 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem
-        id="wsaa_certificate_request_menu"
-        name="Certificate Requests"
-        parent="base_afipws"
-        sequence="55"
-        action="action_wsaa_certificate_request"
-    />
-
 </odoo>
