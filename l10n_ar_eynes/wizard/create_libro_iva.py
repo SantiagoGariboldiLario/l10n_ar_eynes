@@ -565,7 +565,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             if line[0]:
                 aliquot_line = ''.join(line[1])
                 aliquot_lines.append(aliquot_line)
-        for tax_line in self._get_invoice_not_vat_tax_lines(invoice):
+        for tax_line in self._get_invoice_vat_tax_lines(invoice):
             line = self._format_sale_aliquot_line(tax_line, invoice)
             if line[0]:
                 aliquot_line = ''.join(line[1])
@@ -682,7 +682,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         errors = []
         if invoice.denomination in ['C']:
             return (True, aliquot_lines)
-        for tax_line in self._get_invoice_not_vat_tax_lines(invoice):
+        for tax_line in self._get_invoice_vat_tax_lines(invoice):
             line = self._format_aliquot_purchase_line(tax_line, invoice)
             if line[0]:
                 aliquot_line = ''.join(line[1])
