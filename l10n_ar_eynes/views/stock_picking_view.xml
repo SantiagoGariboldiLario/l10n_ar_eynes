@@ -5,6 +5,15 @@
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_form" />
         <field name="arch" type="xml">
+            <xpath expr="/form/header//button[@name='%(stock.act_stock_return_picking)d']" position="after">
+                <button name="%(act_stock_cancel_done_picking)d" string="Cancel" states="done" type="action"/>
+            </xpath>
+            <xpath expr="//field[@name='priority']" position="after">
+                <field name="renum_pick_id" attrs="{'invisible': [('picking_type_code', '!=', 'outgoing')]}"/>
+            </xpath>
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="name_original"/>
+            </xpath>
             <xpath expr="//field[@name='scheduled_date']" position="after">
                 <field
                     name="cot_date"
