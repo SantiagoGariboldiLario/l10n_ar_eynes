@@ -1,0 +1,914 @@
+import binascii
+import codecs
+import logging
+import tempfile
+from calendar import monthrange
+
+from odoo import _, api, fields, models
+
+_logger = logging.getLogger(__name__)
+
+
+class LibroIVAExporterWizard(models.TransientModel):
+    _name = 'libro.iva.exporter.wizard'
+    _description = 'Libro IVA Digital Exporter Wizard'
+
+    date_from = fields.Date()
+    date_to = fields.Date()
+    company_id = fields.Many2one('res.company', 'Company')
+    notes = fields.Text('Notes', readonly=True)
+    state = fields.Selection(
+        [('init', 'Start'), ('done', 'Done')], 'State', default='init'
+    )
+
+    @api.onchange('date_from')
+    def _onchange_date_from(self):
+        if self.date_from:
+            end_of_month = monthrange(
+                self.date_from.year, self.date_from.month
+            )[1]
+            self.date_to = self.date_from.replace(day=end_of_month)
+
+    # METHODS TO GET NEEDED FIELDS:
+    def _get_invoice_tax_lines(self, invoice):
+        tax_line_ids = invoice.line_ids.filtered(lambda line: line.tax_line_id)
+        return tax_line_ids
+
+    def _get_invoice_not_vat_tax_lines(self, invoice):
+        tax_line_ids = self._get_invoice_tax_lines(invoice).filtered(
+            lambda line: line.tax_line_id.tax_group_id
+            != self.env.ref('l10n_ar_eynes.vat_tax_group')
+        )
+        return tax_line_ids
+
+    def _get_invoice_vat_tax_lines(self, invoice):
+        tax_line_ids = self._get_invoice_tax_lines(invoice).filtered(
+            lambda line: line.tax_line_id.tax_group_id
+            == self.env.ref('l10n_ar_eynes.vat_tax_group')
+        )
+        return tax_line_ids
+
+    def _get_perception_with_type_iva(self, invoice):
+        amount = 0.0
+        for perception_id in invoice.perception_ids:
+            if perception_id.perception_id.tax_id.retention_type == 'vat':
+                if perception_id.__contains__('tax_currency'):
+                    amount += perception_id.tax_currency
+                else:
+                    amount += perception_id.amount
+        return ('%016.2f' % amount).replace('.', '')
+
+    def _get_perception_with_type(self, invoice, jurisdiction):
+        amount = 0.0
+        for perception_id in invoice.perception_ids:
+            if (
+                perception_id.perception_id.tax_id.jurisdiccion == jurisdiction
+                and perception_id.perception_id.tax_id.retention_type != 'vat'
+            ):
+                if perception_id.__contains__('tax_currency'):
+                    amount += perception_id.tax_currency
+                else:
+                    amount += perception_id.amount
+        if invoice.__contains__('currency_rate'):
+            amount = amount * invoice.currency_rate
+        return ('%016.2f' % amount).replace('.', '')
+
+    def _get_taxes_with_type(self, invoice, fee_type):
+        amount = 0.0
+        for tax_id in self._get_invoice_tax_lines(invoice):
+            if tax_id.tax_line_id.tax_group_id == fee_type:
+                amount += tax_id.amount
+        return ('%016.2f' % amount).replace('.', '')
+
+    def _get_operation_code(self, invoice):
+        if invoice.iva_digital_operation_code == 'NC':
+            return ' '
+        return invoice.iva_digital_operation_code
+
+    def _get_tax_lines_qty(self, invoice):
+        qty = 0
+        if invoice.denomination in ['C']:
+            return u'{}'.format(qty)
+        qty += len(self._get_invoice_tax_lines(invoice))
+        return u'{}'.format(qty) if qty < 10 else False
+
+    def _get_amount_original_currency(self, invoice, amount, amount_cur):
+        if invoice.currency_id != self.env.ref('base.ARS'):
+            return ('%016.2f' % amount_cur).replace('.', '')
+        return ('%016.2f' % amount).replace('.', '')
+
+    def _get_fiscal_credit_currency(self, invoice):
+        cfc = 0
+        for tax_line in self._get_invoice_vat_tax_lines(invoice):
+            cfc += tax_line.price_unit
+        if invoice.__contains__('currency_rate'):
+            cfc = cfc * invoice.currency_rate
+        return cfc
+
+    def _get_ganancias_retentions(self, invoice):
+        qty = len(
+            self._get_invoice_tax_lines(invoice).filtered(
+                lambda line: line.tax_line_id.tax_group_id
+                == self.env.ref('l10n_ar_eynes.retentions_tax_group')
+                and line.tax_line_id.retention_type == 'profit'
+            )
+        )
+        return ('%016.2f' % qty).replace('.', '')
+
+    def _get_invoice_date(self, invoice, errors):
+        try:
+            date = invoice.invoice_date.strftime('%Y%m%d')
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move.invoice_date', e)
+            )
+            date = False
+            errors.append(
+                _('Invoice with id %s: Wrong invoice_date') % invoice.id
+            )
+        return date
+
+    def _get_invoice_voucher_type(self, invoice, errors):
+        try:
+            voucher_type = '%.3s' % str(
+                invoice.voucher_type_id.afip_code
+            ).rjust(3, '0')
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move.voucher_type_id', e)
+            )
+            voucher_type = False
+            errors.append(
+                _('Invoice with id %s: Wrong voucher_type_id') % invoice.id
+            )
+        return voucher_type
+
+    def _get_invoice_point_of_sale(self, invoice, errors):
+        try:
+            if invoice.is_sale_document():
+                pos = '%.5s' % str(invoice.get_pos()).rjust(5, '0')
+                invoice_name = invoice.internal_number
+            else:
+                invoice_name = invoice.supplier_move_reference
+            if invoice.is_purchase_document() or 'False' in pos:
+                if '-' in invoice_name:
+                    pos = '%.5s' % str(invoice_name.split('-')[0]).rjust(5, '0')
+                    pos = pos if pos.isdigit() else '00000'
+                else:
+                    pos = '00000'
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move.journal_id.code', e)
+            )
+            pos = False
+            errors.append(
+                _('Invoice with id %s: Wrong account_move.journal_id.code')
+                % invoice.id
+            )
+        return pos
+
+    def _get_invoice_number(self, invoice, errors):
+        internal_number_formatted_aux = ''
+        try:
+            if invoice.iva_digital_operation_code in ['X', 'Z']:
+                internal_number = ''
+            elif invoice.is_sale_document():
+                internal_number = invoice.internal_number
+            else:
+                internal_number = invoice.supplier_move_reference
+            if '-' in internal_number:
+                internal_number = internal_number.split('-')[1]
+            internal_number_formatted = '%.20s' % internal_number.rjust(20, '0')
+            try:
+                int(internal_number_formatted)
+            except Exception:
+                internal_number_formatted_aux = internal_number_formatted
+                internal_number_formatted = '00000000000000000000'
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move.internal_number', e)
+            )
+            internal_number_formatted = False
+            errors.append(
+                _('Invoice with id %s: Wrong internal_number') % invoice.id
+            )
+        return internal_number_formatted, internal_number_formatted_aux
+
+    def _get_partner_doc_type(self, invoice, errors):
+        try:
+            partner_document_type = '%.2s' % str(
+                invoice.partner_id.document_type_id.afip_code
+            ).rjust(2, '0')
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s'
+                % ('account_move.partner_id.document_type_id', e)
+            )
+            partner_document_type = False
+            errors.append(
+                _('Invoice with id %s: Wrong partner_id.document_type_id')
+                % invoice.id
+            )
+        return partner_document_type
+
+    def _get_partner_vat(self, invoice, errors):
+        try:
+            partner_vat = '%.20s' % invoice.partner_id.vat.rjust(20, '0')
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move.partner_id.vat', e)
+            )
+            partner_vat = False
+            errors.append(
+                _('Invoice with id %s: Wrong partner_id.vat') % invoice.id
+            )
+        return partner_vat
+
+    def _get_partner_name(self, invoice, errors):
+        try:
+            partner_name = '%.30s' % invoice.partner_id.name.ljust(30, ' ')
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move.partner_id.name', e)
+            )
+            partner_name = False
+            errors.append(
+                _('Invoice with id %s: Wrong partner_id.name') % invoice.id
+            )
+        return partner_name
+
+    def _get_invoice_amount_total(self, invoice):
+        try:
+            amount_total = self._get_amount_original_currency(
+                invoice, invoice.amount_total, invoice.amount_total_cur
+            )
+        except Exception:
+            amount_total = self._get_amount_original_currency(
+                invoice, invoice.amount_total, False
+            )
+        return amount_total
+
+    def _get_invoice_amount_no_taxed(self, invoice):
+        try:
+            if invoice.is_purchase_document() and invoice.denomination in [
+                'B',
+                'C',
+            ]:
+                amount_total_no_taxed = ('%016.2f' % 0).replace('.', '')
+            else:
+                amount_total_no_taxed = self._get_amount_original_currency(
+                    invoice,
+                    invoice.amount_no_taxed,
+                    invoice.amount_no_taxed_cur,
+                )
+        except Exception:
+            amount_total_no_taxed = self._get_amount_original_currency(
+                invoice, invoice.amount_no_taxed, False
+            )
+        return amount_total_no_taxed
+
+    def _get_invoice_amount_exempt(self, invoice):
+        try:
+            amount_exempt = self._get_amount_original_currency(
+                invoice, invoice.amount_exempt, invoice.amount_exempt_cur
+            )
+        except Exception:
+            amount_exempt = self._get_amount_original_currency(
+                invoice, invoice.amount_exempt, False
+            )
+        return amount_exempt
+
+    def _get_invoice_currency(self, invoice, errors):
+        try:
+            currency_code = '%.3s' % str(invoice.currency_id.afip_code).rjust(
+                3, '0'
+            )
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move.currency_id', e)
+            )
+            currency_code = False
+            errors.append(
+                _('Invoice with id %s: Wrong currency_id') % invoice.id
+            )
+        return currency_code
+
+    def _get_invoice_currency_rate(self, invoice, errors):
+        try:
+            if invoice.__contains__('currency_rate'):
+                currency_rate = ('%011.6f' % invoice.currency_rate).replace(
+                    '.', ''
+                )
+            else:
+                currency_rate = ('%011.6f' % 1).replace('.', '')
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move.currency_rate', e)
+            )
+            currency_rate = False
+            errors.append(
+                _('Invoice with id %s: Wrong currency_rate') % invoice.id
+            )
+        return currency_rate
+
+    def _check_invoice_is_exempt(self, invoice):
+        return (
+            any(
+                line.tax_line_id
+                and line.tax_line_id.is_exempt
+                and line.tax_line_id.tax_group_id
+                == self.env.ref('l10n_ar_eynes.vat_tax_group')
+                for line in invoice.line_ids
+            )
+            or len(self._get_invoice_tax_lines(invoice)) == 0
+        )
+
+    # METHODS TO GIVE FORMAT TO EACH LINES:
+    def _format_sale_aliquot_line(self, tax_line, invoice, null=False):
+        errors = []
+        pos = self._get_invoice_point_of_sale(invoice, errors)
+        voucher_type = self._get_invoice_voucher_type(invoice, errors)
+        (
+            internal_number_formatted,
+            internal_number_formatted_aux,
+        ) = self._get_invoice_number(invoice, errors)
+
+        if null:
+            line = [
+                voucher_type,
+                pos,
+                internal_number_formatted,
+                ('%016.2f' % invoice.amount_total).replace('.', ''),
+                ('%.4s' % '3'.rjust(4, '0')),
+                ('%016.2f' % 0).replace('.', ''),
+            ]
+        else:
+            line = [
+                voucher_type,
+                pos,
+                internal_number_formatted,
+                ('%016.2f' % tax_line.tax_base_amount).replace('.', ''),
+                ('%.4s' % str(tax_line.tax_line_id.afip_code).rjust(4, '0')),
+                ('%016.2f' % tax_line.price_unit).replace('.', ''),
+            ]
+        if False in line:
+            errors = '\n'.join(errors)
+            return (False, errors)
+        return (True, line)
+
+    def _format_aliquot_purchase_line(self, tax_line, invoice):
+        errors = []
+        pos = self._get_invoice_point_of_sale(invoice, errors)
+        voucher_type = self._get_invoice_voucher_type(invoice, errors)
+        partner_document_type = self._get_partner_doc_type(invoice, errors)
+        partner_vat = self._get_partner_vat(invoice, errors)
+        (
+            internal_number_formatted,
+            internal_number_formatted_aux,
+        ) = self._get_invoice_number(invoice, errors)
+
+        try:
+            tax_base = tax_line.tax_base_amount
+            if invoice.__contains__('currency_rate'):
+                tax_base = tax_base * invoice.currency_rate
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s'
+                % ('account_move_line.tax_base_amount', e)
+            )
+            errors.append(
+                _('Invoice with id %s: Wrong account_move_line.base')
+                % invoice.id
+            )
+
+        try:
+            tax_amount = tax_line.price_unit
+            if invoice.__contains__('currency_rate'):
+                tax_amount = tax_amount * invoice.currency_rate
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move_line.price_unit', e)
+            )
+            errors.append(
+                _('Invoice with id %s: Wrong account_move_line.price_unit')
+                % invoice.id
+            )
+
+        line = [
+            voucher_type,
+            pos,
+            internal_number_formatted,
+            partner_document_type,
+            partner_vat,
+            ('%016.2f' % tax_base).replace('.', ''),
+            ('%.4s' % str(tax_line.tax_line_id.afip_code).rjust(4, '0')),
+            ('%016.2f' % tax_amount).replace('.', ''),
+        ]
+        if False in line:
+            errors = '\n'.join(errors)
+            return (False, errors)
+        return (True, line)
+
+    def _format_aliquot_import_line(self, tax_line, invoice):
+        errors = []
+        voucher_type = self._get_invoice_voucher_type(invoice, errors)
+        pos = self._get_invoice_point_of_sale(invoice, errors)
+        (
+            internal_number_formatted,
+            internal_number_formatted_aux,
+        ) = self._get_invoice_number(invoice, errors)
+
+        try:
+            if invoice.iva_digital_operation_code in ['X', 'Z']:
+                import_clearance = '%.16s' % str(
+                    internal_number_formatted
+                ).ljust(16, ' ')
+                # Here import_clearance could be internal_number_formatted_aux or
+                # We need to add clearence_id.name field to account.move
+            else:
+                import_clearance = '%.16s' % ''.ljust(16, ' ')
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move.clearance_id', e)
+            )
+            if invoice.__contains__('import_clearance'):
+                import_clearance = False
+            import_clearance = '%.16s' % ''.ljust(16, ' ')
+            errors.append(
+                _('Invoice with id %s: Wrong import clearance') % invoice.id
+            )
+
+        if invoice.iva_digital_operation_code in ['X', 'Z']:
+            line = [
+                import_clearance,
+                ('%016.2f' % tax_line.tax_base_amount).replace('.', ''),
+                ('%.4s' % str(pos).rjust(4, '0')),
+                ('%016.2f' % tax_line.price_unit).replace('.', ''),
+            ]
+        else:
+            line = [
+                import_clearance,
+                voucher_type,
+                ('%016.2f' % tax_line.price_unit).replace('.', ''),
+                ('%.4s' % str(pos).rjust(4, '0')),
+                ('%016.2f' % tax_line.tax_base_amount).replace('.', ''),
+            ]
+        if False in line:
+            errors = '\n'.join(errors)
+            return (False, errors)
+        return (True, line)
+
+    # METHODS TO CREATE MAIN LINES FOR EACH FILE
+    def _create_sale_line(self, invoice):
+        errors = []
+        date = self._get_invoice_date(invoice, errors)
+        voucher_type = self._get_invoice_voucher_type(invoice, errors)
+        pos = self._get_invoice_point_of_sale(invoice, errors)
+        (
+            internal_number_formatted,
+            internal_number_formatted_aux,
+        ) = self._get_invoice_number(invoice, errors)
+        partner_document_type = self._get_partner_doc_type(invoice, errors)
+        partner_vat = self._get_partner_vat(invoice, errors)
+        partner_name = self._get_partner_name(invoice, errors)
+        amount_total = self._get_invoice_amount_total(invoice)
+        amount_total_no_taxed = self._get_invoice_amount_no_taxed(invoice)
+        amount_exempt = self._get_invoice_amount_exempt(invoice)
+        currency_code = self._get_invoice_currency(invoice, errors)
+        currency_rate = self._get_invoice_currency_rate(invoice, errors)
+        tax_lines_qty = self._get_tax_lines_qty(invoice)
+        operation_code = self._get_operation_code(invoice)
+        has_iva_exempt = self._check_invoice_is_exempt(invoice)
+        if has_iva_exempt:
+            amount_total_no_taxed = ('%016.2f' % 0).replace('.', '')
+            amount_exempt = ('%016.2f' % 0).replace('.', '')
+            tax_lines_qty = u'{}'.format(1)
+            operation_code = 'E'
+
+        uncategorized_perception = ('%016.2f' % 0).replace(
+            '.', ''
+        )  # This field doesn't exist anymore, so filled with 0
+        amount_national_perception = self._get_perception_with_type(
+            invoice, 'nacional'
+        )
+        amount_iibb = self._get_perception_with_type(invoice, 'provincial')
+        amount_municipal_perception = self._get_perception_with_type(
+            invoice, 'municipal'
+        )
+        amount_internal_taxes = self._get_taxes_with_type(
+            invoice, self.env.ref('l10n_ar_eynes.internal_tax_group')
+        )
+        amount_other_taxes = self._get_taxes_with_type(
+            invoice, self.env.ref('l10n_ar_eynes.other_tax_group')
+        )
+        try:
+            if (
+                invoice.denomination in ['E']
+                and invoice.voucher_type_id.afip_code in [20, 21]
+            ) or (
+                invoice.move_type == 'out_refund'
+                or (
+                    invoice.move_type == 'out_invoice' and invoice.is_debit_note
+                )
+            ):
+                date_due = '00000000'
+            else:
+                date_due = invoice.invoice_date_due.strftime('%Y%m%d')
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move.invoice_date_due', e)
+            )
+            date_due = False
+            errors.append(
+                _('Invoice with id %s: Wrong invoice_date_due') % invoice.id
+            )
+
+        line = [
+            date,
+            voucher_type,
+            pos,
+            internal_number_formatted,
+            internal_number_formatted,
+            partner_document_type,
+            partner_vat,
+            partner_name,
+            amount_total,
+            amount_total_no_taxed,
+            uncategorized_perception,
+            amount_exempt,
+            amount_national_perception,
+            amount_iibb,
+            amount_municipal_perception,
+            amount_internal_taxes,
+            currency_code,
+            currency_rate,
+            tax_lines_qty,
+            operation_code,
+            amount_other_taxes,
+            date_due,
+        ]
+        if False in line:
+            errors = '\n'.join(errors)
+            return (False, errors)
+
+        return (True, line)
+
+    def _create_sale_aliq_line(self, invoice):
+        aliquot_lines = []
+        errors = []
+        if invoice.denomination in ['C']:
+            return (True, aliquot_lines)
+        if len(self._get_invoice_tax_lines(invoice)) == 0:
+            line = self._format_sale_aliquot_line(
+                self._get_invoice_tax_lines(invoice), invoice, null=True
+            )
+            if line[0]:
+                aliquot_line = ''.join(line[1])
+                aliquot_lines.append(aliquot_line)
+        for tax_line in self._get_invoice_vat_tax_lines(invoice):
+            line = self._format_sale_aliquot_line(tax_line, invoice)
+            if line[0]:
+                aliquot_line = ''.join(line[1])
+                aliquot_lines.append(aliquot_line)
+            else:
+                errors.append(line[1])
+        if len(errors) > 0:
+            return (False, errors)
+        return (True, aliquot_lines)
+
+    def _create_purchase_line(self, invoice):
+        errors = []
+
+        date = self._get_invoice_date(invoice, errors)
+        voucher_type = self._get_invoice_voucher_type(invoice, errors)
+        pos = self._get_invoice_point_of_sale(invoice, errors)
+        (
+            internal_number_formatted,
+            internal_number_formatted_aux,
+        ) = self._get_invoice_number(invoice, errors)
+        partner_document_type = self._get_partner_doc_type(invoice, errors)
+        partner_vat = self._get_partner_vat(invoice, errors)
+        partner_name = self._get_partner_name(invoice, errors)
+        amount_total = self._get_invoice_amount_total(invoice)
+        amount_total_no_taxed = self._get_invoice_amount_no_taxed(invoice)
+        amount_exempt = self._get_invoice_amount_exempt(invoice)
+        currency_code = self._get_invoice_currency(invoice, errors)
+        currency_rate = self._get_invoice_currency_rate(invoice, errors)
+        tax_lines_qty = self._get_tax_lines_qty(invoice)
+        operation_code = self._get_operation_code(invoice)
+        has_iva_exempt = self._check_invoice_is_exempt(invoice)
+        if has_iva_exempt:
+            operation_code = 'E'
+
+        try:
+            if invoice.iva_digital_operation_code in ['X', 'Z']:
+                import_clearance = '%.16s' % str(
+                    internal_number_formatted
+                ).ljust(16, ' ')
+                # Here import_clearance could be internal_number_formatted_aux or
+                # We need to add clearence_id.name field to account.move
+            else:
+                import_clearance = '%.16s' % ''.ljust(16, ' ')
+        except Exception as e:
+            _logger.error(
+                'Error on field %s: %s' % ('account_move.clearance_id', e)
+            )
+            if invoice.__contains__('import_clearance'):
+                import_clearance = False
+            import_clearance = '%.16s' % ''.ljust(16, ' ')
+            errors.append(
+                _('Invoice with id %s: Wrong import clearance') % invoice.id
+            )
+
+        amount_iva = self._get_perception_with_type_iva(invoice)
+
+        fiscal_credit = self._get_fiscal_credit_currency(invoice)
+        fiscal_credit = ('%016.2f' % fiscal_credit).replace('.', '')
+
+        amount_ganancias = self._get_ganancias_retentions(invoice)
+
+        amount_iibb = self._get_perception_with_type(invoice, 'provincial')
+        amount_municipal_perception = self._get_perception_with_type(
+            invoice, 'municipal'
+        )
+        amount_internal_taxes = self._get_taxes_with_type(
+            invoice, self.env.ref('l10n_ar_eynes.internal_tax_group')
+        )
+
+        amount_other_taxes = self._get_taxes_with_type(
+            invoice, self.env.ref('l10n_ar_eynes.other_tax_group')
+        )
+
+        # TODO: add fields and logic for this fields:
+        emitter_cuit = '%.15s' % '0'.ljust(11, '0')
+        emitter_denomination = '%.30s' % ' '.ljust(30, ' ')
+        iva_commission = '%.15s' % '0'.ljust(15, '0')
+
+        line = [
+            date,
+            voucher_type,
+            pos,
+            internal_number_formatted,
+            import_clearance,
+            partner_document_type,
+            partner_vat,
+            partner_name,
+            amount_total,
+            amount_total_no_taxed,
+            amount_exempt,
+            amount_iva,
+            amount_ganancias,
+            amount_iibb,
+            amount_municipal_perception,
+            amount_internal_taxes,
+            currency_code,
+            currency_rate,
+            tax_lines_qty,
+            operation_code,
+            fiscal_credit,
+            amount_other_taxes,
+            emitter_cuit,
+            emitter_denomination,
+            iva_commission,
+        ]
+        if False in line:
+            errors = '\n'.join(errors)
+            return (False, errors)
+
+        return (True, line)
+
+    def _create_aliquot_purchase_line(self, invoice):
+        aliquot_lines = []
+        errors = []
+        if invoice.denomination in ['C']:
+            return (True, aliquot_lines)
+        for tax_line in self._get_invoice_vat_tax_lines(invoice):
+            line = self._format_aliquot_purchase_line(tax_line, invoice)
+            if line[0]:
+                aliquot_line = ''.join(line[1])
+                aliquot_lines.append(aliquot_line)
+            else:
+                errors.append(line[1])
+        if len(errors) > 0:
+            return (False, errors)
+        return (True, aliquot_lines)
+
+    def _create_aliquot_import_purchase_line(self, invoice):
+        aliquot_lines = []
+        errors = []
+
+        for tax_line in self._get_invoice_not_vat_tax_lines(invoice):
+            line = self._format_aliquot_import_line(tax_line, invoice)
+            if line[0]:
+                aliquot_line = ''.join(line[1])
+                aliquot_lines.append(aliquot_line)
+            else:
+                errors.append(line[1])
+        if len(errors) > 0:
+            return (False, errors)
+        return (True, aliquot_lines)
+
+    # METHOD TO CREATE FILES AND ATTACHMENTS:
+    def create_attachment(self, suffix, filename, regs):
+        tmp_filename = tempfile.mkstemp(suffix=suffix)[1]
+        with codecs.open(tmp_filename, "w") as f:
+            for r in regs:
+                sanitized = r.encode('latin1', 'replace')
+                sanitized = sanitized.decode('latin-1')
+                f.write(sanitized)
+                f.write('\r\n')
+
+        generated_file_rec = self.env['libroiva.generated.files'].create(
+            {
+                'code': filename,
+                'date_from': self.date_from,
+                'date_to': self.date_to,
+            }
+        )
+
+        with open(tmp_filename) as f:
+            data_attach = {
+                'name': filename,
+                'datas': binascii.b2a_base64(f.read().encode('latin-1')),
+                'store_fname': filename,
+                'res_model': 'libroiva.generated.files',
+                'res_id': generated_file_rec.id,
+            }
+            new_attachment = self.env['ir.attachment'].create(data_attach)
+            generated_file_rec.write({'attachment_id': new_attachment.id})
+            f.close()
+
+    # GENERATE LINES AND FILES FOR SALES AND PURCHASES:
+    def create_sales_voucher_file(self, invoice_ids):
+        """
+        @param invoice_ids: account.move recordset
+
+        @return: list with errors ocurred. The list always contains at least one item.
+        """
+        sale_regs = []
+        sale_file_errors = [_('\nSale File Errors\n================\n')]
+        sale_aliquot_regs = []
+        sale_aliquot_file_errors = [
+            _('\nSale Aliquot File Errors\n================\n')
+        ]
+
+        for invoice in invoice_ids:
+            line = self._create_sale_line(invoice)
+            if line[0]:
+                afip_line = ''.join(line[1])
+                aliquot_line = self._create_sale_aliq_line(invoice)
+                if aliquot_line[0]:
+                    sale_aliquot_regs += aliquot_line[1]
+                else:
+                    sale_aliquot_file_errors.append(aliquot_line[1])
+
+                sale_regs.append(afip_line)
+            else:
+                sale_file_errors.append(line[1])
+
+        if len(sale_file_errors) <= 1:
+            suffix = ".libroivadigitalsales"
+            filename = "LIBRO_IVA_DIGITAL_VENTAS_CBTE.txt"
+            if sale_regs:
+                self.create_attachment(suffix, filename, sale_regs)
+
+        if len(sale_aliquot_file_errors) <= 1:
+            suffix = ".libroivadigitalsalesaliquot"
+            filename = "LIBRO_IVA_DIGITAL_VENTAS_ALICUOTAS.txt"
+            if sale_aliquot_regs:
+                self.create_attachment(suffix, filename, sale_aliquot_regs)
+
+        return (sale_file_errors, sale_aliquot_file_errors)
+
+    def create_purchases_voucher_file(self, invoice_ids):
+        """
+        @param invoice_ids: account.move recordset
+
+        @return: list with errors ocurred. The list always contains at least one item.
+        """
+        purchase_regs = []
+        purchase_file_errors = [_('\nPurchase File Errors\n================\n')]
+        purchase_aliquot_regs = []
+        purchase_aliquot_file_errors = [
+            _('\\Purchase Aliquot File Errors\n================\n')
+        ]
+        import_aliquot_regs = []
+        import_aliquot_file_errors = [
+            _('\\Import Aliquot File Errors\n================\n')
+        ]
+
+        for invoice in invoice_ids:
+            tipo_responsable = invoice.fiscal_position_id.afip_code
+            if not tipo_responsable:
+                continue
+            line = self._create_purchase_line(invoice)
+            if line[0]:
+                afip_line = ''.join(line[1])
+                aliquot_line = self._create_aliquot_purchase_line(invoice)
+                if invoice.iva_digital_operation_code in ['X', 'Z']:
+                    aliquot_import_line = (
+                        self._create_aliquot_import_purchase_line(invoice)
+                    )
+
+                    if aliquot_import_line[0]:
+                        import_aliquot_regs += aliquot_import_line[1]
+                    else:
+                        import_aliquot_file_errors.append(
+                            aliquot_import_line[1]
+                        )
+
+                if aliquot_line and aliquot_line[0]:
+                    purchase_aliquot_regs += aliquot_line[1]
+                elif aliquot_line and not aliquot_line[0]:
+                    purchase_aliquot_file_errors.append(aliquot_line[1])
+
+                purchase_regs.append(afip_line)
+            else:
+                purchase_file_errors.append(line[1])
+
+        if len(purchase_file_errors) <= 1:
+            suffix = ".libroivadigitalpurchases"
+            filename = "LIBRO_IVA_DIGITAL_COMPRAS_CBTE.txt"
+            if purchase_regs:
+                self.create_attachment(suffix, filename, purchase_regs)
+
+        if len(purchase_aliquot_file_errors) <= 1:
+            suffix = ".libroivadigitalpurchasesaliquot"
+            filename = "LIBRO_IVA_DIGITAL_COMPRAS_ALICUOTAS.txt"
+            if purchase_aliquot_regs:
+                self.create_attachment(suffix, filename, purchase_aliquot_regs)
+
+        if len(import_aliquot_file_errors) <= 1:
+            suffix = ".libroivadigitalimportaliquot"
+            filename = "LIBRO_IVA_DIGITAL_IMPORTACION_BIENES_ALICUOTA.txt"
+            if import_aliquot_regs:
+                self.create_attachment(suffix, filename, import_aliquot_regs)
+
+        return (
+            purchase_file_errors,
+            purchase_aliquot_file_errors,
+            import_aliquot_file_errors,
+        )
+
+    # INIT:
+    def create_files(self):
+        errors = []
+
+        # SALES:
+        invoice_ids = self.env['account.move'].search(
+            [
+                ('date', '>=', self.date_from),
+                ('date', '<=', self.date_to),
+                ('state', 'in', ('posted', 'paid')),
+                ('move_type', 'in', ('out_invoice', 'out_refund')),
+                ('company_id', '=', self.company_id.id),
+            ]
+        )
+        sale_errors = self.create_sales_voucher_file(invoice_ids)
+        for sale_error in sale_errors:
+            if len(sale_error) > 1:
+                errors.extend(sale_error)
+        if (
+            len(sale_errors) > 2
+        ):  # sale_errors expects len == 2, sales and aliquot
+            errors.extend(sale_errors[0])
+
+        # PURCHASES:
+        invoice_purchase_ids = self.env['account.move'].search(
+            [
+                ('date', '>=', self.date_from),
+                ('date', '<=', self.date_to),
+                ('state', 'in', ('posted', 'paid')),
+                ('move_type', 'in', ('in_invoice', 'in_refund')),
+                ('company_id', '=', self.company_id.id),
+            ]
+        )
+        purchase_errors = self.create_purchases_voucher_file(
+            invoice_purchase_ids
+        )
+        for purchase_error in purchase_errors:
+            if len(purchase_error) > 1:
+                errors.extend(purchase_error[1])
+
+        if errors:
+            self.write({'notes': '\n'.join(errors)})
+            view_id = self.env.ref('l10n_ar_eynes.libro_iva_exporter_view')
+            if view_id:
+                view_id = view_id.id
+
+            return {
+                'name': _('Libro IVA Digital Exporter'),
+                'res_model': 'libro.iva.exporter.wizard',
+                'type': 'ir.actions.act_window',
+                'views': [(view_id, 'form')],
+                'target': 'new',
+                'res_id': self.id,
+            }
+
+        return {
+            'name': _('Libro IVA generated files'),
+            'res_model': 'libroiva.generated.files',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+        }

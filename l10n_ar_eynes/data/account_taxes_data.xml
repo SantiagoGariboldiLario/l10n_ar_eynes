@@ -1,5 +1,26 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo noupdate="1">
+    <record id="exempt_percent_tax_sale" model="account.tax" forcecreate="0">
+        <field name="name">IVA Exento</field>
+        <field name="amount">0</field>
+        <field name="is_exempt">True</field>
+        <field name="type_tax_use">sale</field>
+        <field name="amount_type">percent</field>
+        <field name="afip_code">000</field>
+        <field name="description">IVA Exento</field>
+        <field name="country_id" eval="ref('base.ar')" />
+    </record>
+
+    <record id="exempt_percent_tax_purchase" model="account.tax" forcecreate="0">
+        <field name="name">IVA Exento</field>
+        <field name="amount">0</field>
+        <field name="is_exempt">True</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="amount_type">percent</field>
+        <field name="afip_code">000</field>
+        <field name="description">IVA Exento</field>
+        <field name="country_id" eval="ref('base.ar')" />
+    </record>
 
     <record id="0_percent_tax_sale" model="account.tax" forcecreate="0">
         <field name="name">IVA 0.00%</field>
@@ -121,970 +142,950 @@
         <field name="country_id" eval="ref('base.ar')" />
     </record>
 
-    <record id="retentions_tax_group" model="account.tax.group">
-        <field name="name">Retentions</field>
+    <record id="tax_iva_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IVA Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount">6</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">vat</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
-    <record id="perceptions_tax_group" model="account.tax.group">
-        <field name="name">Perceptions</field>
+    <record id="tax_iva_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IVA Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount">20</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">vat</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
-    <record id="vat_tax_group" model="account.tax.group">
-        <field name="name">Vat</field>
+    <record id="tax_iva_retentions_e" model="account.tax">
+        <field name="name">Retenciones IVA Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">vat</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
-    <record id="internal_tax_group" model="account.tax.group">
-        <field name="name">Internal</field>
+    <record id="tax_iva_retentions_s" model="account.tax">
+        <field name="name">Retenciones IVA Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">vat</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
-    <record id="other_tax_group" model="account.tax.group">
-        <field name="name">Other</field>
+    <record id="tax_iva_m21_retentions_e" model="account.tax">
+        <field name="name">Retenciones IVA M21 Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">21</field>
+        <field name="retention_type">vat</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
-        <record id="tax_iva_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IVA Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount">6</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">vat</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iva_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IVA Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount">20</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">vat</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iva_retentions_e" model="account.tax">
-            <field name="name">Retenciones IVA Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">vat</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iva_retentions_s" model="account.tax">
-            <field name="name">Retenciones IVA Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">vat</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iva_m21_retentions_e" model="account.tax">
-            <field name="name">Retenciones IVA M21 Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="amount">21</field>
-            <field name="retention_type">vat</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_arba_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB ARBA Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_caba_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB CABA Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_catamarca_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB CATAMARCA Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_chaco_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB CHACO Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_chubut_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB CHUBUT Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_cordoba_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB CORDOBA Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_corrientes_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB CORRIENTES Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_entre_rios_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB ENTRE RIOS Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_formosa_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB FORMOSA Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_jujuy_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB JUJUY Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_la_pampa_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB LA PAMPA Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_la_rioja_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB LA RIOJA Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_mendoza_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB MENDOZA Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_misiones_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB MISIONES Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_neuquen_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB NEUQUEN Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_rio_negro_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB RIO NEGRO Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_salta_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB SALTA Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_san_juan_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB SAN JUAN Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_san_luis_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB SAN LUIS Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santa_cruz_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB SANTA CRUZ Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santafe_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB SANTA FE Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santiago_del_estero_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB SANTIAGO DEL ESTERO Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_tierra_del_fuego_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB TIERRA DEL FUEGO Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_tucuman_perceptions_s" model="account.tax">
-            <field name="name">Percepciones IIBB TUCUMAN Sufridas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_arba_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB ARBA Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_caba_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB CABA Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_catamarca_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB CATAMARCA Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_chaco_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB CHACO Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_chubut_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB CHUBUT Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_cordoba_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB CORDOBA Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_corrientes_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB CORRIENTES Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_entre_rios_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB ENTRE RIOS Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_formosa_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB FORMOSA Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_jujuy_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB JUJUY Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_la_pampa_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB LA PAMPA Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_la_rioja_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB LA RIOJA Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_mendoza_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB MENDOZA Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_misiones_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB MISIONES Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_neuquen_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB NEUQUEN Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_rio_negro_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB RIO NEGRO Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_salta_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB SALTA Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_san_juan_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB SAN JUAN Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_san_luis_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB SAN LUIS Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santa_cruz_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB SANTA CRUZ Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santafe_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB SANTA FE Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santiago_del_estero_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB SANTIAGO DEL ESTERO Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_tierra_del_fuego_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB TIERRA DEL FUEGO Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_tucuman_perceptions_e" model="account.tax">
-            <field name="name">Percepciones IIBB TUCUMAN Efectuadas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_arba_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB ARBA Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_caba_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB CABA Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_catamarca_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB CATAMARCA Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_chaco_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB CHACO Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_chubut_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB CHUBUT Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-        </record>
-
-        <record id="tax_iibb_cordoba_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB CORDOBA Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_corrientes_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB CORRIENTES Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_entre_rios_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB ENTRE RIOS Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_formosa_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB FORMOSA Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_jujuy_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB JUJUY Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_la_pampa_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB LA PAMPA Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_la_rioja_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB LA RIOJA Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_mendoza_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB MENDOZA Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_misiones_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB MISIONES Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_neuquen_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB NEUQUEN Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_rio_negro_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB RIO NEGRO Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_salta_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB SALTA Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_san_juan_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB SAN JUAN Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_san_luis_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB SAN LUIS Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santa_cruz_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB SANTA CRUZ Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santafe_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB SANTA FE Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santiago_del_estero_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB SANTIAGO DEL ESTERO Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_tierra_del_fuego_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB TIERRA DEL FUEGO Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_tucuman_retentions_s" model="account.tax">
-            <field name="name">Retenciones IIBB TUCUMAN Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_arba_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB ARBA Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_caba_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB CABA Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_catamarca_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB CATAMARCA Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_chaco_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB CHACO Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_chubut_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB CHUBUT Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_cordoba_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB CORDOBA Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_corrientes_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB CORRIENTES Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_entre_rios_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB ENTRE RIOS Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_formosa_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB FORMOSA Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_jujuy_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB JUJUY Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_la_pampa_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB LA PAMPA Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_la_rioja_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB LA RIOJA Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_mendoza_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB MENDOZA Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_misiones_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB MISIONES Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_neuquen_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB NEUQUEN Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_rio_negro_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB RIO NEGRO Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_salta_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB SALTA Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_san_juan_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB SAN JUAN Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_san_luis_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB SAN LUIS Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santa_cruz_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB SANTA CRUZ Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santafe_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB SANTA FE Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_santiago_del_estero_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB SANTIAGO DEL ESTERO Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_tierra_del_fuego_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB TIERRA DEL FUEGO Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_iibb_tucuman_retentions_e" model="account.tax">
-            <field name="name">Retenciones IIBB TUCUMAN Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">gross_income</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_ganancias_retentions_e" model="account.tax">
-            <field name="name">Retenciones Ganancias Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount">2</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">profit</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_ganancias_m_retentions_e" model="account.tax">
-            <field name="name">Retenciones Ganancias M Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">profit</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_suss_retentions_e" model="account.tax">
-            <field name="name">Retenciones SUSS Efectuadas</field>
-            <field name="type_tax_use">purchase</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">suss</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
-
-        <record id="tax_suss_retentions_s" model="account.tax">
-            <field name="name">Retenciones SUSS Sufridas</field>
-            <field name="type_tax_use">sale</field>
-            <field name="country_id">10</field>
-            <field name="amount_type">percent</field>
-            <field name="retention_type">suss</field>
-            <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
-        </record>
+    <record id="tax_iibb_arba_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB ARBA Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_caba_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB CABA Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_catamarca_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB CATAMARCA Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_chaco_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB CHACO Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_chubut_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB CHUBUT Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_cordoba_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB CORDOBA Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_corrientes_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB CORRIENTES Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_entre_rios_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB ENTRE RIOS Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_formosa_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB FORMOSA Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_jujuy_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB JUJUY Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_la_pampa_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB LA PAMPA Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_la_rioja_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB LA RIOJA Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_mendoza_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB MENDOZA Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_misiones_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB MISIONES Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_neuquen_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB NEUQUEN Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_rio_negro_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB RIO NEGRO Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_salta_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB SALTA Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_san_juan_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB SAN JUAN Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_san_luis_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB SAN LUIS Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santa_cruz_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB SANTA CRUZ Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santafe_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB SANTA FE Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santiago_del_estero_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB SANTIAGO DEL ESTERO Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_tierra_del_fuego_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB TIERRA DEL FUEGO Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_tucuman_perceptions_s" model="account.tax">
+        <field name="name">Percepciones IIBB TUCUMAN Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_arba_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB ARBA Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_caba_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB CABA Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_catamarca_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB CATAMARCA Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_chaco_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB CHACO Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_chubut_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB CHUBUT Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_cordoba_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB CORDOBA Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_corrientes_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB CORRIENTES Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_entre_rios_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB ENTRE RIOS Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_formosa_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB FORMOSA Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_jujuy_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB JUJUY Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_la_pampa_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB LA PAMPA Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_la_rioja_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB LA RIOJA Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_mendoza_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB MENDOZA Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_misiones_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB MISIONES Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_neuquen_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB NEUQUEN Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_rio_negro_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB RIO NEGRO Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_salta_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB SALTA Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_san_juan_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB SAN JUAN Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_san_luis_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB SAN LUIS Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santa_cruz_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB SANTA CRUZ Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santafe_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB SANTA FE Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santiago_del_estero_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB SANTIAGO DEL ESTERO Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_tierra_del_fuego_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB TIERRA DEL FUEGO Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_tucuman_perceptions_e" model="account.tax">
+        <field name="name">Percepciones IIBB TUCUMAN Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_arba_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB ARBA Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_caba_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB CABA Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_catamarca_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB CATAMARCA Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_chaco_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB CHACO Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_chubut_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB CHUBUT Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+    </record>
+
+    <record id="tax_iibb_cordoba_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB CORDOBA Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_corrientes_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB CORRIENTES Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_entre_rios_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB ENTRE RIOS Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_formosa_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB FORMOSA Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_jujuy_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB JUJUY Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_la_pampa_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB LA PAMPA Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_la_rioja_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB LA RIOJA Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_mendoza_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB MENDOZA Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_misiones_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB MISIONES Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_neuquen_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB NEUQUEN Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_rio_negro_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB RIO NEGRO Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_salta_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB SALTA Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_san_juan_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB SAN JUAN Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_san_luis_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB SAN LUIS Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santa_cruz_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB SANTA CRUZ Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santafe_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB SANTA FE Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santiago_del_estero_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB SANTIAGO DEL ESTERO Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_tierra_del_fuego_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB TIERRA DEL FUEGO Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_tucuman_retentions_s" model="account.tax">
+        <field name="name">Retenciones IIBB TUCUMAN Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_arba_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB ARBA Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_caba_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB CABA Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_catamarca_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB CATAMARCA Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_chaco_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB CHACO Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_chubut_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB CHUBUT Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_cordoba_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB CORDOBA Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_corrientes_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB CORRIENTES Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_entre_rios_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB ENTRE RIOS Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_formosa_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB FORMOSA Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_jujuy_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB JUJUY Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_la_pampa_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB LA PAMPA Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_la_rioja_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB LA RIOJA Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_mendoza_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB MENDOZA Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_misiones_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB MISIONES Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_neuquen_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB NEUQUEN Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_rio_negro_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB RIO NEGRO Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_salta_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB SALTA Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_san_juan_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB SAN JUAN Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_san_luis_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB SAN LUIS Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santa_cruz_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB SANTA CRUZ Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santafe_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB SANTA FE Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_santiago_del_estero_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB SANTIAGO DEL ESTERO Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_tierra_del_fuego_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB TIERRA DEL FUEGO Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_iibb_tucuman_retentions_e" model="account.tax">
+        <field name="name">Retenciones IIBB TUCUMAN Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_ganancias_retentions_e" model="account.tax">
+        <field name="name">Retenciones Ganancias Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount">2</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">profit</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_ganancias_m_retentions_e" model="account.tax">
+        <field name="name">Retenciones Ganancias M Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">profit</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_suss_retentions_e" model="account.tax">
+        <field name="name">Retenciones SUSS Efectuadas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">suss</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_suss_retentions_s" model="account.tax">
+        <field name="name">Retenciones SUSS Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">suss</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
 
 </odoo>

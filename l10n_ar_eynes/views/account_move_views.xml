@@ -212,6 +212,7 @@
                         'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
                     }"
                 />
+                <field name="iva_digital_operation_code" />
                 <field name="local" invisible="1" />
                 <field
                     name="export_type_id"

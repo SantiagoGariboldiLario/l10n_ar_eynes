@@ -23,6 +23,7 @@ from . import retention  # noqa
 from . import sale_order  # noqa
 from . import stock_move  # noqa
 from . import stock_picking  # noqa
+from . import stock_picking_type  # noqa
 from . import certificate_request  # noqa
 from . import wsaa  # noqa
 from . import account_move_optionals  # noqa
@@ -37,4 +38,5 @@ from . import sifere
 from . import arba_exporter
 from . import arciba_exporter
 from . import sequence_mixin
+from . import libro_iva_generated_files
 from . import ws_padron  # noqa
