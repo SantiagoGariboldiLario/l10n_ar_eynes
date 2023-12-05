@@ -106,7 +106,7 @@
                     name="currency_rate"
                     placeholder="Currency Rate"
                     class="oe_inline"
-                    attrs="{'invisible': [('is_company_cur','=', True)]}"
+                    attrs="{'invisible': [('is_multi_currency','=', False)]}"
                 />
                 <button
                     name="%(action_account_change_currency)d"
@@ -120,22 +120,25 @@
                         title="Update Currency: Will convert the amount lines to the new currency set"
                         class="fa fa-fw fa-refresh"
                     />
+                    Update Price
                 </button>
                 <p attrs="{'invisible': [('currency_preciated', '=', False)]}">
                     <i>Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
                 </p>
                 <field name="currency_preciated" invisible="1" />
-                <field name="is_company_cur" invisible="1" />
                 <field name="is_multi_currency" invisible="1" />
                 <field name="company_currency_id" invisible="1" string="Company Currency" />
             </div>
 
             <field name="fiscal_position_id" position="after">
                 <field name="currency_converted" invisible="1" />
-                <field name="secondary_currency_id" attrs="{'invisible': [('is_company_cur', '=', True)]}" />
+                <field
+                    name="secondary_currency_id"
+                    attrs="{'invisible': [('is_multi_currency', '=', False)]}"
+                />
                 <field
                     name="secondary_currency_rate"
-                    attrs="{'invisible': [('is_company_cur', '=', True)]}"
+                    attrs="{'invisible': [('is_multi_currency', '=', False)]}"
                 />
             </field>
 
@@ -143,7 +146,7 @@
                 <!-- If the invoice has same currency than the company -->
                 <group
                     colspan="8"
-                    attrs="{'invisible': [('secondary_currency_id', '!=', False), ('is_company_cur','=', False)]}"
+                    attrs="{'invisible': [('secondary_currency_id', '!=', False), ('is_multi_currency','=', True)]}"
                 >
                     <field
                         name="narration"
@@ -156,7 +159,7 @@
                 <!-- otherwise -->
                 <group
                     colspan="4"
-                    attrs="{'invisible': ['|',('secondary_currency_id', '=', False), ('is_company_cur','=', True)]}"
+                    attrs="{'invisible': ['|',('secondary_currency_id', '=', False), ('is_multi_currency','=', False)]}"
                 >
                     <field
                         name="narration"
@@ -169,7 +172,7 @@
                 <group
                     colspan="4"
                     class="oe_subtotal_footer oe_right"
-                    attrs="{'invisible': ['|',('secondary_currency_id', '=', False), ('is_company_cur','=', True)]}"
+                    attrs="{'invisible': ['|',('secondary_currency_id', '=', False), ('is_multi_currency','=', False)]}"
                 >
                     <field name="amount_taxed_cur" />
                     <field name="amount_no_taxed_cur" />
@@ -318,11 +321,11 @@
                             <field name="amount" />
                             <field
                                 name="base_secondary_currency"
-                                attrs="{'column_invisible':[('parent.is_company_cur','=',True)]}"
+                                attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
                             />
                             <field
                                 name="amount_secondary_currency"
-                                attrs="{'column_invisible':[('parent.is_company_cur','=',True)]}"
+                                attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
                             />
                             <field name="state_id" />
                         </tree>
