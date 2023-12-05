@@ -142,12 +142,12 @@ class WSFEParser(WSParser):
                 vat_dict[code] = {
                     'Importe': tax_line.price_unit,
                     'BaseImp': tax_line.tax_base_amount / invoice.currency_rate
-                    if not invoice.is_company_cur
+                    if invoice.is_multi_currency
                     else tax_line.tax_base_amount,
                 }
             else:
                 vat_dict[code]['Importe'] += tax_line.price_unit
-                if invoice.is_company_cur:
+                if not invoice.is_multi_currency:
                     vat_dict[code]['BaseImp'] += tax_line.tax_base_amount
                 else:
                     vat_dict[code]['BaseImp'] += (
@@ -172,10 +172,10 @@ class WSFEParser(WSParser):
             perc = {
                 'Id': code,
                 'BaseImp': round(perception.base / invoice.currency_rate, 2)
-                if not invoice.is_company_cur
+                if invoice.is_multi_currency
                 else perception.base,
                 'Importe': round(perception.amount / invoice.currency_rate, 2)
-                if not invoice.is_company_cur
+                if invoice.is_multi_currency
                 else perception.amount,
                 'Alic': 0.0,
                 'Desc': perception.name,
