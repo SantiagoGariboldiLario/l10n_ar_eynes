@@ -19,7 +19,9 @@ def copy_user_journals(cr):
                 users_journals_rel;
         """
         )
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        # pylint: disable=invalid-commit
         cr.rollback()
     return True
 

@@ -14,7 +14,9 @@ def fix_wsfe_view(cr):
                 and model = 'wsfe.config'
             """
         )
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        _logger.info("Error in query execution, method: fix_wsfe_view")
         cr.rollback()
     return True
 
@@ -60,7 +62,11 @@ def copy_wsfe_request_detail_to_ws_request_detail(cr):
             RENAME cae_duedate TO cae_due_date;
             """
         )
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        _logger.info(
+            "Error in query execution, method: copy_wsfe_request_detail_to_ws_request_detail"
+        )
         cr.rollback()
     return True
 
@@ -75,7 +81,9 @@ def rename_wsfe_optionals(cr):
             RENAME TO ws_optionals_id_seq;
             """
         )
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        _logger.info("Error in query execution, method: rename_wsfe_optionals")
         cr.rollback()
     return True
 
@@ -90,7 +98,11 @@ def rename_wsfe_request_seq(cr):
             RENAME TO ws_request_id_seq;
             """
         )
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        _logger.info(
+            "Error in query execution, method: rename_wsfe_request_seq"
+        )
         cr.rollback()
     return True
 
@@ -120,7 +132,11 @@ def delete_wsfex_request_detail_model(cr):
             WHERE model = 'wsfex.request.detail';
             """
         )
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        _logger.info(
+            "Error in query execution, method: delete_wsfex_request_detail_model"
+        )
         cr.rollback()
     return True
 
@@ -150,7 +166,11 @@ def delete_wsfe_request_model(cr):
             WHERE model = 'wsfe.request';
             """
         )
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        _logger.info(
+            "Error in query execution, method: delete_wsfe_request_model"
+        )
         cr.rollback()
     return True
 
@@ -180,7 +200,11 @@ def delete_wsfe_request_detail_model(cr):
             WHERE model = 'wsfe.request.detail';
             """
         )
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        _logger.info(
+            "Error in query execution, method: delete_wsfe_request_detail_model"
+        )
         cr.rollback()
     return True
 
