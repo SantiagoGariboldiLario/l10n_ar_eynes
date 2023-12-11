@@ -12,7 +12,11 @@ def delete_journal_ids_from_users(cr):
             DELETE FROM ir_ui_view WHERE arch_db ilike '%journal_ids%' and model = 'res.users'
             """
         )
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        _logger.info(
+            "Error in query execution, method: delete_journal_ids_from_users"
+        )
         cr.rollback()
     return True
 

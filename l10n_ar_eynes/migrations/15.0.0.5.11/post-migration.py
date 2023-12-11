@@ -13,7 +13,9 @@ def remove_old_constraint(cr):
                 DROP CONSTRAINT res_partner_retention_retention_partner_unique;;
             """
         )
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        _logger.info("Error in query execution, method: remove_old_constraint")
         cr.rollback()
     return True
 
