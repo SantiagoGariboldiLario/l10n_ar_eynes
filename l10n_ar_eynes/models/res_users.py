@@ -11,10 +11,9 @@ class ResUsers(models.Model):
         string='Available Point of Sales Journals',
     )
 
-    def get_journals_by_fiscal_position(self, fiscal_position, fiscal_type):
+    def get_journals_by_fiscal_position(self, fiscal_position):
         return self.journal_rel_ids.journal_id.filtered(
             lambda j: fiscal_position in j.fiscal_position_ids
-            and j.fiscal_type == fiscal_type
         )
 
 

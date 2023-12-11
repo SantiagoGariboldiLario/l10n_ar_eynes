@@ -17,7 +17,9 @@ def fix_old_fields(cr):
 
             """
         )
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        _logger.info("Error in query execution, method: fix_old_fields")
         cr.rollback()
     return True
 
@@ -36,8 +38,9 @@ def rename_journal_codes(cr):
 
             """
         )
-
+        cr.commit()  # pylint: disable=invalid-commit
     except psycopg2.ProgrammingError:
+        _logger.info("Error in query execution, method: rename_journal_codes")
         cr.rollback()
     return True
 

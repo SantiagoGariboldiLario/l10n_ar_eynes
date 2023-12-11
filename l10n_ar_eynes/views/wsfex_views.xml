@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- * Add button and AFIP tables to WSFE form view * -->
+    <record id="view_wsfex_config_form" model="ir.ui.view">
+        <field name="name">wsfex.config.form</field>
+        <field name="model">wsfex.config</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="l10n_ar_eynes.view_ws_config_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='principal']" position="after">
+                <group name="extra">
+                    <button
+                        name="get_afip_tables"
+                        class="oe_highlight"
+                        string="Get AFIP tables"
+                        type="object"
+                        attrs="{'invisible': [('url', '=', False)]}"
+                    />
+                </group>
+
+                <notebook colspan="4">
+                    <page string="Points Of Sale">
+                        <field
+                            name="point_of_sale_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="bottom">
+                                <field name="name" readonly="True" />
+                                <field name="to_date" readonly="True" />
+                                <field name="blocked" readonly="True" />
+                                <field name="journal_id" />
+                                <field name="priority" />
+                                <field name="from_afip" readonly="True" />
+                            </tree>
+                        </field>
+                    </page>
+
+                    <page string="Currencies">
+                        <field
+                            name="currency_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="bottom">
+                                <field name="code" readonly="True" />
+                                <field name="name" readonly="True" />
+                                <field name="from_date" readonly="True" />
+                                <field name="to_date" readonly="True" />
+                                <field name="currency_id" />
+                                <field name="from_afip" readonly="True" />
+                            </tree>
+                        </field>
+                    </page>
+
+                    <page string="Units of Measure">
+                        <field
+                            name="uom_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                                <field name="uom_id" />
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Countries">
+                        <field
+                            name="country_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                                <field name="country_id" />
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Languages">
+                        <field
+                            name="lang_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                                <field name="lang_id" />
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Export Type">
+                        <field
+                            name="export_type_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Incoterms">
+                        <field
+                            name="incoterms_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                                <field name="incoterms_id" />
+                            </tree>
+                        </field>
+                    </page>
+
+                    <!-- <page string="DST CUIT">
+                        <field
+                            name="dst_cuit_ids"
+                            nolabel="1"
+                            options="{'no_create_edit': True, 'no_quick_create': True}"
+                        >
+                            <tree editable="top">
+                                <field name="name" readonly="1" />
+                                <field name="code" readonly="1" />
+                            </tree>
+                        </field>
+                    </page> -->
+
+                    <page string="Validations">
+                        <group col="6" string="Invoice Date Difference from Today">
+                            <field name="services_date_difference" />
+                            <field name="products_date_difference" />
+                        </group>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+
+    <!--Window Action for wsfex.config-->
+    <record id="action_wsfex_config" model="ir.actions.act_window">
+        <field name="name">WSFEX Config</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">wsfex.config</field>
+        <field name="view_mode">tree</field>
+        <field
+            name="view_ids"
+            eval="[
+        (5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('view_ws_config_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('view_wsfex_config_form')})
+        ]"
+        />
+    </record>
+</odoo>

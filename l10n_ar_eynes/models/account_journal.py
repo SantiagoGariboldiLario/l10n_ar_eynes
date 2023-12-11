@@ -80,7 +80,8 @@ class AccountJournal(models.Model):
         selection=[
             ('internal', 'Internal Invoice'),
             ('electronic', 'Electronic Invoice'),
-        ]
+        ],
+        compute='_compute_fiscal_type',
     )
     activity_start_date = fields.Date(
         string="Activity Start Date", default=fields.date.today()
@@ -262,6 +263,18 @@ class AccountJournal(models.Model):
                     )
                     % self.shop_id
                 )
+
+    @api.depends('type')
+    def _compute_fiscal_type(self):
+        sale_journals = self.filtered(lambda j: j.type == 'sale')
+        for journal in sale_journals:
+            electronic = self.env['ws.pos'].search(
+                [('journal_id', '=', journal.id)]
+            )
+            journal.fiscal_type = 'electronic' if electronic else 'internal'
+
+        for journal in self - sale_journals:
+            journal.fiscal_type = False
 
     def get_pos_number(self):
         denomination = dict(self._fields['denomination'].selection).get(

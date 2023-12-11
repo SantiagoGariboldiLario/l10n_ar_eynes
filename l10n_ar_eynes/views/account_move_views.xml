@@ -96,18 +96,13 @@
                 </attribute>
             </xpath>
 
-            <xpath expr="//field[@name='payment_reference']" position="after">
+            <div name="journal_div" position="after">
                 <field
                     name="fiscal_type"
                     attrs="{
-                        'readonly': [('state', '!=', 'draft')],
-                        'required': [('move_type', 'in', ('out_invoice', 'out_refund'))],
                         'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))],
                     }"
                 />
-            </xpath>
-
-            <div name="journal_div" position="after">
                 <field
                     name="currency_rate"
                     placeholder="Currency Rate"
@@ -216,7 +211,6 @@
                         'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
                     }"
                 />
-                <field name="aut_cae" />
                 <field name="local" invisible="1" />
                 <field
                     name="export_type_id"
@@ -254,9 +248,15 @@
             </xpath>
 
             <xpath expr="//group[@id='header_right_group']" position="inside">
+                <field name="is_FCE_invoice" invisible="True" />
                 <field
-                    name="is_FCE_invoice"
-                    attrs="{'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]}"
+                    name="voucher_type_id"
+                    attrs="{
+                        'readonly': [('move_type','in', ['out_refund', 'out_invoice']),
+                            ('fiscal_type','=', 'electronic')],
+                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
+                    }"
+                    widget="selection"
                 />
                 <field
                     name="cae"
@@ -277,7 +277,11 @@
 
             <page name="other_info" position="inside">
                 <group string="Associated Invoices">
-                    <field name="associated_inv_ids" nolabel="1" domain="[('state', '=', 'posted')]">
+                    <field
+                        name="associated_inv_ids"
+                        nolabel="1"
+                        domain="[('state', '=', 'posted'), ('partner_id', '=', partner_id)]"
+                    >
                         <tree>
                             <field name="partner_id" groups="base.group_user" />
                             <field name="date" />
@@ -356,6 +360,7 @@
                     <group string="Optionals">
                         <field name="optional_ids" nolabel="1">
                             <tree editable="bottom">
+                                <field name="code" />
                                 <field
                                     name="optional_id"
                                     options="{'no_create': True, 'no_create_edit':True, 'no_open':True}"
@@ -382,53 +387,16 @@
                             </tree>
                         </field>
                     </group>
-                    <group string="History Requests">
-                        <field name="wsfex_request_ids" nolabel="1">
-                            <tree>
-                                <field name="request_id" />
-                                <field name="date" />
-                                <field name="voucher_number" />
-                                <field name="voucher_type_id" />
-                                <field name="result" />
-                            </tree>
-                            <form string="Requests" version="7.0">
-                                <group>
-                                    <group>
-                                        <field name="voucher_type_id" />
-                                        <field name="voucher_number" />
-                                        <field name="request_id" />
-                                    </group>
-                                    <group>
-                                        <field name="date" />
-                                        <field name="result" />
-                                        <field name="cae" />
-                                        <field name="cae_duedate" />
-                                    </group>
-                                </group>
-                                <group>
-                                    <group string="Error">
-                                        <field name="error" nolabel="1" />
-                                    </group>
-                                    <group string="Event">
-                                        <field name="event" nolabel="1" />
-                                    </group>
-                                </group>
-                                <group string="Details">
-                                    <field name="detail" nolabel="1" />
-                                </group>
-                            </form>
-                        </field>
-                    </group>
                 </page>
 
                 <page
-                    string="WSFE Requests"
+                    string="WS Requests"
                     attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))]}"
                 >
-                    <field name="wsfe_request_ids" readonly="1">
+                    <field name="ws_request_ids" readonly="1">
                         <tree>
-                            <field name="voucher_date" />
-                            <field name="voucher_number" />
+                            <field name="request_id" />
+                            <!-- <field name="voucher_number" /> -->
                             <field name="result" />
                             <field name="errors" />
                         </tree>
