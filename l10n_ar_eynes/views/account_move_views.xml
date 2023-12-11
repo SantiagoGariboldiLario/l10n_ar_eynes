@@ -97,17 +97,14 @@
 
             <div name="journal_div" position="after">
                 <field
-                    name="fiscal_type"
-                    attrs="{
-                        'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))],
-                    }"
-                />
-                <field
                     name="currency_rate"
                     placeholder="Currency Rate"
                     class="oe_inline"
                     attrs="{'invisible': [('is_multi_currency','=', False)]}"
                 />
+                <p attrs="{'invisible': [('currency_preciated', '=', False)]}">
+                    <i>Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
+                </p>
                 <button
                     name="%(action_account_change_currency)d"
                     aria-label="Opened"
@@ -120,11 +117,14 @@
                         title="Update Currency: Will convert the amount lines to the new currency set"
                         class="fa fa-fw fa-refresh"
                     />
-                    Update Price
+                    Update Currency
                 </button>
-                <p attrs="{'invisible': [('currency_preciated', '=', False)]}">
-                    <i>Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
-                </p>
+                <field
+                    name="fiscal_type"
+                    attrs="{
+                        'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))],
+                    }"
+                />
                 <field name="currency_preciated" invisible="1" />
                 <field name="is_multi_currency" invisible="1" />
                 <field name="company_currency_id" invisible="1" string="Company Currency" />
