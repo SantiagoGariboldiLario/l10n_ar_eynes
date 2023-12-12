@@ -69,29 +69,14 @@ class ValidateAccountMove(models.TransientModel):
                     )
                 )
 
-            # Preparamos el lote de facturas para la AFIP
-            next_system_number = invoices[0].get_next_wsfe_number()
-
-            request_log = invoices.action_post_from_massive(
-                first_number=next_system_number
+        action = super(ValidateAccountMove, self).validate_move()
+        for inv in internal_invoices:
+            inv.write(
+                {
+                    'internal_number': inv.journal_id.get_sequence_from_invoice(
+                        inv
+                    )._next()
+                }
             )
-
-            return {
-                'name': _('WSFE Request'),
-                'res_id': request_log.id,
-                'view_mode': 'form',
-                'res_model': 'wsfe.request',
-                'type': 'ir.actions.act_window',
-            }
-        else:
-            action = super(ValidateAccountMove, self).validate_move()
-            for inv in internal_invoices:
-                inv.write(
-                    {
-                        'internal_number': inv.journal_id.get_sequence_from_invoice(
-                            inv
-                        )._next()
-                    }
-                )
-            internal_invoices._compute_name()
-            return action
+        internal_invoices._compute_name()
+        return action

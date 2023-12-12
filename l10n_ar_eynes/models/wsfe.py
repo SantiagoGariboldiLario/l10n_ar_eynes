@@ -330,6 +330,18 @@ class WsfeConfig(models.Model):
                 opcional_id=opt['Code'],
                 valor=opt['Valor'],
             )
+        return {
+            'invoice_id': invoice.id,
+            'pos_ar': data['PtoVta'],
+            'voucher_type': data['CbteTipo'],
+            'doctype': data['DocTipo'],
+            'docnum': data['DocNro'],
+            'voucher_number': number,
+            'voucher_date': invoice.invoice_date,
+            'amount_total': data['total_amount'],
+            'currency': data['MonId'],
+            'currency_rate': data['MonCotiz'],
+        }
 
     def send_invoices_to_afip(self, invoices):
         self.ensure_one()
@@ -342,14 +354,19 @@ class WsfeConfig(models.Model):
         WsRequestDetail = self.env['ws.request.detail']
         request = WsRequest.create({'date_request': fields.Datetime.today()})
         qty_processed = 0
+        errors = []
         for invoice in invoices:
-            self._set_invoice_in_ws(ws, invoice)
+            req_vals = self._set_invoice_in_ws(ws, invoice)
 
             _logger.info("Trying to push Inovice data to AFIP...")
             error_msg = ""
             try:
                 qty_processed += 1
                 ws.CAESolicitar()
+                xml_request = ws.XmlRequest
+                _logger.info("Data sent to AFIP:")
+                _logger.info(xml_request)
+                req_vals.update({'xml_request': xml_request})
             except SoapFault as soap_fault:
                 error_msg = "%s: %s" % (
                     soap_fault.faultcode,
@@ -364,17 +381,14 @@ class WsfeConfig(models.Model):
                     error_msg = str(e)
                     _logger.error("Internal Error.", error_msg)
             if error_msg:
-                WsRequestDetail.create(
+                req_vals.update(
                     {
-                        'invoice_id': invoice.id,
                         'result': 'E',
                         'errors': error_msg,
                         'request_id': request.id,
                     }
                 )
-                _logger.info("Request details saved.")
-                self.env.cr.commit()  # pylint: disable=invalid-commit
-                raise UserError(
+                errors.append(
                     _("Error trying to validate Electronic Invoice: %s")
                     % (error_msg)
                 )
@@ -383,9 +397,8 @@ class WsfeConfig(models.Model):
             obs_msg = '\n'.join(obs for obs in ws.Observaciones)
             if ws.Resultado == "R":
                 _logger.warning("AFIP Validation Error. Invoice not approved.")
-                WsRequestDetail.create(
+                req_vals.update(
                     {
-                        'invoice_id': invoice.id,
                         'result': 'E',
                         'errors': error_msg,
                         'events': events_msg,
@@ -393,9 +406,7 @@ class WsfeConfig(models.Model):
                         'request_id': request.id,
                     }
                 )
-                _logger.info("Request details saved.")
-                self.env.cr.commit()  # pylint: disable=invalid-commit
-                raise UserError(
+                errors.append(
                     _(
                         """
                         Error trying to validate Electronic Invoice: %s
@@ -408,9 +419,8 @@ class WsfeConfig(models.Model):
 
             else:
                 _logger.info("Mission accomplished!")
-                WsRequestDetail.create(
+                req_vals.update(
                     {
-                        'invoice_id': invoice.id,
                         'request_id': request.id,
                         'result': ws.Resultado,
                         'errors': error_msg,
@@ -422,8 +432,6 @@ class WsfeConfig(models.Model):
                         or False,
                     }
                 )
-                self.env.cr.commit()  # pylint: disable=invalid-commit
-                _logger.info("Request details saved.")
 
                 inv_name = "%s-%s" % (
                     str(ws.PuntoVenta).zfill(5),
@@ -445,8 +453,14 @@ class WsfeConfig(models.Model):
                     "CAE: %s. Result: %s\n UPDATED invoice fields: %s"
                     % (ws.CAE, ws.Resultado, inv_vals)
                 )
-                self.env.cr.commit()  # pylint: disable=invalid-commit
+
+            WsRequestDetail.create(req_vals)
+            _logger.info("Request details saved.")
+            self.env.cr.commit()  # pylint: disable=invalid-commit
 
         _logger.info("Transaction with AFIP finished.")
+        request.write({'nregs': qty_processed})
+        if len(errors) != 0:
+            raise UserError('\n'.join(err for err in errors))
 
         return True
