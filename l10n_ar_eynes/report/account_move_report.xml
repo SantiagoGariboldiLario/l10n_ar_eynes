@@ -44,7 +44,7 @@
 
                 <t t-call="l10n_ar_eynes.weblearns_layout">
                     <div class="page mt-5" style="border-bottom: 1px solid black;">
-                        <h1 style="margin-top: 20px;">Factura</h1>
+                        <h1 style="margin-top: 20px; text-indent: -9999px;">Factura</h1>
                         <table width="100%">
                             <tr>
                                 <td>
