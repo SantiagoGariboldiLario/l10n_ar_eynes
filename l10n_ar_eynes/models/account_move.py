@@ -687,26 +687,39 @@ class AccountMove(models.Model):
                 date = self.invoice_date or fields.Date.context_today(self)
                 p.write({'date': date})
 
-    def action_post(self):
-        if self.is_sale_document():
-            if self.id:
-                self.validate_denomination()
-                self.validate_period()
-                if self.fiscal_type == 'electronic':
-                    if self._check_must_be_fce():
-                        self._ensure_fce_values()
-                    self._validate_electronic_invoices()
-                else:
-                    if not self.posted_before:
-                        self.write(
-                            {
-                                'internal_number': self.journal_id.get_sequence_from_invoice(
-                                    self
-                                )._next()
-                            }
-                        )
-                self._set_perception_date()
-        return super(AccountMove, self).action_post()
+    def _post(self, soft=True):
+        invoices = self.filtered(
+            lambda move: move.is_sale_document() and move.id
+        )
+        for inv in invoices:
+            inv.validate_denomination()
+            inv.validate_period()
+            if inv.fiscal_type == 'electronic':
+                if inv._check_must_be_fce():
+                    inv._ensure_fce_values()
+            else:
+                if not inv.posted_before:
+                    inv.write(
+                        {
+                            'internal_number': inv.journal_id.get_sequence_from_invoice(
+                                inv
+                            )._next()
+                        }
+                    )
+        posted = super(AccountMove, self)._post(soft=soft)
+        invoices = posted.filtered(
+            lambda move: (move.is_sale_document() or move.is_puchase_document())
+            and move.id
+        )
+        for inv in invoices:
+            inv._set_perception_date()
+        invoices = self.filtered(
+            lambda move: move.is_sale_document()
+            and move.id
+            and move.fiscal_type == 'electronic'
+        )
+        invoices._validate_electronic_invoices()
+        return posted
 
     def validate_period(self):
         date = self.invoice_date or fields.Date.context_today(self)
@@ -1259,8 +1272,9 @@ class AccountMove(models.Model):
         self.journal_id = pos_ar_id
 
     def _validate_electronic_invoices(self):
-        ws = self._get_ws_conf()
-        ws.send_invoices_to_afip(self)
+        if self:
+            ws = self._get_ws_conf()
+            ws.send_invoices_to_afip(self)
 
     def get_voucher_type(self):
         self.ensure_one()
@@ -1326,14 +1340,3 @@ class AccountMove(models.Model):
         )
 
         return last_invoice.invoice_date if last_invoice else False
-
-    def action_post_from_massive(self, first_number):
-        for rec in self:
-            rec.validate_denomination()
-            rec.validate_period()
-            if rec._check_must_be_fce():
-                rec._ensure_fce_values()
-
-        logs = self._validate_electronic_invoices(first_number)
-        super(AccountMove, self).action_post()
-        return logs

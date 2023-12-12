@@ -26,6 +26,7 @@
                             options="{'no_create_edit': True, 'no_quick_create': True}"
                         >
                             <tree editable="bottom">
+                                <field name="code" readonly="True" />
                                 <field name="name" readonly="True" />
                                 <field name="to_date" readonly="True" />
                                 <field name="blocked" readonly="True" />

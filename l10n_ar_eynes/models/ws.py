@@ -77,7 +77,7 @@ class WsPOS(models.Model):
     _name = "ws.pos"
     _description = "POS"
 
-    code = fields.Char('Code', required=False, size=4)
+    code = fields.Char('AFIP POS', required=False, size=4)
     blocked = fields.Boolean()
     from_afip = fields.Boolean('From AFIP')
     journal_id = fields.Many2one(
