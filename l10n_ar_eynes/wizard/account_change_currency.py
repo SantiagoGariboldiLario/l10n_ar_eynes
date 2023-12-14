@@ -182,8 +182,6 @@ class AccountChangeCurrency(models.TransientModel):
         inv_vals = {
             'currency_id': new_currency.id,
             'currency_rate': new_rate,
-            'secondary_currency_id': inv_currency.id,
-            'secondary_currency_rate': actual_rate,
             'is_multi_currency': new_currency != company_currency,
         }
         invoice.write(inv_vals)
