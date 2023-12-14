@@ -745,10 +745,19 @@ class AccountMove(models.Model):
                 p.write({'date': date})
 
     def _post(self, soft=True):
-        invoices = self.filtered(
+        sale_invoices = self.filtered(
             lambda move: move.is_sale_document() and move.id
         )
-        for inv in invoices:
+        posted_moves = super(AccountMove, self - sale_invoices)._post(soft=soft)
+        WsRequest = self.env['ws.request']
+        request = None
+        if sale_invoices.filtered(
+            lambda move: move.fiscal_type == 'electronic'
+        ):
+            request = WsRequest.create({'date_request': fields.Datetime.now()})
+        self.env.cr.commit()  # pylint: disable=invalid-commit
+        qty_processed = 0
+        for inv in sale_invoices:
             inv.validate_denomination()
             inv.validate_period()
             if inv.fiscal_type == 'electronic':
@@ -763,20 +772,24 @@ class AccountMove(models.Model):
                             )._next()
                         }
                     )
-        posted = super(AccountMove, self)._post(soft=soft)
-        invoices = posted.filtered(
-            lambda move: (move.is_sale_document() or move.is_puchase_document())
-            and move.id
-        )
-        for inv in invoices:
-            inv._set_perception_date()
-        invoices = self.filtered(
-            lambda move: move.is_sale_document()
-            and move.id
-            and move.fiscal_type == 'electronic'
-        )
-        invoices._validate_electronic_invoices()
-        return posted
+            posted = super(AccountMove, inv)._post(soft=soft)
+            if posted:
+                if (
+                    inv.is_sale_document() or inv.is_puchase_document()
+                ) and inv.id:
+                    inv._set_perception_date()
+                if inv.fiscal_type == 'electronic':
+                    qty_processed += 1
+                    try:
+                        inv._validate_electronic_invoices(request)
+                    except Exception:
+                        self.env.cr.rollback()
+                    else:
+                        posted_moves += posted
+                        self.env.cr.commit()  # pylint: disable=invalid-commit
+        if request:
+            request.write({'nregs': qty_processed})
+        return posted_moves
 
     def validate_period(self):
         date = self.invoice_date or fields.Date.context_today(self)
@@ -1328,10 +1341,10 @@ class AccountMove(models.Model):
             )
         self.journal_id = pos_ar_id
 
-    def _validate_electronic_invoices(self):
+    def _validate_electronic_invoices(self, request):
         if self:
             ws = self._get_ws_conf()
-            ws.send_invoices_to_afip(self)
+            ws.send_invoice_to_afip(self, request)
 
     def get_voucher_type(self):
         self.ensure_one()
