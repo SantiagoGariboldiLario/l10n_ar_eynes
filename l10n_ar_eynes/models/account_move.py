@@ -486,16 +486,19 @@ class AccountMove(models.Model):
         self._onchange_payment_term_date_invoice()
         return
 
-    @api.onchange('date', 'currency_id', 'currency_rate')
-    def _onchange_currency(self):
-        super()._onchange_currency()
-        self._onchange_currency_id()
+    @api.onchange('currency_rate')
+    def _onchange_currency_rate(self):
         if self.is_invoice(include_receipts=True):
             for line in self._get_lines_onchange_currency():
                 line.currency_rate = self.currency_rate
-                # line.price_unit = line._get_computed_price_unit()
                 line._onchange_currency()
             self.compute_perceptions()
+
+    @api.onchange('date', 'currency_id')
+    def _onchange_currency(self):
+        super()._onchange_currency()
+        self._onchange_currency_id()
+        self._onchange_currency_rate()
         return
 
     @api.onchange('invoice_payment_term_id', 'invoice_date')
