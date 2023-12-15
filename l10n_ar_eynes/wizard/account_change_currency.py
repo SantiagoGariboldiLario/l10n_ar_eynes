@@ -161,32 +161,17 @@ class AccountChangeCurrency(models.TransientModel):
             new_invoice_lines.append(line_copy)
         invoice.line_ids.unlink()
 
-        # Recalculate taxes
-        # invoice._onchange_invoice_line_ids()
-
-        # Recalculate manual taxes
-        # for manual_tax in filter(lambda t: t.manual, invoice.tax_line_ids):
-        #     manual_tax.base *= rate
-        #     manual_tax.amount *= rate
-
-        # Recalculo en percepcion
-        # try:
-        #     perceptions = invoice.perception_ids
-        # except AttributeError as e:
-        #     print('l10n_ar_perceptions_basic not installed: %s' % e)
-        # else:
-        #     for perc in perceptions:
-        #         perc.base *= new_base
-        #         perc.amount = new_amount
-
         inv_vals = {
             'currency_id': new_currency.id,
             'currency_rate': new_rate,
             'is_multi_currency': new_currency != company_currency,
         }
         invoice.write(inv_vals)
-
         invoice.invoice_line_ids = AccountMoveLine.create(new_invoice_lines)
+        for perception_line in invoice.perception_ids:
+            perception_line.base *= rate
+            perception_line.amount *= rate
+
         # Mensaje de pesificacion
         msg = _(
             "Invoice currency change %(inv_curr)s => %(new_curr)s. "
