@@ -60,7 +60,9 @@ class WsfeSinchronizeCoucher(models.TransientModel):
     def _compute_pos_id_domain(self):
         for rec in self:
             wsfe_conf = rec.config_id
-            ids = [p.id for p in wsfe_conf.point_of_sale_ids]
+            ids = [
+                p.id for p in wsfe_conf.point_of_sale_ids.mapped('journal_id')
+            ]
             rec.voucher_type.denomination or False
             domain = [('id', 'in', ids)]
             rec.pos_id_domain = json.dumps(domain)
@@ -118,19 +120,22 @@ class WsfeSinchronizeCoucher(models.TransientModel):
         else:
             doc_number = [self.document_number]
 
+        if invoice_model.search([('cae', '=', self.cae)]):
+            raise UserError(_('The voucher is already related to an invoice'))
+
         domain = [
-            # ('amount_total', '=', self.amount_total),
-            # ('amount_exempt', '=', self.amount_exempt),
-            # ('amount_taxed', '=', self.amount_taxed),
-            # ('amount_no_taxed', '=', self.amount_no_taxed),
+            ('amount_total', '=', self.amount_total),
+            ('amount_exempt', '=', self.amount_exempt),
+            ('amount_untaxed', '=', self.amount_taxed),
             ('state', '=', 'draft'),
         ]
-
         if document_type and document_type.afip_code != '99':
             domain.append(('partner_id.vat', 'in', doc_number))
         invoice_ids = invoice_model.search(domain)
         if len(invoice_ids) == 1:
             self.invoice_id = invoice_ids and invoice_ids[0]
+        else:
+            self.invoice_id = False
 
         return {'domain': {'invoice_id': domain}}
 
@@ -147,7 +152,6 @@ class WsfeSinchronizeCoucher(models.TransientModel):
         pos = int(self.pos_id.code)
         number = self.voucher_number
         date_invoice = self.date_invoice
-
         invoice.wsfe_relate_invoice(
             pos, number, date_invoice, self.cae, self.cae_due_date
         )
