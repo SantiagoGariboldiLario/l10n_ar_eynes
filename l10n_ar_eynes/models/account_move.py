@@ -338,11 +338,12 @@ class AccountMove(models.Model):
                         raise_if_not_found=False,
                     ):
                         res['amount_tax_cur'] += amount
+                    if line.tax_line_id.tax_group_id == self.env.ref(
+                        'l10n_ar_eynes.perceptions_tax_group',
+                        raise_if_not_found=False,
+                    ):
+                        res['amount_perception_curr'] += amount
                     res['amount_total_cur'] += amount
-
-            res['amount_perception_curr'] = invoice.currency_id.round(
-                sum(invoice.perception_ids.mapped('amount'))
-            )
 
             invoice.update({field: val for field, val in res.items()})
 
