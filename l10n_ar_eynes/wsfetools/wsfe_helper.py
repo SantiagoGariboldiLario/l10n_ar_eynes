@@ -171,12 +171,8 @@ class WSFEParser(WSParser):
             code = int(PCODES[perception.perception_id.tax_id.jurisdiccion])
             perc = {
                 'Id': code,
-                'BaseImp': round(perception.base / invoice.currency_rate, 2)
-                if invoice.is_multi_currency
-                else perception.base,
-                'Importe': round(perception.amount / invoice.currency_rate, 2)
-                if invoice.is_multi_currency
-                else perception.amount,
+                'BaseImp': perception.base,
+                'Importe': perception.amount,
                 'Alic': 0.0,
                 'Desc': perception.name,
             }

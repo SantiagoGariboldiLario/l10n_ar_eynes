@@ -738,6 +738,8 @@ class AccountMove(models.Model):
                     else:
                         posted_moves += posted
                         self.env.cr.commit()  # pylint: disable=invalid-commit
+                else:
+                    posted_moves += posted
 
         errors = self - posted_moves
         if errors:
