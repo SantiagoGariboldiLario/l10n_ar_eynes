@@ -83,6 +83,8 @@ class AccountJournal(models.Model):
         ],
         compute='_compute_fiscal_type',
     )
+    image = fields.Binary("Image", attachment=True)
+    image_filename = fields.Char()
     activity_start_date = fields.Date(
         string="Activity Start Date", default=fields.date.today()
     )
@@ -165,6 +167,14 @@ class AccountJournal(models.Model):
         compute='_compute_dn_seq_number_next',
         inverse='_inverse_dn_seq_number_next',
     )
+
+    @api.constrains('image')
+    def _check_image_type(self):
+        for record in self:
+            if record.image:
+                image_type = record.image_filename.split('.')[-1]
+                if image_type not in ['png', 'jpg', 'jpeg']:
+                    raise ValidationError(_("Only images are allowed."))
 
     @api.depends('type')
     def _compute_default_account_type(self):
