@@ -21,6 +21,8 @@
                                 widget="many2many_tags"
                                 attrs="{'required':[('type','=','sale')]}"
                             />
+                            <field name="image_filename" invisible="True" />
+                            <field name="image" widget="image" filename="image_filename" />
                         </group>
                         <group>
                             <field name="activity_start_date" attrs="{'required':[('type','=','sale')]}" />
