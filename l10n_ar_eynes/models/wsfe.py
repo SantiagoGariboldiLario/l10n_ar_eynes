@@ -356,13 +356,13 @@ class WsfeConfig(models.Model):
         inv_vals = {}
         error_msg = ""
         try:
-            xml_request = ws.XmlRequest
             _logger.info("Data sent to AFIP:")
+            ws.CAESolicitar()
+            xml_request = ws.XmlRequest
             _logger.info(xml_request)
             req_vals.update(
                 {'xml_request': xml_request, 'request_id': request.id}
             )
-            ws.CAESolicitar()
         except SoapFault as soap_fault:
             error_msg = "%s: %s" % (
                 soap_fault.faultcode,
