@@ -15,6 +15,7 @@ _logger = logging.getLogger(__name__)
 class ResCurrency(models.Model):
     _inherit = "res.currency"
 
+    afip_code = fields.Char(string="AFIP Code", size=4)
     preciated = fields.Boolean('Currency preciated', default=False)
 
     def _get_conversion_rate(self, from_currency, to_currency, company, date):

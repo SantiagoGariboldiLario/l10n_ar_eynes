@@ -258,12 +258,31 @@ class WsfeConfig(models.Model):
         return int(last_voucher_number) + 1
 
     def get_voucher_info(self, pos, voucher_type, number):
+        _logger.info(
+            'Requesting data of voucher %s-%s-%s' % (pos, voucher_type, number)
+        )
         self.ensure_one()
         ws = self.ws_auth()
-        cae = ws.CompConsultar(voucher_type, pos, number)
+        ws.CompConsultar(voucher_type, pos, number)
         helper = WSFEParser()
         helper.parse_errors_raise(ws, _("get voucher info"))
-        return cae
+        ws.AnalizarXml('XmlResponse')
+        res = {
+            'DocTipo': ws.ObtenerTagXml('DocTipo'),
+            'CbteFch': ws.ObtenerTagXml('CbteFch'),
+            'FchVto': ws.ObtenerTagXml('FchVto'),
+            'FchProceso': ws.ObtenerTagXml('FchProceso'),
+            'DocNro': ws.ObtenerTagXml('DocNro'),
+            'ImpTotal': ws.ObtenerTagXml('ImpTotal'),
+            'ImpTotConc': ws.ObtenerTagXml('ImpTotConc'),
+            'ImpNeto': ws.ObtenerTagXml('ImpNeto'),
+            'ImpIVA': ws.ObtenerTagXml('ImpIVA'),
+            'ImpTrib': ws.ObtenerTagXml('ImpTrib'),
+            'ImpOpEx': ws.ObtenerTagXml('ImpOpEx'),
+            'CodAutorizacion': ws.ObtenerTagXml('CodAutorizacion'),
+        }
+        _logger.info('Voucher info: %s' % res)
+        return res
 
     def _set_invoice_in_ws(self, ws, invoice):
         _logger.info("Parsing data from invoice ID: %s" % invoice.id)

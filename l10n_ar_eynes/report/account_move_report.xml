@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="paperformat_invoice" model="report.paperformat">
+        <field name="name">Invoice Report</field>
+        <field name="default" eval="False" />
+        <field name="format">A4</field>
+        <field name="page_width">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">90</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_right">5</field>
+        <field name="margin_left">5</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">90</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="account_move_report" model="ir.actions.report">
+        <field name="name">Factura QWEB</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ar_eynes.account_move_report_qweb</field>
+        <field name="report_file">l10n_ar_eynes.account_move_report_qweb</field>
+        <field name="print_report_name">(object._get_report_base_filename())</field>
+        <field name="attachment">(object.state == 'posted') and ((object.name or
+            'INV').replace('/','_')+'.pdf')</field>
+        <field name="binding_model_id" ref="model_account_move" />
+        <field name="binding_type">report</field>
+        <field name="groups_id"
+            eval="[(4, ref('account.group_account_invoice')), (4, ref('account.group_account_readonly'))]" />
+    </record>
+
+    <template id="account_move_report_qweb">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="denomination" t-value="o.internal_number" />
+                <t t-if="o.denomination">
+                    <t t-set="denomination_name" t-value="o.denomination.upper()" />
+                </t>
+                <t t-else="">
+                    <t t-set="denomination_name" t-value="''" />
+                </t>
+
+                <t t-call="l10n_ar_eynes.weblearns_layout">
+                    <div class="page mt-5" style="border-bottom: 1px solid black;">
+                        <h1 style="margin-top: 20px; text-indent: -9999px;">Factura</h1>
+                        <table width="100%">
+                            <tr>
+                                <td>
+                                    <span style="font-size: 18px; font-weight: bold;">Cliente: </span>
+                                    <span t-esc="o.partner_id.name" />
+                                    <br></br>
+                                    <span style="font-size: 18px; font-weight: bold;">Domicilio: </span>
+                                    <span t-esc="o.partner_id.street" />
+                                    <br></br>
+                                    <span style="font-size: 18px; font-weight: bold;">Condicion
+                                        IVA: </span>
+                                    <t
+                                        t-if="o.partner_id.property_account_position_id.name == 'RI'">
+                                        <span>RESPONSABLE INSCRIPTO</span>
+                                    </t>
+                                    <t
+                                        t-elif="o.partner_id.property_account_position_id.name == 'RIM'">
+                                        <span>RESPONSABLE INSCRIPTO "M"</span>
+                                    </t>
+                                    <t t-else="">
+                                        <span
+                                            t-esc="o.partner_id.property_account_position_id.name" />
+                                    </t>
+                                    <br></br>
+
+                                    <span style="font-size: 18px; font-weight: bold;">Condicion
+                                        Venta: </span>
+                                    <span
+                                        t-esc="o.invoice_payment_term_id.name" />
+                                </td>
+                                <td>
+                                    <span style="font-size: 18px; font-weight: bold;">Tel.: </span>
+                                    <span t-esc="o.partner_id.phone" />
+                                    <br></br>
+                                    <span style="font-size: 18px; font-weight: bold;">CUIT: </span>
+                                    <span
+                                        t-esc="o.partner_id.vat" />
+                                    <br></br>
+                                    <span style="font-size: 18px; font-weight: bold;">IIBB: </span>
+                                    <span
+                                        t-esc="o.partner_id.vat" />
+                                    <br></br>
+                                    <span style="font-size: 18px; font-weight: bold;">F. Venc: </span>
+                                    <span
+                                        t-esc="o.invoice_date_due" />
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+                    <div class="div" style="margin-top: 5px;">
+                        <table width="100%" class="items table" style="margin-bottom: 50px;">
+                            <thead>
+                                <tr style="text-align: center">
+                                    <th>
+                                        Descripción
+                                    </th>
+                                    <th>
+                                        Cantidad
+                                    </th>
+                                    <th>
+                                        Precio Unit.
+                                    </th>
+                                    <th>
+                                        Total
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.invoice_line_ids" t-as="line">
+                                    <td>
+                                        <span t-esc="line.name" />
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span t-esc="line.quantity" />
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span t-esc="line.price_unit"
+                                            t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" />
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span t-esc="line.price_subtotal"
+                                            t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" />
+                                    </td>
+                                </tr>
+                            </tbody>
+
+
+                            <style>
+                                .items {
+                                border-collapse: collapse;
+                                }
+                                .items tr:nth-child(even) {
+                                background-color: #f2f2f2;
+                                }
+                            </style>
+                        </table>
+
+                        <div style="float: right;">
+                            <table
+                                style="display: inline-block; margin-top: 20px; border-bottom: 1px solid black;">
+                                <tr>
+                                    <t t-foreach="o.line_ids.filtered('tax_line_id')"
+                                        t-as="line_tax">
+                                        <td style="width: 250px;">
+                                            <div style="text-align: left;">
+                                                <strong>
+                                                    <span t-esc="line_tax.tax_line_id.name" />
+                                                </strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span t-esc="abs(line_tax.balance)"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                        </td>
+                                    </t>
+                                </tr>
+                            </table>
+                        </div>
+
+
+                        <div class="row" style="margin-top: 50px;">
+                            <div class="column"
+                                style="text-align: left; border-right: 1px solid black;">
+                                <h4 style="font-weight: bold;">
+                                    Observaciones:
+                                </h4>
+                            </div>
+                            <div class="column"
+                                style="text-align: center;">
+                                <table width="100%">
+                                    <thead style="background: #d1d1d1;">
+                                        <tr style="font-weight: bold;">
+                                            <td>
+                                                Subtotal
+                                            </td>
+                                            <td>
+                                                Impuestos
+                                            </td>
+                                            <td>
+                                                Total
+                                            </td>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span t-esc="o.amount_untaxed"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                            </td>
+                                            <td>
+                                                <span t-esc="o.amount_tax"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                            </td>
+                                            <td>
+                                                <span t-esc="o.amount_total"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <style>
+                                .row{
+                                border: 1px solid black;
+                                padding: 5px;
+                                margin-top: 10px;
+
+                                }
+                                .column{
+                                width: 50%;
+
+                                }
+                                .row:after{
+                                content: "";
+                                display: table;
+                                clear: both;
+                                }
+                            </style>
+                        </div>
+
+                        <div class="cae">
+
+                            <table width="50%"
+                                style="float: right; font-size: 18px; text-align: center; margin-top: 5px;">
+                                <tr>
+                                    <td>
+                                        Factura Electrónica / CAE:
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="background: #bcc0c4;">
+                                        <t t-if="o.cae">
+                                            <span t-esc="o.cae" />
+                                        </t>
+                                        <t t-else="">
+                                            <span>-</span>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td> F. Vto.: <t t-if="o.cae_due_date">
+                                            <span
+                                                t-esc="o.cae_due_date.strftime('%d-%m-%Y')" />
+                                        </t>
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                        </div>
+
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+
+    <template id="weblearns_layout">
+        <div class="header">
+            <div class="" style="border-bottom: 1px solid black;">
+                <t t-if="docs and docs[0].company_id">
+                    <div class="div">
+                        <table
+                            style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 16px;">
+                            <tr>
+                                <td width="33%" style="font-weight: bold;">
+                                    <!-- <img t-if="point_of_sale_image"
+                                        t-att-src="image_data_uri(point_of_sale_image)"
+                                        style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
+                                        alt="Logo" /> -->
+
+                                    <br></br>
+                                    <h3
+                                        t-esc="o.company_id.name" />
+                                    <span
+                                        t-esc="o.company_id.street" /> | Tel.: <span
+                                        t-esc="o.company_id.phone" />
+                                    <p><span
+                                            t-esc="o.company_id.city" /> (<span
+                                            t-esc="o.company_id.zip" />) - <span
+                                            t-esc="o.company_id.state_id.name" /> - <span
+                                            t-esc="o.company_id.country_id.name" /></p>
+                                </td>
+                                <td width="33%" style="vertical-align: top; text-align: center;">
+                                    <div
+                                        style="display: block; margin: 0 auto; border: 2px solid #000; height: 100px; width: 100px; font-size: 40px;">
+                                        <h1 style="font-size: 65px;"
+                                            t-esc="denomination_name"></h1>
+                                    </div>
+                                </td>
+                                <td width="33%"
+                                    style="font-weight: bold; font-size: 17px; padding-left: 50px;">
+                                    <span>N° <span t-esc="denomination" />
+                                    </span>
+                                    <br></br>
+                                    <span>Fecha: <span t-esc="o.invoice_date" />
+                                    </span>
+                                    <br></br>
+                                    <span>C.U.I.T: <span t-esc="o.company_id.vat" />
+                                    </span>
+                                    <br></br>
+                                    <span>Ing. Brutos: <span t-esc="o.company_id.vat" />
+                                    </span>
+                                    <br></br>
+                                    <span>IVA Responsable Inscripto</span>
+                                    <br></br>
+                                    <span> Inic. Activ.: </span>
+                                    <br></br>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </t>
+            </div>
+        </div>
+        <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name"
+            t-att-data-oe-id="o and o.id">
+            <t t-raw="0" />
+        </div>
+        <div class="footer o_standard_footer">
+        </div>
+    </template>
+
+
+</odoo>

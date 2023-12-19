@@ -2362,7 +2362,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
                     'out_refund': 'Out Refund',
                 }
                 invoice = line.invoice_id
-                if invoice.is_company_cur:
+                if not invoice.is_multi_currency:
                     total_without_vat = (
                         line.amount
                         / invoice.amount_total

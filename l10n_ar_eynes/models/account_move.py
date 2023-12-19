@@ -33,6 +33,21 @@ class AccountMove(models.Model):
         compute='_compute_move_denomination',
         store=True,
     )
+    iva_digital_operation_code = fields.Selection(
+        [
+            ('A', 'No Alcanzado'),
+            ('NC', 'No corresponde'),
+            ('C', 'Operac. Canje'),
+            ('D', 'Devol. IVA Turistas Extr.'),
+            ('E', 'Operaciones Exentas'),
+            ('N', 'No gravado'),
+            ('T', 'Reintegro Decreto 1043/2016'),
+            ('X', 'Import. / Export. al Exterior'),
+            ('Z', 'Import. / Export. a Zona Franca'),
+        ],
+        'Operation Code',
+        default='NC',
+    )
     internal_number = fields.Char(
         string='Internal Number',
         copy=False,
@@ -233,7 +248,6 @@ class AccountMove(models.Model):
         currency_field="secondary_currency_id",
         string='FOB',
     )
-    is_company_cur = fields.Boolean(compute='_compute_is_company_cur')
     vat_date = fields.Date()
 
     _sql_constraints = [
@@ -291,17 +305,16 @@ class AccountMove(models.Model):
         'perception_ids',
     )
     def _compute_amount_all_cur(self):
-        Currency = self.env.get('res.currency')
         for invoice in self:
             res = {
-                'amount_untaxed_cur': 0.0,
-                'amount_tax_cur': 0.0,
-                'amount_perception_curr': 0.0,
-                'amount_total_cur': 0.0,
-                'amount_fob_cur': 0.0,
-                'amount_taxed_cur': 0.0,
-                'amount_no_taxed_cur': 0.0,
-                'amount_exempt_cur': 0.0,
+                'amount_taxed_cur': 0.0,  # Gravado
+                'amount_no_taxed_cur': 0.0,  # No gravado
+                'amount_exempt_cur': 0.0,  # Exento
+                'amount_untaxed_cur': 0.0,  # Subtotal sin impuestos
+                'amount_tax_cur': 0.0,  # IVA
+                'amount_perception_curr': 0.0,  # Percepciones
+                'amount_total_cur': 0.0,  # Total
+                'amount_fob_cur': 0.0,  # ??
             }
 
             secondary_currency = invoice.secondary_currency_id
@@ -312,69 +325,41 @@ class AccountMove(models.Model):
                 invoice.update(res)
                 continue
 
-            amount_base = 0.0
-            amount_exempt = 0.0
-
             for line in invoice.invoice_line_ids:
-                res['amount_untaxed_cur'] += line.price_subtotal
-
-                for tax in line.tax_ids:
-                    if tax.tax_group_id == self.env.ref(
-                        'l10n_ar_eynes.perceptions_tax_group',
+                amount = line.credit or line.debit
+                res['amount_untaxed_cur'] += amount
+                has_vat_tax = line.tax_ids.filtered(
+                    lambda tax: tax.tax_group_id
+                    == self.env.ref(
+                        'l10n_ar_eynes.vat_tax_group',
                         raise_if_not_found=False,
-                    ):
-                        continue
-                    if tax.tax_group_id == self.env.ref(
+                    )
+                )
+                if has_vat_tax.filtered(lambda tax: tax.is_exempt):
+                    res['amount_exempt_cur'] += amount
+                elif has_vat_tax:
+                    res['amount_taxed_cur'] += amount
+                else:
+                    res['amount_no_taxed_cur'] += amount
+                res['amount_total_cur'] += amount
+
+            for line in invoice.line_ids - invoice.invoice_line_ids:
+                if not (
+                    line.account_internal_type in ['payable', 'receivable']
+                ):
+                    amount = line.credit or line.debit
+                    if line.tax_line_id.tax_group_id == self.env.ref(
                         'l10n_ar_eynes.vat_tax_group',
                         raise_if_not_found=False,
                     ):
-                        if tax.is_exempt:
-                            amount_exempt += tax.amount
-                        else:
-                            amount_base += tax.amount
-                    res['amount_tax_cur'] += invoice.currency_id.round(
-                        line.price_subtotal * tax.amount * 0.01
-                    )
+                        res['amount_tax_cur'] += amount
+                    if line.tax_line_id.tax_group_id == self.env.ref(
+                        'l10n_ar_eynes.perceptions_tax_group',
+                        raise_if_not_found=False,
+                    ):
+                        res['amount_perception_curr'] += amount
+                    res['amount_total_cur'] += amount
 
-            date = invoice.date or invoice.date_invoice or fields.Date.today()
-            company = invoice.company_id
-            modify_cur_obj = Currency.with_context(
-                currency1=(invoice.currency_id, invoice.currency_rate),
-                currency2=(secondary_currency, invoice.secondary_currency_rate),
-            )
-            rate = modify_cur_obj._get_conversion_rate(
-                invoice.currency_id,
-                secondary_currency,
-                company,
-                date,
-            )
-
-            res['amount_total_cur'] *= rate
-            res['amount_untaxed_cur'] *= rate
-            res['amount_tax_cur'] *= rate
-            res['amount_perception_curr'] = invoice.currency_id.round(
-                sum(invoice.perception_ids.mapped('amount'))
-                * invoice.currency_rate
-            )
-            amount_base *= rate
-            amount_exempt *= rate
-
-            atc_rounded = secondary_currency.round(res['amount_tax_cur'])
-            atotc_rounded = secondary_currency.round(res['amount_total_cur'])
-            auc_rounded = secondary_currency.round(res['amount_untaxed_cur'])
-            perc_rounded = secondary_currency.round(
-                res['amount_perception_curr']
-            )
-            amount_base = secondary_currency.round(amount_base)
-            amount_exempt = secondary_currency.round(amount_exempt)
-
-            res['amount_total_cur'] = atc_rounded + auc_rounded + perc_rounded
-            res['amount_fob_cur'] = atotc_rounded
-            res['amount_no_taxed_cur'] = (
-                auc_rounded - amount_base - amount_exempt
-            )
-            res['amount_taxed_cur'] = amount_base
-            res['amount_exempt_cur'] = amount_exempt
             invoice.update({field: val for field, val in res.items()})
 
     @api.depends('journal_id')
@@ -385,21 +370,6 @@ class AccountMove(models.Model):
                 [('journal_id', '=', inv.journal_id.id)]
             )
             inv.fiscal_type = 'electronic' if electronic else 'internal'
-
-    def compute_invoice_totals(self, company_currency, invoice_move_lines):
-        modify_self = self.with_context(
-            currency1=(self.currency_id, self.currency_rate),
-            currency2=(company_currency, 1),
-        )
-        return super(AccountMove, modify_self).compute_invoice_totals(
-            company_currency, invoice_move_lines
-        )
-
-    def _compute_is_company_cur(self):
-        for invoice in self:
-            invoice.is_company_cur = (
-                invoice.company_currency_id == invoice.currency_id
-            )
 
     def get_highest_pos_sequence(self):
         invoices = self.env['account.move'].search(
@@ -492,9 +462,8 @@ class AccountMove(models.Model):
 
             self._recompute_dynamic_lines()
 
-    @api.onchange('currency_id', 'invoice_date')
+    @api.onchange('invoice_date')
     def _onchange_currency_id(self):
-        self._compute_is_company_cur()
         date_invoice = self.date or self.invoice_date or fields.Date.today()
         if not self.currency_id:
             self.is_multi_currency = False
@@ -515,6 +484,21 @@ class AccountMove(models.Model):
                 self.currency_rate = 1.0
 
         self._onchange_payment_term_date_invoice()
+        return
+
+    @api.onchange('currency_rate')
+    def _onchange_currency_rate(self):
+        if self.is_invoice(include_receipts=True):
+            for line in self._get_lines_onchange_currency():
+                line.currency_rate = self.currency_rate
+                line._onchange_currency()
+            self.compute_perceptions()
+
+    @api.onchange('date', 'currency_id')
+    def _onchange_currency(self):
+        super()._onchange_currency()
+        self._onchange_currency_id()
+        self._onchange_currency_rate()
         return
 
     @api.onchange('invoice_payment_term_id', 'invoice_date')
@@ -550,32 +534,6 @@ class AccountMove(models.Model):
         res.append('currency_rate')
         return res
 
-    def get_invoice_amounts_in_company_cur(self):
-        res = {}
-        for inv in self:
-            if inv.is_multi_currency and not inv.currency_converted:
-                res[inv.id] = {
-                    'amount_total': inv.amount_total_cur,
-                    'amount_exempt': inv.amount_exempt_cur,
-                    'amount_no_taxed': inv.amount_no_taxed_cur,
-                    'amount_taxed': inv.amount_taxed_cur,
-                    'amount_untaxed': inv.amount_untaxed_cur,
-                    'amount_tax': inv.amount_tax_cur,
-                    'amount_fob': inv.amount_fob_cur,
-                }
-            else:
-                res[inv.id] = {
-                    'amount_total': inv.amount_total,
-                    'amount_exempt': inv.amount_exempt,
-                    'amount_no_taxed': inv.amount_no_taxed,
-                    'amount_taxed': inv.amount_taxed,
-                    'amount_untaxed': inv.amount_untaxed,
-                    'amount_tax': inv.amount_tax,
-                    # 'amount_fob': inv.amount_fob
-                }
-
-        return res
-
     def _prepare_tax_line_vals(self, perception_line):
         """Prepare values to create an account.move.line
 
@@ -584,7 +542,7 @@ class AccountMove(models.Model):
         perception_tax = perception_line.perception_id.tax_id
         sign = -1 if self.move_type in ('out_invoice', 'in_refund') else 1
         line_amount = amount_currency = perception_line.amount
-        if not self.is_company_cur:
+        if self.is_multi_currency:
             line_amount = line_amount * self.currency_rate
 
         is_refund = self.move_type in ('out_refund', 'in_refund')
@@ -682,17 +640,6 @@ class AccountMove(models.Model):
                     )
                 else:
                     inv.voucher_type_id = res
-
-    @api.onchange('date', 'currency_id', 'currency_rate')
-    def _onchange_currency(self):
-        super()._onchange_currency()
-        if self.is_invoice(include_receipts=True):
-            for line in self._get_lines_onchange_currency():
-                line.currency_rate = self.currency_rate
-                line.price_unit = line._get_computed_price_unit()
-                line._onchange_currency()
-            self.compute_perceptions()
-        return
 
     @api.onchange('invoice_date')
     def _onchange_invoice_date(self):

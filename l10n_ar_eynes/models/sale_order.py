@@ -7,7 +7,7 @@
 
 import logging
 
-from odoo import _, api, exceptions, models
+from odoo import _, api, exceptions, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -38,6 +38,21 @@ class SaleOrder(models.Model):
                 )
             )
         invoice_vals['journal_id'] = journals[0].id
+
+        date_invoice = fields.Date.today()
+        company = self.env.user.company_id
+        company_currency = company.currency_id
+        currency = self.currency_id
+        if currency != company_currency:
+            curr_rate = currency._get_currency_rate(company, date_invoice)
+            if currency.preciated:
+                currency_rate = curr_rate.inverse_company_rate
+            else:
+                currency_rate = curr_rate.company_rate
+        else:
+            currency_rate = 1.0
+
+        invoice_vals['currency_rate'] = currency_rate
         return invoice_vals
 
     @api.model
