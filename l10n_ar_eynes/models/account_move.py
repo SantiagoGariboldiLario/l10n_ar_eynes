@@ -387,7 +387,7 @@ class AccountMove(models.Model):
         last_sequence_number = max(invoices.mapped('sequence_number'))
         return str(last_sequence_number + 1).zfill(8)
 
-    @api.onchange('partner_id', 'fiscal_type')
+    @api.onchange('partner_id')
     def _onchange_partner(self):
         if not self.partner_id:
             return
@@ -407,11 +407,10 @@ class AccountMove(models.Model):
                         'title': _('Journal not found'),
                         'message': _(
                             "Could not match any user available journals with fiscal position "
-                            "'%(fiscal_pos)s' and fiscal type '%(fiscal_type)s'\n"
+                            "'%(fiscal_pos)s'\n"
                             "Please check if there are any journals with this parameters "
                             "in users > preferences > available journals",
                             fiscal_pos=partner_fiscal_position.name,
-                            fiscal_type=self.fiscal_type,
                         ),
                     },
                     'domain': {'journal_id': [('id', 'in', [])]},
@@ -698,12 +697,18 @@ class AccountMove(models.Model):
         posted_moves = super(AccountMove, self - sale_invoices)._post(soft=soft)
         WsRequest = self.env['ws.request']
         request = None
-        if sale_invoices.filtered(
+        electronic_invoices = sale_invoices.filtered(
             lambda move: move.fiscal_type == 'electronic'
-        ):
-            request = WsRequest.create({'date_request': fields.Datetime.now()})
+        )
+        if electronic_invoices:
+            request = WsRequest.create(
+                {
+                    'date_request': fields.Datetime.now(),
+                    'nregs': len(electronic_invoices),
+                }
+            )
         self.env.cr.commit()  # pylint: disable=invalid-commit
-        qty_processed = 0
+
         for inv in sale_invoices:
             inv.validate_denomination()
             inv.validate_period()
@@ -726,7 +731,6 @@ class AccountMove(models.Model):
                 ) and inv.id:
                     inv._set_perception_date()
                 if inv.fiscal_type == 'electronic':
-                    qty_processed += 1
                     try:
                         inv._validate_electronic_invoices(request)
                     except Exception:
@@ -734,8 +738,18 @@ class AccountMove(models.Model):
                     else:
                         posted_moves += posted
                         self.env.cr.commit()  # pylint: disable=invalid-commit
-        if request:
-            request.write({'nregs': qty_processed})
+
+        errors = self - posted_moves
+        if errors:
+            raise UserError(
+                _(
+                    "Error trying to validate electronic invoice with ids [%(ids)s]."
+                    "Check WS Requests page or go to 'Informs -> Ws Requests -> %(name)s'.",
+                    ids=', '.join(str(inv_id.id) for inv_id in errors),
+                    name=request.name,
+                )
+            )
+
         return posted_moves
 
     def validate_period(self):
@@ -1246,9 +1260,9 @@ class AccountMove(models.Model):
                                 You need yo configure a CBU for FCE. Go to Settings --> Companies,
                                 select %(name)s
                                 and complete "CBU (FCE)" field.
-                                """
-                            ),
-                            name=self.company_id.name,
+                                """,
+                                name=self.company_id.name,
+                            )
                         )
                 if aio.code == '27':
                     value = self.partner_id.fcred_transfer
@@ -1257,9 +1271,9 @@ class AccountMove(models.Model):
                             _(
                                 """
                                 You need to configure the "SCA/ADC (FCE)?" field for this partner %(name)s.
-                                """
-                            ),
-                            name=self.partner_id.name,
+                                """,
+                                name=self.partner_id.name,
+                            )
                         )
                 dd = {
                     'optional_id': aio.id,
