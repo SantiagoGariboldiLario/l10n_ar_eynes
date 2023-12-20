@@ -212,6 +212,21 @@
                         'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
                     }"
                 />
+                <field
+                    name="cae"
+                    string="CAE"
+                    attrs="{
+                        'readonly': [('move_type','in', ['out_refund', 'out_invoice'])],
+                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
+                    }"
+                />
+                <field
+                    name="cae_due_date"
+                    attrs="{
+                        'readonly': [('move_type','in', ['out_refund', 'out_invoice'])],
+                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
+                    }"
+                />
                 <field name="iva_digital_operation_code" />
                 <field name="local" invisible="1" />
                 <field
@@ -259,21 +274,6 @@
                         'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
                     }"
                     widget="selection"
-                />
-                <field
-                    name="cae"
-                    string="CAE"
-                    attrs="{
-                        'readonly': [('move_type','in', ['out_refund', 'out_invoice'])],
-                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
-                    }"
-                />
-                <field
-                    name="cae_due_date"
-                    attrs="{
-                        'readonly': [('move_type','in', ['out_refund', 'out_invoice'])],
-                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
-                    }"
                 />
             </xpath>
 
