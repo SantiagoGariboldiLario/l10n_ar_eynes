@@ -174,12 +174,18 @@
                     class="oe_subtotal_footer oe_right"
                     attrs="{'invisible': ['|',('secondary_currency_id', '=', False), ('is_multi_currency','=', False)]}"
                 >
-                    <field name="amount_taxed_cur" />
-                    <field name="amount_no_taxed_cur" />
-                    <field name="amount_exempt_cur" />
-                    <field name="amount_untaxed_cur" class="oe_subtotal_footer_separator" />
-                    <field name="amount_tax_cur" />
-                    <field name="amount_perception_curr" />
+                    <field name="amount_taxed_cur" attrs="{'invisible': [('amount_taxed_cur', '=', 0)]}" />
+                    <field
+                        name="amount_no_taxed_cur"
+                        attrs="{'invisible': [('amount_no_taxed_cur', '=', 0)]}"
+                    />
+                    <field name="amount_exempt_cur" attrs="{'invisible': [('amount_exempt_cur', '=', 0)]}" />
+                    <!-- <field name="amount_untaxed_cur" class="oe_subtotal_footer_separator" /> -->
+                    <field name="amount_tax_cur" attrs="{'invisible': [('amount_tax_cur', '=', 0)]}" />
+                    <field
+                        name="amount_perception_curr"
+                        attrs="{'invisible': [('amount_perception_curr', '=', 0)]}"
+                    />
                     <field name="amount_total_cur" class="oe_subtotal_footer_separator" />
                     <i>- Amounts in Secondary Currency</i>
                 </group>
