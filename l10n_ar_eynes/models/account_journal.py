@@ -82,6 +82,7 @@ class AccountJournal(models.Model):
             ('electronic', 'Electronic Invoice'),
         ],
         compute='_compute_fiscal_type',
+        store=True,
     )
     image = fields.Binary("Image", attachment=True)
     image_filename = fields.Char()
