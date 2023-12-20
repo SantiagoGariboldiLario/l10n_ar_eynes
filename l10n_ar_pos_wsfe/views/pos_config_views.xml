@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="pos_config_view_form" model="ir.ui.view">
+        <field name="name">pos.config.inherit.wsfe</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//label[@for='invoice_journal_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <field name="invoice_journal_id" position="attributes">
+                <attribute name="attrs">{'invisible': True, 'required': False}</attribute>
+            </field>
+            <xpath expr="//label[@for='invoice_journal_id']" position="before">
+                <label
+                    string="Invoice Journals"
+                    for="invoice_manual_journal_ids"
+                    class="col-lg-3 o_light_label"
+                />
+                <field
+                    name="invoice_manual_journal_ids"
+                    widget="many2many_tags"
+                    required="1"
+                    context="{
+                        'default_company_id': company_id,
+                        'default_type': 'sale',
+                        'default_fiscal_type': 'internal',
+                        'no_journal_in_pos': True,
+                    }"
+                />
+                <label
+                    string="WSFE Invoice Journals"
+                    for="invoice_journal_ids"
+                    class="col-lg-3 o_light_label"
+                />
+                <field
+                    name="invoice_journal_ids"
+                    widget="many2many_tags"
+                    required="1"
+                    context="{
+                        'default_company_id': company_id,
+                        'default_type': 'sale',
+                        'default_fiscal_type': 'electronic',
+                        'no_journal_in_pos': True,
+                    }"
+                />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

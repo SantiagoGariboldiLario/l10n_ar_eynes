@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="PaymentScreen" t-inherit="point_of_sale.PaymentScreen" t-inherit-mode="extension" owl="1">
+        <!-- <xpath expr="//div[hasclass('button') and hasclass('js_invoice')]" position="before"> -->
+        <!--     <div class="o_date_invoice_container" -->
+        <!--             t-attf-style="display: #{ currentOrder.is_manual_invoice() ? 'block' : 'none'}"> -->
+        <!--         <strong style="font-size: 15px">Date Invoice: </strong> -->
+        <!--         <input type="text" -->
+        <!--             class="o_datepicker_input o_input o_date_invoice" -->
+        <!--             id="o_invoice_datepicker_input"/> -->
+        <!--     </div> -->
+        <!-- </xpath> -->
+        <xpath expr="//div[hasclass('top-content-center')][1]" position="replace">
+            <div class="top-content-center"><h1>Payment <t t-esc="invoiceNumber" /></h1></div>
+        </xpath>
+        <xpath expr="//div[hasclass('button') and hasclass('js_invoice')]" position="after">
+            <div
+                class="button js_manual_invoice"
+                t-att-class="{ highlight: currentOrder.is_manual_invoice() }"
+                t-on-click="toggleIsManualInvoice"
+            >
+                <i class='fa fa-pencil' /> Manual Mode
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('button') and hasclass('js_invoice')]" position="replace">
+            <div
+                t-if="env.pos.config.module_account"
+                class="button js_invoice"
+                t-att-class="{ highlight: currentOrder.is_electronic_invoice() }"
+                t-on-click="toggleIsElectronicInvoice"
+            >
+                <i class="fa fa-file-text-o" /> Electronic Invoice
+            </div>
+        </xpath>
+    </t>
+
+</templates>

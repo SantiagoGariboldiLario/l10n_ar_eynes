@@ -82,6 +82,7 @@ class AccountJournal(models.Model):
             ('electronic', 'Electronic Invoice'),
         ],
         compute='_compute_fiscal_type',
+        store=True,
     )
     activity_start_date = fields.Date(
         string="Activity Start Date", default=fields.date.today()
