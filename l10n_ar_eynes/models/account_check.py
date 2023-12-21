@@ -387,7 +387,9 @@ class AccountCheck(models.Model):
         current_currency = self.currency_id.id
         check_currency = self.checkbook_id.bank_account_id.currency_id.id
         if check_currency != company_currency:
-            amount_in_company_currency = voucher._convert_paid_amount_in_company_currency(self.amount)
+            amount_in_company_currency = (
+                voucher._convert_paid_amount_in_company_currency(self.amount)
+            )
         else:
             amount_in_company_currency = self.amount
         debit = credit = 0.0
@@ -432,6 +434,7 @@ class AccountCheck(models.Model):
     # THIRD PARTY CHECK FIELDS AND METHODS
     third_party_check_state = fields.Selection(
         selection=[
+            ('draft', 'Draft'),
             ('in_wallet', 'In wallet'),
             ('deposited', 'Deposited'),
             ('delivered', 'Delivered'),
@@ -439,7 +442,7 @@ class AccountCheck(models.Model):
             ('rejected', 'Rejected'),
             ('returned', 'Returned'),
         ],
-        default='in_wallet',
+        default='draft',
         string='State',
     )
     deposit_bank_id = fields.Many2one(
@@ -620,7 +623,7 @@ class AccountCheck(models.Model):
         # amount_in_company_currency = (
         #     voucher._convert_paid_amount_in_company_currency(self.amount)
         # )
-        amount_in_company_currency = (self.amount)
+        amount_in_company_currency = self.amount
 
         debit = credit = 0.0
         if voucher.type in ('purchase', 'payment'):
