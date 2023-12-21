@@ -542,7 +542,7 @@ class AccountCheck(models.Model):
     def check_to_wallet(self):
         if self.deposit_move_id:
             self.deposit_move_id.button_cancel()
-            self.deposit_move_id.unlink()
+            self.deposit_move_id.with_context(force_delete=True).unlink()
             self.write({'third_party_check_state': 'in_wallet'})
         else:
             raise ValidationError(
