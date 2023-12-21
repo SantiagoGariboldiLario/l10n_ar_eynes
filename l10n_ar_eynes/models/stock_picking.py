@@ -11,10 +11,10 @@ import logging
 import os
 import re
 
+from pyafipws.cot import COT
+
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-
-from ..lib import cot
 
 _logger = logging.getLogger(__name__)
 
@@ -24,8 +24,78 @@ _logger = logging.getLogger(__name__)
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
-    renum_pick_id = fields.Many2one('stock.picking', string='Renumerated', help="Reference to the new picking created for renumerate this one. You cannot delete pickings if it is done, so it is cancelled and a new one is created, corrected and renumerated")
-    name_original = fields.Char(string='Original picking number')
+    renum_pick_id = fields.Many2one(
+        comodel_name='stock.picking',
+        string='Renumerated',
+        help="Reference to the new picking created for renumerate this one. "
+        "You cannot delete pickings if it is done, so it is cancelled "
+        "and a new one is created, corrected and renumerated",
+    )
+    name_original = fields.Char(
+        string='Original picking number',
+    )
+    declared_value = fields.Float(
+        string='Declared Value',
+        readonly=True,
+        help='Declared Value',
+    )
+    cot = fields.Char(
+        string='COT',
+        readonly=True,
+        copy=False,
+        help='COT Code',
+    )
+    picking_supplier = fields.Char(
+        string='Picking Supplier',
+        size=100,
+    )
+    voucher = fields.Char(
+        string='Voucher',
+        readonly=True,
+        copy=False,
+    )
+    cot_date = fields.Datetime(
+        string='Cot Date',
+        readonly=True,
+        copy=False,
+    )
+    is_origin = fields.Boolean(
+        string='Delivery origin',
+        help='Delivery Origin',
+    )
+    cot_date_transfer = fields.Date(
+        string='Date of Transfer',
+        help='Date of Transport Depature',
+    )
+    express_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Express',
+        readonly=True,
+    )
+    truck_license_plate = fields.Char(
+        string='Truck License Plate',
+    )
+    trailer_license_plate = fields.Char(
+        string='Trailer License Plate',
+    )
+    dimension = fields.Float(
+        string='Dimension',
+    )
+    pick_type = fields.Selection(
+        string='Type',
+        related='picking_type_id.code',
+        store=True,
+        readonly=True,
+    )
+    dom_partner_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Carrier Partner',
+    )
+
+    @api.onchange("carrier_id")
+    def onchange_carrier(self):
+        if self.carrier_id:
+            self.dom_partner_id = self.carrier_id.id
 
     def _action_done(self):
         res = super(StockPicking, self)._action_done()
@@ -266,8 +336,10 @@ class StockPicking(models.Model):
                 'subject': subject,
                 'dest_tenedor': dest_tenedor,
                 'tenedor': tenedor,
+                'trailer_license_plate': trailer_license_plate,
             }
         )
+        return vals
 
     def _get_partner_vals(self):
         """Get partner values for the remit and perform values validations"""
@@ -491,7 +563,6 @@ class StockPicking(models.Model):
         date = datetime.date.today().strftime("%Y%m%d")
         sequence = self.get_sequence()[-6:]
         express_id = self.partner_id.express_id
-        URL = self._get_cot_url()
 
         # file name
         fileName = (
@@ -521,12 +592,13 @@ class StockPicking(models.Model):
         file.write(cot_footer)
         file.close()
 
-        cot_obj = cot.COT()
+        cot_obj = COT()
         cot_obj.Password = self._get_cot_pass()
         cot_obj.Usuario = self._get_cot_user()
 
         # cot_obj.Usuario = cuit
         # TODO: Hacer la verificación del SSL
+        URL = self._get_cot_url()
         cot_obj.Conectar(URL, trace=False, cacert=None)
 
         cot_obj.PresentarRemito(fileName, testing="")
@@ -534,6 +606,18 @@ class StockPicking(models.Model):
         os.remove(fileName)
 
         if cot_obj.Excepcion:
+            if (
+                not isinstance(cot_obj.Excepcion, bytes)
+                and 'xml.parsers.expat' in cot_obj.Excepcion
+                and isinstance(cot_obj.XmlResponse, bytes)
+                and b'404 Not Found' in cot_obj.XmlResponse
+            ):
+                raise ValidationError(
+                    _(
+                        "Error when sending the cot, the url is incorrect "
+                        "or the service is not available"
+                    )
+                )
             raise ValidationError(
                 _(
                     "COT Errorn- Exception: %(exception)s\nTraceback: %(traceback)s",
@@ -590,43 +674,3 @@ class StockPicking(models.Model):
     def _get_cot_url(self):
         # Obtenemos la url para enviar el remito
         return self.company_id.cot_url
-
-    @api.onchange("carrier_id")
-    def onchange_carrier(self):
-        if self.carrier_id:
-            self.dom_partner_id = self.carrier_id.id
-
-    # route_id = fields.Many2one("delivery.route")
-    # route_state = fields.Selection(related="route_id.state")
-    declared_value = fields.Float(
-        "Declared Value",
-        readonly=True,
-        help="Declared Value",
-    )
-    cot = fields.Char("COT", readonly=True, copy=False, help="COT Code")
-    picking_supplier = fields.Char("Picking Supplier", size=100)
-    voucher = fields.Char("Voucher", readonly=True, copy=False)
-    cot_date = fields.Datetime("Cot Date", readonly=True, copy=False)
-    is_origin = fields.Boolean("Delivery origin", help="Delivery Origin")
-    # cot_date_transfer = fields.Date(
-    #     related="route_id.date",
-    #     string="Date of Transfer",
-    #     help="Date of Transport Depature",
-    # )
-    express_id = fields.Many2one("res.partner", "Express", readonly=True)
-    # truck_license_plate = fields.Char(
-    #     related="route_id.scale_entry_id.truck_id.name",
-    #     string="Truck License Plate",
-    # )
-    # trailer_license_plate = fields.Char(
-    #     related="route_id.scale_entry_id.trailer_id.name",
-    #     string="Trailer License Plate",
-    # )
-    dimension = fields.Float("Dimension")
-    pick_type = fields.Selection(
-        string="Type",
-        related="picking_type_id.code",
-        store=True,
-        readonly=True,
-    )
-    dom_partner_id = fields.Many2one("res.partner", string="Carrier Partner")

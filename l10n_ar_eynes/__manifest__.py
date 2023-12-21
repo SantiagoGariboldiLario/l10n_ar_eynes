@@ -125,6 +125,7 @@
         'views/sifere_config_view.xml',
         'views/report_invoice.xml',
         'views/arba_exporter.xml',
+        'views/delivery_carrier_views.xml',
         "wizard/create_arciba_file.xml",
         'views/arciba_exporter.xml',
         'wizard/arba_retention_exporter.xml',
