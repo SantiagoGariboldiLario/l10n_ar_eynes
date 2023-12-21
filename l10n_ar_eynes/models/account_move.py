@@ -941,6 +941,41 @@ class AccountMove(models.Model):
         if not applicable:
             return None
 
+        if perception_id.tax_id.apply_custom_code:
+            new_perception_lines = self.env['perception.tax.line']
+
+            perceptions = perception_id.tax_id._get_taxapps_from_code(
+                perception_data, self
+            )
+
+            for perception_vals in perceptions:
+                concept_id = perception_vals.get('concept_id')
+                if not concept_id:
+                    raise ValidationError(
+                        _("Concet must be setted in python code. Perception %s")
+                        % perception_id.name
+                    )
+
+                if (
+                    perception_vals.get('amount', 0.0) == 0.0
+                    and self.state_id.code != 'R'
+                ):
+                    continue
+
+                # Creamos la percepcion.tax.line
+                perception_line_vals = perception_id._prepare_perception_vals(
+                    concept_id, perception_vals, self
+                )
+                # Creamos la perception.tax.line correspondiente
+                # Le pasamos manual=False para que se cree la account.invoice.tax
+                # con manual=False
+                new_perception_lines += (
+                    self.env['perception.tax.line']
+                    .with_context(manual=False)
+                    .new(perception_line_vals)
+                )
+            return new_perception_lines
+
         # Chequeamos las percepciones a aplicar que matchean
         # (esto corresponde a una percepcion pero que pueden
         # existir varios conceptos y/o actividades)

@@ -69,6 +69,34 @@ class ResPartner(models.Model):
     apartment = fields.Char(string="Apartment", size=4)
     express_id = fields.Many2one("res.partner", string="Express")
     last_update_from_afip = fields.Date()
+    gross_income_ids = fields.One2many(
+        comodel_name='gross.income',
+        inverse_name='partner_id',
+        string='Gross Income',
+    )
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super(ResPartner, self).default_get(fields_list)
+        province = (
+            self.env['res.country.state']
+            .search(
+                [
+                    ('country_id', "=", 'Argentina'),
+                    ('code', "in", ['W', 'P', 'N', 'Q', 'S']),
+                ]
+            )
+            .ids
+        )
+
+        vals = [
+            (0, 0, {'province_id': province[0]}),
+            (0, 0, {'province_id': province[1]}),
+            (0, 0, {'province_id': province[2]}),
+            (0, 0, {'province_id': province[3]}),
+        ]
+        res.update({'gross_income_ids': vals})
+        return res
 
     def parse_afip_values(self, values):
 
@@ -240,12 +268,35 @@ class ResPartner(models.Model):
 
     def write(self, vals):
         self.check_vat_string(vals, write=True)
+        for rec in self:
+            province = self.env['res.country.state'].search(
+                [
+                    ('country_id', "=", 'Argentina'),
+                    ('code', "in", ['W', 'P', 'N', 'Q']),
+                ]
+            )
+            for record in province:
+                if not rec.gross_income_ids.filtered(
+                    lambda ps: ps.province_id == record
+                ):
+                    rec.gross_income_ids.create(
+                        {'province_id': record.id, 'partner_id': rec.id}
+                    )
         res = super().write(vals)
         return res
 
     @api.model
     def create(self, vals_list):
         self.check_vat_string(vals_list)
+        for values in vals_list:
+            if values.get('gross_income_ids'):
+                for rec in values.get('gross_income_ids'):
+                    if not rec[-1].get('type_taxpayer'):
+                        raise ValidationError(
+                            _(
+                                "El campo tipo de contribuyente debe ser completado"
+                            )
+                        )
         return super(ResPartner, self).create(vals_list)
 
     def check_vat_string(self, vals, write=False):

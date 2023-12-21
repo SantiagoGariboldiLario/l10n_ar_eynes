@@ -229,13 +229,21 @@
                     </group>
 
                     <group colspan="4" col="6" string="Tax Application">
-                        <field name="retention_type" colspan="2" />
+                        <field name="retention_type" />
+                        <field name="apply_custom_code" />
                         <separator name="tax_application" />
+                        <field
+                            name="python_code"
+                            colspan="4"
+                            widget="ace"
+                            options="{'mode': 'python'}"
+                            attrs="{'invisible':[('apply_custom_code', '=', False)]}"
+                        />
                         <field
                             name="perc_vat_application_ids"
                             nolabel="1"
                             colspan="4"
-                            attrs="{'invisible':[('retention_type','!=','vat')]}"
+                            attrs="{'invisible':['|', ('retention_type','!=','vat'), ('apply_custom_code', '=', True)]}"
                             context="{'default_type':'vat'}"
                         >
                             <tree>
@@ -268,7 +276,7 @@
                             name="perc_gi_application_ids"
                             nolabel="1"
                             colspan="4"
-                            attrs="{'invisible':[('retention_type','!=','gross_income')]}"
+                            attrs="{'invisible':['|', ('retention_type','!=','gross_income'), ('apply_custom_code', '=', True)]}"
                             context="{'default_type':'gross_income'}"
                         >
                             <tree>
@@ -303,7 +311,7 @@
                             name="perc_profit_application_ids"
                             nolabel="1"
                             colspan="4"
-                            attrs="{'invisible':[('retention_type','!=','profit')]}"
+                            attrs="{'invisible':['|', ('retention_type','!=','profit'), ('apply_custom_code', '=', True)]}"
                             context="{'default_type':'profit'}"
                         >
                             <tree>
