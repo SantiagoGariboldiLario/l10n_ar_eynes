@@ -796,7 +796,7 @@ class AccountJournal(models.Model):
         return perceptions
 
     def _prepare_perception_vals(self, concept_id, vals, invoice):
-        taxapp = vals['tax_app_id']
+        taxapp = vals.get('tax_app_id', False)
         return {
             'name': self.name,
             'concept_id': concept_id,
@@ -805,7 +805,7 @@ class AccountJournal(models.Model):
             'amount': vals['amount'],
             'manual': False,  # La creamos por sistema
             'reg_code': vals['reg_code'],
-            'tax_app_id': taxapp.id,
+            'tax_app_id': taxapp.id if taxapp else taxapp,
             'perception_id': self.id,
             'state_id': self.state_id and self.state_id.id or False,
             'partner_id': invoice.partner_id.id if invoice else False,

@@ -21,15 +21,8 @@
 
             <xpath expr="//field[@name='vat']" position="before">
                 <field name="dst_cuit" invisible="1" />
-                <field
-                    name="document_type_id"
-                    placeholder="Document Type..."
-                    widget="selection"
-                />
-                <field
-                    name="dst_cuit_id"
-                    attrs="{'invisible': [('dst_cuit', '!=', True)]}"
-                />
+                <field name="document_type_id" placeholder="Document Type..." widget="selection" />
+                <field name="dst_cuit_id" attrs="{'invisible': [('dst_cuit', '!=', True)]}" />
                 <field name="supplier_rank" invisible="1" />
                 <field name="customer_rank" invisible="1" />
             </xpath>
@@ -42,10 +35,7 @@
                 <field name="nro_insc_iibb" />
             </xpath>
 
-            <xpath
-                expr="//field[@name='property_account_position_id']"
-                position="after"
-            >
+            <xpath expr="//field[@name='property_account_position_id']" position="after">
                 <field name="fcred_transfer" />
             </xpath>
 
@@ -53,10 +43,7 @@
                 <page string="Perceptions">
                     <field name="perception_ids" nolabel="1">
                         <tree editable="bottom">
-                            <field
-                                name="perception_id"
-                                domain="[('type_tax_use','=','sale')]"
-                            />
+                            <field name="perception_id" domain="[('type_tax_use','=','sale')]" />
                             <field name="activity_id" />
                             <field name="percent" />
                             <field name="excluded_percent" />
@@ -66,6 +53,13 @@
                             <field name="sit_iibb" />
                         </tree>
                     </field>
+                    <separator string="IIBB" />
+                    <field name="gross_income_ids" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="province_id" />
+                            <field name="type_taxpayer" />
+                        </tree>
+                    </field>
                 </page>
                 <page string="Retentions" name="retentions">
                     <group name="retention_activity" string="Retention activity">
@@ -73,10 +67,7 @@
                     </group>
                     <field name="retention_ids" nolabel="1">
                         <tree editable="bottom">
-                            <field
-                                name="retention_id"
-                                domain="[('type_tax_use','=','purchase')]"
-                            />
+                            <field name="retention_id" domain="[('type_tax_use','=','purchase')]" />
                             <field name="percent" />
                             <field name="excluded_percent" />
                             <field name="ex_date_from" />

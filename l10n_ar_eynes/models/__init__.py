@@ -38,3 +38,4 @@ from . import arba_exporter
 from . import arciba_exporter
 from . import sequence_mixin
 from . import ws_padron  # noqa
+from . import gross_income  # noqa
