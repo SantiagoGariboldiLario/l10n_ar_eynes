@@ -6,6 +6,7 @@ from . import account_move_line
 from . import account_payment_method  # noqa
 from . import account_payment_order  # noqa
 from . import account_tax  # noqa
+from . import delivery_carrier  # noqa
 from . import iibb_situation  # noqa
 from . import product  # noqa
 from . import reason_rejected_check  # noqa
@@ -21,7 +22,6 @@ from . import res_users  # noqa
 from . import res_voucher_type  # noqa
 from . import retention  # noqa
 from . import sale_order  # noqa
-from . import stock_move  # noqa
 from . import stock_picking  # noqa
 from . import stock_picking_type  # noqa
 from . import certificate_request  # noqa

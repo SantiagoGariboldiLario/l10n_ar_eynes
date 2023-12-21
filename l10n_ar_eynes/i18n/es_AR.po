@@ -3109,6 +3109,14 @@ msgid "Error when searching for the check"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/stock_picking.py:0
+#, python-format
+msgid ""
+"Error when sending the cot, the url is incorrect or the service is not "
+"available"
+msgstr "Error al enviar el cot. La url es incorrecta o el servicio no está disponible"
+
+#. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/account_change_currency.py:0
 #, python-format
 msgid ""
