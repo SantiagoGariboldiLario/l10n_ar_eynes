@@ -617,6 +617,9 @@ class AccountMove(models.Model):
         if not self.supplier_move_reference:
             return
 
+        if not self.local:
+            return
+
         # Separator missing or multiple separators error
         if self.supplier_move_reference.count('-') != 1:
             raise ValidationError(_('Must be only one separator'))
