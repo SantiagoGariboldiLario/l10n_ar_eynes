@@ -29,16 +29,16 @@ class AccountMove(models.Model):
             )
             journals = pos_line.journal_id
         if not journals:
-            fiscal_type = (
+            desc_fiscal_type = (
                 _('Internal') if fiscal_type == 'internal' else _('Electronic')
             )
             raise ValidationError(
                 _(
                     "No journal of %(fiscal_type)s type was found for "
-                    "account position %(fiscal_position)s configured in pos"
-                ),
-                fiscal_type=fiscal_type,
-                fiscal_position=partner_fiscal_position.display_name,
+                    "fiscal position %(fiscal_position)s configured in pos",
+                    fiscal_type=desc_fiscal_type,
+                    fiscal_position=partner_fiscal_position.display_name,
+                )
             )
         return journals[0]
 
@@ -52,32 +52,23 @@ class AccountMove(models.Model):
         return False
 
     def get_next_sequence_from_pos(
-        self, partner_id, pos_config_id, fiscal_type, amount_total
+        self,
+        partner_id,
+        pos_config_id,
+        fiscal_type,
+        move_type,
+        amount_total,
     ):
         partner = self.env['res.partner'].browse(partner_id)
         pos_config = self.env['pos.config'].browse(pos_config_id)
         journal = self.get_journal_from_pos(partner, fiscal_type, pos_config)
         if fiscal_type == 'electronic':
             is_FCE_invoice = self.is_out_invoice_fce(partner, amount_total)
-            # TODO: Reemplazar esto por query
-            # (el is_CFE_invoice deberia tener store)
-            invoices = (
-                self.env['account.move']
-                .sudo()
-                .search(
-                    [
-                        ('journal_id', '=', journal.id),
-                        ('move_type', '=', 'out_invoice'),
-                        ('is_debit_note', '=', False),
-                        ('is_FCE_invoice', '=', is_FCE_invoice),
-                    ]
-                )
+            sequence = self.env['account.move'].get_highest_pos_sequence(
+                journal,
+                move_type,
+                is_fce=is_FCE_invoice,
             )
-            if not invoices or len(invoices) == 1:
-                sequence = '1'.zfill(8)
-            else:
-                last_sequence_number = max(invoices.mapped('sequence_number'))
-                sequence = str(last_sequence_number + 1).zfill(8)
             pos_number = str(int(journal.get_pos_number())).zfill(5)
             next_seq = '%s-%s' % (pos_number, sequence)
         else:
@@ -89,7 +80,16 @@ class AccountMove(models.Model):
             next_seq = journal.sequence_id.get_next_char(
                 journal.sequence_id.number_next,
             )
+        denom_attrs = journal._fields['denomination'].get_description(self.env)
+        denomination = list(
+            filter(
+                lambda x: x[0] == journal.denomination,
+                denom_attrs['selection'],
+            )
+        )
         return {
             'next_seq': next_seq,
             'journal_id': journal.id,
+            'denomination': denomination[0][1] if denomination else False,
+            'move_type': 'F' if move_type == 'out_invoice' else 'NC',
         }

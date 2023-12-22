@@ -77,6 +77,14 @@ msgstr "Factura Manual"
 #. module: l10n_ar_pos_wsfe
 #: code:addons/l10n_ar_pos_wsfe/models/account_move.py:0
 #, python-format
+msgid ""
+"No journal of %(fiscal_type)s type was found for fiscal position "
+"%(fiscal_position)s configured in pos"
+msgstr "No se encontró ningún diario de tipo %(fiscal_type)s para la posición fiscal %(fiscal_position)s configurada en pos"
+
+#. module: l10n_ar_pos_wsfe
+#: code:addons/l10n_ar_pos_wsfe/models/account_move.py:0
+#, python-format
 msgid "No journal of %s type was found for account position %s configured in pos"
 msgstr "No se encontró ningún diario de tipo %s para la posición fiscal %s configurada en pos"
 

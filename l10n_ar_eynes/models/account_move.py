@@ -371,21 +371,36 @@ class AccountMove(models.Model):
             )
             inv.fiscal_type = 'electronic' if electronic else 'internal'
 
-    def get_highest_pos_sequence(self):
-        invoices = self.env['account.move'].search(
-            [
-                ('journal_id', '=', self.journal_id.id),
-                ('move_type', '=', self.move_type),
-                ('is_debit_note', '=', self.is_debit_note),
-                ('is_FCE_invoice', '=', self.is_FCE_invoice),
-            ]
+    def get_highest_pos_sequence(
+        self, journal, move_type, is_debit_note=False, is_fce=False
+    ):
+        """
+        Returns the next number according to the
+        type of invoice and journal
+        """
+        query = """
+            SELECT max(sequence_number) AS next_sequence
+            FROM account_move
+            WHERE journal_id = %(journal_id)s
+                AND fiscal_type = %(fiscal_type)s
+                AND move_type = %(move_type)s
+                AND is_debit_note = %(is_debit_note)s
+                AND "is_FCE_invoice" = %(is_FCE_invoice)s
+        """
+        self.env.cr.execute(
+            query,
+            {
+                'journal_id': journal.id,
+                'fiscal_type': journal.fiscal_type,
+                'move_type': move_type,
+                'is_debit_note': is_debit_note,
+                'is_FCE_invoice': is_fce,
+            },
         )
-
-        if not invoices or len(invoices) == 1:
+        res = self.env.cr.fetchone()
+        if not res:
             return '1'.zfill(8)
-
-        last_sequence_number = max(invoices.mapped('sequence_number'))
-        return str(last_sequence_number + 1).zfill(8)
+        return str(res[0] + 1).zfill(8)
 
     @api.onchange('partner_id')
     def _onchange_partner(self):
