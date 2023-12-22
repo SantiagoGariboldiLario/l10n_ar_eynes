@@ -77,7 +77,7 @@ class WsPOS(models.Model):
     _name = "ws.pos"
     _description = "POS"
 
-    code = fields.Char('AFIP POS', required=False, size=4)
+    code = fields.Char('AFIP POS', required=True, size=4)
     blocked = fields.Boolean()
     from_afip = fields.Boolean('From AFIP')
     journal_id = fields.Many2one(
@@ -105,6 +105,67 @@ class WsPOS(models.Model):
                     """
                 )
             )
+
+    @api.model
+    def new(
+        self, values={}, origin=None, ref=None  # noqa: B006
+    ):  # pylint: disable=dangerous-default-value
+        # TODO: Cuando creo un nuevo registro de configuracion el context no contiene los params
+        params = self.env.context.get('params', None)
+        if params:
+            model = params.get('model')
+            rec_id = params.get('id')
+            ws = self.env[model].browse(rec_id)
+            ws_field = 'wsfe_config_id'
+            if model == 'wsfex.config':
+                ws_field = 'wsfex_config_id'
+            if ws.config_id.homologation:
+                pos = self.env['ws.pos'].search(
+                    [(ws_field, '=', rec_id)], limit=1
+                )
+                if pos:
+                    values.update(
+                        {
+                            ws_field: rec_id,
+                            'code': pos.code,
+                            'blocked': pos.blocked,
+                            'from_afip': pos.from_afip,
+                            'name': pos.name,
+                            'priority': pos.priority,
+                            'to_date': pos.to_date,
+                        }
+                    )
+        return super(WsPOS, self).new(values=values, origin=origin, ref=ref)
+
+    @api.model
+    def create(self, vals):
+        ws_field = 'wsfe_config_id'
+        rec_id = vals.get('wsfe_config_id', None)
+        if not rec_id:
+            ws_field = 'wsfex_config_id'
+            rec_id = vals.get('wsfex_config_id', None)
+        pos = self.env['ws.pos'].search([(ws_field, '=', rec_id)], limit=1)
+        if pos:
+            vals.update(
+                {
+                    'code': pos.code,
+                    'blocked': pos.blocked,
+                    'from_afip': pos.from_afip,
+                    'name': pos.name,
+                    'priority': pos.priority,
+                    'to_date': pos.to_date,
+                }
+            )
+        journal_id = vals.get('journal_id', None)
+        if journal_id:
+            journal = self.env['account.journal'].browse(journal_id)
+            journal.fiscal_type = 'electronic'
+        return super(WsPOS, self).create(vals)
+
+    def unlink(self):
+        if self.journal_id:
+            self.journal_id.fiscal_type = 'internal'
+        return super(WsPOS, self).unlink()
 
 
 class WsTaxCodes(models.Model):
