@@ -69,6 +69,7 @@ docs/_build/
 # Backup files
 *~
 *.swp
+*.swo
 
 # OCA rules
 !static/lib/

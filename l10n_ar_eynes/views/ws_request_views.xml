@@ -26,29 +26,27 @@
                                     <field name="errors" />
                                 </tree>
                                 <form>
+                                    <separator string="Main Information" colspan="4" />
                                     <group colspan="4" col="6">
-                                        <group colspan="4" col="4">
-                                            <separator
-                                                string="Main Information"
-                                                colspan="4"
-                                            />
+                                        <group>
                                             <field name="invoice_id" />
-                                            <field name="cae" />
                                             <field name="result" />
-                                        </group>
-                                        <group colspan="2">
-                                            <field name="doctype" />
-                                            <field name="docnum" />
                                             <field name="cae" />
                                             <field name="cae_due_date" />
                                         </group>
+                                        <group>
+                                            <field name="pos_ar" />
+                                            <field name="voucher_type" />
+                                            <field name="voucher_number" />
+                                            <field name="voucher_date" />
+                                            <field name="currency" />
+                                            <field name="currency_rate" />
+                                        </group>
                                     </group>
+                                    <separator string="XML Request" colspan="4" />
+                                    <field name="xml_request" nolabel="1" colspan="4" />
                                     <separator string="Observations" colspan="4" />
-                                    <field
-                                        name="observations"
-                                        nolabel="1"
-                                        colspan="4"
-                                    />
+                                    <field name="observations" nolabel="1" colspan="4" />
                                     <separator string="Events" colspan="4" />
                                     <field name="events" nolabel="1" colspan="4" />
                                     <separator string="Errors" colspan="4" />
@@ -68,6 +66,7 @@
         <field name="type">tree</field>
         <field name="arch" type="xml">
             <tree create="false" delete="false">
+                <field name="id" />
                 <field name="date_request" />
                 <field name="nregs" />
             </tree>

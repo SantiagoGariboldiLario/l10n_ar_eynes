@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="libro_iva_exporter_view" model="ir.ui.view">
+        <field name="name">Libro IVA Digital Exporter</field>
+        <field name="model">libro.iva.exporter.wizard</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form>
+                <p colspan="4">
+                This wizard allows you to create files to import to AFIP for Libro IVA Digital.
+                </p>
+                <separator colspan="4" />
+                <group>
+                    <field name="date_from" />
+                    <field name="date_to" />
+                    <field name="company_id" />
+                </group>
+                <separator string="Validation Errors" colspan="4" />
+                <field name="notes" readonly="1" nolabel="1" colspan="4" />
+                <group col="2" colspan="4">
+                </group>
+                <footer>
+                    <button
+                        name="create_files"
+                        string="Generate"
+                        colspan="1"
+                        type="object"
+                        class="oe_highlight"
+                    />
+                    <button special="cancel" string="Cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_export_libro_iva" model="ir.actions.act_window">
+        <field name="name">Libro IVA Digital Exporter</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">libro.iva.exporter.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_libro_iva" parent="menu_taxes_reports" sequence="5" name="Libro IVA Digital" />
+
+    <menuitem id="libroiva_exporter_menu" parent="menu_libro_iva" action="action_export_libro_iva" />
+</odoo>

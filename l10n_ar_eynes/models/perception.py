@@ -116,7 +116,7 @@ class PerceptionTaxLine(models.Model):
         for rec in self:
             rec.base_secondary_currency = 0
             rec.amount_secondary_currency = 0
-            if not rec.invoice_id.is_company_cur:
+            if rec.invoice_id.is_multi_currency:
                 currency_rate = rec.invoice_id.currency_rate
                 rec.base_secondary_currency = rec.base * currency_rate
                 rec.amount_secondary_currency = rec.amount * currency_rate

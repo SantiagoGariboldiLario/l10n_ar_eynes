@@ -83,7 +83,9 @@ class AccountChangeCurrency(models.TransientModel):
         date = self.invoice_id.date or fields.Date.today()
         company = self.env.user.company_id
         curr_rate = self.new_currency_id._get_currency_rate(company, date)
-        if self.new_currency_id.preciated:
+        if self.new_currency_id == company.currency_id:
+            self.new_currency_rate = 1.0
+        elif self.new_currency_id.preciated:
             self.new_currency_rate = curr_rate.inverse_company_rate
         else:
             self.new_currency_rate = curr_rate.rate
@@ -118,36 +120,57 @@ class AccountChangeCurrency(models.TransientModel):
                 _("Error!\n'actual rate' or 'new rate' not provided")
             )
 
-        for line in invoice.invoice_line_ids:
-            line.price_unit *= rate
-
-        # Recalculate taxes
-        invoice._onchange_invoice_line_ids()
-
-        # Recalculate manual taxes
-        for manual_tax in filter(lambda t: t.manual, invoice.tax_line_ids):
-            manual_tax.base *= rate
-            manual_tax.amount *= rate
-
-        # Recalculo en percepcion
-        # try:
-        #     perceptions = invoice.perception_ids
-        # except AttributeError as e:
-        #     print('l10n_ar_perceptions_basic not installed: %s' % e)
-        # else:
-        #     for perc in perceptions:
-        #         perc.base *= new_base
-        #         perc.amount = new_amount
+        AccountMoveLine = self.env['account.move.line']
+        new_invoice_lines = []
+        for line in invoice.line_ids:
+            line_copy = {
+                'move_id': line.move_id.id,
+                'account_id': line.account_id.id,
+                'name': line.name,
+                'quantity': line.quantity,
+                'price_unit': line.price_unit * rate,
+                'discount': line.discount,
+                'debit': line.debit,
+                'credit': line.credit,
+                'balance': line.balance,
+                'price_subtotal': line.price_subtotal * rate,
+                'amount_currency': line.price_subtotal * rate * -1,
+                'price_total': line.price_total * rate,
+                'currency_id': new_currency.id,
+                'blocked': line.blocked,
+                'date_maturity': line.date_maturity,
+                'partner_id': line.partner_id.id,
+                'product_uom_id': line.product_uom_id.id,
+                'product_id': line.product_id.id,
+                'reconcile_model_id': line.reconcile_model_id.id,
+                'payment_id': line.payment_id.id,
+                'statement_line_id': line.statement_line_id.id,
+                'tax_ids': line.tax_ids.ids,
+                'tax_line_id': line.tax_line_id.id,
+                'tax_base_amount': line.tax_base_amount,
+                'tax_repartition_line_id': line.tax_repartition_line_id.id,
+                'full_reconcile_id': line.full_reconcile_id.id,
+                # 'matched_debit_ids': ,
+                # 'matched_credit_ids': ,
+                # 'analytic_line_ids': ,
+                'recompute_tax_line': line.recompute_tax_line,
+                'display_type': line.display_type,
+                'is_rounding_line': line.is_rounding_line,
+                'exclude_from_invoice_tab': line.exclude_from_invoice_tab,
+            }
+            new_invoice_lines.append(line_copy)
+        invoice.line_ids.unlink()
 
         inv_vals = {
             'currency_id': new_currency.id,
             'currency_rate': new_rate,
-            'secondary_currency_id': inv_currency.id,
-            'secondary_currency_rate': actual_rate,
-            'is_multi_currency': new_currency == company_currency,
-            # 'currency_converted': True,
+            'is_multi_currency': new_currency != company_currency,
         }
         invoice.write(inv_vals)
+        invoice.invoice_line_ids = AccountMoveLine.create(new_invoice_lines)
+        for perception_line in invoice.perception_ids:
+            perception_line.base *= rate
+            perception_line.amount *= rate
 
         # Mensaje de pesificacion
         msg = _(

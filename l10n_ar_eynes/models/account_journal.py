@@ -82,7 +82,10 @@ class AccountJournal(models.Model):
             ('electronic', 'Electronic Invoice'),
         ],
         compute='_compute_fiscal_type',
+        store=True,
     )
+    image = fields.Binary("Image", attachment=True)
+    image_filename = fields.Char()
     activity_start_date = fields.Date(
         string="Activity Start Date", default=fields.date.today()
     )
@@ -165,6 +168,14 @@ class AccountJournal(models.Model):
         compute='_compute_dn_seq_number_next',
         inverse='_inverse_dn_seq_number_next',
     )
+
+    @api.constrains('image')
+    def _check_image_type(self):
+        for record in self:
+            if record.image:
+                image_type = record.image_filename.split('.')[-1]
+                if image_type not in ['png', 'jpg', 'jpeg']:
+                    raise ValidationError(_("Only images are allowed."))
 
     @api.depends('type')
     def _compute_default_account_type(self):
@@ -796,7 +807,7 @@ class AccountJournal(models.Model):
         return perceptions
 
     def _prepare_perception_vals(self, concept_id, vals, invoice):
-        taxapp = vals['tax_app_id']
+        taxapp = vals.get('tax_app_id', False)
         return {
             'name': self.name,
             'concept_id': concept_id,
@@ -805,7 +816,7 @@ class AccountJournal(models.Model):
             'amount': vals['amount'],
             'manual': False,  # La creamos por sistema
             'reg_code': vals['reg_code'],
-            'tax_app_id': taxapp.id,
+            'tax_app_id': taxapp.id if taxapp else taxapp,
             'perception_id': self.id,
             'state_id': self.state_id and self.state_id.id or False,
             'partner_id': invoice.partner_id.id if invoice else False,

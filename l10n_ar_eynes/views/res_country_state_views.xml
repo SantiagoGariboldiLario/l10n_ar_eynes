@@ -13,4 +13,18 @@
         </field>
     </record>
 
+    <record id="country_state_view_tree_inherit_l10n_ar_eynes" model="ir.ui.view">
+        <field name="name">country.state.view.tree.inherit</field>
+        <field name="model">res.country.state</field>
+        <field name="inherit_id" ref="base.view_country_state_tree" />
+        <field name="arch" type="xml">
+            <field name="code" position="after">
+                <field name="cot_code" />
+                <field name="cot_valid" />
+            </field>
+        </field>
+    </record>
+
+
+
 </odoo>
