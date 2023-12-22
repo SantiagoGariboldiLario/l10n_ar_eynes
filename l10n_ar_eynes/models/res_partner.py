@@ -286,18 +286,15 @@ class ResPartner(models.Model):
         return res
 
     @api.model
-    def create(self, vals_list):
-        self.check_vat_string(vals_list)
-        for values in vals_list:
-            if values.get('gross_income_ids'):
-                for rec in values.get('gross_income_ids'):
-                    if not rec[-1].get('type_taxpayer'):
-                        raise ValidationError(
-                            _(
-                                "El campo tipo de contribuyente debe ser completado"
-                            )
-                        )
-        return super(ResPartner, self).create(vals_list)
+    def create(self, vals):
+        self.check_vat_string(vals)
+        if vals.get('gross_income_ids'):
+            for rec in vals.get('gross_income_ids'):
+                if not rec[-1].get('type_taxpayer'):
+                    raise ValidationError(
+                        _("El campo tipo de contribuyente debe ser completado")
+                    )
+        return super(ResPartner, self).create(vals)
 
     def check_vat_string(self, vals, write=False):
         vat = vals.get("vat")
