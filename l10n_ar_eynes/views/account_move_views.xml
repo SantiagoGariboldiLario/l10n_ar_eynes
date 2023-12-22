@@ -240,15 +240,15 @@
                     widget="selection"
                     attrs="{
                         'required': [
-                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('move_type', 'in', ('out_invoice', 'out_refund')),
                             ('local','=',False)
                         ],
                         'invisible': [
                             '|',
                             '&amp;',
-                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('move_type', 'in', ('out_invoice', 'out_refund')),
                             ('local','=', True),
-                            ('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('move_type', 'not in', ('out_invoice', 'out_refund')),
                         ],
                     }"
                 />
@@ -256,15 +256,15 @@
                     name="dst_country_id"
                     attrs="{
                         'required': [
-                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('move_type', 'in', ('out_invoice', 'out_refund')),
                             ('local','=',False)
                         ],
                         'invisible': [
                             '|',
                             '&amp;',
-                            ('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('move_type', 'in', ('out_invoice', 'out_refund')),
                             ('local','=', True),
-                            ('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')),
+                            ('move_type', 'not in', ('out_invoice', 'out_refund')),
                         ],
                     }"
                 />
