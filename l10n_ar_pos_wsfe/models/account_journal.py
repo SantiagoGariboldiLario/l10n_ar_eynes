@@ -18,6 +18,16 @@ class AccountJournal(models.Model):
         string='WSFE Pos Config',
     )
 
+    def get_pretty_denomination(self):
+        denom_attrs = self._fields['denomination'].get_description(self.env)
+        denomination = list(
+            filter(
+                lambda x: x[0] == self.denomination,
+                denom_attrs['selection'],
+            )
+        )
+        return denomination[0][1] if denomination else False
+
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
         if self.env.context.get('no_journal_in_pos'):
