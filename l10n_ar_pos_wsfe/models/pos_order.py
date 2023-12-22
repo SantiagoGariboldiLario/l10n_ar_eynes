@@ -18,6 +18,14 @@ class PosOrder(models.Model):
         copy=False,
     )
 
+    def _export_for_ui(self, order):
+        res = super(PosOrder, self)._export_for_ui(order)
+        refunded_moves = order.refunded_order_ids.mapped('account_move')
+        res['doc_origin'] = ', '.join(
+            refunded_moves.mapped(lambda x: x.get_pretty_sequence())
+        )
+        return res
+
     @api.model
     def _order_fields(self, ui_order):
         res = super(PosOrder, self)._order_fields(ui_order)
@@ -36,4 +44,15 @@ class PosOrder(models.Model):
             res['associated_inv_ids'] = [
                 (6, 0, self.refunded_order_ids.mapped('account_move').ids)
             ]
+        return res
+
+    def _hook_recompute_account_move(self, new_move):
+        new_move._onchange_invoice_date()
+        new_move.compute_perceptions()
+        new_move._onchange_payment_term_date_invoice()
+        return
+
+    def _create_invoice(self, move_vals):
+        res = super(PosOrder, self)._create_invoice(move_vals)
+        self._hook_recompute_account_move(res)
         return res

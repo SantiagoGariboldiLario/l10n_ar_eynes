@@ -97,7 +97,15 @@ msgstr "Offline"
 
 #. module: l10n_ar_pos_wsfe
 #. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/payment/PaymentScreen.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/Screens/TicketScreen.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/Screens/TicketScreen.xml:0
+#, python-format
+msgid "Origin"
+msgstr "Origen"
+
+#. module: l10n_ar_pos_wsfe
+#. openerp-web
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/Screens/PaymentScreen.xml:0
 #, python-format
 msgid "Payment"
 msgstr "Pago"
