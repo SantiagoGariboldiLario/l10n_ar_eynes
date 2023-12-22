@@ -976,7 +976,7 @@ class AccountMove(models.Model):
 
                 if (
                     perception_vals.get('amount', 0.0) == 0.0
-                    and self.state_id.code != 'R'
+                    and perception_id.tax_id.state_id.code != 'R'
                 ):
                     continue
 
