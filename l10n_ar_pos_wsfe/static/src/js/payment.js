@@ -11,11 +11,34 @@ odoo.define("l10n_ar_pos_wsfe.WSFEPaymentScreen", function (require) {
             get invoiceNumber() {
                 return this.currentOrder.invoiceNumber;
             }
+            mounted() {
+                super.mounted();
+                this.setNextInvoiceSequence();
+                this.env.pos.on("change:selectedClient", () => this.setNextInvoiceSequence(), this);
+            }
+            willUnmount() {
+                this.env.pos.off("change:selectedClient", null, this);
+            }
+            setSequenceValues(seq_vals) {
+                if (_.isEmpty(seq_vals)) {
+                    this.currentOrder.set_invoice_number();
+                    this.currentOrder.set_invoice_journal(false);
+                } else {
+                    this.currentOrder.set_invoice_number(seq_vals);
+                    this.currentOrder.set_invoice_journal(seq_vals.journal_id);
+                }
+            }
             async setNextInvoiceSequence() {
                 const customer = this.currentOrder.get_client();
+                if (_.isEmpty(customer)) {
+                    this.setSequenceValues();
+                    this.render();
+                    return;
+                }
                 const config = this.currentOrder.pos.config;
                 const amount_total = this.currentOrder.get_total_with_tax();
                 const fiscal_type = this.currentOrder.is_electronic_invoice() ? "electronic" : "internal";
+                const move_type = this.currentOrder.get_due() < 0 ? "out_refund" : "out_invoice";
                 try {
                     const seq_vals = await this.rpc({
                         model: "account.move",
@@ -25,11 +48,11 @@ odoo.define("l10n_ar_pos_wsfe.WSFEPaymentScreen", function (require) {
                             customer.id,
                             config.id,
                             fiscal_type,
+                            move_type,
                             amount_total,
                         ],
                     });
-                    this.currentOrder.set_invoice_number(seq_vals.next_seq);
-                    this.currentOrder.set_invoice_journal(seq_vals.journal_id);
+                    this.setSequenceValues(seq_vals);
                     this.render();
                 } catch (error) {
                     if (isConnectionError(error)) {
@@ -59,9 +82,7 @@ odoo.define("l10n_ar_pos_wsfe.WSFEPaymentScreen", function (require) {
                 }
                 if (!this.currentOrder.is_electronic_invoice()) {
                     this.currentOrder.set_manual_invoice(!this.currentOrder.is_manual_invoice());
-                    const is_manual_invoice = this.currentOrder.is_manual_invoice();
-                    this.currentOrder.set_to_invoice(is_manual_invoice);
-                    if (is_manual_invoice) {
+                    if (this.currentOrder.is_manual_invoice()) {
                         this.setNextInvoiceSequence();
                     } else {
                         this.currentOrder.set_invoice_number();
@@ -76,9 +97,7 @@ odoo.define("l10n_ar_pos_wsfe.WSFEPaymentScreen", function (require) {
                 }
                 if (!this.currentOrder.is_manual_invoice()) {
                     this.currentOrder.set_electronic_invoice(!this.currentOrder.is_electronic_invoice());
-                    const is_electronic_invoice = this.currentOrder.is_electronic_invoice();
-                    this.currentOrder.set_to_invoice(is_electronic_invoice);
-                    if (is_electronic_invoice) {
+                    if (this.currentOrder.is_electronic_invoice()) {
                         this.setNextInvoiceSequence();
                     } else {
                         this.currentOrder.set_invoice_number();

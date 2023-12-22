@@ -20,7 +20,6 @@
                 <field
                     name="invoice_manual_journal_ids"
                     widget="many2many_tags"
-                    required="1"
                     context="{
                         'default_company_id': company_id,
                         'default_type': 'sale',
@@ -36,7 +35,6 @@
                 <field
                     name="invoice_journal_ids"
                     widget="many2many_tags"
-                    required="1"
                     context="{
                         'default_company_id': company_id,
                         'default_type': 'sale',

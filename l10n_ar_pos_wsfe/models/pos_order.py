@@ -1,7 +1,6 @@
 import logging
 
 from odoo import api, fields, models
-from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -30,18 +29,11 @@ class PosOrder(models.Model):
         res = super(PosOrder, self)._prepare_invoice_vals()
         if self.invoice_journal_id:
             res['journal_id'] = self.invoice_journal_id.id
-        if self.is_wsfe:
-            fiscal_position = self.partner_id.property_account_position_id
-            if fiscal_position:
-                res['fiscal_position_id'] = fiscal_position.id
+        fiscal_position = self.partner_id.property_account_position_id
+        if fiscal_position:
+            res['fiscal_position_id'] = fiscal_position.id
+        if self.refunded_order_ids.account_move:
+            res['associated_inv_ids'] = [
+                (6, 0, self.refunded_order_ids.mapped('account_move').ids)
+            ]
         return res
-
-    def _apply_invoice_payments(self):
-        if (
-            self.account_move.ws_request_ids
-            and self.account_move.state != 'posted'
-        ):
-            last_request = self.account_move.ws_request_ids.sorted('id')[-1]
-            if not last_request.cae:
-                raise UserError(last_request.observations)
-        return super(PosOrder, self)._apply_invoice_payments()
