@@ -8,14 +8,6 @@ Doodba implementation
 
 ### Add this to repos.yaml:
 
-    ./server-tools:
-        defaults:
-    	    depth: $DEPTH_DEFAULT
-        remotes:
-    	    origin: https://github.com/OCA/server-tools.git
-        target: origin $ODOO_VERSION
-        merges:
-    	    - origin $ODOO_VERSION
     ./l10n_ar_eynes:
         defaults:
     	    depth: $DEPTH_DEFAULT
@@ -25,10 +17,10 @@ Doodba implementation
         merges:
     	    - origin 15.0-stage
 
-    #OCA
-    ./OCA/bank-statement-import:
+    # OCA:
+    ./OCA/server-ux:
         remotes:
-            origin: https://github.com/OCA/bank-statement-import.git
+            origin: https://github.com/OCA/server-ux.git
         merges:
             - origin 15.0
         target: origin 15.0
@@ -38,54 +30,39 @@ Doodba implementation
         merges:
             - origin 15.0
         target: origin 15.0
-    ./OCA/server-ux:
-        remotes:
-            origin: https://github.com/OCA/server-ux.git
-        merges:
-            - origin 15.0
-        target: origin 15.0
-    ./OCA/account-reconcile:
-        remotes:
-            origin: https://github.com/OCA/account-reconcile.git
-        merges:
-            - origin 15.0
-        target: origin 15.0
-    ./OCA/account-financial-reporting:
-        remotes:
-            origin: https://github.com/OCA/account-financial-reporting.git
-        merges:
-            - origin 15.0
-        target: origin 15.0
     ./OCA/reporting-engine:
         remotes:
             origin: https://github.com/OCA/reporting-engine.git
         merges:
             - origin 15.0
         target: origin 15.0
+
+    # OTROS:
+    ./otros/month_year_widget:
+        defaults:
+            depth: $DEPTH_DEFAULT
+        remotes:
+            origin: https://gitlab.eynes.com.ar/otros/month_year_widget.git
+        target: origin 15.0
+        merges:
+            - origin 15.0
+
     ./otros/popup_messages:
-      defaults:
-        depth: $DEPTH_DEFAULT
-      remotes:
-        origin: https://gitlab.eynes.com.ar/otros/popup_messages.git
-      target: origin 15.0
-      merges:
-        - origin 15.0
+        defaults:
+            depth: $DEPTH_DEFAULT
+        remotes:
+            origin: https://gitlab.eynes.com.ar/otros/popup_messages.git
+        target: origin 15.0
+        merges:
+            - origin 15.0
 
 ### Add this to addons.yaml:
 
-    server-tools:
-        - "*"
     l10n_ar_eynes:
         - "*"
-    OCA/account-financial-reporting:
-        - "*"
-    OCA/account-reconcile:
-        - "*"
-    OCA/bank-statement-import:
+    OCA/server-ux:
         - "*"
     OCA/reporting-engine:
-        - "*"
-    OCA/server-ux:
         - "*"
     OCA/web:
         - "*"
@@ -105,11 +82,16 @@ Doodba implementation
     git+https://github.com/OCA/openupgradelib.git@master
     unicodecsv
     unidecode
-    git+https://gitlab.eynes.com.ar/infra/easywsy.git@master
-    git+https://gitlab.eynes.com.ar/infra/suds_jurko-0.6.1@master#egg=suds_jurko
     M2Crypto==0.38.0
     pyOpenSSL
     pandas
+    sqlalchemy
     qrcode
-    pysimplesoap
+    rarfile
+    gevent>=22.10.2
+    git+https://github.com/pysimplesoap/pysimplesoap.git@py311
     future
+    html2text
+    pyafipws@https://github.com/eynes/pyafipws/archive/main.zip
+    httplib2
+
