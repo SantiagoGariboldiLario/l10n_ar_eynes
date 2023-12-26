@@ -2382,7 +2382,9 @@ class AccountPaymentOrderRetentionLine(models.Model):
                         {
                             'payment_order_line_id': self.id,
                             'move_id': invoice.id,
-                            'move_type': move_type_map[invoice.move_type],
+                            'move_type': move_type_map.get(
+                                invoice.move_type, 'Countable balance'
+                            ),
                             'total_without_vat': total_without_vat,
                             'payment_order_reference': self.payment_order_id.number
                             or '',
