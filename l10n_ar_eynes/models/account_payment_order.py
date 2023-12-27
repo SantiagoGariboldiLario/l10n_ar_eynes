@@ -1898,10 +1898,6 @@ class AccountPaymentOrder(models.Model):
         self.write({'state': 'draft'})
         return True
 
-    @api.model
-    def create(self, vals_list):
-        return super(AccountPaymentOrder, self).create(vals_list=vals_list)
-
     def is_payment(self):
         return self.type in ('purchase', 'payment')
 
