@@ -75,29 +75,6 @@ class ResPartner(models.Model):
         string='Gross Income',
     )
 
-    @api.model
-    def default_get(self, fields_list):
-        res = super(ResPartner, self).default_get(fields_list)
-        province = (
-            self.env['res.country.state']
-            .search(
-                [
-                    ('country_id', "=", 'Argentina'),
-                    ('code', "in", ['W', 'P', 'N', 'Q', 'S']),
-                ]
-            )
-            .ids
-        )
-
-        vals = [
-            (0, 0, {'province_id': province[0]}),
-            (0, 0, {'province_id': province[1]}),
-            (0, 0, {'province_id': province[2]}),
-            (0, 0, {'province_id': province[3]}),
-        ]
-        res.update({'gross_income_ids': vals})
-        return res
-
     def parse_afip_values(self, values):
 
         state = self.env["res.country.state"].search(
@@ -268,22 +245,15 @@ class ResPartner(models.Model):
 
     def write(self, vals):
         self.check_vat_string(vals, write=True)
-        for rec in self:
-            province = self.env['res.country.state'].search(
-                [
-                    ('country_id', "=", 'Argentina'),
-                    ('code', "in", ['W', 'P', 'N', 'Q']),
-                ]
-            )
-            for record in province:
-                if not rec.gross_income_ids.filtered(
-                    lambda ps: ps.province_id == record
-                ):
-                    rec.gross_income_ids.create(
-                        {'province_id': record.id, 'partner_id': rec.id}
+        if vals.get('gross_income_ids'):
+            for rec in vals.get('gross_income_ids'):
+                if not rec[-1].get('type_taxpayer'):
+                    raise ValidationError(
+                        _(
+                            "You must complete 'Type of taxpayer' field on Gross income configuration."
+                        )
                     )
-        res = super().write(vals)
-        return res
+        return super(ResPartner, self).write(vals)
 
     @api.model
     def create(self, vals):
@@ -292,7 +262,9 @@ class ResPartner(models.Model):
             for rec in vals.get('gross_income_ids'):
                 if not rec[-1].get('type_taxpayer'):
                     raise ValidationError(
-                        _("El campo tipo de contribuyente debe ser completado")
+                        _(
+                            "You must complete 'Type of taxpayer' field on Gross income configuration."
+                        )
                     )
         return super(ResPartner, self).create(vals)
 
