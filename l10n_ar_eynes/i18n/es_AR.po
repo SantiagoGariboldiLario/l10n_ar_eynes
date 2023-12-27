@@ -4228,6 +4228,12 @@ msgid "Journal Item"
 msgstr "Asiento Contable"
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid "Journal %(journal)s does not have a sequence configured"
+msgstr "El Diario %(journal)s no tiene una secuencia configurada"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__move_line_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
