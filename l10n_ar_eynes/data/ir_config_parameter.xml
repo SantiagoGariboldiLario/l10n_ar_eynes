@@ -20,14 +20,14 @@
     <record id="url_prod_wsfe" model="ir.config_parameter">
         <field name="key">wsfe_prod</field>
         <field name="value">
-            https://servicios1.afip.gov.ar/wsfev1/service.asmx
+            https://servicios1.afip.gov.ar/wsfev1/service.asmx?WSDL
         </field>
     </record>
 
     <record id="url_homo_wsfe" model="ir.config_parameter">
         <field name="key">wsfe_homo</field>
         <field name="value">
-            https://wswhomo.afip.gov.ar/wsfev1/service.asmx
+            https://wswhomo.afip.gov.ar/wsfev1/service.asmx?WSDL
         </field>
     </record>
 
@@ -35,14 +35,14 @@
     <record id="url_prod_wsfex" model="ir.config_parameter">
         <field name="key">wsfex_prod</field>
         <field name="value">
-            https://servicios1.afip.gov.ar/wsfexv1/service.asmx
+            https://servicios1.afip.gov.ar/wsfexv1/service.asmx?WSDL
         </field>
     </record>
 
     <record id="url_homo_wsfex" model="ir.config_parameter">
         <field name="key">wsfex_homo</field>
         <field name="value">
-            https://wswhomo.afip.gov.ar/wsfexv1/service.asmx
+            https://wswhomo.afip.gov.ar/wsfexv1/service.asmx?WSDL
         </field>
     </record>
 
