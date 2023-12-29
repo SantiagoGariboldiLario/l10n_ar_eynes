@@ -510,7 +510,7 @@ class AccountPaymentOrder(models.Model):
                 'base': amount,
                 'to_pay': amount,
             }
-            base, amount = taxapp.apply_retention(
+            base, amount, payment_order_base = taxapp.apply_retention(
                 self.partner_id,
                 ret_vals.get('percent'),
                 ret_vals.get('excluded_percent'),

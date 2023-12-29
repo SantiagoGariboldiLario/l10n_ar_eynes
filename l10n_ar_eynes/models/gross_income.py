@@ -17,5 +17,5 @@ class GrossIncome(models.Model):
             ('CMsede', 'CM-Sede'),
             ('sin_actividad', 'Sin Actividad'),
         ],
-        string="Tipo de contribuyente",
+        string="Type of taxpayer",
     )
