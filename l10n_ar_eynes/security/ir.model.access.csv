@@ -107,6 +107,7 @@ l10n_ar_eynes.access_libro_iva_exporter_wizard,access_libro_iva_exporter_wizard,
 
 l10n_ar_eynes.access_ws_optionals,access_ws_optionals,l10n_ar_eynes.model_ws_optionals,base.group_user,1,1,1,1
 l10n_ar_eynes.access_ws_pos,access_ws_pos,l10n_ar_eynes.model_ws_pos,base.group_user,1,1,1,1
+l10n_ar_eynes.access_ws_pos_line,access_ws_pos_line,l10n_ar_eynes.model_ws_pos_line,base.group_user,1,1,1,1
 l10n_ar_eynes.access_ws_tax_codes,access_ws_tax_codes,l10n_ar_eynes.model_ws_tax_codes,base.group_user,1,1,1,1
 l10n_ar_eynes.access_ws_config,access_ws_config,l10n_ar_eynes.model_ws_config,base.group_user,1,1,1,1
 l10n_ar_eynes.access_ws_currency_codes,access_ws_currency_codes,l10n_ar_eynes.model_ws_currency_codes,base.group_user,1,1,1,1

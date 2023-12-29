@@ -136,7 +136,7 @@ class WsfexConfig(models.Model):
         string='Languages',
     )
     point_of_sale_ids = fields.One2many(
-        comodel_name='ws.pos',
+        comodel_name='ws.pos.line',
         inverse_name='wsfex_config_id',
         string='POS',
         domain=[('from_afip', '=', True)],

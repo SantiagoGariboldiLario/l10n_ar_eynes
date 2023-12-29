@@ -45,7 +45,7 @@ class WsfeConfig(models.Model):
         domain=[('from_afip', '=', True)],
     )
     point_of_sale_ids = fields.One2many(
-        comodel_name='ws.pos',
+        comodel_name='ws.pos.line',
         inverse_name='wsfe_config_id',
         string='POS',
         domain=[('from_afip', '=', True)],
@@ -284,22 +284,34 @@ class WsfeConfig(models.Model):
         _logger.info('Voucher info: %s' % res)
         return res
 
+    def _match_invoice_pos(self, invoice):
+        ws_pos = self.point_of_sale_ids.search(
+            [
+                ('journal_id', '=', invoice.journal_id.id),
+                ('wsfe_config_id', '=', self.id),
+            ],
+            order="id desc",
+            limit=1,
+        )
+        return int(ws_pos.code)
+
     def _set_invoice_in_ws(self, ws, invoice):
         _logger.info("Parsing data from invoice ID: %s" % invoice.id)
         helper = WSFEParser()
         data = helper.parse_invoice(invoice)
+        punto_vta = self._match_invoice_pos(invoice)
         vat_lines = self._get_vat_array(invoice)
         vat_data = helper.parse_vat_lines(invoice, vat_lines, self.vat_tax_ids)
         tribute_data = helper.parse_taxes_not_vat(invoice)
         associated_data = helper.parse_associated_voucher(invoice)
         opcionals_data = helper.parse_optionals(invoice)
 
-        number = self._get_next_number(ws, data['CbteTipo'], data['PtoVta'])
+        number = self._get_next_number(ws, data['CbteTipo'], punto_vta)
 
         _logger.info("Creating pyafipws invoice")
         ws.CrearFactura(
             tipo_cbte=data['CbteTipo'],
-            punto_vta=data['PtoVta'],
+            punto_vta=punto_vta,
             fecha_cbte=data['CbteFch'],
             concepto=data['Concepto'],
             tipo_doc=data['DocTipo'],
@@ -351,7 +363,7 @@ class WsfeConfig(models.Model):
             )
         return {
             'invoice_id': invoice.id,
-            'pos_ar': data['PtoVta'],
+            'pos_ar': punto_vta,
             'voucher_type': data['CbteTipo'],
             'doctype': data['DocTipo'],
             'docnum': data['DocNro'],

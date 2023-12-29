@@ -108,7 +108,7 @@ class AccountMove(models.Model):
             ('internal', 'Internal Invoice'),
             ('electronic', 'Electronic Invoice'),
         ],
-        compute='_compute_fiscal_type',
+        related='journal_id.fiscal_type',
         store=True,
     )
     is_FCE_invoice = fields.Boolean(
@@ -361,15 +361,6 @@ class AccountMove(models.Model):
                     res['amount_total_cur'] += amount
 
             invoice.update({field: val for field, val in res.items()})
-
-    @api.depends('journal_id')
-    def _compute_fiscal_type(self):
-        invoices = self.filtered(lambda move: move.is_sale_document())
-        for inv in invoices:
-            electronic = self.env['ws.pos'].search(
-                [('journal_id', '=', inv.journal_id.id)]
-            )
-            inv.fiscal_type = 'electronic' if electronic else 'internal'
 
     def get_highest_pos_sequence(
         self, journal, move_type, is_debit_note=False, is_fce=False

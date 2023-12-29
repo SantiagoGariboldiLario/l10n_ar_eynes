@@ -78,7 +78,6 @@ class WSFEParser(WSParser):
 
     def parse_invoice(self, invoice):
         tipo_cbte = invoice.get_voucher_type()
-        pto_vta = invoice.get_pos()
         invoice_date = (
             invoice.invoice_date
             and self._convert_date_to_AFIP_format(invoice.invoice_date)
@@ -108,7 +107,6 @@ class WSFEParser(WSParser):
         subtotals.update(
             {
                 'CbteTipo': tipo_cbte,
-                'PtoVta': pto_vta,
                 'CbteFch': invoice_date,
                 'Concepto': concept,
                 'DocTipo': doc_type,
