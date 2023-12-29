@@ -139,7 +139,12 @@ class StockPicking(models.Model):
         return qty
 
     def button_validate(self):
-        self.write({"declared_value": self._get_declared_value()})
+        for reg in self:
+            reg.write(
+                {
+                    'declared_value': reg._get_declared_value(),
+                }
+            )
         return super(StockPicking, self).button_validate()
 
     def is_refund(self):
@@ -600,6 +605,8 @@ class StockPicking(models.Model):
         # TODO: Hacer la verificación del SSL
         URL = self._get_cot_url()
         cot_obj.Conectar(URL, trace=False, cacert=None)
+        if 'test' in URL:
+            cot_obj.client.http.follow_all_redirects = True
 
         cot_obj.PresentarRemito(fileName, testing="")
 
