@@ -104,9 +104,9 @@ class StockPicking(models.Model):
         for picking_id in picking_ids:
             picking = self.env['stock.picking'].browse(picking_id)
             seq_transfer_id = picking.picking_type_id.sequence_transfer_id
-            sequence_id = seq_transfer_id.id
 
-            if seq_transfer_id.code and not picking.name_original:
+            if seq_transfer_id and not picking.name_original:
+                sequence_id = seq_transfer_id.id
                 picking.write({'name_original': picking.name})
                 name = self.env['ir.sequence'].browse(sequence_id).next_by_id()
                 picking.write({'name': name})
