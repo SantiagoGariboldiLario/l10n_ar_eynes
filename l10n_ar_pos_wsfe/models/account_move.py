@@ -51,6 +51,16 @@ class AccountMove(models.Model):
                 return True
         return False
 
+    def get_pretty_sequence(
+        self, journal=False, sequence=False, move_type=False, **kwargs
+    ):
+        journal = journal or self.journal_id
+        sequence = sequence or self.internal_number
+        move_type = move_type or self.move_type
+        move_type = 'F' if move_type == 'out_invoice' else 'NC'
+        denomination = journal.get_pretty_denomination()
+        return "%s %s%s" % (move_type, denomination or '', sequence)
+
     def get_next_sequence_from_pos(
         self,
         partner_id,
@@ -80,16 +90,13 @@ class AccountMove(models.Model):
             next_seq = journal.sequence_id.get_next_char(
                 journal.sequence_id.number_next,
             )
-        denom_attrs = journal._fields['denomination'].get_description(self.env)
-        denomination = list(
-            filter(
-                lambda x: x[0] == journal.denomination,
-                denom_attrs['selection'],
-            )
+        pretty_sequence = self.get_pretty_sequence(
+            journal=journal,
+            move_type=move_type,
+            sequence=next_seq,
         )
         return {
             'next_seq': next_seq,
             'journal_id': journal.id,
-            'denomination': denomination[0][1] if denomination else False,
-            'move_type': 'F' if move_type == 'out_invoice' else 'NC',
+            'full_sequence': pretty_sequence,
         }

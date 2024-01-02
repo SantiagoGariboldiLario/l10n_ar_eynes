@@ -137,6 +137,9 @@
     "demo": [
         "demo/res_partner_demo.xml",
     ],
+    'assets': {
+        'web.assets_backend': ['l10n_ar_eynes/static/src/js/form_controller.js']
+    },
     'installable': True,
     'application': True,
     "external_dependencies": {

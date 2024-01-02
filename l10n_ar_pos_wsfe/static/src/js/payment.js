@@ -43,14 +43,7 @@ odoo.define("l10n_ar_pos_wsfe.WSFEPaymentScreen", function (require) {
                     const seq_vals = await this.rpc({
                         model: "account.move",
                         method: "get_next_sequence_from_pos",
-                        args: [
-                            this.env.pos.pos_session.id,
-                            customer.id,
-                            config.id,
-                            fiscal_type,
-                            move_type,
-                            amount_total,
-                        ],
+                        args: [false, customer.id, config.id, fiscal_type, move_type, amount_total],
                     });
                     this.setSequenceValues(seq_vals);
                     this.render();

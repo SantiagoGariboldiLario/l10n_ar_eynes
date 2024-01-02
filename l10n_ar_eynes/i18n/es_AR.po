@@ -1122,7 +1122,7 @@ msgstr "Código COT"
 msgid ""
 "COT Error\n"
 "- %s"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - %s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1130,7 +1130,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- %s does not have a city name"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - %s no tiene una ciudad establecida"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1138,7 +1138,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- %s does not have a postal code"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - %s no tiene un código postal establecido"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1146,7 +1146,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- %s does not have a state code"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - %s no tiene un código COT para la provincia"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1154,7 +1154,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- %s does not have a street name"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - %s no tiene una dirección establecida"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1162,7 +1162,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- %s's NIF code is null"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - El código del NIF de %s no esta establecido"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1170,7 +1170,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- %s's NIF is invalid"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - El NIF de %s es inválido"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1178,7 +1178,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- %s, The quantity is out of range"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - %s, La cantidad esta fuera del rango"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1186,7 +1186,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- %s, product description is null"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - %s, la descripción del producto no esta establecido"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1194,7 +1194,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- %s: COT nomenclature is null"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - %s: No tiene una nomenclatura para el COT"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1202,7 +1202,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- %s: UOM's COT code is null"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - %s: El código COT para la unidad de medidaa no esta establecido"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1210,7 +1210,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- Express %s does not have a city name"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - El expreso %s no tiene una ciudad configurada"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1218,7 +1218,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- Express %s does not have a postal code"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - el expreso %s no tiene un código postal configurado"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1226,7 +1226,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- Express %s does not have a state code"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - El expreso %s no tiene un código de provincia para el COT"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1234,7 +1234,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- Express %s does not have a street name"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - El Expreso %s no tiene una dirección configurada"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1242,7 +1242,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- Invalid emission date"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - Fecha de emisión inválida"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1250,7 +1250,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- Invalid sequence: %s"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - Secuencia inválida: %s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1258,7 +1258,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- License plate is null"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - La patente del camión o acoplado no esta establecida"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1266,7 +1266,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- No carrier found"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - No se encontro ningún transportista"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1274,7 +1274,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- No partner found"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - No hay un partner configurado"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1282,7 +1282,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- Transport departure date is null"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - La fecha de salida del transporte no esta establecida"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1290,7 +1290,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- Your company does not have a city name"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - Su empresa no tiene configurado una localidad"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1298,7 +1298,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- Your company does not have a postal code"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - Su empresa no tiene un código postal configurado"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1306,7 +1306,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- Your company does not have a state code"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - Su empresa no tiene un código de provincia para el COT"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1314,7 +1314,7 @@ msgstr ""
 msgid ""
 "COT Error\n"
 "- Your company does not have a street name"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n - Su empresa no tiene una dirección configurada"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1323,7 +1323,7 @@ msgid ""
 "COT Error\n"
 "Error %(err_code)s  Type: %(err_type)s \n"
 " %(err_msg)s"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n Error %(err_code)s  Tipo: %(err_type)s \n %(err_msg)s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -1331,7 +1331,7 @@ msgstr ""
 msgid ""
 "COT Errorn- Exception: %(exception)s\n"
 "Traceback: %(traceback)s"
-msgstr ""
+msgstr "¡Error al Presentar el COT!\n Excepción: %(exception)s\n Traceback: %(traceback)s"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.stock_picking_view_form_inherit_l10n_ar_eynes
@@ -2487,6 +2487,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_generated_files__period_end
 msgid "Date end"
 msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__cot_date_transfer
+msgid "Date of Transfer"
+msgstr "Fecha de Transferencia"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_sicore_files__presentation_date
@@ -4226,6 +4231,12 @@ msgstr "Apunte Contable"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__move_line_id
 msgid "Journal Item"
 msgstr "Asiento Contable"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid "Journal %(journal)s does not have a sequence configured"
+msgstr "El Diario %(journal)s no tiene una secuencia configurada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__move_line_ids
@@ -7357,6 +7368,11 @@ msgid "Total without vat"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__trailer_license_plate
+msgid "Trailer License Plate"
+msgstr "Patente del Acoplado"
+
+#. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_stock_picking
 msgid "Transfer"
 msgstr "Albarán"
@@ -7366,6 +7382,11 @@ msgstr "Albarán"
 #: model:ir.ui.menu,name:l10n_ar_eynes.treasury_menu
 msgid "Treasury"
 msgstr "Tesoreria"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__truck_license_plate
+msgid "Truck License Plate"
+msgstr "Patente Del Camión"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0

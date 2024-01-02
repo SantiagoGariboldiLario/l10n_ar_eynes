@@ -20,12 +20,10 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
                 return;
             }
             const number = seq_vals.next_seq;
-            const denomination = seq_vals.denomination || "";
-            const type = seq_vals.move_type || "";
             if (!number) {
                 this.invoiceNumber = "";
             } else {
-                this.invoiceNumber = `[ ${type} ${denomination}${number} ]`;
+                this.invoiceNumber = `[ ${seq_vals.full_sequence} ]`;
             }
         },
         set_manual_invoice: function (manual_mode) {
@@ -56,6 +54,7 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
             json.inv_manual_mode = this.inv_manual_mode ? this.inv_manual_mode : false;
             json.inv_electronic_mode = this.inv_electronic_mode ? this.inv_electronic_mode : false;
             json.invoice_journal_id = this.invoice_journal_id || false;
+            json.doc_origin = this.doc_origin;
             return json;
         },
         // eslint-disable-next-line no-unused-vars
@@ -65,6 +64,7 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
             this.inv_electronic_mode = true;
             this.to_invoice = true;
             this.invoice_journal_id = false;
+            this.doc_origin = json.doc_origin || "";
         },
     });
 });

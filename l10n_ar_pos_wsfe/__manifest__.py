@@ -36,6 +36,7 @@
         'point_of_sale.assets': [
             'l10n_ar_pos_wsfe/static/src/js/models.js',
             'l10n_ar_pos_wsfe/static/src/js/payment.js',
+            'l10n_ar_pos_wsfe/static/src/js/ticket.js',
         ],
         'web.assets_qweb': [
             'l10n_ar_pos_wsfe/static/src/xml/**/*',

@@ -17,6 +17,13 @@ class AccountPaymentOrder(models.Model):
     _rec_name = 'number'
     _order = 'date DESC'
 
+    def name_get(self):
+        result = []
+        for payment in self:
+            name = payment.number or _('New')
+            result.append((payment.id, name))
+        return result
+
     def fields_view_get(
         self, view_id=None, view_type='form', toolbar=False, submenu=False
     ):
@@ -118,7 +125,7 @@ class AccountPaymentOrder(models.Model):
         # No journal given in the context, use company currency as default
         return self.env.user.company_id.currency_id
 
-    number = fields.Char(string='Number', copy=False)
+    number = fields.Char(string='Number', copy=False, default=False)
     name = fields.Char(string='Memo', default='')
     narration = fields.Text(string='Notes', default=default_narration)
     partner_id = fields.Many2one(
@@ -1153,9 +1160,24 @@ class AccountPaymentOrder(models.Model):
                     if po.amount:
                         po.compute_advance_payment_retentions(po.amount)
 
+    def get_next_sequence(self):
+        if not self.journal_id.sequence_id:
+            raise ValidationError(
+                _(
+                    "Journal %(journal)s does not have a sequence configured",
+                    journal=self.journal_id.name,
+                )
+            )
+        return self.journal_id.sequence_id._next()
+
     def proforma_voucher(self):
         self.ensure_one()
         for voucher in self:
+            voucher.write(
+                {
+                    'number': voucher.get_next_sequence(),
+                }
+            )
             voucher.retention_ids.write(
                 {
                     'unlinkable': False,
@@ -1876,19 +1898,6 @@ class AccountPaymentOrder(models.Model):
         self.write({'state': 'draft'})
         return True
 
-    @api.model
-    def create(self, vals_list):
-        sequence_model = self.env['ir.sequence']
-        if vals_list.get('type') == 'receipt':
-            vals_list['number'] = sequence_model.next_by_code(
-                'customer.payment.order'
-            ) or _('New')
-        elif vals_list.get('type') == 'payment':
-            vals_list['number'] = sequence_model.next_by_code(
-                'supplier.payment.order'
-            ) or _('New')
-        return super(AccountPaymentOrder, self).create(vals_list=vals_list)
-
     def is_payment(self):
         return self.type in ('purchase', 'payment')
 
@@ -2382,7 +2391,9 @@ class AccountPaymentOrderRetentionLine(models.Model):
                         {
                             'payment_order_line_id': self.id,
                             'move_id': invoice.id,
-                            'move_type': move_type_map[invoice.move_type],
+                            'move_type': move_type_map.get(
+                                invoice.move_type, 'Countable balance'
+                            ),
                             'total_without_vat': total_without_vat,
                             'payment_order_reference': self.payment_order_id.number
                             or '',
