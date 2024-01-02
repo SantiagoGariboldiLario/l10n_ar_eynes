@@ -11,9 +11,6 @@ def copy_ws_pos_table(cr):
             """
             CREATE TABLE ws_pos_line
                 AS TABLE ws_pos;
-
-            CREATE TABLE ws_pos_line_id_seq
-                AS TABLE ws_pos_id_seq;
             """
         )
         cr.commit()  # pylint: disable=invalid-commit
