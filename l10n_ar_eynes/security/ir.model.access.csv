@@ -15,6 +15,8 @@ l10n_ar_eynes.access_reject_third_party_check_wizard,access_reject_third_party_c
 l10n_ar_eynes.access_check_reject_expense,access_check_reject_expense,l10n_ar_eynes.model_check_reject_expense,base.group_user,1,1,1,1
 l10n_ar_eynes.access_deposit_check_wizard,access_deposit_check_wizard,l10n_ar_eynes.model_deposit_check_wizard,base.group_user,1,1,1,1
 
+l10n_ar_eynes.access_cancel_picking_done,access_cancel_picking_done,l10n_ar_eynes.model_cancel_picking_done,base.group_user,1,1,1,1
+
 l10n_ar_eynes.access_retention_concept,access_retention_concept,l10n_ar_eynes.model_retention_concept,base.group_user,1,1,1,1
 l10n_ar_eynes.access_retention_activity,access_retention_activity,l10n_ar_eynes.model_retention_activity,base.group_user,1,1,1,1
 l10n_ar_eynes.access_retention_vat_tax,access_retention_vat_tax,l10n_ar_eynes.model_retention_vat_tax,base.group_user,1,1,1,1
