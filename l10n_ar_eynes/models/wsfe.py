@@ -59,8 +59,8 @@ class WsfeConfig(models.Model):
 
     @api.depends('config_id', 'config_id.homologation')
     def _compute_url(self):
-        url_prod = self.env.ref('l10n_ar_eynes.url_prod_wsfe').value
-        url_homo = self.env.ref('l10n_ar_eynes.url_homo_wsfe').value
+        url_prod = self.env.ref('l10n_ar_eynes.url_prod_wsfe').value.rstrip()
+        url_homo = self.env.ref('l10n_ar_eynes.url_homo_wsfe').value.rstrip()
         for rec in self:
             rec.url = url_homo if rec.config_id.homologation else url_prod
 
