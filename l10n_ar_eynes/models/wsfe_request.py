@@ -4,6 +4,7 @@
 ##############################################################################
 
 from odoo import api, fields, models
+from odoo.tools import pytz
 
 
 class WsRequest(models.Model):
@@ -27,6 +28,15 @@ class WsRequest(models.Model):
     def _compute_name(self):
         for rec in self:
             rec.name = 'Req %s / %s' % (rec.id, rec.date_request)
+
+    @api.model_create_multi
+    def create(self, vals):
+        now_time = fields.Datetime.now()
+        tz = pytz.timezone(self.env.user.tz) or pytz.utc
+        user_tz_date = pytz.utc.localize(now_time).astimezone(tz)
+        for val in vals:
+            val.update({'date_request': user_tz_date.replace(tzinfo=None)})
+        return super(WsRequest, self).create(vals)
 
 
 class WsRequestDetail(models.Model):

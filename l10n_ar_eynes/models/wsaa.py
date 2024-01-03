@@ -42,7 +42,7 @@ class WSAAConfig(models.Model):
     homologation = fields.Boolean(default=True)
     key = fields.Text('Private Key', readonly=True)
     name = fields.Char('Description', size=255)
-    url = fields.Char('URL for WSAA', compute='_compute_url')
+    url = fields.Char('URL for WSAA', compute='_compute_url', store=True)
     service_ids = fields.One2many(
         'wsaa.ta', 'config_id', string="Authorized Services"
     )

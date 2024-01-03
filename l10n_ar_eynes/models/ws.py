@@ -206,7 +206,7 @@ class WsConfig(models.Model):
     config_id = fields.Many2one('wsaa.config')
     cuit = fields.Char(related='company_id.partner_id.vat', string='Cuit')
     name = fields.Char('Name', size=64, required=True)
-    url = fields.Char('URL for WS', compute="_compute_url")
+    url = fields.Char('URL for WS', compute="_compute_url", store=True)
     wsaa_ticket_id = fields.Many2one('wsaa.ta', 'Ticket Access')
 
     products_date_difference = fields.Integer(
