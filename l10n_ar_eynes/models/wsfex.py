@@ -504,14 +504,17 @@ class WsfexConfig(models.Model):
                     soap_fault.faultcode,
                     soap_fault.faultstring,
                 )
-                _logger.error("SOAP Error.", error_msg)
+                _logger.exception("SOAP Error.")
+                _logger.exception(error_msg)
             except Exception as e:
                 if ws.Excepcion:
                     error_msg = ws.Excepcion
-                    _logger.error("WSFE Error.", error_msg)
+                    _logger.exception("WSFE Error.")
+                    _logger.exception(error_msg)
                 else:
                     error_msg = str(e)
-                    _logger.error("Internal Error.", error_msg)
+                    _logger.exception("Internal Error.")
+                    _logger.exception(error_msg)
             if error_msg:
                 WsRequestDetail.create(
                     {

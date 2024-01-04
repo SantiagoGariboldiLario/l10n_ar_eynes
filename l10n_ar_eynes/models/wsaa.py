@@ -188,10 +188,12 @@ class WSAATa(models.Model):
                 if wsaa.Excepcion:
                     # get the exception already parsed by the helper
                     err_msg = wsaa.Excepcion
-                    _logger.error("WSAA Error.", err_msg)
+                    _logger.exception("WSAA Error.")
+                    _logger.exception(err_msg)
                 else:
                     err_msg = str(e)
-                    _logger.error("Internal Error.", err_msg)
+                    _logger.exception("Internal Error.")
+                    _logger.exception(err_msg)
                 raise UserError(
                     _("Could not connect. This is the what we received: %s")
                     % (err_msg)
