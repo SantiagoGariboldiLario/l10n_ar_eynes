@@ -402,17 +402,17 @@ class WsfeConfig(models.Model):
                 soap_fault.faultcode,
                 soap_fault.faultstring,
             )
-            _logger.error("SOAP Error.")
-            _logger.error(error_msg)
+            _logger.exception("SOAP Error.")
+            _logger.exception(error_msg)
         except Exception as e:
             if ws and ws.Excepcion:
                 error_msg = ws.Excepcion
-                _logger.error("WSFE Error.")
-                _logger.error(error_msg)
+                _logger.exception("WSFE Error.")
+                _logger.exception(error_msg)
             else:
                 error_msg = str(e)
-                _logger.error("Internal Error.")
-                _logger.error(error_msg)
+                _logger.exception("Internal Error.")
+                _logger.exception(error_msg)
         if error_msg:
             req_vals.update(
                 {
