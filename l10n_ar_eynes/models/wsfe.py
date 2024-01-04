@@ -75,6 +75,9 @@ class WsfeConfig(models.Model):
             [('wsfe_config_id', '=', self.id)]
         ).unlink()
         self.env['ws.pos'].search([('wsfe_config_id', '=', self.id)]).unlink()
+        self.env['ws.pos.line'].search(
+            [('wsfe_config_id', '=', self.id)]
+        ).unlink()
         self.env['ws.tax.codes'].search(
             [('wsfe_config_id', '=', self.id)]
         ).unlink()
