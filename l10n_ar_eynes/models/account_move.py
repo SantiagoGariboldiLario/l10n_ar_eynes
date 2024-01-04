@@ -712,7 +712,6 @@ class AccountMove(models.Model):
         if electronic_invoices:
             request = WsRequest.create(
                 {
-                    'date_request': fields.Datetime.now(),
                     'nregs': len(electronic_invoices),
                 }
             )
@@ -754,7 +753,7 @@ class AccountMove(models.Model):
         if errors:
             raise UserError(
                 _(
-                    "Error trying to validate electronic invoice with ids [%(ids)s]."
+                    "Error trying to validate electronic invoice with ids [%(ids)s].\n"
                     "Check WS Requests page or go to 'Informs -> Ws Requests -> %(name)s'.",
                     ids=', '.join(str(inv_id.id) for inv_id in errors),
                     name=request.name,
