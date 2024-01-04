@@ -58,22 +58,24 @@ class WSFEParser(WSParser):
             )
         return date_due
 
-    def _get_date_from(self, invoice, concept, invoice_date):
+    def _get_date_from(self, invoice, concept):
         date_from = False
         if concept in [2, 3]:
+            # TODO: add this field to invoice
             # date_from = invoice.date_from and
             # self._convert_date_to_AFIP_format(invoice.date_from) or False
             if not date_from:
-                date_from = self._convert_date_to_AFIP_format(invoice_date)
+                date_from = self._convert_date_to_AFIP_format(invoice.invoice_date)
         return date_from
 
-    def _get_date_to(self, invoice, concept, invoice_date):
+    def _get_date_to(self, invoice, concept):
         date_to = False
         if concept in [2, 3]:
+            # TODO: add this field to invoice
             # date_from = invoice.date_to and
             # self._convert_date_to_AFIP_format(invoice.date_to) or False
             if not date_to:
-                date_to = self._convert_date_to_AFIP_format(invoice_date)
+                date_to = self._convert_date_to_AFIP_format(invoice.invoice_date)
         return date_to
 
     def parse_invoice(self, invoice):
@@ -93,8 +95,8 @@ class WSFEParser(WSParser):
         date_due = self._get_date_due(invoice, concept, invoice_date)
         currency_code = invoice.get_currency_code()
         invoice_rate = invoice.currency_rate
-        date_from = self._get_date_from(invoice, concept, invoice_date)
-        date_to = self._get_date_to(invoice, concept, invoice_date)
+        date_from = self._get_date_from(invoice, concept)
+        date_to = self._get_date_to(invoice, concept)
 
         subtotals = {
             'exempt_amount': invoice.amount_exempt,
