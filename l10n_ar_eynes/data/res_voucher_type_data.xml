@@ -49,6 +49,30 @@
         <field name="denomination">b</field>
     </record>
 
+    <record id="factura_c" model="res.voucher.type" forcecreate="0">
+        <field name="name">FACTURAS C</field>
+        <field name="afip_code">011</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">b</field>
+        <field name="denomination">c</field>
+    </record>
+
+    <record id="nota_debito_c" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTAS DE DEBITO C</field>
+        <field name="afip_code">012</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">dn</field>
+        <field name="denomination">c</field>
+    </record>
+
+    <record id="nota_credito_c" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTAS DE CREDITO C</field>
+        <field name="afip_code">013</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">cn</field>
+        <field name="denomination">c</field>
+    </record>
+
     <record id="facturas_exportacion" model="res.voucher.type" forcecreate="0">
         <field name="name">FACTURAS DE EXPORTACION</field>
         <field name="afip_code">019</field>
@@ -143,6 +167,30 @@
         <field name="voucher_model">Factura/NC/ND</field>
         <field name="doc_type">cn</field>
         <field name="denomination">b</field>
+    </record>
+
+    <record id="factura_oc" model="res.voucher.type" forcecreate="0">
+        <field name="name">OTROS COMPROBANTES</field>
+        <field name="afip_code">099</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">b</field>
+        <field name="denomination">oc</field>
+    </record>
+
+    <record id="nota_credito_oc" model="res.voucher.type" forcecreate="0">
+        <field name="name">NOTA DE CREDITO (OTROS COMPROBANTES)</field>
+        <field name="afip_code">090</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">b</field>
+        <field name="denomination">oc</field>
+    </record>
+
+    <record id="factura_despacho_importacion" model="res.voucher.type" forcecreate="0">
+        <field name="name">DESPACHO DE IMPORTACION</field>
+        <field name="afip_code">066</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">b</field>
+        <field name="denomination">ana</field>
     </record>
 
 </odoo>
