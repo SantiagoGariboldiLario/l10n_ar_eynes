@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo noupdate="1">
     <record id="exempt_percent_tax_sale" model="account.tax" forcecreate="0">
-        <field name="name">IVA Exento</field>
+        <field name="name">IVA Ventas Exento</field>
         <field name="amount">0</field>
         <field name="is_exempt">True</field>
         <field name="type_tax_use">sale</field>
@@ -12,7 +12,7 @@
     </record>
 
     <record id="exempt_percent_tax_purchase" model="account.tax" forcecreate="0">
-        <field name="name">IVA Exento</field>
+        <field name="name">IVA Compras Exento</field>
         <field name="amount">0</field>
         <field name="is_exempt">True</field>
         <field name="type_tax_use">purchase</field>
@@ -23,7 +23,7 @@
     </record>
 
     <record id="0_percent_tax_sale" model="account.tax" forcecreate="0">
-        <field name="name">IVA 0.00%</field>
+        <field name="name">IVA Ventas 0.00%</field>
         <field name="amount">0</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
@@ -33,7 +33,7 @@
     </record>
 
     <record id="0_percent_tax_purchase" model="account.tax" forcecreate="0">
-        <field name="name">IVA 0.00%</field>
+        <field name="name">IVA Compras 0.00%</field>
         <field name="amount">0</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
@@ -43,7 +43,7 @@
     </record>
 
     <record id="10_50_percent_tax_sale" model="account.tax" forcecreate="0">
-        <field name="name">IVA 10.50%</field>
+        <field name="name">IVA Ventas 10.50%</field>
         <field name="amount">10.50</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
@@ -53,7 +53,7 @@
     </record>
 
     <record id="10_50_percent_tax_purchase" model="account.tax" forcecreate="0">
-        <field name="name">IVA 10.50%</field>
+        <field name="name">IVA Compras 10.50%</field>
         <field name="amount">10.50</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
@@ -63,7 +63,7 @@
     </record>
 
     <record id="21_percent_tax_sale" model="account.tax" forcecreate="0">
-        <field name="name">IVA 21.00%</field>
+        <field name="name">IVA Ventas 21.00%</field>
         <field name="amount">21</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
@@ -73,7 +73,7 @@
     </record>
 
     <record id="21_percent_tax_purchase" model="account.tax" forcecreate="0">
-        <field name="name">IVA 21.00%</field>
+        <field name="name">IVA Compras 21.00%</field>
         <field name="amount">21</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
@@ -83,7 +83,7 @@
     </record>
 
     <record id="27_percent_tax_sale" model="account.tax" forcecreate="0">
-        <field name="name">IVA 27.00%</field>
+        <field name="name">IVA Ventas 27.00%</field>
         <field name="amount">27</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
@@ -93,7 +93,7 @@
     </record>
 
     <record id="27_percent_tax_purchase" model="account.tax" forcecreate="0">
-        <field name="name">IVA 27.00%</field>
+        <field name="name">IVA Compras 27.00%</field>
         <field name="amount">27</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
@@ -103,7 +103,7 @@
     </record>
 
     <record id="5_percent_tax_sale" model="account.tax" forcecreate="0">
-        <field name="name">IVA 5.00%</field>
+        <field name="name">IVA Ventas 5.00%</field>
         <field name="amount">5</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
@@ -113,7 +113,7 @@
     </record>
 
     <record id="5_percent_tax_purchase" model="account.tax" forcecreate="0">
-        <field name="name">IVA 5.00%</field>
+        <field name="name">IVA Compras 5.00%</field>
         <field name="amount">5</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
@@ -123,7 +123,7 @@
     </record>
 
     <record id="2_5_percent_tax_sale" model="account.tax" forcecreate="0">
-        <field name="name">IVA 2.50%</field>
+        <field name="name">IVA Ventas 2.50%</field>
         <field name="amount">2.5</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
@@ -133,7 +133,7 @@
     </record>
 
     <record id="2_5_percent_tax_purchase" model="account.tax" forcecreate="0">
-        <field name="name">IVA 2.50%</field>
+        <field name="name">IVA Compras 2.50%</field>
         <field name="amount">2.5</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
@@ -159,6 +159,33 @@
         <field name="amount">20</field>
         <field name="amount_type">percent</field>
         <field name="retention_type">vat</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_ganancias_perceptions_e" model="account.tax">
+        <field name="name">Percepciones Ganancias Efectuadas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">profit</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_ganancias_perceptions_s" model="account.tax">
+        <field name="name">Percepciones Ganancias Sufridas</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">profit</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
+    </record>
+
+    <record id="tax_sircreb_perceptions_s" model="account.tax">
+        <field name="name">Percepciones SIRCREB IIBB (Liquidación Bancaria)</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="country_id">10</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -1055,7 +1082,15 @@
         <field name="name">Retenciones Ganancias Efectuadas</field>
         <field name="type_tax_use">purchase</field>
         <field name="country_id">10</field>
-        <field name="amount">2</field>
+        <field name="amount_type">percent</field>
+        <field name="retention_type">profit</field>
+        <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
+    </record>
+
+    <record id="tax_ganancias_retentions_S" model="account.tax">
+        <field name="name">Retenciones Ganancias Sufridas</field>
+        <field name="type_tax_use">sale</field>
+        <field name="country_id">10</field>
         <field name="amount_type">percent</field>
         <field name="retention_type">profit</field>
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
