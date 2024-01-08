@@ -5,7 +5,6 @@
             <field name="name">Retenciones IVA sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RIVAS</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iva_retentions_s' />
         </record>
 
@@ -13,15 +12,34 @@
             <field name="name">Retenciones IVA efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIVAE</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iva_retentions_e' />
+        </record>
+
+        <record id="ganancias_retentions_e" model="account.journal" forcecreate="0">
+            <field name="name">Retenciones Ganancias Efectuadas</field>
+            <field name="type">retentions</field>
+            <field name="code">RGANE</field>
+            <field name="tax_id" ref='tax_ganancias_retentions_e' />
+        </record>
+
+        <record id="ganancias_retentions_s" model="account.journal" forcecreate="0">
+            <field name="name">Retenciones Ganancias Sufridas</field>
+            <field name="type">retentions</field>
+            <field name="code">RGANS</field>
+            <field name="tax_id" ref='tax_ganancias_retentions_s' />
+        </record>
+
+        <record id="ganancias_retentions_m_e" model="account.journal" forcecreate="0">
+            <field name="name">Retenciones Ganancias M Efectuadas</field>
+            <field name="type">retentions</field>
+            <field name="code">RGNME</field>
+            <field name="tax_id" ref='tax_ganancias_m_retentions_e' />
         </record>
 
         <record id="iibb_arba_retentions_s" model="account.journal" forcecreate="0">
             <field name="name">Retenciones IIBB ARBA Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISARB</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_arba_retentions_s' />
         </record>
 
@@ -29,7 +47,6 @@
             <field name="name">Retenciones IIBB CABA Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISCAB</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_caba_retentions_s' />
         </record>
 
@@ -37,7 +54,6 @@
             <field name="name">Retenciones IIBB CATAMARCA Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISCAT</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_catamarca_retentions_s' />
         </record>
 
@@ -45,7 +61,6 @@
             <field name="name">Retenciones IIBB CHACO Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISCHA</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_chaco_retentions_s' />
         </record>
 
@@ -53,7 +68,6 @@
             <field name="name">Retenciones IIBB CHUBUT Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISCHU</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_chubut_retentions_s' />
         </record>
 
@@ -61,7 +75,6 @@
             <field name="name">Retenciones IIBB CORDOBA Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISCOR</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_cordoba_retentions_s' />
         </record>
 
@@ -69,7 +82,6 @@
             <field name="name">Retenciones IIBB CORRIENTES Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISCRR</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_corrientes_retentions_s' />
         </record>
 
@@ -77,7 +89,6 @@
             <field name="name">Retenciones IIBB ENTRE RIOS Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISENT</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_entre_rios_retentions_s' />
         </record>
 
@@ -85,7 +96,6 @@
             <field name="name">Retenciones IIBB FORMOSA Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISFOR</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_formosa_retentions_s' />
         </record>
 
@@ -93,7 +103,6 @@
             <field name="name">Retenciones IIBB JUJUY Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISJUJ</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_jujuy_retentions_s' />
         </record>
 
@@ -101,7 +110,6 @@
             <field name="name">Retenciones IIBB LA PAMPA Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISLAP</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_la_pampa_retentions_s' />
         </record>
 
@@ -109,7 +117,6 @@
             <field name="name">Retenciones IIBB LA RIOJA Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISLAR</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_la_rioja_retentions_s' />
         </record>
 
@@ -117,7 +124,6 @@
             <field name="name">Retenciones IIBB MENDOZA Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISMEN</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_mendoza_retentions_s' />
         </record>
 
@@ -125,7 +131,6 @@
             <field name="name">Retenciones IIBB MISIONES Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISMIS</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_misiones_retentions_s' />
         </record>
 
@@ -133,15 +138,13 @@
             <field name="name">Retenciones IIBB NEUQUEN Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISNEU</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_neuquen_retentions_s' />
         </record>
 
         <record id="iibb_rio_negro_retentions_s" model="account.journal" forcecreate="0">
             <field name="name">Retenciones IIBB RIO NEGRO Sufridas</field>
             <field name="type">retentions</field>
-            <field name="code">RISRIO</field>
-            <field name="active">FALSE</field>
+            <field name="code">RISRIO</field>            
             <field name="tax_id" ref='tax_iibb_rio_negro_retentions_s' />
         </record>
 
@@ -149,7 +152,6 @@
             <field name="name">Retenciones IIBB SALTA Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISSAL</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_salta_retentions_s' />
         </record>
 
@@ -157,7 +159,6 @@
             <field name="name">Retenciones IIBB SAN JUAN Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISSAJ</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_san_juan_retentions_s' />
         </record>
 
@@ -165,7 +166,6 @@
             <field name="name">Retenciones IIBB SAN LUIS Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISSAD</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_san_luis_retentions_s' />
         </record>
 
@@ -173,7 +173,6 @@
             <field name="name">Retenciones IIBB SANTA CRUZ Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISSAC</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_santa_cruz_retentions_s' />
         </record>
 
@@ -181,7 +180,6 @@
             <field name="name">Retenciones IIBB SANTA FE Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISSAF</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_santafe_retentions_s' />
         </record>
 
@@ -189,7 +187,6 @@
             <field name="name">Retenciones IIBB SANTIAGO DEL ESTERO Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISSAE</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_santiago_del_estero_retentions_s' />
         </record>
 
@@ -197,7 +194,6 @@
             <field name="name">Retenciones IIBB TIERRA DEL FUEGO Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISTIE</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_tierra_del_fuego_retentions_s' />
         </record>
 
@@ -205,7 +201,6 @@
             <field name="name">Retenciones IIBB TUCUMAN Sufridas</field>
             <field name="type">retentions</field>
             <field name="code">RISTUC</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_tucuman_retentions_s' />
         </record>
 
@@ -213,7 +208,6 @@
             <field name="name">Retenciones IIBB ARBA Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIEARB</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_arba_retentions_e' />
         </record>
 
@@ -221,7 +215,6 @@
             <field name="name">Retenciones IIBB CABA Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIECAB</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_caba_retentions_e' />
         </record>
 
@@ -229,7 +222,6 @@
             <field name="name">Retenciones IIBB CATAMARCA Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIECAT</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_catamarca_retentions_e' />
         </record>
 
@@ -237,7 +229,6 @@
             <field name="name">Retenciones IIBB CHACO Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIECHA</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_chaco_retentions_e' />
         </record>
 
@@ -245,7 +236,6 @@
             <field name="name">Retenciones IIBB CHUBUT Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIECHU</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_chubut_retentions_e' />
         </record>
 
@@ -253,7 +243,6 @@
             <field name="name">Retenciones IIBB CORDOBA Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIECOR</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_cordoba_retentions_e' />
         </record>
 
@@ -261,7 +250,6 @@
             <field name="name">Retenciones IIBB CORRIENTES Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIECRR</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_corrientes_retentions_e' />
         </record>
 
@@ -269,7 +257,6 @@
             <field name="name">Retenciones IIBB ENTRE RIOS Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIEENT</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_entre_rios_retentions_e' />
         </record>
 
@@ -277,7 +264,6 @@
             <field name="name">Retenciones IIBB FORMOSA Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIEFOR</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_formosa_retentions_e' />
         </record>
 
@@ -285,7 +271,6 @@
             <field name="name">Retenciones IIBB JUJUY Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIEJUJ</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_jujuy_retentions_e' />
         </record>
 
@@ -293,7 +278,6 @@
             <field name="name">Retenciones IIBB LA PAMPA Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIELAP</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_la_pampa_retentions_e' />
         </record>
 
@@ -301,7 +285,6 @@
             <field name="name">Retenciones IIBB LA RIOJA Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIELAR</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_la_rioja_retentions_e' />
         </record>
 
@@ -309,7 +292,6 @@
             <field name="name">Retenciones IIBB MENDOZA Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIEMEN</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_mendoza_retentions_e' />
         </record>
 
@@ -317,7 +299,6 @@
             <field name="name">Retenciones IIBB MISIONES Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIEMIS</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_misiones_retentions_e' />
         </record>
 
@@ -325,7 +306,6 @@
             <field name="name">Retenciones IIBB NEUQUEN Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIENEU</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_neuquen_retentions_e' />
         </record>
 
@@ -333,7 +313,6 @@
             <field name="name">Retenciones IIBB RIO NEGRO Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIERIO</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_rio_negro_retentions_e' />
         </record>
 
@@ -341,7 +320,6 @@
             <field name="name">Retenciones IIBB SALTA Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIESAL</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_salta_retentions_e' />
         </record>
 
@@ -349,7 +327,6 @@
             <field name="name">Retenciones IIBB SAN JUAN Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIESAJ</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_san_juan_retentions_e' />
         </record>
 
@@ -357,7 +334,6 @@
             <field name="name">Retenciones IIBB SAN LUIS Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIESAD</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_san_luis_retentions_e' />
         </record>
 
@@ -365,7 +341,6 @@
             <field name="name">Retenciones IIBB SANTA CRUZ Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIESAC</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_santa_cruz_retentions_e' />
         </record>
 
@@ -373,7 +348,6 @@
             <field name="name">Retenciones IIBB SANTA FE Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIESAF</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_santafe_retentions_e' />
         </record>
 
@@ -381,7 +355,6 @@
             <field name="name">Retenciones IIBB SANTIAGO DEL ESTERO Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIESAE</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_santiago_del_estero_retentions_e' />
         </record>
 
@@ -389,7 +362,6 @@
             <field name="name">Retenciones IIBB TIERRA DEL FUEGO Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIETIE</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_tierra_del_fuego_retentions_e' />
         </record>
 
@@ -397,7 +369,6 @@
             <field name="name">Retenciones IIBB TUCUMAN Efectuadas</field>
             <field name="type">retentions</field>
             <field name="code">RIETUC</field>
-            <field name="active">FALSE</field>
             <field name="tax_id" ref='tax_iibb_tucuman_retentions_e' />
         </record>
 
