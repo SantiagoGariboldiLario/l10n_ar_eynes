@@ -1087,7 +1087,7 @@
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
-    <record id="tax_ganancias_retentions_S" model="account.tax">
+    <record id="tax_ganancias_retentions_s" model="account.tax">
         <field name="name">Retenciones Ganancias Sufridas</field>
         <field name="type_tax_use">sale</field>
         <field name="country_id">10</field>
