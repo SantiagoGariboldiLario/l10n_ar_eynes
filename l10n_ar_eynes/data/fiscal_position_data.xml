@@ -7,6 +7,12 @@
         <field name="afip_code">1</field>
     </record>
 
+    <record id="fiscal_position_ri_oc" model="account.fiscal.position" forcecreate="0">
+        <field name="name">IVA Responsable Inscripto (Otros Comprobantes)</field>
+        <field name="supplier_denomination">oc</field>
+        <field name="afip_code">1</field>
+    </record>
+
     <record id="fiscal_position_rni" model="account.fiscal.position" forcecreate="0">
         <field name="name">IVA Responsable no Inscripto</field>
         <field name="supplier_denomination">not_defined</field>
@@ -22,6 +28,12 @@
     <record id="fiscal_position_se" model="account.fiscal.position" forcecreate="0">
         <field name="name">IVA Sujeto Exento</field>
         <field name="supplier_denomination">c</field>
+        <field name="afip_code">4</field>
+    </record>
+
+    <record id="fiscal_position_se_oc" model="account.fiscal.position" forcecreate="0">
+        <field name="name">IVA Sujeto Exento (Otros Comprobantes)</field>
+        <field name="supplier_denomination">oc</field>
         <field name="afip_code">4</field>
     </record>
 
