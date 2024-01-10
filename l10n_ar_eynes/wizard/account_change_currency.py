@@ -103,6 +103,7 @@ class AccountChangeCurrency(models.TransientModel):
         if inv_currency == new_currency:
             return {}
 
+        amount_cur_mult = 1 if invoice.move_type.startswith("in_") else -1
         actual_rate = self.actual_currency_rate
         new_rate = self.new_currency_rate
         if actual_rate and new_rate:
@@ -134,7 +135,7 @@ class AccountChangeCurrency(models.TransientModel):
                 'credit': line.credit,
                 'balance': line.balance,
                 'price_subtotal': line.price_subtotal * rate,
-                'amount_currency': line.price_subtotal * rate * -1,
+                'amount_currency': line.price_subtotal * rate * amount_cur_mult,
                 'price_total': line.price_total * rate,
                 'currency_id': new_currency.id,
                 'blocked': line.blocked,
