@@ -9,8 +9,8 @@ from datetime import datetime
 from pyafipws.wsfexv1 import WSFEXv1
 from pysimplesoap.client import SoapFault
 
-from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo import SUPERUSER_ID, _, api, fields, models, registry
+from odoo.exceptions import UserError, ValidationError
 
 from ..wsfetools.wsfex_helper import WSFEXParser
 
@@ -44,6 +44,16 @@ class WsfexShippingPermission(models.Model):
     dst_country_id = fields.Many2one(
         'wsfex.dst.country.codes', 'Dest Country', required=True
     )
+
+    @api.constrains('name')
+    def _check_name_length(self):
+        for rec in self:
+            if len(rec.name) != 16:
+                raise ValidationError(
+                    _(
+                        "The export documentation number must have 16 characters."
+                    )
+                )
 
 
 class WsfexUomCodes(models.Model):
@@ -149,8 +159,8 @@ class WsfexConfig(models.Model):
 
     @api.depends('config_id', 'config_id.homologation')
     def _compute_url(self):
-        url_prod = self.env.ref('l10n_ar_eynes.url_prod_wsfex').value
-        url_homo = self.env.ref('l10n_ar_eynes.url_homo_wsfex').value
+        url_prod = self.env.ref('l10n_ar_eynes.url_prod_wsfex').value.rstrip()
+        url_homo = self.env.ref('l10n_ar_eynes.url_homo_wsfex').value.rstrip()
         for rec in self:
             rec.url = url_homo if rec.config_id.homologation else url_prod
 
@@ -174,6 +184,9 @@ class WsfexConfig(models.Model):
             [('wsfex_config_id', '=', self.id)]
         ).unlink()
         self.env['ws.pos'].search([('wsfex_config_id', '=', self.id)]).unlink()
+        self.env['ws.pos.line'].search(
+            [('wsfex_config_id', '=', self.id)]
+        ).unlink()
         self.env['wsfex.uom.codes'].search(
             [('wsfex_config_id', '=', self.id)]
         ).unlink()
@@ -323,37 +336,68 @@ class WsfexConfig(models.Model):
     def _get_pos_tables(self, ws):
         WsPos = self.env['ws.pos']
         helper = WSFEXParser()
-        result = ws.GetParamPtosVenta(sep=SEPARATOR)
         vals_list = []
-        for vat_data in result:
-            code, name, blocked, to_date = vat_data.split(SEPARATOR)
-            blocked = blocked.split(":")[1]
-            to_date = to_date.split(":")[1]
-            vals = {
-                'code': code,
-                'name': name,
-                'blocked': False if blocked == 'N' else True,
-                'to_date': helper.clean_result_date(to_date),
-                'from_afip': True,
-            }
-            record = WsPos.search(
+        error_msg = ''
+        if self.config_id.homologation:
+            wsfex_pos = WsPos.search(
                 [
-                    ('code', '=', code),
                     ('wsfex_config_id', '=', self.id),
                 ]
             )
-            if not record:
-                vals.update(
-                    {
-                        'wsfex_config_id': self.id,
-                    }
+            if not wsfex_pos:
+                wsfe_pos = WsPos.search(
+                    [
+                        ('from_afip', '=', True),
+                        ('blocked', '=', False),
+                        ('to_date', '=', False),
+                    ],
+                    order='id desc',
+                    limit=1,
                 )
-                vals_list.append(vals)
-            else:
-                record.write(vals)
+                if not wsfe_pos:
+                    error_msg = 'There is no HOMO WSFE pos for this company'
+                else:
+                    vals_list.append(
+                        {
+                            'code': wsfe_pos.code,
+                            'name': wsfe_pos.name,
+                            'blocked': wsfe_pos.blocked,
+                            'to_date': wsfe_pos.to_date,
+                            'from_afip': wsfe_pos.from_afip,
+                            'wsfex_config_id': self.id,
+                        }
+                    )
+        else:
+            result = ws.GetParamPtosVenta(sep=SEPARATOR)
+            for vat_data in result:
+                code, name, blocked, to_date = vat_data.split(SEPARATOR)
+                blocked = blocked.split(":")[1]
+                to_date = to_date.split(":")[1]
+                vals = {
+                    'code': code,
+                    'name': name,
+                    'blocked': False if blocked == 'N' else True,
+                    'to_date': helper.clean_result_date(to_date),
+                    'from_afip': True,
+                }
+                record = WsPos.search(
+                    [
+                        ('code', '=', code),
+                        ('wsfex_config_id', '=', self.id),
+                    ]
+                )
+                if not record:
+                    vals.update(
+                        {
+                            'wsfex_config_id': self.id,
+                        }
+                    )
+                    vals_list.append(vals)
+                else:
+                    record.write(vals)
+                error_msg = helper.parse_errors(ws)
         WsPos.create(vals_list)
-        error_msg = helper.parse_errors(ws)
-        if len(result) == 0:
+        if len(vals_list) == 0:
             error_msg = (
                 _("Error: this company doesn't have POS for this Webservice.\n")
                 + error_msg
@@ -369,7 +413,7 @@ class WsfexConfig(models.Model):
 
         ws = self.ws_auth()
 
-        error_msg = ''  # self._get_pos_tables(ws)
+        error_msg = self._get_pos_tables(ws)
         error_msg += self._get_currency_tables(ws)
         error_msg += self._get_countries_tables(ws)
         error_msg += self._get_lang_tables(ws)
@@ -407,32 +451,58 @@ class WsfexConfig(models.Model):
         helper.parse_errors_raise(ws, _("get the last voucher informed"))
         return int(last_voucher_number) + 1
 
+    def _match_invoice_pos(self, invoice):
+        ws_pos = self.point_of_sale_ids.search(
+            [
+                ('journal_id', '=', invoice.journal_id.id),
+                ('wsfex_config_id', '=', self.id),
+            ],
+            order="id desc",
+            limit=1,
+        )
+        if not ws_pos:
+            raise UserError(
+                _(
+                    "This journal '%(journal)s' is not configured in WSFEX.",
+                    journal=invoice.journal_id.name,
+                )
+            )
+        return int(ws_pos.code)
+
     def _set_invoice_in_ws(self, ws, invoice):
         _logger.info("Parsing data from invoice ID: %s" % invoice.id)
         helper = WSFEXParser()
         data = helper.parse_invoice(invoice)
+        punto_vta = self._match_invoice_pos(invoice)
         items = helper.parse_items(invoice)
         associated_vouchers = helper.parse_associated_voucher(invoice)
         permissions = helper.parse_permissions(invoice)
 
-        number = self._get_next_number(ws, data['CbteTipo'], data['PtoVta'])
+        number = self._get_next_number(ws, data['CbteTipo'], punto_vta)
 
         incoterms = ''
-        incoterms_desc = None
-        inv_incoterms = self.env['wsfex.incoterms.codes'].search(
-            [
-                ('incoterms_id', '=', invoice.invoice_incoterm_id.id),
-                ('wsfex_config_id', '=', self.id),
-            ]
-        )
-        if inv_incoterms:
+        incoterms_desc = ''
+        if invoice.invoice_incoterm_id:
+            inv_incoterms = self.env['wsfex.incoterms.codes'].search(
+                [
+                    ('incoterms_id', '=', invoice.invoice_incoterm_id.id),
+                    ('wsfex_config_id', '=', self.id),
+                ]
+            )
+            if not inv_incoterms:
+                raise UserError(
+                    _(
+                        "Incoterm %(name)s is not configured in WSFEX.",
+                        name=invoice.invoice_incoterm_id.display_name,
+                    )
+                )
             incoterms = inv_incoterms.code
             incoterms_desc = inv_incoterms.name
 
         _logger.info("Creating pyafipws invoice")
         ws.CrearFactura(
             tipo_cbte=data['CbteTipo'],
-            punto_vta=data['PtoVta'],
+            punto_vta=punto_vta,
             cbte_nro=number,
             fecha_cbte=data['CbteFch'],
             imp_total=data['total_amount'],
@@ -478,127 +548,122 @@ class WsfexConfig(models.Model):
                 cbte_nro=cbte_asoc['Nro'],
                 cbte_cuit=cbte_asoc['Cuit'],
             )
+        return {
+            'pos_ar': punto_vta,
+            'voucher_type': data['CbteTipo'],
+            'docnum': data['DocNro'] or data['cuit_pais'],
+            'voucher_number': number,
+            'voucher_date': invoice.invoice_date,
+            # 'amount_total': data['total_amount'], This field doesn't exist in WSFEX request
+            'currency': data['MonId'],
+            'currency_rate': data['MonCotiz'],
+        }
 
-    def send_invoices_to_afip(self, invoices):
+    def send_invoice_to_afip(self, invoice, request):
         self.ensure_one()
         if not self.cuit:
             raise UserError(_("Please configure the company VAT!"))
 
-        ws = self.ws_auth()
+        ws = None
+        inv_vals = {}
+        req_vals = {
+            'invoice_id': invoice.id,
+        }
+        error_msg = ""
+        try:
+            ws = self.ws_auth()
 
-        WsRequest = self.env['ws.request']
-        WsRequestDetail = self.env['ws.request.detail']
-        request = WsRequest.create({'date_request': fields.Datetime.today()})
-        qty_processed = 0
-        for invoice in invoices:
-            self._set_invoice_in_ws(ws, invoice)
+            req_vals.update(self._set_invoice_in_ws(ws, invoice))
 
             _logger.info("Trying to push Inovice data to AFIP...")
-            error_msg = ""
-            try:
-                qty_processed += 1
-                afip_id = self._get_next_id(ws)
-                ws.Authorize(afip_id)
-            except SoapFault as soap_fault:
-                error_msg = "%s: %s" % (
-                    soap_fault.faultcode,
-                    soap_fault.faultstring,
-                )
-                _logger.exception("SOAP Error.")
+            afip_id = self._get_next_id(ws)
+            ws.Authorize(afip_id)
+            xml_request = ws.XmlRequest
+            _logger.info("Data sent to AFIP:")
+            _logger.info(xml_request)
+            req_vals.update(
+                {'xml_request': xml_request, 'request_id': request.id}
+            )
+        except SoapFault as soap_fault:
+            error_msg = "%s: %s" % (
+                soap_fault.faultcode,
+                soap_fault.faultstring,
+            )
+            _logger.exception("SOAP Error.")
+            _logger.exception(error_msg)
+        except Exception as e:
+            if ws and ws.Excepcion:
+                error_msg = ws.Excepcion
+                _logger.exception("WSFE Error.")
                 _logger.exception(error_msg)
-            except Exception as e:
-                if ws.Excepcion:
-                    error_msg = ws.Excepcion
-                    _logger.exception("WSFE Error.")
-                    _logger.exception(error_msg)
-                else:
-                    error_msg = str(e)
-                    _logger.exception("Internal Error.")
-                    _logger.exception(error_msg)
-            if error_msg:
-                WsRequestDetail.create(
-                    {
-                        'invoice_id': invoice.id,
-                        'result': 'E',
-                        'errors': error_msg,
-                        'request_id': request.id,
-                    }
-                )
-                _logger.info("Request details saved.")
-                self.env.cr.commit()  # pylint: disable=invalid-commit
-                raise UserError(
-                    _("Error trying to validate Electronic Invoice: %s")
-                    % (error_msg)
-                )
-            error_msg = '\n'.join(err for err in ws.Errores)
-            events_msg = '\n'.join(evn for evn in ws.Eventos)
-            obs_msg = '\n'.join(obs for obs in ws.Observaciones)
-            if ws.Resultado == "R":
-                _logger.warning("AFIP Validation Error. Invoice not approved.")
-                WsRequestDetail.create(
-                    {
-                        'invoice_id': invoice.id,
-                        'result': 'E',
-                        'errors': error_msg,
-                        'events': events_msg,
-                        'observations': obs_msg,
-                        'request_id': request.id,
-                    }
-                )
-                _logger.info("Request details saved.")
-                self.env.cr.commit()  # pylint: disable=invalid-commit
-                raise UserError(
-                    _(
-                        """
-                        Error trying to validate Electronic Invoice: %s
-                        Please, check WS Request generated. You will find the result of
-                        current transaction there.
-                        """
-                    )
-                    % (invoice.id)
-                )
-
             else:
+                error_msg = str(e)
+                _logger.exception("Internal Error.")
+                _logger.exception(error_msg)
+        if error_msg:
+            req_vals.update(
+                {
+                    'result': 'E',
+                    'errors': error_msg,
+                }
+            )
+        else:
+            error_msg = '' if '0: ok' in ws.ErrMsg.lower() else ws.ErrMsg
+            obs_msg = '' if '0: ok' in ws.Obs.lower() else ws.Obs
+            events_msg = ''
+            for event in ws.Eventos:
+                events_msg += '' if '0: ok' in event.lower() else event
+            if ws.Resultado in ["A"] or ws.CAE:
                 _logger.info("Mission accomplished!")
-                WsRequestDetail.create(
+                cae_due_date = (
+                    ws.Vencimiento
+                    and datetime.strptime(ws.Vencimiento, "%d/%m/%Y").date()
+                    or False
+                )
+                req_vals.update(
                     {
-                        'invoice_id': invoice.id,
-                        'request_id': request.id,
                         'result': ws.Resultado,
                         'errors': error_msg,
                         'events': events_msg,
                         'observations': obs_msg,
                         'cae': ws.CAE or "",
-                        'cae_due_date': ws.Vencimiento
-                        and datetime.strptime(ws.Vencimiento, "%Y%m%d").date()
-                        or False,
+                        'cae_due_date': cae_due_date,
                     }
                 )
-                self.env.cr.commit()  # pylint: disable=invalid-commit
-                _logger.info("Request details saved.")
 
                 inv_name = "%s-%s" % (
-                    str(ws.PuntoVenta).zfill(5),
+                    str(req_vals['pos_ar']).zfill(5),
                     str(ws.CbteNro).zfill(8),
                 )
                 inv_vals = {
                     'cae': ws.CAE,
-                    'cae_due_date': datetime.strptime(
-                        ws.Vencimiento, "%Y%m%d"
-                    ).date(),
+                    'cae_due_date': cae_due_date,
                     'internal_number': inv_name,
                     'name': inv_name,
-                    'invoice_date': datetime.strptime(
-                        ws.FechaCbte, "%Y%m%d"
-                    ).date(),
                 }
                 invoice.write(inv_vals)
                 _logger.info(
-                    "CAE: %s. Result: %s\n UPDATED invoice fields: %s"
-                    % (ws.CAE, ws.Resultado, inv_vals)
+                    "Approved\n UPDATED invoice fields: %s" % (inv_vals)
                 )
-                self.env.cr.commit()  # pylint: disable=invalid-commit
+            else:
+                _logger.warning("AFIP Validation Error. Invoice not approved.")
+                req_vals.update(
+                    {
+                        'result': 'E',
+                        'errors': error_msg,
+                        'events': events_msg,
+                        'observations': obs_msg,
+                    }
+                )
+            _logger.info("Transaction with AFIP finished.")
 
-        _logger.info("Transaction with AFIP finished.")
+        with registry(self.env.cr.dbname).cursor() as new_cr:
+            env = api.Environment(new_cr, SUPERUSER_ID, self.env.context)
+            env['ws.request.detail'].create(req_vals)
+            _logger.info("Request details saved.")
+            new_cr.commit()  # pylint: disable=invalid-commit
+
+        if error_msg or ws.Resultado != "A":
+            raise UserError(error_msg)
 
         return True

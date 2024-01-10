@@ -22,7 +22,7 @@
                     <page string="Points Of Sale">
                         <field name="point_of_sale_ids" nolabel="1">
                             <tree editable="bottom">
-                                <field name="pos_id" />
+                                <field name="pos_id" domain="[('wsfe_config_id', '=', parent.id)]" />
                                 <field name="code" readonly="True" />
                                 <field name="name" readonly="True" />
                                 <field name="to_date" readonly="True" />
@@ -33,6 +33,7 @@
                             </tree>
                         </field>
                     </page>
+
                     <page string="VAT Taxes">
                         <field
                             name="vat_tax_ids"

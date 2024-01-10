@@ -20,12 +20,10 @@
 
                 <notebook colspan="4">
                     <page string="Points Of Sale">
-                        <field
-                            name="point_of_sale_ids"
-                            nolabel="1"
-                            options="{'no_create_edit': True, 'no_quick_create': True}"
-                        >
+                        <field name="point_of_sale_ids" nolabel="1">
                             <tree editable="bottom">
+                                <field name="pos_id" domain="[('wsfex_config_id', '=', parent.id)]" />
+                                <field name="code" readonly="True" />
                                 <field name="name" readonly="True" />
                                 <field name="to_date" readonly="True" />
                                 <field name="blocked" readonly="True" />

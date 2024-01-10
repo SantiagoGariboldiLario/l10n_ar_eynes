@@ -293,6 +293,13 @@ class WsfeConfig(models.Model):
             order="id desc",
             limit=1,
         )
+        if not ws_pos:
+            raise UserError(
+                _(
+                    "This journal '%(journal)s' is not configured in WSFEX.",
+                    journal=invoice.journal_id.name,
+                )
+            )
         return int(ws_pos.code)
 
     def _set_invoice_in_ws(self, ws, invoice):

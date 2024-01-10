@@ -65,7 +65,9 @@ class WSFEParser(WSParser):
             # date_from = invoice.date_from and
             # self._convert_date_to_AFIP_format(invoice.date_from) or False
             if not date_from:
-                date_from = self._convert_date_to_AFIP_format(invoice.invoice_date)
+                date_from = self._convert_date_to_AFIP_format(
+                    invoice.invoice_date
+                )
         return date_from
 
     def _get_date_to(self, invoice, concept):
@@ -75,7 +77,9 @@ class WSFEParser(WSParser):
             # date_from = invoice.date_to and
             # self._convert_date_to_AFIP_format(invoice.date_to) or False
             if not date_to:
-                date_to = self._convert_date_to_AFIP_format(invoice.invoice_date)
+                date_to = self._convert_date_to_AFIP_format(
+                    invoice.invoice_date
+                )
         return date_to
 
     def parse_invoice(self, invoice):
@@ -185,24 +189,6 @@ class WSFEParser(WSParser):
         }
         self._afip_round(vals)
         return vals
-
-    def parse_associated_voucher(self, invoice):
-        CbtesAsoc = []
-        for associated_inv in invoice.associated_inv_ids:
-            tipo_cbte = associated_inv.get_voucher_type()
-            pos, number = associated_inv.name.split('-')
-            cbte_fch = self._convert_date_to_AFIP_format(
-                associated_inv.invoice_date
-            )
-            CbteAsoc = {
-                'Tipo': tipo_cbte,
-                'PtoVta': int(pos),
-                'Nro': int(number),
-                'Cuit': invoice.company_id.partner_id.vat,
-                'CbteFch': cbte_fch,
-            }
-            CbtesAsoc.append(CbteAsoc)
-        return CbtesAsoc
 
     def parse_optionals(self, invoice):
         if invoice.optional_ids:

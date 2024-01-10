@@ -39,6 +39,24 @@ class WSParser:
             return False
         return datetime.strptime(date, AFIP_DATE_FORMAT)
 
+    def parse_associated_voucher(self, invoice):
+        CbtesAsoc = []
+        for associated_inv in invoice.associated_inv_ids:
+            tipo_cbte = associated_inv.get_voucher_type()
+            pos, number = associated_inv.name.split('-')
+            cbte_fch = self._convert_date_to_AFIP_format(
+                associated_inv.invoice_date
+            )
+            CbteAsoc = {
+                'Tipo': tipo_cbte,
+                'PtoVta': int(pos),
+                'Nro': int(number),
+                'Cuit': invoice.company_id.partner_id.vat,
+                'CbteFch': cbte_fch,
+            }
+            CbtesAsoc.append(CbteAsoc)
+        return CbtesAsoc
+
     def parse_errors(self, ws):
         excep_msg = '' if '0: ok' in ws.Excepcion.lower() else ws.Excepcion
         error_msg = '' if '0: ok' in ws.ErrMsg.lower() else ws.ErrMsg
@@ -56,26 +74,15 @@ class WSParser:
         return ''
 
     def parse_errors_raise(self, ws, title):
-        error_msg = ""
-        if ws.Errores:
-            error_msg += _(
+        error_parsed = self.parse_errors(ws)
+        if error_parsed:
+            error_msg = _(
                 """
                 Error trying to %(title)s.
+                %(error)s
                 """,
                 title=title,
+                error=error_parsed,
             )
-            for error in ws.Errores:
-                error_msg += error
-        if ws.Eventos:
-            error_msg += _(
-                """
-                Events trying to %(title)s.
-                """,
-                title=title,
-            )
-            for event in ws.Eventos:
-                error_msg += event
-
-        if error_msg:
-            _logger.info(error_msg)
+            _logger.error(error_msg)
             raise UserError(error_msg)
