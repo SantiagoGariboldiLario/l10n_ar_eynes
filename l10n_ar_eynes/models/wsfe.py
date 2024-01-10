@@ -457,19 +457,43 @@ class WsfeConfig(models.Model):
                     str(ws.CbteNro).zfill(8),
                 )
 
-                if inv_vals['voucher_type'] in [
-                    self.env.ref('l10n_ar_eynes.factura_credito_electronica_a'),
-                    self.env.ref('l10n_ar_eynes.factura_credito_electronica_b'),
+                if req_vals['voucher_type'] in [
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.factura_credito_electronica_a'
+                        ).afip_code
+                    ),
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.factura_credito_electronica_b'
+                        ).afip_code
+                    ),
                 ]:
                     inv_name = 'FCE' + inv_name
-                elif inv_vals['voucher_type'] in [
-                    self.env.ref('l10n_ar_eynes.nota_credito_electronica_a'),
-                    self.env.ref('l10n_ar_eynes.nota_credito_electronica_b'),
+                elif req_vals['voucher_type'] in [
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.nota_credito_electronica_a'
+                        ).afip_code
+                    ),
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.nota_credito_electronica_b'
+                        ).afip_code
+                    ),
                 ]:
                     inv_name = 'NCE' + inv_name
-                elif inv_vals['voucher_type'] in [
-                    self.env.ref('l10n_ar_eynes.factura_debito_electronica_a'),
-                    self.env.ref('l10n_ar_eynes.factura_debito_electronica_b'),
+                elif req_vals['voucher_type'] in [
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.factura_debito_electronica_a'
+                        ).afip_code
+                    ),
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.factura_debito_electronica_b'
+                        ).afip_code
+                    ),
                 ]:
                     inv_name = 'NDE' + inv_name
 
