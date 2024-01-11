@@ -456,6 +456,47 @@ class WsfeConfig(models.Model):
                     str(ws.PuntoVenta).zfill(5),
                     str(ws.CbteNro).zfill(8),
                 )
+
+                if req_vals['voucher_type'] in [
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.factura_credito_electronica_a'
+                        ).afip_code
+                    ),
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.factura_credito_electronica_b'
+                        ).afip_code
+                    ),
+                ]:
+                    inv_name = 'FCE' + inv_name
+                elif req_vals['voucher_type'] in [
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.nota_credito_electronica_a'
+                        ).afip_code
+                    ),
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.nota_credito_electronica_b'
+                        ).afip_code
+                    ),
+                ]:
+                    inv_name = 'NCE' + inv_name
+                elif req_vals['voucher_type'] in [
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.factura_debito_electronica_a'
+                        ).afip_code
+                    ),
+                    int(
+                        self.env.ref(
+                            'l10n_ar_eynes.factura_debito_electronica_b'
+                        ).afip_code
+                    ),
+                ]:
+                    inv_name = 'NDE' + inv_name
+
                 inv_vals = {
                     'cae': ws.CAE,
                     'cae_due_date': datetime.strptime(
