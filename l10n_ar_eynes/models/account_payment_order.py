@@ -431,6 +431,9 @@ class AccountPaymentOrder(models.Model):
         'issued_check_line_ids',
     )
     def onchange_checks(self):
+        issued_checks = self.issued_check_line_ids.mapped('issued_check_id')
+        if len(issued_checks) != len(self.issued_check_line_ids):
+            raise ValidationError(_("You can't use the same check twice."))
         amount = self.payment_order_amount_hook()
         self.amount = amount
 
