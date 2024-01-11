@@ -4,6 +4,7 @@
 ##############################################################################
 
 import logging
+import re
 from datetime import datetime
 
 from odoo import _
@@ -202,7 +203,14 @@ class WSFEParser(WSParser):
         CbtesAsoc = []
         for associated_inv in invoice.associated_inv_ids:
             tipo_cbte = associated_inv.get_voucher_type()
-            pos, number = associated_inv.name.split('-')
+
+            inv_name = associated_inv.name
+            pattern = re.compile(r'(FCE|NCE|NDE)')
+            match = pattern.search(associated_inv.name)
+            if match:
+                inv_name = inv_name.replace(match.group(), '')
+            pos, number = inv_name.split('-')
+
             cbte_fch = self._convert_date_to_AFIP_format(
                 associated_inv.invoice_date
             )
