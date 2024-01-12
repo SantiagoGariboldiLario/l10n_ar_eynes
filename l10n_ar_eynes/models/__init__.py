@@ -1,4 +1,3 @@
-# -- coding: utf-8 --
 ##############################################################################
 #
 #   Copyright (c) 2022-2023 Eynes SRL (Eynes - Ingenieria del software)
@@ -49,11 +48,8 @@ from . import sequence_mixin
 from . import libro_iva_generated_files
 from . import ws_padron  # noqa
 from . import gross_income  # noqa
-
-#
-#
-#
 from . import account  # noqa
 from . import account_mapping_fiscal_year_closing  # noqa
 from . import fiscal_year_closing  # noqa
 from . import inflation_index  # noqa
+from . import purchase

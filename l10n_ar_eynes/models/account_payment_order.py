@@ -543,7 +543,7 @@ class AccountPaymentOrder(models.Model):
             'name': advance_ret.retention_id.name,
             'concept_id': advance_ret.concept_id.id,
             'date': self.date,
-            'account_id': advance_ret.retention_id.tax_id.account_id.id,
+            'account_id': advance_ret.retention_id.tax_id.get_retention_account().id,
             'base': base,
             'amount': amount,
             'manual': False,

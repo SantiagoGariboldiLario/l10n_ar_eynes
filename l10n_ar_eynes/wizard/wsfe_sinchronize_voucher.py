@@ -153,7 +153,12 @@ class WsfeSinchronizeCoucher(models.TransientModel):
         number = self.voucher_number
         date_invoice = self.date_invoice
         invoice.wsfe_relate_invoice(
-            pos, number, date_invoice, self.cae, self.cae_due_date
+            pos,
+            number,
+            self.voucher_type,
+            date_invoice,
+            self.cae,
+            self.cae_due_date,
         )
 
         return {'type': 'ir.actions.act_window_close'}
