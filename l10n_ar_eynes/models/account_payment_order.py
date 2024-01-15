@@ -1173,11 +1173,12 @@ class AccountPaymentOrder(models.Model):
     def proforma_voucher(self):
         self.ensure_one()
         for voucher in self:
-            voucher.write(
-                {
-                    'number': voucher.get_next_sequence(),
-                }
-            )
+            if not voucher.number:
+                voucher.write(
+                    {
+                        'number': voucher.get_next_sequence(),
+                    }
+                )
             voucher.retention_ids.write(
                 {
                     'unlinkable': False,
