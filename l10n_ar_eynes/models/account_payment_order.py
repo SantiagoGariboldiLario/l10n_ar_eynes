@@ -431,6 +431,9 @@ class AccountPaymentOrder(models.Model):
         'issued_check_line_ids',
     )
     def onchange_checks(self):
+        issued_checks = self.issued_check_line_ids.mapped('issued_check_id')
+        if len(issued_checks) != len(self.issued_check_line_ids):
+            raise ValidationError(_("You can't use the same check twice."))
         amount = self.payment_order_amount_hook()
         self.amount = amount
 
@@ -543,7 +546,7 @@ class AccountPaymentOrder(models.Model):
             'name': advance_ret.retention_id.name,
             'concept_id': advance_ret.concept_id.id,
             'date': self.date,
-            'account_id': advance_ret.retention_id.tax_id.account_id.id,
+            'account_id': advance_ret.retention_id.tax_id.get_retention_account().id,
             'base': base,
             'amount': amount,
             'manual': False,
@@ -1173,11 +1176,12 @@ class AccountPaymentOrder(models.Model):
     def proforma_voucher(self):
         self.ensure_one()
         for voucher in self:
-            voucher.write(
-                {
-                    'number': voucher.get_next_sequence(),
-                }
-            )
+            if not voucher.number:
+                voucher.write(
+                    {
+                        'number': voucher.get_next_sequence(),
+                    }
+                )
             voucher.retention_ids.write(
                 {
                     'unlinkable': False,

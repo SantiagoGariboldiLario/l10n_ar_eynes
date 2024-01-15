@@ -4,6 +4,7 @@
 ##############################################################################
 
 import logging
+import re
 from datetime import datetime
 
 from odoo import _
@@ -33,13 +34,11 @@ class WSFEParser(WSParser):
 
     def _get_date_due(self, invoice, concept, invoice_date):
         """
-        ** AFIP DOC: Fecha de vencimiento del pago servicio
-        a facturar. Dato obligatorio para
-        concepto 2 o 3 (Servicios / Productos y
-        Servicios) o Facturas del tipo MiPyMEs
-        (FCE). Formato yyyymmdd. Debe ser
-        igual o posterior a la fecha del
-        comprobante
+        ** AFIP DOC: Fecha de vencimiento del pago servicio a facturar. Dato obligatorio para concepto 2 o 3
+        (Servicios / Productos y Servicios) o Facturas del tipo MiPyMEs (FCE). Formato yyyymmdd.
+        Debe ser igual o posterior a la fecha del comprobante.
+        Si el tipo de comprobante que está autorizando es MiPyMEs (FCE), no debe informarse si NO es Factura de Crédito.
+        En el caso de ser Débito o Crédito, solo puede informarse si es de Anulación.
         """
         date_due = False
         voucher_type_FCEA = invoice.env.ref(
@@ -48,8 +47,18 @@ class WSFEParser(WSParser):
         voucher_type_FCEB = invoice.env.ref(
             'l10n_ar_eynes.factura_credito_electronica_b'
         )
-        if (concept in [2, 3] and not date_due) or (
-            invoice.voucher_type_id in [voucher_type_FCEA, voucher_type_FCEB]
+        is_services = concept in [2, 3]
+        is_FCE = invoice.voucher_type_id in [
+            voucher_type_FCEA,
+            voucher_type_FCEB,
+        ]
+        is_cancellation = invoice.optional_ids.filtered(
+            lambda opt: opt.code == '22' and opt.value == 'S'
+        )
+        if (
+            (is_services and not invoice.is_FCE_invoice)
+            or is_FCE
+            or is_cancellation
         ):
             date_due = (
                 invoice.invoice_date_due
@@ -189,6 +198,31 @@ class WSFEParser(WSParser):
         }
         self._afip_round(vals)
         return vals
+
+    def parse_associated_voucher(self, invoice):
+        CbtesAsoc = []
+        for associated_inv in invoice.associated_inv_ids:
+            tipo_cbte = associated_inv.get_voucher_type()
+
+            inv_name = associated_inv.name
+            pattern = re.compile(r'(FCE|NCE|NDE)')
+            match = pattern.search(associated_inv.name)
+            if match:
+                inv_name = inv_name.replace(match.group(), '')
+            pos, number = inv_name.split('-')
+
+            cbte_fch = self._convert_date_to_AFIP_format(
+                associated_inv.invoice_date
+            )
+            CbteAsoc = {
+                'Tipo': tipo_cbte,
+                'PtoVta': int(pos),
+                'Nro': int(number),
+                'Cuit': invoice.company_id.partner_id.vat,
+                'CbteFch': cbte_fch,
+            }
+            CbtesAsoc.append(CbteAsoc)
+        return CbtesAsoc
 
     def parse_optionals(self, invoice):
         if invoice.optional_ids:

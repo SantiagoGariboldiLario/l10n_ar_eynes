@@ -1380,16 +1380,38 @@ class AccountMove(models.Model):
         currency_code = currency_code_ids[0].code
         return currency_code
 
-    # Falta chequear:
-    def wsfe_relate_invoice(self, pos, number, date_invoice, cae, cae_due_date):
+    def wsfe_relate_invoice(
+        self, pos, number, voucher_type, date_invoice, cae, cae_due_date
+    ):
         for inv in self:
             name = '%04d-%08d' % (pos, number)
+            is_FCE = False
+            if voucher_type in [
+                self.env.ref('l10n_ar_eynes.factura_credito_electronica_a'),
+                self.env.ref('l10n_ar_eynes.factura_credito_electronica_b'),
+            ]:
+                name = 'FCE' + name
+                is_FCE = True
+            elif voucher_type in [
+                self.env.ref('l10n_ar_eynes.nota_credito_electronica_a'),
+                self.env.ref('l10n_ar_eynes.nota_credito_electronica_b'),
+            ]:
+                name = 'NCCE' + name
+                is_FCE = True
+            elif voucher_type in [
+                self.env.ref('l10n_ar_eynes.factura_debito_electronica_a'),
+                self.env.ref('l10n_ar_eynes.factura_debito_electronica_b'),
+            ]:
+                name = 'NDCE' + name
+                is_FCE = True
+
             invoice_vals = {
                 'name': name,
                 'internal_number': name,
                 'invoice_date': date_invoice,
                 'cae': cae,
                 'cae_due_date': cae_due_date,
+                'is_FCE_invoice': is_FCE,
             }
 
             # Escribimos los campos necesarios de la factura
@@ -1399,20 +1421,3 @@ class AccountMove(models.Model):
             # el asiento contable.
             inv._post(soft=False)
             return
-
-    def get_last_date_invoice(self):
-        self.ensure_one()
-
-        last_invoice = self.env['account.move'].search(
-            [
-                ('journal_id', '=', self.journal_id.id),
-                ('state', 'in', ['posted', 'paid', 'cancel']),
-                ('move_type', '=', self.move_type),
-                ('is_debit_note', '=', self.is_debit_note),
-                ('is_FCE_invoice', '=', self.is_FCE_invoice),
-            ],
-            order="invoice_date desc",
-            limit=1,
-        )
-
-        return last_invoice.invoice_date if last_invoice else False
