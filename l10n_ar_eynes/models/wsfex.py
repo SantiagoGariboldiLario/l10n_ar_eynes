@@ -581,9 +581,7 @@ class WsfexConfig(models.Model):
             xml_request = ws.XmlRequest
             _logger.info("Data sent to AFIP:")
             _logger.info(xml_request)
-            req_vals.update(
-                {'xml_request': xml_request, 'request_id': request.id}
-            )
+            req_vals.update({'xml_request': xml_request})
         except SoapFault as soap_fault:
             error_msg = "%s: %s" % (
                 soap_fault.faultcode,
@@ -600,6 +598,13 @@ class WsfexConfig(models.Model):
                 error_msg = str(e)
                 _logger.exception("Internal Error.")
                 _logger.exception(error_msg)
+        finally:
+            req_vals.update(
+                {
+                    'request_id': request.id,
+                }
+            )
+
         if error_msg:
             req_vals.update(
                 {
