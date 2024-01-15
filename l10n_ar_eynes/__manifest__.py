@@ -56,7 +56,6 @@
         'data/account_payment_method_data.xml',
         'data/iibb_situation_data.xml',
         'data/dst_cuit_codes_data.xml',
-        'data/ir_sequence_data.xml',
         "data/afip_ws.xml",
         "data/ir_cron.xml",
         "data/perception_data.xml",
