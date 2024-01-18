@@ -51,7 +51,7 @@ msgstr "%(name)s - No pudo generar el informe - %(err)s\n"
 #: code:addons/l10n_ar_eynes/models/res_users.py:0
 #, python-format
 msgid "%(username)s already has this journal (%(journal)s) configured."
-msgstr "%(username) ya tiene este diario %(journal) configurado."
+msgstr "%(username)s ya tiene este diario (%(journal)s) configurado."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/cancel_picking_done.py:0
@@ -1576,7 +1576,7 @@ msgstr "Renovación de certificado"
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_wsaa_certificate_request
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "Certificate Request"
-msgstr ""
+msgstr "Solicitud de certificado"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.wsaa_certificate_request_menu
@@ -1688,7 +1688,7 @@ msgstr "El numero de cheque debe contener numeros solamente"
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
 #, python-format
 msgid "Check Rejected %(check_number)s %(rejected_date)s"
-msgstr "Cheque rechazado %(check_number) %(rejected_date)"
+msgstr "Cheque rechazado %(check_number)s %(rejected_date)s"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.check_config_menu
@@ -2581,7 +2581,7 @@ msgstr "Secuencia de notas de débito"
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
 #, python-format
 msgid "Debit Note due to rejected check %(check_number)s [%(po_number)s]"
-msgstr "Nota de Débito por cheque rechazado %(check_number) [%(po_number)]"
+msgstr "Nota de Débito por cheque rechazado %(check_number)s [%(po_number)s]"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.account_invoice_menu_debit_note
@@ -2643,7 +2643,7 @@ msgstr "Percepciones definidas"
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
 msgid "Definition not found for document_type_name: %(doc_type)s"
-msgstr "Definición no encontrada para document_type_name: %(doc_type)"
+msgstr "Definición no encontrada para document_type_name: %(doc_type)s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__delivered
@@ -3241,7 +3241,7 @@ msgid ""
 "Error! You have to configure an account on Bank Account %(bank_name)s: "
 "%(acc_number)s"
 msgstr ""
-"¡Error! Tienes que configurar una cuenta en la cuenta bancaria %(bank_name): "
+"¡Error! Tienes que configurar una cuenta en la cuenta bancaria %(bank_name)s: "
 "%(acc_number)s"
 
 #. module: l10n_ar_eynes
@@ -4174,7 +4174,7 @@ msgstr "Total de factura"
 msgid ""
 "Invoice currency change %(inv_curr)s => %(new_curr)s. Rate: %(curr_rate)f"
 msgstr ""
-"Cambio de moneda de factura %(inv_curr)s => %(new_curr). Tasa: %(curr_rate)f"
+"Cambio de moneda de factura %(inv_curr)s => %(new_curr)s. Tasa: %(curr_rate)f"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -4967,7 +4967,7 @@ msgstr "No se han encontrado percepciones con los valores seleccionados"
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
 msgid "No perceptions/retentions from %(start)s to %(end)s to inform eArciba."
-msgstr "No hay percepciones/retenciones del %(start) al %(end) para informar a eArciba."
+msgstr "No hay percepciones/retenciones del %(start)s al %(end)s para informar a eArciba."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/arba_retention_exporter.py:0
@@ -5897,6 +5897,8 @@ msgid ""
 "Rate from 1.0 to 0.0. This is the proportion of percent applied to base "
 "amount of this tax."
 msgstr ""
+"Tasa de 1.0 a 0.0.Esta es la proporción del porcentaje aplicada al "
+"monto base de este impuesto."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_reason_rejected_check__name
@@ -7855,7 +7857,7 @@ msgid ""
 "Voucher %(number)s of pos %(pos_name)s has not been found."
 msgstr ""
 "¡Voucher no encontrado!\n"
-"No se ha encontrado el voucher %(number) de pos %(pos_name)"
+"No se ha encontrado el voucher %(number)s de pos %(pos_name)s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__voucher_number
@@ -8112,7 +8114,7 @@ msgid ""
 "There is no UoM Code defined for %(uom_name)s in line %(line_name)s"
 msgstr ""
 "Error WSFEX!\n"
-"No hay código UoM definido para %(uom_name) en línea %(line_name)"
+"No hay código UoM definido para %(uom_name)s en línea %(line_name)s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wsfetools/wsfex_easywsy.py:0
@@ -8540,8 +8542,8 @@ msgid ""
 "ptl #%(per_id)s: IIBB Situation cannot be empty (%(per_name)s) (Partner "
 "%(part_name)s)"
 msgstr ""
-"ptl #%(per_id): La situación IIBB no puede estar vacía %(per_name) (%(per_name)s) (Partner "
-"%(part_name))
+"ptl #%(per_id)s: La situación IIBB no puede estar vacía (%(per_name)s) (Partner "
+"%(part_name)s)"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
@@ -8558,13 +8560,13 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
 msgid "ptl #%(per_id)s: Unable to get associated invoice (%(inv_id)s)"
-msgstr "ptl #%(per_id): No se puede obtener la factura asociada %(inv_id)"
+msgstr "ptl #%(per_id)s: No se puede obtener la factura asociada (%(inv_id)s)"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
 msgid "ptl #%(per_id)s: Unable to get associated invoice (%(per_name)s)"
-msgstr "ptl #%(per_id)s: No se puede obtener la factura asociada %(per_name)"
+msgstr "ptl #%(per_id)s: No se puede obtener la factura asociada (%(per_name)s)"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_report_files_generator
