@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-11-23 19:06+0000\n"
-"PO-Revision-Date: 2023-11-23 19:06+0000\n"
+"PO-Revision-Date: 2024-01-20 19:06+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -132,6 +132,45 @@ msgid ""
 "<br/>\n"
 "                            Web:"
 msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:mail.template,body_html:l10n_ar_eynes.mail_template_data_payment_order
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    Dear <t t-out=\"object.partner_id.name or ''\">Azure Interior</t><br/><br/>\n"
+"                    Thank you for your payment.\n"
+"                    Here is your <t t-if=\"object.retention_ids\">retention certificate and</t> payment order <strong t-out=\"(object.number or '').replace('/','-') or ''\">BNK1-2021-05-0002</strong> amounting\n"
+"                    to <strong t-out=\"format_amount(object.amount, object.currency_id) or ''\">$ 10.00</strong> from <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
+"                    <br/><br/>\n"
+"                    Do not hesitate to contact us if you have any questions.\n"
+"                    <br/><br/>\n"
+"                    Best regards,\n"
+"                    <t t-if=\"user.signature\">\n"
+"                        <br/>\n"
+"                        <t t-out=\"user.signature or ''\">--<br/>Mitchell Admin</t>\n"
+"                    </t>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
+msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    Estimado <t t-out=\"object.partner_id.name or ''\">Azure Interior</t><br/><br/>\n"
+"                    Gracias por su pago.\n"
+"                    Aquí está su <t t-if=\"object.retention_ids\">certificado de retención y</t> su comprobante <strong t-out=\"(object.number or '').replace('/','-') or ''\">BNK1-2021-05-0002</strong> cuyo importe\n"
+"                    es <strong t-out=\"format_amount(object.amount, object.currency_id) or ''\">$ 10.00</strong> de <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
+"                    <br/><br/>\n"
+"                    No dude en contactarnos si tiene alguna duda.\n"
+"                    <br/><br/>\n"
+"                    Saludos,\n"
+"                    <t t-if=\"user.signature\">\n"
+"                        <br/>\n"
+"                        <t t-out=\"user.signature or ''\">--<br/>Mitchell Admin</t>\n"
+"                    </t>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
@@ -6601,6 +6640,11 @@ msgstr "Seleccionado"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__selection_type
 msgid "Selection Type"
 msgstr "Tipo de seleccion"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.server,name:l10n_ar_eynes.send_payment_order_by_email_action
+msgid "Send payment order by email"
+msgstr "Enviar órden de pago por mail"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__sequence_id
