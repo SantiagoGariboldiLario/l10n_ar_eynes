@@ -64,6 +64,7 @@
         "data/res_groups_data.xml",
         "data/sicore_data.xml",
         "data/sifere_data.xml",
+        "data/mail_template.xml",
         'security/ir.model.access.csv',
         'security/account_security.xml',
         'security/perception_ir_rule.xml',

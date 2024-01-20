@@ -1,3 +1,4 @@
+import base64
 import logging
 from pprint import pformat as pf
 
@@ -1907,6 +1908,95 @@ class AccountPaymentOrder(models.Model):
 
     def is_receipt(self):
         return self.type in ('sale', 'receipt')
+
+    def render_report(self, report_name, report_id):
+        retention_report_id = self.env.ref('l10n_ar_eynes.' + report_id)
+        generated_report = retention_report_id._render_qweb_pdf(self.id)
+        data_record = base64.b64encode(generated_report[0])
+        ir_values = {
+            'name': _(report_name),
+            'type': 'binary',
+            'datas': data_record,
+            'store_fname': data_record,
+            'mimetype': 'application/pdf',
+            'res_model': 'account.payment.order',
+            'res_id': self.id,
+        }
+        return self.env['ir.attachment'].sudo().create(ir_values)
+
+    def send_email(self):
+        IrAttachment = self.env['ir.attachment']
+
+        if len(self) > 1:
+            raise UserError(_('You can send only one Payment Order per email.'))
+
+        if self.state != 'posted':
+            raise UserError(
+                _('You can send by email only posted Payment Orders.')
+            )
+
+        template = self.env.ref(
+            'l10n_ar_eynes.mail_template_data_payment_order'
+        )
+
+        payment_order_pdf = IrAttachment.search(
+            [
+                ('res_model', '=', 'account.payment.order'),
+                ('res_id', '=', self.id),
+                ('name', '=', 'Payment order'),
+            ],
+            order='create_date desc',
+            limit=1,
+        )
+        retention_certificate_pdf = IrAttachment.search(
+            [
+                ('res_model', '=', 'account.payment.order'),
+                ('res_id', '=', self.id),
+                ('name', '=', 'Retention certificate'),
+            ],
+            order='create_date desc',
+            limit=1,
+        )
+
+        if not payment_order_pdf:
+            payment_order_pdf = self.render_report(
+                'Payment order', 'action_print_payment_order_qweb'
+            )
+
+        attachments = [payment_order_pdf.id]
+
+        if (
+            not retention_certificate_pdf
+            and self.type == 'payment'
+            and len(self.retention_ids) > 0
+        ):
+            retention_certificate_pdf = self.render_report(
+                'Retention certificate',
+                'action_print_retention_certificate_qweb',
+            )
+        if retention_certificate_pdf:
+            attachments.append(retention_certificate_pdf.id)
+
+        ctx = self.env.context
+        ctx.update(
+            {
+                'default_use_template': bool(template.id),
+                'default_template_id': template.id,
+                'default_composition_mode': 'comment',
+                'custom_layout': 'mail.mail_notification_light',
+                'default_attachment_ids': attachments,
+            }
+        )
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Send payment order by email'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'mail.compose.message',
+            'target': 'new',
+            'context': ctx,
+        }
 
     _sql_constraints = [
         ("unique_number", "unique(type, number)", _("Number must be unique")),
