@@ -12,7 +12,9 @@
                 <p style="margin: 0px; padding: 0px; font-size: 13px;">
                     Dear <t t-out="object.partner_id.name or ''">Azure Interior</t><br /><br />
                     Thank you for your payment.
-                    Here is your payment order <strong
+                    Here is your <t
+                        t-if="object.retention_ids"
+                    >retention certificate and</t> payment order <strong
                         t-out="(object.number or '').replace('/','-') or ''"
                     >BNK1-2021-05-0002</strong> amounting
                     to <strong
