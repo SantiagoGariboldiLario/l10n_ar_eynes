@@ -4043,7 +4043,7 @@ msgstr "En caso de rechazo del tercer cheque."
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__in_wallet
 msgid "In wallet"
-msgstr "En billetera"
+msgstr "En cartera"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_incoterms
@@ -8208,7 +8208,7 @@ msgstr "Códigos de tipo de voucher WSFEX"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_accreditation
 msgid "Waiting accreditation"
-msgstr "Esperando Acreditación"
+msgstr "Esperando débito"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_numeration
