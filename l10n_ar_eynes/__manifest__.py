@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.1.3.3',
+    'version': '15.0.1.4.0',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -68,6 +68,7 @@
         "data/res_groups_data.xml",
         "data/sicore_data.xml",
         "data/sifere_data.xml",
+        "data/mail_template.xml",
         'security/account_security.xml',
         'security/perception_ir_rule.xml',
         "wizard/fiscal_year_closing_operation_wizard_views.xml",

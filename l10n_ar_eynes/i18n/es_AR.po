@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-11-23 19:06+0000\n"
-"PO-Revision-Date: 2023-11-23 19:06+0000\n"
+"PO-Revision-Date: 2024-01-20 19:06+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -24,6 +24,10 @@ msgid ""
 "                        (Accounting->Configuration->Retentions->{}->AFIP Code)\n"
 "                        "
 msgstr ""
+"\n"
+"                        Error: Agregar campo 'código afip' a la retención\n"
+"                        (Contabilidad->Configuración->Retenciones->{}->Código AFIP)\n"
+"                        "
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_journal.py:0
@@ -41,13 +45,13 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
 #, python-format
 msgid "%(name)s - Could not generate report - %(err)s\n"
-msgstr ""
+msgstr "%(name)s - No pudo generar el informe - %(err)s\n"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/res_users.py:0
 #, python-format
 msgid "%(username)s already has this journal (%(journal)s) configured."
-msgstr ""
+msgstr "%(username)s ya tiene este diario (%(journal)s) configurado."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/cancel_picking_done.py:0
@@ -56,18 +60,20 @@ msgid ""
 "%s\n"
 "Pick renumerated from %s. %s"
 msgstr ""
+"%s\n"
+"Elija renumerado de %s. %s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
 #, python-format
 msgid "%s - Report generated with errors, check the report for more details.\n"
-msgstr ""
+msgstr "%s - Informe generado con errores, compruebe el informe para más detalles.\n"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
 #, python-format
 msgid "%s - The file was created successfully.\n"
-msgstr ""
+msgstr "%s - El archivo se ha creado correctamente.\n"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.payment_order
@@ -128,11 +134,52 @@ msgid ""
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:mail.template,body_html:l10n_ar_eynes.mail_template_data_payment_order
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    Dear <t t-out=\"object.partner_id.name or ''\">Azure Interior</t><br/><br/>\n"
+"                    Thank you for your payment.\n"
+"                    Here is your <t t-if=\"object.retention_ids\">retention certificate and</t> payment order <strong t-out=\"(object.number or '').replace('/','-') or ''\">BNK1-2021-05-0002</strong> amounting\n"
+"                    to <strong t-out=\"format_amount(object.amount, object.currency_id) or ''\">$ 10.00</strong> from <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
+"                    <br/><br/>\n"
+"                    Do not hesitate to contact us if you have any questions.\n"
+"                    <br/><br/>\n"
+"                    Best regards,\n"
+"                    <t t-if=\"user.signature\">\n"
+"                        <br/>\n"
+"                        <t t-out=\"user.signature or ''\">--<br/>Mitchell Admin</t>\n"
+"                    </t>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
+msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    Estimado <t t-out=\"object.partner_id.name or ''\">Azure Interior</t><br/><br/>\n"
+"                    Gracias por su pago.\n"
+"                    Aquí está su <t t-if=\"object.retention_ids\">certificado de retención y</t> su comprobante <strong t-out=\"(object.number or '').replace('/','-') or ''\">BNK1-2021-05-0002</strong> cuyo importe\n"
+"                    es <strong t-out=\"format_amount(object.amount, object.currency_id) or ''\">$ 10.00</strong> de <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
+"                    <br/><br/>\n"
+"                    No dude en contactarnos si tiene alguna duda.\n"
+"                    <br/><br/>\n"
+"                    Saludos,\n"
+"                    <t t-if=\"user.signature\">\n"
+"                        <br/>\n"
+"                        <t t-out=\"user.signature or ''\">--<br/>Mitchell Admin</t>\n"
+"                    </t>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
+
+#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid ""
 "<i title=\"Update Currency: Will convert the amount lines to the new "
 "currency set\" class=\"fa fa-fw fa-refresh\"/>"
 msgstr ""
+"<i title=\"Actualizar moneda: convertirá las líneas de monto a la nueva "
+"Moneda establecida\" class=\"fa fa-fw fa-refresh\"/>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
@@ -153,7 +200,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "<span class=\"o_form_label mx-3 oe_edit_only\"> or </span>"
-msgstr ""
+msgstr "<span class=\"o_form_label mx-3 oe_edit_only\"> o </span>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
@@ -169,7 +216,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
 msgid "<span class=\"o_form_label\">Default Journals</span>"
-msgstr ""
+msgstr "<span class=\"o_form_label\">Diario predeterminado</span>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
@@ -177,6 +224,8 @@ msgid ""
 "<span string=\"Keep date empty if the date is the same as the invoice.\" "
 "class=\"oe_grey\"/>"
 msgstr ""
+"<span string=\"Mantenga la fecha vacía si la fecha es la misma que la de la factura.\" "
+"class=\"oe_grey\"/>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.retention_certificate_qweb
@@ -191,6 +240,10 @@ msgid ""
 "                will be attached to the corresponding period\n"
 "            </span>"
 msgstr ""
+"<span>\n"
+"                Este asistente le permite crear percepciones ARBA IIBB de exportación. Los archivos generados\n"
+"                se adjuntarán al periodo correspondiente\n"
+"            </span>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.arba_retention_exporter_wizard_view
@@ -200,6 +253,10 @@ msgid ""
 "                will be attached to the corresponding period\n"
 "            </span>"
 msgstr ""
+"<span>\n"
+"                Este asistente le permite crear percepciones ARBA IIBB de exportación. Los archivos generados\n"
+"                se adjuntarán al periodo correspondiente\n"
+"            </span>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.retention_certificate_qweb
@@ -373,17 +430,17 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "<strong>Gather from<br/>New Certificate</strong>"
-msgstr ""
+msgstr "<strong>Agregar de<br/>Nuevo certificado</strong>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "<strong>Gather from<br/>Old Certificate</strong>"
-msgstr ""
+msgstr "<strong>Agregar de<br/>Certificado antiguo</strong>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "<strong>Generate Key</strong>"
-msgstr ""
+msgstr "<strong>Generar clave</strong>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.payment_order
@@ -394,18 +451,18 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsaa_config_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "<strong>Load Certificate</strong>"
-msgstr ""
+msgstr "<strong>Cargar certificado</strong>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsaa_config_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "<strong>Load Key</strong>"
-msgstr ""
+msgstr "<strong>Cargar clave</strong>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "<strong>Load Old Certificate</strong>"
-msgstr ""
+msgstr "<strong>Cargar certificados antiguos</strong>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.payment_order
@@ -472,7 +529,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__afip_code
 msgid "AFIP retention code"
-msgstr ""
+msgstr "Código de retención AFIP"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_arba
@@ -482,18 +539,18 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
 msgid "ARBA Account Data"
-msgstr ""
+msgstr "Datos de cuenta ARBA"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_arba_generated_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_arba_generated_files_tree
 msgid "ARBA generated files"
-msgstr ""
+msgstr "Archivos generador por ARBA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__access_warning
 msgid "Access warning"
-msgstr ""
+msgstr "Aviso de acceso"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_account
@@ -522,12 +579,12 @@ msgstr "Revocación de movimiento en cuenta"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_payment_order_concept_line
 msgid "Account Payment Order Concept Line"
-msgstr ""
+msgstr "Línea de concepto de orden de pago de cuenta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_tax_codes__tax_id
 msgid "Account Tax"
-msgstr ""
+msgstr "Impuesto de cuenta"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_tax_subjournal_action
@@ -565,6 +622,8 @@ msgid ""
 "Account used for account moves with checks. If not set, account in treasury "
 "configuration is used."
 msgstr ""
+"Cuenta utilizada para movimientos de cuenta con cheques. Si no se establece, se utiliza la cuenta "
+"en la configuración de tesorería."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_concept__account_ids
@@ -586,7 +645,7 @@ msgstr "Acreditado"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "Accion requerida"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_perception_activity_tree
@@ -609,7 +668,7 @@ msgstr "Actividad"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr ""
+msgstr "Decoración de excepción de actividad"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__activity_start_date
@@ -619,32 +678,32 @@ msgstr "Fecha de Comienzo de Actividad"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__activity_state
 msgid "Activity State"
-msgstr ""
+msgstr "Estado de actividad"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__activity_type_icon
 msgid "Activity Type Icon"
-msgstr ""
+msgstr "Icono de tipo de actividad"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__actual_currency_id
 msgid "Actual Currency"
-msgstr ""
+msgstr "Moneda actual"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__actual_currency_preciated
 msgid "Actual Currency Preciated"
-msgstr ""
+msgstr "Moneda actual cotizada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__actual_currency_rate
 msgid "Actual Currency Rate"
-msgstr ""
+msgstr "Tasa de cambio actual"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__invoice_id
 msgid "Actual Invoice"
-msgstr ""
+msgstr "Impuesto actual"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_debit_note
@@ -654,7 +713,7 @@ msgstr "Asistente para agregar nota débito"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.stock_picking_view_form_inherit_l10n_ar_eynes
 msgid "Add an internal note..."
-msgstr ""
+msgstr "Añadir una nota interna..."
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
@@ -669,14 +728,14 @@ msgstr "Informacion adicional..."
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__name
 msgid "Additional Notes"
-msgstr ""
+msgstr "Notas adicionles"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__address_shipping_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__address_shipping_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__address_shipping_id
 msgid "Address Shipping"
-msgstr ""
+msgstr "Dirección de envío"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
@@ -687,7 +746,7 @@ msgstr "Información adicional"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__advance_retention_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__advance_retention_ids
 msgid "Advance Payment Concept"
-msgstr ""
+msgstr "Concepto de pago por adelantado"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
@@ -702,12 +761,12 @@ msgstr "Tpo de alicuota"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__applied_aliquot
 msgid "Aliquot applied"
-msgstr ""
+msgstr "Alicuota aplicada"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_all_exporters
 msgid "All Exporters"
-msgstr ""
+msgstr "Todos los Exportadores"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__update_journal_period_wizard__selection_type__all
@@ -717,13 +776,13 @@ msgstr "Todos los Diarios"
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_all_reports
 msgid "All Reports"
-msgstr ""
+msgstr "Todos los reportes"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/wsfe_massive_sinchronize.py:0
 #, python-format
 msgid "All voucher of this type and POS are sinchronized."
-msgstr ""
+msgstr "Todos los bonos de este tipo y POS están sincronizados."
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -740,7 +799,7 @@ msgstr "Importe en moneda extranjera"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__applicable_state__always
 msgid "Always"
-msgstr ""
+msgstr "Siempre"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__always_apply_padron
@@ -763,7 +822,7 @@ msgstr "Importe"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_currency
 msgid "Amount CCY"
-msgstr ""
+msgstr "Monto CCY"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__amount_currency
@@ -803,7 +862,7 @@ msgstr "Importe total"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__amount_currency
 msgid "Amount in Partner Currency"
-msgstr ""
+msgstr "Importe en moneda del contacto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__amount_secondary_currency
@@ -816,6 +875,7 @@ msgstr "Importe en moenda secundaria"
 msgid ""
 "Amount total must be greater than amount taxed on Invoice ID %(inv_id)s"
 msgstr ""
+"El monto total debe ser mayor que el monto gravado en el ID de factura %(inv_id)"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -842,12 +902,12 @@ msgstr "Departamento"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__applicable_state
 msgid "Applicable State"
-msgstr ""
+msgstr "Estado aplicable"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_vat_tax__application_id
 msgid "Application"
-msgstr ""
+msgstr "Solicitud"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_fiscal_position_form_inherit_l10n_ar_eynes
@@ -864,40 +924,40 @@ msgstr "Retenciones aplicadas"
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.applied_perceptions_action
 msgid "Applied perceptions"
-msgstr ""
+msgstr "Percepciones aplicadas"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__month_applied_retentions
 msgid "Applied retentions this month"
-msgstr ""
+msgstr "Retenciones aplicadas este mes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsfe_request__result__a
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsfe_request_detail__result__a
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsfex_request_detail__result__a
 msgid "Approved"
-msgstr ""
+msgstr "Aprobado"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_arciba_generated_files
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_action_arba_generated_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_arciba_generated_files_tree
 msgid "ArciBA generated files"
-msgstr ""
+msgstr "Archivos generados por ArciBA"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
 msgid "Arciba"
-msgstr ""
+msgstr "Arciba"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Are you sure to unreconcile and cancel this record ?"
-msgstr ""
+msgstr "¿Estás seguro de no conciliar y cancelar este registro?"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.update_journal_period_wizard_view_form
@@ -919,24 +979,24 @@ msgstr "Facturas asociadas"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__associated_inv_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__associated_inv_ids
 msgid "Assoiciated Invoices"
-msgstr ""
+msgstr "Facturas asociadas"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_generated_files__attachment_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arciba_generated_files__attachment_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_generated_files__attachment_id
 msgid "Attachment"
-msgstr ""
+msgstr "Adjunto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "Recuento de adjuntos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files__attachment_ids
 msgid "Attachments"
-msgstr ""
+msgstr "Adjuntos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_config__service_ids
@@ -969,7 +1029,7 @@ msgstr "Diarios de Punto de Venta Disponibles"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_exporter_view_tree
 msgid "Available Reports"
-msgstr ""
+msgstr "Reportes disponibles"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
@@ -1024,7 +1084,7 @@ msgstr "Posición de la columna Base"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__base_currency
 msgid "Base Currency"
-msgstr ""
+msgstr "Moneda base"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_payment_order_retention_line_view_tree
@@ -1036,7 +1096,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__base_secondary_currency
 msgid "Base in secondary currency"
-msgstr "Base en moenda secundaria"
+msgstr "Base en moneda secundaria"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax_subjournal__based_on
@@ -1065,7 +1125,7 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_bank_statement_line__cae
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_move__cae
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment__cae
-msgid "CAE (Codigo de Autorizacion Electronico assigned by AFIP.)"
+msgid "CAE (Codigo de Autorizacion Electronico asignado por AFIP.)"
 msgstr ""
 
 #. module: l10n_ar_eynes
@@ -1453,13 +1513,13 @@ msgstr "Cancelar"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__cancel_picking_done__next_action__renumerate
 msgid "Cancel & Create draft"
-msgstr ""
+msgstr "Cancelar y crear borrador"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.act_stock_cancel_done_picking
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_cancel_picking_done_form
 msgid "Cancel & Renumerate"
-msgstr ""
+msgstr "Cancelar y renumerar"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
@@ -1475,7 +1535,7 @@ msgstr "Cancelar recibo"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__cancel_picking_done__next_action__cancel
 msgid "Cancel only"
-msgstr ""
+msgstr "Solo cancelar"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wizard_create_sifere_files
@@ -1497,7 +1557,7 @@ msgstr "Cheques Cancelados"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 msgid "Cancelled Debit Note"
-msgstr ""
+msgstr "Nota de débito canceladas"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
@@ -1511,6 +1571,8 @@ msgid ""
 "Cannot deposit! You cannot deposit check %s                        because "
 "Payment Date is greater than                        Deposit Date."
 msgstr ""
+"¡No puedo depositar! No puedes depositar el cheque %s                        porque"
+"La Fecha de Pago es mayor que la                        Fecha de Depósito."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__dom_partner_id
@@ -1520,62 +1582,62 @@ msgstr "Transportista"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_load_config__cert_name
 msgid "Cert FileName"
-msgstr ""
+msgstr "Nombre de archivo del certificado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_certificate_request__cert_request
 msgid "Cert Request (.csr)"
-msgstr ""
+msgstr "Solicitud de certificado (.csr)"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_config__certificate
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsaa_config_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "Certificate"
-msgstr ""
+msgstr "Certificado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_certificate_request__certificate
 msgid "Certificate (.crt)"
-msgstr ""
+msgstr "Certificado (.crt)"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__certificate_no
 msgid "Certificate No."
-msgstr ""
+msgstr "Certificado Nro."
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.certificate_renewal_wizard_action
 msgid "Certificate Renewal"
-msgstr ""
+msgstr "Renovación de certificado"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_wsaa_certificate_request
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "Certificate Request"
-msgstr ""
+msgstr "Solicitud de certificado"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.wsaa_certificate_request_menu
 msgid "Certificate Requests"
-msgstr ""
+msgstr "Solicitud de certificado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_load_config__certificate
 msgid "Certificate of Approval"
-msgstr ""
+msgstr "Certificado de aprobación"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_account_change_currency
 #: model:ir.model,name:l10n_ar_eynes.model_account_change_currency
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_change_currency_wizard_view
 msgid "Change Currency"
-msgstr ""
+msgstr "Cambiar moneda"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_change_currency_wizard_view
 msgid "Change To <i class=\"fa fa-arrow-down\"/>"
-msgstr ""
+msgstr "Cambiar a <i class=\"fa fa-arrow-down\"/>"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_check
@@ -1587,7 +1649,7 @@ msgstr "Cheque"
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "Check %s can't be accredited!"
-msgstr ""
+msgstr "¡El cheque %s no puede ser acreditado!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
@@ -1629,24 +1691,24 @@ msgstr "Cheque duplicado"
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "Check Error! Check has to be associated with a voucher"
-msgstr ""
+msgstr "¡Error! El cheque debe estar asociado a un voucher."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "Check Error! You cannot delete a check that is not in Draft"
-msgstr ""
+msgstr "¡Error! No se puede eliminar un cheque que no esté en borrador"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "Check Error! You cannot delete a third check that is not in Wallet"
-msgstr ""
+msgstr "¡Error! No puedes eliminar un tercer cheque que no esté en la cartera"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__check_sit_iibb
 msgid "Check IIBB Situation"
-msgstr ""
+msgstr "Situación de IIBB del cheque"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__number
@@ -1665,7 +1727,7 @@ msgstr "El numero de cheque debe contener numeros solamente"
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
 #, python-format
 msgid "Check Rejected %(check_number)s %(rejected_date)s"
-msgstr ""
+msgstr "Cheque rechazado %(check_number)s %(rejected_date)s"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.check_config_menu
@@ -1675,7 +1737,7 @@ msgstr "Configuracion de cheque"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_tax__inform_arciba
 msgid "Check if you want this perception to be informed to arciba authorities"
-msgstr ""
+msgstr "Marque si desea que esta percepción sea informada a las autoridades de arciba"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_wsfe_tax_codes__exempt_operations
@@ -1684,6 +1746,9 @@ msgid ""
 "to sell books, milk, etc. The taxes with this checked, will be reported to "
 "AFIP as  exempt operations (base amount) without VAT applied on this"
 msgstr ""
+"Revisar si este Impuesto al IVA corresponde a operaciones exentas del IVA, como"
+"venta de libros, leche, etc. Los impuestos con esto marcado, serán reportados a "
+"AFIP como operaciones exentas (monto base) sin que se aplique IVA a este"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
@@ -1692,6 +1757,8 @@ msgid ""
 "Check number %s is postdated and has already been accredited!\n"
 "Please break the conciliation of that check first."
 msgstr ""
+"¡El cheque número %s tiene fecha posterior y ya ha sido acreditado!\n"
+"Por favor, primero rompa la conciliación de ese cheque."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_perception_concept__no_subject
@@ -1701,7 +1768,7 @@ msgstr "Tildar si no se deben aplicar percepciones para este concepto"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_retention_concept__no_subject
 msgid "Check this if Retention should not be applied for this Concept"
-msgstr ""
+msgstr "Marque esto si no se debe aplicar retención para este concepto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_perception_tax_application__exclude_tax_allowance
@@ -1725,7 +1792,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_tax__is_exempt
 msgid "Check this if this Tax represent Tax Exempts"
-msgstr ""
+msgstr "Marque esto si este impuesto representa exenciones de impuestos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__disable_retentions
@@ -1733,6 +1800,8 @@ msgid ""
 "Check this if you want to disable automatic calculation of retention on this"
 " payment"
 msgstr ""
+"Marque esto si desea desactivar el cálculo automático de la retención de este "
+"pago."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_issued_check_line__checkbook_id
@@ -1807,12 +1876,12 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.certificate_renewal_wizard
 msgid "Choose your WSAA Certificate"
-msgstr ""
+msgstr "Elija su certificado WSAA"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.key_renewal_wizard
 msgid "Choose your WSAA Key"
-msgstr ""
+msgstr "Elija su clave WSAA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__clearance_move_id
@@ -1828,12 +1897,12 @@ msgstr "Claro"
 #. module: l10n_ar_eynes
 #: model_terms:ir.actions.act_window,help:l10n_ar_eynes.other_payments_action
 msgid "Click to register a purchase receipt."
-msgstr ""
+msgstr "Haga clic para registrar un recibo de compra."
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.actions.act_window,help:l10n_ar_eynes.other_receipts_action
 msgid "Click to register a receipt."
-msgstr ""
+msgstr "Haga clic para registrar un recibo."
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.payment_order
@@ -1871,7 +1940,7 @@ msgstr "Código"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files__exporter_codename
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files_generator__exporter_codename
 msgid "Codename"
-msgstr ""
+msgstr "Nombre del código"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__type__common
@@ -1912,7 +1981,7 @@ msgstr "Compañia"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__company_currency
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Company Currency"
-msgstr ""
+msgstr "Moneda de la empresa"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/wsfe.py:0
@@ -1922,6 +1991,8 @@ msgid ""
 "Company Error!\n"
 "There is no company being used by this user"
 msgstr ""
+"¡Error de empresa!\n"
+"Este usuario no utiliza ninguna empresa."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_config__company_id
@@ -1929,14 +2000,14 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__company_id
 msgid "Company Name"
-msgstr ""
+msgstr "Nombre de empresa"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_res_partner_advance_retention__company_id
 #: model:ir.model.fields,help:l10n_ar_eynes.field_res_partner_perception__company_id
 #: model:ir.model.fields,help:l10n_ar_eynes.field_res_partner_retention__company_id
 msgid "Company related to this journal"
-msgstr ""
+msgstr "Empresa relacionada con este diario"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.report,name:l10n_ar_eynes.action_print_payment_order_qweb
@@ -1949,6 +2020,8 @@ msgid ""
 "Compute the counter part accounts of this journal item for this journal "
 "entry. This can be needed in reports."
 msgstr ""
+"Calcule las cuentas de contrapartida de este diario para registro del diario. "
+"Esto puede ser necesario en los informes."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__writeoff_amount
@@ -1956,6 +2029,8 @@ msgid ""
 "Computed as the difference between the amount stated in the voucher and the "
 "sum of allocation on the voucher lines."
 msgstr ""
+"Calculado como la diferencia entre el monto indicado en el voucher y la "
+"suma de asignación en las líneas del voucher."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__concept_id
@@ -1999,7 +2074,7 @@ msgstr "Configurar Ajustes"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Config WSFEX"
-msgstr ""
+msgstr "Configuración de WSFEX"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.treasury_configuration_menu
@@ -2012,22 +2087,22 @@ msgstr "Configuracion"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsaa_config
 msgid "Configuration for WSAA"
-msgstr ""
+msgstr "Configuración para WSAA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfe_config
 msgid "Configuration for WSFE"
-msgstr ""
+msgstr "Configuración para WSFE"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfex_config
 msgid "Configuration for WSFEX"
-msgstr ""
+msgstr "Configuración para WSFEX"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_cancel_picking_done_form
 msgid "Confirm"
-msgstr ""
+msgstr "Confirmar"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_res_partner
@@ -2056,6 +2131,8 @@ msgid ""
 "Could not match any user available journals with fiscal position '%(fiscal_pos)s'\n"
 "Please check if there are any journals with this parameters in users > preferences > available journals"
 msgstr ""
+"No se pudo encontrar ningún diario disponible para el usuario con la posición fiscal '%(fiscal_pos)s'\n"
+"Por favor verifique si hay diarios con estos parámetros en usuarios > preferencias > diarios disponibles"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -2070,23 +2147,23 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move_line__counterpart
 msgid "Counterpart"
-msgstr ""
+msgstr "Contrapartida"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__writeoff_acc_id
 msgid "Counterpart Account"
-msgstr ""
+msgstr "Cuenta de contrapartida"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__comment
 msgid "Counterpart Comment"
-msgstr ""
+msgstr "Comentario de la contraparte"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__country_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Countries"
-msgstr ""
+msgstr "Paises"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__dst_cuit_id
@@ -2095,7 +2172,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__dst_cuit_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__dst_cuit_id
 msgid "Country CUIT"
-msgstr ""
+msgstr "CUIT país"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_res_country_state
@@ -2112,18 +2189,18 @@ msgstr "Crear Chequera"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_create_checkbook_wizard
 msgid "Create Checkbook Wizard"
-msgstr ""
+msgstr "Asistente para crear chequera"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.arba_perception_exporter_wizard_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.arba_retention_exporter_wizard_view
 msgid "Create File"
-msgstr ""
+msgstr "Crear archivo"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_sifere_export
 msgid "Create SIFERE Reports"
-msgstr ""
+msgstr "Crear informes SIFERE"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__create_uid
@@ -2298,7 +2375,7 @@ msgstr "Creado en"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_sicore_files
 msgid "Credit Card Settlement Parameters"
-msgstr ""
+msgstr "Parámetros de liquidación de tarjetas de crédito"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move_reversal__refund_method
@@ -2314,12 +2391,12 @@ msgstr "Nota de Credito"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__cn_sequence_number_next
 msgid "Credit Note Next Number"
-msgstr ""
+msgstr "Número de siguiente nota de crédito"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__cn_sequence_id
 msgid "Credit Note Sequence"
-msgstr ""
+msgstr "Secuencia de notas de crédito"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__income_line_ids
@@ -2331,7 +2408,7 @@ msgstr "Creditos"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_reason_rejected_check__is_critical
 msgid "Critical"
-msgstr ""
+msgstr "Crítico"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__crossed
@@ -2343,7 +2420,7 @@ msgstr "Cruzado"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__cuit
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__cuit
 msgid "Cuit"
-msgstr ""
+msgstr "CUIT"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__currency_ids
@@ -2376,7 +2453,7 @@ msgstr "Opciones de Moneda"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__currency_preciated
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__currency_preciated
 msgid "Currency Preciated"
-msgstr ""
+msgstr "Moneda cotizada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_res_currency_rate
@@ -2393,7 +2470,7 @@ msgstr "Tasa monetaria"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_currency__preciated
 msgid "Currency preciated"
-msgstr ""
+msgstr "Moneda cotizada"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -2413,7 +2490,7 @@ msgstr "Pagos de cliente"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__access_url
 msgid "Customer Portal URL"
-msgstr ""
+msgstr "URL del portal del cliente"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__dst_cuit_ids
@@ -2424,7 +2501,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_dst_cuit_codes
 msgid "DST CUIT Codes"
-msgstr ""
+msgstr "Código DST CUIT"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__date
@@ -2439,7 +2516,7 @@ msgstr "Fecha"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__date_applied
 msgid "Date Applied"
-msgstr ""
+msgstr "Fecha aplicada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_generated_files__date_from
@@ -2447,29 +2524,29 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_retention_exporter_wizard__date_from
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arciba_generated_files__date_from
 msgid "Date From"
-msgstr ""
+msgstr "Fecha de"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__date_invoice
 msgid "Date Invoice"
-msgstr ""
+msgstr "Fecha factura"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__date_process
 msgid "Date Processed"
-msgstr ""
+msgstr "Fecha de procesamiento"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files__date_start
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files_generator__date_start
 msgid "Date Start"
-msgstr ""
+msgstr "Fecha de inicio"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files__date_stop
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files_generator__date_stop
 msgid "Date Stop"
-msgstr ""
+msgstr "Fecha de parada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_generated_files__date_to
@@ -2477,7 +2554,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_retention_exporter_wizard__date_to
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arciba_generated_files__date_to
 msgid "Date To"
-msgstr ""
+msgstr "Fecha hasta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_arciba_files__period_end
@@ -2486,7 +2563,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_sifere_files__period_end
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_generated_files__period_end
 msgid "Date end"
-msgstr ""
+msgstr "Fecha finalizacion"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__cot_date_transfer
@@ -2497,7 +2574,7 @@ msgstr "Fecha de Transferencia"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_sicore_files__presentation_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_generated_files__presentation_date
 msgid "Date of presentation"
-msgstr ""
+msgstr "Fecha de presentación"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_arciba_files__period_start
@@ -2506,19 +2583,19 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_sifere_files__period_start
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_generated_files__period_start
 msgid "Date start"
-msgstr ""
+msgstr "Fecha de inicio"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
 #, python-format
 msgid "Date start and date end must be in the same month"
-msgstr ""
+msgstr "La fecha de inicio y la fecha de finalización deben ser el mismo mes."
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 msgid "Debit Nore"
-msgstr ""
+msgstr "Nota de débito"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__is_debit_note
@@ -2532,18 +2609,18 @@ msgstr "Nota de Débito"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__dn_sequence_number_next
 msgid "Debit Note Next Number"
-msgstr ""
+msgstr "Número de siguiente nota de débito"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__dn_sequence_id
 msgid "Debit Note Sequence"
-msgstr ""
+msgstr "Secuencia de notas de débito"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
 #, python-format
 msgid "Debit Note due to rejected check %(check_number)s [%(po_number)s]"
-msgstr ""
+msgstr "Nota de Débito por cheque rechazado %(check_number)s [%(po_number)s]"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.account_invoice_menu_debit_note
@@ -2554,18 +2631,18 @@ msgstr "Notas de Débito"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__debt_line_ids
 msgid "Debits"
-msgstr ""
+msgstr "Débitos"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_form
 msgid "Declare"
-msgstr ""
+msgstr "Declarar"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__report_files__state__declared
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_search
 msgid "Declared"
-msgstr ""
+msgstr "Declarado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__declared_value
@@ -2576,7 +2653,7 @@ msgstr "Valor Declarado"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__type
 msgid "Default Type"
-msgstr ""
+msgstr "Tipo predeterminado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__type__deferred
@@ -2588,12 +2665,12 @@ msgstr "Diferido"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__deferred_account_id
 msgid "Deferred Check Account"
-msgstr ""
+msgstr "Cuenta de cheques diferidos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__deferred_journal_id
 msgid "Deferred Check Journal"
-msgstr ""
+msgstr "Diario de cheques diferido"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__perception_ids
@@ -2605,12 +2682,12 @@ msgstr "Percepciones definidas"
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
 msgid "Definition not found for document_type_name: %(doc_type)s"
-msgstr ""
+msgstr "Definición no encontrada para document_type_name: %(doc_type)s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__delivered
 msgid "Delivered"
-msgstr ""
+msgstr "Entregado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_stock_picking__is_origin
@@ -2639,7 +2716,7 @@ msgstr "Depositar"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_bank_id
 msgid "Deposit Account"
-msgstr ""
+msgstr "Cuenta de depósito"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
@@ -2663,7 +2740,7 @@ msgstr "Depositar cheque %(check_number)s en %(acc_number)s"
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid "Deposit Check %s"
-msgstr ""
+msgstr "Depositar cheque %s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_date
@@ -2694,7 +2771,7 @@ msgstr "Depositar cheque"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_deposit_check_wizard
 msgid "Deposit check wizard"
-msgstr ""
+msgstr "Asistente para depositar cheques"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__deposited
@@ -2709,7 +2786,7 @@ msgstr "Banco Depositario"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__bank_account_id
 msgid "Depositing Bank Account"
-msgstr ""
+msgstr "Depositar cuenta bancaria"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_dst_cuit_codes__name
@@ -2752,17 +2829,17 @@ msgstr "País destino"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__applicable_state__dest
 msgid "Destination"
-msgstr ""
+msgstr "Destino"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__dest
 msgid "Destiny"
-msgstr ""
+msgstr "Destino"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__destiny_partner_id
 msgid "Destiny Partner"
-msgstr ""
+msgstr "Contacto destino"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__detail
@@ -2783,6 +2860,9 @@ msgid ""
 "used by itself, however it can still be used in a group. 'adjustment' is "
 "used to perform tax adjustment."
 msgstr ""
+"Determina dónde se puede seleccionar el impuesto. Nota: 'Ninguno' significa que un impuesto no se puede" 
+"utilizar por sí solo; sin embargo, aún se puede utilizar en un grupo. El 'ajuste' se"
+"utiliza para realizar el ajuste fiscal."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__writeoff_amount
@@ -2797,7 +2877,7 @@ msgstr "Tamaño"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__disable_retentions
 msgid "Disable Retentions"
-msgstr ""
+msgstr "Deshabilitar retenciones"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__display_name
@@ -2888,7 +2968,7 @@ msgstr "Nombre a mostrar"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request_detail__docnum
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__document_number
 msgid "Document Number"
-msgstr ""
+msgstr "Numero de documento"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_voucher_type__doc_type
@@ -2901,7 +2981,7 @@ msgstr "Tipo de documento"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
 msgid "Document Type..."
-msgstr ""
+msgstr "Tipo de documento..."
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.res_document_type_action
@@ -2920,14 +3000,14 @@ msgstr "Tipo de documento"
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.res_document_type_menu
 msgid "Document types"
-msgstr ""
+msgstr "Tipos de documentos"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/certificate_request.py:0
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsaa_certificate_request__state__done
 #, python-format
 msgid "Done"
-msgstr ""
+msgstr "Echo"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__door
@@ -2947,7 +3027,7 @@ msgstr "Borrador"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 msgid "Draft Debit Nore"
-msgstr ""
+msgstr "Borrador de nota de débito"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
@@ -2966,12 +3046,12 @@ msgstr "Fecha de Cierre"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_files
 msgid "E-Arciba Exporter"
-msgstr ""
+msgstr "Exportador E-Arciba"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_nc_file
 msgid "E-Arciba NC Exporter"
-msgstr ""
+msgstr "Exportador E-Arciba NC"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
@@ -2991,18 +3071,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_optionals__to_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_tax_codes__to_date
 msgid "Effect Until"
-msgstr ""
+msgstr "Efecto hasta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__date_effective
 msgid "Effective Date"
-msgstr ""
+msgstr "Fecha efectiva"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_optionals__from_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_tax_codes__from_date
 msgid "Effective From"
-msgstr ""
+msgstr "Efectivo desde"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/certificate_request.py:0
@@ -3010,6 +3090,7 @@ msgstr ""
 msgid ""
 "Either the Request Information or the Old Certificate must be complete!"
 msgstr ""
+"¡La Información de solicitud o el certificado antiguo deben estar completos!"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__fiscal_type__electronic
@@ -3020,26 +3101,26 @@ msgstr "Factura electrónica"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__employee_id
 msgid "Employee"
-msgstr ""
+msgstr "Empleado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__employee_payment
 msgid "Employee Payments"
-msgstr ""
+msgstr "Pagos a empleados"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__dst_cuit
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__dst_cuit
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__dst_cuit
 msgid "Enable DST CUIT"
-msgstr ""
+msgstr "Habilitar CUIT DST"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__group_check_cot
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_config_settings__group_check_cot
 #: model:res.groups,name:l10n_ar_eynes.group_check_cot
 msgid "Enable Web Service"
-msgstr ""
+msgstr "Habilitar sericio Web"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__end_num
@@ -3083,13 +3164,13 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/wizard/wsaa_load_config.py:0
 #, python-format
 msgid "Error ! You must enter a File"
-msgstr ""
+msgstr "Error ! Debes ingresar un Archivo"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/wsfe.py:0
 #, python-format
 msgid "Error fetching voucher from AFIP!"
-msgstr ""
+msgstr "¡Error al recuperar el voucher de la AFIP!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -3099,19 +3180,22 @@ msgid ""
 "The total amount of the invoice does not match the total calculated.\n"
 "Maybe there is a rounding error!. (Amount Calculated: %f)"
 msgstr ""
+"¡Error en importe_total!\n"
+"El importe total de la factura no coincide con el total calculado.\n"
+"¡Quizás haya un error de redondeo!. (Cantidad calculada: %f)"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/wsfe.py:0
 #: code:addons/l10n_ar_eynes/models/wsfe.py:0
 #, python-format
 msgid "Error reading Taxes!\n"
-msgstr ""
+msgstr "¡Error al leer Impuestos!\n"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid "Error when searching for the check"
-msgstr ""
+msgstr "Error al buscar el cheque"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
@@ -3128,6 +3212,8 @@ msgid ""
 "Error!\n"
 "'actual rate' or 'new rate' not provided"
 msgstr ""
+"Error!\n"
+"No se proporciona la 'tasa actual' o la 'nueva tarifa'"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/wsaa_load_config.py:0
@@ -3136,12 +3222,14 @@ msgid ""
 "Error!\n"
 "The Filename should end in \".%s\""
 msgstr ""
+"Error!\n"
+"El nombre del archivo debe terminar en \".%s\""
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid "Error! Bad Treasury configuration for this Company!"
-msgstr ""
+msgstr "¡Error! ¡Mala configuración de tesorería para esta empresa!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
@@ -3150,6 +3238,8 @@ msgid ""
 "Error! Bank Account has no account configured. Please, configure an account "
 "for the bank account used for checks!"
 msgstr ""
+"¡Error! La cuenta bancaria no tiene ninguna cuenta configurada. ¡Por favor, configure una cuenta "
+"para la cuenta bancaria utilizada para los cheques!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
@@ -3158,6 +3248,8 @@ msgid ""
 "Error! The selected checks must be in wallet.\n"
 "Check %s is not in wallet"
 msgstr ""
+"¡Error! Los cheques seleccionados deben estar en la cartera.\n"
+"El cheque %s no está en la billetera"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
@@ -3166,18 +3258,20 @@ msgid ""
 "Error! The selected checks must to be in                     wallet.\n"
 "Check %s is not in wallet"
 msgstr ""
+"¡Error! Los cheques seleccionados deben estar en la                     cartera.\n"
+"El cheque %s no está en la billetera"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "Error! There is no Journal configured for deferred checks."
-msgstr ""
+msgstr "¡Error! No hay ningún diario configurado para cheques diferidos."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid "Error! There is no check configuration for this Company!"
-msgstr ""
+msgstr "¡Error! ¡No existe ninguna configuración de verificación para esta empresa!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
@@ -3186,6 +3280,8 @@ msgid ""
 "Error! You have to configure an account on Bank Account %(bank_name)s: "
 "%(acc_number)s"
 msgstr ""
+"¡Error! Tienes que configurar una cuenta en la cuenta bancaria %(bank_name)s: "
+"%(acc_number)s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files__error_ids
@@ -3194,12 +3290,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_request_form
 msgid "Errors"
-msgstr ""
+msgstr "Errores"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_report_files_error
 msgid "Errors for an exportat"
-msgstr ""
+msgstr "Errores para un exportador"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wizard_create_sifere_files
@@ -3212,14 +3308,14 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__event
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Event"
-msgstr ""
+msgstr "Evento"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_exempt
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__amount_exempt
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__amount_exempt
 msgid "Except"
-msgstr ""
+msgstr "Excepto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__payment_rate
@@ -3243,28 +3339,28 @@ msgstr "Certificado de Exclusión"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__exclusion_date_certificate
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__exclusion_date_certificate
 msgid "Exclusion General Resolution Date"
-msgstr ""
+msgstr "Fecha resolucion general exclusion"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__is_exempt
 msgid "Exempt"
-msgstr ""
+msgstr "Exento"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_tax_codes__exempt_operations
 msgid "Exempt Operations"
-msgstr ""
+msgstr "Operaciones exentas"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_config_form
 msgid "Exempt Operations Taxes Mapping"
-msgstr ""
+msgstr "Mapeo de impuestos de operaciones exentas"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wsfetools/wsfe_easywsy.py:0
 #, python-format
 msgid "Expected Error!\n"
-msgstr ""
+msgstr "¡Error esperado!\n"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_third_party_check_wizard__expense_line_ids
@@ -3274,7 +3370,7 @@ msgstr "Gastos"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_ta__expiration_time
 msgid "Expiration Time"
-msgstr ""
+msgstr "Tiempo de expiración"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__expired
@@ -3286,14 +3382,14 @@ msgstr "Vencido"
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_arba_perception_report
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.arba_perception_exporter_wizard_view
 msgid "Export ARBA Perceptions"
-msgstr ""
+msgstr "Exportar percepciones ARBA"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_create_arba_retention_file
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_arba_retention_report
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.arba_retention_exporter_wizard_view
 msgid "Export ARBA Retentions"
-msgstr ""
+msgstr "Exportar Retenciones ARBA"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
@@ -3303,6 +3399,9 @@ msgid ""
 "                    Applicable Retentions for export based on rule %s not found.\n"
 "                    HINT: The payslips are in state done?"
 msgstr ""
+"Error de exportación\n"
+"                    Retenciones aplicables para exportación basadas en la regla %s no encontrada.\n"
+"                    PISTA: ¿Las nóminas están en estado de terminación?"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
@@ -3313,11 +3412,15 @@ msgid ""
 "                    HINT:\n"
 "                    The retention is of type vat or profit ?"
 msgstr ""
+"Error de exportación\n"
+"                    No se encontraron retenciones aplicables para la exportación.\n"
+"                    PISTA:\n"
+"                    ¿La retención es de tipo iva o beneficio?"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Export Invoice"
-msgstr ""
+msgstr "Exportar factura"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.report,name:l10n_ar_eynes.action_move_line_list_subj_xls
@@ -3331,12 +3434,12 @@ msgstr "Exportar Subdiario"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__export_type_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Export Type"
-msgstr ""
+msgstr "Tipo de exportación"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_report_files
 msgid "Exported Files"
-msgstr ""
+msgstr "Archivos exportados"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files__exporter_id
@@ -3344,7 +3447,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_generator_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_search
 msgid "Exporter"
-msgstr ""
+msgstr "Exportador"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
@@ -3354,11 +3457,13 @@ msgid ""
 "Exporter Failure.\n"
 "[undefined %s]"
 msgstr ""
+"Error del exportador.\n"
+"[undefined %s]"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_parent_exporters
 msgid "Exporters"
-msgstr ""
+msgstr "Exportadores"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__express_id
@@ -3389,6 +3494,7 @@ msgstr ""
 msgid ""
 "FEXResult_LastCMP errorFEXResult_LastCMP is not in the response from AFIP"
 msgstr ""
+"FEXResult_LastCMP errorFEXResult_LastCMP no está en la respuesta de la AFIP"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_fob_cur
@@ -3417,6 +3523,8 @@ msgid ""
 "Fields with internal purpose only that depicts\n"
 "                if the invoice is a multi currency one or not"
 msgstr ""
+"Campos con propósito interno únicamente que muestra\n 
+"                si la factura es multidivisa o no"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__is_multi_currency
@@ -3424,21 +3532,23 @@ msgid ""
 "Fields with internal purpose only that depicts if the voucher is a multi "
 "currency one or not"
 msgstr ""
+"Campos con propósito interno únicamente que muestran si el comprobante es "
+"multidivisa o no"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files_error__file_id
 msgid "File"
-msgstr ""
+msgstr "Archivo"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_sicore_generated_files__datas
 msgid "File Content (base64)"
-msgstr ""
+msgstr "Contenido de archivo (base64)"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_form
 msgid "Files"
-msgstr ""
+msgstr "Archivos"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.payment_order
@@ -3513,12 +3623,12 @@ msgstr "Desde AFIP"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__from_register_AGIP
 msgid "From AGIP Register"
-msgstr ""
+msgstr "Desde registro AGIP"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__from_register_ARBA
 msgid "From ARBA Register"
-msgstr ""
+msgstr "Desde registro ARBA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_perception__from_padron
@@ -3541,7 +3651,7 @@ msgstr "Completo"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__general_resolution
 msgid "GR Number"
-msgstr ""
+msgstr "Numero GR"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -3565,12 +3675,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_nc_file
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_sicore_files
 msgid "Generate"
-msgstr ""
+msgstr "Generar"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_sicore_files
 msgid "Generate (RRHH)"
-msgstr ""
+msgstr "Generar (RRHH)"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.stock_picking_view_form_inherit_l10n_ar_eynes
@@ -3580,73 +3690,73 @@ msgstr "Generar COT"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_reject_issued_check_wizard__generate_rejection_journal_entry
 msgid "Generate Rejection Journal Entry"
-msgstr ""
+msgstr "Generar rechazo de diario entrante"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "Generate Request"
-msgstr ""
+msgstr "Generar solicitud"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__report_files__state__generated
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_search
 msgid "Generated"
-msgstr ""
+msgstr "Generado"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sicore_generated_files_form
 msgid "Generated File"
-msgstr ""
+msgstr "Generar archivo"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_config_form
 msgid "Get AFIP tables"
-msgstr ""
+msgstr "Obtener tablas AFIP"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Get Countries"
-msgstr ""
+msgstr "Obtener paises"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Get Currencies"
-msgstr ""
+msgstr "Obtener monedas"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Get DST CUIT"
-msgstr ""
+msgstr "Obtener CUIT DST"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Get Export Types"
-msgstr ""
+msgstr "Obtener tipos de exportación"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Get Incoterms"
-msgstr ""
+msgstr "Obtener Incoterms"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Get Languages"
-msgstr ""
+msgstr "Obtener idiomas"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Get Units of Measure"
-msgstr ""
+msgstr "Obtener unidades de medida"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Get Voucher Type"
-msgstr ""
+msgstr "Obtener tipo de voucher"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_form
 msgid "Go To"
-msgstr ""
+msgstr "Ir a"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
@@ -3669,17 +3779,17 @@ msgstr "Ingresos Brutos"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__gi_application_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_view_tax_form_inherit_l10n_ar_eynes
 msgid "Gross Income Tax Application"
-msgstr ""
+msgstr "Solicitud de impuesto sobre ingresos brutos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__perc_gi_application_ids
 msgid "Gross Income Tax Application for Perceptions"
-msgstr ""
+msgstr "Solicitud de impuesto sobre ingresos brutos por percepciones"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_search
 msgid "Group By"
-msgstr ""
+msgstr "Ordenar por"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax_subjournal__grouped
@@ -3694,12 +3804,12 @@ msgstr "Monto máximo para el Agrupamiento"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_exporter__group_ids
 msgid "Groups"
-msgstr ""
+msgstr "Grupos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__has_message
 msgid "Has Message"
-msgstr ""
+msgstr "Tiene un mensaje"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_request_form
@@ -3720,20 +3830,22 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_ar_eynes.field_res_partner__retention_ids
 #: model:ir.model.fields,help:l10n_ar_eynes.field_res_users__retention_ids
 msgid ""
-"Here you have to configure retention exceptions for this partner with this "
+"Here you have to configure retention exceptions for this contacto with this "
 "Fiscal Position"
 msgstr ""
+"Aquí debe configurar las excepciones de retención para este socio con esta "
+"posición fiscal"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "History Requests"
-msgstr ""
+msgstr "Historial de solicitudes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__homologation
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__homologation
 msgid "Homologation"
-msgstr ""
+msgstr "Homologación"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__id
@@ -3828,24 +3940,24 @@ msgstr "Situación IIBB"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__activity_exception_icon
 msgid "Icon"
-msgstr ""
+msgstr "Icono"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "Icono para indicar una actividad de excepción."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_needaction
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_unread
 msgid "If checked, new messages require your attention."
-msgstr ""
+msgstr "Si está marcado, los mensajes nuevos requieren su atención."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_has_error
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "Si está marcado, algunos mensajes tienen un error de entrega."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_tax__check_sit_iibb
@@ -3853,6 +3965,8 @@ msgid ""
 "If checked, when IIBB situation is Multilateral, this perception is always "
 "applicable"
 msgstr ""
+"Si está marcado, cuando la situación IIBB es multilateral, esta percepción siempre es "
+"aplicable"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_tax__always_apply_padron
@@ -3860,6 +3974,8 @@ msgid ""
 "If checked, when the partner has a perception exception and it was generated"
 " from a padron, this perception will be applied"
 msgstr ""
+"Si está marcado, cuando el contacto tiene una excepción de percepción y fue generada "
+"a partir de un padrón, se aplicará esta percepción."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_debit_note__journal_id
@@ -3882,6 +3998,8 @@ msgid ""
 "If this invoice was fill as multicurrency and then\n"
 "                converted to local currency, this will be checked"
 msgstr ""
+"Si esta factura fue llenada como multicurrency y después\n"
+"                convertida a la moneda local, esta será verificada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_wsfex_config__homologation
@@ -3889,6 +4007,8 @@ msgid ""
 "If true, there will be some validations that are         disabled, for "
 "example, invoice number correlativeness"
 msgstr ""
+"Si está verdadero, hay algunas validaciones que están         desactivadas, "
+"por ejemplo, la correlatividad del número de factura"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_wsfe_config__homologation
@@ -3896,27 +4016,29 @@ msgid ""
 "If true, there will be some validations that are disabled, for example, "
 "invoice number correlativeness"
 msgstr ""
+"Si está verdadero, hay algunas validaciones que están desactivadas, por ejemplo, "
+"la correlatividad del número de factura"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_wsfex_request_detail__name
 msgid "If you want to write down some detail about this request"
-msgstr ""
+msgstr "Si deseas escribir algún detalle sobre esta solicitud"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_sifere_config__ignore_jurisdiction
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sifere_config_form
 msgid "Ignore jurisdiction errors?"
-msgstr ""
+msgstr "¿Ignorar errores de jurisdicción?"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_check_config__account_id
 msgid "In Argentina, Valores a Depositar is used, for example"
-msgstr ""
+msgstr "En Argentina, Valores a Depositar esta usado, por ejemplo"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_check__debit_note_id
 msgid "In case of rejection of the third check"
-msgstr ""
+msgstr "En caso de rechazo del tercer cheque."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__in_wallet
@@ -3938,6 +4060,10 @@ msgid ""
 "* State/Province is equals to destination address\n"
 "* Always"
 msgstr ""
+"Indica si esta percepción es aplicable cuando:\n"
+"* Estado/Provincia es igual a la dirección de origen\n"
+"* Estado/Provincia es igual a la dirección de destino\n"
+"* Siempre"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__infook
@@ -3947,12 +4073,12 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__inform_arba
 msgid "Inform ARBA?"
-msgstr ""
+msgstr "¿Informar a ARBA?"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__inform_arciba
 msgid "Inform arciba?"
-msgstr ""
+msgstr "Informar a arciba?"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -3964,7 +4090,7 @@ msgstr "Información"
 #. module: l10n_ar_eynes
 #: model:account.tax.group,name:l10n_ar_eynes.internal_tax_group
 msgid "Internal"
-msgstr ""
+msgstr "Interna"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__fiscal_type__internal
@@ -3982,7 +4108,7 @@ msgstr "Notas internas"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__internal_number
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__internal_number
 msgid "Internal Number"
-msgstr ""
+msgstr "Numero interno"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__internal_type
@@ -3993,7 +4119,7 @@ msgstr "Tipo interno"
 #: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
 #, python-format
 msgid "Invalid RRHH Code."
-msgstr ""
+msgstr "Código RRHH no válido."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
@@ -4013,17 +4139,17 @@ msgstr "Factura"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__currency_converted
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__currency_converted
 msgid "Invoice Converted"
-msgstr ""
+msgstr "Factura convertida"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_change_currency_wizard_view
 msgid "Invoice Currency"
-msgstr ""
+msgstr "Moneda de la factura"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_config_form
 msgid "Invoice Date Difference from Today"
-msgstr ""
+msgstr "Diferencia entre la fecha de la factura con respecto a hoy"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wsfetools/wsfe_easywsy.py:0
@@ -4032,6 +4158,8 @@ msgid ""
 "Invoice Date difference with today should be less than [%s] days for product"
 " sales."
 msgstr ""
+"La diferencia entre la fecha de la factura y la fecha de hoy debe ser inferior a [%s] días para las ventas de"
+" productos."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wsfetools/wsfe_easywsy.py:0
@@ -4040,16 +4168,18 @@ msgid ""
 "Invoice Date difference with today should be less than [%s] days for "
 "products and services sales."
 msgstr ""
+"La diferencia entre la fecha de la factura y la fecha de hoy debe ser inferior a [%s] días para "
+"las ventas de productos y servicios."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__perception_tax_application__calculation_base__amount_taxed
 msgid "Invoice Net Taxed"
-msgstr ""
+msgstr "Factura neta gravada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__perception_tax_application__calculation_base__amount_no_taxed
 msgid "Invoice Net Untaxed"
-msgstr ""
+msgstr "Factura neta libre de impuestos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__invoice_ref
@@ -4059,23 +4189,23 @@ msgstr "Referencia factura"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_sinchronize_voucher
 msgid "Invoice Relationship"
-msgstr ""
+msgstr "Relación de factura"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__perception_tax_application__calculation_base__amount_untaxed
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_tax_application__calculation_base__amount_untaxed
 msgid "Invoice Subtotal"
-msgstr ""
+msgstr "Subtotal de factura"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__aml_id
 msgid "Invoice Tax"
-msgstr ""
+msgstr "Impuesto sobre factura"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__perception_tax_application__calculation_base__amount_total
 msgid "Invoice Total"
-msgstr ""
+msgstr "Total de factura"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/account_change_currency.py:0
@@ -4083,12 +4213,13 @@ msgstr ""
 msgid ""
 "Invoice currency change %(inv_curr)s => %(new_curr)s. Rate: %(curr_rate)f"
 msgstr ""
+"Cambio de moneda de factura %(inv_curr)s => %(new_curr)s. Tasa: %(curr_rate)f"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #, python-format
 msgid "Invoice must have a denomination configured"
-msgstr ""
+msgstr "Factura debe tener una denominación configurada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__invoice_ids
@@ -4103,19 +4234,19 @@ msgstr "Facturas y transacciones pendientes"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_account_move_multicurrency_filter
 msgid "Invoices not in company currency"
-msgstr ""
+msgstr "Facturas que no están en la moneda de la empresa"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__is_bank_settlement
 msgid "Is Bank Settlement"
-msgstr ""
+msgstr "¿Es liquidación bancaria?"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__is_company_cur
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__is_company_cur
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__is_company_cur
 msgid "Is Company Cur"
-msgstr ""
+msgstr "¿Es la empresa actual?"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__is_FCE_invoice
@@ -4133,7 +4264,7 @@ msgstr "Es consumidor final"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "Es seguidor"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__issue_date
@@ -4155,7 +4286,7 @@ msgstr "Cheque propio"
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "Issued Check %s"
-msgstr ""
+msgstr "Cheque emitido %s"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_issued_check_action
@@ -4189,21 +4320,21 @@ msgstr "Banco Emisor"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_move_line__currency_rate
 msgid "It is the currency rate"
-msgstr ""
+msgstr "Es el tipo de cambio"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_bank_statement_line__secondary_currency_rate
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_move__secondary_currency_rate
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment__secondary_currency_rate
 msgid "It is the old currency rate of the last change of currency"
-msgstr ""
+msgstr "Es el tipo de cambio antiguo del último cambio de moneda."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_bank_statement_line__currency_rate
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_move__currency_rate
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment__currency_rate
 msgid "It is the preciated currency rate of the invoice"
-msgstr ""
+msgstr "Es el tipo de cambio apreciado de la factura."
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_journal
@@ -4250,7 +4381,7 @@ msgstr "Apuntes contables"
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #, python-format
 msgid "Journal not found"
-msgstr ""
+msgstr "Diario no encontrado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard__journal_ids
@@ -4274,13 +4405,13 @@ msgstr "Información de jurisdicción"
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
 #, python-format
 msgid "Jurisdiction cannot be found"
-msgstr ""
+msgstr "No se puede encontrar jurisdicción"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_sifere_config__jurisdiction_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sifere_config_form
 msgid "Jurisdictions"
-msgstr ""
+msgstr "Jurisdicciones"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__payment_option__without_writeoff
@@ -4297,17 +4428,17 @@ msgstr "Dejar vacío para usar la misma fecha que el comprobante."
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsaa_config_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "Key"
-msgstr ""
+msgstr "Clave"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_load_config__key_name
 msgid "Key FileName"
-msgstr ""
+msgstr "Nombre de clave"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.key_renewal_wizard_action
 msgid "Key Renewal"
-msgstr ""
+msgstr "Renovar clave"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wsfetools/wsfex_easywsy.py:0
@@ -4319,7 +4450,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__lang_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Languages"
-msgstr ""
+msgstr "Idiomas"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency____last_update
@@ -4594,7 +4725,7 @@ msgstr "Lineas"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsaa_load_config
 msgid "Load configuration for WSAA"
-msgstr ""
+msgstr "Cargar configuración para WSAA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_tax_application__sit_iibb__1
@@ -4617,12 +4748,12 @@ msgstr "Adjuntos principales"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__account_id
 msgid "Main Check Account"
-msgstr ""
+msgstr "Cuenta de cheques principal"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_request_form
 msgid "Main Information"
-msgstr ""
+msgstr "Información principal"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__manual
@@ -4633,7 +4764,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.wsfe_massive_sinchronize
 msgid "Massive Sinchronize"
-msgstr ""
+msgstr "Sincronización masiva"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__name
@@ -4643,7 +4774,7 @@ msgstr "Circular"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message
 msgid "Message"
-msgstr ""
+msgstr "Mensaje"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_has_error
@@ -4658,7 +4789,7 @@ msgstr "Mensajes"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_payment_order_issued_check_line
 msgid "Model to communicate issued checks with payment orders"
-msgstr ""
+msgstr "Modelo para comunicar cheques emitidos con órdenes de pago"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__fcred_minimum_amount
@@ -4668,34 +4799,34 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "More information"
-msgstr ""
+msgstr "Mas información"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_move_line__move_id
 msgid "Move"
-msgstr ""
+msgstr "Mover"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__move_line_ids
 msgid "Move Lines"
-msgstr ""
+msgstr "Lineas del movimiento"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_move_line__move_name
 msgid "Move name"
-msgstr ""
+msgstr "Nombre del movimiento"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_move_line__move_type
 msgid "Move type"
-msgstr ""
+msgstr "Tipo de movimiento"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__is_multi_currency
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__is_multi_currency
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__is_multi_currency
 msgid "Multi Currency Invoice"
-msgstr ""
+msgstr "Factura multidivisa"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__is_multi_currency
@@ -4705,7 +4836,7 @@ msgstr "Pago Multimoneda"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_account_move_multicurrency_filter
 msgid "MultiCurrency"
-msgstr ""
+msgstr "Multidivisa"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__jurisdiccion__municipal
@@ -4716,17 +4847,17 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #, python-format
 msgid "Must be only one separator"
-msgstr ""
+msgstr "Debe ser solo un separador"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr ""
+msgstr "Fecha límite de mi actividad"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_search
 msgid "My Reports"
-msgstr ""
+msgstr "Mis reportes"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
@@ -4772,42 +4903,42 @@ msgstr "Nuevo"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__new_currency_id
 msgid "New Currency"
-msgstr ""
+msgstr "Nueva divisa"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__new_currency_preciated
 msgid "New Currency Preciated"
-msgstr ""
+msgstr "Nueva divisa preciada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__new_currency_rate
 msgid "New Currency Rate"
-msgstr ""
+msgstr "Nueva tasa de cambio"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_cancel_picking_done__next_action
 msgid "Next Action"
-msgstr ""
+msgstr "Proxima accion"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr ""
+msgstr "Fecha límite para la próxima actividad"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__activity_summary
 msgid "Next Activity Summary"
-msgstr ""
+msgstr "Resumen de la próxima actividad"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__activity_type_id
 msgid "Next Activity Type"
-msgstr ""
+msgstr "Siguiente tipo de actividad"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__sequence_number_next
 msgid "Next Number"
-msgstr ""
+msgstr "Siguiente número"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsfex_request_detail__reprocess__n
@@ -4818,7 +4949,7 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
 #, python-format
 msgid "No Deferred account id configured"
-msgstr ""
+msgstr "No hay ID de cuenta diferida configurado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_tax_application__sit_iibb__4
@@ -4829,7 +4960,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_concept__no_subject
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__no_subject
 msgid "No Subject"
-msgstr ""
+msgstr "No sujeto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_no_taxed
@@ -4846,13 +4977,13 @@ msgstr "Sin impuestos"
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
 #, python-format
 msgid "No counterpart account found"
-msgstr ""
+msgstr "No se encontró ninguna cuenta de contrapartida"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
 #, python-format
 msgid "No journal configured for rejected checks"
-msgstr ""
+msgstr "No hay ningún diario configurado para cheques rechazados"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/arba_perception_exporter.py:0
@@ -4861,19 +4992,21 @@ msgid ""
 "No perceptions found for export.\n"
 "HINT: Check if the perceptions have the Inform ARBA field checked and/or if the perceptions's type is 'gross income'"
 msgstr ""
+"No se encontraron percepciones para la exportación.\n"
+"PISTA: Verifique si las percepciones tienen marcado el campo Informar ARBA y/o si el tipo de percepciones es 'ingresos brutos'"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
 #, python-format
 msgid "No perceptions have been found with the selected values"
-msgstr ""
+msgstr "No se han encontrado percepciones con los valores seleccionados"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
 msgid "No perceptions/retentions from %(start)s to %(end)s to inform eArciba."
-msgstr ""
+msgstr "No hay percepciones/retenciones del %(start)s al %(end)s para informar a eArciba."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/arba_retention_exporter.py:0
@@ -4882,6 +5015,8 @@ msgid ""
 "No retentions found for export.\n"
 "HINT: Check if the retentions have the Inform ARBA field checked and/or if the retentions's type is 'gross income'"
 msgstr ""
+"No se encontraron retenciones para la exportación.\n"
+"Pista: verifique si las Retenciones tienen el campo Informar ARBA verificado y/o si el tipo de Retenciones es 'Ingresos brutos'"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
@@ -4903,7 +5038,7 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/models/account_tax.py:0
 #, python-format
 msgid "No tax repartition lines where found"
-msgstr ""
+msgstr "No se encontraron líneas de partición de impuestos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_fiscal_position__supplier_denomination__not_defined
@@ -4961,7 +5096,7 @@ msgstr "Número"
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_payment_order_unique_number
 msgid "Number must be unique"
-msgstr ""
+msgstr "El número debe ser único"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_needaction_counter
@@ -4972,12 +5107,12 @@ msgstr "Número de acciones"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__nro_insc_iibb
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__nro_insc_iibb
 msgid "Number of IIBB Registration"
-msgstr ""
+msgstr "Número de registro de IIBB"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request__nregs
 msgid "Number of Records"
-msgstr ""
+msgstr "Número de registros"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_has_error_counter
@@ -5015,23 +5150,23 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 msgid "OP reference"
-msgstr ""
+msgstr "Referencia de OP"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request_detail__observations
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_request_form
 msgid "Observations"
-msgstr ""
+msgstr "Observaciones"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_dst_country_codes__country_id
 msgid "Odoo Country"
-msgstr ""
+msgstr "Odoo pais"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_currency_codes__currency_id
 msgid "Odoo Currency"
-msgstr ""
+msgstr "Odoo divisa"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_incoterms_codes__incoterms_id
@@ -5041,7 +5176,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_lang_codes__lang_id
 msgid "Odoo Language"
-msgstr ""
+msgstr "Odoo idioma"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_uom_codes__uom_id
@@ -5051,17 +5186,17 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_res_voucher_type_codes__voucher_type_id
 msgid "Odoo Voucher Type"
-msgstr ""
+msgstr "Odoo tipo de voucher"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "Old Certificate"
-msgstr ""
+msgstr "Certificado antiguo"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_certificate_request__old_certificate
 msgid "Old Certificate (.crt)"
-msgstr ""
+msgstr "Certificado antiguo (.crt)"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__tax_id
@@ -5082,17 +5217,17 @@ msgstr "Balance inicial"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_unreconciled_currency
 msgid "Open Balance CCY"
-msgstr ""
+msgstr "Abrir balance CCY"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Opened"
-msgstr ""
+msgstr "Abierto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move_optional__optional_id
 msgid "Optional"
-msgstr ""
+msgstr "Opcional"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__optional_ids
@@ -5102,7 +5237,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_config_form
 msgid "Optionals"
-msgstr ""
+msgstr "Opcionales"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.payment_order
@@ -5123,14 +5258,14 @@ msgstr "Monto original"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount_original_currency
 msgid "Original Amount CCY"
-msgstr ""
+msgstr "Monto original CCY"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/stock_picking.py:0
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__name_original
 #, python-format
 msgid "Original picking number"
-msgstr ""
+msgstr "Número de selección original"
 
 #. module: l10n_ar_eynes
 #: model:account.tax.group,name:l10n_ar_eynes.other_tax_group
@@ -5174,12 +5309,12 @@ msgstr "Otros Cobros"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_view_tax_form_inherit_l10n_ar_eynes
 msgid "Other information"
-msgstr ""
+msgstr "Otra información"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.actions.act_window,help:l10n_ar_eynes.other_receipts_action
 msgid "Other ways of getting receipts."
-msgstr ""
+msgstr "Otras formas de obtener recibos."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_massive_sinchronize__pos_id
@@ -5224,7 +5359,7 @@ msgstr "Monto pagado en la moneda de la compania"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsfe_request__result__p
 msgid "Partial"
-msgstr ""
+msgstr "Parcial"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__partner_id
@@ -5243,12 +5378,12 @@ msgstr "Empresa"
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
 #, python-format
 msgid "Partner VAT not found"
-msgstr ""
+msgstr "IVA de empresa no encontrado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_check_config__receivable_rejected_account_id
 msgid "Partner's account in debit note generation."
-msgstr ""
+msgstr "Cuenta de empresa en generación de notas de débito."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__pay_now__pay_now
@@ -5275,7 +5410,7 @@ msgstr "Asiento del Pago"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_tax_application__calculation_base__payment_amount_untaxed
 msgid "Payment Amount Untaxed"
-msgstr ""
+msgstr "Monto de pago sin impuestos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__payment_date
@@ -5360,7 +5495,7 @@ msgstr "Líneas del metodo de pago"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_move_line__payment_order_line_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_move_line__payment_order_reference
 msgid "Payment order"
-msgstr ""
+msgstr "Orden de pago"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_mode_line__name
@@ -5399,7 +5534,7 @@ msgstr "Porcentaje"
 #: model:ir.model.fields,help:l10n_ar_eynes.field_perception_tax_application__percent
 #: model:ir.model.fields,help:l10n_ar_eynes.field_retention_tax_application__percent
 msgid "Percent to Apply if the Partner is inscripted in the Tax"
-msgstr ""
+msgstr "Porcentaje para aplicar si la empresa está inscripta en el impuesto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_perception__excluded_percent
@@ -5453,11 +5588,13 @@ msgid ""
 "Perception Configuration Error!\n"
 "Excluded percent configured has to be between 0.0 and 1.0"
 msgstr ""
+"¡Error de configuración de percepción!\n"
+"El porcentaje excluido configurado tiene que estar entre 0.0 y 1.0"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_res_partner_perception
 msgid "Perception Defined in Partner"
-msgstr ""
+msgstr "Percepción definida en empresa"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
@@ -5467,16 +5604,18 @@ msgid ""
 "Perception File Errors\n"
 "================\n"
 msgstr ""
+"Errores de archivo de percepción\n"
+"================\n"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_perception_activity
 msgid "Perception Gross Income Activity"
-msgstr ""
+msgstr "Percepción Actividad del ingreso bruto"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_perception_journals
 msgid "Perception Journals"
-msgstr ""
+msgstr "Percepción de diarios"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.perception_tax_line_menu_supported
@@ -5605,42 +5744,42 @@ msgstr "Tipo de albarán"
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "Please configure retention_type in the account.tax [%s]."
-msgstr ""
+msgstr "Configure retention_type en account.tax [%s]."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/wsfe.py:0
 #, python-format
 msgid "Please configure the company VAT before get Taxes!"
-msgstr ""
+msgstr "¡Configure el IVA de la empresa antes de obtener impuestos!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
 #, python-format
 msgid "Please, fill the expense account in the product."
-msgstr ""
+msgstr "Por favor, complete la cuenta de gastos en el producto."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_journal__code
 #: model:ir.model.fields,help:l10n_ar_eynes.field_users_journals_priority_rel__code
 msgid "Point of sale reference code"
-msgstr ""
+msgstr "Código de referencia de punto de venta"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_config_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Points Of Sale"
-msgstr ""
+msgstr "Puntos de venta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__point_of_sale_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__point_of_sale_ids
 msgid "Points of Sale"
-msgstr ""
+msgstr "Puntos de venta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__access_url
 msgid "Portal Access URL"
-msgstr ""
+msgstr "URL de acceso al portal"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__posted
@@ -5654,11 +5793,13 @@ msgid ""
 "Posted journal entry must have an unique sequence number per company.\n"
 "Problematic numbers: %s\n"
 msgstr ""
+"La entrada de diario publicada debe tener un número de secuencia único por empresa.\n"
+"Números problemáticos: %s\n"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_currency_rate__preciated
 msgid "Preciated"
-msgstr ""
+msgstr "Preciado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__pre_line
@@ -5668,7 +5809,7 @@ msgstr "Pagos previos?"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__company_currency
 msgid "Primary currency"
-msgstr ""
+msgstr "Divisa primaria"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_tax_subjournal_view_form
@@ -5679,18 +5820,18 @@ msgstr "Imprimir Reporte"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__priority
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_users_journals_priority_rel__priority
 msgid "Priority"
-msgstr ""
+msgstr "Prioridad"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_config__key
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_load_config__key
 msgid "Private Key"
-msgstr ""
+msgstr "Clave privada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_certificate_request__key
 msgid "Private Key (.key)"
-msgstr ""
+msgstr "Clave privada (.key)"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__proforma
@@ -5717,12 +5858,12 @@ msgstr "Unidad de medida del producto"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__products_date_difference
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsfe_request_detail__concept__1
 msgid "Products"
-msgstr ""
+msgstr "Productos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsfe_request_detail__concept__3
 msgid "Products&Services"
-msgstr ""
+msgstr "Productos y servicios"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__retention_type__profit
@@ -5739,12 +5880,12 @@ msgstr "Ganancia"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__profit_application_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_view_tax_form_inherit_l10n_ar_eynes
 msgid "Profit Tax Application"
-msgstr ""
+msgstr "Solicitud de impuestos sobre las ganancias"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__perc_profit_application_ids
 msgid "Profit Tax Application for Perceptions"
-msgstr ""
+msgstr "Solicitud del impuesto sobre las ganancias para las percepciones"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.payment_order
@@ -5769,24 +5910,24 @@ msgstr "Compras"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_sinchronize_voucher
 msgid "Query Information"
-msgstr ""
+msgstr "Información de consulta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_sicore_files__rrhh_ret_profit_code
 msgid "RRHH Rule Code"
-msgstr ""
+msgstr "Código de regla RRHH"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_vat_tax__rate
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_vat_tax__rate
 msgid "Rate"
-msgstr ""
+msgstr "Tasa"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__perception_tax_application__calculation_base__proportional_vat
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_tax_application__calculation_base__proportional_vat
 msgid "Rate Proportional VAT"
-msgstr ""
+msgstr "Tasa de IVA proporcional"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_perception_vat_tax__rate
@@ -5795,6 +5936,8 @@ msgid ""
 "Rate from 1.0 to 0.0. This is the proportion of percent applied to base "
 "amount of this tax."
 msgstr ""
+"Tasa de 1.0 a 0.0.Esta es la proporción del porcentaje aplicada al "
+"monto base de este impuesto."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_reason_rejected_check__name
@@ -5805,7 +5948,7 @@ msgstr "Causa"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_cancel_picking_done__reason
 msgid "Reason of cancellation"
-msgstr ""
+msgstr "Razón de cancelación"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.reason_rejected_check_action
@@ -5827,7 +5970,7 @@ msgstr "Recibo"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__receivable_rejected_account_id
 msgid "Receivable Rejected Check Account"
-msgstr ""
+msgstr "Cuenta de cheque rechazada por cobrar"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__receiving_partner_id
@@ -5867,6 +6010,9 @@ msgid ""
 "delete pickings if it is done, so it is cancelled and a new one is created, "
 "corrected and renumerated"
 msgstr ""
+"Referencia al nuevo picking creado para remunerar éste. No se pueden "
+"eliminar picks si se hace, por lo que se cancela y se crea uno nuevo, se "
+"corrige y se renumera."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__reg_code
@@ -5879,7 +6025,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_form
 msgid "Regenerate"
-msgstr ""
+msgstr "Regenerada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__retention_tax_application__sit_iibb__5
@@ -5889,7 +6035,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_check_reject_expense__reject_id
 msgid "Reject"
-msgstr ""
+msgstr "Rechazar"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
@@ -5900,12 +6046,12 @@ msgstr "Rechazar cheque"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__reject_date
 msgid "Reject Date"
-msgstr ""
+msgstr "Fecha de rechazo"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_check_reject_expense
 msgid "Reject Expense"
-msgstr ""
+msgstr "Rechazar gasto"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.reject_issued_check_wizard_view_form
@@ -5922,12 +6068,12 @@ msgstr "Fecha de rechazo"
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.reject_issued_check_action
 msgid "Reject issued check"
-msgstr ""
+msgstr "Rechazar cheque emitido"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_reject_issued_check_wizard
 msgid "Reject issued check wizard"
-msgstr ""
+msgstr "Asistente para rechazar cheques emitidos"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.reject_third_party_check_action
@@ -5937,7 +6083,7 @@ msgstr "Rechazar cheque de terceros"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_reject_third_party_check_wizard
 msgid "Reject third party check wizard"
-msgstr ""
+msgstr "Asistente para rechazar cheques de terceros"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__rejected
@@ -5952,7 +6098,7 @@ msgstr "Rechazado"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__rejected_account_id
 msgid "Rejected Check Account"
-msgstr ""
+msgstr "Rechazar cuenta de cheque"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
@@ -5965,28 +6111,28 @@ msgstr "Rechazar cheque"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
 msgid "Rejected issued checks Journal"
-msgstr ""
+msgstr "Rechazar diario de cheques emitidos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__rejected_issued_checks_journal_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_config_settings__rejected_issued_checks_journal_id
 msgid "Rejected issued checks journal"
-msgstr ""
+msgstr "Rechazar diario de cheques emitidos"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_sinchronize_voucher
 msgid "Relate"
-msgstr ""
+msgstr "Relatar"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsaa_config_form
 msgid "Renew TA"
-msgstr ""
+msgstr "Renovar TA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__renum_pick_id
 msgid "Renumerated"
-msgstr ""
+msgstr "Renumerado"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/report_exporter.py:0
@@ -5998,69 +6144,69 @@ msgstr "Informe"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_report_exporter
 msgid "Report Exporter"
-msgstr ""
+msgstr "Exportador de informes"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_tree
 msgid "Report Files"
-msgstr ""
+msgstr "Archivos de informes"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/controllers/main.py:0
 #, python-format
 msgid "Report error"
-msgstr ""
+msgstr "Error de informe"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.report_exporters_action
 #: model:ir.actions.act_window,name:l10n_ar_eynes.report_files_action
 msgid "Reports"
-msgstr ""
+msgstr "Informes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request__reprocess
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__reprocess
 msgid "Reprocess"
-msgstr ""
+msgstr "Reprocesar"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request_detail__request_id
 msgid "Request"
-msgstr ""
+msgstr "Solicitar"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/certificate_request.py:0
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsaa_certificate_request__state__requested
 #, python-format
 msgid "Request Created"
-msgstr ""
+msgstr "Solicitud creada"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request__date_request
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__date
 msgid "Request Date"
-msgstr ""
+msgstr "Fecha de solicitud"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_request_form
 msgid "Request Details"
-msgstr ""
+msgstr "Detalles de solicitud"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_request_detail__request_id
 msgid "Request ID"
-msgstr ""
+msgstr "ID de solicitud"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "Request Information"
-msgstr ""
+msgstr "Informacion de solicitud"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Requests"
-msgstr ""
+msgstr "Solicitudes"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
@@ -6070,12 +6216,12 @@ msgstr "Monto restante"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files_error__resource_name
 msgid "Resource Name"
-msgstr ""
+msgstr "Nombre del recurso"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files_error__resource_ref
 msgid "Resource Ref"
-msgstr ""
+msgstr "Referencia de recurso"
 
 #. module: l10n_ar_eynes
 #: model:res.groups,name:l10n_ar_eynes.group_treasury_responsible
@@ -6085,7 +6231,7 @@ msgstr "Responsable"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__activity_user_id
 msgid "Responsible User"
-msgstr ""
+msgstr "Usuario responsable"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_request__result
@@ -6111,7 +6257,7 @@ msgstr "Retención"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_activity_form
 msgid "Retention Activity"
-msgstr ""
+msgstr "Actividad de retención"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.report,name:l10n_ar_eynes.action_print_retention_certificate_qweb
@@ -6121,23 +6267,23 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_concept_form
 msgid "Retention Concept"
-msgstr ""
+msgstr "Concepto de retención"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__retention_id
 msgid "Retention Configuration"
-msgstr ""
+msgstr "Configuración de retención"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_res_partner_retention
 msgid "Retention Defined in Partner"
-msgstr ""
+msgstr "Retención definida en empresa"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/retention.py:0
 #, python-format
 msgid "Retention Error!\n"
-msgstr ""
+msgstr "¡Error de retención!\n"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
@@ -6148,11 +6294,13 @@ msgid ""
 "Retention File Errors\n"
 "================\n"
 msgstr ""
+"Errores de archivo de retención\n"
+"================\n"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_retention_activity
 msgid "Retention Gross Income Activity"
-msgstr ""
+msgstr "Retención Actividad de ingresos brutos"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_retention_journals
@@ -6162,12 +6310,12 @@ msgstr "Diarios de retenciones"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_retention_concept
 msgid "Retention Profit Concepts"
-msgstr ""
+msgstr "Conceptos de ganancias de retención"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_scale_form
 msgid "Retention Scale"
-msgstr ""
+msgstr "Escala de retención"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_retention_scale
@@ -6184,17 +6332,17 @@ msgstr "Tipo de Retención"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes
 msgid "Retention activity"
-msgstr ""
+msgstr "Actividad de retención"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_res_partner_advance_retention
 msgid "Retention advanced defined in Partner"
-msgstr ""
+msgstr "Retención avanzada definida en empresa"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_retention_tax_application
 msgid "Retention configuration for activity or concept"
-msgstr ""
+msgstr "Configuración de retención para actividad o concepto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_retention_line__retention_id
@@ -6202,43 +6350,45 @@ msgid ""
 "Retention configuration used for this retention tax, where all the "
 "configuration resides. Accounts, Tax Codes, etc."
 msgstr ""
+"Configuración de retención utilizada para este impuesto de retención, donde reside toda la "
+"configuración. Cuentas, Códigos Fiscales, etc."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_retention_tax_application__tax_minimum
 msgid "Retention is performed when the amount thereof exceeds this value."
-msgstr ""
+msgstr "La retención se realiza cuando el monto del mismo excede este valor."
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_payment_order_retention_line
 msgid "Retention lines in payment order"
-msgstr ""
+msgstr "Líneas de retención en orden de pago"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__retention_move_line_ids
 msgid "Retention move lines"
-msgstr ""
+msgstr "Líneas de movimiento de retención"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_retention_move_line
 msgid "Retention move lines showed in payment order"
-msgstr ""
+msgstr "Las líneas de movimiento de retención se muestran en la orden de pago"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__actual_payment_retention
 msgid "Retention to be made in actual payment"
-msgstr ""
+msgstr "Retención que se realizará en el pago real"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_retention_line__concept_amount
 #: model:ir.model.fields,help:l10n_ar_eynes.field_retention_tax_application__tax_allowance
 msgid "Retention will be calculated over this amount."
-msgstr ""
+msgstr "La retención se calculará sobre esta cantidad."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_retention_line__retention_type
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_tax__retention_type
 msgid "Retention/Perception type"
-msgstr ""
+msgstr "Tipo de retención/percepción"
 
 #. module: l10n_ar_eynes
 #: model:account.tax,tax_group_name:l10n_ar_eynes.tax_ganancias_m_retentions_e
@@ -6313,7 +6463,7 @@ msgstr "Retenciones"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__retention_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__retention_ids
 msgid "Retentions Exceptions"
-msgstr ""
+msgstr "Excepciones de retenciones"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__returned
@@ -6338,7 +6488,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_generate_sicore_files
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_sicore_report
 msgid "SICORE Files Generation"
-msgstr ""
+msgstr "Generación de archivos SICORE"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_parent_exporters_sifere
@@ -6349,28 +6499,28 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
 #, python-format
 msgid "SIFERE - Create Files"
-msgstr ""
+msgstr "SIFERE - Crear archivos"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.report_files_sifere
 msgid "SIFERE - Generated Reports"
-msgstr ""
+msgstr "SIFERE - Informes generados"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sifere_file.py:0
 #, python-format
 msgid "SIFERE - Generated reports details - Period %s\n"
-msgstr ""
+msgstr "SIFERE - Detalles de informes generados - Período %s\n"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.wizard_create_sifere_files_action
 msgid "SIFERE File Generation"
-msgstr ""
+msgstr "Generación de archivos de SIFERE"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "Error de entrega de SMS"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__retention_type__suss
@@ -6400,12 +6550,12 @@ msgstr "Pedido de venta"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.certificate_renewal_wizard
 msgid "Save Certificate"
-msgstr ""
+msgstr "Guardar certificado"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.key_renewal_wizard
 msgid "Save Key"
-msgstr ""
+msgstr "Guardar clave"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale_line__scale_id
@@ -6417,17 +6567,17 @@ msgstr "Escala"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_retention_scale_line
 msgid "Scale Line for Retention Calculation"
-msgstr ""
+msgstr "Línea de escala para el cálculo de retención"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale__line_ids
 msgid "Scale Lines"
-msgstr ""
+msgstr "Líneas de escala"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_retention_scale
 msgid "Scale for Retention Calculation"
-msgstr ""
+msgstr "Escala para el cálculo de retención"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.retention_retention_scales_menu
@@ -6437,7 +6587,7 @@ msgstr "Escalas"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_search
 msgid "Search Reports"
-msgstr ""
+msgstr "Buscar informes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax_subjournal__base_position__second
@@ -6456,17 +6606,17 @@ msgstr "Moneda secundaria"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__secondary_currency_rate
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__secondary_currency_rate
 msgid "Secondary Currency Rate"
-msgstr ""
+msgstr "Tasa de divisas secundaria"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsaa_config_form
 msgid "Security Info"
-msgstr ""
+msgstr "Información de seguridad"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__access_token
 msgid "Security Token"
-msgstr ""
+msgstr "Token de seguridad"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_journal__type
@@ -6492,6 +6642,11 @@ msgid "Selection Type"
 msgstr "Tipo de seleccion"
 
 #. module: l10n_ar_eynes
+#: model:ir.actions.server,name:l10n_ar_eynes.send_payment_order_by_email_action
+msgid "Send payment order by email"
+msgstr "Enviar órden de pago por mail"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__sequence_id
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax_subjournal__sort_by__sequence
 msgid "Sequence"
@@ -6500,32 +6655,32 @@ msgstr "Secuencia"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking_type__sequence_transfer_id
 msgid "Sequence After Transfer"
-msgstr ""
+msgstr "Secuencia después de la transferencia"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__sequence_to_use
 msgid "Sequence to use"
-msgstr ""
+msgstr "Secuencia para usar"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_ta__name
 msgid "Service"
-msgstr ""
+msgstr "Servicio"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_afipws_service__name
 msgid "Service Name"
-msgstr ""
+msgstr "Nombre de servicio"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsfe_request_detail__concept__2
 msgid "Services"
-msgstr ""
+msgstr "Servicios"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__services_date_difference
 msgid "Services and Products"
-msgstr ""
+msgstr "Productos y Servicios"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_bank_statement_line__is_FCE_invoice
@@ -6559,7 +6714,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_massive_sinchronize
 msgid "Sichronize"
-msgstr ""
+msgstr "Sichronizar"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
@@ -6573,7 +6728,7 @@ msgstr ""
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_action_sicore_config
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sicore_config_form
 msgid "Sicore Configuration"
-msgstr ""
+msgstr "Configuración de Sicore"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_sicore_generated_files
@@ -6581,19 +6736,19 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sicore_generated_files_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sicore_generated_files_tree
 msgid "Sicore generated files"
-msgstr ""
+msgstr "Sicore archivos generados"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_sifere_config
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_action_sifere_config
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sifere_config_form
 msgid "Sifere Configuration"
-msgstr ""
+msgstr "Configuración de Sifere"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_ta__sign
 msgid "Sign"
-msgstr ""
+msgstr "Firma"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__signatory
@@ -6609,7 +6764,7 @@ msgstr "CUIT del Firmante"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__signatory_account
 msgid "Signatory account"
-msgstr ""
+msgstr "Cuenta firmante"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_application__sit_iibb
@@ -6617,7 +6772,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__sit_iibb
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__sit_iibb
 msgid "Situation of IIBB"
-msgstr ""
+msgstr "Situación de IIBB"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__update_journal_period_wizard__selection_type__some
@@ -6628,13 +6783,13 @@ msgstr "Algunos diarios"
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #, python-format
 msgid "Some of the fields exceeds length"
-msgstr ""
+msgstr "Algunos de los campos excede la longitud"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/report_exporter.py:0
 #, python-format
 msgid "Sorry, there is nothing to export 😢"
-msgstr ""
+msgstr "Lo siento, no hay nada que exportar 😢"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax_subjournal__sort_by
@@ -6649,7 +6804,7 @@ msgstr "Ordenamiento"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__applicable_state__source
 msgid "Source"
-msgstr ""
+msgstr "Origen"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__source_partner_id
@@ -6659,7 +6814,7 @@ msgstr "Entidad emisora"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__source_payment_order_id
 msgid "Source Payment Order"
-msgstr ""
+msgstr "Origen orden de pago"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_checkbook_wizard__start_num
@@ -6711,6 +6866,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
+"Estado basado en actividades\n"
+"Atrasado: ya se pasa la fecha de vencimiento\n"
+"Hoy: la fecha de actividad es hoy\n"
+"Planificado: actividades futuras."
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_stock_move
@@ -6720,22 +6879,22 @@ msgstr "Movimiento de existencias"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_certificate_request__subj_cuit
 msgid "Subject CUIT"
-msgstr ""
+msgstr "CUIT de sujeto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_certificate_request__subj_c
 msgid "Subject Country"
-msgstr ""
+msgstr "País de sujeto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_certificate_request__subj_o
 msgid "Subject Enterprise"
-msgstr ""
+msgstr "Empresa de sujeto"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_certificate_request__subj_cn
 msgid "Subject Hostname"
-msgstr ""
+msgstr "Hostname de sujeto"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
@@ -6772,7 +6931,7 @@ msgstr "Pagos a proveedores"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__receipt_number
 msgid "Supplier Receipt Number"
-msgstr ""
+msgstr "Número de recibo de proveedor"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.supported_retentions_action
@@ -6783,7 +6942,7 @@ msgstr "Retenciones soportadas"
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.supported_perceptions_action
 msgid "Supported perceptions"
-msgstr ""
+msgstr "Percepciones compatibles"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_tax
@@ -6799,7 +6958,7 @@ msgstr "Impuesto"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__account_id
 msgid "Tax Account"
-msgstr ""
+msgstr "Cuenta de impuestos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_application__tax_allowance
@@ -6845,7 +7004,7 @@ msgstr "Impuesto minimo"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__tax_group_name
 msgid "Tax group name"
-msgstr ""
+msgstr "Nombre del grupo impuestos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_taxed
@@ -6888,28 +7047,28 @@ msgstr "Subdiario de impuestos"
 #: code:addons/l10n_ar_eynes/wsfetools/wsfe_easywsy.py:0
 #, python-format
 msgid "Taxes `%s` are not configured in WSFE!"
-msgstr ""
+msgstr "¡Los impuestos `%s` no están configurados en WSFE!"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__exempt_operations_tax_ids
 msgid "Taxes of Exempt Operations"
-msgstr ""
+msgstr "Impuestos de las operaciones exentas"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Terms"
-msgstr ""
+msgstr "Términos"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Terms and Conditions"
-msgstr ""
+msgstr "Términos y condiciones"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "The Excluded Percent Should be a value between 0 and 1"
-msgstr ""
+msgstr "El porcentaje excluido debe ser un valor entre 0 y 1"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_retention_line__vat
@@ -6927,14 +7086,14 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "The Vat does not seems to be correct."
-msgstr ""
+msgstr "El IVA no parece ser correcto."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "The Vat only supports numbers."
-msgstr ""
+msgstr "El IVA solo admite números."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_wsaa_config_company_uniq
@@ -6948,11 +7107,13 @@ msgid ""
 "The journal does not have a period established\n"
 "Please add a period in: accounting/journals/update journals periods"
 msgstr ""
+"El diario no tiene un período establecido\n"
+"Agregue un período en: contabilidad/diarios contables/actualización de períodos de diarios"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_line__move_invoice_id
 msgid "The move of this entry line."
-msgstr ""
+msgstr "El movimiento de esta línea de entrada."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_afipws_service_name_uniq
@@ -6964,7 +7125,7 @@ msgstr "El nombre del servicio debe ser único"
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_journal__dn_sequence_number_next
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_journal__sequence_number_next
 msgid "The next sequence number will be used for the next invoice."
-msgstr ""
+msgstr "El siguiente número de secuencia se utilizará para la próxima factura."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_wsaa_ta_company_name_uniq
@@ -6978,6 +7139,8 @@ msgid ""
 "The specific rate that will be used, in this voucher, between the selected "
 "currency (in 'Payment Rate Currency' field) and the voucher currency."
 msgstr ""
+"La tasa específica que se utilizará, en este bono, entre la moneda seleccionada "
+"(en el campo 'Tasa de divisa de pago') y la moneda del voucher."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_perception_tax_application_concept_activity_uniq
@@ -6987,13 +7150,13 @@ msgstr "La combinación Concepto-Actividad debe ser única por percepción!"
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_retention_tax_application_concept_activity_uniq
 msgid "The tuple of Concept, Activity must be unique per Retention !"
-msgstr ""
+msgstr "¡La tupla de concepto, la actividad debe ser única por retención!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "There are more than one voucher referenced to check %s."
-msgstr ""
+msgstr "Hay más de un voucher referenciado para verificar %s."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/retention.py:0
@@ -7002,6 +7165,8 @@ msgid ""
 "There is an error in retention configuration because amount of %s is "
 "negative"
 msgstr ""
+"Hay un error en la configuración de retención porque la cantidad de %s es "
+"negativa"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wsfetools/wsfe_easywsy.py:0
@@ -7017,7 +7182,7 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "There is another partner with same VAT Information"
-msgstr ""
+msgstr "Hay otra empresa con la misma información del IVA"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -7029,13 +7194,13 @@ msgstr "Hay más de una configuración con el POS %s"
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #, python-format
 msgid "There is more than one voucher type that corresponds to this object"
-msgstr ""
+msgstr "Hay más de un tipo de voucher que corresponde a este objeto"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "There is no check configuration for this Company!"
-msgstr ""
+msgstr "¡No hay configuración de verificación para esta empresa!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -7049,18 +7214,19 @@ msgstr "No hay configuración para el POS %s"
 msgid ""
 "There is no reference for account move. Imposible to go back to wallet."
 msgstr ""
+"No hay referencia para el movimiento de la cuenta. Imposible volver a la billetera."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #, python-format
 msgid "There is no voucher type that corresponds to this object"
-msgstr ""
+msgstr "No hay un tipo de voucher que corresponda a este objeto"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_tax.py:0
 #, python-format
 msgid "There should only be one repartition line"
-msgstr ""
+msgstr "Solo debe haber una línea de reparto"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_tax.py:0
@@ -7090,6 +7256,8 @@ msgid ""
 "These are the retentions that will be applied to Suppliers belonging to this"
 " Fiscal Position. Exceptions to this have to be loaded at partner form."
 msgstr ""
+"Estas son las retenciones que se aplicarán a los Proveedores pertenecientes a esta "
+"Posición Fiscal. Las excepciones a esto deberán cargarse en formulario de socio."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
@@ -7101,7 +7269,7 @@ msgstr "Cheque de terceros "
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "Third Check Error! You cannot cancel check if it is not in Wallet"
-msgstr ""
+msgstr "¡Error en cheque de tercero! No puedes cancelar el cheque si no está en la billetera"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
@@ -7110,6 +7278,8 @@ msgid ""
 "Third Check Error! You cannot return to wallet a check if it is not in "
 "Delivered state"
 msgstr ""
+"¡Error en cheque de tercero! No puede devolver a la billetera un cheque si no está en "
+"estado Entregado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__third_party_check_ids
@@ -7164,12 +7334,12 @@ msgstr "Cheques de terceros"
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_payment_method_line_unique_checkbook
 #, python-format
 msgid "This checkbook already exists for this journal"
-msgstr ""
+msgstr "Esta chequera ya existe para este diario."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_mode_line__date
 msgid "This date is informative only."
-msgstr ""
+msgstr "Esta fecha es solo informativa."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_update_journal_period_wizard__due_date
@@ -7187,6 +7357,8 @@ msgid ""
 "This field contains the information related to the numbering of the journal "
 "entries of this journal."
 msgstr ""
+"Este campo contiene la información relacionada con la numeración de los "
+"asientos de este diario."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__payment_option
@@ -7196,6 +7368,9 @@ msgid ""
 " either choose to keep open this difference on the partner's account, or "
 "reconcile it with the payment(s)"
 msgstr ""
+"Este campo le ayuda a elegir qué desea hacer con la eventual "
+"diferencia entre el monto pagado y la suma de los montos asignados. Puede optar "
+"por mantener abierta esta diferencia en la cuenta de la empresa o conciliarla con los pago(s)."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_line__date_due
@@ -7203,28 +7378,30 @@ msgid ""
 "This field is used for payable and receivable journal entries. You can put "
 "the limit date for the payment of this line."
 msgstr ""
+"Este campo se utiliza para asientos de diario por pagar y por cobrar. Puede poner "
+"la fecha límite para el pago de esta línea."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_move_unique_move
 #, python-format
 msgid "This invoice was already entered."
-msgstr ""
+msgstr "Esta factura ya estaba ingresada."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_retention_line__date_applied
 msgid "This is the date of the real application of the retention"
-msgstr ""
+msgstr "Esta es la fecha de la aplicación real de la retención."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__date_effective
 msgid "This is the effective date when one give this voucher to the Supplier"
-msgstr ""
+msgstr "Esta es la fecha de vigencia cuando se le da este voucher al proveedor"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__receipt_number
 msgid "This is the number of the receipt given by the Supplier"
-msgstr ""
+msgstr "Este es el número del recibo dado por el proveedor"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
@@ -7239,22 +7416,24 @@ msgid ""
 "This wizard allows you to change the currency of the invoice by "
 "recalculating all amounts"
 msgstr ""
+"Este asistente le permite cambiar la moneda de la factura "
+"recalculando todos los importes"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_sicore_files
 msgid "This wizard allows you to export a file for SICORE."
-msgstr ""
+msgstr "Este asistente le permite exportar un archivo para SICORE."
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_nc_file
 msgid "This wizard allows you to export a file for arciba."
-msgstr ""
+msgstr "Este asistente le permite exportar un archivo para Arciba."
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_validate_account_move
 msgid "This wizard will confirm the all the selected draft invoices"
-msgstr ""
+msgstr "Este asistente confirmará todas las facturas de borrador seleccionadas"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__wsaa_ticket_id
@@ -7365,7 +7544,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_move_line__total_without_vat
 msgid "Total without vat"
-msgstr ""
+msgstr "Total sin IVA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__trailer_license_plate
@@ -7394,6 +7573,7 @@ msgstr "Patente Del Camión"
 msgid ""
 "Trying to get the WSFE config for invoices mixed between local and not local"
 msgstr ""
+"Intentando obtener la configuración de WSFE para las facturas mezcladas entre local y no local"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -7402,6 +7582,8 @@ msgid ""
 "Trying to get the WSFE config for invoices that belong to different points "
 "of sale"
 msgstr ""
+"Intentando obtener la configuración de WSFE para facturas que pertenecen a diferentes puntos "
+"de venta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__type
@@ -7435,27 +7617,27 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr ""
+msgstr "Tipo de la actividad de excepción registrada."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_config__url
 msgid "URL for WSAA"
-msgstr ""
+msgstr "URL para WSAA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__url
 msgid "URL for WSFE"
-msgstr ""
+msgstr "URL para WSFE"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__url
 msgid "URL for WSFEX"
-msgstr ""
+msgstr "URL para WSFEX"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_form
 msgid "Un-Declare"
-msgstr ""
+msgstr "No-Declarado"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/report_exporter.py:0
@@ -7465,12 +7647,15 @@ msgid ""
 "Error was:\n"
 "%s"
 msgstr ""
+"Incapaz de exportar.Más información en logs.\n"
+"El error fue:\n"
+"%s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__uom_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfex_config_form
 msgid "Units of Measure"
-msgstr ""
+msgstr "Unidades de medida"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__unlinkable
@@ -7504,24 +7689,24 @@ msgstr "Importe libre de impuestos"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Untaxed Amount"
-msgstr ""
+msgstr "Monto libre de impuestos"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.server,name:l10n_ar_eynes.ir_cron_update_big_companies_ir_actions_server
 #: model:ir.cron,cron_name:l10n_ar_eynes.ir_cron_update_big_companies
 #: model:ir.cron,name:l10n_ar_eynes.ir_cron_update_big_companies
 msgid "Update BigCompanies"
-msgstr ""
+msgstr "Actualizar las BigCompanies"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_update_journal_period_wizard
 msgid "Update Journal Period Wizard"
-msgstr ""
+msgstr "Actualizar el asistente del período del diario"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_update_journal_period_wizard_line
 msgid "Update Journal Period Wizard Line"
-msgstr ""
+msgstr "Actualizar la línea del asistente del período del diario"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.update_journal_period_wizard_view_form
@@ -7539,12 +7724,12 @@ msgstr "Actualizar el periodo de los diarios"
 #: code:addons/l10n_ar_eynes/wizard/wsfe_massive_sinchronize.py:0
 #, python-format
 msgid "Updated Invoices"
-msgstr ""
+msgstr "Actualizar facturas"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_view_tax_form_inherit_l10n_ar_eynes
 msgid "Usability Configuration"
-msgstr ""
+msgstr "Configuración de usabilidad"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_debit_note__journal_id
@@ -7583,33 +7768,33 @@ msgstr "Impuesto IVA"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__vat_application_ids
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_view_tax_form_inherit_l10n_ar_eynes
 msgid "VAT Tax Application"
-msgstr ""
+msgstr "Aplicación de impuesto IVA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__perc_vat_application_ids
 msgid "VAT Tax Application for Perceptions"
-msgstr ""
+msgstr "Aplicación de impuestos del IVA para percepciones"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_config_form
 msgid "VAT Taxes"
-msgstr ""
+msgstr "Impuestos IVA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_application__vat_tax_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__vat_tax_ids
 msgid "VAT Taxes for Calculation"
-msgstr ""
+msgstr "Impuestos del IVA para el cálculo"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_perception_vat_tax
 msgid "VAT Taxes for Perception Calculation"
-msgstr ""
+msgstr "Impuestos del IVA para el cálculo de la percepción"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_retention_vat_tax
 msgid "VAT Taxes for Retention Calculation"
-msgstr ""
+msgstr "Impuestos IVA para el cálculo de la retención"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -7622,29 +7807,29 @@ msgstr "Validar"
 #: code:addons/l10n_ar_eynes/wsfetools/wsfe_easywsy.py:0
 #, python-format
 msgid "Validated invoice that not corresponds!"
-msgstr ""
+msgstr "¡Factura validada que no se corresponde!"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_nc_file
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_sicore_files
 msgid "Validation Errors"
-msgstr ""
+msgstr "Errores de validación"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_config_form
 msgid "Validations"
-msgstr ""
+msgstr "Validaciones"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move_optional__value
 msgid "Value"
-msgstr ""
+msgstr "Valor"
 
 #. module: l10n_ar_eynes
 #: model:account.tax.group,name:l10n_ar_eynes.vat_tax_group
 msgid "Vat"
-msgstr ""
+msgstr "IVA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__vat_date
@@ -7656,7 +7841,7 @@ msgstr "Fecha de IVA"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_config_form
 msgid "Vat Taxes Mapping"
-msgstr ""
+msgstr "Mapeo de impuestos IVA"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
@@ -7676,7 +7861,7 @@ msgstr "Verificacion requerida"
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_sifere_reports
 msgid "View SIFERE Reports"
-msgstr ""
+msgstr "Ver informes de SIFERE"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__checkbook_format__virtual
@@ -7715,6 +7900,8 @@ msgid ""
 "Voucher Not Found!\n"
 "Voucher %(number)s of pos %(pos_name)s has not been found."
 msgstr ""
+"¡Voucher no encontrado!\n"
+"No se ha encontrado el voucher %(number)s de pos %(pos_name)s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__voucher_number
@@ -7753,23 +7940,23 @@ msgstr "Tipo de comprobante"
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_afipws_service
 msgid "WS Services"
-msgstr ""
+msgstr "Servicios WS"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_wsaa_config_tree
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsaa_config_form
 msgid "WSAA Config"
-msgstr ""
+msgstr "Configuración de WSAA"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.wsaa_config_menu
 msgid "WSAA Configuration"
-msgstr ""
+msgstr "Configuración de WSAA"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_wsfe_config
 msgid "WSFE Config"
-msgstr ""
+msgstr "Configuración de WSFE"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/wsfe.py:0
@@ -7778,13 +7965,15 @@ msgid ""
 "WSFE Config Error!\n"
 "There is no WSFE configuration set to this company"
 msgstr ""
+"¡Error de configuración de WSFE!\n"
+"No hay configuración de WSFE establecida en esta empresa"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_optionals__wsfe_config_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_tax_codes__wsfe_config_id
 #: model:ir.ui.menu,name:l10n_ar_eynes.wsfe_config_menu
 msgid "WSFE Configuration"
-msgstr ""
+msgstr "Configuración de WSFE"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -7793,7 +7982,7 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #, python-format
 msgid "WSFE Error\n"
-msgstr ""
+msgstr "Error de WSFE \ n"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/wsfe.py:0
@@ -7804,7 +7993,7 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/wsfetools/wsfe_easywsy.py:0
 #, python-format
 msgid "WSFE Error!\n"
-msgstr ""
+msgstr "¡Error de WSFE!\n"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -7843,6 +8032,7 @@ msgid ""
 "WSFE Error!\n"
 "You are trying to validate several invoices but not all of them are in 'draft' state"
 msgstr ""
+"Estás tratando de validar varias facturas, pero no todas están en estado de 'borrador'"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/validate_account_move.py:0
@@ -7851,6 +8041,8 @@ msgid ""
 "WSFE Error!\n"
 "You are trying to validate several invoices but not all of them are the same type. For example, all Customer Invoices or all Customer Refund"
 msgstr ""
+"Error WSFE!\n"
+"Estás tratando de validar varias facturas, pero no todas son del mismo tipo.Por ejemplo, todas las facturas de los clientes o todos los reembolsos del cliente"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/validate_account_move.py:0
@@ -7859,23 +8051,25 @@ msgid ""
 "WSFE Error!\n"
 "You are trying to validate several invoices but not all of them belongs to the same point of sale"
 msgstr ""
+"Error WSFE!\n"
+"Está tratando de validar varias facturas, pero no todas pertenecen al mismo punto de venta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_move_optional
 msgid "WSFE Invoice Optional"
-msgstr ""
+msgstr "Factura WSFE opcional"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_wsfe_massive_sinchronize
 #: model:ir.model,name:l10n_ar_eynes.model_wsfe_massive_sinchronize
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_massive_sinchronize
 msgid "WSFE Massive Sinchronize"
-msgstr ""
+msgstr "Sincronización masiva WSFE"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfe_optionals
 msgid "WSFE Optionals"
-msgstr ""
+msgstr "Opcionales WSFE"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/validate_account_move.py:0
@@ -7885,24 +8079,24 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_request_form
 #, python-format
 msgid "WSFE Request"
-msgstr ""
+msgstr "Solicitud WSFE"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfe_request_detail
 msgid "WSFE Request Detail"
-msgstr ""
+msgstr "Detalle de solicitud WSFE"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "WSFE Requests"
-msgstr ""
+msgstr "Solicitudes WSFE"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_wsfe_sinchronize_voucher
 #: model:ir.model,name:l10n_ar_eynes.model_wsfe_sinchronize_voucher
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_sinchronize_voucher
 msgid "WSFE Sinchronize Voucher"
-msgstr ""
+msgstr "Sincronizar voucher WSFE"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -7912,11 +8106,14 @@ msgid ""
 "Error received was: \n"
 " %s"
 msgstr ""
+"Error de validación WSFE\n"
+"Error recivido: \n"
+" %s"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_wsfex_config
 msgid "WSFEX Config"
-msgstr ""
+msgstr "Configuración WSFEX"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/wsfex.py:0
@@ -7925,21 +8122,23 @@ msgid ""
 "WSFEX Config Error!\n"
 "There is no WSFEX configuration set to this company"
 msgstr ""
+"Error configuración WSFEX!\n"
+"No hay configuración de WSFEX establecida en esta empresa"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.wsfex_config_menu
 msgid "WSFEX Configuration"
-msgstr ""
+msgstr "Configuración WSFEX"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfex_currency_codes
 msgid "WSFEX Currency Codes"
-msgstr ""
+msgstr "Códigos de divisas WSFEX"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfex_dst_country_codes
 msgid "WSFEX Dest Country Codes"
-msgstr ""
+msgstr "Códigos de país de Dest WSFEX"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wsfetools/wsfex_easywsy.py:0
@@ -7948,6 +8147,8 @@ msgid ""
 "WSFEX Error!\n"
 "Currency %s has not code configured"
 msgstr ""
+"Error WSFEX!\n"
+"Divisa %s no tiene codigo configurado"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wsfetools/wsfex_easywsy.py:0
@@ -7956,6 +8157,8 @@ msgid ""
 "WSFEX Error!\n"
 "There is no UoM Code defined for %(uom_name)s in line %(line_name)s"
 msgstr ""
+"Error WSFEX!\n"
+"No hay código UoM definido para %(uom_name)s en línea %(line_name)s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wsfetools/wsfex_easywsy.py:0
@@ -7964,41 +8167,43 @@ msgid ""
 "WSFEX Error!\n"
 "You cannot inform more than one invoice to AFIP WSFEX"
 msgstr ""
+"Error WSFEX!\n"
+"No puede informar más de una factura a AFIP WSFEX"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfex_export_type_codes
 msgid "WSFEX Export Type Codes"
-msgstr ""
+msgstr "Códigos de tipo de exportación WSFEX"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfex_incoterms_codes
 msgid "WSFEX Incoterms Codes"
-msgstr ""
+msgstr "Códigos WSFEX Incoterms"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfex_lang_codes
 msgid "WSFEX Language Codes"
-msgstr ""
+msgstr "Códigos de idioma WSFEX"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfex_request_detail
 msgid "WSFEX Request Detail"
-msgstr ""
+msgstr "Detalle de solicitud WSFEX"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfex_shipping_permission
 msgid "WSFEX Shipping Permission"
-msgstr ""
+msgstr "Permiso de envío WSFEX"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfex_uom_codes
 msgid "WSFEX UoM Codes"
-msgstr ""
+msgstr "Códigos UoM WSFEX"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_wsfex_res_voucher_type_codes
 msgid "WSFEX Voucher Type Codes"
-msgstr ""
+msgstr "Códigos de tipo de voucher WSFEX"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_accreditation
@@ -8008,7 +8213,7 @@ msgstr "Esperando Acreditación"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_numeration
 msgid "Waiting numeration"
-msgstr ""
+msgstr "Esperando numeración"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__warehouse_id
@@ -8018,17 +8223,17 @@ msgstr "Depósito"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__report_files_error__type__warning
 msgid "Warning"
-msgstr ""
+msgstr "Advertencia"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__website_message_ids
 msgid "Website Messages"
-msgstr ""
+msgstr "Mensajes del sitio web"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__website_message_ids
 msgid "Website communication history"
-msgstr ""
+msgstr "Historial de comunicación del sitio web"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.actions.act_window,help:l10n_ar_eynes.other_payments_action
@@ -8036,6 +8241,8 @@ msgid ""
 "When the purchase receipt is confirmed, you can record the\n"
 "                supplier payment related to this purchase receipt."
 msgstr ""
+"Cuando se confirma el recibo de compra, se puede registrar el\n"
+"                pago al proveedor relacionado con este recibo de compra."
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.actions.act_window,help:l10n_ar_eynes.account_invoice_action_debit_note
@@ -8045,6 +8252,10 @@ msgid ""
 "balance, either by an error in billing, interest for late payment, or any "
 "other circumstance that means the increase in the balance of an account."
 msgstr ""
+"Con Notas de Débito de Cliente podrás gestionar las notas de débito de tus clientes."
+" Una nota de débito es un documento que incrementa el valor de la deuda o saldo de la cuenta, "
+"ya sea por un error en la facturación, intereses de demora, o cualquier "
+"otra circunstancia que signifique el aumento del saldo de una cuenta."
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.actions.act_window,help:l10n_ar_eynes.account_invoice_action_debit_note_supplier
@@ -8052,48 +8263,50 @@ msgid ""
 "With Supplier Debit Notes you can manage the debit notes for your suppliers.\n"
 "        A debit note is a document that increases the value of the debt or account balance, either by an error in billing, interest for late payment, or any other circumstance that means the increase in the balance of an account."
 msgstr ""
+"Con Notas de Débito de Proveedores podrás gestionar las notas de débito de tus proveedores.\n"
+"        Una nota de débito es un documento que incrementa el valor de la deuda o saldo de cuenta, ya sea por un error en la facturación, intereses de demora, o cualquier otra circunstancia que signifique el aumento del saldo de una cuenta."
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_search
 msgid "With errors"
-msgstr ""
+msgstr "Con errores"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_update_journal_period_wizard_line__wizard_id
 msgid "Wizard"
-msgstr ""
+msgstr "Asistente"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_create_arciba_nc_file
 msgid "Wizard Create e-ARCIBA NC File"
-msgstr ""
+msgstr "Asistente crear archivo E-Arciba NC"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_create_arciba_files
 msgid "Wizard Create e-arciba Files"
-msgstr ""
+msgstr "Asistente crear archivos E-Arciba"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_create_sicore_files
 msgid "Wizard Create sicore Files"
-msgstr ""
+msgstr "Asistente crear archivos Sicore"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__analytic_id
 msgid "Write-Off Analytic Account"
-msgstr ""
+msgstr "Cuenta analítica de cancelación"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.wsaa_certificate_request_view_form
 msgid "Wsaa Certificate Request"
-msgstr ""
+msgstr "Solicitud de certificado Wsaa"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__wsfe_request_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__wsfe_request_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__wsfe_request_ids
 msgid "Wsfe Request"
-msgstr ""
+msgstr "Solicitud de Wsfe"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_dst_cuit_codes__wsfex_config_id
@@ -8105,24 +8318,24 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_res_voucher_type_codes__wsfex_config_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_uom_codes__wsfex_config_id
 msgid "Wsfex Config"
-msgstr ""
+msgstr "Configuración Wsfex"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__wsfex_request_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__wsfex_request_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__wsfex_request_ids
 msgid "Wsfex Request"
-msgstr ""
+msgstr "Solicitud Wsfex"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_wsaa_load_config__key
 msgid "You Privary Key Here"
-msgstr ""
+msgstr "Tu clave de privado aquí"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
 msgid "You are going to delete an account move. Are you sure?"
-msgstr ""
+msgstr "Vas a eliminar un movimiento de cuenta.¿Está seguro?"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_journal.py:0
@@ -8130,6 +8343,7 @@ msgstr ""
 msgid ""
 "You are not allowed to have more than one PoS per shop with FCE Enabled. %s"
 msgstr ""
+"No se le permite tener más de un PoS por tienda con FCE habilitado. %s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -8147,12 +8361,14 @@ msgid ""
 "You can cancel actual delivery and create a new one with same data to "
 "deliver correct products. New one will be renumerated."
 msgstr ""
+"Puede cancelar la entrega actual y crear una nueva con los mismos datos para "
+"entregar los productos correctos. La nueva será renumerada."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/validate_account_move.py:0
 #, python-format
 msgid "You can't validate Electronic and Internal invoices at the same time."
-msgstr ""
+msgstr "No puede validar las facturas electrónicas e internas al mismo tiempo."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
@@ -8161,34 +8377,36 @@ msgid ""
 "You cannot send to draft this Electronic Invoice because it has been "
 "informed to AFIP."
 msgstr ""
+"No se puede enviar a borrador esta Factura Electrónica porque ya ha sido "
+"informada a la AFIP."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_wsaa_load_config__certificate
 msgid "You certificate (.crt)"
-msgstr ""
+msgstr "Tu certificado (.crt)"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
 #, python-format
 msgid "You must enter 'end' date"
-msgstr ""
+msgstr "Debe ingresar la fecha 'final'"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
 #, python-format
 msgid "You must enter 'start' date"
-msgstr ""
+msgstr "Debe ingresar la fecha de 'inicio'"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/account_tax_subjournal.py:0
 #, python-format
 msgid "You should only select the first day of month"
-msgstr ""
+msgstr "Solo debe seleccionar el primer día del mes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__zip
 msgid "Zip Code"
-msgstr "Codigo psotal"
+msgstr "Codigo postal"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__account_id
@@ -8201,6 +8419,8 @@ msgid ""
 "after this expiration date, account moves are not allowed to use this "
 "journal till its extended"
 msgstr ""
+"después de esta fecha de vencimiento, los movimientos de cuenta no están permitidos para usar este "
+"diario hasta que se extienda"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount
@@ -8245,7 +8465,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order_line__type__debt
 msgid "debt"
-msgstr ""
+msgstr "deuda"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__name
@@ -8266,13 +8486,13 @@ msgstr ""
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_generate_arciba_files
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_arciba_report
 msgid "e-ARCIBA Files Generation"
-msgstr ""
+msgstr "Generación de archivos E-Arciba"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_generate_arciba_nc_files
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_arciba_nc_report
 msgid "e-ARCIBA NC File Generation"
-msgstr ""
+msgstr "e-Arciba NC Generación de archivos"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -8286,7 +8506,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "e.g. Invoice SAJ/0042"
-msgstr ""
+msgstr "e.g. factura SAJ/0042"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__reconcile
@@ -8323,13 +8543,13 @@ msgstr "nombre"
 #: code:addons/l10n_ar_eynes/wizard/update_journal_period.py:0
 #, python-format
 msgid "no journals selected"
-msgstr ""
+msgstr "No se seleccionaron diarios"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #, python-format
 msgid "numbers missing after or before separator"
-msgstr ""
+msgstr "Números que faltan después o antes del separador"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_change_currency_wizard_view
@@ -8352,7 +8572,7 @@ msgstr "cliente"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__payment_order_id
 msgid "payment order"
-msgstr ""
+msgstr "orden de pago"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_perception_tax_application
@@ -8366,6 +8586,8 @@ msgid ""
 "ptl #%(per_id)s: IIBB Situation cannot be empty (%(per_name)s) (Partner "
 "%(part_name)s)"
 msgstr ""
+"ptl #%(per_id)s: La situación IIBB no puede estar vacía (%(per_name)s) (Partner "
+"%(part_name)s)"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
@@ -8375,18 +8597,20 @@ msgid ""
 "ptl #%(per_id)s: Percentage cannot be negative or more than 99.99 "
 "(%(per_name)s) (Invoice ID %(inv_id)s)"
 msgstr ""
+"ptl #%(per_id)s: El porcentaje no puede ser negativo o más de 99.99 "
+"(%(per_name)s) (Invoice ID %(inv_id)s)"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
 msgid "ptl #%(per_id)s: Unable to get associated invoice (%(inv_id)s)"
-msgstr ""
+msgstr "ptl #%(per_id)s: No se puede obtener la factura asociada (%(inv_id)s)"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
 msgid "ptl #%(per_id)s: Unable to get associated invoice (%(per_name)s)"
-msgstr ""
+msgstr "ptl #%(per_id)s: No se puede obtener la factura asociada (%(per_name)s)"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_report_files_generator
@@ -8405,6 +8629,8 @@ msgid ""
 "rtl #%(ret_id)s: IIBB Situation cannot be empty (%(ret_name)s) (Partner "
 "%(part_name)s)"
 msgstr ""
+"rtl #%(ret_id)s: La situación de IIBB no puede estar vacía (%(ret_name)s) (Partner "
+"%(part_name)s)"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
@@ -8413,12 +8639,14 @@ msgid ""
 "rtl #%(ret_id)s: Percentage cannot be negative or more than 99.99 "
 "(%(ret_name)s) (Invoice ID %(inv_id)s)"
 msgstr ""
+"rtl #%(ret_id)s: El porcentaje no puede ser negativo o más de 99.99 "
+"(%(ret_name)s) (Invoice ID %(inv_id)s)"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
 msgid "rtl #%(ret_id)s: Unable to get associated invoice (%(ret_name)s)"
-msgstr ""
+msgstr "rtl #%(ret_id)s: No se puede obtener la factura asociada (%(ret_name)s)"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_sicore_config
@@ -8440,6 +8668,7 @@ msgstr ""
 msgid "sifere.config"
 msgstr ""
 
+
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_sifere_jurisdiction
 msgid "sifere.jurisdiction"
@@ -8455,7 +8684,7 @@ msgstr "El numero inicial tiene que ser un entero"
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
 #, python-format
 msgid "the reference must be numbers only"
-msgstr ""
+msgstr "La referencia solo debe ser números"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__untax_amount
