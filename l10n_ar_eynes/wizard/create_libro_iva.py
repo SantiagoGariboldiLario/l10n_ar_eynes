@@ -89,7 +89,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         qty = 0
         if invoice.denomination in ['C']:
             return u'{}'.format(qty)
-        qty += len(self._get_invoice_tax_lines(invoice))
+        qty += len(self._get_invoice_vat_tax_lines(invoice))
         return u'{}'.format(qty) if qty < 10 else False
 
     def _get_amount_original_currency(self, invoice, amount, amount_cur):
