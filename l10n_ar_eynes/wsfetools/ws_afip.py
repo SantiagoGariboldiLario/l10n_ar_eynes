@@ -60,29 +60,27 @@ class WSParser:
     def parse_errors(self, ws):
         excep_msg = '' if '0: ok' in ws.Excepcion.lower() else ws.Excepcion
         error_msg = '' if '0: ok' in ws.ErrMsg.lower() else ws.ErrMsg
-        obs_msg = '' if '0: ok' in ws.Obs.lower() else ws.Obs
-        if excep_msg or error_msg or obs_msg:
+        if excep_msg or error_msg:
             return """
-                %s
                 %s
                 %s
                 """ % (
                 excep_msg,
                 error_msg,
-                obs_msg,
             )
         return ''
 
     def parse_errors_raise(self, ws, title):
-        error_parsed = self.parse_errors(ws)
-        if error_parsed:
+        error_msg_parsed = self.parse_errors(ws)
+
+        if error_msg_parsed:
             error_msg = _(
                 """
                 Error trying to %(title)s.
-                %(error)s
+                %(error_msg)s
                 """,
                 title=title,
-                error=error_parsed,
+                error_msg=error_msg_parsed,
             )
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise UserError(error_msg)

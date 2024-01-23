@@ -48,6 +48,10 @@ class AccountDebitNote(models.TransientModel):
                 {
                     # 'address_shipping_id': move.address_shipping_id.id,
                     'perception_ids': perceptions,
+                    'associated_inv_ids': [move.id],
+                    'currency_id': move.currency_id.id,
+                    'currency_rate': move.currency_rate,
+                    'is_multi_currency': move.is_multi_currency,
                 }
             )
 
