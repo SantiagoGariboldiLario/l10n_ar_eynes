@@ -15,10 +15,17 @@ _logger = logging.getLogger(__name__)
 
 class WSFEXParser(WSParser):
     def _check_shipping_perm(self, invoice, tipo_cbte, export_type):
+        """
+        Valores posibles: S, N o “vacío”
+        “S” si ya se dispone del despacho de exportación.
+        “N” si aún no se dispone del despacho de exportación.
+        “vacío” si el campo Cbte_Tipo es 20 ó 21 o si Cbte_Tipo es igual a 19 y
+        el campo Tipo_expo es igual a 2 ó 4.
+        """
         if tipo_cbte in ('20', '21') or (
             tipo_cbte == '19' and export_type in (2, 4)
         ):
-            shipping_perm = ''
+            shipping_perm = None
         else:
             shipping_perm = 'S' and invoice.shipping_perm_ids or 'N'
         return shipping_perm
