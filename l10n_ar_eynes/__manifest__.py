@@ -31,8 +31,10 @@
         'account_debit_note',
         'base',
         'contacts',
+        'date_range',
         'delivery',
         'hr',
+        'month_year_widget',  # To pick only month and year in date fields
         'multi_step_wizard',
         'om_fiscal_year',
         'popup_messages',
@@ -42,7 +44,6 @@
         'stock',
         'uom',
         'web_domain_field',  # To handle dynamic domains
-        'month_year_widget',  # To pick only month and year in date fields
     ],
     'data': [
         "data/decimal_precision_data.xml",
