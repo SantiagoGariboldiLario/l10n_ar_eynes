@@ -31,33 +31,18 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
             self._check_unbalanced_moves(closing)
 
     def _pre_run(self, closing):
-        if closing.create_closing_move and not closing.closing_move_id:
-            self.create_closing_move('close', closing)
-
-        if not closing.create_closing_move and closing.closing_move_id:
-            self.remove_move('close', closing)
-
         if closing.create_loss_profit_move and not closing.loss_profit_move_id:
             self.create_closing_move('loss_profit', closing)
-
         if not closing.create_loss_profit_move and closing.loss_profit_move_id:
             self.remove_move('loss_profit', closing)
 
-        if (
-            closing.create_net_loss_profit_move
-            and not closing.net_loss_profit_move_id
-        ):
-            self.create_closing_move('net_loss_profit', closing)
-
-        if (
-            not closing.create_net_loss_profit_move
-            and closing.net_loss_profit_move_id
-        ):
-            self.remove_move('net_loss_profit', closing)
+        if closing.create_closing_move and not closing.closing_move_id:
+            self.create_closing_move('close', closing)
+        if not closing.create_closing_move and closing.closing_move_id:
+            self.remove_move('close', closing)
 
         if closing.create_opening_move and not closing.opening_move_id:
             self.create_opening_move('open', closing)
-
         if not closing.create_opening_move and closing.opening_move_id:
             self.remove_move('open', closing)
 
@@ -65,7 +50,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
             move_id = self.create_recpam_move(closing)
             if move_id:
                 closing.write({'recpam_move_id': move_id})
-
         if not closing.create_recpam and closing.recpam_move_id:
             self.remove_move('recpam', closing)
 
@@ -85,7 +69,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         if (
             not closing.create_closing_move
             and not closing.create_loss_profit_move
-            and not closing.create_net_loss_profit_move
             and not closing.create_opening_move
         ):
             closing.action_cancel()
@@ -142,7 +125,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
 
         excluded_ids = [
             closing.loss_profit_date_range_id.id,
-            closing.net_loss_profit_date_range_id.id,
             closing.closing_date_range_id.id,
         ]
 
@@ -188,7 +170,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
 
         excluded_ids = [
             closing.loss_profit_date_range_id.id,
-            closing.net_loss_profit_date_range_id.id,
             closing.closing_date_range_id.id,
         ]
 
@@ -228,7 +209,7 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
                 _('One or more unbalanced moves found: \n%s') % msg
             )
 
-    def _get_balance(self, account, date_range):
+    def _get_balance(self, account, fiscal_year):
         query = """SELECT SUM(aml.debit - aml.credit) AS balance
             FROM account_move_line AS aml
             JOIN account_move AS am ON am.id = aml.move_id
@@ -240,8 +221,8 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         vals = {
             'account_id': account.id,
             'company_id': account.company_id.id,
-            'date_from': date_range.date_start,
-            'date_to': date_range.date_stop,
+            'date_from': fiscal_year.date_from,
+            'date_to': fiscal_year.date_to,
         }
 
         self.env.cr.execute(query, vals)
@@ -252,18 +233,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         return res
 
     def _get_loss_profit_data(self, closing):
-        mappings = closing.net_loss_profit_account_mapping_ids
-        for mapping in mappings:
-            if not mapping.destination_account_id:
-                msg = (
-                    _(
-                        'Loss & profit account mappings are not properly configured: %s'
-                    )
-                    % mapping.name
-                )
-
-                raise ValidationError(msg)
-
         if not closing.loss_profit_date:
             raise ValidationError(_('Loss & profit date must be defined'))
 
@@ -281,32 +250,7 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         return {
             'date': closing.loss_profit_date,
             'journal_id': closing.loss_profit_journal_id.id,
-            'name': closing.loss_profit_description,
-            'period_id': closing.loss_profit_date_range_id.id,
-        }
-
-    def _get_net_loss_profit_data(self, closing):
-        if not closing.net_loss_profit_date:
-            raise ValidationError(_('Net loss & profit date must be defined'))
-
-        if not closing.net_loss_profit_description:
-            raise ValidationError(
-                _('Net loss & profit description must be defined')
-            )
-
-        if not closing.net_loss_profit_journal_id:
-            raise ValidationError(
-                _('Net loss & profit journal must be defined')
-            )
-
-        if not closing.net_loss_profit_date_range_id:
-            raise ValidationError(_('Net loss & profit period must be defined'))
-
-        return {
-            'date': closing.net_loss_profit_date,
-            'journal_id': closing.net_loss_profit_journal_id.id,
-            'period_id': closing.net_loss_profit_date_range_id.id,
-            'ref': closing.net_loss_profit_description,
+            'ref': closing.loss_profit_description,
         }
 
     def _get_closing_data(self, closing):
@@ -332,20 +276,17 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         return {
             'date': closing.closing_date,
             'journal_id': closing.closing_journal_id.id,
-            'period_id': closing.closing_date_range_id.id,
             'ref': closing.closing_description,
         }
 
-    def _get_accounts_from_group(self, group, closing, operation):
+    def _get_accounts_from_group(self, group, closing):
         AccountAccount = self.env['account.account']
 
         company_id = closing.company_id.id if closing.company_id else False
 
         accounts = AccountAccount.search(
             [
-                '|',
-                ('group_id', '=', group.id),
-                ('group_id', 'child_of', group.id),
+                ('user_type_id', '=', group.id),
                 ('company_id', 'in', [company_id, False]),
             ]
         )
@@ -362,7 +303,7 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         mapping_ids = []
         move_lines = []
 
-        date_range = closing.closing_id
+        fiscal_year = closing.closing_id
 
         if operation == 'close':
             mapping_ids = closing.closing_account_mapping_ids
@@ -372,15 +313,10 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
             mapping_ids = closing.loss_profit_account_mapping_ids
 
             data = self._get_loss_profit_data(closing)
-        elif operation == 'net_loss_profit':
-            mapping_ids = closing.net_loss_profit_account_mapping_ids
-
-            data = self._get_net_loss_profit_data(closing)
         else:
             assert operation in (
                 'close',
                 'loss_profit',
-                'net_loss_profit',
             ), 'The operation is not supported'
 
         for mapping in mapping_ids:
@@ -390,10 +326,10 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
                     destination_account.id
                 ] = destination_account_totals.get(destination_account.id, 0)
 
-            group = mapping.source_group_id
-            accounts = self._get_accounts_from_group(group, closing, operation)
+            group = mapping.source_account_type_id
+            accounts = self._get_accounts_from_group(group, closing)
             for account in accounts:
-                balance = self._get_balance(account, date_range)
+                balance = self._get_balance(account, fiscal_year)
 
                 if (
                     round(
@@ -440,13 +376,10 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
                     closing.write({'closing_move_id': move.id})
                 elif operation == 'loss_profit':
                     closing.write({'loss_profit_move_id': move.id})
-                elif operation == 'net_loss_profit':
-                    closing.write({'net_loss_profit_move_id': move.id})
                 else:
                     assert operation in (
                         'close',
                         'loss_profit',
-                        'net_loss_profit',
                     ), 'The operation is not supported'
 
             return move
@@ -463,7 +396,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         date = None
         description = None
         journal_id = None
-        period_id = None
 
         closing_move = closing.closing_move_id
 
@@ -490,7 +422,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         date = closing.opening_date
         description = closing.opening_description
         journal_id = closing.opening_journal_id.id
-        period_id = closing.opening_date_range_id.id
 
         move_lines = []
 
@@ -503,7 +434,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
                     'debit': line.credit,
                     'journal_id': journal_id,
                     'name': description,
-                    'period_id': period_id,
                 }
             )
 
@@ -513,7 +443,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
                     'date': date,
                     'journal_id': journal_id,
                     'line_ids': [(0, 0, line) for line in move_lines],
-                    'period_id': period_id,
                     'ref': description,
                 }
             )
@@ -535,10 +464,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
             move = closing.loss_profit_move_id
 
             closing.write({'loss_profit_move_id': None})
-        elif operation == 'net_loss_profit':
-            move = closing.net_loss_profit_move_id
-
-            closing.write({'net_loss_profit_move_id': None})
         elif operation == 'open':
             move = closing.opening_move_id
 
@@ -551,7 +476,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
             assert operation in (
                 'close',
                 'loss_profit',
-                'net_loss_profit',
                 'open',
             ), 'The operation is not supported'
 
@@ -561,20 +485,8 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
 
         return move.id
 
-    # pylint: disable=dangerous-default-value
-    def get_coefficient(
-        self, period, date_range={}, special=False  # noqa: B006
-    ):
+    def get_coefficient(self, date_from, date_to, special=False):
         InflationIndex = self.env['inflation.index']
-
-        if date_range.get('date_from', False) and date_range.get(
-            'date_to', False
-        ):
-            date_from = date_range['date_from']
-            date_to = date_range['date_to']
-        else:
-            date_from = period.date_start
-            date_to = period.date_end
 
         inflation_indexes = InflationIndex.search(
             [('date', '>=', date_from), ('date', '<=', date_to)],
@@ -590,29 +502,21 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         date_lst = inflation_indexes.mapped('date')
         last_date = date_lst[-1]
         base_reg = inflation_indexes.filtered(lambda x: x.date == last_date)[0]
-        date_from = period.date_from
-        date_to = period.date_to
         target_reg = inflation_indexes.filtered(
             lambda r: r.date <= date_to and r.date >= date_from
         )
-        if special and not target_reg:
-            target_reg = InflationIndex.search(
-                [
-                    ('date', '<=', period.date_to),
-                    ('date', '>=', period.date_from),
-                ],
-                limit=1,
-            )
         if not target_reg:
             msg = _(
-                'There is not index for inflation for ' 'period %(name)s.',
-                name=period.name,
+                'There is not index for inflation between %(date_from)s and %(date_to)s.',
+                date_from=date_from,
+                date_to=date_to,
             )
             raise ValidationError(msg)
         if len(target_reg) > 1:
             msg = _(
-                'There are many indexes for inflation for ' 'period %(name)s.',
-                name=period.name,
+                'There are many indexes for inflation between %(date_from)s and %(date_to)s.',
+                date_from=date_from,
+                date_to=date_to,
             )
             raise ValidationError(msg)
         base_coeff = base_reg.coefficient
@@ -622,25 +526,23 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         coefficient = base_coeff / current_coeff
         return coefficient
 
-    def get_accounts_by_period(self, period, coefficient=0):
+    def get_accounts_by_period(self, date_from, date_to, coefficient=0):
         query = """
             SELECT mvl.account_id, SUM(mvl.debit - mvl.credit) * (%(coefficient)s-1) AS amount
             FROM account_move_line AS mvl
             LEFT JOIN account_account AS ac ON mvl.account_id = ac.id
             JOIN account_move m ON m.id=mvl.move_id
-            WHERE ac.recpam_type = 'reexpressed' AND m.period_id = %(period_id)s
+            WHERE ac.recpam_type = 'reexpressed'
             GROUP BY mvl.account_id;
         """
         if not coefficient:
-            coefficient = self.get_coefficient(period)
-        vals = {'coefficient': coefficient, 'period_id': period.id}
+            coefficient = self.get_coefficient(date_from, date_to)
+        vals = {'coefficient': coefficient}
         self.env.cr.execute(query, vals)
         res = self.env.cr.dictfetchall()
         return res
 
     def _prepare_move_line(self, desc, journal_id, account_id, amount):
-        DatePeriod = self.env['date.period']
-        period_id = DatePeriod._get_period(datetime.today())
         date = datetime.today().strftime('%Y-%m-%d')
         move_line_vals = {
             'account_id': account_id,
@@ -648,43 +550,39 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
             'credit': amount < 0 and -amount,
             'name': desc,
             'date': date,
-            'period_id': period_id.id,
             'journal_id': journal_id,
         }
         return move_line_vals
 
+    def _generate_monthly_periods(self, fiscal_year):
+        months = []
+
+        date_from = fiscal_year.date_from
+        while fiscal_year.date_to > date_from:
+            next_date_from = date_from + relativedelta(months=1)
+            date_to = next_date_from - relativedelta(days=1)
+            months.append(
+                {
+                    'date_from': date_from,
+                    'date_to': date_to,
+                }
+            )
+            date_from = next_date_from
+
+        return months
+
     def create_recpam_move(self, closing):
         AccountMove = self.env['account.move']
-        DatePeriod = self.env['date.period']
         DecimalPrecision = self.env['decimal.precision']
 
         closing_fiscalyear = closing.closing_id
-        periods = closing_fiscalyear.period_ids
+        periods = self._generate_monthly_periods(closing_fiscalyear)
         account_group = {}
 
         for period in periods:
-            coefficient = False
-            if period.special:
-                pdate_to = period.date_to
-                pdate_to = pdate_to - relativedelta(months=1)
-                code = pdate_to.strftime('%m/%Y')
-                last_period = DatePeriod.search(
-                    [
-                        '&',
-                        ('code', '=', code),
-                        ('special', '=', False),
-                    ],
-                    limit=1,
-                )
-                coefficient = self.get_coefficient(
-                    last_period,
-                    date_range={
-                        'date_from': closing.closing_id.date_from,
-                        'date_to': closing.closing_id.date_to,
-                    },
-                    special=True,
-                )
-            vals = self.get_accounts_by_period(period, coefficient=coefficient)
+            vals = self.get_accounts_by_period(
+                period['date_from'], period['date_to']
+            )
             for line_vals in vals:
                 account_id = line_vals.get('account_id')
                 amount = line_vals.get('amount')
@@ -696,7 +594,7 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         journal_id = closing.recpam_journal_id.id
         recpam_account_id = closing.recpam_account_id.id
         description = closing.recpam_description
-        date = closing.closing_fiscal_year_date
+        date = closing_fiscalyear.date_to
         total_amount = 0.0
         for account_id, amount in account_group.items():
             precision = DecimalPrecision.precision_get('account')
@@ -721,13 +619,9 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         )
         ctx = dict(self.env.context)
         ctx['account_period_prefer_special'] = True
-        latest_period = periods.sorted(
-            key=lambda x: x.date_to, reverse=True
-        ).filtered(lambda x: not x.special)
         move.with_context(**ctx).write(
             {
                 'date': date,
-                'period_id': latest_period[0].id,
             }
         )
         return move.id

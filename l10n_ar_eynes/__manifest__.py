@@ -30,8 +30,6 @@
         'account_check_printing',
         'account_debit_note',
         'base',
-        # 'base_period',
-        # 'close_date_period',
         'contacts',
         'delivery',
         'hr',
@@ -44,6 +42,7 @@
         'stock',
         'uom',
         'web_domain_field',  # To handle dynamic domains
+        'month_year_widget',  # To pick only month and year in date fields
     ],
     'data': [
         "data/decimal_precision_data.xml",

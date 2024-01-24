@@ -26,7 +26,6 @@ class FiscalYearClosing(models.Model):
     closing_id = fields.Many2one(
         'account.fiscal.year',
         'Closing Fiscal Year',
-        oldname='closing_fiscal_year_id',
         required=True,
         ondelete='cascade',
         default=lambda self: self._get_default_closing_id(),
@@ -49,9 +48,7 @@ class FiscalYearClosing(models.Model):
         ondelete='set null',
         readonly=True,
     )
-    closing_date_range_id = fields.Many2one(
-        'date.range', 'Period', oldname='closing_period_id'
-    )
+    closing_date_range_id = fields.Many2one('date.range', 'Period')
     company_id = fields.Many2one(
         'res.company',
         'Company',
@@ -62,9 +59,6 @@ class FiscalYearClosing(models.Model):
     )
     create_closing_move = fields.Boolean('Create Closing Fiscal Year')
     create_loss_profit_move = fields.Boolean('Create Loss & Profit Move')
-    create_net_loss_profit_move = fields.Boolean(
-        'Create Net Loss & Profit Move'
-    )
     create_opening_move = fields.Boolean('Create Opening Fiscal Year Move')
     create_recpam = fields.Boolean('Create RECPAM')
     loss_profit_account_mapping_ids = fields.One2many(
@@ -83,32 +77,8 @@ class FiscalYearClosing(models.Model):
     loss_profit_date_range_id = fields.Many2one(
         'date.range',
         'Net Loss & Profit Period',
-        oldname='loss_profit_period_id',
     )
     name = fields.Char('Description', size=60, required=True)
-    net_loss_profit_account_mapping_ids = fields.One2many(
-        'account.mapping.fiscal.year.closing.net.loss.profit',
-        'fiscal_year_close_id',
-        'Net Loss & Profit Account mappings',
-    )
-    net_loss_profit_date = fields.Date('Net Loss & Profit Date')
-    net_loss_profit_description = fields.Char(
-        'Net Loss & Profit Description', size=60
-    )
-    net_loss_profit_journal_id = fields.Many2one(
-        'account.journal', 'Net Loss & Profit Journal'
-    )
-    net_loss_profit_move_id = fields.Many2one(
-        'account.move',
-        'Net Loss & Profit Move',
-        ondelete='set null',
-        readonly=True,
-    )
-    net_loss_profit_date_range_id = fields.Many2one(
-        'date.range',
-        'Net Loss & Profit Period',
-        oldname='net_loss_profit_period_id',
-    )
     opening_id = fields.Many2one(
         'account.fiscal.year',
         'Opening Fiscal Year',
@@ -130,7 +100,8 @@ class FiscalYearClosing(models.Model):
         readonly=True,
     )
     opening_date_range_id = fields.Many2one(
-        'date.range', 'Opening Fiscal Year Period', oldname='opening_period_id'
+        'date.range',
+        'Opening Fiscal Year Period',
     )
     recpam_account_id = fields.Many2one(
         'account.account', 'RECPAM Account', ondelete='set null'
@@ -275,19 +246,12 @@ class FiscalYearClosing(models.Model):
                 'closing_date_range_id': self._get_closing_period(self),
                 'create_closing_move': True,
                 'create_loss_profit_move': True,
-                'create_net_loss_profit_move': False,
                 'create_opening_move': True,
                 'create_recpam': True,
                 'loss_profit_date': self.closing_id.date_to,
                 'loss_profit_description': _('Loss & Profit'),
                 'loss_profit_journal_id': self._get_journal_id(self),
                 'loss_profit_date_range_id': self._get_loss_profit_period(self),
-                'net_loss_profit_date': self.closing_id.date_to,
-                'net_loss_profit_description': _('Net Loss & Profit'),
-                'net_loss_profit_journal_id': self._get_journal_id(self),
-                'net_loss_profit_date_range_id': self._get_loss_profit_period(
-                    self
-                ),
                 'opening_date': self.opening_id.date_from,
                 'opening_description': _('Fiscal Year Opening'),
                 'opening_journal_id': self._get_journal_id(self),
@@ -334,7 +298,6 @@ class FiscalYearClosing(models.Model):
                 'check_unbalanced_moves': False,
                 'create_closing_move': False,
                 'create_loss_profit_move': False,
-                'create_net_loss_profit_move': False,
                 'create_opening_move': False,
                 'create_recpam': False,
             }
@@ -344,14 +307,14 @@ class FiscalYearClosing(models.Model):
             if rec.loss_profit_move_id:
                 rec.loss_profit_move_id.unlink()
 
-            if rec.net_loss_profit_move_id:
-                rec.net_loss_profit_move_id.unlink()
-
             if rec.closing_move_id:
                 rec.closing_move_id.unlink()
 
             if rec.opening_move_id:
                 rec.opening_move_id.unlink()
+
+            if rec.recpam_move_id:
+                rec.recpam_move_id.unlink()
 
         self.write({'state': 'canceled'})
 

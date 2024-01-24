@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <record id="fiscal_year_closing_view_form" model="ir.ui.view">
         <field name="name">fiscal.year.closing.view.form</field>
@@ -7,73 +7,86 @@
         <field name="arch" type="xml">
             <form string="Fiscal Year Closing">
                 <header>
-                    <button name="action_draft"
+                    <button
+                        name="action_draft"
                         string="Continue"
                         type="object"
                         states="new"
-                        attrs="{'invisible': [('state', '!=', 'new')]}"/>
-                    <button name="%(action_fiscal_year_closing)d"
+                        attrs="{'invisible': [('state', '!=', 'new')]}"
+                    />
+                    <button
+                        name="%(action_fiscal_year_closing)d"
                         string="Perform Operations"
                         type="action"
                         class="oe_highlight"
-                        states="draft,in_progress"/>
-                    <button name="action_confirm"
+                        states="draft,in_progress"
+                    />
+                    <button
+                        name="action_confirm"
                         string="Confirm"
                         type="object"
                         states="in_progress"
-                        class="oe_highlight"/>
-                    <button name="action_cancel"
-                        string="Cancel"
-                        type="object"
-                        states="in_progress,done"/>
-                    <button name="action_recover"
-                        string="Draft"
-                        type="object"
-                        states="canceled"/>
-                    <field name="state" widget="statusbar" readonly="1"/>
+                        class="oe_highlight"
+                    />
+                    <button name="action_cancel" string="Cancel" type="object" states="in_progress,done" />
+                    <button name="action_recover" string="Draft" type="object" states="canceled" />
+                    <field name="state" widget="statusbar" readonly="1" />
                 </header>
                 <sheet>
                     <group colspan="4">
-                        <field name="company_id"
+                        <field
+                            name="company_id"
                             select="1"
                             required="1"
-                            attrs="{'readonly': [('state', '!=', 'new')]}"/>
-                        <field name="name" select="2" attrs="{'readonly': [('state', '!=', 'new')]}"/>
+                            attrs="{'readonly': [('state', '!=', 'new')]}"
+                        />
+                        <field name="name" select="2" attrs="{'readonly': [('state', '!=', 'new')]}" />
                     </group>
                     <group string="Fiscal Years" colspan="4">
-                        <field name="closing_id" attrs="{'readonly': [('state', '!=', 'new')]}"/>
-                        <field name="opening_id" attrs="{'readonly': [('state', '!=', 'new')]}"/>
+                        <field name="closing_id" attrs="{'readonly': [('state', '!=', 'new')]}" />
+                        <field name="opening_id" attrs="{'readonly': [('state', '!=', 'new')]}" />
                     </group>
                     <group attrs="{'invisible': [('state', '=', 'new')]}" colspan="4">
                         <notebook>
                             <page string="General">
                                 <group string="Operations">
                                     <group>
-                                        <separator string="Operation to Perform"/>
-                                        <separator string="Move Created by the Operation"/>
-                                        <field name="create_loss_profit_move"
-                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                        <field name="loss_profit_move_id"/>
-                                        <field name="create_net_loss_profit_move"
-                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                        <field name="net_loss_profit_move_id"/>
-                                        <field name="create_closing_move"
-                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                        <field name="closing_move_id"/>
-                                        <field name="create_opening_move"
-                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                        <field name="opening_move_id"/>
-                                        <field name="create_recpam"
-                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                        <field name="recpam_move_id"/>
+                                        <separator string="Operation to Perform" />
+                                        <separator string="Move Created by the Operation" />
+                                        <field
+                                            name="create_loss_profit_move"
+                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                        />
+                                        <field name="loss_profit_move_id" />
+                                        <field
+                                            name="create_closing_move"
+                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                        />
+                                        <field name="closing_move_id" />
+                                        <field
+                                            name="create_opening_move"
+                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                        />
+                                        <field name="opening_move_id" />
+                                        <field
+                                            name="create_recpam"
+                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                        />
+                                        <field name="recpam_move_id" />
                                     </group>
                                     <group string="Checks">
-                                        <field name="check_invalid_period_moves"
-                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                        <field name="check_draft_moves"
-                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                        <field name="check_unbalanced_moves"
-                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                                        <field
+                                            name="check_invalid_period_moves"
+                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                        />
+                                        <field
+                                            name="check_draft_moves"
+                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                        />
+                                        <field
+                                            name="check_unbalanced_moves"
+                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                        />
                                     </group>
                                 </group>
                             </page>
@@ -82,122 +95,139 @@
                                     <page string="Loss and Profit">
                                         <group>
                                             <group>
-                                                <field name="loss_profit_description"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                                <field name="loss_profit_journal_id"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                                                <field
+                                                    name="loss_profit_description"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
+                                                <field
+                                                    name="loss_profit_journal_id"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
                                             </group>
                                             <group>
-                                                <field name="loss_profit_date_range_id"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                                <field name="loss_profit_date"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                                                <field
+                                                    name="loss_profit_date_range_id"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
+                                                <field
+                                                    name="loss_profit_date"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
                                             </group>
                                         </group>
-                                        <field name="loss_profit_account_mapping_ids"
+                                        <field
+                                            name="loss_profit_account_mapping_ids"
                                             nolabel="1"
-                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}">
+                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                        >
                                             <tree string="Account mappings" editable="top">
-                                                <field name="source_group_id"/>
-                                                <field name="destination_account_id" required="1"/>
+                                                <field
+                                                    name="source_account_type_id"
+                                                    widget="account_hierarchy_selection"
+                                                />
+                                                <field name="destination_account_id" required="1" />
                                             </tree>
                                             <form string="Account mapping">
-                                                <field name="source_group_id"/>
-                                                <field name="destination_account_id" required="1"/>
-                                                <field name="name"/>
-                                            </form>
-                                        </field>
-                                    </page>
-                                    <page string="Net Loss and Profit">
-                                        <group>
-                                            <group>
-                                                <field name="net_loss_profit_description"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                                <field name="net_loss_profit_journal_id"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                            </group>
-                                            <group>
-                                                <field name="net_loss_profit_date_range_id"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                                <field name="net_loss_profit_date"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                            </group>
-                                        </group>
-                                        <field name="net_loss_profit_account_mapping_ids"
-                                            nolabel="1"
-                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}">
-                                            <tree string="Account mappings" editable="top">
-                                                <field name="source_group_id"/>
-                                                <field name="destination_account_id"/>
-                                            </tree>
-                                            <form string="Account mapping">
-                                                <field name="source_group_id"/>
-                                                <field name="destination_account_id"/>
-                                                <field name="name"/>
+                                                <field
+                                                    name="source_account_type_id"
+                                                    widget="account_hierarchy_selection"
+                                                />
+                                                <field name="destination_account_id" required="1" />
+                                                <field name="name" />
                                             </form>
                                         </field>
                                     </page>
                                     <page string="Closing">
                                         <group>
                                             <group>
-                                                <field name="closing_description"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                                <field name="closing_journal_id"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                                                <field
+                                                    name="closing_description"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
+                                                <field
+                                                    name="closing_journal_id"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
                                             </group>
                                             <group>
-                                                <field name="closing_date_range_id"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                                <field name="closing_date"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                                                <field
+                                                    name="closing_date_range_id"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
+                                                <field
+                                                    name="closing_date"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
                                             </group>
                                         </group>
-                                        <field name="closing_account_mapping_ids"
+                                        <field
+                                            name="closing_account_mapping_ids"
                                             nolabel="1"
-                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}">
+                                            attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                        >
                                             <tree string="Accounts to close" editable="top">
-                                                <field name="source_group_id"/>
-                                                <field name="destination_account_id"/>
+                                                <field
+                                                    name="source_account_type_id"
+                                                    widget="account_hierarchy_selection"
+                                                />
+                                                <field name="destination_account_id" />
                                             </tree>
                                             <form string="Account to close">
-                                                <field name="source_group_id"/>
-                                                <field name="name"/>
+                                                <field
+                                                    name="source_account_type_id"
+                                                    widget="account_hierarchy_selection"
+                                                />
+                                                <field name="name" />
                                             </form>
                                         </field>
                                     </page>
                                     <page string="Opening">
                                         <group>
                                             <group>
-                                                <field name="opening_description"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                                <field name="opening_journal_id"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                                                <field
+                                                    name="opening_description"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
+                                                <field
+                                                    name="opening_journal_id"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
                                             </group>
                                             <group>
-                                                <field name="opening_date_range_id"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                                <field name="opening_date"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                                                <field
+                                                    name="opening_date_range_id"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
+                                                <field
+                                                    name="opening_date"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
                                             </group>
                                         </group>
                                     </page>
                                     <page string="RECPAM">
                                         <group>
                                             <group>
-                                                <field name="recpam_description"
-                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                                                <field name="recpam_account_id"
+                                                <field
+                                                    name="recpam_description"
+                                                    attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
+                                                />
+                                                <field
+                                                    name="recpam_account_id"
                                                     attrs="{
                                                         'readonly': [('state', 'in', ('done', 'cancel'))],
                                                         'required': [('create_recpam', '=', True)],
-                                                    }"/>
+                                                    }"
+                                                />
                                             </group>
                                             <group>
-                                                <field name="recpam_journal_id"
+                                                <field
+                                                    name="recpam_journal_id"
                                                     attrs="{
                                                         'readonly': [('state', 'in', ('done', 'cancel'))],
                                                         'required': [('create_recpam', '=', True)],
-                                                    }"/>
+                                                    }"
+                                                />
                                             </group>
                                         </group>
                                     </page>
@@ -215,15 +245,17 @@
         <field name="model">fiscal.year.closing</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="Fiscal Year Closings"
+            <tree
+                string="Fiscal Year Closings"
                 decoration-danger="state == 'new'"
                 decoration-primary="state == 'draft'"
-                decoration-success="state == 'in_progress'">
-                <field name="company_id" select="1"/>
-                <field name="name" select="2"/>
-                <field name="closing_id" select="1"/>
-                <field name="opening_id" select="1"/>
-                <field name="state"/>
+                decoration-success="state == 'in_progress'"
+            >
+                <field name="company_id" select="1" />
+                <field name="name" select="2" />
+                <field name="closing_id" select="1" />
+                <field name="opening_id" select="1" />
+                <field name="state" />
             </tree>
         </field>
     </record>
@@ -232,7 +264,7 @@
         <field name="name">Close Fiscal Year</field>
         <field name="res_model">fiscal.year.closing</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="view_id" ref="fiscal_year_closing_view_form"/>
+        <field name="view_id" ref="fiscal_year_closing_view_form" />
         <field name="view_mode">form,tree</field>
     </record>
 
@@ -240,7 +272,7 @@
         <field name="name">Fiscal Years Closings</field>
         <field name="res_model">fiscal.year.closing</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="view_id" ref="fiscal_year_closing_view_tree"/>
+        <field name="view_id" ref="fiscal_year_closing_view_tree" />
         <field name="view_mode">tree,form</field>
     </record>
 </odoo>
