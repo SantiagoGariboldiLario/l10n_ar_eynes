@@ -22,10 +22,8 @@ class WSFEXParser(WSParser):
         “vacío” si el campo Cbte_Tipo es 20 ó 21 o si Cbte_Tipo es igual a 19 y
         el campo Tipo_expo es igual a 2 ó 4.
         """
-        if tipo_cbte in ('20', '21') or (
-            tipo_cbte == '19' and export_type in (2, 4)
-        ):
-            shipping_perm = None
+        if tipo_cbte in (20, 21) or (tipo_cbte == 19 and export_type in (2, 4)):
+            shipping_perm = ''
         else:
             shipping_perm = 'S' and invoice.shipping_perm_ids or 'N'
         return shipping_perm
@@ -41,7 +39,7 @@ class WSFEXParser(WSParser):
         2 Servicios / 4 Otros, debe ser igual o posterior a la fecha de emisión del comprobante.
         """
         date_due = None
-        if tipo_cbte == '19' and export_type in (2, 4):
+        if tipo_cbte == 19 and export_type in (2, 4):
             if invoice.invoice_date_due < invoice.invoice_date:
                 raise UserError(
                     _(
@@ -90,8 +88,6 @@ class WSFEXParser(WSParser):
             .decode('utf8')
             .replace('\n', ' ')
         )
-        partner_name = "DFSDFSDSD"
-        partner_address = "DFSDFSDSD"
 
         date_due = self._get_date_due(invoice, tipo_cbte, export_type)
         currency_code = invoice.get_currency_code()
