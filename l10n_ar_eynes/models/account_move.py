@@ -33,6 +33,7 @@ class AccountMove(models.Model):
         compute='_compute_move_denomination',
         store=True,
     )
+    disable_perceptions = fields.Boolean(default=False)
     iva_digital_operation_code = fields.Selection(
         [
             ('A', 'No Alcanzado'),
@@ -1053,56 +1054,61 @@ class AccountMove(models.Model):
 
         return vals
 
-    @api.onchange('invoice_line_ids')
+    @api.onchange('invoice_line_ids', 'disable_perceptions')
     def compute_perceptions(self):
         for rec in self:
             if rec.is_sale_document():
-                new_perception_lines = self.env['perception.tax.line']
-                # Calculamos cada Percepcion configurada en el Partner
-                partner_perceptions = rec.partner_id._get_perceptions_to_apply()
-                for partner_perc in partner_perceptions.values():
-                    excluded_percent = partner_perc['excluded_percent']
-
-                    # Chequeamos las fechas de eximision
-                    vdate = rec.invoice_date or datetime.date.today()
-
-                    first_day_of_year = datetime.date.min.replace(
-                        year=datetime.date.today().year
+                if rec.disable_perceptions:
+                    rec.perception_ids.unlink()
+                else:
+                    new_perception_lines = self.env['perception.tax.line']
+                    # Calculamos cada Percepcion configurada en el Partner
+                    partner_perceptions = (
+                        rec.partner_id._get_perceptions_to_apply()
                     )
-                    last_day_of_year = datetime.date.max.replace(
-                        year=datetime.date.today().year
-                    )
-                    date_from = first_day_of_year
-                    date_to = last_day_of_year
-                    if partner_perc['ex_date_from']:
-                        date_from = partner_perc['ex_date_from']
-                    if partner_perc['ex_date_to']:
-                        date_to = partner_perc['ex_date_to']
+                    for partner_perc in partner_perceptions.values():
+                        excluded_percent = partner_perc['excluded_percent']
 
-                    # TODO: Chequear cuando solo se llena uno de las dos fechas
-                    if (not date_from and not date_to) or (
-                        vdate >= date_from and vdate <= date_to
-                    ):
-                        if excluded_percent > 1.0 or excluded_percent < 0.0:
-                            raise ValidationError(
-                                _(
-                                    "Perception Configuration Error!\n"
-                                    + "Excluded percent configured has to be "
-                                    + "between 0.0 and 1.0"
+                        # Chequeamos las fechas de eximision
+                        vdate = rec.invoice_date or datetime.date.today()
+
+                        first_day_of_year = datetime.date.min.replace(
+                            year=datetime.date.today().year
+                        )
+                        last_day_of_year = datetime.date.max.replace(
+                            year=datetime.date.today().year
+                        )
+                        date_from = first_day_of_year
+                        date_to = last_day_of_year
+                        if partner_perc['ex_date_from']:
+                            date_from = partner_perc['ex_date_from']
+                        if partner_perc['ex_date_to']:
+                            date_to = partner_perc['ex_date_to']
+
+                        # TODO: Chequear cuando solo se llena uno de las dos fechas
+                        if (not date_from and not date_to) or (
+                            vdate >= date_from and vdate <= date_to
+                        ):
+                            if excluded_percent > 1.0 or excluded_percent < 0.0:
+                                raise ValidationError(
+                                    _(
+                                        "Perception Configuration Error!\n"
+                                        + "Excluded percent configured has to be "
+                                        + "between 0.0 and 1.0"
+                                    )
                                 )
-                            )
 
-                        # Si esta totalmente eximido
-                        if excluded_percent == 1.0:
-                            continue
-                    else:
-                        partner_perc['excluded_percent'] = 0.0
-                    new_perception = rec.compute_perception(
-                        perception_data=partner_perc
-                    )
-                    if new_perception:
-                        new_perception_lines += new_perception
-                rec.perception_ids = new_perception_lines
+                            # Si esta totalmente eximido
+                            if excluded_percent == 1.0:
+                                continue
+                        else:
+                            partner_perc['excluded_percent'] = 0.0
+                        new_perception = rec.compute_perception(
+                            perception_data=partner_perc
+                        )
+                        if new_perception:
+                            new_perception_lines += new_perception
+                    rec.perception_ids = new_perception_lines
             if rec.is_sale_document() or rec.is_purchase_document():
                 rec._onchange_perception_ids()
 
