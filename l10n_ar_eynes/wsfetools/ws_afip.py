@@ -39,6 +39,24 @@ class WSParser:
             return False
         return datetime.strptime(date, AFIP_DATE_FORMAT)
 
+    def parse_associated_voucher(self, invoice):
+        CbtesAsoc = []
+        for associated_inv in invoice.associated_inv_ids:
+            tipo_cbte = associated_inv.get_voucher_type()
+            pos, number = associated_inv.name.split('-')
+            cbte_fch = self._convert_date_to_AFIP_format(
+                associated_inv.invoice_date
+            )
+            CbteAsoc = {
+                'Tipo': tipo_cbte,
+                'PtoVta': int(pos),
+                'Nro': int(number),
+                'Cuit': invoice.company_id.partner_id.vat,
+                'CbteFch': cbte_fch,
+            }
+            CbtesAsoc.append(CbteAsoc)
+        return CbtesAsoc
+
     def parse_errors(self, ws):
         excep_msg = '' if '0: ok' in ws.Excepcion.lower() else ws.Excepcion
         error_msg = '' if '0: ok' in ws.ErrMsg.lower() else ws.ErrMsg
