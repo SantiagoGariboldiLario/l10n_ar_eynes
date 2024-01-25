@@ -9,6 +9,7 @@
         <field name="afip_code">000</field>
         <field name="description">IVA Exento</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="exempt_percent_tax_purchase" model="account.tax" forcecreate="0">
@@ -20,6 +21,7 @@
         <field name="afip_code">000</field>
         <field name="description">IVA Exento</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="0_percent_tax_sale" model="account.tax" forcecreate="0">
@@ -30,6 +32,7 @@
         <field name="afip_code">0003</field>
         <field name="description">0.00%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="0_percent_tax_purchase" model="account.tax" forcecreate="0">
@@ -40,6 +43,7 @@
         <field name="afip_code">0003</field>
         <field name="description">0.00%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="10_50_percent_tax_sale" model="account.tax" forcecreate="0">
@@ -50,6 +54,7 @@
         <field name="afip_code">0004</field>
         <field name="description">10.50%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="10_50_percent_tax_purchase" model="account.tax" forcecreate="0">
@@ -60,6 +65,7 @@
         <field name="afip_code">0004</field>
         <field name="description">10.50%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="21_percent_tax_sale" model="account.tax" forcecreate="0">
@@ -70,6 +76,7 @@
         <field name="afip_code">0005</field>
         <field name="description">21.00%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="21_percent_tax_purchase" model="account.tax" forcecreate="0">
@@ -80,6 +87,7 @@
         <field name="afip_code">0005</field>
         <field name="description">21.00%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="27_percent_tax_sale" model="account.tax" forcecreate="0">
@@ -90,6 +98,7 @@
         <field name="afip_code">0006</field>
         <field name="description">27.00%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="27_percent_tax_purchase" model="account.tax" forcecreate="0">
@@ -100,6 +109,7 @@
         <field name="afip_code">0006</field>
         <field name="description">27.00%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="5_percent_tax_sale" model="account.tax" forcecreate="0">
@@ -110,6 +120,7 @@
         <field name="afip_code">0008</field>
         <field name="description">5.00%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="5_percent_tax_purchase" model="account.tax" forcecreate="0">
@@ -120,6 +131,7 @@
         <field name="afip_code">0008</field>
         <field name="description">5.00%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="2_5_percent_tax_sale" model="account.tax" forcecreate="0">
@@ -130,6 +142,7 @@
         <field name="afip_code">0009</field>
         <field name="description">2.50%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="2_5_percent_tax_purchase" model="account.tax" forcecreate="0">
@@ -140,6 +153,7 @@
         <field name="afip_code">0009</field>
         <field name="description">2.50%</field>
         <field name="country_id" eval="ref('base.ar')" />
+        <field name="tax_group_id" ref='l10n_ar_eynes.vat_tax_group' />
     </record>
 
     <record id="tax_iva_perceptions_e" model="account.tax">
