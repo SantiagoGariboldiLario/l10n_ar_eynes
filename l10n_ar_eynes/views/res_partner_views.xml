@@ -19,10 +19,24 @@
                 <field name="express_id" domain="[('supplier_rank', '>', 0)]" />
             </group>
 
+            <xpath expr="//field[@name='country_id']" position="attributes">
+                <attribute name="attrs">{
+                    'required': [('dst_cuit', '=', True)],
+                    'readonly': [('type', '=', 'contact'), ('parent_id', '!=', False)]
+                }</attribute>
+                <!-- 'readonly': [('type', '=', 'contact'), ('parent_id', '!=', False)] COPIED FROM BASE VIEW -->
+            </xpath>
+
             <xpath expr="//field[@name='vat']" position="before">
                 <field name="dst_cuit" invisible="1" />
                 <field name="document_type_id" placeholder="Document Type..." widget="selection" />
-                <field name="dst_cuit_id" attrs="{'invisible': [('dst_cuit', '!=', True)]}" />
+                <field
+                    name="dst_cuit_id"
+                    attrs="{
+                        'invisible': [('dst_cuit', '!=', True)],
+                        'required': [('dst_cuit', '=', True)],
+                    }"
+                />
                 <field name="supplier_rank" invisible="1" />
                 <field name="customer_rank" invisible="1" />
             </xpath>
