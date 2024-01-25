@@ -52,7 +52,7 @@
         id="update_journals_period_menu"
         name="Update journals period"
         action="update_journals_period_action"
-        parent="account.menu_finance_entries_accounting_journals"
+        parent="account.menu_finance_entries_actions"
     />
 
 </odoo>

@@ -296,6 +296,13 @@ class WsfeConfig(models.Model):
             order="id desc",
             limit=1,
         )
+        if not ws_pos:
+            raise UserError(
+                _(
+                    "This journal '%(journal)s' is not configured in WSFEX.",
+                    journal=invoice.journal_id.name,
+                )
+            )
         return int(ws_pos.code)
 
     def _set_invoice_in_ws(self, ws, invoice):
@@ -397,9 +404,7 @@ class WsfeConfig(models.Model):
             xml_request = ws.XmlRequest
             _logger.info("Data sent to AFIP:")
             _logger.info(xml_request)
-            req_vals.update(
-                {'xml_request': xml_request, 'request_id': request.id}
-            )
+            req_vals.update({'xml_request': xml_request})
         except SoapFault as soap_fault:
             error_msg = "%s: %s" % (
                 soap_fault.faultcode,
@@ -416,6 +421,13 @@ class WsfeConfig(models.Model):
                 error_msg = str(e)
                 _logger.exception("Internal Error.")
                 _logger.exception(error_msg)
+        finally:
+            req_vals.update(
+                {
+                    'request_id': request.id,
+                }
+            )
+
         if error_msg:
             req_vals.update(
                 {

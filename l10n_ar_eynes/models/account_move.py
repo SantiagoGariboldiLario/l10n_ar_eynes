@@ -27,6 +27,7 @@ class AccountMove(models.Model):
             ("e", "E"),
             ('m', 'M'),
             ('oc', 'OC'),
+            ('ana', 'ANA'),
             ("not_defined", "Not Defined"),
         ],
         string='Denomination',

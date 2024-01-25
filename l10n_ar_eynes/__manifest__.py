@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.1.4.1',
+    'version': '15.0.1.5.2',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -50,13 +50,13 @@
         'data/fiscal_position_data.xml',
         'data/account_tax_group_data.xml',
         'data/account_taxes_data.xml',
+        'data/res_currency_data.xml',
         'data/res_document_type_data.xml',
         'data/res_voucher_type_data.xml',
         'data/account_default_journals_data.xml',
         'data/account_payment_method_data.xml',
         'data/iibb_situation_data.xml',
         'data/dst_cuit_codes_data.xml',
-        'data/ir_sequence_data.xml',
         "data/afip_ws.xml",
         "data/ir_cron.xml",
         "data/perception_data.xml",
@@ -154,4 +154,5 @@
             "pyafipws",
         ]
     },
+    'post_init_hook': 'post_init_hook',
 }

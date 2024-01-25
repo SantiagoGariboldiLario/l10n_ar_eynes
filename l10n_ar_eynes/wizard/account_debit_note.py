@@ -17,11 +17,10 @@ class AccountDebitNote(models.TransientModel):
 
     def _prepare_default_values(self, move):
         res = super(AccountDebitNote, self)._prepare_default_values(move)
-        res['is_debit_note'] = True
 
         # Add perception lines
+        perceptions = []
         if self.copy_lines:
-            perceptions = []
             for p in move.perception_ids:
                 perceptions.append(
                     (
@@ -44,15 +43,16 @@ class AccountDebitNote(models.TransientModel):
                         },
                     )
                 )
-            res.update(
-                {
-                    # 'address_shipping_id': move.address_shipping_id.id,
-                    'perception_ids': perceptions,
-                    'associated_inv_ids': [move.id],
-                    'currency_id': move.currency_id.id,
-                    'currency_rate': move.currency_rate,
-                    'is_multi_currency': move.is_multi_currency,
-                }
-            )
+        res.update(
+            {
+                'is_debit_note': True,
+                # 'address_shipping_id': move.address_shipping_id.id,
+                'perception_ids': perceptions,
+                'associated_inv_ids': [move.id],
+                'currency_id': move.currency_id.id,
+                'currency_rate': move.currency_rate,
+                'is_multi_currency': move.is_multi_currency,
+            }
+        )
 
         return res
