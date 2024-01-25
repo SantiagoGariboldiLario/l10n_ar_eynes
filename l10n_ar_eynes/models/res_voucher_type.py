@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import fields, models
 
 
 class ResVoucherType(models.Model):
@@ -22,6 +22,7 @@ class ResVoucherType(models.Model):
             ("e", "E"),
             ("m", "M"),
             ('oc', 'OC'),
+            ('ana', 'ANA'),
         ],
         required=True,
     )
