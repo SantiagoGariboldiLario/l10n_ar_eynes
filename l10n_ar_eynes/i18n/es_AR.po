@@ -875,7 +875,7 @@ msgstr "Importe en moenda secundaria"
 msgid ""
 "Amount total must be greater than amount taxed on Invoice ID %(inv_id)s"
 msgstr ""
-"El monto total debe ser mayor que el monto gravado en el ID de factura %(inv_id)"
+"El monto total debe ser mayor que el monto gravado en el ID de factura %(inv_id)s"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -1708,7 +1708,7 @@ msgstr "¡Error! No puedes eliminar un tercer cheque que no esté en la cartera"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__check_sit_iibb
 msgid "Check IIBB Situation"
-msgstr "Situación de IIBB del cheque"
+msgstr "Chequeo de situación de IIBB"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__number
@@ -7086,14 +7086,14 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "The Vat does not seems to be correct."
-msgstr "El IVA no parece ser correcto."
+msgstr "El NIF no parece ser correcto."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "The Vat only supports numbers."
-msgstr "El IVA solo admite números."
+msgstr "El NIF solo admite números."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_wsaa_config_company_uniq

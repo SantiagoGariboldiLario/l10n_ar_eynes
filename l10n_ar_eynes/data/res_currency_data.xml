@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Currencies -->
+    <record id="base.USD" model="res.currency">
+        <field name="symbol">U$S</field>
+    </record>
+</odoo>

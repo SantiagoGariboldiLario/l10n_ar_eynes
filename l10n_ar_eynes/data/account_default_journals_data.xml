@@ -31,4 +31,11 @@
         <field name="code">MISC</field>
     </record>
 
+    <record id="rejected_issued_checks_journal" model="account.journal">
+        <field name="name">Rejected issued checks</field>
+        <field name="type">rejected_issued_checks</field>
+        <field name="code">CHR</field>
+    </record>
+
+
 </odoo>

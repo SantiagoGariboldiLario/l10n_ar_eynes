@@ -129,4 +129,17 @@
         <field name="active">0</field>
     </record>
 
+    <record id="fiscal_position_a" model="account.fiscal.position" forcecreate="0">
+        <field name="name">Aduana</field>
+    </record>
+
+    <record id="fiscal_position_m" model="account.fiscal.position" forcecreate="0">
+        <field name="name">M</field>
+    </record>
+
+    <record id="fiscal_position_l" model="account.fiscal.position" forcecreate="0">
+        <field name="name">Leyenda</field>
+    </record>
+
+
 </odoo>
