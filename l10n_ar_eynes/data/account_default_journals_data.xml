@@ -31,10 +31,4 @@
         <field name="code">MISC</field>
     </record>
 
-    <record id="manual_moves_journal" model="account.journal">
-        <field name="name">Operaciones Manuales</field>
-        <field name="type">general</field>
-        <field name="code">MISC</field>
-    </record>
-
 </odoo>
