@@ -37,8 +37,16 @@ class PurchaseOrder(models.Model):
         invoice_vals['currency_rate'] = currency_rate
         return invoice_vals
 
-    def action_view_invoice(self, moves):
-        res = super(PurchaseOrder, self).action_view_invoice(moves)
-        for invoice in moves:
+    def action_view_invoice(self, invoices=False):
+        res = super(PurchaseOrder, self).action_view_invoice(invoices=invoices)
+        if not invoices:
+            # Invoice_ids may be filtered depending on the user. To ensure we get all
+            # invoices related to the purchase order, we read them in sudo to fill the
+            # cache.
+            self.sudo()._read(['invoice_ids'])
+            invoices = self.invoice_ids
+
+        for invoice in invoices:
             invoice._onchange_currency_id()
+
         return res
