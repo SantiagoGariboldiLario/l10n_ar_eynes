@@ -188,4 +188,26 @@
 
         </field>
     </record>
+
+    <record id="account.action_account_journal_form" model="ir.actions.act_window">
+        <field name="name">Journals</field>
+        <field name="res_model">account.journal</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('account.view_account_journal_tree')}),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('account.account_journal_view_kanban')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('account.view_account_journal_form')})]"
+        />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            Add a journal
+            </p><p>
+            A journal is used to record transactions of all accounting data
+            related to the day-to-day business.
+            </p>
+        </field>
+        <field name="domain">[('type', 'not in', ('perceptions', 'retentions'))]</field>
+    </record>
 </odoo>
