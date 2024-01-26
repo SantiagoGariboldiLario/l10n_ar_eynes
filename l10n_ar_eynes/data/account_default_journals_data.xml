@@ -25,7 +25,7 @@
         <field name="code">DIFCAM</field>
     </record>
 
-    <record id="manual_moves_journal" model="account.journal">
+    <record id="manual_moves_journal" model="account.journal" forcecreate="False">
         <field name="name">Operaciones Manuales</field>
         <field name="type">general</field>
         <field name="code">MISC</field>
