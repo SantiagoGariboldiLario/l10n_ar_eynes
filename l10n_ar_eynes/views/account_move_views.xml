@@ -440,6 +440,7 @@
         <field name="arch" type="xml">
             <field name="name" position="before">
                 <field name="denomination" />
+                <field name="voucher_type_id" />
             </field>
         </field>
     </record>
