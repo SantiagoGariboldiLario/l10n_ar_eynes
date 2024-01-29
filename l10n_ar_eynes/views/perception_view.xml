@@ -72,11 +72,7 @@
                 <field name="code" select="1" />
                 <field name="type" select="1" />
                 <field name="name" select="1" />
-                <field
-                    name="company_id"
-                    groups="base.group_multi_company"
-                    options="{'no_create': True}"
-                />
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" />
                 <separator string="Notes" colspan="4" />
                 <field name="notes" colspan="4" nolabel="1" />
             </form>
@@ -92,11 +88,7 @@
                 <field name="code" />
                 <field name="type" />
                 <field name="name" />
-                <field
-                    name="company_id"
-                    groups="base.group_multi_company"
-                    options="{'no_create': True}"
-                />
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" />
             </tree>
         </field>
     </record>
@@ -169,13 +161,13 @@
         <field name="name">Supported perceptions</field>
         <field name="res_model">perception.tax.line</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('perception_id.type_tax_use', '=', 'sale')]</field>
+        <field name="domain">[('perception_id.type_tax_use', '=', 'purchase')]</field>
     </record>
 
     <record id="applied_perceptions_action" model="ir.actions.act_window">
         <field name="name">Applied perceptions</field>
         <field name="res_model">perception.tax.line</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('perception_id.type_tax_use', '=', 'purchase')]</field>
+        <field name="domain">[('perception_id.type_tax_use', '=', 'sale')]</field>
     </record>
 </odoo>
