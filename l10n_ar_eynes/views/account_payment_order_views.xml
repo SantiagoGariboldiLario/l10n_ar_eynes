@@ -238,6 +238,7 @@
                                             'readonly': [('move_line_id', '!=', False)]}"
                                         options="{'no_quick_create': True, 'no_create_edit': True}"
                                     />
+                                    <field name="voucher_type_id" />
                                     <field name="ref" readonly="1" force_save="True" />
                                     <field
                                         name="move_line_id"
@@ -346,6 +347,7 @@
                                         'readonly': [('move_line_id', '!=', False)]}"
                                         options="{'no_quick_create': True, 'no_create_edit': True}"
                                     />
+                                    <field name="voucher_type_id" />
                                     <field name="ref" attrs="{'readonly': True}" force_save="True" />
                                     <field
                                         name="move_line_id"
@@ -891,6 +893,7 @@
                                         'readonly': [('move_line_id', '!=', False)]}"
                                         options="{'no_quick_create': True, 'no_create_edit': True}"
                                     />
+                                    <field name="voucher_type_id" />
                                     <field name="ref" readonly="1" force_save="True" />
                                     <field
                                         name="move_line_id"
@@ -999,6 +1002,7 @@
                                             'readonly': [('move_line_id', '!=', False)]}"
                                         options="{'no_quick_create': True, 'no_create_edit': True}"
                                     />
+                                    <field name="voucher_type_id" />
                                     <field name="ref" attrs="{'readonly': True}" force_save="True" />
                                     <field
                                         name="move_line_id"

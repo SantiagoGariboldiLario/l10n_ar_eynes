@@ -2098,6 +2098,7 @@ class AccountPaymentOrderLine(models.Model):
         string='State', related='payment_order_id.state', readonly=True
     )
     ref = fields.Char(string='Reference', size=64)
+    voucher_type_id = fields.Many2one(related='move_invoice_id.voucher_type_id')
 
     # @api.onchange('amount')
     # def onchange_amount(self):
