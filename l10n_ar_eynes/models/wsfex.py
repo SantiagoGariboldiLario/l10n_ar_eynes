@@ -370,12 +370,12 @@ class WsfexConfig(models.Model):
         else:
             result = ws.GetParamPtosVenta(sep=SEPARATOR)
             for vat_data in result:
-                code, name, blocked, to_date = vat_data.split(SEPARATOR)
+                code, blocked, to_date = vat_data.split(SEPARATOR)
                 blocked = blocked.split(":")[1]
                 to_date = to_date.split(":")[1]
                 vals = {
                     'code': code,
-                    'name': name,
+                    'name': code,
                     'blocked': False if blocked == 'N' else True,
                     'to_date': helper.clean_result_date(to_date),
                     'from_afip': True,
