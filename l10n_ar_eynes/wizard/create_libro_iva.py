@@ -1000,23 +1000,23 @@ class LibroIVAExporterWizard(models.TransientModel):
         errors = []
 
         # SALES:
-        # invoice_ids = self.env['account.move'].search(
-        #     [
-        #         ('date', '>=', self.date_from),
-        #         ('date', '<=', self.date_to),
-        #         ('state', 'in', ('posted', 'paid')),
-        #         ('move_type', 'in', ('out_invoice', 'out_refund')),
-        #         ('company_id', '=', self.company_id.id),
-        #     ]
-        # )
-        # sale_errors = self.create_sales_voucher_file(invoice_ids)
-        # for sale_error in sale_errors:
-        #     if len(sale_error) > 1:
-        #         errors.extend(sale_error)
-        # if (
-        #     len(sale_errors) > 2
-        # ):  # sale_errors expects len == 2, sales and aliquot
-        #     errors.extend(sale_errors)
+        invoice_ids = self.env['account.move'].search(
+            [
+                ('date', '>=', self.date_from),
+                ('date', '<=', self.date_to),
+                ('state', 'in', ('posted', 'paid')),
+                ('move_type', 'in', ('out_invoice', 'out_refund')),
+                ('company_id', '=', self.company_id.id),
+            ]
+        )
+        sale_errors = self.create_sales_voucher_file(invoice_ids)
+        for sale_error in sale_errors:
+            if len(sale_error) > 1:
+                errors.extend(sale_error)
+        if (
+            len(sale_errors) > 2
+        ):  # sale_errors expects len == 2, sales and aliquot
+            errors.extend(sale_errors)
 
         # PURCHASES:
         invoice_purchase_ids = self.env['account.move'].search(
