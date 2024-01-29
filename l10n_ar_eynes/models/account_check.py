@@ -50,7 +50,6 @@ class AccountCheckConfig(models.Model):
         required=True,
     )
 
-
     def name_get(self):
         ret = []
         for config in self:
