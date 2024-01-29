@@ -124,12 +124,25 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
             date = False
             errors.append(
-                _('Invoice with id %s: Wrong invoice_date') % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['account.move']
+                    ._fields['invoice_date']
+                    .string,
+                )
             )
         return date
 
     def _get_invoice_voucher_type(self, invoice, errors):
         try:
+            if not invoice.voucher_type_id:
+                raise ValueError('User must enter voucher type')
             voucher_type = '%.3s' % str(
                 invoice.voucher_type_id.afip_code
             ).rjust(3, '0')
@@ -139,7 +152,18 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
             voucher_type = False
             errors.append(
-                _('Invoice with id %s: Wrong voucher_type_id') % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s in Voucher Type or it is not selected',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['res.voucher.type']
+                    ._fields['afip_code']
+                    .string,
+                )
             )
         return voucher_type
 
@@ -162,8 +186,16 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
             pos = False
             errors.append(
-                _('Invoice with id %s: Wrong account_move.journal_id.code')
-                % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s in Journal',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['account.journal']._fields['code'].string,
+                )
             )
         return pos
 
@@ -190,7 +222,18 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
             internal_number_formatted = False
             errors.append(
-                _('Invoice with id %s: Wrong internal_number') % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['account.move']
+                    ._fields['internal_number']
+                    .string,
+                )
             )
         return internal_number_formatted, internal_number_formatted_aux
 
@@ -206,8 +249,18 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
             partner_document_type = False
             errors.append(
-                _('Invoice with id %s: Wrong partner_id.document_type_id')
-                % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s in Partner',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['res.partner']
+                    ._fields['document_type_id']
+                    .string,
+                )
             )
         return partner_document_type
 
@@ -220,7 +273,16 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
             partner_vat = False
             errors.append(
-                _('Invoice with id %s: Wrong partner_id.vat') % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s in Partner',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['res.partner']._fields['vat'].string,
+                )
             )
         return partner_vat
 
@@ -233,7 +295,16 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
             partner_name = False
             errors.append(
-                _('Invoice with id %s: Wrong partner_id.name') % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s in Partner',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['res.partner']._fields['name'].string,
+                )
             )
         return partner_name
 
@@ -289,7 +360,18 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
             currency_code = False
             errors.append(
-                _('Invoice with id %s: Wrong currency_id') % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['account.move']
+                    ._fields['currency_id']
+                    .string,
+                )
             )
         return currency_code
 
@@ -307,7 +389,18 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
             currency_rate = False
             errors.append(
-                _('Invoice with id %s: Wrong currency_rate') % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['account.move']
+                    ._fields['currency_rate']
+                    .string,
+                )
             )
         return currency_rate
 
@@ -377,8 +470,18 @@ class LibroIVAExporterWizard(models.TransientModel):
                 % ('account_move_line.tax_base_amount', e)
             )
             errors.append(
-                _('Invoice with id %s: Wrong account_move_line.base')
-                % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s in account move line',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['account.move.line']
+                    ._fields['tax_base_amount']
+                    .string,
+                )
             )
 
         try:
@@ -390,8 +493,18 @@ class LibroIVAExporterWizard(models.TransientModel):
                 'Error on field %s: %s' % ('account_move_line.price_unit', e)
             )
             errors.append(
-                _('Invoice with id %s: Wrong account_move_line.price_unit')
-                % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s in account move line',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['account.move.line']
+                    ._fields['price_unit']
+                    .string,
+                )
             )
 
         line = [
@@ -435,7 +548,18 @@ class LibroIVAExporterWizard(models.TransientModel):
                 import_clearance = False
             import_clearance = '%.16s' % ''.ljust(16, ' ')
             errors.append(
-                _('Invoice with id %s: Wrong import clearance') % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['account.move']
+                    ._fields['import_clearance']
+                    .string,
+                )
             )
 
         if invoice.iva_digital_operation_code in ['X', 'Z']:
@@ -503,8 +627,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         )
         try:
             if (
-                invoice.denomination in ['E']
-                and invoice.voucher_type_id.afip_code in [20, 21]
+                invoice.denomination in ['E'] and voucher_type in ['020', '021']
             ) or (
                 invoice.move_type == 'out_refund'
                 or (
@@ -520,7 +643,18 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
             date_due = False
             errors.append(
-                _('Invoice with id %s: Wrong invoice_date_due') % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['account.move']
+                    ._fields['invoice_date_due']
+                    .string,
+                )
             )
 
         line = [
@@ -617,7 +751,18 @@ class LibroIVAExporterWizard(models.TransientModel):
                 import_clearance = False
             import_clearance = '%.16s' % ''.ljust(16, ' ')
             errors.append(
-                _('Invoice with id %s: Wrong import clearance') % invoice.id
+                _(
+                    'Invoice %(name)s of %(type)s: Wrong %(field)s',
+                    name=invoice.name,
+                    type=(
+                        _('suppliers')
+                        if invoice.move_type.startswith('in_')
+                        else _('customers')
+                    ),
+                    field=self.env['account.move']
+                    ._fields['import_clearance']
+                    .string,
+                )
             )
 
         amount_iva = self._get_perception_with_type_iva(invoice)
@@ -871,7 +1016,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         if (
             len(sale_errors) > 2
         ):  # sale_errors expects len == 2, sales and aliquot
-            errors.extend(sale_errors[0])
+            errors.extend(sale_errors)
 
         # PURCHASES:
         invoice_purchase_ids = self.env['account.move'].search(
@@ -888,7 +1033,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         )
         for purchase_error in purchase_errors:
             if len(purchase_error) > 1:
-                errors.extend(purchase_error[1])
+                errors.extend(purchase_error)
 
         if errors:
             self.write({'notes': '\n'.join(errors)})
