@@ -13,7 +13,7 @@
         <field name="code">APECIE</field>
     </record>
 
-    <record id="deferred_checks_journal" model="account.journal">
+    <record id="deferred_checks_journal" model="account.journal" forcecreate="False">
         <field name="name">Operaciones de Acreditación de Cheques Diferidos</field>
         <field name="type">general</field>
         <field name="code">CHQDIF</field>
