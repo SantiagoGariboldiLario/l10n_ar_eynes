@@ -95,6 +95,13 @@
                 </attribute>
             </xpath>
 
+            <xpath expr="//field[@name='partner_bank_id']" position="after">
+                <field
+                    name="disable_perceptions"
+                    attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))]}"
+                />
+            </xpath>
+
             <xpath expr="//field[@name='invoice_incoterm_id']" position="attributes">
                 <attribute name="attrs">
                     {
