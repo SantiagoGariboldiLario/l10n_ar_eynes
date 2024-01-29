@@ -44,6 +44,13 @@ class AccountCheckConfig(models.Model):
         default=lambda self: self.env.user.company_id.id,
     )
 
+    rejected_issued_checks_journal_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Rejected Issued Checks Journal',
+        required=True,
+    )
+
+
     def name_get(self):
         ret = []
         for config in self:
