@@ -16,7 +16,7 @@ class AccountMove(models.Model):
                 lambda x: partner_fiscal_position in x.fiscal_position_ids
             )
         else:
-            pos_line = self.env['ws.pos'].search(
+            pos_line = self.env['ws.pos.line'].search(
                 [
                     ('journal_id', 'in', pos_config.invoice_journal_ids.ids),
                     (
