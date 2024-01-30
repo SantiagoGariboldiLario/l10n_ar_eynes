@@ -691,6 +691,13 @@
                         string="Set to Draft"
                         invisible="context.get('line_type', False)"
                     />
+                    <button
+                        name="send_email"
+                        string="Send by e-mail"
+                        type="object"
+                        states="posted"
+                        class="oe_highlight"
+                    />
                     <field
                         name="state"
                         widget="statusbar"
@@ -1377,15 +1384,4 @@
         parent="account.menu_finance_payables"
         sequence="4"
     />
-
-    <record model="ir.actions.server" id="send_payment_order_by_email_action">
-       <field name="name">Send payment order by email</field>
-       <field name="model_id" ref="model_account_payment_order" />
-       <field name="binding_model_id" ref="model_account_payment_order" />
-       <field name="binding_view_types">form</field>
-       <field name="state">code</field>
-       <field name="code">
-           action = records.send_email()
-       </field>
-   </record>
 </odoo>
