@@ -1977,7 +1977,7 @@ class AccountPaymentOrder(models.Model):
         if retention_certificate_pdf:
             attachments.append(retention_certificate_pdf.id)
 
-        ctx = self.env.context
+        ctx = self.env.context.copy()
         ctx.update(
             {
                 'default_use_template': bool(template.id),
