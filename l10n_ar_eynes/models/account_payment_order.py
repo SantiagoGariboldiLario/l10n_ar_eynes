@@ -1888,10 +1888,15 @@ class AccountPaymentOrder(models.Model):
             # Cancelamos los cheques emitidos
             issued_checks = voucher.issued_check_ids
             issued_checks.cancel_check(internal_type='issued')
+
+            voucher.retention_ids.write(
+                {
+                    'unlinkable': True,
+                }
+            )
         return True
 
     def action_cancel_draft(self):
-        self._check_retentions_unlinkable()
         for voucher in self:
             # A draft los cheques emitidos
             issued_checks = voucher.issued_check_ids
@@ -2669,6 +2674,16 @@ class AccountPaymentOrderRetentionLine(models.Model):
         rl_partner_name = self.partner_id.name or 'Undefined'
         name = u"RTL(#{})[{}-{}]".format(rl_id, rl_name, rl_partner_name)
         return name
+
+    def unlink(self):
+        if self.filtered(lambda rec: not rec.unlinkable):
+            raise UserError(
+                _("You can't delete a retention of a Posted Payment Order")
+            )
+        payment_orders = self.mapped('payment_order_id')
+        res = super(AccountPaymentOrderRetentionLine, self).unlink()
+        payment_orders._onchange_retentions()
+        return res
 
 
 class RetentionMoveLine(models.Model):
