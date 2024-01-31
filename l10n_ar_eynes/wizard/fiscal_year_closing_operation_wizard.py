@@ -485,11 +485,11 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
 
         return move.id
 
-    def get_coefficient(self, date_from, date_to, special=False):
+    def get_coefficient(self, date_from, date_to, fiscal_year, special=False):
         InflationIndex = self.env['inflation.index']
 
         inflation_indexes = InflationIndex.search(
-            [('date', '>=', date_from), ('date', '<=', date_to)],
+            [('date', '>=', date_from), ('date', '<=', fiscal_year.date_to)],
             order='date ASC',
         )
         if not inflation_indexes:
@@ -500,8 +500,9 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
             raise ValidationError(msg)
 
         date_lst = inflation_indexes.mapped('date')
-        last_date = date_lst[-1]
-        base_reg = inflation_indexes.filtered(lambda x: x.date == last_date)[0]
+        base_reg = inflation_indexes.filtered(lambda x: x.date == date_lst[-1])[
+            0
+        ]  # Last index of Fiscal Year
         target_reg = inflation_indexes.filtered(
             lambda r: r.date <= date_to and r.date >= date_from
         )
@@ -526,7 +527,9 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         coefficient = base_coeff / current_coeff
         return coefficient
 
-    def get_accounts_by_period(self, date_from, date_to, coefficient=0):
+    def get_accounts_by_period(
+        self, date_from, date_to, fiscal_year, coefficient=0
+    ):
         query = """
             SELECT mvl.account_id, SUM(mvl.debit - mvl.credit) * (%(coefficient)s-1) AS amount
             FROM account_move_line AS mvl
@@ -536,7 +539,7 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
             GROUP BY mvl.account_id;
         """
         if not coefficient:
-            coefficient = self.get_coefficient(date_from, date_to)
+            coefficient = self.get_coefficient(date_from, date_to, fiscal_year)
         vals = {'coefficient': coefficient}
         self.env.cr.execute(query, vals)
         res = self.env.cr.dictfetchall()
@@ -581,7 +584,7 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
 
         for period in periods:
             vals = self.get_accounts_by_period(
-                period['date_from'], period['date_to']
+                period['date_from'], period['date_to'], closing_fiscalyear
             )
             for line_vals in vals:
                 account_id = line_vals.get('account_id')
@@ -594,7 +597,6 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         journal_id = closing.recpam_journal_id.id
         recpam_account_id = closing.recpam_account_id.id
         description = closing.recpam_description
-        date = closing_fiscalyear.date_to
         total_amount = 0.0
         for account_id, amount in account_group.items():
             precision = DecimalPrecision.precision_get('account')
@@ -621,7 +623,7 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         ctx['account_period_prefer_special'] = True
         move.with_context(**ctx).write(
             {
-                'date': date,
+                'date': closing_fiscalyear.date_to,
             }
         )
         return move.id
