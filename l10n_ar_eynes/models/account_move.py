@@ -101,6 +101,7 @@ class AccountMove(models.Model):
         compute='_compute_voucher_type',
         store=True,
     )
+    voucher_type_domain = fields.Char(compute="_compute_voucher_type")
     ws_request_ids = fields.One2many(
         comodel_name='ws.request.detail', inverse_name='invoice_id'
     )
@@ -523,20 +524,6 @@ class AccountMove(models.Model):
         elif self.invoice_date_due and (date_invoice > self.invoice_date_due):
             self.invoice_date_due = date_invoice
 
-    @api.onchange('voucher_type_id')
-    def _onchange_voucher_type_id(self):
-        if (
-            (
-                self.is_purchase_document()
-                or (self.is_sale_document() and self.fiscal_type == 'internal')
-            )
-            and self.voucher_type_id
-            and int(self.voucher_type_id.afip_code) > AFIP_FCE_CODE_START
-        ):
-            self.is_FCE_invoice = True
-        else:
-            self.is_FCE_invoice = False
-
     def _get_refund_common_fields(self):
         res = super(AccountMove, self)._get_refund_common_fields()
         res.append('currency_rate')
@@ -603,35 +590,30 @@ class AccountMove(models.Model):
             pos_code.zfill(4) + '-' + move_code.zfill(8)
         )
 
-    @api.depends('denomination', 'move_type', 'is_debit_note')
+    @api.depends(
+        'denomination', 'move_type', 'is_debit_note', 'invoice_line_ids'
+    )
     def _compute_voucher_type(self):
+        ResVoucherType = self.env['res.voucher.type']
         for inv in self:
+            inv_type = 'b'
+            if inv.move_type.endswith("refund"):
+                inv_type = 'cn'
+            elif inv.is_debit_note:
+                inv_type = 'dn'
+
+            domain = [
+                ('doc_type', '=', inv_type),
+                ('denomination', '=', inv.denomination),
+            ]
+
+            inv.voucher_type_domain = json.dumps(domain)
+
+            res = ResVoucherType.search(domain)
             if inv.is_sale_document():
-                voucher_type_obj = inv.env['res.voucher.type']
-                res = self.env['res.voucher.type']
-
-                inv_type = 'b'
-                if inv.move_type.endswith("refund"):
-                    inv_type = 'cn'
-                elif inv.is_debit_note:
-                    inv_type = 'dn'
-
-                res = voucher_type_obj.search(
-                    [
-                        ('doc_type', '=', inv_type),
-                        ('denomination', '=', inv.denomination),
-                    ]
-                )
-
-                if not len(res):
-                    _logger.warning(
-                        _(
-                            "There is no voucher type that corresponds "
-                            "to this object"
-                        )
-                    )
-
-                if inv.is_FCE_invoice:
+                inv.is_FCE_invoice = False
+                if inv._check_must_be_fce():
+                    inv.is_FCE_invoice = True
                     res = res.filtered(
                         lambda voucher_type: int(voucher_type.afip_code)
                         > AFIP_FCE_CODE_START
@@ -642,15 +624,17 @@ class AccountMove(models.Model):
                         < AFIP_FCE_CODE_START
                     )
 
-                if len(res) > 1:
-                    _logger.warning(
-                        _(
-                            "There is more than one voucher type that "
-                            "corresponds to this object"
-                        )
-                    )
-                else:
+                inv.voucher_type_id = res[0] if res else False
+            if self.is_purchase_document():
+                if len(res) == 1:
                     inv.voucher_type_id = res
+
+    @api.onchange('voucher_type_id')
+    def _compute_is_FCE(self):
+        if self.is_purchase_document():
+            self.is_FCE_invoice = False
+            if int(self.voucher_type_id.afip_code) > AFIP_FCE_CODE_START:
+                self.is_FCE_invoice = True
 
     @api.onchange('invoice_date')
     def _onchange_invoice_date(self):
@@ -1258,17 +1242,6 @@ class AccountMove(models.Model):
                     'The Invoice ID: %s must be of type FCRED' % self.id
                 )
                 return True
-        if self.associated_inv_ids:
-            associated_type = self.associated_inv_ids.mapped('is_FCE_invoice')
-            if len(associated_type) > 1:
-                raise UserError(
-                    _(
-                        """
-                        You can't associate FCE and non-FCE invoices to the same voucher.
-                        """
-                    )
-                )
-            return associated_type[0]
         return False
 
     def _ensure_fce_values(self):
@@ -1276,8 +1249,19 @@ class AccountMove(models.Model):
         If invoice must be of type FCE, ensure certain values are set.
         """
         # Ensure Fiscal Type FCE
-        self.is_FCE_invoice = True
-        self._compute_voucher_type()
+        # self.is_FCE_invoice = True
+
+        # if self.associated_inv_ids:
+        #     associated_type = self.associated_inv_ids.mapped('is_FCE_invoice')
+        #     if len(associated_type) > 1:
+        #         raise UserError(
+        #             _(
+        #                 """
+        #                 You can't associate FCE and non-FCE invoices to the same voucher.
+        #                 """
+        #             )
+        #         )
+
         conf = self._get_ws_conf()
         set_optionals = True
         if self.is_debit_note or self.move_type == 'out_refund':
