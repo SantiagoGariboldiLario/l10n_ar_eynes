@@ -1,7 +1,7 @@
 import logging
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -441,7 +441,7 @@ class AccountJournal(models.Model):
                 )
             ).state_id.id
             if not partner_state:
-                raise RetentionError(
+                raise UserError(
                     _(
                         'There is no State/Province configured for '
                         f'the Supplier while computing Retention: {self.name}'
@@ -457,7 +457,7 @@ class AccountJournal(models.Model):
             ).state_id.id
 
             if not partner_state:
-                raise RetentionError(
+                raise UserError(
                     _('There is no State/Province configured for this Company')
                 )
         # Hacemos el chequeo de los states
@@ -813,14 +813,3 @@ class AccountJournal(models.Model):
             'state_id': self.state_id and self.state_id.id or False,
             'partner_id': invoice.partner_id.id if invoice else False,
         }
-
-
-class RetentionError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return self.msg
-
-    def __repr__(self):
-        return self.__str__()
