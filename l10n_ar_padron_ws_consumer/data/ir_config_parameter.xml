@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+
+    <record id="url_padron" model="ir.config_parameter" forcecreate="False">
+        <field name="key">padron_url</field>
+        <field name="value">
+            https://l10n-v15-testing.staging.eynes.com.ar/web/get_padron_data
+        </field>
+    </record>
+
+</odoo>

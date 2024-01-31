@@ -61,6 +61,7 @@ class AccountJournal(models.Model):
             ("e", "E"),
             ('m', 'M'),
             ('oc', 'OC'),
+            ('ana', 'ANA'),
             ("not_defined", "Not Defined"),
         ],
         string='Denomination',
@@ -103,6 +104,7 @@ class AccountJournal(models.Model):
             ('receipt', 'Receipt'),
             ('payment', 'Payment'),
             ('third_party_checks', 'Third party checks'),
+            ('rejected_issued_checks', 'Rejected issued checks'),
             ('retentions', 'Retentions'),
             ('perceptions', 'Perceptions'),
         ],
@@ -110,6 +112,9 @@ class AccountJournal(models.Model):
             'receipt': lambda recs: recs.write({'type': 'general'}),
             'payment': lambda recs: recs.write({'type': 'general'}),
             'third_party_checks': lambda recs: recs.write({'type': 'general'}),
+            'rejected_issued_checks': lambda recs: recs.write(
+                {'type': 'general'}
+            ),
             'retentions': lambda recs: recs.write({'type': 'general'}),
             'perceptions': lambda recs: recs.write({'type': 'general'}),
         },

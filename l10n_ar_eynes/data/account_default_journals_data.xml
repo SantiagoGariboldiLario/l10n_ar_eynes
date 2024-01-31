@@ -2,9 +2,40 @@
 <odoo noupdate="1">
 
     <record id="third_party_checks_journal" model="account.journal">
-        <field name="name">Third party checks</field>
+        <field name="name">Cheques de Tercero</field>
         <field name="type">third_party_checks</field>
         <field name="code">CHQ</field>
     </record>
+
+    <record id="open_close_journal" model="account.journal">
+        <field name="name">Operaciones de Apertura/Cierre de Ejercicio</field>
+        <field name="type">general</field>
+        <field name="code">APECIE</field>
+    </record>
+
+    <record id="deferred_checks_journal" model="account.journal" forcecreate="False">
+        <field name="name">Operaciones de Acreditación de Cheques Diferidos</field>
+        <field name="type">general</field>
+        <field name="code">CHQDIF</field>
+    </record>
+
+    <record id="currency_difference_journal" model="account.journal">
+        <field name="name">Operaciones de Diferencia de Cambio</field>
+        <field name="type">general</field>
+        <field name="code">DIFCAM</field>
+    </record>
+
+    <record id="manual_moves_journal" model="account.journal" forcecreate="False">
+        <field name="name">Operaciones Manuales</field>
+        <field name="type">general</field>
+        <field name="code">MISC</field>
+    </record>
+
+    <record id="rejected_issued_checks_journal" model="account.journal">
+        <field name="name">Rejected issued checks</field>
+        <field name="type">rejected_issued_checks</field>
+        <field name="code">CHR</field>
+    </record>
+
 
 </odoo>

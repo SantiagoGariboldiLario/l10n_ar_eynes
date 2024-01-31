@@ -244,7 +244,7 @@ class ResPartner(models.Model):
             self.dst_cuit_id = False
 
     def write(self, vals):
-        self.check_vat_string(vals, write=True)
+        vals = self._parse_vat_string(vals)
         if vals.get('gross_income_ids'):
             for rec in vals.get('gross_income_ids'):
                 if not rec[-1].get('type_taxpayer'):
@@ -257,7 +257,7 @@ class ResPartner(models.Model):
 
     @api.model
     def create(self, vals):
-        self.check_vat_string(vals)
+        vals = self._parse_vat_string(vals)
         if vals.get('gross_income_ids'):
             for rec in vals.get('gross_income_ids'):
                 if not rec[-1].get('type_taxpayer'):
@@ -268,29 +268,12 @@ class ResPartner(models.Model):
                     )
         return super(ResPartner, self).create(vals)
 
-    def check_vat_string(self, vals, write=False):
-        vat = vals.get("vat")
-        if not vat:
-            return False
-        ci_extranjera = self.env.ref('l10n_ar_eynes.document_ci_extranjera')
-        pasaporte = self.env.ref('l10n_ar_eynes.document_pasaporte')
-        if write:
-            if [
-                x
-                for x in self
-                if x.document_type_id not in [ci_extranjera, pasaporte]
-            ]:
-                vat = vat.replace('.', '').replace('-', '')
-                if not vat.isdigit():
-                    raise ValidationError(_('The Vat only supports numbers.'))
-                vals['vat'] = vat
-        else:
-            if vals.get('document_type_id') not in [ci_extranjera, pasaporte]:
-                vat = vat.replace('.', '').replace('-', '')
-                if not vat.isdigit():
-                    raise ValidationError(_('The Vat only supports numbers.'))
-                vals['vat'] = vat
-        return False
+    def _parse_vat_string(self, vals):
+        vat = vals.get('vat')
+        if vat:
+            vat = vat.replace('.', '').replace('-', '')
+            vals['vat'] = vat
+        return vals
 
     @api.constrains('vat', 'country_id', 'document_type_id')
     def check_vat(self):
@@ -300,31 +283,31 @@ class ResPartner(models.Model):
         for partner in self:
             if not partner.vat:
                 continue
-            if partner.country_id:
-                vat_country = partner.country_id.code.lower()
-                vat_number = partner.vat
-            else:
-                try:
-                    int(partner.vat[:2].lower())
-                    vat_country = 'ar'
-                    vat_number = partner.vat
-                except ValueError:
-                    vat_country, vat_number = partner.vat[
-                        :2
-                    ].lower(), partner.vat[2:].replace(' ', '')
+
             if not partner.document_type_id:
                 return True
-            if (
-                partner.document_type_id
-                and not partner.document_type_id.sudo().verification_required
+
+            if not partner.document_type_id.sudo().verification_required:
+                return True
+
+            country = self.env.ref('base.ar')
+            vat_number = partner.vat
+            if partner.document_type_id == self.sudo().env.ref(
+                'l10n_ar_eynes.document_cuit_country'
             ):
+                country = partner.country_id
+            country_code = country.code.lower()
+
+            if not hasattr(partner, 'check_vat_' + country_code):
                 return True
-            if not hasattr(partner, 'check_vat_' + vat_country):
-                return True
-            check = getattr(partner, 'check_vat_' + vat_country)
+            check = getattr(partner, 'check_vat_' + country_code)
             if not check(vat_number):
                 raise ValidationError(
-                    _('The Vat does not seems to be correct.')
+                    _(
+                        'The %(doc_type)s does not seems to be correct for %(country)s.',
+                        doc_type=partner.document_type_id.sudo().name,
+                        country=country.name,
+                    )
                 )
         return True
 

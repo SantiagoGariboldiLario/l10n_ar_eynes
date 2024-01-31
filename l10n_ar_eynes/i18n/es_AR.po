@@ -134,6 +134,33 @@ msgid ""
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#, python-format
+msgid ""
+"\n"
+"Purchase File Errors\n"
+"================\n"
+msgstr "Errores en el archivo de COMPRAS"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#, python-format
+msgid ""
+"\n"
+"Sale Aliquot File Errors\n"
+"================\n"
+msgstr "Errores en el archivo de ALICUOTAS VENTAS"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#, python-format
+msgid ""
+"\n"
+"Sale File Errors\n"
+"================\n"
+msgstr "Errores en el archivo de VENTAS"
+
+#. module: l10n_ar_eynes
 #: model:mail.template,body_html:l10n_ar_eynes.mail_template_data_payment_order
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
@@ -875,7 +902,7 @@ msgstr "Importe en moenda secundaria"
 msgid ""
 "Amount total must be greater than amount taxed on Invoice ID %(inv_id)s"
 msgstr ""
-"El monto total debe ser mayor que el monto gravado en el ID de factura %(inv_id)"
+"El monto total debe ser mayor que el monto gravado en el ID de factura %(inv_id)s"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -1496,6 +1523,7 @@ msgstr "No se puede romper la conciliación de un cheque no emitido!"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.certificate_renewal_wizard
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.create_checkbook_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.key_renewal_wizard
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_iva_exporter_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.reject_issued_check_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.reject_third_party_check_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_generator_view
@@ -1708,7 +1736,7 @@ msgstr "¡Error! No puedes eliminar un tercer cheque que no esté en la cartera"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__check_sit_iibb
 msgid "Check IIBB Situation"
-msgstr "Situación de IIBB del cheque"
+msgstr "Chequeo de situación de IIBB"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__number
@@ -1962,6 +1990,7 @@ msgstr "Compañías"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_retention_line__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax_subjournal__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__company_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_activity__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_concept__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__company_id
@@ -2523,8 +2552,10 @@ msgstr "Fecha aplicada"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_perception_exporter_wizard__date_from
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_retention_exporter_wizard__date_from
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arciba_generated_files__date_from
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__date_from
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_libroiva_generated_files__date_from
 msgid "Date From"
-msgstr "Fecha de"
+msgstr "Fecha desde"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__date_invoice
@@ -2553,6 +2584,8 @@ msgstr "Fecha de parada"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_perception_exporter_wizard__date_to
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_retention_exporter_wizard__date_to
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arciba_generated_files__date_to
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__date_to
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_libroiva_generated_files__date_to
 msgid "Date To"
 msgstr "Fecha hasta"
 
@@ -3670,6 +3703,7 @@ msgid "Generar"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_iva_exporter_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_generator_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_nc_file
@@ -4043,7 +4077,7 @@ msgstr "En caso de rechazo del tercer cheque."
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__in_wallet
 msgid "In wallet"
-msgstr "En billetera"
+msgstr "En cartera"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_incoterms
@@ -4235,6 +4269,49 @@ msgstr "Facturas y transacciones pendientes"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_account_move_multicurrency_filter
 msgid "Invoices not in company currency"
 msgstr "Facturas que no están en la moneda de la empresa"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#, python-format
+msgid "Invoice %(name)s of %(type)s: Wrong %(field)s"
+msgstr "Factura %(name)s de %(type)s: Campo %(field)s erróneo"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#, python-format
+msgid "Invoice %(name)s of %(type)s: Wrong %(field)s in Journal"
+msgstr "Factura %(name)s de %(type)s: Campo %(field)s erróneo en el Diario"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#, python-format
+msgid "Invoice %(name)s of %(type)s: Wrong %(field)s in Partner"
+msgstr "Factura %(name)s de %(type)s: Campo %(field)s erróneo en el Contacto"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#, python-format
+msgid ""
+"Invoice %(name)s of %(type)s: Wrong %(field)s in Voucher Type or it is not "
+"selected"
+msgstr ""
+"Factura %(name)s de %(type)s: Campo %(field)s erróneo en el Tipo de comprobante o "
+"no ha sido seleccionado"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#, python-format
+msgid "Invoice %(name)s of %(type)s: Wrong %(field)s in account move line"
+msgstr "Factura %(name)s de %(type)s: Campo %(field)s erróneo en la linea contable"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__is_bank_settlement
@@ -4706,6 +4783,29 @@ msgstr "Última actualización por"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_uom_codes__write_date
 msgid "Last Updated on"
 msgstr "Última actualización el"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_export_libro_iva
+#: model:ir.ui.menu,name:l10n_ar_eynes.libroiva_exporter_menu
+#, python-format
+msgid "Libro IVA Digital Exporter"
+msgstr "Exportador Libro IVA Digital"
+
+#. module: l10n_ar_eynes
+#: model:ir.model,name:l10n_ar_eynes.model_libro_iva_exporter_wizard
+msgid "Libro IVA Digital Exporter Wizard"
+msgstr "Asistente para Exportador Libro IVA Digital"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_libro_iva.py:0
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_libro_IVA_generated_files
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_libroiva_generated_files
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_iva_generated_files_form_view
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_iva_generated_files_tree_view
+#, python-format
+msgid "Libro IVA generated files"
+msgstr "Archivos generados para Libro IVA"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale_line__limit
@@ -7086,14 +7186,14 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "The Vat does not seems to be correct."
-msgstr "El IVA no parece ser correcto."
+msgstr "El NIF no parece ser correcto."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #: code:addons/l10n_ar_eynes/models/res_partner.py:0
 #, python-format
 msgid "The Vat only supports numbers."
-msgstr "El IVA solo admite números."
+msgstr "El NIF solo admite números."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.constraint,message:l10n_ar_eynes.constraint_wsaa_config_company_uniq
@@ -7429,6 +7529,14 @@ msgstr "Este asistente le permite exportar un archivo para SICORE."
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_nc_file
 msgid "This wizard allows you to export a file for arciba."
 msgstr "Este asistente le permite exportar un archivo para Arciba."
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_iva_exporter_view
+msgid ""
+"This wizard allows you to create files to import to AFIP for Libro IVA "
+"Digital."
+msgstr "Este asistente le permite crear los archivos para importar en AFIP"
+"para el Libro IVA Digital"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_validate_account_move
@@ -7810,6 +7918,7 @@ msgid "Validated invoice that not corresponds!"
 msgstr "¡Factura validada que no se corresponde!"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_iva_exporter_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_nc_file
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_sicore_files
@@ -8208,7 +8317,7 @@ msgstr "Códigos de tipo de voucher WSFEX"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_accreditation
 msgid "Waiting accreditation"
-msgstr "Esperando Acreditación"
+msgstr "Esperando débito"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_numeration

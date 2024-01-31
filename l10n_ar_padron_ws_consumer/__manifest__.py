@@ -35,6 +35,7 @@
         'data/cron_data.xml',
         'data/perception_data.xml',
         'data/retention_data.xml',
+        'data/ir_config_parameter.xml',
         'views/account_journal_view.xml',
         'views/res_partner_view.xml',
     ],

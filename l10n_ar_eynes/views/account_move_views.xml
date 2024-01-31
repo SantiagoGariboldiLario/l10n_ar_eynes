@@ -95,6 +95,21 @@
                 </attribute>
             </xpath>
 
+            <xpath expr="//field[@name='partner_bank_id']" position="after">
+                <field
+                    name="disable_perceptions"
+                    attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))]}"
+                />
+            </xpath>
+
+            <xpath expr="//field[@name='invoice_incoterm_id']" position="attributes">
+                <attribute name="attrs">
+                    {
+                    'required': [('local', '=', False), ('move_type', 'in', ('out_invoice', 'out_refund'))]
+                    }
+                </attribute>
+            </xpath>
+
             <div name="journal_div" position="after">
                 <field
                     name="currency_rate"
@@ -315,13 +330,19 @@
                         name="perception_ids"
                         nolabel="1"
                         colspan="4"
-                        context="{'default_partner_id': partner_id}"
+                        context="{'default_partner_id': partner_id, 'default_company_id': company_id}"
                     >
-                        <tree>
-                            <field name="name" />
+                        <tree editable="bottom">
+                            <field name="name" invisible="1" />
                             <field name="partner_id" invisible="1" />
+                            <field name="company_id" invisible="1" />
                             <field name="date" />
-                            <field name="perception_id" string="Perception Type" />
+                            <field name="perception_id_domain" invisible="1" />
+                            <field
+                                name="perception_id"
+                                string="Perception Type"
+                                domain="perception_id_domain"
+                            />
                             <field name="concept_id" />
                             <field name="base" />
                             <field name="amount" />
@@ -335,32 +356,6 @@
                             />
                             <field name="state_id" />
                         </tree>
-                        <form>
-                            <h1>
-                                <field
-                                    name="perception_id"
-                                    class="oe_inline"
-                                    domain="[('type', '=', 'perceptions')]"
-                                />
-                            </h1>
-                            <group>
-                                <group string="Information" name="info">
-                                    <field name="name" />
-                                    <field name="partner_id" invisible="1" />
-                                    <field name="state_id" />
-                                    <field name="date" />
-                                    <span
-                                        string="Keep date empty if the date is the same as the invoice."
-                                        class="oe_grey"
-                                    />
-                                </group>
-                                <group string="Amounts" name="amount">
-                                    <field name="base" />
-                                    <field name="amount" />
-                                    <field name="concept_id" />
-                                </group>
-                            </group>
-                        </form>
                     </field>
                 </page>
 
@@ -432,6 +427,7 @@
         <field name="arch" type="xml">
             <field name="name" position="before">
                 <field name="denomination" />
+                <field name="voucher_type_id" />
             </field>
         </field>
     </record>

@@ -191,9 +191,9 @@ class CreateSicoreFiles(models.TransientModel):
             nro_cert_propio = re.sub('[-]', '', tax_line.certificate_no or '')
             reg_code = (
                 tax_line.reg_code
-                or tax_line.tax_app_id.reg_code
+                or tax_line.taxapp_id.reg_code
                 or tax_line.concept_id.code
-            )
+            )[:3]
             if not reg_code:
                 reg_code = 0
                 # raise UserError(
