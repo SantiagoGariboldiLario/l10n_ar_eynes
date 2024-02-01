@@ -123,10 +123,14 @@ class WsPOSLine(models.Model):
     priority = fields.Integer(related='pos_id.priority')
     to_date = fields.Date(related='pos_id.to_date')
     wsfe_config_id = fields.Many2one(
-        comodel_name='wsfe.config', related='pos_id.wsfe_config_id'
+        comodel_name='wsfe.config',
+        related='pos_id.wsfe_config_id',
+        store="True",
     )
     wsfex_config_id = fields.Many2one(
-        comodel_name='wsfex.config', related='pos_id.wsfex_config_id'
+        comodel_name='wsfex.config',
+        related='pos_id.wsfex_config_id',
+        store="True",
     )
 
     @api.model

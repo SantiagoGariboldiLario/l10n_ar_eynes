@@ -337,6 +337,7 @@ class WsfexConfig(models.Model):
         WsPos = self.env['ws.pos']
         helper = WSFEXParser()
         vals_list = []
+        result = []
         error_msg = ''
         if self.config_id.homologation:
             wsfex_pos = WsPos.search(
@@ -397,7 +398,7 @@ class WsfexConfig(models.Model):
                     record.write(vals)
                 error_msg = helper.parse_errors(ws)
         WsPos.create(vals_list)
-        if len(vals_list) == 0:
+        if len(result) == 0:
             error_msg = (
                 _("Error: this company doesn't have POS for this Webservice.\n")
                 + error_msg
