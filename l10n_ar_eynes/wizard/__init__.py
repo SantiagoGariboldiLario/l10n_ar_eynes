@@ -22,3 +22,7 @@ from . import create_arciba_file  # noqa
 from . import create_libro_iva
 from . import res_partner_afip_padron_wizard  # noqa
 from . import cancel_picking_done
+
+#
+#
+from . import fiscal_year_closing_operation_wizard  # noqa

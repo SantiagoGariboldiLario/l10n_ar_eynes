@@ -1,3 +1,10 @@
+##############################################################################
+#
+#   Copyright (c) 2022-2023 Eynes SRL (Eynes - Ingenieria del software)
+#   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+#
+##############################################################################
+
 from . import account_check  # noqa
 from . import account_fiscal_position  # noqa
 from . import account_journal  # noqa
@@ -41,4 +48,8 @@ from . import sequence_mixin
 from . import libro_iva_generated_files
 from . import ws_padron  # noqa
 from . import gross_income  # noqa
+from . import account  # noqa
+from . import account_mapping_fiscal_year_closing  # noqa
+from . import fiscal_year_closing  # noqa
+from . import inflation_index  # noqa
 from . import purchase
