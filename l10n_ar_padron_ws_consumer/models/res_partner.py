@@ -425,6 +425,7 @@ class ResPartner(models.Model):
         partners = res_partner_obj.search(domain)
         _logger.info('Getting Padron Information')
         if partners:
+            updates = set()
             response = self._get_padron_values(
                 partners, padron_url, padron_name, padron_type
             )
@@ -454,11 +455,22 @@ class ResPartner(models.Model):
                 self._update_partner_retentions(partner_id, retentions)
                 self._update_partner_coeficients(partner_id, coeficients)
                 self._update_partner_ivas(partner_id, ivas)
-
                 partner_id.write(
                     {
                         "last_padron_update": current_period,
                     }
                 )
+                total_updates = perceptions + retentions + coeficients
+                new_values = set([value for value in [value["P"] + " - " + value["M"] for value in total_updates]])
+                updates.update(new_values)
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'type': 'info',
+                    'sticky': True,
+                    'message': ("Se actualizaron los siguientes Padrones: " + " | ".join([value for value in updates])),
+                }
+            }
         else:
             _logger.info(_("No partners to check. All updated."))
