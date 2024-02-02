@@ -56,6 +56,14 @@ Doodba implementation
         merges:
             - origin 15.0
 
+    ./odoomates:
+        remotes:
+            origin: https://github.com/odoomates/odooapps.git
+        merges:
+            - origin 15.0
+        target: origin 15.0
+
+
 ### Add this to addons.yaml:
 
     l10n_ar_eynes:
@@ -68,6 +76,9 @@ Doodba implementation
         - "*"
     otros:
         - "*"
+    odoomates:
+      - "*"
+
 
 ## Other dependencies
 
