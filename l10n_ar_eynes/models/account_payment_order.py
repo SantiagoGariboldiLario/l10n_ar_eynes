@@ -921,13 +921,14 @@ class AccountPaymentOrder(models.Model):
 
     def unlink(self):
         self._check_retentions_unlinkable()
-        if self.state not in ['draft', 'cancel']:
-            raise ValidationError(
-                _(
-                    "Error!\nYou can't unlink a posted payment order.\n"
-                    "First you should unreconcile It."
+        for state in set(self.mapped('state')):
+            if state not in ['draft', 'cancel']:
+                raise ValidationError(
+                    _(
+                        "Error!\nYou can't unlink a posted payment order.\n"
+                        "First you should unreconcile It."
+                    )
                 )
-            )
         for voucher in self:
             if voucher.type == 'receipt':
                 voucher.third_party_check_ids.unlink()
@@ -942,7 +943,7 @@ class AccountPaymentOrder(models.Model):
                     _(
                         "Error!\nVoucher %(voucher_name)s [id: %(voucher_id)s] "
                         "has Unlinkable Retentions:\n%(retentions)s",
-                        voucher_name=voucher.name,
+                        voucher_name=voucher.number,
                         voucher_id=voucher.id,
                         retentions=("\n").join(
                             ["%s [id: %s]" % (r.name, r.id) for r in u_rets]
@@ -1888,10 +1889,15 @@ class AccountPaymentOrder(models.Model):
             # Cancelamos los cheques emitidos
             issued_checks = voucher.issued_check_ids
             issued_checks.cancel_check(internal_type='issued')
+
+            voucher.retention_ids.write(
+                {
+                    'unlinkable': True,
+                }
+            )
         return True
 
     def action_cancel_draft(self):
-        self._check_retentions_unlinkable()
         for voucher in self:
             # A draft los cheques emitidos
             issued_checks = voucher.issued_check_ids
@@ -1977,7 +1983,7 @@ class AccountPaymentOrder(models.Model):
         if retention_certificate_pdf:
             attachments.append(retention_certificate_pdf.id)
 
-        ctx = self.env.context
+        ctx = self.env.context.copy()
         ctx.update(
             {
                 'default_use_template': bool(template.id),
@@ -2669,6 +2675,16 @@ class AccountPaymentOrderRetentionLine(models.Model):
         rl_partner_name = self.partner_id.name or 'Undefined'
         name = u"RTL(#{})[{}-{}]".format(rl_id, rl_name, rl_partner_name)
         return name
+
+    def unlink(self):
+        if self.filtered(lambda rec: not rec.unlinkable):
+            raise UserError(
+                _("You can't delete a retention of a Posted Payment Order")
+            )
+        payment_orders = self.mapped('payment_order_id')
+        res = super(AccountPaymentOrderRetentionLine, self).unlink()
+        payment_orders._onchange_retentions()
+        return res
 
 
 class RetentionMoveLine(models.Model):

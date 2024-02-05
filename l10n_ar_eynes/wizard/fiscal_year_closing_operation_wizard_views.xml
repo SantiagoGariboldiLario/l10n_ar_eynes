@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="fiscal_year_closing_operation_wizard_view" model="ir.ui.view">
+        <field name="name">fiscal.year.closing.operation.wizard.view</field>
+        <field name="model">fiscal.year.closing.operation.wizard</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Fiscal Year Closing">
+                <p>
+                    This wizard will perform the selected operations. It will create account moves
+                    for the operations you select, skipping those already created. Non-selected
+                    operations will be canceled.
+                </p>
+                <footer>
+                    <button string="Run" name="run" type="object" class="btn-primary" colspan="2"/>
+                    <button string="Cancel" special="cancel" colspan="2"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fiscal_year_closing" model="ir.actions.act_window">
+        <field name="name">Fiscal Year Closing Operations</field>
+        <field name="res_model">fiscal.year.closing.operation.wizard</field>
+        <field name="target">new</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_id" ref="fiscal_year_closing_operation_wizard_view"/>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

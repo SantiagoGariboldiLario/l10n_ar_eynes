@@ -3,6 +3,7 @@
 #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 ##############################################################################
 
+import json
 import logging
 
 from odoo import api, fields, models
@@ -61,14 +62,11 @@ class PerceptionTaxLine(models.Model):
     perception_id = fields.Many2one(
         'account.journal',
         string='Perception Configuration',
-        domain=lambda self: [
-            ('type', '=', 'perceptions'),
-            ('company_id', '=', self.env.user.company_id.id),
-        ],
         required=True,
         help="Perception configuration used for this perception tax, "
         "where all the configuration resides. Accounts, Tax Codes, etc.",
     )
+    perception_id_domain = fields.Char(compute='_compute_perception_id_domain')
     base_amount = fields.Float(
         'Base Code Amount',
         digits='Account',
@@ -111,6 +109,22 @@ class PerceptionTaxLine(models.Model):
 
     def _default_company_id(self):
         return self.env.company.id
+
+    @api.depends('invoice_id')
+    def _compute_perception_id_domain(self):
+        for rec in self:
+            domain = [
+                ('type', '=', 'perceptions'),
+                ('company_id', '=', self.env.user.company_id.id),
+            ]
+            if self.invoice_id:
+                if self.invoice_id.move_type.startswith('in_'):
+                    domain.append(('tax_id.type_tax_use', '=', 'purchase'))
+                else:
+                    domain.append(('tax_id.type_tax_use', '=', 'sale'))
+            rec.perception_id_domain = json.dumps(domain)
+
+        return domain
 
     def _compute_base_amount_second_cur(self):
         for rec in self:

@@ -123,10 +123,14 @@ class WsPOSLine(models.Model):
     priority = fields.Integer(related='pos_id.priority')
     to_date = fields.Date(related='pos_id.to_date')
     wsfe_config_id = fields.Many2one(
-        comodel_name='wsfe.config', related='pos_id.wsfe_config_id'
+        comodel_name='wsfe.config',
+        related='pos_id.wsfe_config_id',
+        store="True",
     )
     wsfex_config_id = fields.Many2one(
-        comodel_name='wsfex.config', related='pos_id.wsfex_config_id'
+        comodel_name='wsfex.config',
+        related='pos_id.wsfex_config_id',
+        store="True",
     )
 
     @api.model
@@ -171,10 +175,7 @@ class WsTaxCodes(models.Model):
     tax_id = fields.Many2one(
         comodel_name='account.tax',
         string='Odoo Account Tax',
-        domain=[
-            ('type_tax_use', '=', 'sale'),
-            ('tax_group_id.name', 'ilike', 'vat'),
-        ],
+        domain=lambda self: self._get_tax_id_domain(),
     )
     to_date = fields.Date('Effect Until')
     wsfe_config_id = fields.Many2one(
@@ -194,6 +195,13 @@ class WsTaxCodes(models.Model):
                     """
                 )
             )
+
+    def _get_tax_id_domain(self):
+        tax_group = self.env.ref('l10n_ar_eynes.vat_tax_group')
+        return [
+            ('type_tax_use', '=', 'sale'),
+            ('tax_group_id', '=', tax_group.id),
+        ]
 
 
 class WsConfig(models.Model):

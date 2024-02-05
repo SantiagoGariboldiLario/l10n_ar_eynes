@@ -299,7 +299,7 @@ class WsfeConfig(models.Model):
         if not ws_pos:
             raise UserError(
                 _(
-                    "This journal '%(journal)s' is not configured in WSFEX.",
+                    "This journal '%(journal)s' is not configured in WSFE.",
                     journal=invoice.journal_id.name,
                 )
             )

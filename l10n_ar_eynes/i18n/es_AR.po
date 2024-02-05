@@ -6073,6 +6073,11 @@ msgid "Receivable Rejected Check Account"
 msgstr "Cuenta de cheque rechazada por cobrar"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__rejected_issued_checks_journal_id
+msgid "Rejected Issued Checks Journal"
+msgstr "Diario de cheques emitidos rechazados"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__receiving_partner_id
 msgid "Receiving Entity"
 msgstr "Entidad receptora"

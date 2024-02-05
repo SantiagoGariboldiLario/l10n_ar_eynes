@@ -35,7 +35,7 @@ class WSParser:
         return date.strftime(AFIP_DATE_FORMAT)
 
     def clean_result_date(self, date):
-        if date == 'NULL':
+        if not date or date == 'NULL' or date == 'None':
             return False
         return datetime.strptime(date, AFIP_DATE_FORMAT)
 
