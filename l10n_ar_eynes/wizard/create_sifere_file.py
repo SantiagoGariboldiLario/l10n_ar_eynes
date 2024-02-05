@@ -159,7 +159,7 @@ class ReportFilesGenerator(models.Model):
         JOIN account_journal ret ON r.retention_id = ret.id
         JOIN account_tax at ON ret.tax_id=at.id
         WHERE r.date BETWEEN %(date_from)s AND %(date_to)s
-        AND ret.type in ('gross_income') AND at.type_tax_use LIKE 'sale'
+        AND at.retention_type in ('gross_income') AND at.type_tax_use LIKE 'sale'
         AND r.company_id = %(company_id)s ORDER BY r.date
         """
 
@@ -187,7 +187,7 @@ class ReportFilesGenerator(models.Model):
         JOIN account_move i ON p.invoice_id=i.id
         WHERE p.date BETWEEN %(date_from)s AND %(date_to)s
         AND i.state IN %(inv_state)s
-        AND per.type in %(type)s AND at.type_tax_use LIKE 'purchase'
+        AND at.retention_type in %(type)s AND at.type_tax_use LIKE 'purchase'
         AND p.company_id = %(company_id)s
         AND at.is_bank_settlement IS True
         ORDER BY p.date
@@ -374,7 +374,7 @@ class ReportFilesGenerator(models.Model):
         JOIN account_move i ON p.invoice_id=i.id
         WHERE p.date BETWEEN %(date_from)s AND %(date_to)s
         AND i.state IN %(inv_state)s
-        AND per.type in %(type)s AND at.type_tax_use LIKE 'purchase'
+        AND at.retention_type in %(type)s AND at.type_tax_use LIKE 'purchase'
         AND p.company_id = %(company_id)s
         AND at.is_bank_settlement IS NOT True
         ORDER BY p.date
