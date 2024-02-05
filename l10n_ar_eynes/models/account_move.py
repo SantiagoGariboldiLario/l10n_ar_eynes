@@ -1224,20 +1224,70 @@ class AccountMove(models.Model):
         wsfex_conf = WSFEXConfig.with_context(**ctx).get_config()
         return wsfex_conf
 
+    def _check_fce_using_abc(self):
+        if not self.partner_id:
+            return False
+        if not self.partner_id.vat:
+            return False
+        ABC = self.env['afip.big.company'].sudo()
+        is_bc = ABC.search([('cuit', '=like', self.partner_id.vat)])
+        fcred_minimum_amount = self.company_id.fcred_minimum_amount
+        return {
+            'is_bc': is_bc,
+            'fcred_minimum_amount': fcred_minimum_amount,
+        }
+
+    def _check_fce_using_ws(self):
+        if not self.partner_id:
+            return False
+        if not self.partner_id.vat:
+            return False
+        ctx = self.env.context.copy()
+        company = self.mapped('journal_id.company_id')
+        if len(list(set(company))) != 1:
+            raise UserError(
+                _(
+                    """
+                    You are trying to check partner FCE situation for Invoices
+                        from different Companies.
+                    """
+                )
+            )
+
+        ctx['company_id'] = company.id
+        ws = self.env['wsfecred.config'].with_context(**ctx).get_config()
+        amount = ws.check_partner_obliged_to_FCE(self)
+        res = {
+            'is_bc': True if amount else False,
+            'fcred_minimum_amount': amount if amount else -1,
+        }
+        return res
+
     def _check_must_be_fce(self):
         """
         If the invoice matches some criteria, the invoice must be -FCE-
         """
-        if self.is_sale_document() and self.company_id.fcred_is_fce_emitter:
-            ABC = self.env['afip.big.company'].sudo()
-            is_bc = ABC.search([('cuit', '=like', self.partner_id.vat)])
+        if (
+            self.is_sale_document()
+            and self.company_id.fcred_is_fce_emitter
+            and self.fiscal_type == 'electronic'
+        ):
             amount_total = (
                 self.amount_total_cur
                 if self.is_multi_currency
                 else self.amount_total
             )
-            fcred_minimum_amount = self.company_id.fcred_minimum_amount
-            if is_bc and amount_total > fcred_minimum_amount:
+            res = None
+            try:
+                res = self._check_fce_using_ws()
+            except Exception:
+                _logger.warning('WSFECRED Fail.. trying old method..')
+                res = self._check_fce_using_abc()
+
+            if not res:
+                return False
+
+            if res['is_bc'] and amount_total > res['fcred_minimum_amount']:
                 _logger.info(
                     'The Invoice ID: %s must be of type FCRED' % self.id
                 )
