@@ -57,7 +57,12 @@
             />
         </menuitem>
 
-        <menuitem id="treasury_configuration_menu" name="Configuration" sequence="3">
+        <menuitem
+            id="treasury_configuration_menu"
+            name="Configuration"
+            sequence="3"
+            groups="l10n_ar_eynes.group_treasury_responsible"
+        >
             <menuitem
                 id="check_config_menu"
                 name="Check configuration"
