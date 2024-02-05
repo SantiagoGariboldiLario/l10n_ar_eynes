@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-    <menuitem id="treasury_menu" name="Treasury" sequence="6">
+    <menuitem id="treasury_menu" name="Treasury" sequence="6" groups="l10n_ar_eynes.group_treasury_user">
         <menuitem id="treasury_issued_check_submenu" name="Issued Checks" sequence="1">
             <menuitem
                 id="treasury_issued_check_menu"
@@ -29,11 +29,7 @@
             />
         </menuitem>
 
-        <menuitem
-            id="treasury_third_party_check_submenu"
-            name="Third Party Checks"
-            sequence="2"
-        >
+        <menuitem id="treasury_third_party_check_submenu" name="Third Party Checks" sequence="2">
             <menuitem
                 id="treasury_third_party_check_menu"
                 name="Third party Checks"
@@ -61,7 +57,12 @@
             />
         </menuitem>
 
-        <menuitem id="treasury_configuration_menu" name="Configuration" sequence="3">
+        <menuitem
+            id="treasury_configuration_menu"
+            name="Configuration"
+            sequence="3"
+            groups="l10n_ar_eynes.group_treasury_responsible"
+        >
             <menuitem
                 id="check_config_menu"
                 name="Check configuration"
