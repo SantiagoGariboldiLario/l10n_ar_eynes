@@ -15,7 +15,7 @@ _logger = logging.getLogger(__name__)
 
 
 class FiscalYearClosing(models.Model):
-    _name = 'fiscal.year.closing'
+    _name = 'fiscal.yeaqr.closing'
     _description = 'Fiscal Year Closing'
 
     check_draft_moves = fields.Boolean('Check Draft Moves')

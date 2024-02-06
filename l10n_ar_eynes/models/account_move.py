@@ -4,13 +4,11 @@ import json
 import logging
 import urllib.parse
 from io import BytesIO
-from base64 import b64encode
 
 import qrcode
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import file_open
 
 _logger = logging.getLogger(__name__)
 
@@ -1355,12 +1353,6 @@ class AccountMove(models.Model):
                 )
             )
         self.journal_id = pos_ar_id
-
-    def get_afip_logo_path(self):
-        return "l10n_ar_eynes/static/img/logo_afip.png"
-
-    def get_afip_logo(self):
-        return b64encode(file_open(self.get_afip_logo_path(), 'rb').read())
 
     def _validate_electronic_invoices(self, request):
         if self:
