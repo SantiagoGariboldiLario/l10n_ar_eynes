@@ -1,7 +1,9 @@
 import logging
+
 import psycopg2
 
 _logger = logging.getLogger(__name__)
+
 
 def move_rejected_issued_checks_journal_id(cr):
     try:
@@ -18,6 +20,7 @@ def move_rejected_issued_checks_journal_id(cr):
         _logger.info("Error in query execution, method: move_rejected_issued_checks_journal_id")
         cr.rollback()
     return True
+
 
 def migrate(cr, version):
     _logger.info("""Moving 'rejected_issued_checks_journal_id' from 'res.config.settings' to 'account.check.config'...""")
