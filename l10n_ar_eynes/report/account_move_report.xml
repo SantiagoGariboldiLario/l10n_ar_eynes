@@ -228,38 +228,51 @@
                             </style>
                         </div>
 
-                        <div class="cae">
-
-                            <table width="50%"
-                                style="float: right; font-size: 18px; text-align: center; margin-top: 5px;">
-                                <tr>
-                                    <td>
-                                        Factura Electrónica / CAE:
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="background: #bcc0c4;">
-                                        <t t-if="o.cae">
-                                            <span t-esc="o.cae" />
-                                        </t>
-                                        <t t-else="">
-                                            <span>-</span>
-                                        </t>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td> F. Vto.: <t t-if="o.cae_due_date">
-                                            <span
-                                                t-esc="o.cae_due_date.strftime('%d-%m-%Y')" />
-                                        </t>
-                                    </td>
-                                </tr>
-
-                            </table>
-
+                        <div style="display: flex;">
+                            <div style="float: left; width: 50%; hight: 120px;">
+                                <div style="margin-top: 1px;">
+                                    <div style="display: flex;">
+                                        <img 
+                                            t-attf-src="data:image/png;base64,#{o._generate_qr()}" 
+                                            alt="QR" 
+                                            style="height: 150px; width: 150px; margin-right: 20px;"
+                                        />
+                                        <img 
+                                            t-attf-src="data:image/png;base64,#{o.get_afip_logo()}" 
+                                            alt="Logo Afip"   
+                                            style="height: 150px; width: 250px; margin-bot: 20px;" 
+                                        />
+                                    </div>
+                                    <!-- <p>Comprobante Autorizado</p>
+                                    <p>Esta Administracion Federal no se responsabiliza por los datos ingresados en el detalle de la operacion</p> -->
+                                </div>
+                            </div>
+                            <div class="cae" tyle="float: right; width: 50%; margin: 0 auto;">
+                                <table style="font-size: 18px; text-align: center; margin: 0 auto;">
+                                    <tr>
+                                        <td>
+                                            Factura Electrónica / CAE:
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="background: #bcc0c4;">
+                                            <t t-if="o.cae">
+                                                <span t-esc="o.cae" />
+                                            </t>
+                                            <t t-else="">
+                                                <span>-</span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td> F. Vto.: <t t-if="o.cae_due_date">
+                                                <span t-esc="o.cae_due_date.strftime('%d-%m-%Y')" />
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
-
-
                     </div>
                 </t>
             </t>
@@ -280,18 +293,25 @@
                                         t-att-src="image_data_uri(point_of_sale_image)"
                                         style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
                                         alt="Logo" /> -->
-
+                                    <img t-if="o.journal_id.image" 
+                                        t-attf-src="data:image/png;base64,#{o.journal_id.image}"
+                                        style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
+                                    />
+                                    <img t-else="" 
+                                        t-attf-src="data:image/png;base64,#{o.company_id.logo}"
+                                        style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
+                                    />
                                     <br></br>
                                     <h3
                                         t-esc="o.company_id.name" />
                                     <span
-                                        t-esc="o.company_id.street" /> | Tel.: <span
-                                        t-esc="o.company_id.phone" />
+                                        t-esc="o.journal_id.warehouse_id.partner_id.street" /> | Tel.: <span
+                                        t-esc="o.journal_id.warehouse_id.partner_id.phone" />
                                     <p><span
-                                            t-esc="o.company_id.city" /> (<span
-                                            t-esc="o.company_id.zip" />) - <span
-                                            t-esc="o.company_id.state_id.name" /> - <span
-                                            t-esc="o.company_id.country_id.name" /></p>
+                                            t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
+                                            t-esc="o.journal_id.warehouse_id.partner_id.zip" />) - <span
+                                            t-esc="o.journal_id.warehouse_id.partner_id.state_id.name" /> - <span
+                                            t-esc="o.journal_id.warehouse_id.partner_id.country_id.name" /></p>
                                 </td>
                                 <td width="33%" style="vertical-align: top; text-align: center;">
                                     <div
@@ -314,7 +334,8 @@
                                     <span>Ing. Brutos: <span t-esc="o.company_id.vat" />
                                     </span>
                                     <br></br>
-                                    <span>IVA Responsable Inscripto</span>
+                                    <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
+                                    </span>
                                     <br></br>
                                     <span> Inic. Activ.: </span>
                                     <br></br>
