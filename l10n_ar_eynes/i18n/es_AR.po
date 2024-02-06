@@ -2698,12 +2698,12 @@ msgstr "Diferido"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__deferred_account_id
 msgid "Deferred Check Account"
-msgstr "Cuenta de cheques propios diferidos entregados"
+msgstr "Cuenta de cheques diferidos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__deferred_journal_id
 msgid "Deferred Check Journal"
-msgstr "Diario de cheques diferidos entregados"
+msgstr "Diario de cheques diferido"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__perception_ids
@@ -4848,7 +4848,7 @@ msgstr "Adjuntos principales"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__account_id
 msgid "Main Check Account"
-msgstr "Cuenta de cheques de terceros en cartera"
+msgstr "Cuenta de cheques principal"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_request_form
@@ -6203,7 +6203,7 @@ msgstr "Rechazado"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__rejected_account_id
 msgid "Rejected Check Account"
-msgstr "Cuenta de cheques rechazados"
+msgstr "Rechazar cuenta de cheque"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
