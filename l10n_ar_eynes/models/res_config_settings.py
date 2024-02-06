@@ -4,13 +4,13 @@ from odoo import api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    rejected_issued_checks_journal_id = fields.Many2one(
-        comodel_name='account.journal',
-        related='company_id.rejected_issued_checks_journal_id',
-        readonly=False,
-        domain="[('company_id', '=', company_id)]",
-        string='Rejected issued checks journal',
-    )
+    # rejected_issued_checks_journal_id = fields.Many2one(
+    #     comodel_name='account.journal',
+    #     related='company_id.rejected_issued_checks_journal_id',
+    #     readonly=False,
+    #     domain="[('company_id', '=', company_id)]",
+    #     string='Rejected issued checks journal',
+    # )
     cot_user = fields.Char(
         related='company_id.cot_user',
         string="COT User (NIF)",
