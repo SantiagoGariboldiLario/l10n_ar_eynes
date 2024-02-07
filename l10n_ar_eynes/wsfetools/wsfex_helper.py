@@ -134,10 +134,10 @@ class WSFEXParser(WSParser):
                         """
                         WSFEX Error!
                         There is no UoM Code defined for %(uom_name)s in line %(line_name)s
-                        """
-                    ),
-                    uom_name=line.product_uom_id.name,
-                    line_name=line.name,
+                        """,
+                        uom_name=line.product_uom_id.name,
+                        line_name=line.name,
+                    )
                 )
 
             uom_code = uom_codes[0].code
