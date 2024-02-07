@@ -199,25 +199,26 @@ class WsfexConfig(models.Model):
         vals_list = []
         for vat_data in result:
             _id, code, name, _void = vat_data.split(SEPARATOR)
-            vals = {
-                'code': code,
-                'name': name,
-            }
-            record = model_to_create.search(
-                [
-                    ('code', '=', code),
-                    ('wsfex_config_id', '=', self.id),
-                ]
-            )
-            if not record:
-                vals.update(
-                    {
-                        'wsfex_config_id': self.id,
-                    }
+            if code and name:
+                vals = {
+                    'code': code,
+                    'name': name,
+                }
+                record = model_to_create.search(
+                    [
+                        ('code', '=', code),
+                        ('wsfex_config_id', '=', self.id),
+                    ]
                 )
-                vals_list.append(vals)
-            else:
-                record.write(vals)
+                if not record:
+                    vals.update(
+                        {
+                            'wsfex_config_id': self.id,
+                        }
+                    )
+                    vals_list.append(vals)
+                else:
+                    record.write(vals)
         model_to_create.create(vals_list)
         return helper.parse_errors(ws)
 
@@ -228,44 +229,45 @@ class WsfexConfig(models.Model):
             _id, code, name, from_date, to_date, _void = vat_data.split(
                 SEPARATOR
             )
-            vals = {
-                'code': code,
-                'name': name,
-            }
-            if hasattr(model_to_create, 'from_date'):
-                vals.update(
-                    {
-                        'from_date': helper.clean_result_date(from_date),
-                    }
-                )
-            if hasattr(model_to_create, 'to_date'):
-                vals.update(
-                    {
-                        'to_date': helper.clean_result_date(to_date),
-                    }
-                )
-            if hasattr(model_to_create, 'from_afip'):
-                vals.update(
-                    {
-                        'from_afip': True,
-                    }
-                )
+            if code and name:
+                vals = {
+                    'code': code,
+                    'name': name,
+                }
+                if hasattr(model_to_create, 'from_date'):
+                    vals.update(
+                        {
+                            'from_date': helper.clean_result_date(from_date),
+                        }
+                    )
+                if hasattr(model_to_create, 'to_date'):
+                    vals.update(
+                        {
+                            'to_date': helper.clean_result_date(to_date),
+                        }
+                    )
+                if hasattr(model_to_create, 'from_afip'):
+                    vals.update(
+                        {
+                            'from_afip': True,
+                        }
+                    )
 
-            record = model_to_create.search(
-                [
-                    ('code', '=', code),
-                    ('wsfex_config_id', '=', self.id),
-                ]
-            )
-            if not record:
-                vals.update(
-                    {
-                        'wsfex_config_id': self.id,
-                    }
+                record = model_to_create.search(
+                    [
+                        ('code', '=', code),
+                        ('wsfex_config_id', '=', self.id),
+                    ]
                 )
-                vals_list.append(vals)
-            else:
-                record.write(vals)
+                if not record:
+                    vals.update(
+                        {
+                            'wsfex_config_id': self.id,
+                        }
+                    )
+                    vals_list.append(vals)
+                else:
+                    record.write(vals)
         model_to_create.create(vals_list)
         return helper.parse_errors(ws)
 
@@ -398,7 +400,7 @@ class WsfexConfig(models.Model):
                     record.write(vals)
                 error_msg = helper.parse_errors(ws)
         WsPos.create(vals_list)
-        if len(result) == 0:
+        if len(result) == 0 and not self.config_id.homologation:
             error_msg = (
                 _("Error: this company doesn't have POS for this Webservice.\n")
                 + error_msg
