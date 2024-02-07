@@ -78,16 +78,8 @@ class WSFEXParser(WSParser):
                 )
             )
 
-        partner_name = invoice.partner_id.name.encode(
-            'latin-1', errors='ignore'
-        ).decode('utf8')
-        partner_address = (
-            invoice.partner_id.contact_address.encode(
-                'latin-1', errors='ignore'
-            )
-            .decode('utf8')
-            .replace('\n', ' ')
-        )
+        partner_name = invoice.partner_id.name
+        partner_address = invoice.partner_id.contact_address
 
         date_due = self._get_date_due(invoice, tipo_cbte, export_type)
         currency_code = invoice.get_currency_code()
@@ -145,11 +137,7 @@ class WSFEXParser(WSParser):
             items.append(
                 {
                     'Pro_codigo': line.product_id.default_code or '',
-                    'Pro_ds': (
-                        line.name.encode('latin-1', errors='ignore')
-                        .decode('utf8')
-                        .replace('\n', ' ')
-                    ),
+                    'Pro_ds': line.name,
                     'Pro_qty': line.quantity,
                     'Pro_umed': uom_code,
                     'Pro_precio_uni': line.price_unit,
