@@ -353,7 +353,13 @@
                     </group>
                 </page>
             </notebook>
-
+            <xpath expr="//notebook" position="after">
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="activity_ids" widget="mail_activity" />
+                    <field name="message_ids" widget="mail_thread" options="{'display_log_button': True}" />
+                </div>
+            </xpath>
         </field>
     </record>
 
