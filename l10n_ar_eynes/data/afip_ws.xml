@@ -22,4 +22,11 @@
         </field>
     </record>
 
+    <record id="afipws_service_wsfecred" model="afipws.service">
+        <field name="name">wsfecred</field>
+        <field name="description">
+            Web Service de Factura de Crédito Electrónica
+        </field>
+    </record>
+
 </odoo>

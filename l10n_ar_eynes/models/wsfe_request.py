@@ -32,7 +32,7 @@ class WsRequest(models.Model):
     @api.model_create_multi
     def create(self, vals):
         now_time = fields.Datetime.now()
-        tz = pytz.timezone(self.env.user.tz) or pytz.utc
+        tz = pytz.timezone(self.env.user.tz) if self.env.user.tz else pytz.utc
         user_tz_date = pytz.utc.localize(now_time).astimezone(tz)
         for val in vals:
             val.update({'date_request': user_tz_date.replace(tzinfo=None)})

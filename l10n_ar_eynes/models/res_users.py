@@ -37,13 +37,16 @@ class UsersJournalPriorityRel(models.Model):
             user_records = (
                 self.env['users.journals.priority.rel']
                 .sudo()
-                .filtered(
-                    lambda r: r.user_id.id == record.user_id.id
-                    and r.journal_id.id == record.journal_id.id
+                .search(
+                    [
+                        ('user_id', '=', record.user_id.id),
+                        ('journal_id', '=', record.journal_id.id),
+                        ('id', '!=', record.id),
+                    ]
                 )
             )
 
-            if user_records and record not in user_records:
+            if user_records:
                 raise ValidationError(
                     _(
                         '%(username)s already has this journal (%(journal)s) configured.',
