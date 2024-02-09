@@ -246,11 +246,7 @@ class WsConfig(models.Model):
         """To be inherited. Returns the self.env.ref() of the Webservice."""
         return ""
 
-    @api.model
-    def create(self, vals):
-        """
-        Create Ticket Access for the Webservice at the same time it is created.
-        """
+    def _create_ta(self, vals=None):
         WSAATa = self.env['wsaa.ta']
         WSAAConfig = self.env['wsaa.config']
         service = self._get_webservice()
@@ -258,28 +254,26 @@ class WsConfig(models.Model):
         if not service:
             raise UserError(_("Webservice not implemented."))
 
+        company_id = vals['company_id'] if vals else self.company_id.id
+
         # WSAA are unique per company. Search the WSAA for current company:
-        wsaa = WSAAConfig.search([('company_id', '=', vals['company_id'])])
+        wsaa = WSAAConfig.search([('company_id', '=', company_id)])
         if wsaa:
             # Create a TA for this service and company:
-            ta_vals = {
-                'name': service.id,
-                'company_id': vals['company_id'],
-                'config_id': wsaa.id,
-            }
-            ta = WSAATa.create(ta_vals)
-
-            vals.update(
+            ta = WSAATa.create(
                 {
-                    'wsaa_ticket_id': ta.id,
+                    'name': service.id,
+                    'company_id': company_id,
                     'config_id': wsaa.id,
                 }
             )
+            return {
+                'wsaa_ticket_id': ta.id,
+                'config_id': wsaa.id,
+            }
         else:
             # If not WSAA configuration has found, we need to alert user to do it.
-            company_name = (
-                self.env['res.company'].browse(vals['company_id']).name
-            )
+            company_name = self.env['res.company'].browse(company_id).name
             raise UserError(
                 _(
                     """
@@ -290,6 +284,13 @@ class WsConfig(models.Model):
                 )
             )
 
+    @api.model
+    def create(self, vals):
+        """
+        Create Ticket Access for the Webservice at the same time it is created.
+        """
+        ta_vals = self._create_ta(vals)
+        vals.update(ta_vals)
         return super(WsConfig, self).create(vals)
 
     def unlink(self):
@@ -327,6 +328,9 @@ class WsConfig(models.Model):
         return config
 
     def ws_auth(self):
+        if not self.wsaa_ticket_id:
+            vals = self._create_ta()
+            self.write(vals)
         token, sign = self.wsaa_ticket_id.get_token_sign()
         FILESTORE_PATH = tools.config.filestore(self.env.cr.dbname)
 
