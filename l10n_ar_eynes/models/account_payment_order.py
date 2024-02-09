@@ -921,13 +921,14 @@ class AccountPaymentOrder(models.Model):
 
     def unlink(self):
         self._check_retentions_unlinkable()
-        if self.state not in ['draft', 'cancel']:
-            raise ValidationError(
-                _(
-                    "Error!\nYou can't unlink a posted payment order.\n"
-                    "First you should unreconcile It."
+        for state in set(self.mapped('state')):
+            if state not in ['draft', 'cancel']:
+                raise ValidationError(
+                    _(
+                        "Error!\nYou can't unlink a posted payment order.\n"
+                        "First you should unreconcile It."
+                    )
                 )
-            )
         for voucher in self:
             if voucher.type == 'receipt':
                 voucher.third_party_check_ids.unlink()
@@ -942,7 +943,7 @@ class AccountPaymentOrder(models.Model):
                     _(
                         "Error!\nVoucher %(voucher_name)s [id: %(voucher_id)s] "
                         "has Unlinkable Retentions:\n%(retentions)s",
-                        voucher_name=voucher.name,
+                        voucher_name=voucher.number,
                         voucher_id=voucher.id,
                         retentions=("\n").join(
                             ["%s [id: %s]" % (r.name, r.id) for r in u_rets]

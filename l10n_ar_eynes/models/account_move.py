@@ -4,11 +4,13 @@ import json
 import logging
 import urllib.parse
 from io import BytesIO
+from base64 import b64encode
 
 import qrcode
 
-from odoo import _, api, fields, models
+from odoo import SUPERUSER_ID, _, api, fields, models, registry
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import file_open
 
 _logger = logging.getLogger(__name__)
 
@@ -101,6 +103,7 @@ class AccountMove(models.Model):
         compute='_compute_voucher_type',
         store=True,
     )
+    voucher_type_domain = fields.Char(compute="_compute_voucher_type")
     ws_request_ids = fields.One2many(
         comodel_name='ws.request.detail', inverse_name='invoice_id'
     )
@@ -425,7 +428,7 @@ class AccountMove(models.Model):
                 }
             self.journal_id = journals[0]
             self._onchange_journal()
-            return {'domain': {'journal_id': [('id', 'in', journals.ids)]}}
+            self.suitable_journal_ids = journals
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
@@ -523,20 +526,6 @@ class AccountMove(models.Model):
         elif self.invoice_date_due and (date_invoice > self.invoice_date_due):
             self.invoice_date_due = date_invoice
 
-    @api.onchange('voucher_type_id')
-    def _onchange_voucher_type_id(self):
-        if (
-            (
-                self.is_purchase_document()
-                or (self.is_sale_document() and self.fiscal_type == 'internal')
-            )
-            and self.voucher_type_id
-            and int(self.voucher_type_id.afip_code) > AFIP_FCE_CODE_START
-        ):
-            self.is_FCE_invoice = True
-        else:
-            self.is_FCE_invoice = False
-
     def _get_refund_common_fields(self):
         res = super(AccountMove, self)._get_refund_common_fields()
         res.append('currency_rate')
@@ -603,35 +592,30 @@ class AccountMove(models.Model):
             pos_code.zfill(4) + '-' + move_code.zfill(8)
         )
 
-    @api.depends('denomination', 'move_type', 'is_debit_note')
+    @api.depends(
+        'denomination', 'move_type', 'is_debit_note', 'invoice_line_ids'
+    )
     def _compute_voucher_type(self):
+        ResVoucherType = self.env['res.voucher.type']
         for inv in self:
+            inv_type = 'b'
+            if inv.move_type.endswith("refund"):
+                inv_type = 'cn'
+            elif inv.is_debit_note:
+                inv_type = 'dn'
+
+            domain = [
+                ('doc_type', '=', inv_type),
+                ('denomination', '=', inv.denomination),
+            ]
+
+            inv.voucher_type_domain = json.dumps(domain)
+
+            res = ResVoucherType.search(domain)
             if inv.is_sale_document():
-                voucher_type_obj = inv.env['res.voucher.type']
-                res = self.env['res.voucher.type']
-
-                inv_type = 'b'
-                if inv.move_type.endswith("refund"):
-                    inv_type = 'cn'
-                elif inv.is_debit_note:
-                    inv_type = 'dn'
-
-                res = voucher_type_obj.search(
-                    [
-                        ('doc_type', '=', inv_type),
-                        ('denomination', '=', inv.denomination),
-                    ]
-                )
-
-                if not len(res):
-                    _logger.warning(
-                        _(
-                            "There is no voucher type that corresponds "
-                            "to this object"
-                        )
-                    )
-
-                if inv.is_FCE_invoice:
+                inv.is_FCE_invoice = False
+                if inv._check_must_be_fce():
+                    inv.is_FCE_invoice = True
                     res = res.filtered(
                         lambda voucher_type: int(voucher_type.afip_code)
                         > AFIP_FCE_CODE_START
@@ -642,15 +626,17 @@ class AccountMove(models.Model):
                         < AFIP_FCE_CODE_START
                     )
 
-                if len(res) > 1:
-                    _logger.warning(
-                        _(
-                            "There is more than one voucher type that "
-                            "corresponds to this object"
-                        )
-                    )
-                else:
+                inv.voucher_type_id = res[0] if res else False
+            if self.is_purchase_document():
+                if len(res) == 1:
                     inv.voucher_type_id = res
+
+    @api.onchange('voucher_type_id')
+    def _compute_is_FCE(self):
+        if self.is_purchase_document():
+            self.is_FCE_invoice = False
+            if int(self.voucher_type_id.afip_code) > AFIP_FCE_CODE_START:
+                self.is_FCE_invoice = True
 
     @api.onchange('invoice_date')
     def _onchange_invoice_date(self):
@@ -695,74 +681,48 @@ class AccountMove(models.Model):
             )
 
     def _set_perception_date(self):
-        # If not date write the invoice date
-        for p in self.perception_ids:
-            if not p.date:
-                date = self.invoice_date or fields.Date.context_today(self)
-                p.write({'date': date})
+        for inv in self:
+            if (inv.is_sale_document() or inv.is_puchase_document()) and inv.id:
+                # If not date write the invoice date
+                for p in inv.perception_ids:
+                    if not p.date:
+                        date = inv.invoice_date or fields.Date.context_today(
+                            inv
+                        )
+                        p.write({'date': date})
 
     def _post(self, soft=True):
         sale_invoices = self.filtered(
             lambda move: move.is_sale_document() and move.id
         )
-        posted_moves = super(AccountMove, self - sale_invoices)._post(soft=soft)
-        WsRequest = self.env['ws.request']
-        request = None
-        electronic_invoices = sale_invoices.filtered(
-            lambda move: move.fiscal_type == 'electronic'
-        )
-        if electronic_invoices:
-            request = WsRequest.create(
-                {
-                    'nregs': len(electronic_invoices),
-                }
-            )
-        self.env.cr.commit()  # pylint: disable=invalid-commit
 
         for inv in sale_invoices:
             inv.validate_denomination()
             inv.validate_period()
-            if inv.fiscal_type == 'electronic':
-                if inv._check_must_be_fce():
-                    inv._ensure_fce_values()
-            else:
-                if not inv.posted_before:
-                    inv.write(
-                        {
-                            'internal_number': inv.journal_id.get_sequence_from_invoice(
-                                inv
-                            )._next()
-                        }
-                    )
-            posted = super(AccountMove, inv)._post(soft=soft)
-            if posted:
-                if (
-                    inv.is_sale_document() or inv.is_puchase_document()
-                ) and inv.id:
-                    inv._set_perception_date()
-                if inv.fiscal_type == 'electronic':
-                    try:
-                        inv._validate_electronic_invoices(request)
-                    except Exception:
-                        self.env.cr.rollback()
-                    else:
-                        posted_moves += posted
-                        self.env.cr.commit()  # pylint: disable=invalid-commit
-                else:
-                    posted_moves += posted
 
-        errors = self - posted_moves
-        if errors:
-            raise UserError(
-                _(
-                    "Error trying to validate electronic invoice with ids [%(ids)s].\n"
-                    "Check WS Requests page or go to 'Informs -> Ws Requests -> %(name)s'.",
-                    ids=', '.join(str(inv_id.id) for inv_id in errors),
-                    name=request.name,
-                )
-            )
+        posted_moves = super(AccountMove, self)._post(soft=soft)
+        posted_moves._set_perception_date()
 
         return posted_moves
+
+    def action_post(self):
+        electronic_invoices = self.filtered(
+            lambda move: move.fiscal_type == 'electronic'
+        )
+
+        for inv in self - electronic_invoices:
+            if not inv.posted_before:
+                inv.write(
+                    {
+                        'internal_number': inv.journal_id.get_sequence_from_invoice(
+                            inv
+                        )._next()
+                    }
+                )
+
+        super(AccountMove, self - electronic_invoices).action_post()
+
+        return electronic_invoices._validate_electronic_invoices()
 
     def validate_period(self):
         date = self.invoice_date or fields.Date.context_today(self)
@@ -1242,35 +1202,74 @@ class AccountMove(models.Model):
         wsfex_conf = WSFEXConfig.with_context(**ctx).get_config()
         return wsfex_conf
 
+    def _check_fce_using_abc(self):
+        if not self.partner_id:
+            return False
+        if not self.partner_id.vat:
+            return False
+        ABC = self.env['afip.big.company'].sudo()
+        is_bc = ABC.search([('cuit', '=like', self.partner_id.vat)])
+        fcred_minimum_amount = self.company_id.fcred_minimum_amount
+        return {
+            'is_bc': is_bc,
+            'fcred_minimum_amount': fcred_minimum_amount,
+        }
+
+    def _check_fce_using_ws(self):
+        if not self.partner_id:
+            return False
+        if not self.partner_id.vat:
+            return False
+        ctx = self.env.context.copy()
+        company = self.mapped('journal_id.company_id')
+        if len(list(set(company))) != 1:
+            raise UserError(
+                _(
+                    """
+                    You are trying to check partner FCE situation for Invoices
+                        from different Companies.
+                    """
+                )
+            )
+
+        ctx['company_id'] = company.id
+        ws = self.env['wsfecred.config'].with_context(**ctx).get_config()
+        amount = ws.check_partner_obliged_to_FCE(self)
+        res = {
+            'is_bc': True if amount else False,
+            'fcred_minimum_amount': amount if amount else -1,
+        }
+        return res
+
     def _check_must_be_fce(self):
         """
         If the invoice matches some criteria, the invoice must be -FCE-
         """
-        if self.is_sale_document() and self.company_id.fcred_is_fce_emitter:
-            ABC = self.env['afip.big.company'].sudo()
-            is_bc = ABC.search([('cuit', '=like', self.partner_id.vat)])
+        if (
+            self.is_sale_document()
+            and self.company_id.fcred_is_fce_emitter
+            and self.fiscal_type == 'electronic'
+        ):
             amount_total = (
                 self.amount_total_cur
                 if self.is_multi_currency
                 else self.amount_total
             )
-            fcred_minimum_amount = self.company_id.fcred_minimum_amount
-            if is_bc and amount_total > fcred_minimum_amount:
+            res = None
+            try:
+                res = self._check_fce_using_ws()
+            except Exception:
+                _logger.warning('WSFECRED Fail.. trying old method..')
+                res = self._check_fce_using_abc()
+
+            if not res:
+                return False
+
+            if res['is_bc'] and amount_total > res['fcred_minimum_amount']:
                 _logger.info(
                     'The Invoice ID: %s must be of type FCRED' % self.id
                 )
                 return True
-        if self.associated_inv_ids:
-            associated_type = self.associated_inv_ids.mapped('is_FCE_invoice')
-            if len(associated_type) > 1:
-                raise UserError(
-                    _(
-                        """
-                        You can't associate FCE and non-FCE invoices to the same voucher.
-                        """
-                    )
-                )
-            return associated_type[0]
         return False
 
     def _ensure_fce_values(self):
@@ -1279,7 +1278,18 @@ class AccountMove(models.Model):
         """
         # Ensure Fiscal Type FCE
         self.is_FCE_invoice = True
-        self._compute_voucher_type()
+
+        if self.associated_inv_ids:
+            associated_type = self.associated_inv_ids.mapped('is_FCE_invoice')
+            if False in associated_type:
+                raise UserError(
+                    _(
+                        """
+                        You can't associate non-FCE invoices to FCE invoice.
+                        """
+                    )
+                )
+
         conf = self._get_ws_conf()
         set_optionals = True
         if self.is_debit_note or self.move_type == 'out_refund':
@@ -1356,10 +1366,63 @@ class AccountMove(models.Model):
             )
         self.journal_id = pos_ar_id
 
-    def _validate_electronic_invoices(self, request):
+    def get_afip_logo_path(self):
+        return "l10n_ar_eynes/static/img/logo_afip.png"
+
+    def get_afip_logo(self):
+        return b64encode(file_open(self.get_afip_logo_path(), 'rb').read())
+
+    def _validate_electronic_invoices(self, soft=False):
         if self:
-            ws = self._get_ws_conf()
-            ws.send_invoice_to_afip(self, request)
+            posted_moves = self.env['account.move']
+            with registry(self.env.cr.dbname).cursor() as new_cr:
+                env = api.Environment(new_cr, SUPERUSER_ID, self.env.context)
+                request = env['ws.request'].create(
+                    {
+                        'nregs': len(self),
+                    }
+                )
+                new_cr.commit()  # pylint: disable=invalid-commit
+
+                ws = self._get_ws_conf()
+
+                for inv in self:
+                    inv = env['account.move'].browse(inv.id)
+                    if inv._check_must_be_fce():
+                        inv._ensure_fce_values()
+                    posted = inv._post(soft=soft)
+                    if posted:
+                        try:
+                            ws.send_invoice_to_afip(inv, request)
+                        except Exception:
+                            new_cr.rollback()
+                        else:
+                            posted_moves += posted
+                            new_cr.commit()  # pylint: disable=invalid-commit
+
+                errors = self - posted_moves
+                if errors:
+                    context = dict(self._context or {})
+                    context["message"] = _(
+                        "Error trying to validate electronic invoice with ids [%(ids)s].\n"
+                        "Check WS Requests page or go to 'Informs -> Ws Requests -> %(name)s'.",
+                        ids=', '.join(str(inv_id.id) for inv_id in errors),
+                        name=request.name,
+                    )
+                    view = self.env.ref("popup_messages.message_wizard")
+                    view_id = view and view.id or False
+
+                    return {
+                        'name': _('WSFE Error'),
+                        'type': 'ir.actions.act_window',
+                        'view_mode': 'form',
+                        'res_model': 'message.wizard',
+                        'views': [(view_id, 'form')],
+                        'view_id': view_id,
+                        'target': 'new',
+                        'context': context,
+                    }
+        return True
 
     def get_voucher_type(self):
         self.ensure_one()
