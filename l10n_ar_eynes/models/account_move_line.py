@@ -190,3 +190,29 @@ class AccountMoveLine(models.Model):
             inverse_currency_rate=self.move_id.currency_rate
         )
         return super(AccountMoveLine, modify_self)._onchange_amount_currency()
+
+    def price_unit_to_PDF(self):
+        price_unit = self.price_unit
+        if self.move_id.denomination == 'b':
+            tax_amount = 0
+            vat_taxes = self.tax_ids.filtered(
+                lambda tax: tax.tax_group_id
+                == self.env.ref('l10n_ar_eynes.vat_tax_group')
+            )
+            for tax in vat_taxes:
+                tax_amount += price_unit * tax.amount / 100
+            price_unit += tax_amount
+        return price_unit
+
+    def price_subtotal_to_PDF(self):
+        price_subtotal = self.price_subtotal
+        if self.move_id.denomination == 'b':
+            tax_amount = 0
+            vat_taxes = self.tax_ids.filtered(
+                lambda tax: tax.tax_group_id
+                == self.env.ref('l10n_ar_eynes.vat_tax_group')
+            )
+            for tax in vat_taxes:
+                tax_amount += price_subtotal * tax.amount / 100
+            price_subtotal += tax_amount
+        return price_subtotal

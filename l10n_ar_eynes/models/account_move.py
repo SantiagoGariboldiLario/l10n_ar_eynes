@@ -3,8 +3,8 @@ import datetime
 import json
 import logging
 import urllib.parse
-from io import BytesIO
 from base64 import b64encode
+from io import BytesIO
 
 import qrcode
 
@@ -1151,6 +1151,18 @@ class AccountMove(models.Model):
         self.ensure_one()
         return 'l10n_ar_eynes.report_invoice_document'
 
+    def get_afip_logo_path(self):
+        return "l10n_ar_eynes/static/img/logo_afip.png"
+
+    def get_afip_logo(self):
+        return b64encode(file_open(self.get_afip_logo_path(), 'rb').read())
+
+    def price_subtotal_to_PDF(self):
+        price_subtotal = self.amount_untaxed
+        if self.denomination == 'b':
+            price_subtotal += self.amount_tax
+        return price_subtotal
+
     # --------------------------------------------------------------------------------
     # METHODS FOR ELECTRONIC INVOICES:
     def _get_ws_conf(self):
@@ -1363,12 +1375,6 @@ class AccountMove(models.Model):
                 )
             )
         self.journal_id = pos_ar_id
-
-    def get_afip_logo_path(self):
-        return "l10n_ar_eynes/static/img/logo_afip.png"
-
-    def get_afip_logo(self):
-        return b64encode(file_open(self.get_afip_logo_path(), 'rb').read())
 
     def _validate_electronic_invoices(self, soft=False):
         if self:
