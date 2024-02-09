@@ -1,18 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <record id="paperformat_invoice" model="report.paperformat">
         <field name="name">Invoice Report</field>
         <field name="default" eval="False" />
         <field name="format">A4</field>
         <field name="page_width">0</field>
-        <field name="page_width">0</field>
         <field name="orientation">Portrait</field>
-        <field name="margin_top">90</field>
-        <field name="margin_bottom">0</field>
+        <field name="margin_top">50</field>
+        <field name="margin_bottom">32</field>
         <field name="margin_right">5</field>
         <field name="margin_left">5</field>
         <field name="header_line" eval="False" />
-        <field name="header_spacing">90</field>
+        <field name="header_spacing">40</field>
         <field name="dpi">90</field>
     </record>
 
@@ -22,13 +21,16 @@
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">l10n_ar_eynes.account_move_report_qweb</field>
         <field name="report_file">l10n_ar_eynes.account_move_report_qweb</field>
+        <field name="paperformat_id" ref="l10n_ar_eynes.paperformat_invoice" />
         <field name="print_report_name">(object._get_report_base_filename())</field>
         <field name="attachment">(object.state == 'posted') and ((object.name or
             'INV').replace('/','_')+'.pdf')</field>
         <field name="binding_model_id" ref="model_account_move" />
         <field name="binding_type">report</field>
-        <field name="groups_id"
-            eval="[(4, ref('account.group_account_invoice')), (4, ref('account.group_account_readonly'))]" />
+        <field
+            name="groups_id"
+            eval="[(4, ref('account.group_account_invoice')), (4, ref('account.group_account_readonly'))]"
+        />
     </record>
 
     <template id="account_move_report_qweb">
@@ -50,46 +52,39 @@
                                 <td>
                                     <span style="font-size: 18px; font-weight: bold;">Cliente: </span>
                                     <span t-esc="o.partner_id.name" />
-                                    <br></br>
+                                    <br />
                                     <span style="font-size: 18px; font-weight: bold;">Domicilio: </span>
                                     <span t-esc="o.partner_id.street" />
-                                    <br></br>
+                                    <br />
                                     <span style="font-size: 18px; font-weight: bold;">Condicion
                                         IVA: </span>
-                                    <t
-                                        t-if="o.partner_id.property_account_position_id.name == 'RI'">
+                                    <t t-if="o.partner_id.property_account_position_id.name == 'RI'">
                                         <span>RESPONSABLE INSCRIPTO</span>
                                     </t>
-                                    <t
-                                        t-elif="o.partner_id.property_account_position_id.name == 'RIM'">
+                                    <t t-elif="o.partner_id.property_account_position_id.name == 'RIM'">
                                         <span>RESPONSABLE INSCRIPTO "M"</span>
                                     </t>
                                     <t t-else="">
-                                        <span
-                                            t-esc="o.partner_id.property_account_position_id.name" />
+                                        <span t-esc="o.partner_id.property_account_position_id.name" />
                                     </t>
-                                    <br></br>
+                                    <br />
 
                                     <span style="font-size: 18px; font-weight: bold;">Condicion
                                         Venta: </span>
-                                    <span
-                                        t-esc="o.invoice_payment_term_id.name" />
+                                    <span t-esc="o.invoice_payment_term_id.name" />
                                 </td>
                                 <td>
                                     <span style="font-size: 18px; font-weight: bold;">Tel.: </span>
                                     <span t-esc="o.partner_id.phone" />
-                                    <br></br>
+                                    <br />
                                     <span style="font-size: 18px; font-weight: bold;">CUIT: </span>
-                                    <span
-                                        t-esc="o.partner_id.vat" />
-                                    <br></br>
+                                    <span t-esc="o.partner_id.vat" />
+                                    <br />
                                     <span style="font-size: 18px; font-weight: bold;">IIBB: </span>
-                                    <span
-                                        t-esc="o.partner_id.vat" />
-                                    <br></br>
+                                    <span t-esc="o.partner_id.vat" />
+                                    <br />
                                     <span style="font-size: 18px; font-weight: bold;">F. Venc: </span>
-                                    <span
-                                        t-esc="o.invoice_date_due" />
+                                    <span t-esc="o.invoice_date_due" />
                                 </td>
                             </tr>
 
@@ -122,12 +117,16 @@
                                         <span t-esc="line.quantity" />
                                     </td>
                                     <td style="text-align: center;">
-                                        <span t-esc="line.price_unit"
-                                            t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" />
+                                        <span
+                                            t-esc="line.price_unit"
+                                            t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                        />
                                     </td>
                                     <td style="text-align: center;">
-                                        <span t-esc="line.price_subtotal"
-                                            t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" />
+                                        <span
+                                            t-esc="line.price_subtotal"
+                                            t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                        />
                                     </td>
                                 </tr>
                             </tbody>
@@ -145,10 +144,10 @@
 
                         <div style="float: right;">
                             <table
-                                style="display: inline-block; margin-top: 20px; border-bottom: 1px solid black;">
+                                style="display: inline-block; margin-top: 20px; border-bottom: 1px solid black;"
+                            >
                                 <tr>
-                                    <t t-foreach="o.line_ids.filtered('tax_line_id')"
-                                        t-as="line_tax">
+                                    <t t-foreach="o.line_ids.filtered('tax_line_id')" t-as="line_tax">
                                         <td style="width: 250px;">
                                             <div style="text-align: left;">
                                                 <strong>
@@ -157,8 +156,10 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <span t-esc="abs(line_tax.balance)"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                            <span
+                                                t-esc="abs(line_tax.balance)"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
                                         </td>
                                     </t>
                                 </tr>
@@ -167,14 +168,12 @@
 
 
                         <div class="row" style="margin-top: 50px;">
-                            <div class="column"
-                                style="text-align: left; border-right: 1px solid black;">
+                            <div class="column" style="text-align: left; border-right: 1px solid black;">
                                 <h4 style="font-weight: bold;">
                                     Observaciones:
                                 </h4>
                             </div>
-                            <div class="column"
-                                style="text-align: center;">
+                            <div class="column" style="text-align: center;">
                                 <table width="100%">
                                     <thead style="background: #d1d1d1;">
                                         <tr style="font-weight: bold;">
@@ -193,16 +192,22 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <span t-esc="o.amount_untaxed"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                                <span
+                                                    t-esc="o.amount_untaxed"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
                                             </td>
                                             <td>
-                                                <span t-esc="o.amount_tax"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                                <span
+                                                    t-esc="o.amount_tax"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
                                             </td>
                                             <td>
-                                                <span t-esc="o.amount_total"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                                <span
+                                                    t-esc="o.amount_total"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
                                             </td>
                                         </tr>
                                     </tbody>
@@ -232,15 +237,15 @@
                             <div style="float: left; width: 50%; hight: 120px;">
                                 <div style="margin-top: 1px;">
                                     <div style="display: flex;">
-                                        <img 
-                                            t-attf-src="data:image/png;base64,#{o._generate_qr()}" 
-                                            alt="QR" 
+                                        <img
+                                            t-attf-src="data:image/png;base64,#{o._generate_qr()}"
+                                            alt="QR"
                                             style="height: 150px; width: 150px; margin-right: 20px;"
                                         />
-                                        <img 
-                                            t-attf-src="data:image/png;base64,#{o.get_afip_logo()}" 
-                                            alt="Logo Afip"   
-                                            style="height: 150px; width: 250px; margin-bot: 20px;" 
+                                        <img
+                                            t-attf-src="data:image/png;base64,#{o.get_afip_logo()}"
+                                            alt="Logo Afip"
+                                            style="height: 120px; width: 200px; margin-bot: 20px;"
                                         />
                                     </div>
                                     <!-- <p>Comprobante Autorizado</p>
@@ -286,59 +291,70 @@
                 <t t-if="docs and docs[0].company_id">
                     <div class="div">
                         <table
-                            style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 16px;">
+                            style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 16px;"
+                        >
                             <tr>
                                 <td width="33%" style="font-weight: bold;">
                                     <!-- <img t-if="point_of_sale_image"
                                         t-att-src="image_data_uri(point_of_sale_image)"
                                         style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
                                         alt="Logo" /> -->
-                                    <img t-if="o.journal_id.image" 
+                                    <img
+                                        t-if="o.journal_id.image"
                                         t-attf-src="data:image/png;base64,#{o.journal_id.image}"
                                         style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
                                     />
-                                    <img t-else="" 
+                                    <img
+                                        t-else=""
                                         t-attf-src="data:image/png;base64,#{o.company_id.logo}"
                                         style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
                                     />
-                                    <br></br>
-                                    <h3
-                                        t-esc="o.company_id.name" />
-                                    <span
-                                        t-esc="o.journal_id.warehouse_id.partner_id.street" /> | Tel.: <span
-                                        t-esc="o.journal_id.warehouse_id.partner_id.phone" />
-                                    <p><span
-                                            t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
-                                            t-esc="o.journal_id.warehouse_id.partner_id.zip" />) - <span
-                                            t-esc="o.journal_id.warehouse_id.partner_id.state_id.name" /> - <span
-                                            t-esc="o.journal_id.warehouse_id.partner_id.country_id.name" /></p>
+                                    <br />
+                                    <p>
+                                            <h3 t-esc="o.company_id.name" />
+                                            <span t-esc="o.journal_id.warehouse_id.partner_id.street" />
+                                            <span t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
+                                            t-esc="o.journal_id.warehouse_id.partner_id.zip"
+                                        />) - <span
+                                            t-esc="o.journal_id.warehouse_id.partner_id.state_id.name"
+                                        /> - <span
+                                            t-esc="o.journal_id.warehouse_id.partner_id.country_id.name"
+                                        />
+                                            <br />
+                                            Tel.: <span t-esc="o.journal_id.warehouse_id.partner_id.phone" />
+                                    </p>
+
                                 </td>
                                 <td width="33%" style="vertical-align: top; text-align: center;">
                                     <div
-                                        style="display: block; margin: 0 auto; border: 2px solid #000; height: 100px; width: 100px; font-size: 40px;">
-                                        <h1 style="font-size: 65px;"
-                                            t-esc="denomination_name"></h1>
+                                        style="display: block; margin: 0 auto; border: 2px solid #000; height: 100px; width: 100px; font-size: 40px;"
+                                    >
+                                        <h1 style="font-size: 65px;" t-esc="denomination_name" />
                                     </div>
                                 </td>
-                                <td width="33%"
-                                    style="font-weight: bold; font-size: 17px; padding-left: 50px;">
+                                <td
+                                    width="33%"
+                                    style="font-weight: bold; font-size: 17px; padding-left: 50px;"
+                                >
                                     <span>N° <span t-esc="denomination" />
                                     </span>
-                                    <br></br>
+                                    <br />
                                     <span>Fecha: <span t-esc="o.invoice_date" />
                                     </span>
-                                    <br></br>
+                                    <br />
                                     <span>C.U.I.T: <span t-esc="o.company_id.vat" />
                                     </span>
-                                    <br></br>
+                                    <br />
                                     <span>Ing. Brutos: <span t-esc="o.company_id.vat" />
                                     </span>
-                                    <br></br>
+                                    <br />
+                                    <span>IVA Responsable Inscripto</span>
+                                    <br />
                                     <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
                                     </span>
-                                    <br></br>
+                                    <br />
                                     <span> Inic. Activ.: </span>
-                                    <br></br>
+                                    <br />
                                 </td>
                             </tr>
                         </table>
@@ -347,8 +363,11 @@
                 </t>
             </div>
         </div>
-        <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name"
-            t-att-data-oe-id="o and o.id">
+        <div
+            class="article o_report_layout_standard"
+            t-att-data-oe-model="o and o._name"
+            t-att-data-oe-id="o and o.id"
+        >
             <t t-raw="0" />
         </div>
         <div class="footer o_standard_footer">
