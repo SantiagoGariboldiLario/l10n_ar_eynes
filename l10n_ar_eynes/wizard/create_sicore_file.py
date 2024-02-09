@@ -149,6 +149,8 @@ class CreateSicoreFiles(models.TransientModel):
             )
             nro_doc_retenido = tax_line.partner_id.vat
 
+            tax_line.partner_id.property_account_position_id.local
+
             # First search in number then in reference
             m = tax_line.payment_order_id.number or ''
             m2 = tax_line.payment_order_id.reference or ''
@@ -161,7 +163,9 @@ class CreateSicoreFiles(models.TransientModel):
                 continue
             else:
                 if m:
-                    internal_number = int(m.replace('OP-', ''))
+                    internal_number = int(
+                        m.replace('OP', '').replace(' ', '').replace('-', '')
+                    )
                 if m2:
                     internal_number = int(m2.replace('-', ''))
 
@@ -193,7 +197,8 @@ class CreateSicoreFiles(models.TransientModel):
                 tax_line.reg_code
                 or tax_line.taxapp_id.reg_code
                 or tax_line.concept_id.code
-            )[:3]
+            )
+            reg_code = str(reg_code)[:3] if reg_code else False
             if not reg_code:
                 reg_code = 0
                 # raise UserError(
@@ -241,10 +246,10 @@ class CreateSicoreFiles(models.TransientModel):
                 'porcentaje_exclusion': moneyfmt(
                     Decimal(porcentaje_exclusion), places=2, ndigits=3, dp=','
                 ),
-                'fecha_emision_boletin': exclusion_date_certificate,
+                'fecha_emision_boletin': date_emited,
                 'tipo_documento_retenido': tipo_doc_retenido,
                 'numero_documento_retenido': nro_doc_retenido,
-                'numero_certificado_original': nro_cert_propio[2:],
+                'numero_certificado_original': nro_cert_propio,
                 'denominacion_ordenante': tax_line.partner_id.name[:30],
                 'acrecentamiento': '0',  # Segun longport
                 'cuit_pais_retenido': '',  # TODO!

@@ -123,8 +123,8 @@ HEAD_LINES = {
         'type': 'string',
         'start_pos': 112,
         'length': 20,
-        'alignment': 'left',
-        'padding': ' ',
+        'alignment': 'right',
+        'padding': '0',
         'required': True,
     },
     'numero_certificado_original': {
