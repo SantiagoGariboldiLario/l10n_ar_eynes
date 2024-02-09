@@ -572,7 +572,7 @@ msgstr "Datos de cuenta ARBA"
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_arba_generated_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_arba_generated_files_tree
 msgid "ARBA generated files"
-msgstr "Archivos generador por ARBA"
+msgstr "Archivos ARBA Generados"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__access_warning
@@ -1535,6 +1535,7 @@ msgstr "No se puede romper la conciliación de un cheque no emitido!"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_sicore_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_massive_sinchronize
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_sinchronize_voucher
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -1574,6 +1575,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__cancelled
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__cancelled
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__cancel
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__fiscal_year_closing__state__canceled
 msgid "Cancelled"
 msgstr "Cancelado"
 
@@ -2003,6 +2005,7 @@ msgstr "Compañías"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_activity__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__company_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__company_id
 msgid "Company"
 msgstr "Compañia"
 
@@ -2110,6 +2113,7 @@ msgstr "Configuración de WSFEX"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_tax_subjournal_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sicore_config_tree
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sifere_config_tree
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
 msgid "Configuration"
 msgstr "Configuracion"
 
@@ -2130,6 +2134,7 @@ msgstr "Configuración para WSFEX"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_cancel_picking_done_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
 msgid "Confirm"
 msgstr "Confirmar"
 
@@ -2848,6 +2853,7 @@ msgstr "Descripción"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_config__name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__name
 msgid "Description"
 msgstr "Descripción"
 
@@ -3038,9 +3044,10 @@ msgstr "Tipos de documentos"
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/certificate_request.py:0
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsaa_certificate_request__state__done
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__fiscal_year_closing__state__done
 #, python-format
 msgid "Done"
-msgstr "Echo"
+msgstr "Hecho"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__door
@@ -3054,6 +3061,7 @@ msgstr "Puerta"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__draft
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__draft
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__fiscal_year_closing__state__draft
 msgid "Draft"
 msgstr "Borrador"
 
@@ -3168,6 +3176,7 @@ msgstr "El numero final tiene que ser un entero"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax_subjournal__date_to
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_account_end_of_period
 msgid "End of period"
 msgstr "Fin del Período"
 
@@ -4996,6 +5005,7 @@ msgstr "Nombre:"
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/certificate_request.py:0
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__wsaa_certificate_request__state__new
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__fiscal_year_closing__state__new
 #, python-format
 msgid "New"
 msgstr "Nuevo"
@@ -6960,6 +6970,7 @@ msgstr "Estado/Provincia"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__state
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_search
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__state
 msgid "Status"
 msgstr "Estado"
 
@@ -7832,6 +7843,233 @@ msgstr "Actualizar Periodos"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.update_journal_period_wizard_view_form
 msgid "Update journals period"
 msgstr "Actualizar el periodo de los diarios"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.inflation_index_menu
+msgid "Inflation Index"
+msgstr "Índice de inflación"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_fiscal_year_closing_form
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_mapping_fiscal_year_closing__fiscal_year_close_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_mapping_fiscal_year_closing_loss_profit__fiscal_year_close_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_mapping_fiscal_year_closing_net_loss_profit__fiscal_year_close_id
+msgid "Fiscal Year Closing"
+msgstr "Cierre de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_fiscal_year_closing_tree
+msgid "Fiscal Years Closings"
+msgstr "Cierres de Años Fiscales"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__closing_id
+msgid "Closing Fiscal Year"
+msgstr "Cierre de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__opening_id
+msgid "Opening Fiscal Year"
+msgstr "Apertura de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__opening_description
+msgid "Opening Fiscal Year Description"
+msgstr "Descripción de Apertura de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__opening_journal_id
+msgid "Opening Fiscal Year Journal"
+msgstr "Diario de Apertura de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__opening_date_range_id
+msgid "Opening Fiscal Year Period"
+msgstr "Período de Apertura de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__opening_date
+msgid "Opening Fiscal Year Date"
+msgstr "Fecha de Apertura de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__create_loss_profit_move
+msgid "Create Loss & Profit Move"
+msgstr "Crear Movimiento de Pérdidas y Ganancias"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__loss_profit_move_id
+msgid "Loss & Profit Move"
+msgstr "Movimiento de Pérdidas y Ganancias"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__loss_profit_description
+msgid "Loss & Profit Description"
+msgstr "Descripción de Pérdidas y Ganancias"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__loss_profit_journal_id
+msgid "Loss & Profit Journal"
+msgstr "Diario de Pérdidas y Ganancias"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__loss_profit_date_range_id
+msgid "Net Loss & Profit Period"
+msgstr "Período de Pérdidas y Ganancias Neto"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__loss_profit_date
+msgid "Loss & Profit Date"
+msgstr "Fecha de Pérdidas y Ganancias"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__closing_description
+msgid "Closing Fiscal Year Description"
+msgstr "Descripción de Cierre de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__closing_journal_id
+msgid "Closing Fiscal Year Journal"
+msgstr "Diario de Cierre de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__closing_date_range_id
+msgid "Period"
+msgstr "Período"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__closing_date
+msgid "Closing Fiscal Year Date"
+msgstr "Fecha de Cierre de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_mapping_fiscal_year_closing__source_account_type_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_mapping_fiscal_year_closing_loss_profit__source_account_type_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_mapping_fiscal_year_closing_net_loss_profit__source_account_type_id
+msgid "Account type"
+msgstr "Tipo de Cuenta"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_mapping_fiscal_year_closing__destination_account_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_mapping_fiscal_year_closing_loss_profit__destination_account_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_mapping_fiscal_year_closing_net_loss_profit__destination_account_id
+msgid "Destination Account"
+msgstr "Cuenta Destino"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
+msgid "Loss and Profit"
+msgstr "Pérdidas y Ganancias"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
+msgid "Closing"
+msgstr "Cierre"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
+msgid "Opening"
+msgstr "Apertura"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__create_closing_move
+msgid "Create Closing Fiscal Year"
+msgstr "Crear Cierre de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__closing_move_id
+msgid "Closing Fiscal Year Move"
+msgstr "Cierre de Movimiento de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__create_opening_move
+msgid "Create Opening Fiscal Year Move"
+msgstr "Crear Movimiento de Apertura de Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__opening_move_id
+msgid "Opening Fiscal Year Move"
+msgstr "Apertura de Movimiento del Año Fiscal"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__create_recpam
+msgid "Create RECPAM"
+msgstr "Crear RECPAM"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__recpam_move_id
+msgid "RECPAM Move"
+msgstr "Movimiento RECPAM"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__recpam_description
+msgid "RECPAM Description"
+msgstr "Descripción de RECPAM"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__recpam_account_id
+msgid "RECPAM Account"
+msgstr "Ceunta de RECPAM"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__recpam_journal_id
+msgid "RECPAM Journal"
+msgstr "Diario de RECPAM"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__check_invalid_period_moves
+msgid "Check Invalid Period or Date Moves"
+msgstr "Verificar Período o Fechas de Movimientos no Válidos"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__check_draft_moves
+msgid "Check Draft Moves"
+msgstr "Verificar Movimientos en Borrador"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__check_unbalanced_moves
+msgid "Check Unbalanced Moves"
+msgstr "Verificar Movimientos Desequilibrados"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_fiscal_year_closing_tree
+msgid "Fiscal Years Closings"
+msgstr "Cierres de Años Fiscales"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__fiscal_year_closing__state__in_progress
+msgid "In Progress"
+msgstr "En Progreso"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
+msgid "Perform Operations"
+msgstr "Aplicar Operaciones"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
+msgid "Fiscal Years"
+msgstr "Años Fiscales"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
+msgid "Checks"
+msgstr "Verificaciones"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
+msgid "Operations"
+msgstr "Operaciones"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
+msgid "Operation to Perform"
+msgstr "Operación por Aplicar"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
+msgid "Move Created by the Operation"
+msgstr "Mover Creado por Operación"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/wsfe_massive_sinchronize.py:0
