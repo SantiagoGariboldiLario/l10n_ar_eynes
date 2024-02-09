@@ -234,15 +234,16 @@
                         <separator name="tax_application" />
                         <field
                             name="python_code"
-                            colspan="4"
+                            colspan="6"
                             widget="ace"
                             options="{'mode': 'python'}"
                             attrs="{'invisible':[('apply_custom_code', '=', False)]}"
+                            nolabel="1"
                         />
                         <field
                             name="perc_vat_application_ids"
                             nolabel="1"
-                            colspan="4"
+                            colspan="6"
                             attrs="{'invisible':['|', ('retention_type','!=','vat'), ('apply_custom_code', '=', True)]}"
                             context="{'default_type':'vat'}"
                         >
