@@ -355,7 +355,7 @@ class PerceptionTaxApplication(models.Model):
     _sql_constraints = [
         (
             'concept_activity_uniq',
-            'unique (concept_id, activity_id, perception_id)',
+            'unique (concept_id, activity_id, perception_tax_id)',
             'The tuple of Concept, Activity must be unique per Perception !',
         ),
     ]
