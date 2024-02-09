@@ -102,14 +102,6 @@
                 />
             </xpath>
 
-            <xpath expr="//field[@name='invoice_incoterm_id']" position="attributes">
-                <attribute name="attrs">
-                    {
-                    'required': [('local', '=', False), ('move_type', 'in', ('out_invoice', 'out_refund'))]
-                    }
-                </attribute>
-            </xpath>
-
             <div name="journal_div" position="after">
                 <field
                     name="currency_rate"
