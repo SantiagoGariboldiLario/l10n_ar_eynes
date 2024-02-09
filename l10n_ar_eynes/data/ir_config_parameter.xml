@@ -46,6 +46,7 @@
         </field>
     </record>
 
+    <!-- Padron AFIP -->
     <record id="url_prod_padron" model="ir.config_parameter">
         <field name="key">ws_padron_prod</field>
         <field name="value">
@@ -57,6 +58,21 @@
         <field name="key">ws_padron_homo</field>
         <field name="value">
             https://awshomo.afip.gov.ar/sr-padron/webservices/personaServiceA5?wsdl
+        </field>
+    </record>
+
+    <!-- WSFECRED: Electronic Invoice miPyme -->
+    <record id="url_prod_wsfecred" model="ir.config_parameter">
+        <field name="key">wsfecred_prod</field>
+        <field name="value">
+            https://serviciosjava.afip.gob.ar/wsfecred/FECredService?wsdl
+        </field>
+    </record>
+
+    <record id="url_homo_wsfecred" model="ir.config_parameter">
+        <field name="key">wsfecred_homo</field>
+        <field name="value">
+            https://fwshomo.afip.gov.ar/wsfecred/FECredService?wsdl
         </field>
     </record>
 
