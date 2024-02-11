@@ -159,7 +159,6 @@ class CreateSicoreFiles(models.TransientModel):
             )
             nro_doc_retenido = tax_line.partner_id.vat
 
-
             # First search in number then in reference
             m = tax_line.payment_order_id.number or ''
             m2 = tax_line.payment_order_id.reference or ''
@@ -239,14 +238,14 @@ class CreateSicoreFiles(models.TransientModel):
                 'monto_comprobante': self._format_monetary(amount_total),
                 'codigo_impuesto': codigo_impuesto,
                 'codigo_regimen': reg_code,
-                'codigo_operacion': 1, # Cod. Retenciones
+                'codigo_operacion': 1,  # Cod. Retenciones
                 'base_calculo': self._format_monetary(base_amount),
                 'fecha_emision_retenc': date_emited,
                 'codigo_condicion': '01',  # Inscripto (HARD: Segun longport)
                 'sujetos_suspend': '',  # Beneficiarios en el exterior
                 'importe_retencion': self._format_monetary(ret_aplicada),
                 'porcentaje_exclusion': self._format_monetary(porcentaje_exclusion),
-                'fecha_emision_boletin': date_emited if porcentaje_exclusion != 0 else "", # Solo si hay exclusion
+                'fecha_emision_boletin': date_emited if porcentaje_exclusion != 0 else "",  # Solo si hay exclusion
                 'tipo_documento_retenido': tipo_doc_retenido,
                 'numero_documento_retenido': nro_doc_retenido,
                 'numero_certificado_original': nro_cert_propio,
@@ -281,7 +280,7 @@ class CreateSicoreFiles(models.TransientModel):
 
         f.close()
 
-        f = open(head_filename, 'rb') # rb to export with CRLF line terminators
+        f = open(head_filename, 'rb')  # rb to export with CRLF line terminators
 
         name_base = "SICORE_RET" if is_local else "SICORE_RET_EXT"
         name = ('%s_%s.txt') % (name_base, self.period_start)
