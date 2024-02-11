@@ -2899,7 +2899,7 @@ msgid ""
 "used by itself, however it can still be used in a group. 'adjustment' is "
 "used to perform tax adjustment."
 msgstr ""
-"Determina dónde se puede seleccionar el impuesto. Nota: 'Ninguno' significa que un impuesto no se puede" 
+"Determina dónde se puede seleccionar el impuesto. Nota: 'Ninguno' significa que un impuesto no se puede"
 "utilizar por sí solo; sin embargo, aún se puede utilizar en un grupo. El 'ajuste' se"
 "utiliza para realizar el ajuste fiscal."
 
@@ -3565,7 +3565,7 @@ msgid ""
 "Fields with internal purpose only that depicts\n"
 "                if the invoice is a multi currency one or not"
 msgstr ""
-"Campos con propósito interno únicamente que muestra\n 
+"Campos con propósito interno únicamente que muestra\n
 "                si la factura es multidivisa o no"
 
 #. module: l10n_ar_eynes
@@ -6604,6 +6604,12 @@ msgstr ""
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_sicore_report
 msgid "SICORE Files Generation"
 msgstr "Generación de archivos SICORE"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
+#, python-format
+msgid "SICORE Reports created: %s "
+msgstr "Reportes SICORE generados: %s "
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_parent_exporters_sifere
