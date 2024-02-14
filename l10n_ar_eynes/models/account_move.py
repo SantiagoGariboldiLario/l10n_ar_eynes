@@ -924,7 +924,9 @@ class AccountMove(models.Model):
                 concept_id = perception_vals.get('concept_id')
                 if not concept_id:
                     raise ValidationError(
-                        _("Concet must be setted in python code. Perception %s")
+                        _(
+                            "Concept must be setted in python code. Perception %s"
+                        )
                         % perception_id.name
                     )
 

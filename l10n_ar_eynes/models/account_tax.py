@@ -249,8 +249,11 @@ class AccountTax(models.Model):
                 'invoice': invoice,
                 'partner': partner,
                 'perception': self,
+                'retention': self,
+                'line': invoice,
             }
         )
+
         try:
             safe_eval(
                 self.python_code.strip(),
