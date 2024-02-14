@@ -682,7 +682,9 @@ class AccountMove(models.Model):
 
     def _set_perception_date(self):
         for inv in self:
-            if (inv.is_sale_document() or inv.is_puchase_document()) and inv.id:
+            if (
+                inv.is_sale_document() or inv.is_purchase_document()
+            ) and inv.id:
                 # If not date write the invoice date
                 for p in inv.perception_ids:
                     if not p.date:
@@ -706,11 +708,11 @@ class AccountMove(models.Model):
         return posted_moves
 
     def action_post(self):
-        electronic_invoices = self.filtered(
+        sale_invoices = self.filtered(lambda move: move.is_sale_document())
+        electronic_invoices = sale_invoices.filtered(
             lambda move: move.fiscal_type == 'electronic'
         )
-
-        for inv in self - electronic_invoices:
+        for inv in sale_invoices - electronic_invoices:
             if not inv.posted_before:
                 inv.write(
                     {
