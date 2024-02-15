@@ -220,9 +220,10 @@ class AccountTax(models.Model):
             ),
             'get_taxpayer_type': self.get_taxpayer_type,
             'ValidationError': ValidationError,
+            'print': print,
         }
 
-    def _get_taxapps_from_code(self, perc_data, invoice):
+    def _get_taxapps_from_code(self, perc_data, invoice=None, po_line=None):
         """
         Execute the python code to know
         if any perception has to be applied
@@ -250,7 +251,8 @@ class AccountTax(models.Model):
                 'partner': partner,
                 'perception': self,
                 'retention': self,
-                'line': invoice,
+                'po_line': po_line,
+                'invoice_line': po_line.move_line_id if po_line else None,
             }
         )
 

@@ -691,7 +691,7 @@ class AccountPaymentOrder(models.Model):
 
             if retention.tax_id.apply_custom_code:
                 retentions = retention.tax_id._get_taxapps_from_code(
-                    retention_data, move_line
+                    retention_data, po_line=po_line
                 )
 
                 for retention_vals in retentions:

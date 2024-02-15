@@ -917,7 +917,7 @@ class AccountMove(models.Model):
             new_perception_lines = self.env['perception.tax.line']
 
             perceptions = perception_id.tax_id._get_taxapps_from_code(
-                perception_data, self
+                perception_data, invoice=self
             )
 
             for perception_vals in perceptions:
