@@ -627,7 +627,7 @@ class AccountMove(models.Model):
                     )
 
                 inv.voucher_type_id = res[0] if res else False
-            if self.is_purchase_document():
+            if inv.is_purchase_document():
                 if len(res) == 1:
                     inv.voucher_type_id = res
 
