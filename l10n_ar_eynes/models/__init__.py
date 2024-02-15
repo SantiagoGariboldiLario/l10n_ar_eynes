@@ -53,3 +53,4 @@ from . import account_mapping_fiscal_year_closing  # noqa
 from . import fiscal_year_closing  # noqa
 from . import inflation_index  # noqa
 from . import purchase
+from . import ir_attachment
