@@ -45,7 +45,7 @@ l10n_ar_eynes.access_wsaa_certificate_request,wsaa.certificate.request invoice,l
 l10n_ar_eynes.access_wsaa_ta_payment,wsaa.ta payment,l10n_ar_eynes.model_wsaa_ta,base.group_user,1,1,0,0
 l10n_ar_eynes.access_wsaa_load_config,access_wsaa_load_config,l10n_ar_eynes.model_wsaa_load_config,base.group_user,1,1,1,1
 
-l10n_ar_eynes.access_account_move_optional_group_account_user,access_account_move_optional,l10n_ar_eynes.model_account_move_optional,account.group_account_user,1,1,1,1
+l10n_ar_eynes.access_account_move_optional,access_account_move_optional,l10n_ar_eynes.model_account_move_optional,base.group_user,1,1,1,1
 l10n_ar_eynes.access_wsfe_config_group_user,access_wsfe_config,l10n_ar_eynes.model_wsfe_config,base.group_user,1,1,1,1
 l10n_ar_eynes.access_wsfex_config_group_user,access_wsfex_config,l10n_ar_eynes.model_wsfex_config,base.group_user,1,1,1,1
 l10n_ar_eynes.access_wsfex_shipping_permission_group_user,access_wsfex_shipping_permission,l10n_ar_eynes.model_wsfex_shipping_permission,base.group_user,1,1,1,1
