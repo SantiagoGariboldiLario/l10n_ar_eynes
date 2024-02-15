@@ -237,7 +237,11 @@ class AccountTax(models.Model):
         """
         self.ensure_one()
         eval_context = self._get_eval_code_context()
-        partner = invoice.partner_id
+        partner = None
+        if invoice:
+            partner = invoice.partner_id
+        if po_line:
+            partner = po_line.partner_id
 
         # Pasamos el parent partner como variable en caso de
         # que exista para poder tomar sus percepciones
