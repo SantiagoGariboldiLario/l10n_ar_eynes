@@ -54,7 +54,7 @@
             </xpath>
 
             <page name="accounting" position="after">
-                <page string="Perceptions" groups="account.group_account_invoice">
+                <page string="Perceptions" groups="account.group_account_invoice,account.group_account_manager">
                     <field name="perception_ids" nolabel="1">
                         <tree editable="bottom">
                             <field name="perception_id" domain="[('type_tax_use','=','sale')]" />
@@ -75,7 +75,7 @@
                         </tree>
                     </field>
                 </page>
-                <page string="Retentions" name="retentions" groups="account.group_account_invoice">
+                <page string="Retentions" name="retentions" groups="account.group_account_invoice,account.group_account_manager">
                     <group name="retention_activity" string="Retention activity">
                         <field name="retention_activity_id" />
                     </group>
