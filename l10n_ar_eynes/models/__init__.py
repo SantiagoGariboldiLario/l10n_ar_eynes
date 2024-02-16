@@ -54,3 +54,4 @@ from . import fiscal_year_closing  # noqa
 from . import inflation_index  # noqa
 from . import purchase
 from . import ir_attachment
+from . import account_tax_group

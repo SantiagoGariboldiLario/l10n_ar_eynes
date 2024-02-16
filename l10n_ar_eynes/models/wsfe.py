@@ -239,11 +239,11 @@ class WsfeConfig(models.Model):
             )
 
     def _get_vat_array(self, invoice):
-        vat_tax_group = self.env.ref('l10n_ar_eynes.vat_tax_group')
         invoice_vat_lines = invoice.line_ids.filtered(
             lambda x: x.price_unit
             and x.tax_line_id
-            and x.tax_group_id == vat_tax_group
+            and x.tax_group_id
+            and x.tax_group_id.group_type == 'vat'
         )
 
         self._check_vat_taxes_configured(invoice_vat_lines)
