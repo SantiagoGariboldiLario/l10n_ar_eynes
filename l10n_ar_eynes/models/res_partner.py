@@ -226,7 +226,7 @@ class ResPartner(models.Model):
                     ),
                 )
             )
-        for p_perc in partner_perceptions_for_fiscal_position:
+        for p_perc in partner_perceptions_for_fiscal_position_period:
             perception = {
                 'perception': p_perc.perception_id,
                 'activity_id': p_perc.activity_id.id,
