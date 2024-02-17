@@ -1,5 +1,7 @@
 import logging
 
+from dateutil.relativedelta import relativedelta
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
@@ -176,7 +178,7 @@ class ResPartner(models.Model):
         values = self.parse_afip_values(ws)
         return values
 
-    def _get_perceptions_to_apply(self):
+    def _get_perceptions_to_apply(self, invoice_date):
         # Buscamos las percepciones a aplicar segun la posicion fiscal
         perceptions = {}
         for perc in self.property_account_position_id.perception_ids:
@@ -195,7 +197,36 @@ class ResPartner(models.Model):
 
         # Ahora buscamos a ver si tiene alguna excepcion
         partner_perceptions = {}
-        for p_perc in self.perception_ids:
+        partner_perceptions_for_fiscal_position = self.perception_ids.filtered(
+            lambda perception: perception.perception_id.id in perceptions.keys()
+        )
+        partner_perceptions_for_fiscal_position_period = (
+            partner_perceptions_for_fiscal_position.filtered(
+                lambda perception: (
+                    perception.period
+                    <= invoice_date
+                    <= (
+                        (perception.period + relativedelta(months=1))
+                        - relativedelta(days=1)
+                    )
+                )
+            )
+        )
+        difference = partner_perceptions_for_fiscal_position.mapped(
+            'perception_id'
+        ) - partner_perceptions_for_fiscal_position_period.mapped(
+            'perception_id'
+        )
+        if difference:
+            raise UserError(
+                _(
+                    'The perceptions for this partner must be updated: [%(perceptions_name)s]',
+                    perceptions_name=', '.join(
+                        [diff.name for diff in difference]
+                    ),
+                )
+            )
+        for p_perc in partner_perceptions_for_fiscal_position_period:
             perception = {
                 'perception': p_perc.perception_id,
                 'activity_id': p_perc.activity_id.id,

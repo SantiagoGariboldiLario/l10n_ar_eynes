@@ -28,7 +28,7 @@ HEAD_LINES = {
         'start_pos': 29,
         'length': 16,
         'alignment': 'right',
-        'padding': '0',
+        'padding': ' ',
         'required': True,
     },
     'codigo_impuesto': {
@@ -60,7 +60,7 @@ HEAD_LINES = {
         'start_pos': 53,
         'length': 14,
         'alignment': 'right',
-        'padding': '0',
+        'padding': ' ',
         'required': True,
     },
     'fecha_emision_retenc': {
@@ -92,7 +92,7 @@ HEAD_LINES = {
         'start_pos': 80,
         'length': 14,
         'alignment': 'right',
-        'padding': '0',
+        'padding': ' ',
         'required': True,
     },
     'porcentaje_exclusion': {
@@ -100,7 +100,7 @@ HEAD_LINES = {
         'start_pos': 94,
         'length': 6,
         'alignment': 'right',
-        'padding': '0',
+        'padding': ' ',
         'required': False,
     },
     'fecha_emision_boletin': {
@@ -123,8 +123,8 @@ HEAD_LINES = {
         'type': 'string',
         'start_pos': 112,
         'length': 20,
-        'alignment': 'left',
-        'padding': ' ',
+        'alignment': 'right',
+        'padding': '0',
         'required': True,
     },
     'numero_certificado_original': {
@@ -135,6 +135,10 @@ HEAD_LINES = {
         'padding': '0',
         'required': False,
     },
+}
+
+HEAD_LINES_EXTERIOR = {
+    **HEAD_LINES,
     'denominacion_ordenante': {
         'type': 'string',
         'start_pos': 146,

@@ -45,9 +45,10 @@ class AccountCheckConfig(models.Model):
     )
 
     rejected_issued_checks_journal_id = fields.Many2one(
-        comodel_name='account.account',
-        string='Rejected Issued Checks Journal',
-        required=True,
+        comodel_name='account.journal',
+        readonly=False,
+        domain="[('company_id', '=', company_id)]",
+        string='Rejected issued checks journal',
     )
 
     def name_get(self):

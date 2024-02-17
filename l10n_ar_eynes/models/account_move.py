@@ -1014,7 +1014,7 @@ class AccountMove(models.Model):
 
         return vals
 
-    @api.onchange('invoice_line_ids', 'disable_perceptions')
+    @api.onchange('invoice_line_ids', 'disable_perceptions', 'invoice_date')
     def compute_perceptions(self):
         for rec in self:
             if rec.is_sale_document():
@@ -1024,7 +1024,9 @@ class AccountMove(models.Model):
                     new_perception_lines = self.env['perception.tax.line']
                     # Calculamos cada Percepcion configurada en el Partner
                     partner_perceptions = (
-                        rec.partner_id._get_perceptions_to_apply()
+                        rec.partner_id._get_perceptions_to_apply(
+                            rec.invoice_date or datetime.date.today()
+                        )
                     )
                     for partner_perc in partner_perceptions.values():
                         excluded_percent = partner_perc['excluded_percent']

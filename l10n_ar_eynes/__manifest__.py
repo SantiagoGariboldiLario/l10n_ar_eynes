@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.1.8.0',
+    'version': '15.0.1.7.6',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -34,6 +34,7 @@
         'date_range',
         'delivery',
         'hr',
+        'mail',
         'month_year_widget',  # To pick only month and year in date fields
         'multi_step_wizard',
         'om_fiscal_year',
@@ -150,7 +151,9 @@
         "demo/res_partner_demo.xml",
     ],
     'assets': {
-        'web.assets_backend': ['l10n_ar_eynes/static/src/js/form_controller.js']
+        'web.assets_backend': [
+            'l10n_ar_eynes/static/src/js/form_controller.js',
+        ],
     },
     'installable': True,
     'application': True,
