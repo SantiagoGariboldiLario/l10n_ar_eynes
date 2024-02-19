@@ -330,7 +330,11 @@
                                     <div
                                         style="display: block; margin: 0 auto; border: 2px solid #000; height: 100px; width: 100px; font-size: 40px;"
                                     >
-                                        <h1 style="font-size: 65px;" t-esc="denomination_name" />
+                                        <h1 
+                                            t-if="denomination_name != 'NOT_DEFINED'"
+                                            style="font-size: 65px;"   
+                                            t-esc="denomination_name" 
+                                        />
                                     </div>
                                 </td>
                                 <td
