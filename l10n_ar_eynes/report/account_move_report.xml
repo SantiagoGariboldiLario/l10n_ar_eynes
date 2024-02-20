@@ -84,7 +84,7 @@
                                     <span t-esc="o.partner_id.vat" />
                                     <br />
                                     <span style="font-size: 18px; font-weight: bold;">F. Venc: </span>
-                                    <span t-esc="o.invoice_date_due" />
+                                    <span t-esc="o.invoice_date_due.strftime('%d/%m/%Y')" />
                                 </td>
                             </tr>
 
@@ -340,7 +340,7 @@
                                     <span>N° <span t-esc="denomination" />
                                     </span>
                                     <br />
-                                    <span>Fecha: <span t-esc="o.invoice_date" />
+                                    <span>Fecha: <span t-esc="o.invoice_date.strftime('%d/%m/%Y')" />
                                     </span>
                                     <br />
                                     <span>C.U.I.T: <span t-esc="o.company_id.vat" />
@@ -354,7 +354,7 @@
                                     <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
                                     </span>
                                     <br />
-                                    <span> Inic. Activ.: <span t-esc="o.journal_id.activity_start_date" />
+                                    <span> Inic. Activ.: <span t-esc="o.journal_id.activity_start_date.strftime('%d/%m/%Y')" />
                                     </span>
                                     <br />
                                 </td>
