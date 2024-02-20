@@ -1,4 +1,3 @@
-import difflib
 import logging
 
 from odoo import _, api, exceptions, fields, models
@@ -374,35 +373,35 @@ class AccountTax(models.Model):
             )
         return tax_repartition_lines[0].account_id
 
-    def _message_create(self, values_list):
-        model = values_list.get('model', None)
-        if model and model == 'account.tax':
-            python_code_id = (
-                self.env['ir.model.fields']
-                .search(
-                    [('name', '=', 'python_code'), ('model', '=', self._name)]
-                )
-                .id
-            )
-            tracking_value_ids = values_list.get('tracking_value_ids', [])
-            diffs = []
-            for values in tracking_value_ids:
-                if values[2].get('field', 0) == python_code_id:
-                    old_value = (
-                        values[2]
-                        .get('old_value_text', '')
-                        .splitlines(keepends=True)
-                    )
-                    new_value = (
-                        values[2]
-                        .get('new_value_text', '')
-                        .splitlines(keepends=True)
-                    )
-                    d = difflib.Differ()
-                    result = list(d.compare(old_value, new_value))
-                    for diff in result:
-                        if diff[0] in ['+', '-', '?']:
-                            diffs.append(create_diff_html(diff))
-            body = "<strong style='padding:4px'>Diffs:</strong> <br/>"
-            values_list['body'] = body + ' <br/> '.join(diff for diff in diffs)
-        return super(AccountTax, self)._message_create(values_list)
+    # def _message_create(self, values_list):
+    # model = values_list.get('model', None)
+    # if model and model == 'account.tax':
+    # python_code_id = (
+    # self.env['ir.model.fields']
+    # .search(
+    # [('name', '=', 'python_code'), ('model', '=', self._name)]
+    # )
+    # .id
+    # )
+    # tracking_value_ids = values_list.get('tracking_value_ids', [])
+    # diffs = []
+    # for values in tracking_value_ids:
+    # if values[2].get('field', 0) == python_code_id:
+    # old_value = (
+    # values[2]
+    # .get('old_value_text', '')
+    # .splitlines(keepends=True)
+    # )
+    # new_value = (
+    # values[2]
+    # .get('new_value_text', '')
+    # .splitlines(keepends=True)
+    # )
+    # d = difflib.Differ()
+    # result = list(d.compare(old_value, new_value))
+    # for diff in result:
+    # if diff[0] in ['+', '-', '?']:
+    # diffs.append(create_diff_html(diff))
+    # body = "<strong style='padding:4px'>Diffs:</strong> <br/>"
+    # values_list['body'] = body + ' <br/> '.join(diff for diff in diffs)
+    # return super(AccountTax, self)._message_create(values_list)
