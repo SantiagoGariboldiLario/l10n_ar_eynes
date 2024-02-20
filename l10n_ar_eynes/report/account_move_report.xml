@@ -354,7 +354,8 @@
                                     <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
                                     </span>
                                     <br />
-                                    <span> Inic. Activ.: </span>
+                                    <span> Inic. Activ.: <span t-esc="o.journal_id.activity_start_date.strftime('%d/%m/%Y')" />
+                                    </span>
                                     <br />
                                 </td>
                             </tr>
