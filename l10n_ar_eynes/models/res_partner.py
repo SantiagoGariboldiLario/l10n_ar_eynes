@@ -276,14 +276,14 @@ class ResPartner(models.Model):
 
     def write(self, vals):
         vals = self._parse_vat_string(vals)
-        if vals.get('gross_income_ids'):
-            for rec in vals.get('gross_income_ids'):
-                if not rec[-1].get('type_taxpayer'):
-                    raise ValidationError(
-                        _(
-                            "You must complete 'Type of taxpayer' field on Gross income configuration."
-                        )
+        gross_income_ids = vals.get('gross_income_ids', [])
+        for rec in gross_income_ids:
+            if rec[-1] and not rec[-1].get('type_taxpayer'):
+                raise ValidationError(
+                    _(
+                        "You must complete 'Type of taxpayer' field on Gross income configuration."
                     )
+                )
         return super(ResPartner, self).write(vals)
 
     @api.model
