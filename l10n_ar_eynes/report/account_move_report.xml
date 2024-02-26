@@ -240,9 +240,6 @@
                             <div class="row" style="margin-top: 5px;">
                                 <p style="text-align: center">
                                     El crédito fiscal discriminado en el presente comprobante, sólo podrá ser computado a efectos del Régimen de Sostenimiento e Inclusión Fiscal para Pequeños Contribuyentes de la Ley Nº 27.618
-                                    <span
-                                        t-esc="o.partner_id.property_account_position_id.name"
-                                    />
                                 </p>
                             </div>
                         </t>
