@@ -9,6 +9,7 @@
             </html>
             <t t-foreach="docs" t-as="o">
                 <t t-foreach="o.retention_ids" t-as="r">
+                    <!-- *-* *-* TITLE I *-* *-* -->
                     <div class="header">
                         <table style="width:100%">
                             <tr>
@@ -25,8 +26,8 @@
                     <div class="article">
                         <table style="width:100%">
                         <tr>
-                            <td colspan="2" style="text-align:center;padding:9px;">
-                                <strong style="font-size:30px;">Nro. de Constancia: </strong>
+                            <td colspan="2" style="text-align:center;padding:9px;font-size:30px;">
+                                <strong>Nro. de Constancia: </strong>
                                 <t t-set="certificate_no" t-value="r.certificate_no" />
                                 <span t-esc="certificate_no" />
                             </td>
