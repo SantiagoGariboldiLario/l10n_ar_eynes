@@ -235,6 +235,17 @@
                                 }
                             </style>
                         </div>
+                        
+                        <t t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'">
+                            <div class="row" style="margin-top: 5px;">
+                                <p style="text-align: center">
+                                    El crédito fiscal discriminado en el presente comprobante, sólo podrá ser computado a efectos del Régimen de Sostenimiento e Inclusión Fiscal para Pequeños Contribuyentes de la Ley Nº 27.618
+                                    <span
+                                        t-esc="o.partner_id.property_account_position_id.name"
+                                    />
+                                </p>
+                            </div>
+                        </t>
 
                         <div style="display: flex;">
                             <div style="float: left; width: 50%; hight: 120px;">
