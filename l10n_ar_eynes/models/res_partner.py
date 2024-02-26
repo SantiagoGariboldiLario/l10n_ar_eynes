@@ -495,10 +495,11 @@ class ResPartnerRetention(models.Model):
     )
     def _compute_retention_percent(self):
         for p_retention in self:
+            ret_id = p_retention.retention_id
             ret_activity = p_retention.partner_id.retention_activity_id
-            ret_tax = p_retention.retention_id.tax_id
+            ret_tax = ret_id.tax_id
             ret_tax_type = ret_tax.retention_type
-            if not ret_tax_type:
+            if ret_id and not ret_tax_type:
                 raise ValidationError(
                     _(
                         "Please configure retention_type in the "
