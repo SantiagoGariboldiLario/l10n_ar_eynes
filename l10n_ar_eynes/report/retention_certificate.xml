@@ -9,20 +9,25 @@
             </html>
             <t t-foreach="docs" t-as="o">
                 <t t-foreach="o.retention_ids" t-as="r">
-                    <table style="width:100%">
-                        <!-- *-* *-* TITLE *-* *-* -->
+                    <!-- *-* *-* TITLE I *-* *-* -->
+                    <div class="header">
+                        <table style="width:100%">
+                            <tr>
+                                <td colspan="2" style="text-align:center;padding:9px;">
+                                    <t
+                                        t-set="title"
+                                        t-value="'CONSTANCIA DE RETENCION - {}'.format(r.retention_id.name)"
+                                    />
+                                    <strong t-esc="title" style="font-size:30px;" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="article">
+                        <table style="width:100%">
                         <tr>
-                            <td colspan="2" style="text-align:center;padding:9px;">
-                                <t
-                                    t-set="title"
-                                    t-value="'CONSTANCIA DE RETENCION - {}'.format(r.retention_id.name)"
-                                />
-                                <strong t-esc="title" style="font-size:30px;" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" style="text-align:center;padding:9px;">
-                                <strong style="font-size:30px;">Nro. de Constancia: </strong>
+                            <td colspan="2" style="text-align:center;padding:9px;font-size:30px;">
+                                <strong>Nro. de Constancia: </strong>
                                 <t t-set="certificate_no" t-value="r.certificate_no" />
                                 <span t-esc="certificate_no" />
                             </td>
@@ -202,6 +207,7 @@
                             </td>
                         </tr>
                     </table>
+                
                     <table style="width:100%">
                         <tr>
                             <td style="padding:9px;">
@@ -237,6 +243,8 @@
                             </td>
                         </tr>
                     </table>
+                </div>
+                <div class="footer">
                     <table style="width:100%;margin-top:250px;">
                         <tr>
                             <td rowspan="2" style="width:70%;padding:9px;">
@@ -250,6 +258,7 @@
                             </td>
                         </tr>
                     </table>
+                </div>
                 </t>
             </t>
         </t>
