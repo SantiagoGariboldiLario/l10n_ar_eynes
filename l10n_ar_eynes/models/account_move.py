@@ -691,13 +691,10 @@ class AccountMove(models.Model):
                         p.write({'date': date})
 
     def _post(self, soft=True):
-        sale_invoices = self.filtered(
-            lambda move: move.is_sale_document() and move.id
-        )
-
-        for inv in sale_invoices:
-            inv.validate_denomination()
-            inv.validate_period()
+        for move in self:
+            move.validate_period()
+            if move.is_sale_document() and move.id:
+                move.validate_denomination()
 
         posted_moves = super(AccountMove, self)._post(soft=soft)
         posted_moves._set_perception_date()
@@ -724,7 +721,7 @@ class AccountMove(models.Model):
         return electronic_invoices._validate_electronic_invoices()
 
     def validate_period(self):
-        date = self.invoice_date or fields.Date.context_today(self)
+        date = self.date or self.invoice_date or fields.Date.context_today(self)
         if not self.journal_id.due_date:
             raise ValidationError(
                 _(
