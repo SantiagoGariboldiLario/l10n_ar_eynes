@@ -619,6 +619,23 @@ class AccountPaymentOrder(models.Model):
         return list(retentions.values())
 
     def calculate_single_retention(self, retention_data):
+        def _filter_po_line_applicable(po_line):
+            invoice = po_line.move_invoice_id
+            destination_shipping = (
+                invoice.address_shipping_id
+                or ResPartner.browse(
+                    invoice.partner_id.address_get(['delivery']).get('delivery')
+                )
+            )
+            source_shipping = self.env.user.company_id.partner_id
+            applicable = retention.check_applicable(
+                sit_iibb=sit_iibb,
+                from_padron=from_padron,
+                source_shipping_id=source_shipping,
+                destination_shipping_id=destination_shipping,
+            )
+            return applicable
+
         self.ensure_one()
         ResPartner = self.env['res.partner']
         retention = retention_data.get('retention')
@@ -642,96 +659,89 @@ class AccountPaymentOrder(models.Model):
             f"Porcentaje en partner: {percent}. "
             f"Porcentaje de Exclusion: {excluded_percent}"
         )
-        for po_line in [
-            line
-            for line in (self.income_line_ids + self.debt_line_ids)
-            if line.amount
-        ]:
-            # Chequeamos si la Retencion tiene seteado un state_id,
-            # que coincida con el state_id de la direccion de
-            # entrega del partner. Sino no se realiza # la Retencion
-            invoice = po_line.move_invoice_id
-            destination_shipping = (
-                invoice.address_shipping_id
-                or ResPartner.browse(
-                    invoice.partner_id.address_get(['delivery']).get('delivery')
-                )
+
+        income_line_affected = self.income_line_ids.filtered(
+            lambda line: line.amount
+        )
+        debt_line_affected = self.debt_line_ids.filtered(
+            lambda line: line.amount
+        )
+        if retention.tax_id.jurisdiccion == 'provincial':
+            income_line_affected = income_line_affected.filtered(
+                lambda po_line: _filter_po_line_applicable(po_line)
             )
-            source_shipping = self.env.user.company_id.partner_id
-            applicable = retention.check_applicable(
-                sit_iibb=sit_iibb,
-                from_padron=from_padron,
-                source_shipping_id=source_shipping,
-                destination_shipping_id=destination_shipping,
+            debt_line_affected = debt_line_affected.filtered(
+                lambda po_line: _filter_po_line_applicable(po_line)
             )
-            if not applicable:
-                continue
 
-            move_line = po_line.move_line_id
+        if retention.tax_id.apply_custom_code:
+            retentions = retention.tax_id._get_taxapps_from_code(
+                retention_data,
+                payment_order=self,
+                income_lines=income_line_affected,
+                debt_lines=debt_line_affected,
+            )
 
-            # Chequeamos si la factura que corresponde a esta move_line ya
-            # tiene una retencion aplicada previa de este tipo en algun pago
-            # parcial previo.
-            # Por lo tanto, no corresponde retener nuevamente porque sino
-            # estariamos aplicando dos veces la misma
-            # retencion sobre el pago de una misma factura
-            prev_ret_ids = self._check_previous_retentions(retention, move_line)
-
-            # Agrupamos por retencion y concepto antes de aplicar la retencion
-            # O sea, vamos a calcular las bases para cada
-            # (retencion,concepto) y luego aplicamos la retencion
-
-            # Obtenemos el factor desde el total de la deuda contra
-            # lo que se pretende pagar
-            mla = move_line.credit or move_line.debit
-            factor_to_pay = mla / po_line.amount
-            factor_unrec = mla / po_line.amount_unreconciled
-
-            logging_messages.append("Linea a aplicar %s" % (po_line.ref))
-
-            if retention.tax_id.apply_custom_code:
-                retentions = retention.tax_id._get_taxapps_from_code(
-                    retention_data, po_line=po_line
-                )
-
-                for retention_vals in retentions:
-                    concept = retention_vals.get('concept_id')
-                    if not concept:
-                        raise ValidationError(
-                            _(
-                                "Concept must be setted in python code. Retention %s"
-                            )
-                            % retention.name
-                        )
-
-                    if (
-                        retention_vals.get('amount', 0.0) == 0.0
-                        and retention.tax_id.state_id.code != 'R'
-                    ):
-                        continue
-
-                    key = (retention.id, concept)
-                    all_concepts.setdefault(
-                        key,
-                        {
-                            'base': 0.0,
-                            'amount': 0.0,
-                            'taxapp': None,
-                            'move_lines': self.env['account.move.line'],
-                            'reg_code': retention_vals.get('reg_code'),
-                        },
-                    )
-                    all_concepts[key]['base'] += retention_vals.get('base', 0)
-                    all_concepts[key]['amount'] += retention_vals.get(
-                        'amount', 0
+            for retention_vals in retentions:
+                concept = retention_vals.get('concept_id')
+                if not concept:
+                    raise ValidationError(
+                        _("Concept must be setted in python code. Retention %s")
+                        % retention.name
                     )
 
-                    # Agregamos la move_line.
-                    # En realidad nos interesa la voucher_line,
-                    # pero a estas alturas todavia no la tenemos
-                    if move_line not in all_concepts[key]['move_lines']:
-                        all_concepts[key]['move_lines'] += move_line
-            else:
+                if (
+                    retention_vals.get('amount', 0.0) == 0.0
+                    and retention.tax_id.state_id.code != 'R'
+                ):
+                    continue
+
+                key = (retention.id, concept)
+                all_concepts.setdefault(
+                    key,
+                    {
+                        'base': 0.0,
+                        'amount': 0.0,
+                        'taxapp': None,
+                        'move_lines': self.env['account.move.line'],
+                        'reg_code': retention_vals.get('reg_code'),
+                    },
+                )
+                all_concepts[key]['base'] += retention_vals.get('base', 0)
+                all_concepts[key]['amount'] += retention_vals.get('amount', 0)
+
+                # Agregamos la move_line.
+                # En realidad nos interesa la voucher_line,
+                # pero a estas alturas todavia no la tenemos
+                all_concepts[key]['move_lines'] = (
+                    income_line_affected + debt_line_affected
+                ).mapped('move_line_id')
+        else:
+            for po_line in income_line_affected + debt_line_affected:
+                move_line = po_line.move_line_id
+
+                # Chequeamos si la factura que corresponde a esta move_line ya
+                # tiene una retencion aplicada previa de este tipo en algun pago
+                # parcial previo.
+                # Por lo tanto, no corresponde retener nuevamente porque sino
+                # estariamos aplicando dos veces la misma
+                # retencion sobre el pago de una misma factura
+                prev_ret_ids = self._check_previous_retentions(
+                    retention, move_line
+                )
+
+                # Agrupamos por retencion y concepto antes de aplicar la retencion
+                # O sea, vamos a calcular las bases para cada
+                # (retencion,concepto) y luego aplicamos la retencion
+
+                # Obtenemos el factor desde el total de la deuda contra
+                # lo que se pretende pagar
+                mla = move_line.credit or move_line.debit
+                factor_to_pay = mla / po_line.amount
+                factor_unrec = mla / po_line.amount_unreconciled
+
+                logging_messages.append("Linea a aplicar %s" % (po_line.ref))
+
                 retentions = retention._compute_base_retention(
                     move_line,
                     factor_to_pay,
