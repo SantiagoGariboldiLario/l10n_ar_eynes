@@ -335,10 +335,7 @@ class AccountMove(models.Model):
                 res['amount_untaxed_cur'] += amount
                 has_vat_tax = line.tax_ids.filtered(
                     lambda tax: tax.tax_group_id
-                    == self.env.ref(
-                        'l10n_ar_eynes.vat_tax_group',
-                        raise_if_not_found=False,
-                    )
+                    and tax.tax_group_id.group_type == 'vat'
                 )
                 if has_vat_tax.filtered(lambda tax: tax.is_exempt):
                     res['amount_exempt_cur'] += amount
@@ -353,14 +350,15 @@ class AccountMove(models.Model):
                     line.account_internal_type in ['payable', 'receivable']
                 ):
                     amount = line.credit or line.debit
-                    if line.tax_line_id.tax_group_id == self.env.ref(
-                        'l10n_ar_eynes.vat_tax_group',
-                        raise_if_not_found=False,
+                    if (
+                        line.tax_line_id.tax_group_id
+                        and line.tax_line_id.tax_group_id.group_type == 'vat'
                     ):
                         res['amount_tax_cur'] += amount
-                    if line.tax_line_id.tax_group_id == self.env.ref(
-                        'l10n_ar_eynes.perceptions_tax_group',
-                        raise_if_not_found=False,
+                    if (
+                        line.tax_line_id.tax_group_id
+                        and line.tax_line_id.tax_group_id.group_type
+                        == 'perception'
                     ):
                         res['amount_perception_curr'] += amount
                     res['amount_total_cur'] += amount
@@ -449,10 +447,6 @@ class AccountMove(models.Model):
         """
         Update tax information based on perceptions.
         """
-        tax_group_perception = self.env.ref(
-            'l10n_ar_eynes.perceptions_tax_group'
-        )
-
         if self.is_sale_document() or self.is_purchase_document():
             perceptions_applied = self.env['account.tax']
             for perception in self.perception_ids:
@@ -462,7 +456,8 @@ class AccountMove(models.Model):
                 line.tax_ids = (
                     line.tax_ids
                     - line.tax_ids.filtered(
-                        lambda tax: tax.tax_group_id == tax_group_perception
+                        lambda tax: tax.tax_group_id
+                        and tax.tax_group_id.group_type == 'perception'
                     )
                 ) | perceptions_applied
 
@@ -654,7 +649,9 @@ class AccountMove(models.Model):
 
         def _filter_taxed(line):
             taxed = line.tax_ids.mapped(
-                lambda x: x.tax_group_id.name == 'vat' and not x.is_exempt
+                lambda x: x.tax_group_id
+                and x.tax_group_id.group_type == 'vat'
+                and not x.is_exempt
             )
             return any(taxed)
 

@@ -197,7 +197,7 @@ class AccountMoveLine(models.Model):
             tax_amount = 0
             vat_taxes = self.tax_ids.filtered(
                 lambda tax: tax.tax_group_id
-                == self.env.ref('l10n_ar_eynes.vat_tax_group')
+                and tax.tax_group_id.group_type == 'vat'
             )
             for tax in vat_taxes:
                 tax_amount += price_unit * tax.amount / 100
@@ -210,7 +210,7 @@ class AccountMoveLine(models.Model):
             tax_amount = 0
             vat_taxes = self.tax_ids.filtered(
                 lambda tax: tax.tax_group_id
-                == self.env.ref('l10n_ar_eynes.vat_tax_group')
+                and tax.tax_group_id.group_type == 'vat'
             )
             for tax in vat_taxes:
                 tax_amount += price_subtotal * tax.amount / 100
