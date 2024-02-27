@@ -914,14 +914,16 @@ class AccountMove(models.Model):
             new_perception_lines = self.env['perception.tax.line']
 
             perceptions = perception_id.tax_id._get_taxapps_from_code(
-                perception_data, self
+                perception_data, invoice=self
             )
 
             for perception_vals in perceptions:
                 concept_id = perception_vals.get('concept_id')
                 if not concept_id:
                     raise ValidationError(
-                        _("Concet must be setted in python code. Perception %s")
+                        _(
+                            "Concept must be setted in python code. Perception %s"
+                        )
                         % perception_id.name
                     )
 

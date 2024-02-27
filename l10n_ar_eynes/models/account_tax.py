@@ -232,9 +232,10 @@ class AccountTax(models.Model):
             ),
             'get_taxpayer_type': self.get_taxpayer_type,
             'ValidationError': ValidationError,
+            'print': print,
         }
 
-    def _get_taxapps_from_code(self, perc_data, invoice):
+    def _get_taxapps_from_code(self, perc_data, invoice=None, po_line=None):
         """
         Execute the python code to know
         if any perception has to be applied
@@ -248,7 +249,11 @@ class AccountTax(models.Model):
         """
         self.ensure_one()
         eval_context = self._get_eval_code_context()
-        partner = invoice.partner_id
+        partner = None
+        if invoice:
+            partner = invoice.partner_id
+        if po_line:
+            partner = po_line.partner_id
 
         # Pasamos el parent partner como variable en caso de
         # que exista para poder tomar sus percepciones
@@ -261,8 +266,12 @@ class AccountTax(models.Model):
                 'invoice': invoice,
                 'partner': partner,
                 'perception': self,
+                'retention': self,
+                'po_line': po_line,
+                'invoice_line': po_line.move_line_id if po_line else None,
             }
         )
+
         try:
             safe_eval(
                 self.python_code.strip(),
