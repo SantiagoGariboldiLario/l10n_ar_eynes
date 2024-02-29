@@ -202,7 +202,8 @@ class ResPartner(models.Model):
         )
         partner_perceptions_for_fiscal_position_period = (
             partner_perceptions_for_fiscal_position.filtered(
-                lambda perception: (
+                lambda perception: not perception.period
+                or (
                     perception.period
                     <= invoice_date
                     <= (
