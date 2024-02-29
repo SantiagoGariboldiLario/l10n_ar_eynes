@@ -7,7 +7,7 @@
         <field name="page_width">0</field>
         <field name="orientation">Portrait</field>
         <field name="margin_top">50</field>
-        <field name="margin_bottom">32</field>
+        <field name="margin_bottom">100</field>
         <field name="margin_right">5</field>
         <field name="margin_left">5</field>
         <field name="header_line" eval="False" />
@@ -61,7 +61,8 @@
                                     <t t-if="o.partner_id.property_account_position_id.name == 'RI'">
                                         <span>RESPONSABLE INSCRIPTO</span>
                                     </t>
-                                    <t t-elif="o.partner_id.property_account_position_id.name == 'RIM'">
+                                    <t
+                                        t-elif="o.partner_id.property_account_position_id.name == 'RIM'">
                                         <span>RESPONSABLE INSCRIPTO "M"</span>
                                     </t>
                                     <t t-else="">
@@ -144,149 +145,164 @@
                             </style>
                         </table>
 
-                        <div style="float: right;">
-                            <table
-                                style="display: inline-block; margin-top: 20px; border-bottom: 1px solid black;"
-                                t-if="o.denomination != 'b'"
-                            >
-                                <tr>
-                                    <t t-foreach="o.line_ids.filtered('tax_line_id')" t-as="line_tax">
-                                        <td style="width: 250px;">
-                                            <div style="text-align: left;">
-                                                <strong>
-                                                    <span t-esc="line_tax.tax_line_id.name" />
-                                                </strong>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span
-                                                t-esc="abs(line_tax.balance)"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                            />
-                                        </td>
-                                    </t>
-                                </tr>
-                            </table>
-                        </div>
-
-
-                        <div class="row" style="margin-top: 50px;">
-                            <div class="column" style="text-align: left; border-right: 1px solid black;">
-                                <h4 style="font-weight: bold;">
-                                    Observaciones:
-                                </h4>
-                            </div>
-                            <div class="column" style="text-align: center;">
-                                <table width="100%">
-                                    <thead style="background: #d1d1d1;">
-                                        <tr style="font-weight: bold;">
-                                            <td>
-                                                Subtotal
+                        <div class="footer" style="position: relative; bottom: 10px;">
+                            <div>
+                                <table
+                                    style="display: inline-block; margin-top: 20px; border-bottom: 1px solid black; position: relative; left: 550px;"
+                                    t-if="o.denomination != 'b'"
+                                >
+                                    <tr>
+                                        <t t-foreach="o.line_ids.filtered('tax_line_id')"
+                                            t-as="line_tax">
+                                            <td style="width: 250px;">
+                                                <div style="text-align: left;">
+                                                    <strong>
+                                                        <span t-esc="line_tax.tax_line_id.name" />
+                                                    </strong>
+                                                </div>
                                             </td>
-                                            <td t-if="o.denomination != 'b'">
-                                                Impuestos
-                                            </td>
-                                            <td>
-                                                Total
-                                            </td>
-
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
+                                            <td style="padding-right: 1em;">
                                                 <span
-                                                    t-esc="o.price_subtotal_to_PDF()"
+                                                    t-esc="abs(line_tax.balance)"
                                                     t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                 />
                                             </td>
-                                            <td t-if="o.denomination != 'b'">
-                                                <span
-                                                    t-esc="o.amount_tax"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
-                                            </td>
-                                            <td>
-                                                <span
-                                                    t-esc="o.amount_total"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
-                                            </td>
-                                        </tr>
-                                    </tbody>
+                                        </t>
+                                    </tr>
+                                    <style>
+                                        tr td:last-child {
+                                        padding-right: 0 !important;
+                                        }
+                                    </style>
                                 </table>
                             </div>
 
-                            <style>
-                                .row{
-                                border: 1px solid black;
-                                padding: 5px;
-                                margin-top: 10px;
 
-                                }
-                                .column{
-                                width: 50%;
+                            <div class="row" style="margin-top: 20px;">
+                                <div class="column"
+                                    style="text-align: left; border-right: 1px solid black;">
+                                    <h4 style="font-weight: bold;">
+                                        Observaciones:
+                                    </h4>
+                                </div>
+                                <div class="column" style="text-align: center;">
+                                    <table width="100%">
+                                        <thead style="background: #d1d1d1;">
+                                            <tr style="font-weight: bold;">
+                                                <td>
+                                                    Subtotal
+                                                </td>
+                                                <td t-if="o.denomination != 'b'">
+                                                    Impuestos
+                                                </td>
+                                                <td>
+                                                    Total
+                                                </td>
 
-                                }
-                                .row:after{
-                                content: "";
-                                display: table;
-                                clear: both;
-                                }
-                            </style>
-                        </div>
-                        
-                        <t t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'">
-                            <div class="row" style="margin-top: 5px;">
-                                <p style="text-align: center">
-                                    El crédito fiscal discriminado en el presente comprobante, sólo podrá ser computado a efectos del Régimen de Sostenimiento e Inclusión Fiscal para Pequeños Contribuyentes de la Ley Nº 27.618
-                                </p>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <span
+                                                        t-esc="o.price_subtotal_to_PDF()"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
+                                                </td>
+                                                <td t-if="o.denomination != 'b'">
+                                                    <span
+                                                        t-esc="o.amount_tax"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        t-esc="o.amount_total"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <style>
+                                    .row{
+                                    border: 1px solid black;
+                                    padding: 5px;
+                                    margin-top: 10px;
+
+                                    }
+                                    .column{
+                                    width: 50%;
+
+                                    }
+                                    .row:after{
+                                    content: "";
+                                    display: table;
+                                    clear: both;
+                                    }
+                                </style>
                             </div>
-                        </t>
 
-                        <div style="display: flex;">
-                            <div style="float: left; width: 50%; hight: 120px;">
-                                <div style="margin-top: 1px;">
-                                    <div style="display: flex;">
-                                        <img
-                                            t-attf-src="data:image/png;base64,#{o._generate_qr()}"
-                                            alt="QR"
-                                            style="height: 150px; width: 150px; margin-right: 20px;"
-                                        />
-                                        <img
-                                            t-attf-src="data:image/png;base64,#{o.get_afip_logo()}"
-                                            alt="Logo Afip"
-                                            style="height: 120px; width: 200px; margin-bot: 20px;"
-                                        />
-                                    </div>
-                                    <!-- <p>Comprobante Autorizado</p>
+                            <t
+                                t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'">
+                                <div class="row" style="margin-top: 5px;">
+                                    <p style="text-align: center">
+                                        El crédito fiscal discriminado en el presente comprobante,
+                                        sólo podrá ser computado a efectos del Régimen de
+                                        Sostenimiento e Inclusión Fiscal para Pequeños
+                                        Contribuyentes de la Ley Nº 27.618
+                                    </p>
+                                </div>
+                            </t>
+
+                            <div style="display: flex;">
+                                <div style="float: left; width: 50%; hight: 120px;">
+                                    <div style="margin-top: 1px;">
+                                        <div style="display: flex;">
+                                            <img
+                                                t-attf-src="data:image/png;base64,#{o._generate_qr()}"
+                                                alt="QR"
+                                                style="height: 150px; width: 150px; margin-right: 20px;"
+                                            />
+                                            <img
+                                                t-attf-src="data:image/png;base64,#{o.get_afip_logo()}"
+                                                alt="Logo Afip"
+                                                style="height: 120px; width: 200px; margin-bot: 20px;"
+                                            />
+                                        </div>
+                                        <!-- <p>Comprobante Autorizado</p>
                                     <p>Esta Administracion Federal no se responsabiliza por los datos ingresados en el detalle de la operacion</p> -->
                                 </div>
-                            </div>
-                            <div class="cae" tyle="float: right; width: 50%; margin: 0 auto;">
-                                <table style="font-size: 18px; text-align: center; margin: 0 auto;">
-                                    <tr>
-                                        <td>
-                                            Factura Electrónica / CAE:
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="background: #bcc0c4;">
-                                            <t t-if="o.cae">
-                                                <span t-esc="o.cae" />
-                                            </t>
-                                            <t t-else="">
-                                                <span>-</span>
-                                            </t>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td> F. Vto.: <t t-if="o.cae_due_date">
-                                                <span t-esc="o.cae_due_date.strftime('%d-%m-%Y')" />
-                                            </t>
-                                        </td>
-                                    </tr>
-                                </table>
+                                </div>
+                                <div class="cae" tyle="float: right; width: 50%; margin: 0 auto;">
+                                    <table
+                                        style="font-size: 18px; text-align: center; margin: 0 auto;">
+                                        <tr>
+                                            <td>
+                                                Factura Electrónica / CAE:
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background: #bcc0c4;">
+                                                <t t-if="o.cae">
+                                                    <span t-esc="o.cae" />
+                                                </t>
+                                                <t t-else="">
+                                                    <span>-</span>
+                                                </t>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td> F. Vto.: <t t-if="o.cae_due_date">
+                                                    <span
+                                                        t-esc="o.cae_due_date.strftime('%d-%m-%Y')" />
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -322,9 +338,11 @@
                                     />
                                     <br />
                                     <p>
-                                            <h3 t-esc="o.company_id.name" />
-                                            <span t-esc="o.journal_id.warehouse_id.partner_id.street" />
-                                            <span t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
+                                        <h3 t-esc="o.company_id.name" />
+                                            <span
+                                            t-esc="o.journal_id.warehouse_id.partner_id.street" />
+                                            <span
+                                            t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
                                             t-esc="o.journal_id.warehouse_id.partner_id.zip"
                                         />) - <span
                                             t-esc="o.journal_id.warehouse_id.partner_id.state_id.name"
@@ -332,7 +350,7 @@
                                             t-esc="o.journal_id.warehouse_id.partner_id.country_id.name"
                                         />
                                             <br />
-                                            Tel.: <span t-esc="o.journal_id.warehouse_id.partner_id.phone" />
+                                    Tel.: <span t-esc="o.journal_id.warehouse_id.partner_id.phone" />
                                     </p>
 
                                 </td>
@@ -340,16 +358,20 @@
                                     <div
                                         style="display: block; margin: 0 auto; border: 2px solid #000; height: 100px; width: 100px; font-size: 40px;"
                                     >
-                                        <h1 
+                                        <h1
                                             t-if="denomination_name != 'NOT_DEFINED'"
-                                            style="font-size: 65px;"   
-                                            t-esc="denomination_name" 
+                                            style="font-size: 65px;"
+                                            t-esc="denomination_name"
                                         />
+                                        <p
+                                            style="font-size: 15px; position: relative; bottom: 10px;">
+                                            cod. <span t-esc="o.voucher_type_id.afip_code" /></p>
+
                                     </div>
                                 </td>
                                 <td
                                     width="33%"
-                                    style="font-weight: bold; font-size: 17px; padding-left: 50px;"
+                                    style="font-weight: bold; font-size: 17px; padding-left: 50px; position: absolute; right: 57px;"
                                 >
                                     <span>N° <span t-esc="denomination" />
                                     </span>
