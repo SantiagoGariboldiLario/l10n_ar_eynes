@@ -13,7 +13,13 @@ odoo.define("l10n_ar_pos_wsfe.WSFEPaymentScreen", function (require) {
             }
             mounted() {
                 super.mounted();
-                this.setNextInvoiceSequence();
+                // By default set electronic invoice
+                if(!this.currentOrder.is_manual_invoice() &&
+                    !this.currentOrder.is_electronic_invoice()){
+                    this.toggleIsElectronicInvoice()
+                }else{
+                    this.setNextInvoiceSequence();
+                }
                 this.env.pos.on("change:selectedClient", () => this.setNextInvoiceSequence(), this);
             }
             willUnmount() {
