@@ -69,7 +69,19 @@
                     </td>
                 </tr>
             </table>
+            <div t-if="o.is_multi_currency">
+                <table>
+                    <tr>
+                        <td>Moneda: <span t-esc="o.currency_id.name"/></td>
+                    </tr>
+                    <tr>
+                        <td>Tasa de cambio: <span t-esc="o.currency_rate"/></td>
+                    </tr>
+                </table>
+                <p>El total de este comprobante expresado en la moneda de curso legal - Pesos Argentinos - asciende a $  <span t-esc="tax_totals['amount_total'] * o.currency_rate"/></p>                
+            </div>
         </xpath>
+        
     </template>
 
     <template id="report_invoice" inherit_id="account.report_invoice">
