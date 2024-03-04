@@ -348,16 +348,16 @@
                                     <img
                                         t-if="o.journal_id.image"
                                         t-attf-src="data:image/png;base64,#{o.journal_id.image}"
-                                        style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
+                                        style="margin-left: 20px; max-width: 98%; max-height: 80px; margin-right: 10px;"
                                     />
                                     <img
                                         t-else=""
                                         t-attf-src="data:image/png;base64,#{o.company_id.logo}"
-                                        style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
+                                        style="margin-left: 20px; max-width: 98%; max-height: 80px; margin-right: 10px;"
                                     />
                                     <br />
                                     <p>
-                                        <h3 t-esc="o.company_id.name" />
+                                        <h4 t-esc="o.company_id.name" style="white-space:nowrap;" />
                                             <span t-esc="o.journal_id.warehouse_id.partner_id.street" />
                                             <span t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
                                             t-esc="o.journal_id.warehouse_id.partner_id.zip"
