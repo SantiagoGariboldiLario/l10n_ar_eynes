@@ -334,7 +334,9 @@ class WsfeConfig(models.Model):
             cbt_desde=number,
             cbt_hasta=number,
             imp_total=data['total_amount'],
-            imp_tot_conc=data['no_taxed_amount'],
+            imp_tot_conc=0.00
+            if invoice.denomination == 'c'
+            else data['no_taxed_amount'],
             imp_neto=vat_data['base_vat_amount']
             if invoice.denomination != 'c'
             else (data['total_amount'] - tribute_data['tribute_total']),
