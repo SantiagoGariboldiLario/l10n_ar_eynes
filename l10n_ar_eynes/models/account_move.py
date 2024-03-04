@@ -771,87 +771,105 @@ class AccountMove(models.Model):
                     move.write({'denomination': denomination})
         return res
 
-    # def action_register_payment(self):
-    #     """Override to redirect to account payment order"""
-    #     po = self.env['account.payment.order'].create(
-    #         self.get_payment_order_vals()
-    #     )
+    def action_register_payment(self):
+        '''Open the account.payment.register wizard to pay the selected journal entries.
+        :return: An action opening the account.payment.register wizard.
+        '''
+        try:
+            self.ensure_one()
+        except ValueError:
+            return super(AccountMove, self).action_register_payment()
 
-    #     if self.is_sale_document():
-    #         view_id = self.env.ref(
-    #             'l10n_ar_eynes.account_customer_payment_order_view_form'
-    #         )
-    #     else:
-    #         view_id = self.env.ref(
-    #             'l10n_ar_eynes.account_supplier_payment_order_view_form'
-    #         )
-    #     return {
-    #         'name': _('Customer Payment'),
-    #         'res_model': 'account.payment.order',
-    #         'res_id': po.id,
-    #         'view_mode': 'form',
-    #         'view_id': view_id.id,
-    #         'target': 'current',
-    #         'type': 'ir.actions.act_window',
-    #     }
+        view_id = self.env.ref(
+            'l10n_ar_eynes.account_supplier_payment_order_view_form'
+        )
+        context = {
+            'active_model': 'account.move',
+            'default_disable_retentions': True,
+        }
+        if self.is_sale_document():
+            view_id = self.env.ref(
+                'l10n_ar_eynes.account_customer_payment_order_view_form'
+            )
+            context.update(
+                {
+                    'default_type': 'receipt',
+                }
+            )
 
-    # def get_payment_order_vals(self):
-    #     move_line_domain = [
-    #         ('id', 'in', self.line_ids.ids),
-    #         ('reconciled', '=', False),
-    #     ]
-    #     if self.is_sale_document():
-    #         move_line_domain += [
-    #             ('debit', '>', 0),
-    #             ('credit', '=', 0),
-    #         ]
-    #     else:
-    #         move_line_domain += [
-    #             ('debit', '=', 0),
-    #             ('credit', '>', 0),
-    #         ]
-    #     move_line = self.env['account.move.line'].search(move_line_domain)
-    #     po_move_line = [
-    #         (
-    #             0,
-    #             0,
-    #             {
-    #                 'invoice_id': self.id,
-    #                 'move_line_id': move_line.id,
-    #                 'account_id': move_line.account_id.id,
-    #             },
-    #         )
-    #     ]
+        po = self.env['account.payment.order'].create(
+            self._get_payment_order_vals()
+        )
 
-    #     _type = 'receipt' if self.is_sale_document() else 'payment'
-    #     po_vals = {
-    #         'type': _type,
-    #         'partner_id': self.partner_id.id,
-    #         'journal_id': self.get_payment_order_journal(_type).id,
-    #     }
+        return {
+            'name': _('Register Payment'),
+            'res_model': 'account.payment.order',
+            'res_id': po.id,
+            'view_mode': 'form',
+            'view_id': view_id.id,
+            'target': 'current',
+            'context': context,
+            'type': 'ir.actions.act_window',
+        }
 
-    #     if self.currency_id != self.company_id.currency_id:
-    #         po_vals['payment_rate'] = self.currency_rate
+    def _get_payment_order_vals(self):
+        move_line_domain = [
+            ('id', 'in', self.line_ids.ids),
+            ('reconciled', '=', False),
+        ]
+        if self.is_sale_document():
+            move_line_domain += [
+                ('debit', '>', 0),
+                ('credit', '=', 0),
+            ]
+        else:
+            move_line_domain += [
+                ('debit', '=', 0),
+                ('credit', '>', 0),
+            ]
+        move_line = self.env['account.move.line'].search(move_line_domain)
+        po_move_line = [
+            (
+                0,
+                0,
+                {
+                    'invoice_id': self.id,
+                    'move_line_id': move_line.id,
+                    'account_id': move_line.account_id.id,
+                },
+            )
+        ]
 
-    #     if self.is_sale_document():
-    #         po_vals['income_line_ids'] = po_move_line
-    #     else:
-    #         po_vals['debt_line_ids'] = po_move_line
+        _type = 'receipt' if self.is_sale_document() else 'payment'
+        po_vals = {
+            'type': _type,
+            'partner_id': self.partner_id.id,
+            'journal_id': self._get_payment_order_journal(_type).id,
+            'currency_id': self.currency_id.id,
+        }
 
-    #     return po_vals
+        if self.currency_id != self.company_id.currency_id:
+            po_vals['payment_rate'] = self.currency_rate
 
-    # def get_payment_order_journal(self, journal_type):
-    #     journals = self.env['account.journal'].search(
-    #         [
-    #             ('type', '=', journal_type),
-    #             ('currency_id', '=', self.currency_id.id),
-    #         ]
-    #     )
-    #     if not journals:
-    #         raise ValidationError(
-    #             _("There are no payment/receipt journals with this currency.")
-    #         )
-    #     return journals[0]
+        if self.is_sale_document():
+            po_vals['income_line_ids'] = po_move_line
+        else:
+            po_vals['debt_line_ids'] = po_move_line
+
+        return po_vals
+
+    def _get_payment_order_journal(self, journal_type):
+        domain = [('type', '=', journal_type)]
+        if self.is_multi_currency:
+            domain.append(
+                ('currency_id', '=', self.currency_id.id),
+            )
+        journals = self.env['account.journal'].search(domain)
+        if not journals:
+            raise ValidationError(
+                _("There are no payment/receipt journals with this currency.")
+            )
+        return journals[0]
 
     @api.constrains('name', 'journal_id', 'state')
     def _check_unique_sequence_number(self):
