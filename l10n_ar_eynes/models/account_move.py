@@ -335,10 +335,7 @@ class AccountMove(models.Model):
                 res['amount_untaxed_cur'] += amount
                 has_vat_tax = line.tax_ids.filtered(
                     lambda tax: tax.tax_group_id
-                    == self.env.ref(
-                        'l10n_ar_eynes.vat_tax_group',
-                        raise_if_not_found=False,
-                    )
+                    and tax.tax_group_id.group_type == 'vat'
                 )
                 if has_vat_tax.filtered(lambda tax: tax.is_exempt):
                     res['amount_exempt_cur'] += amount
@@ -353,14 +350,15 @@ class AccountMove(models.Model):
                     line.account_internal_type in ['payable', 'receivable']
                 ):
                     amount = line.credit or line.debit
-                    if line.tax_line_id.tax_group_id == self.env.ref(
-                        'l10n_ar_eynes.vat_tax_group',
-                        raise_if_not_found=False,
+                    if (
+                        line.tax_line_id.tax_group_id
+                        and line.tax_line_id.tax_group_id.group_type == 'vat'
                     ):
                         res['amount_tax_cur'] += amount
-                    if line.tax_line_id.tax_group_id == self.env.ref(
-                        'l10n_ar_eynes.perceptions_tax_group',
-                        raise_if_not_found=False,
+                    if (
+                        line.tax_line_id.tax_group_id
+                        and line.tax_line_id.tax_group_id.group_type
+                        == 'perception'
                     ):
                         res['amount_perception_curr'] += amount
                     res['amount_total_cur'] += amount
@@ -449,10 +447,6 @@ class AccountMove(models.Model):
         """
         Update tax information based on perceptions.
         """
-        tax_group_perception = self.env.ref(
-            'l10n_ar_eynes.perceptions_tax_group'
-        )
-
         if self.is_sale_document() or self.is_purchase_document():
             perceptions_applied = self.env['account.tax']
             for perception in self.perception_ids:
@@ -462,7 +456,8 @@ class AccountMove(models.Model):
                 line.tax_ids = (
                     line.tax_ids
                     - line.tax_ids.filtered(
-                        lambda tax: tax.tax_group_id == tax_group_perception
+                        lambda tax: tax.tax_group_id
+                        and tax.tax_group_id.group_type == 'perception'
                     )
                 ) | perceptions_applied
 
@@ -627,7 +622,7 @@ class AccountMove(models.Model):
                     )
 
                 inv.voucher_type_id = res[0] if res else False
-            if self.is_purchase_document():
+            if inv.is_purchase_document():
                 if len(res) == 1:
                     inv.voucher_type_id = res
 
@@ -654,7 +649,9 @@ class AccountMove(models.Model):
 
         def _filter_taxed(line):
             taxed = line.tax_ids.mapped(
-                lambda x: x.tax_group_id.name == 'vat' and not x.is_exempt
+                lambda x: x.tax_group_id
+                and x.tax_group_id.group_type == 'vat'
+                and not x.is_exempt
             )
             return any(taxed)
 
@@ -682,7 +679,9 @@ class AccountMove(models.Model):
 
     def _set_perception_date(self):
         for inv in self:
-            if (inv.is_sale_document() or inv.is_puchase_document()) and inv.id:
+            if (
+                inv.is_sale_document() or inv.is_purchase_document()
+            ) and inv.id:
                 # If not date write the invoice date
                 for p in inv.perception_ids:
                     if not p.date:
@@ -692,13 +691,10 @@ class AccountMove(models.Model):
                         p.write({'date': date})
 
     def _post(self, soft=True):
-        sale_invoices = self.filtered(
-            lambda move: move.is_sale_document() and move.id
-        )
-
-        for inv in sale_invoices:
-            inv.validate_denomination()
-            inv.validate_period()
+        for move in self:
+            move.validate_period()
+            if move.is_sale_document() and move.id:
+                move.validate_denomination()
 
         posted_moves = super(AccountMove, self)._post(soft=soft)
         posted_moves._set_perception_date()
@@ -706,11 +702,11 @@ class AccountMove(models.Model):
         return posted_moves
 
     def action_post(self):
-        electronic_invoices = self.filtered(
+        sale_invoices = self.filtered(lambda move: move.is_sale_document())
+        electronic_invoices = sale_invoices.filtered(
             lambda move: move.fiscal_type == 'electronic'
         )
-
-        for inv in self - electronic_invoices:
+        for inv in sale_invoices - electronic_invoices:
             if not inv.posted_before:
                 inv.write(
                     {
@@ -725,7 +721,7 @@ class AccountMove(models.Model):
         return electronic_invoices._validate_electronic_invoices()
 
     def validate_period(self):
-        date = self.invoice_date or fields.Date.context_today(self)
+        date = self.date or self.invoice_date or fields.Date.context_today(self)
         if not self.journal_id.due_date:
             raise ValidationError(
                 _(
@@ -915,14 +911,16 @@ class AccountMove(models.Model):
             new_perception_lines = self.env['perception.tax.line']
 
             perceptions = perception_id.tax_id._get_taxapps_from_code(
-                perception_data, self
+                perception_data, invoice=self
             )
 
             for perception_vals in perceptions:
                 concept_id = perception_vals.get('concept_id')
                 if not concept_id:
                     raise ValidationError(
-                        _("Concet must be setted in python code. Perception %s")
+                        _(
+                            "Concept must be setted in python code. Perception %s"
+                        )
                         % perception_id.name
                     )
 
@@ -1015,7 +1013,7 @@ class AccountMove(models.Model):
 
         return vals
 
-    @api.onchange('invoice_line_ids', 'disable_perceptions')
+    @api.onchange('invoice_line_ids', 'disable_perceptions', 'invoice_date')
     def compute_perceptions(self):
         for rec in self:
             if rec.is_sale_document():
@@ -1025,7 +1023,9 @@ class AccountMove(models.Model):
                     new_perception_lines = self.env['perception.tax.line']
                     # Calculamos cada Percepcion configurada en el Partner
                     partner_perceptions = (
-                        rec.partner_id._get_perceptions_to_apply()
+                        rec.partner_id._get_perceptions_to_apply(
+                            rec.invoice_date or datetime.date.today()
+                        )
                     )
                     for partner_perc in partner_perceptions.values():
                         excluded_percent = partner_perc['excluded_percent']

@@ -46,7 +46,6 @@
                         <group>
                             <field
                                 name="partner_id"
-                                domain="[('customer_rank', '>', 0)]"
                                 required="1"
                                 string="Customer"
                                 widget="res_partner_many2one"
@@ -719,7 +718,6 @@
                             <field
                                 name="partner_id"
                                 required="1"
-                                domain="[('supplier_rank', '>', 0)]"
                                 widget="res_partner_many2one"
                                 invisible="context.get('line_type', False)"
                                 context="{'invoice_currency':currency_id, 'search_default_supplier': 1, 'default_supplier': 1}"

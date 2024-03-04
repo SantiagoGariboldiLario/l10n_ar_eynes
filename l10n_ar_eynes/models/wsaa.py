@@ -76,7 +76,7 @@ class WSAAConfig(models.Model):
             'type': 'ir.actions.act_url',
             'url': (
                 '/web/binary/download_document?model=%(model)s&'
-                + 'field=%(field)s&id=%(id)s&filename=%(fname)s'
+                + 'field=%(field)s&_id=%(id)s&filename=%(fname)s'
             )
             % vals,
             'target': 'new',

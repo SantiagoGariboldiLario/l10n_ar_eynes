@@ -83,13 +83,10 @@ class SubjournalXlsx(models.AbstractModel):
         base_first = obj.base_position == 'first'
 
         for tax in taxes.sorted(lambda t: getattr(t, obj.sort_by)):
-            perception_tax_group = self.env.ref(
-                'l10n_ar_eynes.perceptions_tax_group'
-            )
             if (
                 not (
                     tax.tax_group_id
-                    and tax.tax_group_id == perception_tax_group
+                    and tax.tax_group_id.group_type == 'perception'
                 )
                 and base_first
             ):
@@ -116,7 +113,7 @@ class SubjournalXlsx(models.AbstractModel):
             if (
                 not (
                     tax.tax_group_id
-                    and tax.tax_group_id == perception_tax_group
+                    and tax.tax_group_id.group_type == 'perception'
                 )
                 and not base_first
             ):

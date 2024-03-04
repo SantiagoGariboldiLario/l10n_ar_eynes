@@ -2,21 +2,26 @@
 <odoo noupdate="1">
     <record id="retentions_tax_group" model="account.tax.group">
         <field name="name">Retentions</field>
+        <field name="group_type">retention</field>
     </record>
 
     <record id="perceptions_tax_group" model="account.tax.group">
         <field name="name">Perceptions</field>
+        <field name="group_type">perception</field>
     </record>
 
     <record id="vat_tax_group" model="account.tax.group">
         <field name="name">Vat</field>
+        <field name="group_type">vat</field>
     </record>
 
     <record id="internal_tax_group" model="account.tax.group">
         <field name="name">Internal</field>
+        <field name="group_type">internals</field>
     </record>
 
     <record id="other_tax_group" model="account.tax.group">
         <field name="name">Other</field>
+        <field name="group_type">other</field>
     </record>
 </odoo>

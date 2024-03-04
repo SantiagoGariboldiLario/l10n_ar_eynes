@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <template id="retention_certificate_qweb">
         <t t-call="web.html_container">
@@ -9,39 +9,37 @@
             </html>
             <t t-foreach="docs" t-as="o">
                 <t t-foreach="o.retention_ids" t-as="r">
-                    <table style="width:100%">
-                        <!-- *-* *-* TITLE *-* *-* -->
+                    <!-- *-* *-* TITLE I *-* *-* -->
+                    <div class="header">
+                        <table style="width:100%">
+                            <tr>
+                                <td colspan="2" style="text-align:center;padding:9px;">
+                                    <t
+                                        t-set="title"
+                                        t-value="'CONSTANCIA DE RETENCION - {}'.format(r.retention_id.name)"
+                                    />
+                                    <strong t-esc="title" style="font-size:30px;" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="article">
+                        <table style="width:100%">
                         <tr>
-                            <td colspan="2" style="text-align:center;padding:9px;">
-                                <t
-                                    t-set="title"
-                                    t-value="'CONSTANCIA DE RETENCION - {}'.format(r.retention_id.name)"
-                                />
-                                <strong t-esc="title" style="font-size:30px;" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" style="text-align:center;padding:9px;">
-                                <strong
-                                    style="font-size:30px;"
-                                >Nro. de Constancia: </strong>
+                            <td colspan="2" style="text-align:center;padding:9px;font-size:30px;">
+                                <strong>Nro. de Constancia: </strong>
                                 <t t-set="certificate_no" t-value="r.certificate_no" />
                                 <span t-esc="certificate_no" />
                             </td>
                         </tr>
                         <tr>
-                            <td
-                                colspan="2"
-                                style="border-bottom:solid 1px;padding:9px;"
-                            >
+                            <td colspan="2" style="border-bottom:solid 1px;padding:9px;">
                             </td>
                         </tr>
                         <!-- *-* *-* RUBRO I *-* *-* -->
                         <tr>
                             <td style="width:50%;padding:9px;">
-                                <strong
-                                    style="font-size:21px;"
-                                >RUBRO I: AGENTE DE RETENCION</strong>
+                                <strong style="font-size:21px;">RUBRO I: AGENTE DE RETENCION</strong>
                             </td>
                             <td style="padding:9px;">
                             </td>
@@ -89,28 +87,20 @@
                         <tr>
                             <td style="width:50%;padding:9px;">
                                 <strong style="font-size:21px;">Nro Agente: </strong>
-                                <t
-                                    t-set="agent_nro"
-                                    t-value="o.company_id.partner_id.nro_insc_iibb"
-                                />
+                                <t t-set="agent_nro" t-value="o.company_id.partner_id.nro_insc_iibb" />
                                 <span t-esc="agent_nro" style="font-size:21px;" />
                             </td>
                             <td style="padding:9px;">
                             </td>
                         </tr>
                         <tr>
-                            <td
-                                colspan="2"
-                                style="border-bottom:solid 1px;padding:9px;"
-                            >
+                            <td colspan="2" style="border-bottom:solid 1px;padding:9px;">
                             </td>
                         </tr>
                         <!-- *-* *-* RUBRO II *-* *-* -->
                         <tr>
                             <td style="width:50%;padding:9px;">
-                                <strong
-                                    style="font-size:21px;"
-                                >RUBRO II: IDENTIFICACION DEL
+                                <strong style="font-size:21px;">RUBRO II: IDENTIFICACION DEL
                                     CONTRIBUYENTE</strong>
                             </td>
                             <td style="padding:9px;">
@@ -128,10 +118,7 @@
                         <tr>
                             <td style="width:50%;padding:9px;">
                                 <strong style="font-size:21px;">Direccion: </strong>
-                                <t
-                                    t-set="partner_street"
-                                    t-value="o.partner_id.street"
-                                />
+                                <t t-set="partner_street" t-value="o.partner_id.street" />
                                 <span t-esc="partner_street" style="font-size:21px;" />
                             </td>
                             <td style="padding:9px;">
@@ -147,35 +134,20 @@
                                 <span t-esc="partner_city" style="font-size:21px;" />
                                 <span> - </span>
                                 <strong style="font-size:21px;">C.P.: </strong>
-                                <t
-                                    t-set="partner_zip_code"
-                                    t-value="o.partner_id.zip"
-                                />
-                                <span
-                                    t-esc="partner_zip_code"
-                                    style="font-size:21px;"
-                                />
+                                <t t-set="partner_zip_code" t-value="o.partner_id.zip" />
+                                <span t-esc="partner_zip_code" style="font-size:21px;" />
                             </td>
                             <td style="padding:9px;">
                                 <strong style="font-size:21px;">Provincia: </strong>
-                                <t
-                                    t-set="partner_state"
-                                    t-value="o.partner_id.state_id.name"
-                                />
+                                <t t-set="partner_state" t-value="o.partner_id.state_id.name" />
                                 <span t-esc="partner_state" style="font-size:21px;" />
                             </td>
                         </tr>
                         <tr>
                             <td style="width:50%;padding:9px;">
                                 <strong style="font-size:21px;">Nro II.BB.: </strong>
-                                <t
-                                    t-set="partner_agent_nro"
-                                    t-value="o.partner_id.nro_insc_iibb"
-                                />
-                                <span
-                                    t-esc="partner_agent_nro"
-                                    style="font-size:21px;"
-                                />
+                                <t t-set="partner_agent_nro" t-value="o.partner_id.nro_insc_iibb" />
+                                <span t-esc="partner_agent_nro" style="font-size:21px;" />
                             </td>
                             <td style="padding:9px;">
                                 <strong style="font-size:21px;">C.U.I.T.: </strong>
@@ -184,18 +156,13 @@
                             </td>
                         </tr>
                         <tr>
-                            <td
-                                colspan="2"
-                                style="border-bottom:solid 1px;padding:9px;"
-                            >
+                            <td colspan="2" style="border-bottom:solid 1px;padding:9px;">
                             </td>
                         </tr>
                         <!-- *-* *-* RUBRO III *-* *-* -->
                         <tr>
                             <td style="width:50%;padding:9px;">
-                                <strong
-                                    style="font-size:21px;"
-                                >RUBRO III: DETALLE DE EL/LOS MONTO/S
+                                <strong style="font-size:21px;">RUBRO III: DETALLE DE EL/LOS MONTO/S
                                     RETENIDO/S</strong>
                             </td>
                             <td style="padding:9px;">
@@ -205,34 +172,25 @@
                     <table style="width:100%">
                         <tr>
                             <td style="width:25%;text-align:center;padding:9px;">
-                                <strong
-                                    style="font-size:21px;"
-                                >Monto Base Imponible</strong>
+                                <strong style="font-size:21px;">Monto Base Imponible</strong>
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
                                 <strong style="font-size:21px;">Alicuota</strong>
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
-                                <strong
-                                    style="font-size:21px;"
-                                >Impuesto Ret./Perc.</strong>
+                                <strong style="font-size:21px;">Impuesto Ret./Perc.</strong>
                             </td>
                             <td style="text-align:center;padding:9px;">
-                                <strong
-                                    style="font-size:21px;"
-                                >Fecha de acreditacion</strong>
+                                <strong style="font-size:21px;">Fecha de acreditacion</strong>
                             </td>
                         </tr>
                         <tr>
                             <td style="width:25%;text-align:center;padding:9px;">
-                                <t t-set="base" t-value="r.base - r.concept_amount" />
+                                <t t-set="base" t-value="r.base" />
                                 <span t-esc="base" style="font-size:21px;" />
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
-                                <t
-                                    t-set="applied_aliquot"
-                                    t-value="r.applied_aliquot"
-                                />
+                                <t t-set="applied_aliquot" t-value="r.applied_aliquot" />
                                 <span t-esc="applied_aliquot" style="font-size:21px;" />
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
@@ -245,19 +203,15 @@
                             </td>
                         </tr>
                         <tr>
-                            <td
-                                colspan="4"
-                                style="border-bottom:solid 1px;padding:9px;"
-                            >
+                            <td colspan="4" style="border-bottom:solid 1px;padding:9px;">
                             </td>
                         </tr>
                     </table>
+                
                     <table style="width:100%">
                         <tr>
                             <td style="padding:9px;">
-                                <strong
-                                    style="font-size:21px;"
-                                >Total Retenido: </strong>
+                                <strong style="font-size:21px;">Total Retenido: </strong>
                                 <span t-esc="amount" style="font-size:21px;" />
                             </td>
                         </tr>
@@ -268,10 +222,7 @@
                                 >A informarse en la DD.JJ. del periodo: </strong>
                                 <t t-set="month" t-value="str(r.date).split('-')[1]" />
                                 <t t-set="year" t-value="str(r.date).split('-')[0]" />
-                                <t
-                                    t-set="period"
-                                    t-value="'{}/{}'.format(month, year)"
-                                />
+                                <t t-set="period" t-value="'{}/{}'.format(month, year)" />
                                 <span t-esc="period" style="font-size:21px;" />
                             </td>
                         </tr>
@@ -283,14 +234,17 @@
                         </tr>
                         <tr>
                             <td style="padding:9px;">
-                                <strong
-                                    style="font-size:21px;"
-                                >Comprobante asociado: </strong>
+                                <strong style="font-size:21px;">Comprobante asociado: </strong>
+                                <t t-if="o.type == 'payment'">
+                                    <span style="font-size:21px;">Recibo </span>
+                                </t>
                                 <t t-set="voucher" t-value="o.number" />
                                 <span t-esc="voucher" style="font-size:21px;" />
                             </td>
                         </tr>
                     </table>
+                </div>
+                <div class="footer">
                     <table style="width:100%;margin-top:250px;">
                         <tr>
                             <td rowspan="2" style="width:70%;padding:9px;">
@@ -304,6 +258,7 @@
                             </td>
                         </tr>
                     </table>
+                </div>
                 </t>
             </t>
         </t>
@@ -332,10 +287,7 @@
         <field name="report_name">l10n_ar_eynes.retention_certificate_qweb</field>
         <field name="report_file">l10n_ar_eynes.retention_certificate_qweb</field>
         <field name="paperformat_id" ref="retention_certificate_paperformat" />
-        <field
-            name="binding_model_id"
-            ref="l10n_ar_eynes.model_account_payment_order"
-        />
+        <field name="binding_model_id" ref="l10n_ar_eynes.model_account_payment_order" />
         <field name="binding_type">report</field>
     </record>
 </odoo>

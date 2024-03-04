@@ -66,6 +66,14 @@
                 <field name="due_date" attrs="{'readonly': [('id', '!=', False)]}" />
             </xpath>
 
+            <xpath expr="//page[@name='advanced_settings']" position="attributes">
+                <attribute name="attrs">
+                    {
+                        'invisible': [('type', 'in', ('perceptions', 'retentions'))],
+                    }
+                </attribute>
+            </xpath>
+
             <xpath
                 expr="//field[@name='outbound_payment_method_line_ids']/tree/field[@name='name']"
                 position="after"
@@ -76,8 +84,7 @@
             <xpath expr="//field[@name='profit_account_id']" position="attributes">
                 <attribute name="attrs">
                     {
-                        'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks', 'retentions', 'perceptions'))],
-                        'required': [('type', 'in', ('retentions'))]
+                        'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks'))],
                     }
                 </attribute>
             </xpath>
@@ -97,7 +104,7 @@
                             '|',
                             ('type', 'not in', ('sale')),
                             ('fiscal_type', 'not in', ('internal')),
-                            ('type', 'not in', ('receipt', 'payment', 'retentions', 'perceptions')),
+                            ('type', 'not in', ('receipt', 'payment', 'retentions')),
                     ],
                 }"
                 />
@@ -109,7 +116,7 @@
                                 '|',
                                 ('type', 'not in', ('sale')),
                                 ('fiscal_type', 'not in', ('internal')),
-                                ('type', 'not in', ('receipt', 'payment', 'retentions', 'perceptions')),
+                                ('type', 'not in', ('receipt', 'payment', 'retentions')),
                             ],
                         }"
                         style="padding-right: 1.0em"

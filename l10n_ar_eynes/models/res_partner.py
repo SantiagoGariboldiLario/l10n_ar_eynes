@@ -1,5 +1,7 @@
 import logging
 
+from dateutil.relativedelta import relativedelta
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
@@ -176,7 +178,7 @@ class ResPartner(models.Model):
         values = self.parse_afip_values(ws)
         return values
 
-    def _get_perceptions_to_apply(self):
+    def _get_perceptions_to_apply(self, invoice_date):
         # Buscamos las percepciones a aplicar segun la posicion fiscal
         perceptions = {}
         for perc in self.property_account_position_id.perception_ids:
@@ -195,7 +197,37 @@ class ResPartner(models.Model):
 
         # Ahora buscamos a ver si tiene alguna excepcion
         partner_perceptions = {}
-        for p_perc in self.perception_ids:
+        partner_perceptions_for_fiscal_position = self.perception_ids.filtered(
+            lambda perception: perception.perception_id.id in perceptions.keys()
+        )
+        partner_perceptions_for_fiscal_position_period = (
+            partner_perceptions_for_fiscal_position.filtered(
+                lambda perception: not perception.period
+                or (
+                    perception.period
+                    <= invoice_date
+                    <= (
+                        (perception.period + relativedelta(months=1))
+                        - relativedelta(days=1)
+                    )
+                )
+            )
+        )
+        difference = partner_perceptions_for_fiscal_position.mapped(
+            'perception_id'
+        ) - partner_perceptions_for_fiscal_position_period.mapped(
+            'perception_id'
+        )
+        if difference:
+            raise UserError(
+                _(
+                    'The perceptions for this partner must be updated: [%(perceptions_name)s]',
+                    perceptions_name=', '.join(
+                        [diff.name for diff in difference]
+                    ),
+                )
+            )
+        for p_perc in partner_perceptions_for_fiscal_position_period:
             perception = {
                 'perception': p_perc.perception_id,
                 'activity_id': p_perc.activity_id.id,
@@ -245,14 +277,14 @@ class ResPartner(models.Model):
 
     def write(self, vals):
         vals = self._parse_vat_string(vals)
-        if vals.get('gross_income_ids'):
-            for rec in vals.get('gross_income_ids'):
-                if not rec[-1].get('type_taxpayer'):
-                    raise ValidationError(
-                        _(
-                            "You must complete 'Type of taxpayer' field on Gross income configuration."
-                        )
+        gross_income_ids = vals.get('gross_income_ids', [])
+        for rec in gross_income_ids:
+            if rec[-1] and not rec[-1].get('type_taxpayer'):
+                raise ValidationError(
+                    _(
+                        "You must complete 'Type of taxpayer' field on Gross income configuration."
                     )
+                )
         return super(ResPartner, self).write(vals)
 
     @api.model
@@ -464,10 +496,11 @@ class ResPartnerRetention(models.Model):
     )
     def _compute_retention_percent(self):
         for p_retention in self:
+            ret_id = p_retention.retention_id
             ret_activity = p_retention.partner_id.retention_activity_id
-            ret_tax = p_retention.retention_id.tax_id
+            ret_tax = ret_id.tax_id
             ret_tax_type = ret_tax.retention_type
-            if not ret_tax_type:
+            if ret_id and not ret_tax_type:
                 raise ValidationError(
                     _(
                         "Please configure retention_type in the "

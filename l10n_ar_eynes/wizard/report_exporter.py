@@ -86,10 +86,11 @@ class ReportFilesGenerator(models.Model):
                 encoded_data = binascii.b2a_base64(data)
                 data_attach = {
                     'name': ffile.get('name'),
-                    'datas_fname': ffile.get('name'),
+                    'store_fname': ffile.get('name'),
                     'datas': encoded_data,
                     'res_id': new_file.id,
                     'res_model': 'report.files',
+                    'report_file_id': new_file.id,
                 }
                 self.env['ir.attachment'].create(data_attach)
         form_view = self.env.ref('l10n_ar_eynes.report_files_view_form')
@@ -183,18 +184,8 @@ class ReportFiles(models.Model):
         'report.files.error', 'file_id', string='Errors'
     )
     attachment_ids = fields.One2many(
-        'ir.attachment', compute='_compute_attachment_ids', string="Attachments"
+        'ir.attachment', inverse_name='report_file_id', string="Attachments"
     )
-
-    def _compute_attachment_ids(self):
-        for x in self:
-            x.attachment_ids = (
-                self.env['ir.attachment']
-                .search(
-                    [('res_id', '=', x.id), ('res_model', '=', 'report.files')]
-                )
-                .ids
-            )
 
     def to_declared(self):
         self.write({'state': 'declared'})

@@ -36,15 +36,15 @@ class LibroIVAExporterWizard(models.TransientModel):
 
     def _get_invoice_not_vat_tax_lines(self, invoice):
         tax_line_ids = self._get_invoice_tax_lines(invoice).filtered(
-            lambda line: line.tax_line_id.tax_group_id
-            != self.env.ref('l10n_ar_eynes.vat_tax_group')
+            lambda line: line.tax_line_id.tax_group_id.group_type
+            != self.env.ref('l10n_ar_eynes.vat_tax_group').group_type
         )
         return tax_line_ids
 
     def _get_invoice_vat_tax_lines(self, invoice):
         tax_line_ids = self._get_invoice_tax_lines(invoice).filtered(
-            lambda line: line.tax_line_id.tax_group_id
-            == self.env.ref('l10n_ar_eynes.vat_tax_group')
+            lambda line: line.tax_line_id.tax_group_id.group_type
+            == self.env.ref('l10n_ar_eynes.vat_tax_group').group_type
         )
         return tax_line_ids
 
@@ -76,7 +76,7 @@ class LibroIVAExporterWizard(models.TransientModel):
     def _get_taxes_with_type(self, invoice, fee_type):
         amount = 0.0
         for tax_id in self._get_invoice_tax_lines(invoice):
-            if tax_id.tax_line_id.tax_group_id == fee_type:
+            if tax_id.tax_line_id.tax_group_id.group_type == fee_type:
                 amount += tax_id.amount
         return ('%016.2f' % amount).replace('.', '')
 
@@ -108,8 +108,8 @@ class LibroIVAExporterWizard(models.TransientModel):
     def _get_ganancias_retentions(self, invoice):
         qty = len(
             self._get_invoice_tax_lines(invoice).filtered(
-                lambda line: line.tax_line_id.tax_group_id
-                == self.env.ref('l10n_ar_eynes.retentions_tax_group')
+                lambda line: line.tax_line_id.tax_group_id.group_type
+                == self.env.ref('l10n_ar_eynes.retentions_tax_group').group_type
                 and line.tax_line_id.retention_type == 'profit'
             )
         )
@@ -409,8 +409,8 @@ class LibroIVAExporterWizard(models.TransientModel):
             any(
                 line.tax_line_id
                 and line.tax_line_id.is_exempt
-                and line.tax_line_id.tax_group_id
-                == self.env.ref('l10n_ar_eynes.vat_tax_group')
+                and line.tax_line_id.tax_group_id.group_type
+                == self.env.ref('l10n_ar_eynes.vat_tax_group').group_type
                 for line in invoice.line_ids
             )
             or len(self._get_invoice_tax_lines(invoice)) == 0
@@ -620,10 +620,10 @@ class LibroIVAExporterWizard(models.TransientModel):
             invoice, 'municipal'
         )
         amount_internal_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.internal_tax_group')
+            invoice, self.env.ref('l10n_ar_eynes.internal_tax_group').group_type
         )
         amount_other_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.other_tax_group')
+            invoice, self.env.ref('l10n_ar_eynes.other_tax_group').group_type
         )
         try:
             if (
@@ -777,11 +777,11 @@ class LibroIVAExporterWizard(models.TransientModel):
             invoice, 'municipal'
         )
         amount_internal_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.internal_tax_group')
+            invoice, self.env.ref('l10n_ar_eynes.internal_tax_group').group_type
         )
 
         amount_other_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.other_tax_group')
+            invoice, self.env.ref('l10n_ar_eynes.other_tax_group').group_type
         )
 
         # TODO: add fields and logic for this fields:

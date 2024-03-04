@@ -7,8 +7,19 @@ from odoo.tools.safe_eval import safe_eval, wrap_module
 _logger = logging.getLogger(__name__)
 
 
+def create_diff_html(diff):
+    color = ''
+    if diff[0] == '+':
+        color = 'green'
+    elif diff[0] == '-':
+        color = 'red'
+    style = "style='color:%s;'" % color if color else ''
+    return '<span %s>%s</span>' % (style, diff.rstrip())
+
+
 class AccountTax(models.Model):
-    _inherit = 'account.tax'
+    _name = 'account.tax'
+    _inherit = ['account.tax', 'mail.thread', 'mail.activity.mixin']
 
     afip_code = fields.Char(string="AFIP Code", size=4)
     check_sit_iibb = fields.Boolean(
@@ -128,6 +139,7 @@ class AccountTax(models.Model):
         ),
         help="The code will be executed to evaluate "
         "if it is appropriate to apply perception",
+        track_visibility='onchange',
     )
 
     @api.constrains('python_code')
@@ -220,9 +232,17 @@ class AccountTax(models.Model):
             ),
             'get_taxpayer_type': self.get_taxpayer_type,
             'ValidationError': ValidationError,
+            'print': print,
         }
 
-    def _get_taxapps_from_code(self, perc_data, invoice):
+    def _get_taxapps_from_code(
+        self,
+        perc_data,
+        invoice=None,
+        payment_order=None,
+        income_lines=None,
+        debt_lines=None,
+    ):
         """
         Execute the python code to know
         if any perception has to be applied
@@ -236,7 +256,11 @@ class AccountTax(models.Model):
         """
         self.ensure_one()
         eval_context = self._get_eval_code_context()
-        partner = invoice.partner_id
+        partner = None
+        if invoice:
+            partner = invoice.partner_id
+        if payment_order:
+            partner = payment_order.partner_id
 
         # Pasamos el parent partner como variable en caso de
         # que exista para poder tomar sus percepciones
@@ -249,8 +273,13 @@ class AccountTax(models.Model):
                 'invoice': invoice,
                 'partner': partner,
                 'perception': self,
+                'retention': self,
+                'income_lines': income_lines,
+                'debt_lines': debt_lines,
+                'payment_order': payment_order,
             }
         )
+
         try:
             safe_eval(
                 self.python_code.strip(),
@@ -360,3 +389,36 @@ class AccountTax(models.Model):
                 % self.name
             )
         return tax_repartition_lines[0].account_id
+
+    # def _message_create(self, values_list):
+    # model = values_list.get('model', None)
+    # if model and model == 'account.tax':
+    # python_code_id = (
+    # self.env['ir.model.fields']
+    # .search(
+    # [('name', '=', 'python_code'), ('model', '=', self._name)]
+    # )
+    # .id
+    # )
+    # tracking_value_ids = values_list.get('tracking_value_ids', [])
+    # diffs = []
+    # for values in tracking_value_ids:
+    # if values[2].get('field', 0) == python_code_id:
+    # old_value = (
+    # values[2]
+    # .get('old_value_text', '')
+    # .splitlines(keepends=True)
+    # )
+    # new_value = (
+    # values[2]
+    # .get('new_value_text', '')
+    # .splitlines(keepends=True)
+    # )
+    # d = difflib.Differ()
+    # result = list(d.compare(old_value, new_value))
+    # for diff in result:
+    # if diff[0] in ['+', '-', '?']:
+    # diffs.append(create_diff_html(diff))
+    # body = "<strong style='padding:4px'>Diffs:</strong> <br/>"
+    # values_list['body'] = body + ' <br/> '.join(diff for diff in diffs)
+    # return super(AccountTax, self)._message_create(values_list)

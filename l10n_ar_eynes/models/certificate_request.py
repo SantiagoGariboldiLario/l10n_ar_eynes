@@ -28,14 +28,22 @@ class WSAACertificateRequest(models.Model):
     subj_cuit = fields.Char(string="Subject CUIT")
     subj_c = fields.Char(string="Subject Country")
     partner_id = fields.Many2one(comodel_name='res.partner', string="Partner")
-    date = fields.Date(string="Date", required=True, default=fields.Date.context_today)
+    date = fields.Date(
+        string="Date", required=True, default=fields.Date.context_today
+    )
     due_date = fields.Date(string="Due Date")
     cert_request = fields.Text(string="Cert Request (.csr)", readonly=True)
-    old_certificate = fields.Text(string="Old Certificate (.crt)", readonly=True)
+    old_certificate = fields.Text(
+        string="Old Certificate (.crt)", readonly=True
+    )
     certificate = fields.Text(string="Certificate (.crt)", readonly=True)
     key = fields.Text(string="Private Key (.key)", readonly=True)
     state = fields.Selection(
-        [('new', _("New")), ('requested', _("Request Created")), ('done', _("Done"))],
+        [
+            ('new', _("New")),
+            ('requested', _("Request Created")),
+            ('done', _("Done")),
+        ],
         string="State",
         compute="_compute_state",
         store=True,
@@ -84,7 +92,9 @@ class WSAACertificateRequest(models.Model):
         CReqSubj = CReq.get_subject()
         if not all([self.subj_c, self.subj_o, self.subj_cn, self.subj_cuit]):
             try:
-                Cert = crypto.load_certificate(crypto.FILETYPE_PEM, self.old_certificate)
+                Cert = crypto.load_certificate(
+                    crypto.FILETYPE_PEM, self.old_certificate
+                )
                 CertSubj = Cert.get_subject()
             except Exception:
                 raise ValidationError(
@@ -140,7 +150,7 @@ class WSAACertificateRequest(models.Model):
             'type': 'ir.actions.act_url',
             'url': (
                 '/web/binary/download_document?model=%(model)s&'
-                + 'field=%(field)s&id=%(id)s&filename=%(fname)s'
+                + 'field=%(field)s&_id=%(id)s&filename=%(fname)s'
             )
             % vals,
             'target': 'new',

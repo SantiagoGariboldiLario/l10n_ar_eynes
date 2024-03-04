@@ -54,20 +54,20 @@ class CreateSifereFiles(models.TransientModel):
         return "%s-%s" % (period_start.month, period_start.year)
 
     def create_files(self):
-        exporters = self.env['report.exporter'].search(
+        ReportExporter = self.env['report.exporter'].search(
             [('codename', 'ilike', '%%sifere%%')]
         )
-        generator_obj = self.env['report.files.generator']
+        FilesGenerator = self.env['report.files.generator']
         result = _("SIFERE - Generated reports details - Period %s\n") % (
             self._get_period_name()
         )
-        for exp in exporters:
+        for exp in ReportExporter:
             vals = {
                 'date_start': self.period_start,
                 'date_stop': self.period_end,
                 'exporter_id': exp.id,
             }
-            rfe = generator_obj.create(vals)
+            rfe = FilesGenerator.create(vals)
             fname = '_do_%s' % exp.codename
             if not hasattr(rfe, fname):
                 raise ValidationError(
@@ -159,7 +159,7 @@ class ReportFilesGenerator(models.Model):
         JOIN account_journal ret ON r.retention_id = ret.id
         JOIN account_tax at ON ret.tax_id=at.id
         WHERE r.date BETWEEN %(date_from)s AND %(date_to)s
-        AND ret.type in ('gross_income') AND at.type_tax_use LIKE 'sale'
+        AND at.retention_type in ('gross_income') AND at.type_tax_use LIKE 'sale'
         AND r.company_id = %(company_id)s ORDER BY r.date
         """
 
@@ -187,7 +187,7 @@ class ReportFilesGenerator(models.Model):
         JOIN account_move i ON p.invoice_id=i.id
         WHERE p.date BETWEEN %(date_from)s AND %(date_to)s
         AND i.state IN %(inv_state)s
-        AND per.type in %(type)s AND at.type_tax_use LIKE 'purchase'
+        AND at.retention_type in %(type)s AND at.type_tax_use LIKE 'purchase'
         AND p.company_id = %(company_id)s
         AND at.is_bank_settlement IS True
         ORDER BY p.date
@@ -216,18 +216,16 @@ class ReportFilesGenerator(models.Model):
 
     @api.model
     def _generate_retention_file(self, retention_ids, perception_ids):
-        retention_tax_line_obj = self.env[
-            'account.payment.order.retention.line'
-        ]
-        sifere_jurisdiction_obj = self.env['sifere.jurisdiction']
-        sifere_config = self.env['sifere.config'].search(
+        RetentionTaxLine = self.env['account.payment.order.retention.line']
+        SifereJurisdiction = self.env['sifere.jurisdiction']
+        SifereConfig = self.env['sifere.config'].search(
             [('name', '=', 'Default')]
         )
         fixed_width = FixedWidth(HEAD_LINES_RET)
 
         regs = []
         errors = []
-        for tax_line in retention_tax_line_obj.browse(retention_ids):
+        for tax_line in RetentionTaxLine.browse(retention_ids):
             # String(YYYY-MM-DD)->Datetime
             date = datetime.strptime(str(tax_line.date), '%Y-%m-%d')
             # Datetime->String: dd/mm/yyyy
@@ -248,16 +246,16 @@ class ReportFilesGenerator(models.Model):
                     nro_doc_retenido[2:10],
                     nro_doc_retenido[10],
                 )
-            jurisdiction = sifere_jurisdiction_obj.search(
-                [('state', '=', tax_line.retention_id.state_id.id)]
+            jurisdiction = SifereJurisdiction.search(
+                [('state', '=', tax_line.retention_id.tax_id.state_id.id)]
             )
             if not jurisdiction.code:
                 jurisdiction_code = 0
-                if not sifere_config.ignore_jurisdiction:
+                if not SifereConfig.ignore_jurisdiction:
                     errors.append(
                         {
                             'error': _('Jurisdiction cannot be found'),
-                            'resource': tax_line.retention_id,
+                            'resource': tax_line.retention_id.tax_id,
                         }
                     )
             else:
@@ -285,8 +283,8 @@ class ReportFilesGenerator(models.Model):
             regs.append(fixed_width.line)
 
         # Percepciones de Liquidacion Bancaria
-        perception_tax_line_obj = self.env['perception.tax.line']
-        for tax_line in perception_tax_line_obj.browse(perception_ids):
+        PerceptionTaxLine = self.env['perception.tax.line']
+        for tax_line in PerceptionTaxLine.browse(perception_ids):
             # String(YYYY-MM-DD)->Datetime
             date = datetime.strptime(str(tax_line.date), '%Y-%m-%d')
             # Datetime->String: dd/mm/yyyy
@@ -307,16 +305,16 @@ class ReportFilesGenerator(models.Model):
                     nro_doc_percibido[2:10],
                     nro_doc_percibido[10],
                 )
-            jurisdiction = sifere_jurisdiction_obj.search(
-                [('state', '=', tax_line.perception_id.state_id.id)]
+            jurisdiction = SifereJurisdiction.search(
+                [('state', '=', tax_line.perception_id.tax_id.state_id.id)]
             )
             if not jurisdiction.code:
                 jurisdiction_code = 0
-                if not sifere_config.ignore_jurisdiction:
+                if not SifereConfig.ignore_jurisdiction:
                     errors.append(
                         {
                             'error': _('Jurisdiction cannot be found'),
-                            'resource': tax_line.perception_id,
+                            'resource': tax_line.perception_id.tax_id,
                         }
                     )
             else:
@@ -374,7 +372,7 @@ class ReportFilesGenerator(models.Model):
         JOIN account_move i ON p.invoice_id=i.id
         WHERE p.date BETWEEN %(date_from)s AND %(date_to)s
         AND i.state IN %(inv_state)s
-        AND per.type in %(type)s AND at.type_tax_use LIKE 'purchase'
+        AND at.retention_type in %(type)s AND at.type_tax_use LIKE 'purchase'
         AND p.company_id = %(company_id)s
         AND at.is_bank_settlement IS NOT True
         ORDER BY p.date
@@ -417,16 +415,16 @@ class ReportFilesGenerator(models.Model):
 
     @api.model
     def _generate_perception_file(self, perception_ids):
-        perception_tax_line_obj = self.env['perception.tax.line']
-        sifere_jurisdiction_obj = self.env['sifere.jurisdiction']
-        sifere_config = self.env['sifere.config'].search(
+        PerceptionTaxLine = self.env['perception.tax.line']
+        SifereJurisdiction = self.env['sifere.jurisdiction']
+        SifereConfig = self.env['sifere.config'].search(
             [('name', '=', 'Default')]
         )
         fixed_width = FixedWidth(HEAD_LINES_PER)
 
         regs = []
         errors = []
-        for tax_line in perception_tax_line_obj.browse(perception_ids):
+        for tax_line in PerceptionTaxLine.browse(perception_ids):
             # String(YYYY-MM-DD)->Datetime
             date = datetime.strptime(str(tax_line.date), '%Y-%m-%d')
             # Datetime->String: dd/mm/yyyy
@@ -447,16 +445,16 @@ class ReportFilesGenerator(models.Model):
                     nro_doc_percibido[2:10],
                     nro_doc_percibido[10],
                 )
-            jurisdiction = sifere_jurisdiction_obj.search(
-                [('state', '=', tax_line.perception_id.state_id.id)]
+            jurisdiction = SifereJurisdiction.search(
+                [('state', '=', tax_line.perception_id.tax_id.state_id.id)]
             )
             if not jurisdiction.code:
                 jurisdiction_code = 0
-                if not sifere_config.ignore_jurisdiction:
+                if not SifereConfig.ignore_jurisdiction:
                     errors.append(
                         {
                             'error': _('Jurisdiction cannot be found'),
-                            'resource': tax_line.perception_id,
+                            'resource': tax_line.perception_id.tax_id,
                         }
                     )
             else:

@@ -197,10 +197,12 @@ class WsTaxCodes(models.Model):
             )
 
     def _get_tax_id_domain(self):
-        tax_group = self.env.ref('l10n_ar_eynes.vat_tax_group')
+        tax_group = self.env['account.tax.group'].search(
+            [('group_type', '=', 'vat')]
+        )
         return [
             ('type_tax_use', '=', 'sale'),
-            ('tax_group_id', '=', tax_group.id),
+            ('tax_group_id', 'in', tax_group.ids),
         ]
 
 

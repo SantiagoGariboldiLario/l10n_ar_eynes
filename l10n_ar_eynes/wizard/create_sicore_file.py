@@ -31,7 +31,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 from ..utils.sicore_fixed_width import FixedWidth, moneyfmt
-from ..utils.sicore_fixed_width_dicts import HEAD_LINES, HEAD_LINES_PADRON
+from ..utils.sicore_fixed_width_dicts import HEAD_LINES, HEAD_LINES_EXTERIOR, HEAD_LINES_PADRON
 
 _logger = logging.getLogger(__name__)
 
@@ -126,15 +126,25 @@ class CreateSicoreFiles(models.TransientModel):
         if not self.period_end:
             raise UserError(_("You must enter 'end' date"))
 
+    def _format_monetary(self, value):
+        return "{:,.2f}".format(value).replace(",", "").replace(".", ",")
+
     @api.model
-    def _generate_retention_file(self, retention_ids):
+    def _generate_retention_file(self, retention_ids, exterior=False):
         head_file_errors = []
         head_regs = []
-        fixed_width = FixedWidth(HEAD_LINES)
+        fixed_width = FixedWidth(HEAD_LINES) if not exterior else FixedWidth(HEAD_LINES_EXTERIOR)
+        is_local = not exterior
 
-        for tax_line in self.env['account.payment.order.retention.line'].browse(
-            retention_ids
-        ):
+        tax_lines = self.env['account.payment.order.retention.line'].browse(retention_ids)
+
+        # Filtrar lineas según si es local o no, para sacar los archivos separados.
+        if is_local:
+            filtered_tax_lines = tax_lines.filtered(lambda line: line.partner_id.property_account_position_id.local)
+        else:
+            filtered_tax_lines = tax_lines.filtered(lambda line: not line.partner_id.property_account_position_id.local)
+
+        for tax_line in filtered_tax_lines:
             line_ident = 'Retention Tax Line #%s of Voucher #%s (%s)' % (
                 tax_line.id,
                 tax_line.payment_order_id,
@@ -161,7 +171,9 @@ class CreateSicoreFiles(models.TransientModel):
                 continue
             else:
                 if m:
-                    internal_number = int(m.replace('OP-', ''))
+                    internal_number = int(
+                        m.replace('OP', '').replace(' ', '').replace('-', '')
+                    )
                 if m2:
                     internal_number = int(m2.replace('-', ''))
 
@@ -193,7 +205,8 @@ class CreateSicoreFiles(models.TransientModel):
                 tax_line.reg_code
                 or tax_line.taxapp_id.reg_code
                 or tax_line.concept_id.code
-            )[:3]
+            )
+            reg_code = str(reg_code)[:3] if reg_code else False
             if not reg_code:
                 reg_code = 0
                 # raise UserError(
@@ -222,33 +235,24 @@ class CreateSicoreFiles(models.TransientModel):
                 # 06: Orden de pago; HARD: Todas las ret. salen de una op
                 'fecha_emision': date_voucher,
                 'numero_comprobante': internal_number,
-                'monto_comprobante': moneyfmt(
-                    Decimal(amount_total), places=2, ndigits=13, dp=','
-                ),
+                'monto_comprobante': self._format_monetary(amount_total),
                 'codigo_impuesto': codigo_impuesto,
                 'codigo_regimen': reg_code,
-                'codigo_operacion': 1,
-                # 1: retencion; HARD: Exportamos retenciones
-                'base_calculo': moneyfmt(
-                    Decimal(base_amount), places=2, ndigits=11, dp=','
-                ),
+                'codigo_operacion': 1,  # Cod. Retenciones
+                'base_calculo': self._format_monetary(base_amount),
                 'fecha_emision_retenc': date_emited,
                 'codigo_condicion': '01',  # Inscripto (HARD: Segun longport)
                 'sujetos_suspend': '',  # Beneficiarios en el exterior
-                'importe_retencion': moneyfmt(
-                    Decimal(ret_aplicada), places=2, ndigits=11, dp=','
-                ),
-                'porcentaje_exclusion': moneyfmt(
-                    Decimal(porcentaje_exclusion), places=2, ndigits=3, dp=','
-                ),
-                'fecha_emision_boletin': exclusion_date_certificate,
+                'importe_retencion': self._format_monetary(ret_aplicada),
+                'porcentaje_exclusion': self._format_monetary(porcentaje_exclusion),
+                'fecha_emision_boletin': date_emited if porcentaje_exclusion != 0 else "",  # Solo si hay exclusion
                 'tipo_documento_retenido': tipo_doc_retenido,
                 'numero_documento_retenido': nro_doc_retenido,
-                'numero_certificado_original': nro_cert_propio[2:],
-                'denominacion_ordenante': tax_line.partner_id.name[:30],
-                'acrecentamiento': '0',  # Segun longport
-                'cuit_pais_retenido': '',  # TODO!
-                'cuit_ordenante': '',  # TODO!
+                'numero_certificado_original': nro_cert_propio,
+                'denominacion_ordenante': '' if is_local else tax_line.partner_id.name[:30],
+                'acrecentamiento': '' if is_local else '0',  # Segun longport
+                'cuit_pais_retenido': '' if is_local else '',  # TODO
+                'cuit_ordenante': '' if is_local else '',  # TODO
             }
 
             # Apendeamos el registro
@@ -257,7 +261,11 @@ class CreateSicoreFiles(models.TransientModel):
 
         # Chequeamos si hubo errores
         if len(head_file_errors):
-            return head_file_errors
+            return head_file_errors, False
+
+        # Retornar vacio si no hay lineas generadas
+        if len(head_regs) < 1:
+            return [], False
 
         head_filename = tempfile.mkstemp(suffix='.sicore')[1]
         f = codecs.open(head_filename, "w", "latin-1")
@@ -272,9 +280,10 @@ class CreateSicoreFiles(models.TransientModel):
 
         f.close()
 
-        f = open(head_filename, 'r')
+        f = open(head_filename, 'rb')  # rb to export with CRLF line terminators
 
-        name = 'SICORE_RET_%s.txt' % self.period_start
+        name_base = "SICORE_RET" if is_local else "SICORE_RET_EXT"
+        name = ('%s_%s.txt') % (name_base, self.period_start)
         generated_file_rec = self.env['sicore.generated.files'].create(
             {
                 'code': name,
@@ -297,7 +306,7 @@ class CreateSicoreFiles(models.TransientModel):
         generated_file_rec.write({'attachment_id': new_attachment.id})
         f.close()
 
-        return []
+        return [], True
 
     def create_files(self):
         self._validate_before_create()
@@ -330,13 +339,16 @@ class CreateSicoreFiles(models.TransientModel):
                     The retention is of type vat or profit ?"""
                 )
             )
+
         retention_ids = [retention_ids[0] for retention_ids in res]
+        retention_errors_local, success_local = self._generate_retention_file(retention_ids)
+        retention_errors_ext, success_ext = self._generate_retention_file(retention_ids, exterior=True)
+        created = "LOCAL & EXT" if success_local and success_ext else "LOCAL" if success_local else "EXT" if success_ext else "No success"
 
-        retention_errors = self._generate_retention_file(retention_ids)
-
-        if retention_errors:
+        if retention_errors_local or retention_errors_ext:
             errors += _('Retention File Errors\n================\n')
-            errors += '\n'.join(retention_errors)
+            errors += '\n'.join(retention_errors_local)
+            errors += '\n'.join(retention_errors_ext)
 
         if errors:
             self.write({'notes': errors})
@@ -353,8 +365,19 @@ class CreateSicoreFiles(models.TransientModel):
                 'type': 'ir.actions.act_window',
                 'target': 'new',
             }
-        else:
-            res = True
+        elif success_local or success_ext:
+            message = _("SICORE Reports created: %s ") % (created)
+            notification = {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': message,
+                    'type': 'success',
+                    'sticky': False,
+                    'next': {'type': 'ir.actions.act_window_close'},
+                },
+            }
+            return notification
 
         return res
 
