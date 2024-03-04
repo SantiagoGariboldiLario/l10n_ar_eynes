@@ -61,8 +61,7 @@
                                     <t t-if="o.partner_id.property_account_position_id.name == 'RI'">
                                         <span>RESPONSABLE INSCRIPTO</span>
                                     </t>
-                                    <t
-                                        t-elif="o.partner_id.property_account_position_id.name == 'RIM'">
+                                    <t t-elif="o.partner_id.property_account_position_id.name == 'RIM'">
                                         <span>RESPONSABLE INSCRIPTO "M"</span>
                                     </t>
                                     <t t-else="">
@@ -152,8 +151,7 @@
                                     t-if="o.denomination != 'b'"
                                 >
                                     <tr>
-                                        <t t-foreach="o.line_ids.filtered('tax_line_id')"
-                                            t-as="line_tax">
+                                        <t t-foreach="o.line_ids.filtered('tax_line_id')" t-as="line_tax">
                                             <td style="width: 250px;">
                                                 <div style="text-align: left;">
                                                     <strong>
@@ -179,8 +177,7 @@
 
 
                             <div class="row" style="margin-top: 20px;">
-                                <div class="column"
-                                    style="text-align: left; border-right: 1px solid black;">
+                                <div class="column" style="text-align: left; border-right: 1px solid black;">
                                     <h4 style="font-weight: bold;">
                                         Observaciones:
                                     </h4>
@@ -246,7 +243,8 @@
                             </div>
 
                             <t
-                                t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'">
+                                t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'"
+                            >
                                 <div class="row" style="margin-top: 5px;">
                                     <p style="text-align: center">
                                         El crédito fiscal discriminado en el presente comprobante,
@@ -277,8 +275,7 @@
                                 </div>
                                 </div>
                                 <div class="cae" tyle="float: right; width: 50%; margin: 0 auto;">
-                                    <table
-                                        style="font-size: 18px; text-align: center; margin: 0 auto;">
+                                    <table style="font-size: 18px; text-align: center; margin: 0 auto;">
                                         <tr>
                                             <td>
                                                 Factura Electrónica / CAE:
@@ -296,13 +293,21 @@
                                         </tr>
                                         <tr>
                                             <td> F. Vto.: <t t-if="o.cae_due_date">
-                                                    <span
-                                                        t-esc="o.cae_due_date.strftime('%d-%m-%Y')" />
+                                                    <span t-esc="o.cae_due_date.strftime('%d-%m-%Y')" />
                                                 </t>
                                             </td>
                                         </tr>
                                     </table>
                                 </div>
+                            </div>
+                            <div t-if="o.is_multi_currency" style="clear: left;">
+                                <p>
+                                    Moneda: <span t-esc="o.currency_id.name" /> -
+                                    Tasa de cambio: <span t-esc="o.currency_rate" />
+                                    <br />
+                                    El total de este comprobante expresado en la moneda de curso legal - Pesos Argentinos - asciende a $
+                                    <span t-esc="o.amount_total * o.currency_rate" />
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -339,10 +344,8 @@
                                     <br />
                                     <p>
                                         <h3 t-esc="o.company_id.name" />
-                                            <span
-                                            t-esc="o.journal_id.warehouse_id.partner_id.street" />
-                                            <span
-                                            t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
+                                            <span t-esc="o.journal_id.warehouse_id.partner_id.street" />
+                                            <span t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
                                             t-esc="o.journal_id.warehouse_id.partner_id.zip"
                                         />) - <span
                                             t-esc="o.journal_id.warehouse_id.partner_id.state_id.name"
@@ -363,8 +366,7 @@
                                             style="font-size: 65px;"
                                             t-esc="denomination_name"
                                         />
-                                        <p
-                                            style="font-size: 15px; position: relative; bottom: 10px;">
+                                        <p style="font-size: 15px; position: relative; bottom: 10px;">
                                             cod. <span t-esc="o.voucher_type_id.afip_code" /></p>
 
                                     </div>
