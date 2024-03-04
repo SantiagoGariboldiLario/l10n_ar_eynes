@@ -8,7 +8,9 @@
 
 import logging
 
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import TransactionCase, Form
+from odoo.exceptions import ValidationError
+
 
 _logger = logging.getLogger(__name__)
 
@@ -16,8 +18,11 @@ _logger = logging.getLogger(__name__)
 class TestResPartner(TransactionCase):
 
     def test_document_type_and_vat(self):
-        with Form(self.env["res.partner"]) as f:
-            import wdb
-
-            wdb.set_trace()
-            pass
+        f = Form(self.env["res.partner"])
+        f.name = "Prueba de validación de CUIT"
+        f.document_type_id = self.env["res.document.type"].search(
+            [("name", "=", "CUIT")]
+        )
+        with self.assertRaises(ValidationError):
+            f.vat = "0123456789"
+            f.save()
