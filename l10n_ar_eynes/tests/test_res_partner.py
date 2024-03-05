@@ -32,6 +32,9 @@ class TestResPartner(TransactionCase):
             self.form.vat = "0123456789"
             self.form.save()  # Raises "The %(doc_type)s does not seems to be correct for %(country)s"
         with self.assertRaises(ValidationError):
+            self.form.vat = "012345678901"
+            self.form.save()  # Raises "The %(doc_type)s does not seems to be correct for %(country)s"
+        with self.assertRaises(ValidationError):
             self.form.vat = self.ResPartner.search(
                 [("document_type_id", "=", "CUIT")]
             )[0].vat
