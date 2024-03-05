@@ -112,6 +112,7 @@
                             </thead>
                             <tbody>
                                 <tr t-foreach="o.invoice_line_ids" t-as="line">
+                                  <t t-if="not line.display_type" name="account_invoice_line_accountable">
                                     <td>
                                         <span t-esc="line.name" />
                                     </td>
@@ -120,16 +121,29 @@
                                     </td>
                                     <td style="text-align: center;">
                                         <span
-                                            t-esc="line.price_unit_to_PDF()"
-                                            t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                                        />
+                                                t-esc="line.price_unit_to_PDF()"
+                                                t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                            />
                                     </td>
                                     <td style="text-align: center;">
                                         <span
-                                            t-esc="line.price_subtotal_to_PDF()"
-                                            t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                                        />
+                                                t-esc="line.price_subtotal_to_PDF()"
+                                                t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                            />
                                     </td>
+                                  </t>
+                                  <t t-if="line.display_type == 'line_section'">
+                                    <td colspan="99">
+                                        <span t-field="line.name" t-options="{'widget': 'text'}" />
+                                    </td>
+                                    <t t-set="current_section" t-value="line" />
+                                    <t t-set="current_subtotal" t-value="0" />
+                                  </t>
+                                  <t t-if="line.display_type == 'line_note'">
+                                    <td colspan="99">
+                                        <span t-field="line.name" t-options="{'widget': 'text'}" />
+                                    </td>
+                                  </t>
                                 </tr>
                             </tbody>
 
@@ -334,16 +348,16 @@
                                     <img
                                         t-if="o.journal_id.image"
                                         t-attf-src="data:image/png;base64,#{o.journal_id.image}"
-                                        style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
+                                        style="margin-left: 20px; max-width: 98%; max-height: 80px; margin-right: 10px;"
                                     />
                                     <img
                                         t-else=""
                                         t-attf-src="data:image/png;base64,#{o.company_id.logo}"
-                                        style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
+                                        style="margin-left: 20px; max-width: 98%; max-height: 80px; margin-right: 10px;"
                                     />
                                     <br />
                                     <p>
-                                        <h3 t-esc="o.company_id.name" />
+                                        <h4 t-esc="o.company_id.name" style="white-space:nowrap;" />
                                             <span t-esc="o.journal_id.warehouse_id.partner_id.street" />
                                             <span t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
                                             t-esc="o.journal_id.warehouse_id.partner_id.zip"
