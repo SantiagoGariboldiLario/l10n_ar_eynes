@@ -45,6 +45,7 @@
         'stock',
         'uom',
         'web_domain_field',  # To handle dynamic domains
+        'report_qweb_element_page_visibility',
     ],
     'data': [
         "data/decimal_precision_data.xml",
