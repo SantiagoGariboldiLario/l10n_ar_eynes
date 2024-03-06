@@ -7,7 +7,7 @@
         <field name="page_width">0</field>
         <field name="orientation">Portrait</field>
         <field name="margin_top">55</field>
-        <field name="margin_bottom">45</field>
+        <field name="margin_bottom">35</field>
         <field name="margin_right">5</field>
         <field name="margin_left">5</field>
         <field name="header_line" eval="False" />
@@ -176,6 +176,7 @@
                     <p><strong>Comprobante Autorizado</strong><br/>Esta Administracion Federal no se responsabiliza por los datos ingresados en el detalle de la operacion</p>
                 </div>
                 <div class="column-afip-3">
+                    <div style="height: 20px;" />
                     <table class="cae-table">
                         <tr>
                             <td>
@@ -209,13 +210,13 @@
                 }
 
                 .column-afip-1 {
-                    width: 20%;
+                    width: 15%;
                 }
 
                 .column-afip-1 img {
-                    height: 150px;
-                    width: 150px;
-                    margin-right: 20px;
+                    height: 100px;
+                    width: 100px;
+                    margin-right: 10px;
                 }
 
                 .column-afip-2 {
@@ -223,19 +224,27 @@
                 }
 
                 .column-afip-3 {
-                    width: 30%;
+                    width: 35%;
                 }
 
                 .column-afip-2 img {
-                    height: 60px;
-                    width: 200px;
+                    height: 35px;
+                    width: 132px;
+                }
+
+                .column-afip-2 p {
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 14px;
                 }
 
                 .cae-table {
                     font-size: 18px;
                     text-align: center;
                     margin: 0 auto;
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 14px;
                 }
+
                 .row{
                     width: 100%;
                     padding-top: 20px;
