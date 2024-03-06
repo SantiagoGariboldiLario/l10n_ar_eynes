@@ -18,6 +18,22 @@ class AccountPaymentOrder(models.Model):
     _rec_name = 'number'
     _order = 'date DESC'
 
+    def _creation_message(self):
+        """ Get the creation message to log into the chatter at the record's creation.
+        :returns: The message's body to log.
+        """
+        self.ensure_one()
+        doc_name = self.env['ir.model']._get(self._name).name
+        apo_type = self.type
+        
+        if apo_type == 'payment':
+            doc_name = 'Pagos de Proveedores'
+        
+        elif apo_type == 'receipt':
+            doc_name = 'Pagos de Clientes'
+
+        return _('%s created', doc_name)
+
     def name_get(self):
         result = []
         for payment in self:
