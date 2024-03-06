@@ -98,24 +98,23 @@
                                 attrs="{'readonly': [('state', 'not in', ('draft'))]}"
                             />
                             <field name="currency_id" attrs="{'readonly': True}" force_save="True" />
-
-                            <div attrs="{'invisible':[('is_multi_currency','=',False)]}">
-                                    <field name="is_multi_currency" invisible="1" />
-                                    <field
+                        </group>
+                        <group attrs="{'invisible':[('is_multi_currency','=',False)]}">
+                            <field name="is_multi_currency" invisible="1" />
+                            <label for="payment_rate" colspan="1" />
+                            <div>
+                                <field
                                     name="payment_rate"
                                     required="1"
                                     class="oe_inline"
-                                    attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                                    attrs="{'readonly': [('state', 'not in', ('draft',))]}"
                                 />
-                                    <field
+                                <field
                                     name="payment_rate_currency_id"
-                                    readonly="1"
                                     class="oe_inline"
-                                    attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                                    attrs="{'readonly': [('state', 'not in', ('draft',))]}"
                                     groups="base.group_multi_currency"
                                 />
-                                    <!-- <field name="currency_help_label" colspan="2" nolabel="1" class="oe_grey"/> -->
-                                    <field name="paid_amount_in_company_currency" colspan="4" invisible="1" />
                             </div>
                         </group>
                         <group col="2">
@@ -501,7 +500,12 @@
                                     <field name="name" />
                                     <field name="debit" />
                                     <field name="credit" />
-                                    <field name="amount_currency" />
+                                    <field
+                                        name="amount_currency"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
+                                        attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
+                                    />
                                     <field name="currency_id" groups="base.group_multi_currency" />
                                 </tree>
                             </field>
@@ -763,27 +767,26 @@
                             />
                             <field name="company_id" widget="selection" groups="base.group_multi_company" />
                         </group>
-                        <group col="2" attrs="{'invisible':[('is_multi_currency','=',False)]}">
-                            <separator string="Currency Options" colspan="2" />
-                            <field name="is_multi_currency" invisible="1" />
-                            <label for="payment_rate" colspan="1" />
-                            <div>
-                                <field
+                        <group attrs="{'invisible':[('is_multi_currency','=',False)]}">
+                        <field name="is_multi_currency" invisible="1" />
+                        <label for="payment_rate" colspan="1" />
+                        <div>
+                            <field
                                     name="payment_rate"
                                     required="1"
                                     class="oe_inline"
-                                    attrs="{'readonly': [('state', 'not in', ('draft'))]}"
+                                    attrs="{'readonly': [('state', 'not in', ('draft',))]}"
                                 />
-                                <field
+                            <field
                                     name="payment_rate_currency_id"
-                                    readonly="1"
                                     class="oe_inline"
+                                    attrs="{'readonly': [('state', 'not in', ('draft',))]}"
                                     groups="base.group_multi_currency"
                                 />
-                            </div>
-                            <!-- <field name="currency_help_label" colspan="2" nolabel="1" class="oe_grey"/> -->
-                            <field name="paid_amount_in_company_currency" colspan="2" invisible="1" />
-                        </group>
+                        </div>
+                        <!-- <field name="currency_help_label" colspan="2" nolabel="1" class="oe_grey"/> -->
+                        <field name="paid_amount_in_company_currency" colspan="4" />
+                    </group>
                         <group col="2">
                             <separator string="Payment Options" colspan="2" />
                             <field
@@ -1345,7 +1348,13 @@
                                     <field name="name" />
                                     <field name="debit" />
                                     <field name="credit" />
-                                    <field name="amount_currency" groups="base.group_multi_currency" />
+                                    <field
+                                        name="amount_currency"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
+                                        attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
+                                        groups="base.group_multi_currency"
+                                    />
                                     <field name="currency_id" groups="base.group_multi_currency" />
                                 </tree>
                             </field>
