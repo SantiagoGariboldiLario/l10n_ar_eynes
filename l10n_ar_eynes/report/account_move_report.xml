@@ -447,7 +447,7 @@
                             </t>
                             <!--Multicurrency-->
                             <div t-if="o.is_multi_currency">
-                                <table>
+                                <table class="multicurrency-table">
                                     <tr>
                                         <td>Moneda: <span t-esc="o.currency_id.name"/></td>
                                     </tr>
@@ -483,7 +483,12 @@
                             font-size: 13px;
                         }
 
-                                
+                        .message p,
+                        .multicurrency-table td, p {
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 13px;
+                        }     
+                        
                         .column,{
                             -webkit-box-flex: 1;
                         }
