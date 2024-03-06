@@ -47,20 +47,21 @@
                             t-attf-src="data:image/png;base64,#{o.company_id.logo}"
                         />
                         <br/>
-                        <h3 t-esc="o.company_id.name" />
                         <p>
-                            <span
-                                t-esc="o.journal_id.warehouse_id.partner_id.street" />
-                                <span
-                                t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
-                                t-esc="o.journal_id.warehouse_id.partner_id.zip"
-                            />) - <span
-                                t-esc="o.journal_id.warehouse_id.partner_id.state_id.name"
-                            /> - <span
-                                t-esc="o.journal_id.warehouse_id.partner_id.country_id.name"
-                            />
-                                <br />
-                        Tel.: <span t-esc="o.journal_id.warehouse_id.partner_id.phone" />
+                            Razón social: <span t-esc="o.journal_id.warehouse_id.partner_id.name"/>
+                            <br/>
+                            Domicillio: <span t-esc="o.journal_id.warehouse_id.partner_id.street" />
+                            <span t-esc="o.journal_id.warehouse_id.partner_id.city" 
+                                /> (
+                            <span t-esc="o.journal_id.warehouse_id.partner_id.zip"
+                                />) - 
+                            <span t-esc="o.journal_id.warehouse_id.partner_id.state_id.name"
+                                /> - 
+                            <span t-esc="o.journal_id.warehouse_id.partner_id.country_id.name"/>
+                            <br/>
+                            Tel.: <span t-esc="o.journal_id.warehouse_id.partner_id.phone" />
+                            <br/>
+                            Condición frente al IVA: <span t-esc="o.journal_id.warehouse_id.partner_id.property_account_position_id.name"/>
                         </p>
 
                     </td>
@@ -92,8 +93,6 @@
                         <br/>
                         <span>Ing. Brutos: <span t-esc="o.company_id.vat" />
                         </span>
-                        <br/>
-                        <span>IVA Responsable Inscripto</span>
                         <br/>
                         <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
                         </span>
@@ -324,7 +323,7 @@
                             <table class="product-table">
                                     <thead>
                                         <tr>
-                                            <th>
+                                            <th class="product-description-column" width="60%">
                                                 Descripción
                                             </th>
                                             <th>
@@ -340,7 +339,7 @@
                                     </thead>
                                     <tbody>
                                         <tr t-foreach="o.invoice_line_ids" t-as="line">
-                                            <td>
+                                            <td class="product-description-column">
                                                 <span t-esc="line.name" />
                                             </td>
                                             <td>
@@ -362,7 +361,7 @@
                                     </tbody>
                             </table>
                             <!--Taxes-->
-                            <table class="taxes-table" t-if="o.denomination != 'b' and o.denomination != 'c'" style="width: 50%">
+                            <table class="taxes-table" t-if="o.denomination != 'b' and o.denomination != 'c'" style="width: 40%">
                                 <thead>
                                     <tr>
                                         <th>
@@ -494,13 +493,11 @@
                         }
 
                         .column-1{
-                            font-weight: bold;
-                            text-align: center;
-                            width: 40%;
+                            width: 50%;
                         }
 
                         .column-2 {
-                            width: 60%;
+                            width: 50%;
                         }  
                         /*Partner table - Product table*/
 
@@ -529,7 +526,6 @@
                         .taxes-table thead tr {
                             background-color: rgb(202, 215, 226);
                             color: black;
-                            text-align: left;
                             font-weight: bold;
                             font-family: Arial, Helvetica, sans-serif;
                             font-size: 13px;
@@ -551,6 +547,11 @@
                             padding: 2px 2px;
                             font-family: Arial, Helvetica, sans-serif;
                             font-size: 13px;
+                            text-align: right;
+                        }
+
+                        .product-description-column {
+                            text-align: left !important;
                         }
 
                         .product-table tbody tr {
