@@ -25,10 +25,10 @@ class AccountPaymentOrder(models.Model):
         self.ensure_one()
         doc_name = self.env['ir.model']._get(self._name).name
         apo_type = self.type
-        
+
         if apo_type == 'payment':
             doc_name = 'Pagos de Proveedores'
-        
+
         elif apo_type == 'receipt':
             doc_name = 'Pagos de Clientes'
 
