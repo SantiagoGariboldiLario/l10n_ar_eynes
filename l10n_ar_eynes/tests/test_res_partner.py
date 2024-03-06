@@ -39,3 +39,6 @@ class TestResPartner(TransactionCase):
                 [("document_type_id", "=", "CUIT")]
             )[0].vat
             self.form.save()  # Raises "There is another partner with same VAT Information"
+        with self.assertRaises(ValidationError):
+            self.form.vat = "30712306545"
+            self.form.save()  # Raises "The %(doc_type)s does not seems to be correct for %(country)s"
