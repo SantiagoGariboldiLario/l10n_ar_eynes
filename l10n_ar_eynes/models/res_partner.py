@@ -171,7 +171,7 @@ class ResPartner(models.Model):
         ws_conf = self._get_ws_conf()
         ws = ws_conf.ws_auth()
         try:
-            ws.Conectar()
+            # ws.Conectar() Se realiza en ws_auth
             ws.Consultar(cuit)
         except Exception as e:
             raise UserError(f'ERROR: {ws.ErrMsg}') from e
