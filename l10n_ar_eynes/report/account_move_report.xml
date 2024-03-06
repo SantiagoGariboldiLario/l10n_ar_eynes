@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version='1.0' encoding='utf-8'?>
 <odoo>
     <record id="paperformat_invoice" model="report.paperformat">
         <field name="name">Invoice Report</field>
@@ -6,12 +6,12 @@
         <field name="format">A4</field>
         <field name="page_width">0</field>
         <field name="orientation">Portrait</field>
-        <field name="margin_top">50</field>
-        <field name="margin_bottom">100</field>
+        <field name="margin_top">55</field>
+        <field name="margin_bottom">35</field>
         <field name="margin_right">5</field>
         <field name="margin_left">5</field>
         <field name="header_line" eval="False" />
-        <field name="header_spacing">40</field>
+        <field name="header_spacing">50</field>
         <field name="dpi">90</field>
     </record>
 
@@ -33,6 +33,245 @@
         />
     </record>
 
+    <template id="weblearns_layout">
+        <div class="header">
+            <table class="company-table">
+                <tr>
+                    <td class="right">
+                        <img
+                            t-if="o.journal_id.image"
+                            t-attf-src="data:image/png;base64,#{o.journal_id.image}"
+                        />
+                        <img
+                            t-else=""
+                            t-attf-src="data:image/png;base64,#{o.company_id.logo}"
+                        />
+                        <br/>
+                        <h3 t-esc="o.company_id.name" />
+                        <p>
+                            <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.street" />
+                                <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
+                                t-esc="o.journal_id.warehouse_id.partner_id.zip"
+                            />) - <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.state_id.name"
+                            /> - <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.country_id.name"
+                            />
+                                <br />
+                        Tel.: <span t-esc="o.journal_id.warehouse_id.partner_id.phone" />
+                        </p>
+
+                    </td>
+                    <td class="center">
+                        <div class="denomination-render">
+                            <h1
+                                t-if="denomination_name != 'NOT_DEFINED'"
+                                style="font-size: 65px;"
+                                t-esc="denomination_name"
+                            />
+                            <p
+                            style="font-size: 15px; position: relative; bottom: 10px;">
+                            cod. <span t-esc="o.voucher_type_id.afip_code" /></p>
+
+                        </div>
+                    </td>
+                    <td class="left">
+                        <span>N° <span t-esc="denomination" /></span>
+                        <br/>
+                        <span>
+                            Fecha:
+                            <t t-if="o.invoice_date">
+                                <span t-esc="o.invoice_date.strftime('%d/%m/%Y')" />
+                            </t>
+                        </span>
+                        <br />
+                        <span>C.U.I.T: <span t-esc="o.company_id.vat" />
+                        </span>
+                        <br/>
+                        <span>Ing. Brutos: <span t-esc="o.company_id.vat" />
+                        </span>
+                        <br/>
+                        <span>IVA Responsable Inscripto</span>
+                        <br/>
+                        <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
+                        </span>
+                        <br/>
+                        <span>
+                            Inic. Activ.:
+                            <t t-if="o.journal_id.activity_start_date">
+                                <span
+                                    t-esc="o.journal_id.activity_start_date.strftime('%d/%m/%Y')"
+                                />
+                            </t>
+                        </span>
+                        <br />
+                    </td>
+                </tr>
+            </table>
+            <style>
+                .company-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 25px 0;
+                    border-radius: 5px 5px 0 0;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+                    background-color: #f3f3f3;
+                }
+
+                .right{
+                    font-weight: bold;
+                    width: 40%;
+                }
+
+                .right p, .left span{
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 14px;
+                }
+
+                .right img {
+                    height: 80px;
+                    width: 70%;
+                }
+
+                .center{
+                    width: 20%;
+                    vertical-align: top;
+                    text-align: center;
+                }
+
+                .left {
+                    width: 40%;
+                    font-weight: bold;
+                }
+                
+                .denomination-render{ 
+                    display: block;
+                    margin: 0 auto;
+                    border: 2px solid #000;
+                    height: 100px;
+                    width: 100px;
+                    font-size: 40px;
+                }
+            </style>
+        </div>
+        <t t-raw="0"/>
+        <div class="footer last-page">
+            <!--Footer afip-->
+            <div class="row afip-footer">
+                <div class="column-afip-1">
+                    <img
+                        t-attf-src="data:image/png;base64,#{o._generate_qr()}"
+                        alt="QR"
+                    />
+                </div>
+                <div class="column-afip-2">
+                    <img
+                        t-attf-src="data:image/png;base64,#{o.get_afip_logo()}"
+                        alt="Logo Afip"
+                    />
+                    <br/>
+                    <p><strong>Comprobante Autorizado</strong><br/>Esta Administracion Federal no se responsabiliza por los datos ingresados en el detalle de la operacion</p>
+                </div>
+                <div class="column-afip-3">
+                    <div style="height: 20px;" />
+                    <table class="cae-table">
+                        <tr>
+                            <td>
+                                Factura Electrónica / CAE:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background: #bcc0c4;">
+                                <t t-if="o.cae">
+                                    <span t-esc="o.cae" />
+                                </t>
+                                <t t-else="">
+                                    <span>-</span>
+                                </t>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> F. Vto.: <t t-if="o.cae_due_date">
+                                    <span
+                                        t-esc="o.cae_due_date.strftime('%d-%m-%Y')" />
+                                </t>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <style>
+                /*Footer afip*/
+                .afip-footer {
+                    height: 155px;
+                }
+
+                .column-afip-1 {
+                    width: 15%;
+                }
+
+                .column-afip-1 img {
+                    height: 100px;
+                    width: 100px;
+                    margin-right: 10px;
+                }
+
+                .column-afip-2 {
+                    width: 50%;
+                }
+
+                .column-afip-3 {
+                    width: 35%;
+                }
+
+                .column-afip-2 img {
+                    height: 35px;
+                    width: 132px;
+                }
+
+                .column-afip-2 p {
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 14px;
+                }
+
+                .cae-table {
+                    font-size: 18px;
+                    text-align: center;
+                    margin: 0 auto;
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 14px;
+                }
+
+                .row{
+                    width: 100%;
+                    padding-top: 20px;
+                    padding-botton: 0px;
+                    display: -webkit-box;
+                    -webkit-box-orient: horizontal;
+                    -webkit-box-direction: normal;
+                    clear: both;
+                }
+                        
+                .column,{
+                    -webkit-box-flex: 1;
+                }
+
+                .column-1{
+                    font-weight: bold;
+                    text-align: center;
+                    width: 40%;
+                }
+
+                .column-2 {
+                    width: 60%;
+                }
+            </style>
+        </div>
+    </template>
+
     <template id="account_move_report_qweb">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
@@ -43,163 +282,121 @@
                 <t t-else="">
                     <t t-set="denomination_name" t-value="''" />
                 </t>
-
-                <t t-call="l10n_ar_eynes.weblearns_layout">
-                    <div class="page mt-5" style="border-bottom: 1px solid black;">
-                        <h1 style="margin-top: 20px; text-indent: -9999px;">Factura</h1>
-                        <table width="100%">
-                            <tr>
-                                <td>
-                                    <span style="font-size: 18px; font-weight: bold;">Cliente: </span>
-                                    <span t-esc="o.partner_id.name" />
-                                    <br />
-                                    <span style="font-size: 18px; font-weight: bold;">Domicilio: </span>
-                                    <span t-esc="o.partner_id.street" />
-                                    <br />
-                                    <span style="font-size: 18px; font-weight: bold;">Condicion
-                                        IVA: </span>
-                                    <t t-if="o.partner_id.property_account_position_id.name == 'RI'">
-                                        <span>RESPONSABLE INSCRIPTO</span>
-                                    </t>
-                                    <t t-elif="o.partner_id.property_account_position_id.name == 'RIM'">
-                                        <span>RESPONSABLE INSCRIPTO "M"</span>
-                                    </t>
-                                    <t t-else="">
-                                        <span t-esc="o.partner_id.property_account_position_id.name" />
-                                    </t>
-                                    <br />
-
-                                    <span style="font-size: 18px; font-weight: bold;">Condicion
-                                        Venta: </span>
-                                    <span t-esc="o.invoice_payment_term_id.name" />
-                                </td>
-                                <td>
-                                    <span style="font-size: 18px; font-weight: bold;">Tel.: </span>
-                                    <span t-esc="o.partner_id.phone" />
-                                    <br />
-                                    <span style="font-size: 18px; font-weight: bold;">CUIT: </span>
-                                    <span t-esc="o.partner_id.vat" />
-                                    <br />
-                                    <span style="font-size: 18px; font-weight: bold;">IIBB: </span>
-                                    <span t-esc="o.partner_id.vat" />
-                                    <br />
-                                    <span style="font-size: 18px; font-weight: bold;">F. Venc: </span>
-                                    <t t-if="o.invoice_date_due">
-                                        <span t-esc="o.invoice_date_due.strftime('%d/%m/%Y')" />
-                                    </t>
-                                </td>
-                            </tr>
-
-                        </table>
-                    </div>
-                    <div class="div" style="margin-top: 5px;">
-                        <table width="100%" class="items table" style="margin-bottom: 50px;">
-                            <thead>
-                                <tr style="text-align: center">
-                                    <th>
-                                        Descripción
-                                    </th>
-                                    <th>
-                                        Cantidad
-                                    </th>
-                                    <th>
-                                        Precio Unit.
-                                    </th>
-                                    <th>
-                                        Total
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr t-foreach="o.invoice_line_ids" t-as="line">
-                                  <t t-if="not line.display_type" name="account_invoice_line_accountable">
-                                    <td>
-                                        <span t-esc="line.name" />
-                                    </td>
-                                    <td style="text-align: center;">
-                                        <span t-esc="line.quantity" />
-                                    </td>
-                                    <td style="text-align: center;">
-                                        <span
-                                                t-esc="line.price_unit_to_PDF()"
-                                                t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                                            />
-                                    </td>
-                                    <td style="text-align: center;">
-                                        <span
-                                                t-esc="line.price_subtotal_to_PDF()"
-                                                t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                                            />
-                                    </td>
-                                  </t>
-                                  <t t-if="line.display_type == 'line_section'">
-                                    <td colspan="99">
-                                        <span t-field="line.name" t-options="{'widget': 'text'}" />
-                                    </td>
-                                    <t t-set="current_section" t-value="line" />
-                                    <t t-set="current_subtotal" t-value="0" />
-                                  </t>
-                                  <t t-if="line.display_type == 'line_note'">
-                                    <td colspan="99">
-                                        <span t-field="line.name" t-options="{'widget': 'text'}" />
-                                    </td>
-                                  </t>
-                                </tr>
-                            </tbody>
-
-
-                            <style>
-                                .items {
-                                border-collapse: collapse;
-                                }
-                                .items tr:nth-child(even) {
-                                background-color: #f2f2f2;
-                                }
-                            </style>
-                        </table>
-
-                        <div class="footer" style="position: relative; bottom: 10px;">
-                            <div>
-                                <table
-                                    style="display: inline-block; margin-top: 20px; border-bottom: 1px solid black; position: relative; left: 550px;"
-                                    t-if="o.denomination != 'b'"
-                                >
+                <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
+                    <div t-call="l10n_ar_eynes.weblearns_layout">
+                        <div class="page">
+                            <!--Partner-->
+                            <table class="partner-table">
                                     <tr>
-                                        <t t-foreach="o.line_ids.filtered('tax_line_id')" t-as="line_tax">
-                                            <td style="width: 250px;">
-                                                <div style="text-align: left;">
-                                                    <strong>
-                                                        <span t-esc="line_tax.tax_line_id.name" />
-                                                    </strong>
-                                                </div>
+                                        <td width="60%">
+                                            <span class="partner-info">Cliente: </span><span t-esc="o.partner_id.name"/>
+                                            <br/>
+                                            <span class="partner-info">Domicilio: </span><span t-esc="o.partner_id.street"/>
+                                            <br/>
+                                            <span class="partner-info">Condicion IVA: </span>
+                                            <t t-if="o.partner_id.property_account_position_id.name == 'RI'">
+                                                <span>RESPONSABLE INSCRIPTO</span>
+                                            </t>
+                                            <t t-elif="o.partner_id.property_account_position_id.name == 'RIM'">
+                                                <span>RESPONSABLE INSCRIPTO "M"</span>
+                                            </t>
+                                            <t t-else="">
+                                                <span t-esc="o.partner_id.property_account_position_id.name" />
+                                            </t>
+                                            <br/>
+                                            <span class="partner-info">Condicion Venta: </span><span t-esc="o.invoice_payment_term_id.name" />
+                                        </td>
+                                        <td width="40%">
+                                            <span class="partner-info">Tel.: </span><span t-esc="o.partner_id.phone"/>
+                                            <br/>
+                                            <span class="partner-info">CUIT: </span><span t-esc="o.partner_id.vat"/>
+                                            <br/>
+                                            <span class="partner-info">IIBB: </span><span t-esc="o.partner_id.vat"/>
+                                            <br/>
+                                            <span class="partner-info">F. Venc: </span>
+                                            <t t-if="o.invoice_date_due">
+                                                <span t-esc="o.invoice_date_due.strftime('%d/%m/%Y')" />
+                                            </t>
+                                        </td>
+                                    </tr>
+                            </table>
+                            <!--Products-->
+                            <table class="product-table">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Descripción
+                                            </th>
+                                            <th>
+                                                Cantidad
+                                            </th>
+                                            <th>
+                                                Precio Unit.
+                                            </th>
+                                            <th>
+                                                Total
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="o.invoice_line_ids" t-as="line">
+                                            <td>
+                                                <span t-esc="line.name" />
                                             </td>
-                                            <td style="padding-right: 1em;">
+                                            <td>
+                                                <span t-esc="line.quantity" />
+                                            </td>
+                                            <td>
+                                                <span
+                                                    t-esc="line.price_unit_to_PDF()"
+                                                    t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                                />
+                                            </td>
+                                            <td>
+                                                <span
+                                                    t-esc="line.price_subtotal_to_PDF()"
+                                                    t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                                />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                            </table>
+                            <!--Taxes-->
+                            <table class="taxes-table" t-if="o.denomination != 'b' and o.denomination != 'c'" style="width: 50%">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Descripción
+                                        </th>
+                                        <th>
+                                            Importe
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbofy>
+                                        <tr t-foreach="o.line_ids.filtered('tax_line_id')" t-as="line_tax">
+                                            <td>
+                                                <span t-esc="line_tax.tax_line_id.name" />
+                                            </td>
+                                            <td>
                                                 <span
                                                     t-esc="abs(line_tax.balance)"
                                                     t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                 />
                                             </td>
-                                        </t>
-                                    </tr>
-                                    <style>
-                                        tr td:last-child {
-                                        padding-right: 0 !important;
-                                        }
-                                    </style>
-                                </table>
-                            </div>
-
-
-                            <div class="row" style="margin-top: 20px;">
-                                <div class="column" style="text-align: left; border-right: 1px solid black;">
-                                    <h4 style="font-weight: bold;">
-                                        Observaciones:
-                                    </h4>
+                                        </tr>
+                                </tbofy>
+                            </table>
+                            <!--Observations/Total-->
+                            <div class="row total">
+                                <div class="column column-1">
+                                    <!-- <h3>Observaciones:</h3>
+                                    <br/> -->
                                 </div>
-                                <div class="column" style="text-align: center;">
-                                    <table width="100%">
-                                        <thead style="background: #d1d1d1;">
-                                            <tr style="font-weight: bold;">
+                                <div class="column column-2">
+                                    <table class="total-table">
+                                        <thead>
+                                            <tr>
                                                 <td>
                                                     Subtotal
                                                 </td>
@@ -236,30 +433,10 @@
                                         </tbody>
                                     </table>
                                 </div>
-
-                                <style>
-                                    .row{
-                                    border: 1px solid black;
-                                    padding: 5px;
-                                    margin-top: 10px;
-
-                                    }
-                                    .column{
-                                    width: 50%;
-
-                                    }
-                                    .row:after{
-                                    content: "";
-                                    display: table;
-                                    clear: both;
-                                    }
-                                </style>
                             </div>
-
-                            <t
-                                t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'"
-                            >
-                                <div class="row" style="margin-top: 5px;">
+                            <!--Masagge-->
+                            <t t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'">
+                                <div class="message">
                                     <p style="text-align: center">
                                         El crédito fiscal discriminado en el presente comprobante,
                                         sólo podrá ser computado a efectos del Régimen de
@@ -268,175 +445,131 @@
                                     </p>
                                 </div>
                             </t>
-
-                            <div style="display: flex;">
-                                <div style="float: left; width: 50%; hight: 120px;">
-                                    <div style="margin-top: 1px;">
-                                        <div style="display: flex;">
-                                            <img
-                                                t-attf-src="data:image/png;base64,#{o._generate_qr()}"
-                                                alt="QR"
-                                                style="height: 150px; width: 150px; margin-right: 20px;"
-                                            />
-                                            <img
-                                                t-attf-src="data:image/png;base64,#{o.get_afip_logo()}"
-                                                alt="Logo Afip"
-                                                style="height: 120px; width: 200px; margin-bot: 20px;"
-                                            />
-                                        </div>
-                                        <!-- <p>Comprobante Autorizado</p>
-                                    <p>Esta Administracion Federal no se responsabiliza por los datos ingresados en el detalle de la operacion</p> -->
-                                </div>
-                                </div>
-                                <div class="cae" tyle="float: right; width: 50%; margin: 0 auto;">
-                                    <table style="font-size: 18px; text-align: center; margin: 0 auto;">
-                                        <tr>
-                                            <td>
-                                                Factura Electrónica / CAE:
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style="background: #bcc0c4;">
-                                                <t t-if="o.cae">
-                                                    <span t-esc="o.cae" />
-                                                </t>
-                                                <t t-else="">
-                                                    <span>-</span>
-                                                </t>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td> F. Vto.: <t t-if="o.cae_due_date">
-                                                    <span t-esc="o.cae_due_date.strftime('%d-%m-%Y')" />
-                                                </t>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                            <div t-if="o.is_multi_currency" style="clear: left;">
-                                <p>
-                                    Moneda: <span t-esc="o.currency_id.name" /> -
-                                    Tasa de cambio: <span t-esc="o.currency_rate" />
-                                    <br />
-                                    El total de este comprobante expresado en la moneda de curso legal - Pesos Argentinos - asciende a $
-                                    <span t-esc="o.amount_total * o.currency_rate" />
-                                </p>
+                            <!--Multicurrency-->
+                            <div t-if="o.is_multi_currency">
+                                <table class="multicurrency-table">
+                                    <tr>
+                                        <td>Moneda: <span t-esc="o.currency_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tasa de cambio: <span t-esc="o.currency_rate"/></td>
+                                    </tr>
+                                </table>
+                                <p>El total de este comprobante expresado en la moneda de curso legal - Pesos Argentinos - asciende a $  <span t-esc="o.amount_total_cur"/></p>                
                             </div>
                         </div>
                     </div>
-                </t>
+                    <style>
+                        /*Taxes table*/
+                        .taxes-table {
+                            float: right;
+                        }
+                                
+                        /*Total Table*/
+                        .row{
+                            width: 100%;
+                            padding-top: 20px;
+                            padding-botton: 0px;
+                            display: -webkit-box;
+                            -webkit-box-orient: horizontal;
+                            -webkit-box-direction: normal;
+                            clear: both;
+                        }
+
+                        .product-table,
+                        .taxes-table,
+                        .total {
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 13px;
+                        }
+
+                        .message p,
+                        .multicurrency-table td, p {
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 13px;
+                        }     
+                        
+                        .column,{
+                            -webkit-box-flex: 1;
+                        }
+
+                        .column-1{
+                            font-weight: bold;
+                            text-align: center;
+                            width: 40%;
+                        }
+
+                        .column-2 {
+                            width: 60%;
+                        }  
+                        /*Partner table - Product table*/
+
+                        .partner-info{
+                            font-weight: bold;
+                        }
+
+                        .product-table, 
+                        .partner-table,
+                        .total-table,
+                        .taxes-table,
+                        .message {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 1.2em;
+                            margin: 25px 0;
+                            border-radius: 5px 5px 5px 5px;
+                            overflow: hidden;
+                            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+                            margin-bottom: 0px;
+                            margin-top: 20px;
+                        }
+
+                        .product-table thead tr,
+                        .total-table thead tr,
+                        .taxes-table thead tr {
+                            background-color: rgb(202, 215, 226);
+                            color: black;
+                            text-align: left;
+                            font-weight: bold;
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 13px;
+                        }
+
+                        .partner-table th,
+                        .partner-table td {
+                            padding: 2px 2px;
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 14px;
+                        }
+
+                        .product-table th,
+                        .product-table td,
+                        .total-table th,
+                        .total-table td,
+                        .taxes-table th,
+                        .taxes-table td {
+                            padding: 2px 2px;
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 13px;
+                        }
+
+                        .product-table tbody tr {
+                            border-bottom: 1px solid rgb(202, 215, 226);
+                        }
+
+                        .product-table tbody tr:nth-of-type(even), 
+                        .partner-table,
+                        .taxes-table tbody tr:nth-of-type(even),
+                        .message {
+                            background-color: #f3f3f3;
+                        }
+
+                        .product-table tbody tr:last-of-type {
+                            border-bottom: 2px solid rgb(202, 215, 226);
+                        }
+                    </style>
+                </div>
             </t>
         </t>
     </template>
-
-
-    <template id="weblearns_layout">
-        <div class="header">
-            <div class="" style="border-bottom: 1px solid black;">
-                <t t-if="docs and docs[0].company_id">
-                    <div class="div">
-                        <table
-                            style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 16px;"
-                        >
-                            <tr>
-                                <td width="33%" style="font-weight: bold;">
-                                    <!-- <img t-if="point_of_sale_image"
-                                        t-att-src="image_data_uri(point_of_sale_image)"
-                                        style="margin-left: 30px; max-height: 80px; margin-right: 10px;"
-                                        alt="Logo" /> -->
-                                    <img
-                                        t-if="o.journal_id.image"
-                                        t-attf-src="data:image/png;base64,#{o.journal_id.image}"
-                                        style="margin-left: 20px; max-width: 98%; max-height: 80px; margin-right: 10px;"
-                                    />
-                                    <img
-                                        t-else=""
-                                        t-attf-src="data:image/png;base64,#{o.company_id.logo}"
-                                        style="margin-left: 20px; max-width: 98%; max-height: 80px; margin-right: 10px;"
-                                    />
-                                    <br />
-                                    <p>
-                                        <h4 t-esc="o.company_id.name" style="white-space:nowrap;" />
-                                            <span t-esc="o.journal_id.warehouse_id.partner_id.street" />
-                                            <span t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
-                                            t-esc="o.journal_id.warehouse_id.partner_id.zip"
-                                        />) - <span
-                                            t-esc="o.journal_id.warehouse_id.partner_id.state_id.name"
-                                        /> - <span
-                                            t-esc="o.journal_id.warehouse_id.partner_id.country_id.name"
-                                        />
-                                            <br />
-                                    Tel.: <span t-esc="o.journal_id.warehouse_id.partner_id.phone" />
-                                    </p>
-
-                                </td>
-                                <td width="33%" style="vertical-align: top; text-align: center;">
-                                    <div
-                                        style="display: block; margin: 0 auto; border: 2px solid #000; height: 100px; width: 100px; font-size: 40px;"
-                                    >
-                                        <h1
-                                            t-if="denomination_name != 'NOT_DEFINED'"
-                                            style="font-size: 65px;"
-                                            t-esc="denomination_name"
-                                        />
-                                        <p style="font-size: 15px; position: relative; bottom: 10px;">
-                                            cod. <span t-esc="o.voucher_type_id.afip_code" /></p>
-
-                                    </div>
-                                </td>
-                                <td
-                                    width="33%"
-                                    style="font-weight: bold; font-size: 17px; padding-left: 50px; position: absolute; right: 57px;"
-                                >
-                                    <span>N° <span t-esc="denomination" />
-                                    </span>
-                                    <br />
-                                    <span>
-                                        Fecha:
-                                        <t t-if="o.invoice_date">
-                                            <span t-esc="o.invoice_date.strftime('%d/%m/%Y')" />
-                                        </t>
-                                    </span>
-                                    <br />
-                                    <span>C.U.I.T: <span t-esc="o.company_id.vat" />
-                                    </span>
-                                    <br />
-                                    <span>Ing. Brutos: <span t-esc="o.company_id.vat" />
-                                    </span>
-                                    <br />
-                                    <span>IVA Responsable Inscripto</span>
-                                    <br />
-                                    <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
-                                    </span>
-                                    <br />
-                                    <span>
-                                        Inic. Activ.:
-                                        <t t-if="o.journal_id.activity_start_date">
-                                            <span
-                                                t-esc="o.journal_id.activity_start_date.strftime('%d/%m/%Y')"
-                                            />
-                                        </t>
-                                    </span>
-                                    <br />
-                                </td>
-                            </tr>
-                        </table>
-
-                    </div>
-                </t>
-            </div>
-        </div>
-        <div
-            class="article o_report_layout_standard"
-            t-att-data-oe-model="o and o._name"
-            t-att-data-oe-id="o and o.id"
-        >
-            <t t-raw="0" />
-        </div>
-        <div class="footer o_standard_footer">
-        </div>
-    </template>
-
-
 </odoo>
