@@ -341,6 +341,7 @@ class WsConfig(models.Model):
             raise UserError(_("Webservice not implemented."))
 
         ws.HOMO = self.config_id.homologation
+        ws.WSDL = self.url
         ws.InstallDir = FILESTORE_PATH
 
         _logger.info("Starting connection with AFIP...")
