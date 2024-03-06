@@ -11,7 +11,7 @@
         <field name="margin_right">5</field>
         <field name="margin_left">5</field>
         <field name="header_line" eval="False" />
-        <field name="header_spacing">5</field>
+        <field name="header_spacing">50</field>
         <field name="dpi">90</field>
     </record>
 
@@ -46,10 +46,10 @@
                             t-else=""
                             t-attf-src="data:image/png;base64,#{o.company_id.logo}"
                         />
-                        <br />
+                        <br/>
+                        <h3 t-esc="o.company_id.name" />
                         <p>
-                            <h3 t-esc="o.company_id.name" />
-                                <span
+                            <span
                                 t-esc="o.journal_id.warehouse_id.partner_id.street" />
                                 <span
                                 t-esc="o.journal_id.warehouse_id.partner_id.city" /> (<span
@@ -123,7 +123,12 @@
 
                 .right{
                     font-weight: bold;
-                    width: 40%
+                    width: 40%;
+                }
+
+                .right p, .left span{
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 14px;
                 }
 
                 .right img {
@@ -274,7 +279,7 @@
                             <!--Partner-->
                             <table class="partner-table">
                                     <tr>
-                                        <td>
+                                        <td width="60%">
                                             <span class="partner-info">Cliente: </span><span t-esc="o.partner_id.name"/>
                                             <br/>
                                             <span class="partner-info">Domicilio: </span><span t-esc="o.partner_id.street"/>
@@ -292,7 +297,7 @@
                                             <br/>
                                             <span class="partner-info">Condicion Venta: </span><span t-esc="o.invoice_payment_term_id.name" />
                                         </td>
-                                        <td>
+                                        <td width="40%">
                                             <span class="partner-info">Tel.: </span><span t-esc="o.partner_id.phone"/>
                                             <br/>
                                             <span class="partner-info">CUIT: </span><span t-esc="o.partner_id.vat"/>
@@ -374,7 +379,7 @@
                                 </tbofy>
                             </table>
                             <!--Observations/Total-->
-                            <div class="row">
+                            <div class="row total">
                                 <div class="column column-1">
                                     <!-- <h3>Observaciones:</h3>
                                     <br/> -->
@@ -461,6 +466,14 @@
                             -webkit-box-direction: normal;
                             clear: both;
                         }
+
+                        .product-table,
+                        .taxes-table,
+                        .total {
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 13px;
+                        }
+
                                 
                         .column,{
                             -webkit-box-flex: 1;
@@ -476,8 +489,8 @@
                             width: 60%;
                         }  
                         /*Partner table - Product table*/
+
                         .partner-info{
-                            font-size: 18px; 
                             font-weight: bold;
                         }
 
@@ -504,18 +517,26 @@
                             color: black;
                             text-align: left;
                             font-weight: bold;
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 13px;
+                        }
+
+                        .partner-table th,
+                        .partner-table td {
+                            padding: 2px 2px;
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 14px;
                         }
 
                         .product-table th,
-                        .product-table td {
-                            padding: 12px 15px;
-                        }
-
+                        .product-table td,
                         .total-table th,
                         .total-table td,
                         .taxes-table th,
                         .taxes-table td {
-                            padding: 5px 5px;
+                            padding: 2px 2px;
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 13px;
                         }
 
                         .product-table tbody tr {
