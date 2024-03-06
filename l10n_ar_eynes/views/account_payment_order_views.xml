@@ -784,8 +784,6 @@
                                     groups="base.group_multi_currency"
                                 />
                         </div>
-                        <!-- <field name="currency_help_label" colspan="2" nolabel="1" class="oe_grey"/> -->
-                        <field name="paid_amount_in_company_currency" colspan="4" />
                     </group>
                         <group col="2">
                             <separator string="Payment Options" colspan="2" />
