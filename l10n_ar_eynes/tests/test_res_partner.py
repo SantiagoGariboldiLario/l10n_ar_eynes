@@ -18,15 +18,19 @@ _logger = logging.getLogger(__name__)
 class TestResPartnerForm(TransactionCase):
 
     def setUp(self):
-        super().setUp()
-
+        super(TestResPartnerForm, self).setUp()
         self.ResPartner = self.env["res.partner"]
-        self.ResDocumentType = self.env["res.document.type"]
-
         self.form = Form(self.ResPartner)
         self.form.name = "res.partner form tests"
 
-    def test_document_type_and_vat_CUIT(self):
+
+class TestResPartnerDocumentTypeAndVat(TestResPartnerForm):
+
+    def setUp(self):
+        super(TestResPartnerDocumentTypeAndVat, self).setUp()
+        self.ResDocumentType = self.env["res.document.type"]
+
+    def test_CUIT_is_valid(self):
         self.form.document_type_id = self.ResDocumentType.search(
             [("name", "=", "CUIT")]
         )
@@ -44,20 +48,34 @@ class TestResPartnerForm(TransactionCase):
             self.form.save()
         with self.assertRaises(
             ValidationError,
-            msg="There is another partner with same VAT Information",
-        ):
-            self.form.vat = self.ResPartner.search(
-                [("document_type_id", "=", "CUIT")]
-            )[0].vat
-            self.form.save()
-        with self.assertRaises(
-            ValidationError,
             msg="The %(doc_type)s does not seems to be correct for %(country)s",
         ):
             self.form.vat = "30712306545"
             self.form.save()
 
-    def test_document_type_and_vat_DNI(self):
+    def test_CUIT_is_repeated(self):
+        self.form.document_type_id = self.ResDocumentType.search(
+            [("name", "=", "CUIT")]
+        )
+        partners_w_CUIT = self.ResPartner.search(
+            [("document_type_id", "=", "CUIT")]
+        )
+        CUIT_on_db = (
+            partners_w_CUIT[0].vat if partners_w_CUIT else "30712306544"
+        )
+
+        if not partners_w_CUIT:
+            self.form.vat = CUIT_on_db
+            self.form.save()
+
+        with self.assertRaises(
+            ValidationError,
+            msg="There is another partner with same VAT Information",
+        ):
+            self.form.vat = CUIT_on_db
+            self.form.save()
+
+    def test_DNI_is_valid(self):
         self.form.document_type_id = self.ResDocumentType.search(
             [("name", "=", "DNI")]
         )
@@ -67,8 +85,20 @@ class TestResPartnerForm(TransactionCase):
         with self.assertRaises(ValidationError, msg="DNI is too long"):
             self.form.vat = "123456789"
             self.form.save()
+
+    def test_DNI_is_repeated(self):
+        self.form.document_type_id = self.ResDocumentType.search(
+            [("name", "=", "DNI")]
+        )
+        partners_w_DNI = self.ResPartner.search(
+            [("document_type_id", "=", "DNI")]
+        )
+        DNI_on_db = partners_w_DNI[0].vat if partners_w_DNI else "40123456"
+
+        if not partners_w_DNI:
+            self.form.vat = DNI_on_db
+            self.form.save()
+
         with self.assertRaises(ValidationError, msg="DNI is already in DB"):
-            self.form.vat = self.ResPartner.search(
-                [("document_type_id", "=", "DNI")]
-            )[0].vat
+            self.form.vat = DNI_on_db
             self.form.save()
