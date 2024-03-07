@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 class TestResPartner(TransactionCase):
 
     def setUp(self):
-        super.setUp()
+        super().setUp()
         self.ResPartner = self.env["res.partner"]
         self.ResDocumentType = self.env["res.document.type"]
 
