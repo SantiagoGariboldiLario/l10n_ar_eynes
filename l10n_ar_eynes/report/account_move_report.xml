@@ -82,6 +82,9 @@
                         <t t-if="o.move_type == 'out_refund' or o.move_type == 'in_refund'">
                             <span style="font-size: 20px;">NOTA DE CREDITO</span>
                         </t>
+                        <t t-elif="o.is_debit_note">
+                            <span style="font-size: 20px;">NOTA DE DEBITO</span>
+                        </t>
                         <br/>
                         <span>N° <span t-esc="denomination" /></span>
                         <br/>
