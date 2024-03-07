@@ -22,6 +22,6 @@
 
     <record id="other_tax_group" model="account.tax.group">
         <field name="name">Other</field>
-        <field name="group_type">other</field>
+        <field name="group_type">others</field>
     </record>
 </odoo>
