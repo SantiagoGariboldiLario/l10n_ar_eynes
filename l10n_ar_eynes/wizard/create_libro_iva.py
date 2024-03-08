@@ -281,7 +281,7 @@ class LibroIVAExporterWizard(models.TransientModel):
                         if invoice.move_type.startswith('in_')
                         else _('customers')
                     ),
-                    field=self.env['res.partner']._fields['vat'].string,
+                    field='NIF',
                 )
             )
         return partner_vat
