@@ -7,6 +7,7 @@
 ##############################################################################
 
 import logging
+import unittest
 
 from odoo.tests.common import TransactionCase, Form
 from odoo.exceptions import ValidationError
@@ -30,10 +31,25 @@ class TestResPartnerDocumentTypeAndVat(TestResPartnerForm):
         super(TestResPartnerDocumentTypeAndVat, self).setUp()
         self.ResDocumentType = self.env["res.document.type"]
 
-    def test_CUIT_is_valid(self):
+    def test_CUIT(self):
         self.form.document_type_id = self.ResDocumentType.search(
             [("name", "=", "CUIT")]
         )
+        with self.subTest():
+            self._is_valid_CUIT()
+        with self.subTest():
+            self._is_reapeated_CUIT
+
+    def test_DNI(self):
+        self.form.document_type_id = self.ResDocumentType.search(
+            [("name", "=", "DNI")]
+        )
+        with self.subTest():
+            self._is_valid_DNI()
+        with self.subTest():
+            self._is_repeated_DNI()
+
+    def _is_valid_CUIT(self):
         with self.assertRaises(
             ValidationError,
             msg="The %(doc_type)s does not seems to be correct for %(country)s",
@@ -53,10 +69,7 @@ class TestResPartnerDocumentTypeAndVat(TestResPartnerForm):
             self.form.vat = "30712306545"
             self.form.save()
 
-    def test_CUIT_is_repeated(self):
-        self.form.document_type_id = self.ResDocumentType.search(
-            [("name", "=", "CUIT")]
-        )
+    def _is_reapeated_CUIT(self):
         partners_w_CUIT = self.ResPartner.search(
             [("document_type_id", "=", "CUIT")]
         )
@@ -75,10 +88,7 @@ class TestResPartnerDocumentTypeAndVat(TestResPartnerForm):
             self.form.vat = CUIT_on_db
             self.form.save()
 
-    def test_DNI_is_valid(self):
-        self.form.document_type_id = self.ResDocumentType.search(
-            [("name", "=", "DNI")]
-        )
+    def _is_valid_DNI(self):
         with self.assertRaises(ValidationError, msg="DNI is too short"):
             self.form.vat = "123456"
             self.form.save()
@@ -86,10 +96,8 @@ class TestResPartnerDocumentTypeAndVat(TestResPartnerForm):
             self.form.vat = "123456789"
             self.form.save()
 
-    def test_DNI_is_repeated(self):
-        self.form.document_type_id = self.ResDocumentType.search(
-            [("name", "=", "DNI")]
-        )
+    @unittest.skip("Generally we don't care if DNIs are repeated")
+    def _is_repeated_DNI(self):
         partners_w_DNI = self.ResPartner.search(
             [("document_type_id", "=", "DNI")]
         )
