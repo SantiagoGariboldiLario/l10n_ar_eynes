@@ -21,6 +21,7 @@ class TestResPartnerForm(TransactionCase):
     def setUp(self):
         super(TestResPartnerForm, self).setUp()
         self.ResPartner = self.env["res.partner"]
+        self.company_types = ("person", "company")
         self.form = Form(self.ResPartner)
         self.form.name = "res.partner form tests"
 
@@ -35,19 +36,25 @@ class TestResPartnerDocumentTypeAndVat(TestResPartnerForm):
         self.form.document_type_id = self.ResDocumentType.search(
             [("name", "=", "CUIT")]
         )
-        with self.subTest():
-            self._is_valid_CUIT()
-        with self.subTest():
-            self._is_reapeated_CUIT
+        for company_type in self.company_types:
+            with self.subTest(company_type):
+                self.form.company_type = company_type
+                self._is_valid_CUIT()
+            with self.subTest(company_type):
+                self.form.company_type = company_type
+                self._is_reapeated_CUIT()
 
     def test_DNI(self):
         self.form.document_type_id = self.ResDocumentType.search(
             [("name", "=", "DNI")]
         )
-        with self.subTest():
-            self._is_valid_DNI()
-        with self.subTest():
-            self._is_repeated_DNI()
+        for company_type in self.company_types:
+            with self.subTest(company_type):
+                self.form.company_type = company_type
+                self._is_valid_DNI()
+            with self.subTest(company_type):
+                self.form.company_type = company_type
+                self._is_repeated_DNI()
 
     def _is_valid_CUIT(self):
         with self.assertRaises(
