@@ -169,7 +169,7 @@
                                 </p>
                                 <p style="font-size:21px;">
                                     <strong>
-                                        RÉGIMEN: <span t-esc="r.certificate_no" /> - <span
+                                        RÉGIMEN: <span t-esc="r.concept_id.code" /> - <span
                                                 t-esc="r.concept_id.name"
                                             />
                                     </strong>
