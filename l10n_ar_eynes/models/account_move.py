@@ -373,7 +373,7 @@ class AccountMove(models.Model):
         type of invoice and journal
         """
         query = """
-            SELECT max(sequence_number) AS next_sequence
+            SELECT COALESCE(MAX(sequence_number), 0) AS next_sequence
             FROM account_move
             WHERE journal_id = %(journal_id)s
                 AND fiscal_type = %(fiscal_type)s
