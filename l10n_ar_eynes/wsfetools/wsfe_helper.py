@@ -226,17 +226,18 @@ class WSFEParser(WSParser):
 
     def parse_associated_period(self, invoice):
         CbtesAsoc = []
-        from_date = self._convert_date_to_AFIP_format(
-            invoice.inform_period_date_from
-        )
-        to_date = self._convert_date_to_AFIP_format(
-            invoice.inform_period_date_to
-        )
-        CbteAsoc = {
-            'from': from_date,
-            'to': to_date,
-        }
-        CbtesAsoc.append(CbteAsoc)
+        if invoice.inform_period:
+            from_date = self._convert_date_to_AFIP_format(
+                invoice.inform_period_date_from
+            )
+            to_date = self._convert_date_to_AFIP_format(
+                invoice.inform_period_date_to
+            )
+            CbteAsoc = {
+                'from': from_date,
+                'to': to_date,
+            }
+            CbtesAsoc.append(CbteAsoc)
         return CbtesAsoc
 
     def parse_optionals(self, invoice):
