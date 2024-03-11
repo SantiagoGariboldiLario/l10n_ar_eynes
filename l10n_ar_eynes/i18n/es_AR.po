@@ -9058,3 +9058,24 @@ msgstr ""
 #: model:ir.model,name:l10n_ar_eynes.model_account_payment_order_line
 msgid "voucher lines"
 msgstr "lineas de comprobante"
+
+#. module: point_of_sale
+#. openerp-web
+#: code:addons/point_of_sale/static/src/js/ChromeWidgets/CashMoveButton.js:0
+#, python-format
+msgid "Successfully made a cash %s of %s."
+msgstr "Se realizo un movimineto (%s) de efectivo de %s"
+
+#. module: point_of_sale
+#. openerp-web
+#: code:addons/point_of_sale/static/src/js/ChromeWidgets/CashMoveButton.js:0
+#, python-format
+msgid "out"
+msgstr "retiro"
+
+#. module: point_of_sale
+#. openerp-web
+#: code:addons/point_of_sale/static/src/js/ChromeWidgets/CashMoveButton.js:0
+#, python-format
+msgid "in"
+msgstr "ingreso"

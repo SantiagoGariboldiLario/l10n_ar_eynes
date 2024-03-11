@@ -77,7 +77,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount = 0.0
         for tax_id in self._get_invoice_tax_lines(invoice):
             if tax_id.tax_line_id.tax_group_id.group_type == fee_type:
-                amount += tax_id.amount
+                amount += tax_id.price_total
         return ('%016.2f' % amount).replace('.', '')
 
     def _get_operation_code(self, invoice):
@@ -281,7 +281,7 @@ class LibroIVAExporterWizard(models.TransientModel):
                         if invoice.move_type.startswith('in_')
                         else _('customers')
                     ),
-                    field=self.env['res.partner']._fields['vat'].string,
+                    field='NIF',
                 )
             )
         return partner_vat

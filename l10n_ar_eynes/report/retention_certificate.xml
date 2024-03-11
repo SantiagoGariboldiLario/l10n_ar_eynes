@@ -198,7 +198,9 @@
                                 <span t-esc="amount" style="font-size:21px;" />
                             </td>
                             <td style="text-align:center;padding:9px;">
-                                <t t-set="date" t-value="r.date" />
+                                <t t-if="r.date">
+                                    <t t-set="date" t-value="r.date.strftime('%d/%m/%Y')" />
+                                </t>
                                 <span t-esc="date" style="font-size:21px;" />
                             </td>
                         </tr>

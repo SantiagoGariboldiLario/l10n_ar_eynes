@@ -18,6 +18,22 @@ class AccountPaymentOrder(models.Model):
     _rec_name = 'number'
     _order = 'date DESC'
 
+    def _creation_message(self):
+        """Get the creation message to log into the chatter at the record's creation.
+        :returns: The message's body to log.
+        """
+        self.ensure_one()
+        doc_name = self.env['ir.model']._get(self._name).name
+        apo_type = self.type
+
+        if apo_type == 'payment':
+            doc_name = 'Pagos de Proveedores'
+
+        elif apo_type == 'receipt':
+            doc_name = 'Pagos de Clientes'
+
+        return _('%s created', doc_name)
+
     def name_get(self):
         result = []
         for payment in self:
@@ -317,11 +333,6 @@ class AccountPaymentOrder(models.Model):
         + "this voucher, between the selected currency "
         + "(in 'Payment Rate Currency' field) and the "
         + "voucher currency.",
-    )
-    paid_amount_in_company_currency = fields.Float(
-        string='Paid Amount in Company Currency',
-        compute='_compute_paid_amount_in_company_currency',
-        readonly=True,
     )
     is_multi_currency = fields.Boolean(
         string='Multi Currency Voucher',
@@ -930,12 +941,6 @@ class AccountPaymentOrder(models.Model):
     def get_concept_lines_amount(self):
         return sum(self.concept_line_ids.mapped('amount'))
 
-    @api.depends('amount')
-    def _compute_paid_amount_in_company_currency(self):
-        """Returns the same amount"""
-        for p in self:
-            p.paid_amount_in_company_currency = p.amount
-
     @api.depends('currency_id')
     def _compute_is_multicurrency(self):
         for p in self:
@@ -943,6 +948,9 @@ class AccountPaymentOrder(models.Model):
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
+        self.income_line_ids = False
+        self.debt_line_ids = False
+
         if self.journal_id.type in ('sale', 'sale_refund'):
             account_id = self.partner_id.property_account_receivable_id
         elif self.journal_id.type in ('purchase', 'purchase_refund', 'expense'):
@@ -1498,14 +1506,6 @@ class AccountPaymentOrder(models.Model):
                 % retentions_without_sequence.mapped('name')
             )
 
-    @api.model
-    def _convert_paid_amount_in_company_currency(self, amount):
-        """Return actual amount, the user defines the rate of conversion and its result"""
-        currency = self.currency_id.with_context(date=self.date)
-        company_currency = self.company_id.currency_id
-        res = currency.compute(amount, company_currency)
-        return res
-
     def _create_move_line_payment(
         self,
         move_id,
@@ -1517,16 +1517,12 @@ class AccountPaymentOrder(models.Model):
         current_currency,
         sign,
     ):
-        # amount_in_company_currency = (
-        #     self._convert_paid_amount_in_company_currency(amount)
-        # )
-        amount_in_company_currency = amount
         debit = credit = 0.0
         pl_account_id = journal_id.suspense_account_id.id
         if self.type in ('purchase', 'payment'):
-            credit = amount_in_company_currency
+            credit = amount
         elif self.type in ('sale', 'receipt'):
-            debit = amount_in_company_currency
+            debit = amount
         if debit < 0:
             credit = -debit
             debit = 0.0
@@ -1560,9 +1556,9 @@ class AccountPaymentOrder(models.Model):
         # TODO: Make this logic available.
         # -for sale, purchase we have but for the payment and receipt we do not have as based on the bank/cash journal we can not know its payment or receipt  # noqa
         if self.type in ('purchase', 'payment'):
-            total_credit = self.paid_amount_in_company_currency
+            total_credit = self.amount
         elif self.type in ('sale', 'receipt'):
-            total_debit = self.paid_amount_in_company_currency
+            total_debit = self.amount
         if total_debit < 0:
             total_credit = -total_debit
             total_debit = 0.0
@@ -1585,7 +1581,7 @@ class AccountPaymentOrder(models.Model):
                     pml.amount,
                     company_currency,
                     pml.amount_currency,
-                    pml.currency_id,
+                    current_currency,
                     sign,
                 )
             )
@@ -1651,9 +1647,9 @@ class AccountPaymentOrder(models.Model):
         # receipt we do not have as based on the bank/cash
         # journal we can not know its payment or receipt
         if self.type in ('purchase', 'payment'):
-            credit = self.paid_amount_in_company_currency
+            credit = self.amount
         elif self.type in ('sale', 'receipt'):
-            debit = self.paid_amount_in_company_currency
+            debit = self.amount
         if debit < 0:
             credit = -debit
             debit = 0.0
@@ -1912,7 +1908,9 @@ class AccountPaymentOrder(models.Model):
                 'credit': diff > 0 and diff or 0.0,
                 'debit': diff < 0 and -diff or 0.0,
                 'amount_currency': company_currency != current_currency
-                and (sign * -1 * self.writeoff_amount)
+                and current_currency.round(
+                    sign * -1 * self.writeoff_amount / self.payment_rate
+                )
                 or 0.0,
                 'currency_id': company_currency != current_currency
                 and current_currency.id
@@ -2165,14 +2163,14 @@ class AccountPaymentOrderLine(models.Model):
     ref = fields.Char(string='Reference', size=64)
     voucher_type_id = fields.Many2one(related='move_invoice_id.voucher_type_id')
 
-    # @api.onchange('amount')
-    # def onchange_amount(self):
-    #     parent = self.payment_order_id
-    #     if self.original_currency_id.id != parent.company_currency.id:
-    #         amount_computed = self.amount / parent.payment_rate
-    #     else:
-    #         amount_computed = 0
-    #     self.amount_currency = amount_computed
+    @api.onchange('amount')
+    def onchange_amount(self):
+        parent = self.payment_order_id
+        if self.original_currency_id.id != parent.company_currency.id:
+            amount_computed = self.amount / parent.payment_rate
+        else:
+            amount_computed = 0
+        self.amount_currency = amount_computed
 
     @api.onchange('amount_currency')
     def onchange_amount_currency(self):
@@ -2312,16 +2310,20 @@ class AccountPaymentModeLine(models.Model):
     @api.onchange('amount')
     def onchange_amount(self):
         parent = self.payment_order_id
-
-        if self.currency_id.id != parent.company_currency.id:
+        if self.currency_id != parent.company_currency:
             amount_computed = self.amount / parent.payment_rate
         else:
             amount_computed = self.amount
+        self.amount_currency = amount_computed
 
-        if self.amount_currency == amount_computed:
-            return
+    @api.onchange('amount_currency')
+    def onchange_amount_currency(self):
+        parent = self.payment_order_id
+        if self.currency_id != parent.company_currency:
+            amount_computed = self.amount_currency * parent.payment_rate
         else:
-            self.amount_currency = amount_computed
+            amount_computed = self.amount
+        self.amount = amount_computed
 
     @api.model
     def _get_company_currency(self):

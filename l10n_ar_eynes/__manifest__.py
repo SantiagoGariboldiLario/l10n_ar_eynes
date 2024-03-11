@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.1.7.10',
+    'version': '15.0.1.7.15',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -45,6 +45,7 @@
         'stock',
         'uom',
         'web_domain_field',  # To handle dynamic domains
+        'report_qweb_element_page_visibility',
     ],
     'data': [
         "data/decimal_precision_data.xml",
