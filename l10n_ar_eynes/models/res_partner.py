@@ -55,7 +55,9 @@ class ResPartner(models.Model):
     dst_cuit = fields.Boolean(
         string="Enable DST CUIT", related='document_type_id.dst_cuit'
     )
-    fcred_transfer = fields.Char(string='SCA/ADC (FCE)?', default='SCA')
+    fcred_transfer = fields.Selection(
+        selection=[("SCA", "SCA"), ("ADC", "ADC")], string='SCA/ADC (FCE)?'
+    )
     perception_ids = fields.One2many(
         'res.partner.perception',
         'partner_id',
