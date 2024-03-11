@@ -46,7 +46,14 @@ Doodba implementation
         target: origin 15.0
         merges:
             - origin 15.0
-
+    ./otros/ocr_ai_connector:
+        defaults:
+            depth: $DEPTH_DEFAULT
+        remotes:
+            origin: https://gitlab.eynes.com.ar/otros/ocr_ai_connector.git
+        target: origin 15.0
+        merges:
+            - origin 15.0
     ./otros/popup_messages:
         defaults:
             depth: $DEPTH_DEFAULT
@@ -63,7 +70,6 @@ Doodba implementation
             - origin 15.0
         target: origin 15.0
 
-
 ### Add this to addons.yaml:
 
     l10n_ar_eynes:
@@ -78,7 +84,6 @@ Doodba implementation
         - "*"
     odoomates:
       - "*"
-
 
 ## Other dependencies
 
@@ -105,4 +110,3 @@ Doodba implementation
     html2text
     pyafipws@https://github.com/eynes/pyafipws/archive/main.zip
     httplib2
-
