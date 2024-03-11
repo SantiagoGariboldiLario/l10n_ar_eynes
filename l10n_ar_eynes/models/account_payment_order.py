@@ -19,7 +19,7 @@ class AccountPaymentOrder(models.Model):
     _order = 'date DESC'
 
     def _creation_message(self):
-        """ Get the creation message to log into the chatter at the record's creation.
+        """Get the creation message to log into the chatter at the record's creation.
         :returns: The message's body to log.
         """
         self.ensure_one()
@@ -948,6 +948,9 @@ class AccountPaymentOrder(models.Model):
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
+        self.income_line_ids = False
+        self.debt_line_ids = False
+
         if self.journal_id.type in ('sale', 'sale_refund'):
             account_id = self.partner_id.property_account_receivable_id
         elif self.journal_id.type in ('purchase', 'purchase_refund', 'expense'):
