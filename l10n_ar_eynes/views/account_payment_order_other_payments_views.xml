@@ -14,12 +14,7 @@
                         type="object"
                         states="draft"
                     />
-                <button
-                        name="cancel_voucher"
-                        string="Cancel Receipt"
-                        type="object"
-                        states="draft,proforma"
-                    />
+                <button name="cancel_voucher" string="Cancel Receipt" type="object" states="draft,proforma" />
                 <button
                         name="cancel_voucher"
                         string="Unreconcile"
@@ -27,12 +22,7 @@
                         states="posted"
                         confirm="Are you sure to unreconcile and cancel this record ?"
                     />
-                <button
-                        name="action_cancel_draft"
-                        type="object"
-                        states="cancel"
-                        string="Set to Draft"
-                    />
+                <button name="action_cancel_draft" type="object" states="cancel" string="Set to Draft" />
                 <field
                         name="state"
                         widget="statusbar"
@@ -43,10 +33,7 @@
             </header>
             <sheet>
                 <h1 attrs="{'invisible': [('number','=',False)]}">
-                    <field
-                            name="number"
-                            attrs="{'readonly': [('state', 'not in', ('draft',))]}"
-                        />
+                    <field name="number" attrs="{'readonly': [('state', 'not in', ('draft',))]}" />
                 </h1>
                 <group invisible="context.get('line_type', False)">
                     <group>
@@ -75,6 +62,7 @@
                             }"
                             />
                         <field name="currency_id" invisible="1" />
+                        <field name="company_currency" invisible="1" readonly="1" />
                         <field
                                 name="journal_id"
                                 string="Journal"
@@ -87,16 +75,13 @@
                                 class="oe_inline"
                                 string="Paid Amount"
                                 widget="monetary"
-                                options="{'currency_field': 'currency_id'}"
+                                options="{'currency_field': 'company_currency'}"
                                 force_save="True"
                                 attrs="{'readonly': True}"
                             />
                     </group>
                     <group>
-                        <field
-                                name="date"
-                                attrs="{'readonly': [('state', 'not in', ('draft',))]}"
-                            />
+                        <field name="date" attrs="{'readonly': [('state', 'not in', ('draft',))]}" />
                         <field
                                 name="reference"
                                 string="Payment Ref"
@@ -109,11 +94,7 @@
                                 placeholder="e.g. Invoice SAJ/0042"
                                 attrs="{'readonly': [('state', 'not in', ('draft',))]}"
                             />
-                        <field
-                                name="company_id"
-                                readonly="1"
-                                groups="base.group_multi_company"
-                            />
+                        <field name="company_id" readonly="1" groups="base.group_multi_company" />
                         <field
                                 name="account_id"
                                 widget="selection"
@@ -126,16 +107,9 @@
                                 invisible="1"
                                 attrs="{'readonly': [('state', 'not in', ('draft',))]}"
                             />
-                        <field
-                                name="currency_id"
-                                attrs="{'readonly': True}"
-                                force_save="True"
-                            />
+                        <field name="currency_id" attrs="{'readonly': True}" force_save="True" />
                     </group>
-                    <group
-                            col="4"
-                            attrs="{'invisible':[('is_multi_currency','=',False)]}"
-                        >
+                    <group attrs="{'invisible':[('is_multi_currency','=',False)]}">
                         <field name="is_multi_currency" invisible="1" />
                         <label for="payment_rate" colspan="1" />
                         <div>
@@ -152,19 +126,13 @@
                                     groups="base.group_multi_currency"
                                 />
                         </div>
-                        <!-- <field name="currency_help_label" colspan="2" nolabel="1" class="oe_grey"/> -->
-                        <field
-                                name="paid_amount_in_company_currency"
-                                colspan="4"
-                                invisible="1"
-                            />
                     </group>
                     <group col="2">
                         <separator string="Payment Options" colspan="2" />
                         <field
                                 name="writeoff_amount"
                                 widget="monetary"
-                                options="{'currency_field': 'currency_id'}"
+                                options="{'currency_field': 'company_currency'}"
                             />
                         <field
                                 name="payment_option"
@@ -213,11 +181,7 @@
                     </group>
                 </group>
                 <notebook>
-                    <page
-                            string="Payment Information"
-                            name="payment_information"
-                            groups="base.group_user"
-                        >
+                    <page string="Payment Information" name="payment_information" groups="base.group_user">
                         <label for="payment_mode_line_ids" />
                         <field
                                 name="payment_mode_line_ids"
@@ -231,14 +195,22 @@
                                         domain="[('type', 'in', ['cash', 'bank']), ('company_id', '=', parent.company_id)]"
                                     />
                                 <field name="name" invisible="1" />
-                                <field name="currency_id" readonly="1" />
+                                <field name="currency_id" readonly="1" force_save="True" />
                                 <field name="date" />
                                 <field name="payment_order_id" invisible="1" />
                                 <field
                                         name="amount"
                                         sum="Total"
                                         widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
+                                    />
+                                <field
+                                        name="amount_currency"
+                                        sum="Total Allocation CCY"
+                                        widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
+                                        attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
+                                        groups="base.group_multi_currency"
                                     />
                             </tree>
                         </field>
@@ -251,10 +223,7 @@
                             <tree editable="bottom">
                                 <field name="name" />
                                 <field name="account_id" />
-                                <field
-                                        name="journal_id"
-                                        domain="[('type', 'in', ['bank', 'cash'])]"
-                                    />
+                                <field name="journal_id" domain="[('type', 'in', ['bank', 'cash'])]" />
                                 <field name="amount" />
                                 <field
                                         name="account_analytic_id"
@@ -274,12 +243,7 @@
                         </group>
                     </page>
                     <page string="Checks">
-                        <field
-                                name="issued_check_ids"
-                                string="Issued Checks"
-                                nolabel="1"
-                                colspan="4"
-                            >
+                        <field name="issued_check_ids" string="Issued Checks" nolabel="1" colspan="4">
                             <tree>
                                 <field name="number" />
                                 <field name="type" />
@@ -311,10 +275,7 @@
                                         <field name="clearing" />
                                         <field name="signatory" />
                                         <field name="origin" />
-                                        <field
-                                                name="issued_check_state"
-                                                invisible="1"
-                                            />
+                                        <field name="issued_check_state" invisible="1" />
                                         <field name="crossed" />
                                         <field name="not_order" />
                                     </group>
@@ -363,15 +324,13 @@
                                 <field name="name" />
                                 <field name="debit" />
                                 <field name="credit" />
-                                <!-- TODO: No existe mas el campo state -->
-                                <!-- <field name="state"/> -->
-                                <!-- TODO: No existe el modelo 'account.move.reconcile' -->
-                                <!-- <field name="reconcile_id"/> -->
-                                <field name="amount_currency" />
                                 <field
-                                        name="currency_id"
-                                        groups="base.group_multi_currency"
+                                        name="amount_currency"
+                                        widget="monetary"
+                                        options="{'currency_field': 'original_currency_id'}"
+                                        attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
                                     />
+                                <field name="currency_id" groups="base.group_multi_currency" />
                             </tree>
                         </field>
                     </page>

@@ -11,7 +11,7 @@
         <field name="margin_right">5</field>
         <field name="margin_left">5</field>
         <field name="header_line" eval="False" />
-        <field name="header_spacing">50</field>
+        <field name="header_spacing">5</field>
         <field name="dpi">90</field>
     </record>
 
@@ -66,7 +66,20 @@
 
                     </td>
                     <td class="center">
-                        <div class="denomination-render">
+                        <table class="center-header-table">
+                            <tr>
+                              <td>
+                                <h1
+                                    t-if="denomination_name != 'NOT_DEFINED'"
+                                    t-esc="denomination_name"
+                                />
+                                <p>
+                                    cod. <span t-esc="o.voucher_type_id.afip_code" />
+                                </p>
+                              </td>
+                            </tr>
+                          </table>
+                        <!-- <div class="denomination-render" style="backgound-color: yellow;">
                             <h1
                                 t-if="denomination_name != 'NOT_DEFINED'"
                                 style="font-size: 65px;"
@@ -76,9 +89,16 @@
                             style="font-size: 15px; position: relative; bottom: 10px;">
                             cod. <span t-esc="o.voucher_type_id.afip_code" /></p>
 
-                        </div>
+                        </div> -->
                     </td>
                     <td class="left">
+                        <t t-if="o.move_type == 'out_refund' or o.move_type == 'in_refund'">
+                            <span style="font-size: 20px;">NOTA DE CREDITO</span>
+                        </t>
+                        <t t-elif="o.is_debit_note">
+                            <span style="font-size: 20px;">NOTA DE DEBITO</span>
+                        </t>
+                        <br/>
                         <span>N° <span t-esc="denomination" /></span>
                         <br/>
                         <span>
@@ -122,7 +142,8 @@
 
                 .right{
                     font-weight: bold;
-                    width: 40%;
+                    width: 44%;
+                    padding-right: 10px;
                 }
 
                 .right p, .left span{
@@ -136,14 +157,31 @@
                 }
 
                 .center{
-                    width: 20%;
-                    vertical-align: top;
+                    width: 12%;
                     text-align: center;
                 }
 
+                .center-header-table td {
+                    border: 2px solid black;
+                    width: 200px;
+                    height: 100px;
+                    text-align: center;
+                    padding: 0px;
+                }
+
+                .center-header-table h1 {
+                    font-size: 65px;
+                }
+
+                .center-header-table h1,p {
+                    margin: 0px;
+                    padding: 0px;
+                }
+
                 .left {
-                    width: 40%;
+                    width: 44%;
                     font-weight: bold;
+                    padding-left: 30px;
                 }
                 
                 .denomination-render{ 
@@ -393,7 +431,7 @@
                                     <br/> -->
                                 </div>
                                 <div class="column column-2">
-                                    <table class="total-table">
+                                    <table class="total-table" width="100%">
                                         <thead>
                                             <tr>
                                                 <td>

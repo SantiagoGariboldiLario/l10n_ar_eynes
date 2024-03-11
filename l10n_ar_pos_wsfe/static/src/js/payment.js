@@ -14,10 +14,9 @@ odoo.define("l10n_ar_pos_wsfe.WSFEPaymentScreen", function (require) {
             mounted() {
                 super.mounted();
                 // By default set electronic invoice
-                if(!this.currentOrder.is_manual_invoice() &&
-                    !this.currentOrder.is_electronic_invoice()){
-                    this.toggleIsElectronicInvoice()
-                }else{
+                if (!this.currentOrder.is_manual_invoice() && !this.currentOrder.is_electronic_invoice()) {
+                    this.toggleIsElectronicInvoice();
+                } else {
                     this.setNextInvoiceSequence();
                 }
                 this.env.pos.on("change:selectedClient", () => this.setNextInvoiceSequence(), this);
@@ -44,7 +43,7 @@ odoo.define("l10n_ar_pos_wsfe.WSFEPaymentScreen", function (require) {
                 const config = this.currentOrder.pos.config;
                 const amount_total = this.currentOrder.get_total_with_tax();
                 const fiscal_type = this.currentOrder.is_electronic_invoice() ? "electronic" : "internal";
-                const move_type = this.currentOrder.get_due() < 0 ? "out_refund" : "out_invoice";
+                const move_type = this.currentOrder._isRefundAndSaleOrder() ? "out_refund" : "out_invoice";
                 try {
                     const seq_vals = await this.rpc({
                         model: "account.move",
