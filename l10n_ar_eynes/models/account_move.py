@@ -254,6 +254,9 @@ class AccountMove(models.Model):
         string='FOB',
     )
     vat_date = fields.Date()
+    inform_period = fields.Boolean(default=False)
+    inform_period_date_from = fields.Date()
+    inform_period_date_to = fields.Date()
 
     _sql_constraints = [
         (
@@ -520,6 +523,14 @@ class AccountMove(models.Model):
             self.invoice_date_due = pterm_list[0]
         elif self.invoice_date_due and (date_invoice > self.invoice_date_due):
             self.invoice_date_due = date_invoice
+
+    @api.onchange('inform_period')
+    def _onchange_inform_period(self):
+        if self.inform_period:
+            self.associated_inv_ids = False
+        else:
+            self.inform_period_date_from = False
+            self.inform_period_date_to = False
 
     def _get_refund_common_fields(self):
         res = super(AccountMove, self)._get_refund_common_fields()
