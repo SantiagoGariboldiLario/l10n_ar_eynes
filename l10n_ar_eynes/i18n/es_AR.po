@@ -7278,7 +7278,7 @@ msgstr "¡La tupla de concepto, la actividad debe ser única por retención!"
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "There are more than one voucher referenced to check %s."
-msgstr "Hay más de un voucher referenciado para verificar %s."
+msgstr "Hay más de un voucher referenciado al cheque %s."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/retention.py:0
