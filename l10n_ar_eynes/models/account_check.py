@@ -392,13 +392,8 @@ class AccountCheck(models.Model):
         # multicurrency estas dos lineas de abajo
         company_currency = voucher.company_id.currency_id.id
         current_currency = self.currency_id.id
-        check_currency = self.checkbook_id.bank_account_id.currency_id.id
-        if check_currency != company_currency:
-            amount_in_company_currency = (
-                voucher._convert_paid_amount_in_company_currency(self.amount)
-            )
-        else:
-            amount_in_company_currency = self.amount
+        self.checkbook_id.bank_account_id.currency_id.id
+        amount_in_company_currency = self.amount
         debit = credit = 0.0
         if voucher.type in ('purchase', 'payment'):
             credit = amount_in_company_currency

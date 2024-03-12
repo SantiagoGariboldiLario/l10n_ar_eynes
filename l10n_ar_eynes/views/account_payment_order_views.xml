@@ -618,6 +618,18 @@
         </field>
     </record>
 
+    <record id="account_payment_order_view_search" model="ir.ui.view">
+        <field name="name">account.payment.order.view.search</field>
+        <field name="model">account.payment.order</field>
+        <field name="arch" type="xml">
+            <search string="Search Payment">
+                <field name="number" />
+                <field name="reference" />
+                <field name="partner_id" />
+            </search>
+        </field>
+    </record>
+
     <record id="account_payment_order_view_tree" model="ir.ui.view">
         <field name="name">account.payment.order.view.tree</field>
         <field name="model">account.payment.order</field>

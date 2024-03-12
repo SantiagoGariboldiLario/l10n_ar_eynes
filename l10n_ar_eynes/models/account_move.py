@@ -826,18 +826,21 @@ class AccountMove(models.Model):
                 ('debit', '=', 0),
                 ('credit', '>', 0),
             ]
-        move_line = self.env['account.move.line'].search(move_line_domain)
-        po_move_line = [
-            (
-                0,
-                0,
-                {
-                    'invoice_id': self.id,
-                    'move_line_id': move_line.id,
-                    'account_id': move_line.account_id.id,
-                },
+        move_lines = self.env['account.move.line'].search(move_line_domain)
+
+        po_move_lines = []
+        for move_line in move_lines:
+            po_move_lines.append(
+                (
+                    0,
+                    0,
+                    {
+                        'invoice_id': self.id,
+                        'move_line_id': move_line.id,
+                        'account_id': move_line.account_id.id,
+                    },
+                )
             )
-        ]
 
         _type = 'receipt' if self.is_sale_document() else 'payment'
         po_vals = {
@@ -851,9 +854,9 @@ class AccountMove(models.Model):
             po_vals['payment_rate'] = self.currency_rate
 
         if self.is_sale_document():
-            po_vals['income_line_ids'] = po_move_line
+            po_vals['income_line_ids'] = po_move_lines
         else:
-            po_vals['debt_line_ids'] = po_move_line
+            po_vals['debt_line_ids'] = po_move_lines
 
         return po_vals
 
