@@ -285,6 +285,8 @@ class ResPartner(models.Model):
                         "You must complete 'Type of taxpayer' field on Gross income configuration."
                     )
                 )
+        if not "vat" in vals:
+            vals["vat"] = self.vat
         return super(ResPartner, self).write(vals)
 
     @api.model
