@@ -385,7 +385,24 @@
                                             <span class="partner-info">Incoterms: </span><span t-esc="o.invoice_incoterm_id.name"/>
                                         </td>
                                     </tr>
-                            </table>
+                                </table>
+                            </div>
+                            <!--Table if is a export invoice-->
+                            <div t-if="denomination_name == 'E'">
+                                <table class="export-invoice-table">
+                                    <tr>
+                                        <td width="60%">
+                                            <span class="partner-info">Divisa: </span><span t-esc="o.currency_id.name"/>
+                                            <br/>
+                                            <span class="partner-info">Destino del comprobante: </span><span t-esc="o.dst_country_id.name"/>
+                                        </td>
+                                        <td width="40%">
+                                            <span class="partner-info">Forma de pago: </span>
+                                            <br/>
+                                            <span class="partner-info">Incoterms: </span><span t-esc="o.invoice_incoterm_id.name"/>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                             <!--Products-->
                             <table class="product-table">
@@ -496,66 +513,66 @@
                             </table>
                             <!--Observations/Total-->
                             <table class="total-table fix-position" style="width: 40%">
-                                        <thead>
-                                            <tr>
-                                                <td t-if="o.denomination != 'e'">
-                                                    Subtotal
-                                                </td>
-                                                <td t-else="">
-                                                    Tipo de cambio
-                                                </td>
-                                                <td t-if="o.denomination != 'e'">
-                                                    Impuestos
-                                                </td>
-                                                <td t-else="">
-                                                    Divisa
-                                                </td>
-                                                <td>
-                                                    Total
-                                                </td>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr t-if="o.denomination != 'e'">
-                                                <td>
-                                                    <span
-                                                        t-esc="o.price_subtotal_to_PDF()"
-                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                    />
-                                                </td>
-                                                <td t-if="o.denomination != 'b'">
-                                                    <span
-                                                        t-esc="o.amount_tax"
-                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <span
-                                                        t-esc="o.amount_total"
-                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr t-else="">
-                                                <td>
-                                                    $ <span
-                                                        t-esc="o.currency_rate"
-                                                    />
-                                                </td>
-                                                <td t-if="o.denomination != 'b'">
-                                                    <span
-                                                        t-esc="o.currency_id.name"
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <span
-                                                        t-esc="o.amount_total"
-                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                    />
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <thead>
+                                    <tr>
+                                        <td t-if="o.denomination != 'e'">
+                                            Subtotal
+                                        </td>
+                                        <td t-else="">
+                                            Tipo de cambio
+                                        </td>
+                                        <td t-if="o.denomination != 'e'">
+                                            Impuestos
+                                        </td>
+                                        <td t-else="">
+                                            Divisa
+                                        </td>
+                                        <td>
+                                            Total
+                                        </td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-if="o.denomination != 'e'">
+                                        <td>
+                                            <span
+                                                t-esc="o.price_subtotal_to_PDF()"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                        <td t-if="o.denomination != 'b'">
+                                            <span
+                                                t-esc="o.amount_tax"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                        <td>
+                                            <span
+                                                t-esc="o.amount_total"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                    </tr>
+                                    <tr t-else="">
+                                        <td>
+                                            $ <span
+                                                t-esc="o.currency_rate"
+                                            />
+                                        </td>
+                                        <td t-if="o.denomination != 'b'">
+                                            <span
+                                                t-esc="o.currency_id.name"
+                                            />
+                                        </td>
+                                        <td>
+                                            <span
+                                                t-esc="o.amount_total"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                             <!--Masagge-->
                             <div class="fix-position">
                                 <t t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'">
@@ -571,14 +588,6 @@
                             </div>
                             <!--Multicurrency-->
                             <div class="fix-position" t-if="o.is_multi_currency">
-                                <!-- <table class="multicurrency-table">
-                                    <tr>
-                                        <td>Moneda: <span t-esc="o.currency_id.name"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tasa de cambio: <span t-esc="o.currency_rate"/></td>
-                                    </tr>
-                                </table> -->
                                 <p style="text-align: center">El total de este comprobante expresado en la moneda de curso legal - Pesos Argentinos - asciende a $  <span t-esc="o.amount_total_cur"/></p>                
                             </div>
                         </div>
