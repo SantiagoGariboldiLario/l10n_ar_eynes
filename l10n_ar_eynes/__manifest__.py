@@ -45,6 +45,7 @@
         'stock',
         'uom',
         'web_domain_field',  # To handle dynamic domains
+        'web_notify',
         'report_qweb_element_page_visibility',
     ],
     'data': [
