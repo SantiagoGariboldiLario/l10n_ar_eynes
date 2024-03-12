@@ -23,8 +23,7 @@
                 <attribute name="attrs">{
                     'required': [('dst_cuit', '=', True)],
                     'readonly': [('type', '=', 'contact'), ('parent_id', '!=', False)]
-                }</attribute>
-                <!-- 'readonly': [('type', '=', 'contact'), ('parent_id', '!=', False)] COPIED FROM BASE VIEW -->
+                    }</attribute>
             </xpath>
 
             <xpath expr="//field[@name='vat']" position="before">
@@ -36,6 +35,7 @@
                         'invisible': [('dst_cuit', '!=', True)],
                         'required': [('dst_cuit', '=', True)],
                     }"
+                    options="{'no_create': True}"
                 />
                 <field name="supplier_rank" invisible="1" />
                 <field name="customer_rank" invisible="1" />
