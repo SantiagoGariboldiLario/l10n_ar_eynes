@@ -225,11 +225,21 @@ class WSFEParser(WSParser):
         return CbtesAsoc
 
     def parse_optionals(self, invoice):
-        if invoice.optional_ids:
-            return invoice.optional_ids.mapped(
-                lambda o: {
-                    'Code': int(o.optional_id.code),
-                    'Valor': o.value.strip(),
-                }
-            )
-        return []
+        optionals = []
+        for optional in invoice.optional_ids:
+            optional_code = int(optional.optional_id.code)
+            if optional.value:
+                optionals.append(
+                    {
+                        'Code': optional_code,
+                        'Valor': optional.value.strip(),
+                    }
+                )
+            else:
+                raise UserError(
+                    _(
+                        'You must set a value for Optional code %(code)s',
+                        code=optional_code,
+                    )
+                )
+        return optionals
