@@ -161,9 +161,19 @@
                         </tr>
                         <!-- *-* *-* RUBRO III *-* *-* -->
                         <tr>
-                            <td style="width:50%;padding:9px;">
-                                <strong style="font-size:21px;">RUBRO III: DETALLE DE EL/LOS MONTO/S
-                                    RETENIDO/S</strong>
+                            <td style="width:50%;padding:9px;" colspan="2">
+                                <p style="font-size:21px; margin-bottom: 0px;">
+                                    <strong>
+                                        RUBRO III: DATOS DE RETENCIÓN PRACTICADA
+                                    </strong>
+                                </p>
+                                <p style="font-size:21px;">
+                                    <strong>
+                                        RÉGIMEN: <span t-esc="r.concept_id.code" /> - <span
+                                                t-esc="r.concept_id.name"
+                                            />
+                                    </strong>
+                                </p>
                             </td>
                             <td style="padding:9px;">
                             </td>
@@ -186,7 +196,7 @@
                         </tr>
                         <tr>
                             <td style="width:25%;text-align:center;padding:9px;">
-                                <t t-set="base" t-value="r.base" />
+                                <t t-set="base" t-value="r.base_amount" />
                                 <span t-esc="base" style="font-size:21px;" />
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
@@ -209,7 +219,7 @@
                             </td>
                         </tr>
                     </table>
-                
+
                     <table style="width:100%">
                         <tr>
                             <td style="padding:9px;">
@@ -220,8 +230,8 @@
                         <tr>
                             <td style="padding:9px;">
                                 <strong
-                                    style="font-size:21px;"
-                                >A informarse en la DD.JJ. del periodo: </strong>
+                                        style="font-size:21px;"
+                                    >A informarse en la DD.JJ. del periodo: </strong>
                                 <t t-set="month" t-value="str(r.date).split('-')[1]" />
                                 <t t-set="year" t-value="str(r.date).split('-')[0]" />
                                 <t t-set="period" t-value="'{}/{}'.format(month, year)" />
@@ -242,6 +252,16 @@
                                 </t>
                                 <t t-set="voucher" t-value="o.number" />
                                 <span t-esc="voucher" style="font-size:21px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;">
+                                <strong style="font-size:21px;">Comprobante originante: </strong>
+                                <t
+                                        t-set="related_moves"
+                                        t-value="', '.join( list(set((r.mapped('retention_move_line_ids.move_name')))))"
+                                    />
+                                <span style="font-size:21px;" t-esc="related_moves" />
                             </td>
                         </tr>
                     </table>
