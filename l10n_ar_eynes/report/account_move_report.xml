@@ -371,24 +371,7 @@
                                 </tr>
                             </table>
                             <!--Table if is a export invoice-->
-                            <div t-if="denomination_name == 'E'">
-                                <table class="export-invoice-table">
-                                    <tr>
-                                        <td width="60%">
-                                            <span class="partner-info">Divisa: </span><span t-esc="o.currency_id.name"/>
-                                            <br/>
-                                            <span class="partner-info">Destino del comprobante: </span><span t-esc="o.dst_country_id.name"/>
-                                        </td>
-                                        <td width="40%">
-                                            <span class="partner-info">Forma de pago: </span>
-                                            <br/>
-                                            <span class="partner-info">Incoterms: </span><span t-esc="o.invoice_incoterm_id.name"/>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <!--Table if is a export invoice-->
-                            <div t-if="denomination_name == 'E'">
+                            <div t-if="o.denomination == 'e'">
                                 <table class="export-invoice-table">
                                     <tr>
                                         <td width="60%">
@@ -484,7 +467,7 @@
                                     </tbody>
                             </table>
                             <!--Taxes-->
-                            <table class="taxes-table fix-position" t-if="o.denomination != 'b' and o.denomination != 'c'" style="width: 30%">
+                            <table class="taxes-table fix-position" t-if="o.denomination != 'b' and o.denomination != 'c' and o.denomination != 'e'" style="width: 30%">
                                 <thead>
                                     <tr>
                                         <th>
