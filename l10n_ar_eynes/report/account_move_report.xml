@@ -446,7 +446,7 @@
                                             </td>
                                             <div t-if="o.denomination == 'a' or o.is_debit_note">
                                                 <t t-set="sub_total_per_product" t-value="line.quantity * line.price_unit" />
-                                                <t t-foreach="line.product_id.taxes_id" t-as="tax">
+                                                <t t-foreach="line.tax_ids" t-as="tax">
                                                     <t t-if="'IVA' in tax.name">
                                                         <t t-set="iva_tax_amount" t-value="tax.amount"/>
                                                     </t>
@@ -457,17 +457,21 @@
                                                         t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
                                                     />
                                                 </td>
-                                                <td>
+                                                <td t-if="iva_tax_amount">
                                                     <span
                                                         t-if="iva_tax_amount"
                                                         t-esc="iva_tax_amount"
                                                      />%
+                                                </td>
+                                                <td t-else="">
+                                                    <span> </span>
                                                 </td>
                                             </div>
                                             <td>
                                                 <span 
                                                     t-if="iva_tax_amount and (o.denomination == 'a' or o.is_debit_note)"
                                                     t-esc="(iva_tax_amount/100 + 1) * sub_total_per_product"
+                                                    t-set="iva_tax_amount" t-value=""
                                                     t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
                                                 />
                                                 <span
