@@ -1,19 +1,21 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
-    <record id="paperformat_invoice" model="report.paperformat">
-        <field name="name">Invoice Report</field>
-        <field name="default" eval="False" />
-        <field name="format">A4</field>
-        <field name="page_width">0</field>
-        <field name="orientation">Portrait</field>
-        <field name="margin_top">55</field>
-        <field name="margin_bottom">35</field>
-        <field name="margin_right">5</field>
-        <field name="margin_left">5</field>
-        <field name="header_line" eval="False" />
-        <field name="header_spacing">5</field>
-        <field name="dpi">90</field>
-    </record>
+    <data noupdate="1">
+        <record id="paperformat_invoice" model="report.paperformat">
+            <field name="name">Invoice Report</field>
+            <field name="default" eval="False" />
+            <field name="format">A4</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">55</field>
+            <field name="margin_bottom">35</field>
+            <field name="margin_right">5</field>
+            <field name="margin_left">5</field>
+            <field name="header_line" eval="False" />
+            <field name="header_spacing">5</field>
+            <field name="dpi">90</field>
+        </record>
+    </data>
 
     <record id="account_move_report" model="ir.actions.report">
         <field name="name">Factura QWEB</field>
@@ -46,39 +48,42 @@
                             t-else=""
                             t-attf-src="data:image/png;base64,#{o.company_id.logo}"
                         />
-                        <br/>
-                        <p>
-                            Razón social: <span t-esc="o.journal_id.warehouse_id.partner_id.name"/>
-                            <br/>
-                            Domicillio: <span t-esc="o.journal_id.warehouse_id.partner_id.street" />
-                            <span t-esc="o.journal_id.warehouse_id.partner_id.city" 
-                                /> (
-                            <span t-esc="o.journal_id.warehouse_id.partner_id.zip"
-                                />) - 
-                            <span t-esc="o.journal_id.warehouse_id.partner_id.state_id.name"
-                                /> - 
-                            <span t-esc="o.journal_id.warehouse_id.partner_id.country_id.name"/>
-                            <br/>
-                            Tel.: <span t-esc="o.journal_id.warehouse_id.partner_id.phone" />
-                            <br/>
-                            Condición frente al IVA: <span t-esc="o.journal_id.warehouse_id.partner_id.property_account_position_id.name"/>
+                        <br />
+                        <p> Razón social: <span t-esc="o.journal_id.warehouse_id.partner_id.name" />
+                            <br />
+                            Domicillio: <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.street" />
+                            <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.city"
+                            /> ( <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.zip"
+                            />) - <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.state_id.name"
+                            /> - <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.country_id.name" />
+                            <br />
+                            Tel.: <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.phone" />
+                            <br />
+                            Condición frente al IVA: <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.property_account_position_id.name" />
                         </p>
 
                     </td>
                     <td class="center">
                         <table class="center-header-table">
                             <tr>
-                              <td>
-                                <h1
-                                    t-if="denomination_name != 'NOT_DEFINED'"
-                                    t-esc="denomination_name"
-                                />
-                                <p>
-                                    cod. <span t-esc="o.voucher_type_id.afip_code" />
-                                </p>
-                              </td>
+                                <td>
+                                    <h1
+                                        t-if="denomination_name != 'NOT_DEFINED'"
+                                        t-esc="denomination_name"
+                                    />
+                                    <p> cod. <span
+                                            t-esc="o.voucher_type_id.afip_code" />
+                                    </p>
+                                </td>
                             </tr>
-                          </table>
+                        </table>
                         <!-- <div class="denomination-render" style="backgound-color: yellow;">
                             <h1
                                 t-if="denomination_name != 'NOT_DEFINED'"
@@ -101,35 +106,31 @@
                         <t t-elif="denomination_name == 'E'">
                             <span style="font-size: 20px;">FACTURA DE EXPORTACION</span>
                         </t>
-                        <br/>
+                        <br />
                         <span>N° <span t-esc="denomination" /></span>
-                        <br/>
-                        <span>
-                            Fecha:
-                            <t t-if="o.invoice_date">
+                        <br />
+                        <span> Fecha: <t t-if="o.invoice_date">
                                 <span t-esc="o.invoice_date.strftime('%d/%m/%Y')" />
                             </t>
                         </span>
                         <br />
                         <span>C.U.I.T: <span t-esc="o.company_id.vat" />
                         </span>
-                        <br/>
+                        <br />
                         <span>Ing. Brutos: <span t-esc="o.company_id.vat" />
                         </span>
-                        <br/>
+                        <br />
                         <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
                         </span>
-                        <br/>
-                        <span>
-                            Inic. Activ.:
-                            <t t-if="o.journal_id.activity_start_date">
+                        <br />
+                        <span> Inic. Activ.: <t t-if="o.journal_id.activity_start_date">
                                 <span
                                     t-esc="o.journal_id.activity_start_date.strftime('%d/%m/%Y')"
                                 />
                             </t>
                         </span>
                         <t t-if="denomination_name == 'E'">
-                            <br/>
+                            <br />
                             <span>IVA EXENTO OPERACIÓN DE EXPORTACION</span>
                         </t>
                     </td>
@@ -137,72 +138,73 @@
             </table>
             <style>
                 .company-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin: 25px 0;
-                    border-radius: 5px 5px 0 0;
-                    overflow: hidden;
-                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-                    background-color: #f3f3f3;
+                width: 100%;
+                border-collapse: collapse;
+                margin: 25px 0;
+                border-radius: 5px 5px 0 0;
+                overflow: hidden;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+                background-color: #f3f3f3;
                 }
 
                 .right{
-                    font-weight: bold;
-                    width: 44%;
-                    padding-right: 10px;
+                font-weight: bold;
+                width: 44%;
+                padding-right: 10px;
                 }
 
                 .right p, .left span{
-                    font-family: Arial, Helvetica, sans-serif;
-                    font-size: 14px;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 14px;
                 }
 
                 .right img {
-                    height: 80px;
-                    width: 70%;
+                height: 80px;
+                width: 70%;
                 }
 
                 .center{
-                    width: 12%;
-                    text-align: center;
+                width: 12%;
+                text-align: center;
                 }
 
                 .center-header-table td {
-                    border: 2px solid black;
-                    width: 200px;
-                    height: 100px;
-                    text-align: center;
-                    padding: 0px;
+                border: 2px solid black;
+                width: 200px;
+                height: 100px;
+                text-align: center;
+                padding: 0px;
                 }
 
                 .center-header-table h1 {
-                    font-size: 65px;
+                font-size: 65px;
                 }
 
                 .center-header-table h1,p {
-                    margin: 0px;
-                    padding: 0px;
+                margin: 0px;
+                padding: 0px;
                 }
 
                 .left {
-                    width: 44%;
-                    font-weight: bold;
-                    padding-left: 30px;
+                width: 44%;
+                font-weight: bold;
+                padding-left: 30px;
                 }
-                
-                .denomination-render{ 
-                    display: block;
-                    margin: 0 auto;
-                    border: 2px solid #000;
-                    height: 100px;
-                    width: 100px;
-                    font-size: 40px;
+
+                .denomination-render{
+                display: block;
+                margin: 0 auto;
+                border: 2px solid #000;
+                height: 100px;
+                width: 100px;
+                font-size: 40px;
                 }
             </style>
         </div>
-        <t t-raw="0"/>
+        <t t-raw="0" />
         <div class="footer last-page">
-            <!--Footer afip-->
+            <!--Footer
+            afip-->
             <div class="row afip-footer">
                 <div class="column-afip-1">
                     <img
@@ -215,8 +217,9 @@
                         t-attf-src="data:image/png;base64,#{o.get_afip_logo()}"
                         alt="Logo Afip"
                     />
-                    <br/>
-                    <p><strong>Comprobante Autorizado</strong><br/>Esta Administracion Federal no se responsabiliza por los datos ingresados en el detalle de la operacion</p>
+                    <br />
+                    <p><strong>Comprobante Autorizado</strong><br />Esta Administracion Federal no
+                        se responsabiliza por los datos ingresados en el detalle de la operacion</p>
                 </div>
                 <div class="column-afip-3">
                     <div style="height: 20px;" />
@@ -249,67 +252,67 @@
             <style>
                 /*Footer afip*/
                 .afip-footer {
-                    height: 155px;
+                height: 155px;
                 }
 
                 .column-afip-1 {
-                    width: 15%;
+                width: 15%;
                 }
 
                 .column-afip-1 img {
-                    height: 100px;
-                    width: 100px;
-                    margin-right: 10px;
+                height: 100px;
+                width: 100px;
+                margin-right: 10px;
                 }
 
                 .column-afip-2 {
-                    width: 50%;
+                width: 50%;
                 }
 
                 .column-afip-3 {
-                    width: 35%;
+                width: 35%;
                 }
 
                 .column-afip-2 img {
-                    height: 35px;
-                    width: 132px;
+                height: 35px;
+                width: 132px;
                 }
 
                 .column-afip-2 p {
-                    font-family: Arial, Helvetica, sans-serif;
-                    font-size: 14px;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 14px;
                 }
 
                 .cae-table {
-                    font-size: 18px;
-                    text-align: center;
-                    margin: 0 auto;
-                    font-family: Arial, Helvetica, sans-serif;
-                    font-size: 14px;
+                font-size: 18px;
+                text-align: center;
+                margin: 0 auto;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 14px;
                 }
 
                 .row{
-                    width: 100%;
-                    padding-top: 20px;
-                    padding-botton: 0px;
-                    display: -webkit-box;
-                    -webkit-box-orient: horizontal;
-                    -webkit-box-direction: normal;
-                    clear: both;
+                width: 100%;
+                padding-top: 20px;
+                padding-botton: 0px;
+                display: -webkit-box;
+                -webkit-box-orient: horizontal;
+                -webkit-box-direction: normal;
+                clear: both;
                 }
-                        
+
                 .column,{
-                    -webkit-box-flex: 1;
+                -webkit-box-flex: 1;
                 }
 
                 .column-1{
-                    font-weight: bold;
-                    text-align: center;
-                    width: 40%;
+                font-weight: bold;
+                text-align: center;
+                width: 40%;
                 }
 
                 .column-2 {
-                    width: 60%;
+                width: 60%;
                 }
             </style>
         </div>
@@ -325,148 +328,165 @@
                 <t t-else="">
                     <t t-set="denomination_name" t-value="''" />
                 </t>
-                <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
+                <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name"
+                    t-att-data-oe-id="o and o.id">
                     <div t-call="l10n_ar_eynes.weblearns_layout">
                         <div class="page">
                             <!--Partner-->
                             <table class="partner-table">
                                 <tr>
                                     <td width="60%">
-                                        <span class="partner-info">Cliente: </span><span t-esc="o.partner_id.name"/>
-                                        <br/>
-                                        <span class="partner-info">Domicilio: </span><span t-esc="o.partner_id.street"/>
-                                        <br/>
+                                        <span class="partner-info">Cliente: </span>
+                                        <span t-esc="o.partner_id.name" />
+                                        <br />
+                                        <span class="partner-info">Domicilio: </span>
+                                        <span t-esc="o.partner_id.street" />
+                                        <br />
                                         <span class="partner-info">Condicion IVA: </span>
-                                        <t t-if="o.partner_id.property_account_position_id.name == 'RI'">
+                                        <t
+                                            t-if="o.partner_id.property_account_position_id.name == 'RI'">
                                             <span>RESPONSABLE INSCRIPTO</span>
                                         </t>
-                                        <t t-elif="o.partner_id.property_account_position_id.name == 'RIM'">
+                                        <t
+                                            t-elif="o.partner_id.property_account_position_id.name == 'RIM'">
                                             <span>RESPONSABLE INSCRIPTO "M"</span>
                                         </t>
                                         <t t-else="">
-                                            <span t-esc="o.partner_id.property_account_position_id.name" />
+                                            <span
+                                                t-esc="o.partner_id.property_account_position_id.name" />
                                         </t>
-                                        <br/>
-                                        <span class="partner-info">Condicion Venta: </span><span t-esc="o.invoice_payment_term_id.name" />
+                                        <br />
+                                        <span class="partner-info">Condicion Venta: </span>
+                                        <span t-esc="o.invoice_payment_term_id.name" />
                                     </td>
                                     <td width="40%">
-                                            <span class="partner-info">Tel.: </span><span t-esc="o.partner_id.phone"/>
-                                            <br/>
-                                            <t t-if="denomination_name == 'E'">
-                                                <span class="partner-info">CUIT Pais: </span><span t-if="o.partner_id.dst_cuit_id.code" t-esc="int(o.partner_id.dst_cuit_id.code)"/>
-                                                <br/>
-                                                <span class="partner-info">ID Impositivo: </span>
-                                            </t>
-                                            <t t-else="">
-                                                <span class="partner-info">CUIT: </span><span t-esc="o.partner_id.vat"/>
-                                                <br/>
-                                                <span class="partner-info">IIBB: </span><span t-esc="o.partner_id.vat"/>
-                                            </t>
-                                            <br/>
-                                            <span class="partner-info">F. Venc: </span>
-                                            <t t-if="o.invoice_date_due">
-                                                <span t-esc="o.invoice_date_due.strftime('%d/%m/%Y')" />
-                                            </t>
+                                        <span class="partner-info">Tel.: </span>
+                                        <span t-esc="o.partner_id.phone" />
+                                        <br />
+                                        <t t-if="denomination_name == 'E'">
+                                            <span class="partner-info">CUIT Pais: </span>
+                                            <span t-if="o.partner_id.dst_cuit_id.code"
+                                                t-esc="int(o.partner_id.dst_cuit_id.code)" />
+                                            <br />
+                                            <span class="partner-info">ID Impositivo: </span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="partner-info">CUIT: </span>
+                                            <span t-esc="o.partner_id.vat" />
+                                            <br />
+                                            <span class="partner-info">IIBB: </span>
+                                            <span t-esc="o.partner_id.vat" />
+                                        </t>
+                                        <br />
+                                        <span class="partner-info">F. Venc: </span>
+                                        <t t-if="o.invoice_date_due">
+                                            <span t-esc="o.invoice_date_due.strftime('%d/%m/%Y')" />
+                                        </t>
                                     </td>
                                 </tr>
                             </table>
-                            <!--Table if is a export invoice-->
+                            <!--Table
+                            if is a export invoice-->
                             <div t-if="o.denomination == 'e'">
                                 <table class="export-invoice-table">
                                     <tr>
                                         <td width="60%">
-                                            <span class="partner-info">Divisa: </span><span t-esc="o.currency_id.name"/>
-                                            <br/>
-                                            <span class="partner-info">Destino del comprobante: </span><span t-esc="o.dst_country_id.name"/>
+                                            <span class="partner-info">Divisa: </span>
+                                            <span t-esc="o.currency_id.name" />
+                                            <br />
+                                            <span class="partner-info">Destino del comprobante: </span>
+                                            <span t-esc="o.dst_country_id.name" />
                                         </td>
                                         <td width="40%">
                                             <span class="partner-info">Forma de pago: </span>
-                                            <br/>
-                                            <span class="partner-info">Incoterms: </span><span t-esc="o.invoice_incoterm_id.name"/>
+                                            <br />
+                                            <span class="partner-info">Incoterms: </span>
+                                            <span t-esc="o.invoice_incoterm_id.name" />
                                         </td>
                                     </tr>
                                 </table>
                             </div>
                             <!--Products-->
                             <table class="product-table">
-                                    <thead>
-                                        <tr>
-                                            <th class="product-description-column" width="50%">
-                                                Descripción
+                                <thead>
+                                    <tr>
+                                        <th class="product-description-column" width="50%">
+                                            Descripción
+                                        </th>
+                                        <th>
+                                            Cantidad
+                                        </th>
+                                        <th>
+                                            Precio Unit.
+                                        </th>
+                                        <div t-if="o.denomination == 'a' or o.is_debit_note">
+                                            <th>
+                                                % Desc.
                                             </th>
                                             <th>
-                                                Cantidad
+                                                Alic. IVA
                                             </th>
-                                            <th>
-                                                Precio Unit.
-                                            </th>
-                                            <div t-if="o.denomination == 'a' or o.is_debit_note">
-                                                <th>
-                                                    % Desc.
-                                                </th>
-                                                <th>
-                                                    Alic. IVA
-                                                </th>
-                                            </div>
-                                            <th>
-                                                Total
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr t-foreach="o.invoice_line_ids" t-as="line">
-                                            <td class="product-description-column">
-                                                <span t-esc="line.name" />
-                                            </td>
-                                            <td>
-                                                <span t-esc="line.quantity" />
-                                            </td>
-                                            <td>
-                                                <span
-                                                    t-esc="line.price_unit_to_PDF()"
-                                                    t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                                                />
-                                            </td>
-                                            <div t-if="o.denomination == 'a' or o.is_debit_note">
-                                                <t t-set="sub_total_per_product" t-value="line.quantity * line.price_unit" />
-                                                <t t-foreach="line.tax_ids" t-as="tax">
-                                                    <t t-if="'IVA' in tax.name">
-                                                        <t t-set="iva_tax_amount" t-value="tax.amount"/>
-                                                    </t>
+                                        </div>
+                                        <th>
+                                            Total
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.invoice_line_ids" t-as="line">
+                                        <td class="product-description-column">
+                                            <span t-esc="line.name" />
+                                        </td>
+                                        <td>
+                                            <span t-esc="line.quantity" />
+                                        </td>
+                                        <td>
+                                            <span
+                                                t-esc="line.price_unit_to_PDF()"
+                                                t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                            />
+                                        </td>
+                                        <div t-if="o.denomination == 'a' or o.is_debit_note">
+                                            <t t-set="sub_total_per_product"
+                                                t-value="line.quantity * line.price_unit" />
+                                            <t t-foreach="line.tax_ids" t-as="tax">
+                                                <t t-if="'IVA' in tax.name">
+                                                    <t t-set="iva_tax_amount" t-value="tax.amount" />
                                                 </t>
-                                                <td>
-                                                    <span 
-                                                        t-esc="line.discount"
-                                                    />%
-                                                </td>
-                                                <td t-if="iva_tax_amount">
-                                                    <span
-                                                        t-if="iva_tax_amount"
-                                                        t-esc="iva_tax_amount"
-                                                     />%
-                                                </td>
-                                                <td t-else="">
-                                                    <span> </span>
-                                                </td>
-                                            </div>
+                                            </t>
                                             <td>
-                                                <span 
-                                                    t-if="iva_tax_amount and (o.denomination == 'a' or o.is_debit_note)"
-                                                    t-esc="(sub_total_per_product * (1 - line.discount/100)) * (1+ iva_tax_amount/100)"
-                                                    t-set="iva_tax_amount" t-value=""
-                                                    t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                                                />
                                                 <span
-                                                    t-else=""
-                                                    t-esc="line.price_subtotal_to_PDF()"
-                                                    t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                                                />
+                                                    t-esc="line.discount"
+                                                />% </td>
+                                            <td t-if="iva_tax_amount">
+                                                <span
+                                                    t-if="iva_tax_amount"
+                                                    t-esc="iva_tax_amount"
+                                                />% </td>
+                                            <td t-else="">
+                                                <span> </span>
                                             </td>
-                                        </tr>
-                                    </tbody>
+                                        </div>
+                                        <td>
+                                            <span
+                                                t-if="iva_tax_amount and (o.denomination == 'a' or o.is_debit_note)"
+                                                t-esc="(sub_total_per_product * (1 - line.discount/100)) * (1+ iva_tax_amount/100)"
+                                                t-set="iva_tax_amount" t-value=""
+                                                t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                            />
+                                            <span
+                                                t-else=""
+                                                t-esc="line.price_subtotal_to_PDF()"
+                                                t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                            />
+                                        </td>
+                                    </tr>
+                                </tbody>
                             </table>
                             <!--Taxes-->
-                            <table class="taxes-table fix-position" t-if="o.denomination != 'b' and o.denomination != 'c' and o.denomination != 'e'" style="width: 30%">
+                            <table class="taxes-table fix-position"
+                                t-if="o.denomination != 'b' and o.denomination != 'c' and o.denomination != 'e'"
+                                style="width: 30%">
                                 <thead>
                                     <tr>
                                         <th>
@@ -478,23 +498,24 @@
                                     </tr>
                                 </thead>
                                 <tbofy>
-                                        <tr t-foreach="o.line_ids.filtered('tax_line_id')" t-as="line_tax">
-                                            <td>
-                                                <span t-esc="line_tax.tax_line_id.name" />
-                                            </td>
-                                            <td>
-                                                <span
-                                                    t-if="o.is_multi_currency"
-                                                    t-esc="abs(line_tax.balance)/o.currency_rate"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
-                                                <span
-                                                    t-else=""
-                                                    t-esc="abs(line_tax.balance)"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
-                                            </td>
-                                        </tr>
+                                    <tr t-foreach="o.line_ids.filtered('tax_line_id')"
+                                        t-as="line_tax">
+                                        <td>
+                                            <span t-esc="line_tax.tax_line_id.name" />
+                                        </td>
+                                        <td>
+                                            <span
+                                                t-if="o.is_multi_currency"
+                                                t-esc="abs(line_tax.balance)/o.currency_rate"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                            <span
+                                                t-else=""
+                                                t-esc="abs(line_tax.balance)"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                    </tr>
                                 </tbofy>
                             </table>
                             <!--Observations/Total-->
@@ -540,8 +561,7 @@
                                         </td>
                                     </tr>
                                     <tr t-else="">
-                                        <td>
-                                            $ <span
+                                        <td> $ <span
                                                 t-esc="o.currency_rate"
                                             />
                                         </td>
@@ -561,10 +581,12 @@
                             </table>
                             <!--Masagge-->
                             <div class="fix-position">
-                                <t t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'">
+                                <t
+                                    t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'">
                                     <div class="message">
                                         <p style="text-align: center">
-                                            El crédito fiscal discriminado en el presente comprobante,
+                                            El crédito fiscal discriminado en el presente
+                                            comprobante,
                                             sólo podrá ser computado a efectos del Régimen de
                                             Sostenimiento e Inclusión Fiscal para Pequeños
                                             Contribuyentes de la Ley Nº 27.618
@@ -574,7 +596,9 @@
                             </div>
                             <!--Multicurrency-->
                             <div class="fix-position" t-if="o.is_multi_currency">
-                                <p style="text-align: center">El total de este comprobante expresado en la moneda de curso legal - Pesos Argentinos - asciende a $  <span t-esc="o.amount_total_cur"/></p>                
+                                <p style="text-align: center">El total de este comprobante expresado
+                                    en la moneda de curso legal - Pesos Argentinos - asciende a $ <span
+                                        t-esc="o.amount_total_cur" /></p>
                             </div>
                         </div>
                     </div>
@@ -582,89 +606,89 @@
                         /*Taxes table*/
                         .taxes-table,
                         .total-table {
-                            float: right;
+                        float: right;
                         }
 
                         .fix-position {
-                            padding-top: 10px;
-                            clear: both;
+                        padding-top: 10px;
+                        clear: both;
                         }
-                                
+
                         /*Total Table*/
                         .row{
-                            width: 100%;
-                            padding-top: 20px;
-                            padding-botton: 0px;
-                            display: -webkit-box;
-                            -webkit-box-orient: horizontal;
-                            -webkit-box-direction: normal;
-                            clear: both;
+                        width: 100%;
+                        padding-top: 20px;
+                        padding-botton: 0px;
+                        display: -webkit-box;
+                        -webkit-box-orient: horizontal;
+                        -webkit-box-direction: normal;
+                        clear: both;
                         }
 
                         .product-table,
                         .taxes-table,
                         .total {
-                            font-family: Arial, Helvetica, sans-serif;
-                            font-size: 13px;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px;
                         }
 
                         .message p,
                         .multicurrency-table td, p {
-                            font-family: Arial, Helvetica, sans-serif;
-                            font-size: 13px;
-                        }     
-                        
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px;
+                        }
+
                         .column,{
-                            -webkit-box-flex: 1;
+                        -webkit-box-flex: 1;
                         }
 
                         .column-1{
-                            width: 50%;
+                        width: 50%;
                         }
 
                         .column-2 {
-                            width: 50%;
-                        }  
+                        width: 50%;
+                        }
                         /*Partner table - Product table*/
 
                         .partner-info{
-                            font-weight: bold;
+                        font-weight: bold;
                         }
 
-                        .product-table, 
+                        .product-table,
                         .partner-table,
                         .total-table,
                         .taxes-table,
                         .message,
                         .export-invoice-table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            font-size: 1.2em;
-                            margin: 25px 0;
-                            border-radius: 5px 5px 5px 5px;
-                            overflow: hidden;
-                            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-                            margin-bottom: 0px;
-                            margin-top: 20px;
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 1.2em;
+                        margin: 25px 0;
+                        border-radius: 5px 5px 5px 5px;
+                        overflow: hidden;
+                        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+                        margin-bottom: 0px;
+                        margin-top: 20px;
                         }
 
                         .product-table thead tr,
                         .total-table thead tr,
                         .taxes-table thead tr {
-                            background-color: rgb(202, 215, 226);
-                            color: black;
-                            font-weight: bold;
-                            font-family: Arial, Helvetica, sans-serif;
-                            font-size: 13px;
+                        background-color: rgb(202, 215, 226);
+                        color: black;
+                        font-weight: bold;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px;
                         }
 
                         .partner-table th,
                         .partner-table td,
                         .export-invoice-table th,
                         .export-invoice-table td {
-                            padding: 2px 2px;
-                            font-family: Arial, Helvetica, sans-serif;
-                            font-size: 14px;
+                        padding: 2px 2px;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 14px;
                         }
 
                         .product-table th,
@@ -673,30 +697,30 @@
                         .total-table td,
                         .taxes-table th,
                         .taxes-table td {
-                            padding: 2px 2px;
-                            font-family: Arial, Helvetica, sans-serif;
-                            font-size: 13px;
-                            text-align: right;
+                        padding: 2px 2px;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px;
+                        text-align: right;
                         }
 
                         .product-description-column {
-                            text-align: left !important;
+                        text-align: left !important;
                         }
 
                         .product-table tbody tr {
-                            border-bottom: 1px solid rgb(202, 215, 226);
+                        border-bottom: 1px solid rgb(202, 215, 226);
                         }
 
-                        .product-table tbody tr:nth-of-type(even), 
+                        .product-table tbody tr:nth-of-type(even),
                         .partner-table,
                         .taxes-table tbody tr:nth-of-type(even),
                         .message,
                         .export-invoice-table {
-                            background-color: #f3f3f3;
+                        background-color: #f3f3f3;
                         }
 
                         .product-table tbody tr:last-of-type {
-                            border-bottom: 2px solid rgb(202, 215, 226);
+                        border-bottom: 2px solid rgb(202, 215, 226);
                         }
                     </style>
                 </div>
