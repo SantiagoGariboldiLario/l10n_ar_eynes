@@ -402,7 +402,7 @@
                                             </th>
                                             <div t-if="o.denomination == 'a' or o.is_debit_note">
                                                 <th>
-                                                    Subtot.
+                                                    % Desc.
                                                 </th>
                                                 <th>
                                                     Alic. IVA
@@ -436,9 +436,8 @@
                                                 </t>
                                                 <td>
                                                     <span 
-                                                        t-esc="sub_total_per_product"
-                                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                                                    />
+                                                        t-esc="line.discount"
+                                                    />%
                                                 </td>
                                                 <td t-if="iva_tax_amount">
                                                     <span
@@ -453,7 +452,7 @@
                                             <td>
                                                 <span 
                                                     t-if="iva_tax_amount and (o.denomination == 'a' or o.is_debit_note)"
-                                                    t-esc="(iva_tax_amount/100 + 1) * sub_total_per_product"
+                                                    t-esc="(sub_total_per_product * (1 - line.discount/100)) * (1+ iva_tax_amount/100)"
                                                     t-set="iva_tax_amount" t-value=""
                                                     t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
                                                 />
