@@ -20,14 +20,13 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.1.7.15',
+    'version': '15.0.1.8.0',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
     'category': 'Accounting/Accounting',
     'depends': [
         'account',
-        'account_check_printing',
         'account_debit_note',
         'base',
         'contacts',

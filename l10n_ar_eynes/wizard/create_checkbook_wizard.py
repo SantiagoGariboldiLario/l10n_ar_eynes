@@ -31,7 +31,7 @@ class CreateCheckbookWizard(models.TransientModel):
 
     def create_checkbook(self):
         payment_method = self.env.ref(
-            'account_check_printing.account_payment_method_check'
+            'l10n_ar_eynes.account_payment_method_check'
         )
 
         payment_method_name = _(
