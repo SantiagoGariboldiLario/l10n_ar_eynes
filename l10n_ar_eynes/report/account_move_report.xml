@@ -382,7 +382,7 @@
                                                 <th>
                                                     % Desc.
                                                 </th>
-                                                <th>
+                                                <th t-if="o.denomination != 'b'">
                                                     Alic. IVA
                                                 </th>
                                             </div>
@@ -417,15 +417,17 @@
                                                         t-esc="line.discount"
                                                     />%
                                                 </td>
-                                                <td t-if="iva_tax_amount">
-                                                    <span
-                                                        t-if="iva_tax_amount"
-                                                        t-esc="iva_tax_amount"
-                                                     />%
-                                                </td>
-                                                <td t-else="">
-                                                    <span> </span>
-                                                </td>
+                                                <div t-if="o.denomination != 'b'">
+                                                    <td t-if="iva_tax_amount">
+                                                        <span
+                                                            t-if="iva_tax_amount"
+                                                            t-esc="iva_tax_amount"
+                                                        />%
+                                                    </td>
+                                                    <td t-else="">
+                                                        <span> </span>
+                                                    </td>
+                                                </div>
                                             </div>
                                             <td>
                                                 <span 
