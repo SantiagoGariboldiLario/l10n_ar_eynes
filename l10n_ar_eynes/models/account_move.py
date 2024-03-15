@@ -102,6 +102,7 @@ class AccountMove(models.Model):
         string='Voucher type',
         compute='_compute_voucher_type',
         store=True,
+        readonly=False,
     )
     voucher_type_domain = fields.Char(compute="_compute_voucher_type")
     ws_request_ids = fields.One2many(
@@ -591,7 +592,6 @@ class AccountMove(models.Model):
         'denomination', 'move_type', 'is_debit_note', 'invoice_line_ids'
     )
     def _compute_voucher_type(self):
-        ResVoucherType = self.env['res.voucher.type']
         for inv in self:
             inv_type = 'b'
             if inv.move_type.endswith("refund"):
@@ -606,32 +606,11 @@ class AccountMove(models.Model):
 
             inv.voucher_type_domain = json.dumps(domain)
 
-            res = ResVoucherType.search(domain)
-            if inv.is_sale_document():
-                inv.is_FCE_invoice = False
-                if inv._check_must_be_fce():
-                    inv.is_FCE_invoice = True
-                    res = res.filtered(
-                        lambda voucher_type: int(voucher_type.afip_code)
-                        > AFIP_FCE_CODE_START
-                    )
-                else:
-                    res = res.filtered(
-                        lambda voucher_type: int(voucher_type.afip_code)
-                        < AFIP_FCE_CODE_START
-                    )
-
-                inv.voucher_type_id = res[0] if res else False
-            if inv.is_purchase_document():
-                if len(res) == 1:
-                    inv.voucher_type_id = res
-
     @api.onchange('voucher_type_id')
-    def _compute_is_FCE(self):
-        if self.is_purchase_document():
-            self.is_FCE_invoice = False
-            if int(self.voucher_type_id.afip_code) > AFIP_FCE_CODE_START:
-                self.is_FCE_invoice = True
+    def _set_is_FCE(self):
+        self.is_FCE_invoice = False
+        if int(self.voucher_type_id.afip_code) > AFIP_FCE_CODE_START:
+            self.is_FCE_invoice = True
 
     @api.onchange('invoice_date')
     def _onchange_invoice_date(self):

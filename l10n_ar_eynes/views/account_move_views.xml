@@ -61,12 +61,18 @@
             </xpath>
 
             <xpath expr="//widget[@name='web_ribbon']" position="after">
-                <widget name="web_ribbon" title="COBRADO"
-                        attrs="{'invisible': ['|', ('payment_state', '!=', 'paid'), ('move_type', 'not in', ('out_invoice', 'out_refund', 'out_receipt'))]}"/>
-                <widget name="web_ribbon" title="PAGADO"
-                        attrs="{'invisible': ['|', ('payment_state', '!=', 'paid'), ('move_type', 'not in', ('in_invoice', 'in_refund', 'in_receipt'))]}"/>
+                <widget
+                    name="web_ribbon"
+                    title="COBRADO"
+                    attrs="{'invisible': ['|', ('payment_state', '!=', 'paid'), ('move_type', 'not in', ('out_invoice', 'out_refund', 'out_receipt'))]}"
+                />
+                <widget
+                    name="web_ribbon"
+                    title="PAGADO"
+                    attrs="{'invisible': ['|', ('payment_state', '!=', 'paid'), ('move_type', 'not in', ('in_invoice', 'in_refund', 'in_receipt'))]}"
+                />
             </xpath>
-            
+
 
             <xpath expr="//group[@id='header_right_group']/div[2]" position="replace">
                 <div
@@ -291,8 +297,6 @@
                 <field
                     name="voucher_type_id"
                     attrs="{
-                        'readonly': [('move_type','in', ['out_refund', 'out_invoice']),
-                            ('fiscal_type','=', 'electronic')],
                         'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
                     }"
                     domain="voucher_type_domain"
