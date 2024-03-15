@@ -303,6 +303,45 @@
                 <t t-else="">
                     <t t-set="denomination_name" t-value="''" />
                 </t>
+                <t t-set="iva_amount" t-value="0.0"/>
+                <t t-set="percepciones_amount" t-value="0.0"/>
+                <t t-set="retenciones_amount" t-value="0.0"/>
+                
+                <t t-foreach="o.invoice_line_ids" t-as="product_line">
+                    
+                    <t 
+                        t-if="o.move_type in ['out_invoice', 'out_refund']"
+                        t-foreach="product_line.product_id.taxes_id" t-as="taxe">
+                    </t>
+                        <div t-if="taxe">
+                            <t t-if="'IVA' in taxe.name">
+                                <t t-set="iva_amount" t-value="taxe.amount"/>
+                            </t>
+                            <t t-elif="'Percepciones' in taxe.name">
+                                <t t-set="percepciones_amount" t-value="taxe.amount"/>
+                            </t>
+                            <t t-elif="'Retenciones' in taxe.name">
+                                <t t-set="retenciones_amount" t-value="taxe.amount"/>
+                            </t>
+                        </div>
+
+                    <t 
+                        t-elif="o.move_type in ['in_invoice', 'in_refund']"
+                        t-foreach="product_line.product_id.supplier_taxes_id" t-as="taxe">
+                    </t>
+                        <div t-if="taxe">
+                            <t t-if="'IVA' in taxe.name">
+                                <t t-set="iva_amount" t-value="taxe.amount"/>
+                            </t>
+                            <t t-elif="'Percepciones' in taxe.name">
+                                <t t-set="percepciones_amount" t-value="taxe.amount"/>
+                            </t>
+                            <t t-elif="'Retenciones' in taxe.name">
+                                <t t-set="retenciones_amount" t-value="taxe.amount"/>
+                            </t>
+                        </div>
+                </t>
+
                 <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
                     <div t-call="l10n_ar_eynes.weblearns_layout">
                         <div class="page">
@@ -444,7 +483,7 @@
                                     </tbody>
                             </table>
                             <!--Taxes-->
-                            <table class="taxes-table fix-position" t-if="o.denomination != 'b' and o.denomination != 'c' and o.denomination != 'e'" style="width: 30%">
+                            <table class="taxes-table fix-position" t-if="o.denomination not in ['b', 'c', 'e'] and o.line_ids.filtered('tax_line_id')" style="width: 30%">
                                 <thead>
                                     <tr>
                                         <th>
@@ -501,22 +540,6 @@
                                 </thead>
                                 <tbody>
                                     <tr t-if="o.denomination == 'b'">
-                                        <t t-set="tax_totals" t-value="json.loads(o.tax_totals_json)"/>
-                                        <t t-set="iva_amount" t-value="0.0"/>
-                                        <t t-set="percepciones_amount" t-value="0.0"/>
-                                        <t t-set="retenciones_amount" t-value="0.0"/>
-                                        
-                                        <t t-foreach="tax_totals['groups_by_subtotal']['Base imponible']" t-as="tax_group">
-                                            <t t-if="tax_group['tax_group_name'] == 'IVA'">
-                                                <t t-set="iva_amount" t-value="tax_group['tax_group_amount']"/>
-                                            </t>
-                                            <t t-elif="tax_group['tax_group_name'] == 'Percepciones'">
-                                                <t t-set="percepciones_amount" t-value="tax_group['tax_group_amount']"/>
-                                            </t>
-                                            <t t-elif="tax_group['tax_group_name'] == 'Retenciones'">
-                                                <t t-set="retenciones_amount" t-value="tax_group['tax_group_amount']"/>
-                                            </t>
-                                        </t>
                                         <td>
                                             <span
                                                 t-esc="o.amount_total - (percepciones_amount + retenciones_amount)"
