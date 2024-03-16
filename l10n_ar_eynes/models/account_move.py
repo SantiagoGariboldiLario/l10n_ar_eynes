@@ -1180,18 +1180,6 @@ class AccountMove(models.Model):
                 )
             )
 
-        pos_ar_list = self.mapped('journal_id')
-        if len(list(set(pos_ar_list))) != 1:
-            raise UserError(
-                _(
-                    """
-                    You are trying to send to AFIP Invoices from
-                    different Point of Sales.
-                    """
-                )
-            )
-
-        ctx = self.env.context.copy()
         company = self.mapped('journal_id.company_id')
         if len(list(set(company))) != 1:
             raise UserError(
@@ -1203,6 +1191,7 @@ class AccountMove(models.Model):
                 )
             )
 
+        ctx = self.env.context.copy()
         ctx['company_id'] = company.id
 
         wsfe_conf = WSFEConfig.with_context(**ctx).get_config()
