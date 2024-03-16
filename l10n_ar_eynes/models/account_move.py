@@ -436,14 +436,9 @@ class AccountMove(models.Model):
     def _onchange_partner_id(self):
         res = super(AccountMove, self)._onchange_partner_id()
         if self.is_sale_document():
-            # If partner changes set the partner_id for existent perceptions
-            perception_ids = self.perception_ids.ids
-            if self.partner_id and perception_ids:
-                upd_lst = [
-                    (1, p, {'partner_id': self.partner_id})
-                    for p in perception_ids
-                ]
-                self.perception_ids = upd_lst
+            self.with_context(
+                raise_padron_not_updated=True
+            ).compute_perceptions()
         return res
 
     @api.onchange('perception_ids')
@@ -627,6 +622,10 @@ class AccountMove(models.Model):
     def _onchange_invoice_date(self):
         super()._onchange_invoice_date()
         self.vat_date = self.invoice_date
+        if self.is_sale_document():
+            self.with_context(
+                raise_padron_not_updated=True
+            ).compute_perceptions()
         return
 
     @api.depends('invoice_line_ids')
@@ -1024,7 +1023,7 @@ class AccountMove(models.Model):
 
         return vals
 
-    @api.onchange('invoice_line_ids', 'disable_perceptions', 'invoice_date')
+    @api.onchange('invoice_line_ids', 'disable_perceptions')
     def compute_perceptions(self):
         for rec in self:
             if rec.is_sale_document():
