@@ -305,11 +305,24 @@
             </xpath>
 
             <page name="other_info" position="inside">
-                <group string="Associated Invoices">
+                <div>
+                    <separator string="Associated Invoices" />
+                    <group>
+                        <field name="inform_period" />
+                        <field
+                            name="inform_period_date_from"
+                            attrs="{'invisible': [('inform_period', '=', False)]}"
+                        />
+                        <field
+                            name="inform_period_date_to"
+                            attrs="{'invisible': [('inform_period', '=', False)]}"
+                        />
+                    </group>
                     <field
                         name="associated_inv_ids"
                         nolabel="1"
                         domain="[('state', '=', 'posted'), ('partner_id', '=', partner_id)]"
+                        attrs="{'invisible': [('inform_period', '=', True)]}"
                     >
                         <tree>
                             <field name="partner_id" groups="base.group_user" />
@@ -322,7 +335,7 @@
                             <field name="state" />
                         </tree>
                     </field>
-                </group>
+                </div>
             </page>
 
             <page name="other_info" position="before">
