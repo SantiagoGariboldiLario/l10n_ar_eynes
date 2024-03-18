@@ -897,6 +897,50 @@ class AccountMove(models.Model):
                 % ', '.join(r[1] for r in res)
             )
 
+    def _compute_base_perception(
+        self, perception, perception_data, origin_vals=None
+    ):
+        if not self:
+            return {}
+        origin_vals = origin_vals or {}
+        percent = perception_data['percent']
+
+        concept_id = False
+
+        # Por cada linea, nos fijamos la configuracion del producto
+        perceptions = {}
+        for line in self.invoice_line_ids:
+            taxapps = perception._get_taxapps(perception_data, line.account_id)
+            if taxapps is None:
+                continue
+
+            concept_id = taxapps.concept_id.id
+
+            # Obtenemos toda la info contable de la linea de factura
+            # todas las cantidades y los impuestos de IVA aplicados
+            res = line._compute_all_vat_taxes()[line.id]
+
+            # Hacemos el computo de la Percepcion por linea de factura
+            base = taxapps.compute_base(percent, res)
+
+            if base == 0.0:
+                continue
+
+            # Luego vamos agrupando por Concepto (no por actividad)
+            if concept_id in perceptions:
+                perceptions[concept_id]['base'] += base
+                # perceptions[concept_id]['amount'] += amount
+                perceptions[concept_id]['lines'].append(line.id)
+            else:
+                perceptions[concept_id] = {
+                    'base': base,
+                    # 'amount': amount,
+                    'lines': [line.id],
+                    'reg_code': taxapps.reg_code,
+                    'tax_app_id': taxapps,
+                }
+        return perceptions
+
     @api.model
     def compute_perception(self, perception_data):
         perception_id = perception_data['perception']
@@ -1023,6 +1067,17 @@ class AccountMove(models.Model):
 
         return vals
 
+    def _get_perceptions_ctx(self):
+        """
+        Return values to compute perception in python code field
+        """
+        # TODO: Define values
+        return {
+            'invoice_date': self.invoice_date,
+            'amount_untaxed': self.amount_untaxed,
+            # 'invoice': self,
+        }
+
     @api.onchange('invoice_line_ids', 'disable_perceptions')
     def compute_perceptions(self):
         for rec in self:
@@ -1031,54 +1086,25 @@ class AccountMove(models.Model):
                     rec.perception_ids.unlink()
                 else:
                     new_perception_lines = self.env['perception.tax.line']
+                    journal_obj = self.env['account.journal']
                     # Calculamos cada Percepcion configurada en el Partner
-                    partner_perceptions = (
-                        rec.partner_id._get_perceptions_to_apply(
-                            rec.invoice_date or datetime.date.today()
-                        )
+                    perception_ctx = rec._get_perceptions_ctx()
+                    perception_lst = journal_obj.get_applicable_perceptions(
+                        rec.partner_id,
+                        rec,
+                        origin_vals=perception_ctx,
+                        date=rec.invoice_date,
+                        address_shipping=rec.address_shipping_id,
                     )
-                    for partner_perc in partner_perceptions.values():
-                        excluded_percent = partner_perc['excluded_percent']
-
-                        # Chequeamos las fechas de eximision
-                        vdate = rec.invoice_date or datetime.date.today()
-
-                        first_day_of_year = datetime.date.min.replace(
-                            year=datetime.date.today().year
+                    # Creamos la perception.tax.line correspondiente
+                    # Le pasamos manual=False para que se cree la account.invoice.tax
+                    # con manual=False
+                    for perception_line_vals in perception_lst:
+                        new_perception_lines += (
+                            self.env['perception.tax.line']
+                            .with_context(manual=False)
+                            .new(perception_line_vals)
                         )
-                        last_day_of_year = datetime.date.max.replace(
-                            year=datetime.date.today().year
-                        )
-                        date_from = first_day_of_year
-                        date_to = last_day_of_year
-                        if partner_perc['ex_date_from']:
-                            date_from = partner_perc['ex_date_from']
-                        if partner_perc['ex_date_to']:
-                            date_to = partner_perc['ex_date_to']
-
-                        # TODO: Chequear cuando solo se llena uno de las dos fechas
-                        if (not date_from and not date_to) or (
-                            vdate >= date_from and vdate <= date_to
-                        ):
-                            if excluded_percent > 1.0 or excluded_percent < 0.0:
-                                raise ValidationError(
-                                    _(
-                                        "Perception Configuration Error!\n"
-                                        + "Excluded percent configured has to be "
-                                        + "between 0.0 and 1.0"
-                                    )
-                                )
-
-                            # Si esta totalmente eximido
-                            if excluded_percent == 1.0:
-                                continue
-                        else:
-                            partner_perc['excluded_percent'] = 0.0
-                        new_perception = rec.compute_perception(
-                            perception_data=partner_perc
-                        )
-                        if new_perception:
-                            new_perception_lines += new_perception
                     rec.perception_ids = new_perception_lines
             if rec.is_sale_document() or rec.is_purchase_document():
                 rec._onchange_perception_ids()

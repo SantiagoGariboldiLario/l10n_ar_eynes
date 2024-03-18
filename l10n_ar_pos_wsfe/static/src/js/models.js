@@ -74,6 +74,7 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
             this.inv_manual_mode = false;
             this.inv_electronic_mode = true;
             this.to_invoice = true;
+            this.perception_amount = 0.0;
             return this;
         },
         set_invoice_number: function (seq_vals) {
@@ -82,6 +83,7 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
                 return;
             }
             const number = seq_vals.next_seq;
+            // eslint-disable-next-line no-negated-condition
             if (!number) {
                 this.invoiceNumber = "";
             } else {
@@ -121,12 +123,92 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
         },
         // eslint-disable-next-line no-unused-vars
         init_from_JSON: function (json) {
+            this._on_init_json = true;
             _super_order.init_from_JSON.apply(this, arguments);
+            this._on_init_json = false;
             this.inv_manual_mode = false;
             this.inv_electronic_mode = true;
             this.to_invoice = true;
             this.invoice_journal_id = false;
             this.doc_origin = json.doc_origin || "";
+            this.compute_perceptions();
+        },
+
+        /* -- Percepcions -- */
+        _prepare_lines_to_compute_perception() {
+            return _.map(this.get_orderlines(), (line) => ({
+                product_id: line.product.id,
+                qty: line.quantity,
+                price: line.price,
+                tax_ids: line.tax_ids || line.product.taxes_id || [],
+                discount: line.discount,
+                price_subtotal: line.get_price_without_tax(),
+            }));
+        },
+        _prepare_order_vals: function () {
+            const partner = this.get_client();
+            let date = false;
+            if (this.creation_date) {
+                date = this.creation_date.toISOString().slice(0, 10);
+            }
+            return {
+                partner_id: partner ? partner.id : false,
+                date: date,
+                untaxed_amount: this.get_total_without_tax(),
+                tax_amount: this.get_total_tax(),
+                invoice_type: this._isRefundAndSaleOrder() ? "out_refund" : "out_invoice",
+                order_lines: this._prepare_lines_to_compute_perception(),
+                currency_id: this.pos.currency.id,
+            };
+        },
+        set_perception: function (percepcion) {
+            this.perception_amount = percepcion || 0.0;
+            this.trigger("change-summary");
+            this.trigger("change");
+        },
+        get_total_perception: function () {
+            return this.perception_amount || 0.0;
+        },
+        compute_perceptions: async function () {
+            // To avoid restart perception on load values from json
+            if (this._on_init_json) {
+                return Promise.resolve();
+            }
+            // To avoid send request
+            if (!this.get_client() || !this.get_orderlines().length) {
+                this.set_perception(0);
+                return Promise.resolve();
+            }
+            const order_vals = this._prepare_order_vals();
+            const self = this;
+            return this.pos
+                .rpc({
+                    model: "pos.order",
+                    method: "compute_perceptions",
+                    args: [order_vals],
+                })
+                .then(function (percepcion) {
+                    self.set_perception(percepcion);
+                });
+        },
+        // eslint-disable-next-line no-unused-vars
+        add_product: async function (product, options) {
+            const res = _super_order.add_product.apply(this, arguments);
+            await this.compute_perceptions();
+            return res;
+        },
+
+        // eslint-disable-next-line no-unused-vars
+        set_client: function (client) {
+            const res = _super_order.set_client.apply(this, arguments);
+            this.compute_perceptions();
+            return res;
+        },
+
+        get_total_tax: function () {
+            let res = _super_order.get_total_tax.apply(this, arguments);
+            res += this.get_total_perception();
+            return res;
         },
     });
 });
