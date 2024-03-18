@@ -21,7 +21,6 @@
             </xpath>
             <xpath expr="//field[@name='origin']" position="after">
                 <field name="name_original" />
-                <field name="shipping_number" attrs="{'invisible': [('picking_type_code', '!=', 'incoming')], 'readonly': False}"/>
             </xpath>
             <xpath expr="//field[@name='scheduled_date']" position="after">
                 <field
@@ -29,6 +28,9 @@
                     attrs="{'invisible' : ['|',('voucher','=', False),('pick_type','!=','outgoing')]}"
                 />
                 <field name="pick_type" invisible="False" />
+            </xpath>
+            <xpath expr="//field[@name='group_id']" position="after">
+                <field name="shipping_number" attrs="{'invisible': [('picking_type_code', '!=', 'incoming')], 'readonly': False}"/>
             </xpath>
             <field name="carrier_id" readonly="1" />
             <field name="partner_id" invisible="False" />
