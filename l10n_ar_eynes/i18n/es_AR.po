@@ -1577,12 +1577,12 @@ msgstr ""
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__cancel
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__fiscal_year_closing__state__canceled
 msgid "Cancelled"
-msgstr "Cancelado"
+msgstr "Anulado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__cancelled_issued_check_ids
 msgid "Cancelled Checks"
-msgstr "Cheques Cancelados"
+msgstr "Cheques Anulados"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
