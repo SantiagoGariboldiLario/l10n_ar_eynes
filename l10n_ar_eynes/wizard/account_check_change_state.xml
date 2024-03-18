@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="change_check_state_wizard_view" model="ir.ui.view">
+        <field name="name">Change check state</field>
+        <field name="model">change.check.state.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Change Check State">
+                <group colspan="8" col="8">
+                    <field name="new_state" />
+                    <field name="reason" />
+                </group>
+                <footer>
+                    <button
+                        type="object"
+                        string="Change State"
+                        name="change_stage"
+                        class="oe_highlight"
+                        icon="fa-check"
+                    />
+                    <button type="special" special="cancel" string="Cancel" icon="fa-times" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="change_check_state_action" model="ir.actions.act_window">
+        <field name="name">Change check state</field>
+        <field name="res_model">change.check.state.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
