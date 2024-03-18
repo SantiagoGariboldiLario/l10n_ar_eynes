@@ -21,6 +21,7 @@
             </xpath>
             <xpath expr="//field[@name='origin']" position="after">
                 <field name="name_original" />
+                <field name="shipping_number" attrs="{'invisible': [('picking_type_code', '!=', 'incoming')], 'readonly': False}"/>
             </xpath>
             <xpath expr="//field[@name='scheduled_date']" position="after">
                 <field
