@@ -378,11 +378,11 @@
                                             <th>
                                                 Precio Unit.
                                             </th>
-                                            <div t-if="o.denomination == 'a' or o.is_debit_note">
+                                            <div t-if="o.denomination in ['a', 'b'] or o.is_debit_note">
                                                 <th>
                                                     % Desc.
                                                 </th>
-                                                <th>
+                                                <th t-if="o.denomination != 'b'">
                                                     Alic. IVA
                                                 </th>
                                             </div>
@@ -405,7 +405,7 @@
                                                     t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
                                                 />
                                             </td>
-                                            <div t-if="o.denomination == 'a' or o.is_debit_note">
+                                            <div t-if="o.denomination in ['a', 'b'] or o.is_debit_note">
                                                 <t t-set="sub_total_per_product" t-value="line.quantity * line.price_unit" />
                                                 <t t-foreach="line.tax_ids" t-as="tax">
                                                     <t t-if="'IVA' in tax.name">
@@ -417,15 +417,17 @@
                                                         t-esc="line.discount"
                                                     />%
                                                 </td>
-                                                <td t-if="iva_tax_amount">
-                                                    <span
-                                                        t-if="iva_tax_amount"
-                                                        t-esc="iva_tax_amount"
-                                                     />%
-                                                </td>
-                                                <td t-else="">
-                                                    <span> </span>
-                                                </td>
+                                                <div t-if="o.denomination != 'b'">
+                                                    <td t-if="iva_tax_amount">
+                                                        <span
+                                                            t-if="iva_tax_amount"
+                                                            t-esc="iva_tax_amount"
+                                                        />%
+                                                    </td>
+                                                    <td t-else="">
+                                                        <span> </span>
+                                                    </td>
+                                                </div>
                                             </div>
                                             <td>
                                                 <span 
