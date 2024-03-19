@@ -48,14 +48,21 @@ class PosOrder(models.Model):
         return res
 
     def _hook_recompute_account_move(self, new_move):
-        new_move._onchange_invoice_date()
-        new_move.compute_perceptions()
+        ctx = dict(self.env.context)
+        ctx['check_move_validity'] = False
+        new_move.with_context(**ctx)._onchange_invoice_date()
+        new_move.with_context(**ctx).compute_perceptions()
         new_move._onchange_payment_term_date_invoice()
         return
+
+    def _check_balanced(self, new_move):
+        new_move._check_balanced()
+        return True
 
     def _create_invoice(self, move_vals):
         res = super(PosOrder, self)._create_invoice(move_vals)
         self._hook_recompute_account_move(res)
+        self._check_balanced(res)
         return res
 
     def _compute_all_vat_taxes(self, line_vals, order_vals):
