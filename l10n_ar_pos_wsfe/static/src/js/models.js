@@ -159,6 +159,9 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
                 invoice_type: this._isRefundAndSaleOrder() ? "out_refund" : "out_invoice",
                 order_lines: this._prepare_lines_to_compute_perception(),
                 currency_id: this.pos.currency.id,
+                config_id: this.pos.config.id,
+                fiscal_type: this.is_electronic_invoice() ? "electronic" : "internal",
+                invoice_journal_id: this.invoice_journal_id,
             };
         },
         set_perception: function (percepcion) {

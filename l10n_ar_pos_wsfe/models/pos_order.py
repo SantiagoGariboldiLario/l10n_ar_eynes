@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from odoo import api, fields, models
+from odoo import _, api, exceptions, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -65,8 +65,7 @@ class PosOrder(models.Model):
         product = self.env['product.product'].browse(line_vals['product_id'])
         partner = self.env['res.partner'].browse(order_vals['partner_id'])
         taxes = self.env['account.tax'].browse(line_vals['tax_ids'])
-        account = self._get_computed_account(product, partner)
-
+        account = self._get_computed_account(product, partner, order_vals)
         currency = order_currency.with_context(
             date=order_vals['date'] or fields.Date.context_today(self)
         )
@@ -123,12 +122,33 @@ class PosOrder(models.Model):
             'vat_taxes': line_taxes,
         }
 
-    def _get_computed_account(self, product, partner):
+    def _get_computed_account(self, product, partner, order_vals):
         fiscal_position = partner.property_account_position_id
         accounts = product.product_tmpl_id.get_product_accounts(
             fiscal_pos=fiscal_position
         )
-        return accounts['income']
+        account = accounts['income']
+        if account:
+            return account
+
+        invoice_journal_id = order_vals['invoice_journal_id']
+        invoice_journal = self.env['account.journal'].browse(invoice_journal_id)
+
+        if invoice_journal:
+            return invoice_journal.default_account_id
+
+        pos_config = self.env['pos.config'].browse(order_vals['config_id'])
+        fiscal_type = order_vals['fiscal_type']
+        AccountMove = self.env['account.move']
+        try:
+            invoice_journal = AccountMove.get_journal_from_pos(
+                partner,
+                fiscal_type,
+                pos_config,
+            )
+        except Exception:
+            invoice_journal = self.env['account.journal']
+        return invoice_journal.default_account_id
 
     def _compute_base_perception(
         self, perception, perception_data, origin_vals=None
@@ -146,7 +166,16 @@ class PosOrder(models.Model):
         order_vals = origin_vals['order_vals']
         for line in order_vals['order_lines']:
             product = self.env['product.product'].browse(line['product_id'])
-            account = self._get_computed_account(product, partner)
+            account = self._get_computed_account(product, partner, order_vals)
+
+            if not account:
+                raise exceptions.ValidationError(
+                    _(
+                        "The product %(product)s has not account configured.",
+                        product=product.display_name,
+                    )
+                )
+
             taxapps = perception._get_taxapps(perception_data, account)
             if taxapps is None:
                 continue
@@ -188,7 +217,7 @@ class PosOrder(models.Model):
 
     @api.model
     def compute_perceptions(self, order_vals):
-        journal_obj = self.env['account.journal']
+        AccountJournal = self.env['account.journal']
         partner_id = order_vals['partner_id']
         if order_vals.get('date'):
             order_vals['date'] = datetime.strptime(
@@ -200,7 +229,7 @@ class PosOrder(models.Model):
             return 0.0
         partner = self.env['res.partner'].browse(partner_id)
         perception_ctx = self._get_perceptions_ctx(order_vals)
-        perception_lst = journal_obj.get_applicable_perceptions(
+        perception_lst = AccountJournal.get_applicable_perceptions(
             partner, self, origin_vals=perception_ctx, date=date
         )
         return sum(x['amount'] for x in perception_lst)

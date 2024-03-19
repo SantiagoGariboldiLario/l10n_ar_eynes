@@ -147,6 +147,12 @@ msgid "Pos Config"
 msgstr "Configuración"
 
 #. module: l10n_ar_pos_wsfe
+#: code:addons/l10n_ar_pos_wsfe/models/pos_order.py:0
+#, python-format
+msgid "The product %(product)s has not account configured."
+msgstr "El producto %(product)s no tiene una cuenta configurada."
+
+#. module: l10n_ar_pos_wsfe
 #: code:addons/l10n_ar_pos_wsfe/models/account_move.py:0
 #, python-format
 msgid "There is no sequence configured for journal %s"
