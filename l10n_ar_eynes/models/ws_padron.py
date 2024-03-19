@@ -33,7 +33,7 @@ class WsPadronConfig(models.Model):
         url_prod = self.env.ref('l10n_ar_eynes.url_prod_padron').value
         url_homo = self.env.ref('l10n_ar_eynes.url_homo_padron').value
         for rec in self:
-            rec.url = url_homo if rec.config_id.homologation else url_prod
+            rec.url = url_homo.strip() if rec.config_id.homologation else url_prod.strip()
 
     def _get_webservice(self):
         return self.env.ref('l10n_ar_eynes.afipws_service_ws_padron')
