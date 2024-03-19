@@ -21,6 +21,13 @@ odoo.define("l10n_ar_pos_wsfe.OrderWidget", function (require) {
                 }
                 return res;
             }
+
+            _updateSummary() {
+                const perception = this.order ? this.order.get_total_perception() : 0;
+                this.state.perception = this.env.pos.format_currency(perception);
+                this.state.show_perception = perception != 0;
+                return super._updateSummary();
+            }
         };
 
     Registries.Component.extend(OrderWidget, PosWSFEOrderWidget);

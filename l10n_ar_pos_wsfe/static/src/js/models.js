@@ -208,8 +208,8 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
             return res;
         },
 
-        get_total_tax: function () {
-            let res = _super_order.get_total_tax.apply(this, arguments);
+        get_total_with_tax: function () {
+            let res = _super_order.get_total_with_tax.apply(this, arguments);
             res += this.get_total_perception();
             return res;
         },
