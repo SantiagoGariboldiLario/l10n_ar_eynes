@@ -74,6 +74,7 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
             this.inv_manual_mode = false;
             this.inv_electronic_mode = true;
             this.to_invoice = true;
+            this.invoice_journal_id = false;
             this.perception_amount = 0.0;
             return this;
         },
@@ -153,7 +154,7 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
             }
             return {
                 partner_id: partner ? partner.id : false,
-                date: date,
+                date: date || false,
                 untaxed_amount: this.get_total_without_tax(),
                 tax_amount: this.get_total_tax(),
                 invoice_type: this._isRefundAndSaleOrder() ? "out_refund" : "out_invoice",
@@ -161,7 +162,7 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
                 currency_id: this.pos.currency.id,
                 config_id: this.pos.config.id,
                 fiscal_type: this.is_electronic_invoice() ? "electronic" : "internal",
-                invoice_journal_id: this.invoice_journal_id,
+                invoice_journal_id: this.invoice_journal_id || false,
             };
         },
         set_perception: function (percepcion) {
