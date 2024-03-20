@@ -9,7 +9,7 @@ odoo.define('l10n_ar_pos_wsfe.WSFEPaymentScreenStatus', function(require) {
     const WSFEPaymentScreenStatus = (PaymentScreenStatus) =>
         class extends PaymentScreenStatus {
 
-            getTotal(taxNameContains) {
+            getTaxesTotals(taxNameContains) {
                 let total = 0.0;
             
                 let groupTaxes = {};
@@ -30,20 +30,21 @@ odoo.define('l10n_ar_pos_wsfe.WSFEPaymentScreenStatus', function(require) {
                     let taxAmount = groupTaxes[taxIds[j]];
                     let taxName = this.env.pos.taxes_by_id[taxIds[j]].name;
                     
-                    if(taxName.toLowerCase().includes(taxNameContains)){
+                    if(taxName.toLowerCase().startsWith(taxNameContains)){
                         total += taxAmount;
                     }
                 }
             
-                return this.env.pos.format_currency(total);
+                return total;
             }
             
-            get total_iva() {
-                return this.getTotal("iva");
+            get total_iva_and_retentions() {
+                let total_value = this.getTaxesTotals("iva") + this.getTaxesTotals("retenciones");
+                return this.env.pos.format_currency(total_value);
             }
             
             get total_perceptions() {
-                return this.getTotal("percepciones");
+                return this.env.pos.format_currency(this.getTaxesTotals("percepciones"));
             }
             
         };

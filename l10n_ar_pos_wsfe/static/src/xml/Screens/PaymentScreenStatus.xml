@@ -5,7 +5,7 @@
 
         <xpath expr="//div[@class='message']" position="before">
             <div class="subtotal">
-                <span>Impuestos: <t t-esc="total_iva" /></span>
+                <span>Impuestos: <t t-esc="total_iva_and_retentions" /></span>
                 <br/>
                 <span>Percepciones: <t t-esc="total_perceptions" /></span>
             </div>
