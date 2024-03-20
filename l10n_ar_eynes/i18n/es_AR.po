@@ -1605,6 +1605,14 @@ msgstr ""
 "La Fecha de Pago es mayor que la                        Fecha de Depósito."
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid ""
+"Cannot deposit! You cannot deposit check %s. Payment Date is not defined."
+msgstr ""
+"No puedes depositar! No puedes depositar el cheque %s. La fecha de pago no esta definida."
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__dom_partner_id
 msgid "Carrier Partner"
 msgstr "Transportista"

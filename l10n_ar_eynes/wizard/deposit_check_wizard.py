@@ -14,8 +14,14 @@ class DepositCheckwizard(models.TransientModel):
         model = self._context.get('active_model', False)
         if model and model == 'account.third.check':
             ids = self.env.context.get('active_ids', [])
-            vouchers = self.env[model].browse(ids).read(['source_payment_order_id'])
-            if vouchers and vouchers[0] and 'source_payment_order_id' in vouchers[0]:
+            vouchers = (
+                self.env[model].browse(ids).read(['source_payment_order_id'])
+            )
+            if (
+                vouchers
+                and vouchers[0]
+                and 'source_payment_order_id' in vouchers[0]
+            ):
                 if vouchers[0]['source_payment_order_id']:
                     payment_order_id = vouchers[0]['source_payment_order_id'][0]
                     journal_id = voucher_obj.browse(payment_order_id).read(
@@ -79,14 +85,20 @@ class DepositCheckwizard(models.TransientModel):
 
     def _get_source_account_check(self, company_id):
         # Obtenemos la configuracion
-        res = self.env['account.check.config'].search([('company_id', '=', company_id)])
+        res = self.env['account.check.config'].search(
+            [('company_id', '=', company_id)]
+        )
         if not res:
-            raise UserError(_('Error! There is no check configuration for this Company!'))
+            raise UserError(
+                _('Error! There is no check configuration for this Company!')
+            )
         src_account = res.read(['account_id'])[0]
         if 'account_id' in src_account:
             return src_account['account_id'][0]
 
-        raise UserError(_('Error! Bad Treasury configuration for this Company!'))
+        raise UserError(
+            _('Error! Bad Treasury configuration for this Company!')
+        )
 
     @api.onchange('bank_account_id')
     def onchange_bank_account(self):
@@ -110,7 +122,9 @@ class DepositCheckwizard(models.TransientModel):
                 )
             )
 
-        check = self.env['account.check'].browse(self.env.context.get('active_id', False))
+        check = self.env['account.check'].browse(
+            self.env.context.get('active_id', False)
+        )
 
         if check:
             if check.third_party_check_state != 'in_wallet':
@@ -122,6 +136,13 @@ class DepositCheckwizard(models.TransientModel):
                     % (check.number)
                 )
 
+            if not check.payment_date:
+                raise UserError(
+                    _(
+                        "Cannot deposit! You cannot deposit check %s. Payment Date is not defined."
+                    )
+                    % (check.number)
+                )
             if check.payment_date > deposit_date:
                 raise UserError(
                     _(
@@ -132,7 +153,9 @@ class DepositCheckwizard(models.TransientModel):
                     % (check.number)
                 )
 
-            account_check_id = self._get_source_account_check(self.company_id.id)
+            account_check_id = self._get_source_account_check(
+                self.company_id.id
+            )
 
             # name = self.pool.get('ir.sequence').get_id(cr, uid,
             # check.payment_order_id.journal_id.id)
