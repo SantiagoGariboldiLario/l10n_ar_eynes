@@ -203,7 +203,7 @@ class PosOrder(models.Model):
             if concept_id in perceptions:
                 perceptions[concept_id]['base'] += base
                 # perceptions[concept_id]['amount'] += amount
-                perceptions[concept_id]['lines'].append(line.id)
+                # perceptions[concept_id]['lines'].append(line.id)
             else:
                 perceptions[concept_id] = {
                     'base': base,
