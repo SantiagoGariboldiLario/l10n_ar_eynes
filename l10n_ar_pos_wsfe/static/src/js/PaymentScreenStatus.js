@@ -44,7 +44,7 @@ odoo.define('l10n_ar_pos_wsfe.WSFEPaymentScreenStatus', function(require) {
             }
             
             get total_perceptions() {
-                return this.env.pos.format_currency(this.getTaxesTotals("percepciones"));
+                return this.env.pos.format_currency(this.currentOrder.perception_amount);
             }
             
         };
