@@ -221,12 +221,12 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
         data_attach = {
             'name': name,
             'datas': binascii.b2a_base64(file.read().encode('latin-1')),
-            'datas_fname': name,
+            # 'datas_fname': name,
             'res_model': 'arba.generated.files',
             'res_id': generated_file_rec.id,
         }
 
-        IrAttachment.create(data_attach)
-        generated_file_rec.write({'attachment_id': data_attach.id})
+        attach_id = IrAttachment.create(data_attach)
+        generated_file_rec.write({'attachment_id': attach_id.id})
 
         file.close()

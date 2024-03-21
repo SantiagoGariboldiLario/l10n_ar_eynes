@@ -21,7 +21,7 @@
     </record>
 
     <menuitem
-        id="menu_action_arba_generated_files"
+        id="menu_action_arciba_generated_files"
         name="ArciBA generated files"
         action="action_arciba_generated_files"
         parent="menu_arciba"
