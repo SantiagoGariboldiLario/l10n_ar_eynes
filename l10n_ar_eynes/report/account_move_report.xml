@@ -440,55 +440,55 @@
                                     <tbody>
                                         <tr t-foreach="o.invoice_line_ids" t-as="line">
                                             <t t-if="not line.display_type" name="account_invoice_line_accountable">
-                                                <td class="product-description-column">
-                                                    <span t-esc="line.name" />
-                                                </td>
-                                                <td>
-                                                    <span t-esc="line.quantity" />
-                                                </td>
+                                            <td class="product-description-column">
+                                                <span t-esc="line.name" />
+                                            </td>
+                                            <td>
+                                                <span t-esc="line.quantity" />
+                                            </td>
+                                            <td>
+                                                <span
+                                                    t-esc="line.price_unit_to_PDF()"
+                                                    t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                                />
+                                            </td>
+                                            <div t-if="o.denomination in ['a', 'b'] or o.is_debit_note">
+                                                <t t-set="sub_total_per_product" t-value="line.quantity * line.price_unit" />
+                                                <t t-foreach="line.tax_ids" t-as="tax">
+                                                    <t t-if="'IVA' in tax.name">
+                                                        <t t-set="iva_tax_amount" t-value="tax.amount"/>
+                                                    </t>
+                                                </t>
                                                 <td>
                                                     <span
-                                                        t-esc="line.price_unit_to_PDF()"
-                                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                                                    />
+                                                        t-esc="line.discount"
+                                                    />%
                                                 </td>
-                                                <div t-if="o.denomination in ['a', 'b'] or o.is_debit_note">
-                                                    <t t-set="sub_total_per_product" t-value="line.quantity * line.price_unit" />
-                                                    <t t-foreach="line.tax_ids" t-as="tax">
-                                                        <t t-if="'IVA' in tax.name">
-                                                            <t t-set="iva_tax_amount" t-value="tax.amount"/>
-                                                        </t>
-                                                    </t>
-                                                    <td>
+                                                <div t-if="o.denomination != 'b'">
+                                                    <td t-if="iva_tax_amount">
                                                         <span
-                                                            t-esc="line.discount"
+                                                            t-if="iva_tax_amount"
+                                                            t-esc="iva_tax_amount"
                                                         />%
                                                     </td>
-                                                    <div t-if="o.denomination != 'b'">
-                                                        <td t-if="iva_tax_amount">
-                                                            <span
-                                                                t-if="iva_tax_amount"
-                                                                t-esc="iva_tax_amount"
-                                                            />%
-                                                        </td>
-                                                        <td t-else="">
-                                                            <span> </span>
-                                                        </td>
-                                                    </div>
+                                                    <td t-else="">
+                                                        <span> </span>
+                                                    </td>
                                                 </div>
-                                                <td>
-                                                    <span
-                                                        t-if="iva_tax_amount and (o.denomination == 'a' or o.is_debit_note)"
-                                                        t-esc="(sub_total_per_product * (1 - line.discount/100)) * (1+ iva_tax_amount/100)"
-                                                        t-set="iva_tax_amount" t-value=""
-                                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                                                    />
-                                                    <span
-                                                        t-else=""
-                                                        t-esc="line.price_subtotal_to_PDF()"
-                                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                                                    />
-                                                </td>
+                                            </div>
+                                            <td>
+                                                <span
+                                                    t-if="iva_tax_amount and (o.denomination == 'a' or o.is_debit_note)"
+                                                    t-esc="(sub_total_per_product * (1 - line.discount/100)) * (1+ iva_tax_amount/100)"
+                                                    t-set="iva_tax_amount" t-value=""
+                                                    t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                                />
+                                                <span
+                                                    t-else=""
+                                                    t-esc="line.price_subtotal_to_PDF()"
+                                                    t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                                />
+                                            </td>
                                             </t>
                                             <t t-if="line.display_type == 'line_section'">
                                                 <td colspan="99" style="text-align: left">
