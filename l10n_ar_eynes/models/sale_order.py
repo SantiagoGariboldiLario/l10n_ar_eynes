@@ -62,8 +62,12 @@ class SaleOrder(models.Model):
             final,
             date=date,
         )
+        ctx = dict(self.env.context)
+        ctx['check_move_validity'] = False
         for invoice in invoice_ids:
             invoice._onchange_currency_id()
+            invoice.with_context(**ctx).compute_perceptions()
+            invoice._check_balanced()
         return invoice_ids
 
     def action_confirm(self):
