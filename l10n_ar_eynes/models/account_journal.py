@@ -393,10 +393,10 @@ class AccountJournal(models.Model):
                     "%(error)s"
                     "Account %(account_name)s[%(account_code)s] must have "
                     "an associated concept for %(tax)s. Please configure it!",
-                    error = err_title,
-                    account_name = account.name,
-                    account_code = account.code,
-                    tax = tax_name,
+                    error=err_title,
+                    account_name=account.name,
+                    account_code=account.code,
+                    tax=tax_name,
                 )
             )
         return concepts
@@ -586,10 +586,10 @@ class AccountJournal(models.Model):
                         "Activity: %(activity)s \n"
                         "Concept: %(concept)s\n"
                         "for the Account %(account_name)s",
-                        retention_name = retention.name,
-                        activity = activity_name,
-                        concept = concept_name,
-                        account_name = ml.account_id.name,
+                        retention_name=retention.name,
+                        activity=activity_name,
+                        concept=concept_name,
+                        account_name=ml.account_id.name,
                     )
                 )
 
@@ -601,10 +601,10 @@ class AccountJournal(models.Model):
                         "(%(retention_name)s) configured that corresponds to\n"
                         "Activity: %(activity)s\nConcept: %(concept)s\n"
                         "for the Account %(account_name)s",
-                        retention_name = retention.name,
-                        activity = activity_name,
-                        concept = concept_name,
-                        account_name = ml.account_id.name,
+                        retention_name=retention.name,
+                        activity=activity_name,
+                        concept=concept_name,
+                        account_name=ml.account_id.name,
                     )
                 )
 
