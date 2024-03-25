@@ -604,7 +604,7 @@ class AccountJournal(models.Model):
                         retention_name = retention.name,
                         activity = activity_name,
                         concept = concept_name,
-                        account_name =ml.account_id.name,
+                        account_name = ml.account_id.name,
                     )
                 )
 
