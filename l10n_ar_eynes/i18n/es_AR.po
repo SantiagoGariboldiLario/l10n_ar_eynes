@@ -9109,13 +9109,13 @@ msgstr "Error de Retención\n"
 #: code:addons/l10n_ar_eynes/models/account_journal.py:0
 #, python-format
 msgid ""
-"%s\n"
-"Account %s[%s] must have "
-"an associated concept for %s. Please configure it!"
+"%(error)s"
+"Account %(account_name)s[%(account_code)s] must have "
+"an associated concept for %(tax)s. Please configure it!"
 msgstr ""
-"%s\n"
-"Cuenta %s[%s] debe tener"
-"un concepto asociado para %s. Por favor configurelo!"
+"%(error)s"
+"La cuenta %(account_name)s[%(account_code)s] debe tener "
+"un concepto asociado en %(tax)s. Por favor configurelo!"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_journal.py:0
@@ -9128,7 +9128,7 @@ msgid ""
 "the Account %(acc_name)s"
 msgstr ""
 "Error de Percepción!\n"
-"Hay mas de una Aplicación de Percepción (%(perc_name)s) "
+"Hay más de una Aplicación de Percepción (%(perc_name)s) "
 "que corresponden a/nActividad: %(activity_name)s\n"
 "Concepto: %(concept_name)s\n para "
 "la Cuenta %(acc_name)s"
@@ -9145,9 +9145,43 @@ msgid ""
 msgstr ""
 "Error de Percepción!\n"
 "No hay configurada una Aplicación de Percepción (%(perc_name)s) "
-"que corresponden a/nActividad: %(activity_name)s\n"
+"que corresponda a/nActividad: %(activity_name)s\n"
 "Concepto: %(concept_name)s\n para "
 "la Cuenta %(acc_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Retention Error!\n"
+"There is no configured a Retention Application "
+"(%(retention_name)s) that corresponds to\n"
+"Activity: %(activity)s \n"
+"Concept: %(concept)s\n"
+"for the Account %(account_name)s"
+msgstr ""
+"Error de Retención!\n"
+"No hay configurada una Aplicación de Retención "
+"(%(retention_name)s) que corresponda a\n"
+"Actividad: %(activity)s \n"
+"Concepto: %(concept)s\n"
+"para la Cuenta %(account_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Retention Error!\n"
+"There is more than one Retention Application "
+"(%(retention_name)s) configured that corresponds to\n"
+"Activity: %(activity)s\nConcept: %(concept)s\n"
+"for the Account %(account_name)s"
+msgstr ""
+"Error de Retención!\n"
+"Hay más de una Aplicación de Retención "
+"(%(retention_name)s) configurada que corresponde a\n"
+"Actividad: %(activity)s\nConcepto: %(concept)s\n"
+"para la Cuenta %(account_name)s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
