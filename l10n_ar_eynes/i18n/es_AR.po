@@ -9092,3 +9092,69 @@ msgstr "retiro"
 #, python-format
 msgid "in"
 msgstr "ingreso"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid "Perception Error\n"
+msgstr "Error de Percepción\n"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid "Retention Error\n"
+msgstr "Error de Retención\n"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"%s\n"
+"Account %s[%s] must have "
+"an associated concept for %s. Please configure it!"
+msgstr ""
+"%s\n"
+"Cuenta %s[%s] debe tener"
+"un concepto asociado para %s. Por favor configurelo!"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Perception Error!\n"
+"There is more than one Perception Application (%(perc_name)s) "
+"that corresponds to\nActivity: %(activity_name)s\n"
+"Concept: %(concept_name)s\n for "
+"the Account %(acc_name)s"
+msgstr ""
+"Error de Percepción!\n"
+"Hay mas de una Aplicación de Percepción (%(perc_name)s) "
+"que corresponden a/nActividad: %(activity_name)s\n"
+"Concepto: %(concept_name)s\n para "
+"la Cuenta %(acc_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Perception Error!\n"
+"There is no configured a Perception Application (%(perc_name)s) "
+"that corresponds to\nActivity: %(activity_name)s\n"
+"Concept: %(concept_name)s\n for "
+"the Account %(acc_name)s"
+msgstr ""
+"Error de Percepción!\n"
+"No hay configurada una Aplicación de Percepción (%(perc_name)s) "
+"que corresponden a/nActividad: %(activity_name)s\n"
+"Concepto: %(concept_name)s\n para "
+"la Cuenta %(acc_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid ""
+"Error trying to validate electronic invoice with ids [%(ids)s].\n"
+"Check WS Requests page or go to 'Informs -> Ws Requests -> %(name)s'."
+msgstr ""
+"Error al tratar de validar factura electrónica con ids [%(ids)s].\n"
+"Verifica la pagina de Solicitud  WS o ve a 'Informes -> Solicitudes WS -> %(name)s'."
