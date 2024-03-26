@@ -1,6 +1,7 @@
 import logging
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -50,9 +51,55 @@ class PosOrder(models.Model):
         new_move._onchange_invoice_date()
         new_move.compute_perceptions()
         new_move._onchange_payment_term_date_invoice()
+        new_move.select_default_voucher_type()
         return
 
     def _create_invoice(self, move_vals):
         res = super(PosOrder, self)._create_invoice(move_vals)
         self._hook_recompute_account_move(res)
         return res
+
+    def _generate_pos_order_invoice(self):
+        moves = self.env['account.move']
+
+        for order in self:
+            # Force company for all SUPERUSER_ID action
+            if order.account_move:
+                moves += order.account_move
+                continue
+
+            if not order.partner_id:
+                raise UserError(_('Please provide a partner for the sale.'))
+
+            move_vals = order._prepare_invoice_vals()
+            new_move = order._create_invoice(move_vals)
+
+            order.write({'account_move': new_move.id, 'state': 'invoiced'})
+            afip_result = False
+            if order.is_wsfe:
+                afip_result = (
+                    new_move.sudo()
+                    .with_company(order.company_id)
+                    ._validate_electronic_invoices()
+                )
+            if (order.is_wsfe and afip_result) or not (
+                order.is_wsfe and afip_result
+            ):
+                new_move.sudo().with_company(order.company_id)._post()
+                moves += new_move
+                order._apply_invoice_payments()
+
+        if not moves:
+            return {}
+
+        return {
+            'name': _('Customer Invoice'),
+            'view_mode': 'form',
+            'view_id': self.env.ref('account.view_move_form').id,
+            'res_model': 'account.move',
+            'context': "{'move_type':'out_invoice'}",
+            'type': 'ir.actions.act_window',
+            'nodestroy': True,
+            'target': 'current',
+            'res_id': moves and moves.ids[0] or False,
+        }

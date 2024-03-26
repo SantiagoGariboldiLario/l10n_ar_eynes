@@ -1377,6 +1377,7 @@ class AccountMove(models.Model):
 
     def _validate_electronic_invoices(self, soft=False):
         if self:
+            self.env.cr.commit()  # pylint: disable=invalid-commit
             posted_moves = self.env['account.move']
             with registry(self.env.cr.dbname).cursor() as new_cr:
                 env = api.Environment(new_cr, SUPERUSER_ID, self.env.context)
