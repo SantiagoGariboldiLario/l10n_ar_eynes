@@ -1463,7 +1463,7 @@ class AccountPaymentOrder(models.Model):
                 res['issued_check_id'] = check.id
                 move_lines.append(res)
 
-                if check.type == 'postdated':
+                if check.type in ['common', 'deferred']:
                     state = 'waiting_accreditation'
                 else:
                     state = 'paid'
