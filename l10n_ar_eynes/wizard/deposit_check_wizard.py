@@ -59,22 +59,29 @@ class DepositCheckwizard(models.TransientModel):
         This method gets overrided to ensure that the check's
         internal type is third_party and its state is 'in_wallet'
         """
-        check = self.env['account.check'].search(
-            [
-                ('id', '=', self.env.context.get('active_id')),
-                ('internal_type', '=', 'third_party'),
-            ],
-            limit=1,
+        check = self.env['account.check'].browse(
+            self.env.context.get('active_id', False)
         )
         if check:
-            if check.third_party_check_state != 'in_wallet':
-                raise UserError(
-                    _(
-                        "Error! The selected checks must be in wallet.\n"
-                        "Check %s is not in wallet"
+            if check.internal_type == 'third_party':
+                if check.third_party_check_state != 'in_wallet':
+                    raise UserError(
+                        _(
+                            "Error! The selected checks must be in wallet.\n"
+                            "Check %s is not in wallet"
+                        )
+                        % (check.number)
                     )
-                    % (check.number)
-                )
+            else:
+                if check.issued_check_state != 'waiting_accreditation':
+                    raise UserError(
+                        _(
+                            "Error! The selected checks must be in Waiting accreditation.\n"
+                            "Check %s is not in Waiting accreditation"
+                        )
+                        % (check.number)
+                    )
+
         else:
             raise ValidationError(_("Error when searching for the check"))
 
@@ -127,31 +134,49 @@ class DepositCheckwizard(models.TransientModel):
         )
 
         if check:
-            if check.third_party_check_state != 'in_wallet':
-                raise UserError(
-                    _(
-                        "Error! The selected checks must to be in \
-                    wallet.\nCheck %s is not in wallet"
+            if check.internal_type == 'third_party':
+                if check.third_party_check_state != 'in_wallet':
+                    raise UserError(
+                        _(
+                            "Error! The selected checks must to be in \
+                        wallet.\nCheck %s is not in wallet"
+                        )
+                        % (check.number)
                     )
-                    % (check.number)
-                )
-
-            if not check.payment_date:
-                raise UserError(
-                    _(
-                        "Cannot deposit! You cannot deposit check %s. Payment Date is not defined."
+                if not check.payment_date:
+                    raise UserError(
+                        _(
+                            "Cannot deposit! You cannot deposit check %s. Payment Date is not defined."
+                        )
+                        % (check.number)
                     )
-                    % (check.number)
-                )
-            if check.payment_date > deposit_date:
-                raise UserError(
-                    _(
-                        "Cannot deposit! You cannot deposit check %s \
-                       because Payment Date is greater than \
-                       Deposit Date."
+                if check.payment_date > deposit_date:
+                    raise UserError(
+                        _(
+                            "Cannot deposit! You cannot deposit check %s \
+                           because Payment Date is greater than \
+                           Deposit Date."
+                        )
+                        % (check.number)
                     )
-                    % (check.number)
-                )
+            else:
+                if check.type == 'deferred':
+                    if not check.payment_date:
+                        raise UserError(
+                            _(
+                                "Cannot deposit! You cannot deposit check %s. Payment Date is not defined."
+                            )
+                            % (check.number)
+                        )
+                    if check.payment_date > deposit_date:
+                        raise UserError(
+                            _(
+                                "Cannot deposit! You cannot deposit check %s \
+                               because Payment Date is greater than \
+                               Deposit Date."
+                            )
+                            % (check.number)
+                        )
 
             account_check_id = self._get_source_account_check(
                 self.company_id.id
@@ -208,15 +233,26 @@ class DepositCheckwizard(models.TransientModel):
                     'ref': _('Deposit Check %s') % check.number,
                 }
             )
-            check.write(
-                {
-                    'third_party_check_state': 'deposited',
-                    'deposit_bank_id': self.bank_account_id.id,
-                    'deposit_date': deposit_date,
-                    'deposit_slip': self.voucher_number,
-                    'deposit_move_id': move_id.id,
-                }
-            )
+            if check.internal_type == 'third_party':
+                check.write(
+                    {
+                        'third_party_check_state': 'deposited',
+                        'deposit_bank_id': self.bank_account_id.id,
+                        'deposit_date': deposit_date,
+                        'deposit_slip': self.voucher_number,
+                        'deposit_move_id': move_id.id,
+                    }
+                )
+            else:
+                check.write(
+                    {
+                        'issued_check_state': 'paid',
+                        'deposit_bank_id': self.bank_account_id.id,
+                        'deposit_date': deposit_date,
+                        'deposit_slip': self.voucher_number,
+                        'deposit_move_id': move_id.id,
+                    }
+                )
 
             # Se postea el asiento llamando a la funcion post de account_move.
             # TODO: Se podria poner un check en el wizard
