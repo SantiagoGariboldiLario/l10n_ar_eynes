@@ -414,6 +414,8 @@ class PerceptionTaxApplication(models.Model):
             percent = self.percent
 
         base = vals['base']
+        sign = -1 if base < 0 else 1
+        base = base * sign
         if base < self.tax_allowance:
             return 0.0, 0.0
 
@@ -438,4 +440,4 @@ class PerceptionTaxApplication(models.Model):
         # Si tenemos excluded_percent, lo aplicamos
         amount *= 1 - excluded_percent
 
-        return base, amount
+        return base * sign, amount * sign
