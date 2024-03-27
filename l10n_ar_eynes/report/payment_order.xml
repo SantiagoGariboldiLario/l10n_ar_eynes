@@ -832,10 +832,18 @@
                                                 <t
                                                     t-if="o.type == 'receipt' or o.type == 'sale'"
                                                 >
-                                                    <strong>Total cobrado:  <t
+                                                    <strong>Total cobrado:  
+                                                        <t
+                                                            t-if="o.currency_id.name.lower() == 'ars'"
                                                             t-esc="o.amount"
                                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                        /></strong>
+                                                        />
+                                                        <t 
+                                                            t-else=""
+                                                            t-esc="o.amount / o.payment_rate"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </strong>
                                                 </t>
                                                 <t t-else="">
                                                     <strong>Total pagado: <t
