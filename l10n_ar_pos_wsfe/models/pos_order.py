@@ -83,19 +83,15 @@ class PosOrder(models.Model):
             new_move = order._create_invoice(move_vals)
 
             order.write({'account_move': new_move.id, 'state': 'invoiced'})
-            afip_result = False
             if order.is_wsfe:
-                afip_result = (
-                    new_move.sudo()
-                    .with_company(order.company_id)
-                    ._validate_electronic_invoices()
-                )
-            if (order.is_wsfe and afip_result) or not (
-                order.is_wsfe and afip_result
-            ):
+                new_move.sudo().with_company(
+                    order.company_id
+                )._validate_electronic_invoices()
+            else:
                 new_move.sudo().with_company(order.company_id)._post()
-                moves += new_move
-                order._apply_invoice_payments()
+
+            moves += new_move
+            order._apply_invoice_payments()
 
         if not moves:
             return {}
