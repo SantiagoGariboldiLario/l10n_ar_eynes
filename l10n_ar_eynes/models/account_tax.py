@@ -235,13 +235,25 @@ class AccountTax(models.Model):
             'print': print,
         }
 
+    def _prepare_vals_from_origin(self, partner, origin, origin_vals=None):
+        """
+        Returns the values to compute the taxapps.
+        In the python code avoid using origin, since it may come empty
+        """
+        origin_vals = origin_vals or {}
+        return {
+            'origin': origin,
+            'origin_name': origin._name,
+            'partner': partner,
+            **origin_vals,
+        }
+
     def _get_taxapps_from_code(
         self,
         perc_data,
-        invoice=None,
-        payment_order=None,
-        income_lines=None,
-        debt_lines=None,
+        partner,
+        origin,
+        origin_vals=None,
     ):
         """
         Execute the python code to know
@@ -255,31 +267,25 @@ class AccountTax(models.Model):
         @rtype :  dict
         """
         self.ensure_one()
+        origin_vals = origin_vals or {}
         eval_context = self._get_eval_code_context()
-        partner = None
-        if invoice:
-            partner = invoice.partner_id
-        if payment_order:
-            partner = payment_order.partner_id
-
         # Pasamos el parent partner como variable en caso de
         # que exista para poder tomar sus percepciones
         if not partner.is_company and partner.parent_id:
             partner = partner.parent_id
 
+        origin_eval_ctx = self._prepare_vals_from_origin(
+            partner, origin, origin_vals
+        )
         eval_context.update(
             {
+                **origin_eval_ctx,
                 'perc_data': perc_data,
-                'invoice': invoice,
-                'partner': partner,
                 'perception': self,
                 'retention': self,
-                'income_lines': income_lines,
-                'debt_lines': debt_lines,
-                'payment_order': payment_order,
+                'partner': partner,
             }
         )
-
         try:
             safe_eval(
                 self.python_code.strip(),
