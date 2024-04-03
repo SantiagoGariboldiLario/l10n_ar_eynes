@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime
 
-from odoo import _, api, exceptions, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -53,6 +54,7 @@ class PosOrder(models.Model):
         new_move.with_context(**ctx)._onchange_invoice_date()
         new_move.with_context(**ctx).compute_perceptions()
         new_move._onchange_payment_term_date_invoice()
+        new_move.select_default_voucher_type()
         return
 
     def _check_balanced(self, new_move):
@@ -64,6 +66,47 @@ class PosOrder(models.Model):
         self._hook_recompute_account_move(res)
         self._check_balanced(res)
         return res
+
+    def _generate_pos_order_invoice(self):
+        moves = self.env['account.move']
+
+        for order in self:
+            # Force company for all SUPERUSER_ID action
+            if order.account_move:
+                moves += order.account_move
+                continue
+
+            if not order.partner_id:
+                raise UserError(_('Please provide a partner for the sale.'))
+
+            move_vals = order._prepare_invoice_vals()
+            new_move = order._create_invoice(move_vals)
+
+            order.write({'account_move': new_move.id, 'state': 'invoiced'})
+            if order.is_wsfe:
+                new_move.sudo().with_company(
+                    order.company_id
+                )._validate_electronic_invoices()
+            else:
+                new_move.sudo().with_company(order.company_id)._post()
+
+            moves += new_move
+            order._apply_invoice_payments()
+
+        if not moves:
+            return {}
+
+        return {
+            'name': _('Customer Invoice'),
+            'view_mode': 'form',
+            'view_id': self.env.ref('account.view_move_form').id,
+            'res_model': 'account.move',
+            'context': "{'move_type':'out_invoice'}",
+            'type': 'ir.actions.act_window',
+            'nodestroy': True,
+            'target': 'current',
+            'res_id': moves and moves.ids[0] or False,
+        }
 
     def _compute_all_vat_taxes(self, line_vals, order_vals):
         order_currency = self.env['res.currency'].browse(
@@ -176,7 +219,7 @@ class PosOrder(models.Model):
             account = self._get_computed_account(product, partner, order_vals)
 
             if not account:
-                raise exceptions.ValidationError(
+                raise ValidationError(
                     _(
                         "The product %(product)s has not account configured.",
                         product=product.display_name,

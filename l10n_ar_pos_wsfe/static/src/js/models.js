@@ -173,6 +173,9 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
         get_total_perception: function () {
             return this.perception_amount || 0.0;
         },
+        get_total_perception_formatted: function () {
+            return this.pos.format_currency(this.get_total_perception());
+        },
         compute_perceptions: async function () {
             // To avoid restart perception on load values from json
             if (this._on_init_json) {

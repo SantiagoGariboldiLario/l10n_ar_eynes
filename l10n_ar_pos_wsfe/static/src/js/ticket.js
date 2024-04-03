@@ -10,6 +10,10 @@ odoo.define("l10n_ar_pos_wsfe.WSFETicketScreen", function (require) {
             getDocOrigin(order) {
                 return order.doc_origin || "";
             }
+            async _onDoRefund() {
+                await super._onDoRefund(...arguments);
+                await this.props.destinationOrder.compute_perceptions();
+            }
         };
 
     Registries.Component.extend(TicketScreen, WSFETicketScreen);

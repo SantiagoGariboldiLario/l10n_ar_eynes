@@ -1314,9 +1314,14 @@ class AccountMove(models.Model):
 
     def _validate_electronic_invoices(self, soft=False):
         if self:
+            self.env.cr.commit()  # pylint: disable=invalid-commit
             posted_moves = self.env['account.move']
             with registry(self.env.cr.dbname).cursor() as new_cr:
                 env = api.Environment(new_cr, SUPERUSER_ID, self.env.context)
+                # Make sure to write all records with new cursor
+                # to avoid concurrency update error.
+                new_self = self.with_env(env)
+
                 request = env['ws.request'].create(
                     {
                         'nregs': len(self),
@@ -1324,10 +1329,9 @@ class AccountMove(models.Model):
                 )
                 new_cr.commit()  # pylint: disable=invalid-commit
 
-                ws = self._get_ws_conf()
+                ws = new_self._get_ws_conf()
 
-                for inv in self:
-                    inv = env['account.move'].browse(inv.id)
+                for inv in new_self:
                     if inv._check_must_be_fce():
                         inv._ensure_fce_values()
                     posted = inv._post(soft=soft)
