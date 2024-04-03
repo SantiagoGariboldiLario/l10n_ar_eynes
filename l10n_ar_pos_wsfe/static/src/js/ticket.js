@@ -11,8 +11,11 @@ odoo.define("l10n_ar_pos_wsfe.WSFETicketScreen", function (require) {
                 return order.doc_origin || "";
             }
             async _onDoRefund() {
-                await super._onDoRefund(...arguments);
-                await this.props.destinationOrder.compute_perceptions();
+                const res = await super._onDoRefund(...arguments);
+                if (this.props.destinationOrder) {
+                    await this.props.destinationOrder.compute_perceptions();
+                }
+                return res;
             }
         };
 
