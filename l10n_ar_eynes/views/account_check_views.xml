@@ -38,7 +38,7 @@
                 <field name="deferred_account_id" />
                 <field name="receivable_rejected_account_id" />
                 <field name="rejected_account_id" />
-                <field name="rejected_issued_checks_journal_id"/>
+                <field name="rejected_issued_checks_journal_id" />
                 <field name="deferred_journal_id" />
             </tree>
         </field>
@@ -50,7 +50,7 @@
         <field name="res_model">account.check.config</field>
         <field name="view_mode">tree,form</field>
     </record>
-    
+
     <!-- ISSUED CHECK FORM VIEW-->
     <record id="account_issued_check_view_form" model="ir.ui.view">
         <field name="name">account.issued.check.view.form</field>
@@ -69,7 +69,7 @@
                     <field
                         name="issued_check_state"
                         widget="statusbar"
-                        statusbar_visible="draft,waiting_accreditation,cancelled,paid,expired,rejected,waiting_numeration"
+                        statusbar_visible="draft,waiting_accreditation,cancelled,paid,expired,rejected"
                         statusbar_colors='{"cancel":"red"}'
                         attrs="{'invisible' : [('internal_type', '=', 'third_party')]}"
                     />
@@ -93,10 +93,7 @@
                         </group>
                         <group>
                             <field name="issue_date" />
-                            <field
-                                name="payment_date"
-                                attrs="{'invisible': [('type', '=', 'common')]}"
-                            />
+                            <field name="payment_date" attrs="{'invisible': [('type', '=', 'common')]}" />
                             <field
                                 name="reject_date"
                                 attrs="{'invisible': [('issued_check_state', '!=', 'rejected')]}"
@@ -157,11 +154,7 @@
         <field name="type">calendar</field>
         <field eval="2" name="priority" />
         <field name="arch" type="xml">
-            <calendar
-                color="bank_id"
-                date_start="issue_date"
-                string="Issued Checks by Issue Date"
-            >
+            <calendar color="bank_id" date_start="issue_date" string="Issued Checks by Issue Date">
                 <field name="number" />
                 <field name="amount" />
             </calendar>
@@ -174,11 +167,7 @@
         <field name="type">calendar</field>
         <field eval="10" name="priority" />
         <field name="arch" type="xml">
-            <calendar
-                color="bank_id"
-                date_start="payment_date"
-                string="Issued Checks by Payment Date"
-            >
+            <calendar color="bank_id" date_start="payment_date" string="Issued Checks by Payment Date">
                 <field name="number" />
                 <field name="amount" />
             </calendar>
@@ -199,10 +188,7 @@
         />
     </record>
 
-    <record
-        id="account_issued_check_action_calendar_payment_date"
-        model="ir.actions.act_window"
-    >
+    <record id="account_issued_check_action_calendar_payment_date" model="ir.actions.act_window">
         <field name="name">Issued Checks by Payment Date</field>
         <field name="res_model">account.check</field>
         <field name="view_mode">calendar,form</field>
@@ -215,10 +201,7 @@
         />
     </record>
 
-    <record
-        id="account_issued_check_action_calendar_issued_date"
-        model="ir.actions.act_window"
-    >
+    <record id="account_issued_check_action_calendar_issued_date" model="ir.actions.act_window">
         <field name="name">Issued Checks by Issue Date</field>
         <field name="res_model">account.check</field>
         <field name="view_mode">calendar,form</field>
@@ -454,11 +437,7 @@
         <field name="type">calendar</field>
         <field eval="2" name="priority" />
         <field name="arch" type="xml">
-            <calendar
-                color="bank_id"
-                date_start="issue_date"
-                string="Third Checks by Issue Date"
-            >
+            <calendar color="bank_id" date_start="issue_date" string="Third Checks by Issue Date">
                 <field name="number" />
                 <field name="amount" />
             </calendar>
@@ -471,11 +450,7 @@
         <field name="type">calendar</field>
         <field eval="10" name="priority" />
         <field name="arch" type="xml">
-            <calendar
-                color="bank_id"
-                date_start="payment_date"
-                string="Third Checks by Payment Date"
-            >
+            <calendar color="bank_id" date_start="payment_date" string="Third Checks by Payment Date">
                 <field name="number" />
                 <field name="amount" />
             </calendar>
@@ -488,11 +463,7 @@
         <field name="type">calendar</field>
         <field eval="10" name="priority" />
         <field name="arch" type="xml">
-            <calendar
-                color="bank_id"
-                date_start="endorsement_date"
-                string="Third Checks by Endorsement Date"
-            >
+            <calendar color="bank_id" date_start="endorsement_date" string="Third Checks by Endorsement Date">
                 <field name="number" />
                 <field name="amount" />
             </calendar>
@@ -513,10 +484,7 @@
         />
     </record>
 
-    <record
-        id="account_third_check_action_calendar_payment_date"
-        model="ir.actions.act_window"
-    >
+    <record id="account_third_check_action_calendar_payment_date" model="ir.actions.act_window">
         <field name="name">Third Checks by Payment Date</field>
         <field name="res_model">account.check</field>
         <field name="view_mode">calendar,form</field>
@@ -529,10 +497,7 @@
         />
     </record>
 
-    <record
-        id="account_third_check_action_calendar_issued_date"
-        model="ir.actions.act_window"
-    >
+    <record id="account_third_check_action_calendar_issued_date" model="ir.actions.act_window">
         <field name="name">Third Checks by Issue Date</field>
         <field name="res_model">account.check</field>
         <field name="view_mode">calendar,form</field>
@@ -545,16 +510,11 @@
         />
     </record>
 
-    <record
-        id="account_third_check_action_calendar_endorsement_date"
-        model="ir.actions.act_window"
-    >
+    <record id="account_third_check_action_calendar_endorsement_date" model="ir.actions.act_window">
         <field name="name">Third Checks by Endorsement Date</field>
         <field name="res_model">account.check</field>
         <field name="view_mode">calendar,form</field>
-        <field
-            name="domain"
-        >[('internal_type', '=', 'third_party'),('endorsement_date','!=',False)]</field>
+        <field name="domain">[('internal_type', '=', 'third_party'),('endorsement_date','!=',False)]</field>
         <field
             name="view_ids"
             eval="[(5, 0, 0),
