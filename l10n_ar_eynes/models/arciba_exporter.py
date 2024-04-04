@@ -12,6 +12,7 @@ class ArcibaGeneratedFiles(models.Model):
     _name = 'arciba.generated.files'
 
     code = fields.Char()
+    datas = fields.Binary(related='attachment_id.datas')
     date_from = fields.Date(string='Date From')
     date_to = fields.Date(string='Date To')
     attachment_id = fields.Many2one('ir.attachment')
