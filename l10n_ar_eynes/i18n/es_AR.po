@@ -9092,3 +9092,103 @@ msgstr "retiro"
 #, python-format
 msgid "in"
 msgstr "ingreso"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid "Perception Error\n"
+msgstr "Error de Percepción\n"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid "Retention Error\n"
+msgstr "Error de Retención\n"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"%(error)s"
+"Account %(account_name)s[%(account_code)s] must have "
+"an associated concept for %(tax)s. Please configure it!"
+msgstr ""
+"%(error)s"
+"La cuenta %(account_name)s[%(account_code)s] debe tener "
+"un concepto asociado en %(tax)s. Por favor configurelo!"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Perception Error!\n"
+"There is more than one Perception Application (%(perc_name)s) "
+"that corresponds to\nActivity: %(activity_name)s\n"
+"Concept: %(concept_name)s\n for "
+"the Account %(acc_name)s"
+msgstr ""
+"Error de Percepción!\n"
+"Hay más de una Aplicación de Percepción (%(perc_name)s) "
+"que corresponden a/nActividad: %(activity_name)s\n"
+"Concepto: %(concept_name)s\n para "
+"la Cuenta %(acc_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Perception Error!\n"
+"There is no configured a Perception Application (%(perc_name)s) "
+"that corresponds to\nActivity: %(activity_name)s\n"
+"Concept: %(concept_name)s\n for "
+"the Account %(acc_name)s"
+msgstr ""
+"Error de Percepción!\n"
+"No hay configurada una Aplicación de Percepción (%(perc_name)s) "
+"que corresponda a/nActividad: %(activity_name)s\n"
+"Concepto: %(concept_name)s\n para "
+"la Cuenta %(acc_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Retention Error!\n"
+"There is no configured a Retention Application "
+"(%(retention_name)s) that corresponds to\n"
+"Activity: %(activity)s \n"
+"Concept: %(concept)s\n"
+"for the Account %(account_name)s"
+msgstr ""
+"Error de Retención!\n"
+"No hay configurada una Aplicación de Retención "
+"(%(retention_name)s) que corresponda a\n"
+"Actividad: %(activity)s \n"
+"Concepto: %(concept)s\n"
+"para la Cuenta %(account_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Retention Error!\n"
+"There is more than one Retention Application "
+"(%(retention_name)s) configured that corresponds to\n"
+"Activity: %(activity)s\nConcept: %(concept)s\n"
+"for the Account %(account_name)s"
+msgstr ""
+"Error de Retención!\n"
+"Hay más de una Aplicación de Retención "
+"(%(retention_name)s) configurada que corresponde a\n"
+"Actividad: %(activity)s\nConcepto: %(concept)s\n"
+"para la Cuenta %(account_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid ""
+"Error trying to validate electronic invoice with ids [%(ids)s].\n"
+"Check WS Requests page or go to 'Informs -> Ws Requests -> %(name)s'."
+msgstr ""
+"Error al tratar de validar factura electrónica con ids [%(ids)s].\n"
+"Verifica la pagina de Solicitud  WS o ve a 'Informes -> Solicitudes WS -> %(name)s'."

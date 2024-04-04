@@ -391,9 +391,13 @@ class AccountJournal(models.Model):
                 tax_name = perception.name
             raise ValidationError(
                 _(
-                    f"{err_title}"
-                    f"Account {account.name}[{account.code}] must have "
-                    f"an associated concept for {tax_name}. Please configure it!"
+                    "%(error)s"
+                    "Account %(account_name)s[%(account_code)s] must have "
+                    "an associated concept for %(tax)s. Please configure it!",
+                    error=err_title,
+                    account_name=account.name,
+                    account_code=account.code,
+                    tax=tax_name,
                 )
             )
         return concepts
@@ -579,10 +583,14 @@ class AccountJournal(models.Model):
                     _(
                         "Retention Error!\n"
                         "There is no configured a Retention Application "
-                        f"({retention.name}) that corresponds to\n"
-                        "Activity: {activity_name} \n"
-                        f"Concept: {concept_name}\n"
-                        f"for the Account {ml.account_id.name}"
+                        "(%(retention_name)s) that corresponds to\n"
+                        "Activity: %(activity)s \n"
+                        "Concept: %(concept)s\n"
+                        "for the Account %(account_name)s",
+                        retention_name=retention.name,
+                        activity=activity_name,
+                        concept=concept_name,
+                        account_name=ml.account_id.name,
                     )
                 )
 
@@ -591,9 +599,13 @@ class AccountJournal(models.Model):
                     _(
                         "Retention Error!\n"
                         "There is more than one Retention Application "
-                        f"({retention.name}) configured that corresponds to\n"
-                        f"Activity: {activity_name}\nConcept: {concept_name}\n"
-                        f"for the Account {ml.account_id.name}"
+                        "(%(retention_name)s) configured that corresponds to\n"
+                        "Activity: %(activity)s\nConcept: %(concept)s\n"
+                        "for the Account %(account_name)s",
+                        retention_name=retention.name,
+                        activity=activity_name,
+                        concept=concept_name,
+                        account_name=ml.account_id.name,
                     )
                 )
 
