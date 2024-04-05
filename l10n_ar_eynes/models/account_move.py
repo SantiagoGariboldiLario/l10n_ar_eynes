@@ -634,7 +634,7 @@ class AccountMove(models.Model):
             return any(line.tax_ids.mapped("is_exempt"))
 
         def _filter_untaxed(line):
-            return not line.tax_ids
+            return not _filter_exempt(line) and not _filter_taxed(line)
 
         def _filter_taxed(line):
             taxed = line.tax_ids.mapped(
