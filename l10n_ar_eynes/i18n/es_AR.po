@@ -972,7 +972,6 @@ msgstr "Aprobado"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_arciba_generated_files
-#: model:ir.ui.menu,name:l10n_ar_eynes.menu_action_arba_generated_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_arciba_generated_files_tree
 msgid "ArciBA generated files"
 msgstr "Archivos generados por ArciBA"
