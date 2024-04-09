@@ -27,7 +27,6 @@
     'category': 'Accounting/Accounting',
     'depends': [
         'account',
-        'account_check_printing',
         'account_debit_note',
         'base',
         'contacts',

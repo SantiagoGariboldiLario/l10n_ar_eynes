@@ -302,9 +302,7 @@ class AccountJournal(models.Model):
 
     def _default_outbound_payment_methods(self):
         res = super()._default_outbound_payment_methods()
-        res -= self.env.ref(
-            'account_check_printing.account_payment_method_check'
-        )
+        res -= self.env.ref('l10n_ar_eynes.account_payment_method_check')
         return res
 
     def create_pos_sequence(self):

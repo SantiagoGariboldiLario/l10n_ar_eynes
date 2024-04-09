@@ -231,7 +231,7 @@ class AccountCheck(models.Model):
         comodel_name='account.payment.method.line',
         string='Checkbook ID',
         ondelete='restrict',
-        domain=[('payment_method_id.code', '=', 'check_printing')],
+        domain=[('payment_method_id.code', '=', 'checks')],
     )
     receiving_partner_id = fields.Many2one(
         comodel_name='res.partner', string='Receiving Entity'
