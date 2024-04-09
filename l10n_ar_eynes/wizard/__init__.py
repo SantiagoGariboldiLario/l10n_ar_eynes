@@ -26,3 +26,4 @@ from . import cancel_picking_done
 #
 #
 from . import fiscal_year_closing_operation_wizard  # noqa
+from . import account_check_change_state  # noqa
