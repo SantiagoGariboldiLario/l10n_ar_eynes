@@ -621,12 +621,12 @@ msgstr "Subdiario de Impuestos"
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_customer_payment_order_action
 msgid "Account customer payment order"
-msgstr "Pagos de cliente"
+msgstr "Cobros a clientes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_payment_order
 msgid "Account payment order"
-msgstr "Pagos de Clientes"
+msgstr "Cobros a Clientes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_report_account_report_invoice
@@ -2531,7 +2531,7 @@ msgstr "Notas de Débito"
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.account_customer_payment_order_menu
 msgid "Customer Payments"
-msgstr "Pagos de cliente"
+msgstr "Cobros a clientes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__access_url
@@ -9191,3 +9191,26 @@ msgid ""
 msgstr ""
 "Error al tratar de validar factura electrónica con ids [%(ids)s].\n"
 "Verifica la pagina de Solicitud  WS o ve a 'Informes -> Solicitudes WS -> %(name)s'."
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_bank_statement_line__payment_state
+#: model:ir.model.fields,field_description:account.field_account_invoice_report__payment_state
+#: model:ir.model.fields,field_description:account.field_account_move__payment_state
+#: model:ir.model.fields,field_description:account.field_account_payment__payment_state
+msgid "Payment Status"
+msgstr "Estado de cobro"
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_move__payment_state__not_paid
+msgid "Not Paid"
+msgstr "No cobrado"
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_move__payment_state__partial
+msgid "Partially Paid"
+msgstr "Cobrado parcialmente"
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_move__payment_state__paid
+msgid "Paid"
+msgstr "Cobrado"
