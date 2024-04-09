@@ -41,6 +41,7 @@
             'l10n_ar_pos_wsfe/static/src/js/product.js',
             'l10n_ar_pos_wsfe/static/src/js/order_widget.js',
             'l10n_ar_pos_wsfe/static/src/scss/cash_move_button_popup.scss',
+            'l10n_ar_pos_wsfe/static/src/js/PaymentScreenStatus.js',
         ],
         'web.assets_qweb': [
             'l10n_ar_pos_wsfe/static/src/xml/**/*',
