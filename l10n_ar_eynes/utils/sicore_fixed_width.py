@@ -231,8 +231,7 @@ class FixedWidth(object):
                 # make sure passed in value is of the proper type
                 if not type_tests[parameters['type']](self.data[field_name]):
                     raise ValueError(
-                        "%s is defined as a %s, \
-                    but the value is not of that type."
+                        "%s is defined as a %s but the value is not of that type."
                         % (field_name, parameters['type'])
                     )
 
@@ -245,8 +244,7 @@ class FixedWidth(object):
 
                 elif len(str(self.data[field_name])) > parameters['length']:
                     raise ValueError(
-                        "%s is too long (limited to %d \
-                        characters)."
+                        "%s is too long (limited to %d characters)."
                         % (field_name, parameters['length'])
                     )
 
@@ -266,9 +264,8 @@ class FixedWidth(object):
                 # if required but not provided
                 if parameters['required'] and ('value' not in parameters):
                     raise ValueError(
-                        "Field %s is required, but was \
-                        not provided."
-                        % (field_name,)
+                        "Field %s is required, but was not provided."
+                        % field_name
                     )
 
                 # if there's a default value

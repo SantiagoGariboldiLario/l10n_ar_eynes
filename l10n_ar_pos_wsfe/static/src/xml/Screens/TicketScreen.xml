@@ -13,4 +13,15 @@
         </xpath>
     </t>
 
+    <t t-name="OrderDetails" t-inherit="point_of_sale.OrderDetails" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('summary')]/div/div/div" position="after">
+            <div t-if="props.order.get_total_perception()" class="subentry">
+                Percepciones:
+                <span class="value">
+                    <t t-esc="props.order.get_total_perception_formatted()" />
+                </span>
+            </div>
+        </xpath>
+    </t>
+
 </templates>

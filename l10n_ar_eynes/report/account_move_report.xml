@@ -1,19 +1,21 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8' ?>
 <odoo>
-    <record id="paperformat_invoice" model="report.paperformat">
-        <field name="name">Invoice Report</field>
-        <field name="default" eval="False" />
-        <field name="format">A4</field>
-        <field name="page_width">0</field>
-        <field name="orientation">Portrait</field>
-        <field name="margin_top">55</field>
-        <field name="margin_bottom">35</field>
-        <field name="margin_right">5</field>
-        <field name="margin_left">5</field>
-        <field name="header_line" eval="False" />
-        <field name="header_spacing">5</field>
-        <field name="dpi">90</field>
-    </record>
+    <data noupdate="1">
+        <record id="paperformat_invoice" model="report.paperformat">
+            <field name="name">Invoice Report</field>
+            <field name="default" eval="False" />
+            <field name="format">A4</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">55</field>
+            <field name="margin_bottom">35</field>
+            <field name="margin_right">5</field>
+            <field name="margin_left">5</field>
+            <field name="header_line" eval="False" />
+            <field name="header_spacing">5</field>
+            <field name="dpi">90</field>
+        </record>
+    </data>
 
     <record id="account_move_report" model="ir.actions.report">
         <field name="name">Factura QWEB</field>
@@ -42,54 +44,36 @@
                             t-if="o.journal_id.image"
                             t-attf-src="data:image/png;base64,#{o.journal_id.image}"
                         />
-                        <img
-                            t-else=""
-                            t-attf-src="data:image/png;base64,#{o.company_id.logo}"
-                        />
-                        <br/>
+                        <img t-else="" t-attf-src="data:image/png;base64,#{o.company_id.logo}" />
+                        <br />
                         <p>
-                            Razón social: <span t-esc="o.journal_id.warehouse_id.partner_id.name"/>
-                            <br/>
+                            Razón social: <span t-esc="o.journal_id.warehouse_id.partner_id.name" />
+                            <br />
                             Domicillio: <span t-esc="o.journal_id.warehouse_id.partner_id.street" />
-                            <span t-esc="o.journal_id.warehouse_id.partner_id.city" 
-                                /> (
-                            <span t-esc="o.journal_id.warehouse_id.partner_id.zip"
-                                />) - 
-                            <span t-esc="o.journal_id.warehouse_id.partner_id.state_id.name"
-                                /> - 
-                            <span t-esc="o.journal_id.warehouse_id.partner_id.country_id.name"/>
-                            <br/>
+                            <span t-esc="o.journal_id.warehouse_id.partner_id.city" /> (
+                            <span t-esc="o.journal_id.warehouse_id.partner_id.zip" />) -
+                            <span t-esc="o.journal_id.warehouse_id.partner_id.state_id.name" /> -
+                            <span t-esc="o.journal_id.warehouse_id.partner_id.country_id.name" />
+                            <br />
                             Tel.: <span t-esc="o.journal_id.warehouse_id.partner_id.phone" />
-                            <br/>
-                            Condición frente al IVA: <span t-esc="o.journal_id.warehouse_id.partner_id.property_account_position_id.name"/>
+                            <br />
+                            Condición frente al IVA: <span
+                                t-esc="o.journal_id.warehouse_id.partner_id.property_account_position_id.name"
+                            />
                         </p>
 
                     </td>
                     <td class="center">
-                        <table class="center-header-table">
-                            <tr>
-                              <td>
-                                <h1
-                                    t-if="denomination_name != 'NOT_DEFINED'"
-                                    t-esc="denomination_name"
-                                />
-                                <p>
-                                    cod. <span t-esc="o.voucher_type_id.afip_code" />
-                                </p>
-                              </td>
-                            </tr>
-                          </table>
-                        <!-- <div class="denomination-render" style="backgound-color: yellow;">
+                        <div class="denomination-render">
                             <h1
                                 t-if="denomination_name != 'NOT_DEFINED'"
                                 style="font-size: 65px;"
                                 t-esc="denomination_name"
                             />
-                            <p
-                            style="font-size: 15px; position: relative; bottom: 10px;">
+                            <p style="font-size: 15px; position: relative; bottom: 10px;">
                             cod. <span t-esc="o.voucher_type_id.afip_code" /></p>
 
-                        </div> -->
+                        </div>
                     </td>
                     <td class="left">
                         <t t-if="o.move_type == 'out_refund' or o.move_type == 'in_refund'">
@@ -101,9 +85,11 @@
                         <t t-elif="denomination_name == 'E'">
                             <span style="font-size: 20px;">FACTURA DE EXPORTACION</span>
                         </t>
-                        <br/>
+                        <span t-elif="o.denomination in ['a', 'b', 'c']" style="font-size: 20px;">FACTURA
+                        </span>
+                        <br />
                         <span>N° <span t-esc="denomination" /></span>
-                        <br/>
+                        <br />
                         <span>
                             Fecha:
                             <t t-if="o.invoice_date">
@@ -113,23 +99,21 @@
                         <br />
                         <span>C.U.I.T: <span t-esc="o.company_id.vat" />
                         </span>
-                        <br/>
+                        <br />
                         <span>Ing. Brutos: <span t-esc="o.company_id.vat" />
                         </span>
-                        <br/>
+                        <br />
                         <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
                         </span>
-                        <br/>
+                        <br />
                         <span>
                             Inic. Activ.:
                             <t t-if="o.journal_id.activity_start_date">
-                                <span
-                                    t-esc="o.journal_id.activity_start_date.strftime('%d/%m/%Y')"
-                                />
+                                <span t-esc="o.journal_id.activity_start_date.strftime('%d/%m/%Y')" />
                             </t>
                         </span>
                         <t t-if="denomination_name == 'E'">
-                            <br/>
+                            <br />
                             <span>IVA EXENTO OPERACIÓN DE EXPORTACION</span>
                         </t>
                     </td>
@@ -163,25 +147,9 @@
                 }
 
                 .center{
-                    width: 12%;
+                    width: 20%;
+                    vertical-align: top;
                     text-align: center;
-                }
-
-                .center-header-table td {
-                    border: 2px solid black;
-                    width: 200px;
-                    height: 100px;
-                    text-align: center;
-                    padding: 0px;
-                }
-
-                .center-header-table h1 {
-                    font-size: 65px;
-                }
-
-                .center-header-table h1,p {
-                    margin: 0px;
-                    padding: 0px;
                 }
 
                 .left {
@@ -189,8 +157,8 @@
                     font-weight: bold;
                     padding-left: 30px;
                 }
-                
-                .denomination-render{ 
+
+                .denomination-render{
                     display: block;
                     margin: 0 auto;
                     border: 2px solid #000;
@@ -200,23 +168,18 @@
                 }
             </style>
         </div>
-        <t t-raw="0"/>
+        <t t-raw="0" />
         <div class="footer last-page">
             <!--Footer afip-->
             <div class="row afip-footer">
                 <div class="column-afip-1">
-                    <img
-                        t-attf-src="data:image/png;base64,#{o._generate_qr()}"
-                        alt="QR"
-                    />
+                    <img t-attf-src="data:image/png;base64,#{o._generate_qr()}" alt="QR" />
                 </div>
                 <div class="column-afip-2">
-                    <img
-                        t-attf-src="data:image/png;base64,#{o.get_afip_logo()}"
-                        alt="Logo Afip"
-                    />
-                    <br/>
-                    <p><strong>Comprobante Autorizado</strong><br/>Esta Administracion Federal no se responsabiliza por los datos ingresados en el detalle de la operacion</p>
+                    <img t-attf-src="data:image/png;base64,#{o.get_afip_logo()}" alt="Logo Afip" />
+                    <br />
+                    <p><strong>Comprobante Autorizado</strong><br
+                        />Esta Administracion Federal no se responsabiliza por los datos ingresados en el detalle de la operacion</p>
                 </div>
                 <div class="column-afip-3">
                     <div style="height: 20px;" />
@@ -238,8 +201,7 @@
                         </tr>
                         <tr>
                             <td> F. Vto.: <t t-if="o.cae_due_date">
-                                    <span
-                                        t-esc="o.cae_due_date.strftime('%d-%m-%Y')" />
+                                    <span t-esc="o.cae_due_date.strftime('%d-%m-%Y')" />
                                 </t>
                             </td>
                         </tr>
@@ -297,7 +259,7 @@
                     -webkit-box-direction: normal;
                     clear: both;
                 }
-                        
+
                 .column,{
                     -webkit-box-flex: 1;
                 }
@@ -325,17 +287,68 @@
                 <t t-else="">
                     <t t-set="denomination_name" t-value="''" />
                 </t>
-                <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
+                <t t-set="iva_amount" t-value="0.0" />
+                <t t-set="percepciones_amount" t-value="0.0" />
+                <t t-set="retenciones_amount" t-value="0.0" />
+
+                <t t-foreach="o.invoice_line_ids" t-as="product_line">
+
+                    <t
+                        t-if="o.move_type in ['out_invoice', 'out_refund']"
+                        t-foreach="product_line.product_id.taxes_id"
+                        t-as="taxe"
+                    >
+                    </t>
+                        <div t-if="taxe">
+                            <t t-if="'IVA' in taxe.name">
+                                <t t-set="iva_amount" t-value="taxe.amount" />
+                            </t>
+                            <t t-elif="'Percepciones' in taxe.name">
+                                <t t-set="percepciones_amount" t-value="taxe.amount" />
+                            </t>
+                            <t t-elif="'Retenciones' in taxe.name">
+                                <t t-set="retenciones_amount" t-value="taxe.amount" />
+                            </t>
+                        </div>
+
+                    <t
+                        t-elif="o.move_type in ['in_invoice', 'in_refund']"
+                        t-foreach="product_line.product_id.supplier_taxes_id"
+                        t-as="taxe"
+                    >
+                    </t>
+                        <div t-if="taxe">
+                            <t t-if="'IVA' in taxe.name">
+                                <t t-set="iva_amount" t-value="taxe.amount" />
+                            </t>
+                            <t t-elif="'Percepciones' in taxe.name">
+                                <t t-set="percepciones_amount" t-value="taxe.amount" />
+                            </t>
+                            <t t-elif="'Retenciones' in taxe.name">
+                                <t t-set="retenciones_amount" t-value="taxe.amount" />
+                            </t>
+                        </div>
+                </t>
+
+                <div
+                    class="article o_report_layout_standard"
+                    t-att-data-oe-model="o and o._name"
+                    t-att-data-oe-id="o and o.id"
+                >
                     <div t-call="l10n_ar_eynes.weblearns_layout">
                         <div class="page">
                             <!--Partner-->
                             <table class="partner-table">
                                 <tr>
                                     <td width="60%">
-                                        <span class="partner-info">Cliente: </span><span t-esc="o.partner_id.name"/>
-                                        <br/>
-                                        <span class="partner-info">Domicilio: </span><span t-esc="o.partner_id.street"/>
-                                        <br/>
+                                        <span class="partner-info">Cliente: </span><span
+                                            t-esc="o.partner_id.name"
+                                        />
+                                        <br />
+                                        <span class="partner-info">Domicilio: </span><span
+                                            t-esc="o.partner_id.street"
+                                        />
+                                        <br />
                                         <span class="partner-info">Condicion IVA: </span>
                                         <t t-if="o.partner_id.property_account_position_id.name == 'RI'">
                                             <span>RESPONSABLE INSCRIPTO</span>
@@ -346,23 +359,41 @@
                                         <t t-else="">
                                             <span t-esc="o.partner_id.property_account_position_id.name" />
                                         </t>
-                                        <br/>
-                                        <span class="partner-info">Condicion Venta: </span><span t-esc="o.invoice_payment_term_id.name" />
+                                        <br />
+                                        <span class="partner-info">Condicion Venta: </span><span
+                                            t-esc="o.invoice_payment_term_id.name"
+                                        />
+                                        <t t-if="o.associated_inv_ids">
+                                            <br />
+                                            <span class="partner-info">Comprobantes asociados: </span>
+                                            <span>
+                                                <t t-esc="', '.join(o.associated_inv_ids.mapped('name'))" />
+                                            </span>
+                                        </t>
                                     </td>
                                     <td width="40%">
-                                            <span class="partner-info">Tel.: </span><span t-esc="o.partner_id.phone"/>
-                                            <br/>
+                                            <span class="partner-info">Tel.: </span><span
+                                            t-esc="o.partner_id.phone"
+                                        />
+                                            <br />
                                             <t t-if="denomination_name == 'E'">
-                                                <span class="partner-info">CUIT Pais: </span><span t-if="o.partner_id.dst_cuit_id.code" t-esc="int(o.partner_id.dst_cuit_id.code)"/>
-                                                <br/>
+                                                <span class="partner-info">CUIT Pais: </span><span
+                                                t-if="o.partner_id.dst_cuit_id.code"
+                                                t-esc="int(o.partner_id.dst_cuit_id.code)"
+                                            />
+                                                <br />
                                                 <span class="partner-info">ID Impositivo: </span>
                                             </t>
                                             <t t-else="">
-                                                <span class="partner-info">CUIT: </span><span t-esc="o.partner_id.vat"/>
-                                                <br/>
-                                                <span class="partner-info">IIBB: </span><span t-esc="o.partner_id.vat"/>
+                                                <span class="partner-info">CUIT: </span><span
+                                                t-esc="o.partner_id.vat"
+                                            />
+                                                <br />
+                                                <span class="partner-info">IIBB: </span><span
+                                                t-esc="o.partner_id.vat"
+                                            />
                                             </t>
-                                            <br/>
+                                            <br />
                                             <span class="partner-info">F. Venc: </span>
                                             <t t-if="o.invoice_date_due">
                                                 <span t-esc="o.invoice_date_due.strftime('%d/%m/%Y')" />
@@ -375,14 +406,20 @@
                                 <table class="export-invoice-table">
                                     <tr>
                                         <td width="60%">
-                                            <span class="partner-info">Divisa: </span><span t-esc="o.currency_id.name"/>
-                                            <br/>
-                                            <span class="partner-info">Destino del comprobante: </span><span t-esc="o.dst_country_id.name"/>
+                                            <span class="partner-info">Divisa: </span><span
+                                                t-esc="o.currency_id.name"
+                                            />
+                                            <br />
+                                            <span class="partner-info">Destino del comprobante: </span><span
+                                                t-esc="o.dst_country_id.name"
+                                            />
                                         </td>
                                         <td width="40%">
                                             <span class="partner-info">Forma de pago: </span>
-                                            <br/>
-                                            <span class="partner-info">Incoterms: </span><span t-esc="o.invoice_incoterm_id.name"/>
+                                            <br />
+                                            <span class="partner-info">Incoterms: </span><span
+                                                t-esc="o.invoice_incoterm_id.name"
+                                            />
                                         </td>
                                     </tr>
                                 </table>
@@ -400,11 +437,11 @@
                                             <th>
                                                 Precio Unit.
                                             </th>
-                                            <div t-if="o.denomination == 'a' or o.is_debit_note">
+                                            <div t-if="o.denomination in ['a', 'b'] or o.is_debit_note">
                                                 <th>
                                                     % Desc.
                                                 </th>
-                                                <th>
+                                                <th t-if="o.denomination != 'b'">
                                                     Alic. IVA
                                                 </th>
                                             </div>
@@ -415,6 +452,11 @@
                                     </thead>
                                     <tbody>
                                         <tr t-foreach="o.invoice_line_ids" t-as="line">
+                                            <t t-set="iva_tax_amount" t-value="" />
+                                            <t
+                                            t-if="not line.display_type"
+                                            name="account_invoice_line_accountable"
+                                        >
                                             <td class="product-description-column">
                                                 <span t-esc="line.name" />
                                             </td>
@@ -427,33 +469,32 @@
                                                     t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
                                                 />
                                             </td>
-                                            <div t-if="o.denomination == 'a' or o.is_debit_note">
-                                                <t t-set="sub_total_per_product" t-value="line.quantity * line.price_unit" />
+                                            <div t-if="o.denomination in ['a', 'b'] or o.is_debit_note">
+                                                <t
+                                                    t-set="sub_total_per_product"
+                                                    t-value="line.quantity * line.price_unit"
+                                                />
                                                 <t t-foreach="line.tax_ids" t-as="tax">
                                                     <t t-if="'IVA' in tax.name">
-                                                        <t t-set="iva_tax_amount" t-value="tax.amount"/>
+                                                        <t t-set="iva_tax_amount" t-value="tax.amount" />
                                                     </t>
                                                 </t>
                                                 <td>
-                                                    <span 
-                                                        t-esc="line.discount"
-                                                    />%
+                                                    <span t-esc="line.discount" />%
                                                 </td>
-                                                <td t-if="iva_tax_amount">
-                                                    <span
-                                                        t-if="iva_tax_amount"
-                                                        t-esc="iva_tax_amount"
-                                                     />%
-                                                </td>
-                                                <td t-else="">
-                                                    <span> </span>
-                                                </td>
+                                                <div t-if="o.denomination != 'b'">
+                                                    <td t-if="iva_tax_amount">
+                                                        <span t-if="iva_tax_amount" t-esc="iva_tax_amount" />%
+                                                    </td>
+                                                    <td t-else="">
+                                                        <span> </span>
+                                                    </td>
+                                                </div>
                                             </div>
                                             <td>
-                                                <span 
+                                                <span
                                                     t-if="iva_tax_amount and (o.denomination == 'a' or o.is_debit_note)"
                                                     t-esc="(sub_total_per_product * (1 - line.discount/100)) * (1+ iva_tax_amount/100)"
-                                                    t-set="iva_tax_amount" t-value=""
                                                     t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
                                                 />
                                                 <span
@@ -462,11 +503,34 @@
                                                     t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
                                                 />
                                             </td>
+                                            </t>
+                                            <t t-if="line.display_type == 'line_section'">
+                                                <td colspan="99" style="text-align: left">
+                                                    <span
+                                                    t-field="line.name"
+                                                    t-options="{'widget': 'text'}"
+                                                />
+                                                </td>
+                                                <t t-set="current_section" t-value="line" />
+                                                <t t-set="current_subtotal" t-value="0" />
+                                            </t>
+                                            <t t-if="line.display_type == 'line_note'">
+                                                <td colspan="99" style="text-align: left">
+                                                    <span
+                                                    t-field="line.name"
+                                                    t-options="{'widget': 'text'}"
+                                                />
+                                                </td>
+                                            </t>
                                         </tr>
                                     </tbody>
                             </table>
                             <!--Taxes-->
-                            <table class="taxes-table fix-position" t-if="o.denomination != 'b' and o.denomination != 'c' and o.denomination != 'e'" style="width: 30%">
+                            <table
+                                class="taxes-table fix-position"
+                                t-if="o.denomination not in ['b', 'c', 'e'] and o.line_ids.filtered('tax_line_id')"
+                                style="width: 30%"
+                            >
                                 <thead>
                                     <tr>
                                         <th>
@@ -484,15 +548,15 @@
                                             </td>
                                             <td>
                                                 <span
-                                                    t-if="o.is_multi_currency"
-                                                    t-esc="abs(line_tax.balance)/o.currency_rate"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                t-if="o.is_multi_currency"
+                                                t-esc="abs(line_tax.balance)/o.currency_rate"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
                                                 <span
-                                                    t-else=""
-                                                    t-esc="abs(line_tax.balance)"
-                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                />
+                                                t-else=""
+                                                t-esc="abs(line_tax.balance)"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
                                             </td>
                                         </tr>
                                 </tbofy>
@@ -507,7 +571,10 @@
                                         <td t-else="">
                                             Tipo de cambio
                                         </td>
-                                        <td t-if="o.denomination != 'e'">
+                                        <td t-if="o.denomination == 'b'">
+                                            Otros imp.
+                                        </td>
+                                        <td t-elif="o.denomination != 'e'">
                                             Impuestos
                                         </td>
                                         <td t-else="">
@@ -519,7 +586,27 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr t-if="o.denomination != 'e'">
+                                    <tr t-if="o.denomination == 'b'">
+                                        <td>
+                                            <span
+                                                t-esc="o.amount_total - (percepciones_amount + retenciones_amount)"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                        <td>
+                                            <span
+                                                t-esc="percepciones_amount + retenciones_amount"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                        <td>
+                                            <span
+                                                t-esc="o.amount_total"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                    </tr>
+                                    <tr t-elif="o.denomination != 'e'">
                                         <td>
                                             <span
                                                 t-esc="o.price_subtotal_to_PDF()"
@@ -541,14 +628,10 @@
                                     </tr>
                                     <tr t-else="">
                                         <td>
-                                            $ <span
-                                                t-esc="o.currency_rate"
-                                            />
+                                            $ <span t-esc="o.currency_rate" />
                                         </td>
                                         <td t-if="o.denomination != 'b'">
-                                            <span
-                                                t-esc="o.currency_id.name"
-                                            />
+                                            <span t-esc="o.currency_id.name" />
                                         </td>
                                         <td>
                                             <span
@@ -561,7 +644,9 @@
                             </table>
                             <!--Masagge-->
                             <div class="fix-position">
-                                <t t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'">
+                                <t
+                                    t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'"
+                                >
                                     <div class="message">
                                         <p style="text-align: center">
                                             El crédito fiscal discriminado en el presente comprobante,
@@ -574,7 +659,14 @@
                             </div>
                             <!--Multicurrency-->
                             <div class="fix-position" t-if="o.is_multi_currency">
-                                <p style="text-align: center">El total de este comprobante expresado en la moneda de curso legal - Pesos Argentinos - asciende a $  <span t-esc="o.amount_total_cur"/></p>                
+                                <p style="text-align: center; margin-bottom:0px;">Tasa de cambio: <span
+                                        t-esc="o.currency_rate"
+                                    /></p>
+                                <p
+                                    style="text-align: center"
+                                >El total de este comprobante expresado en la moneda de curso legal - Pesos Argentinos - asciende a $  <span
+                                        t-esc="o.amount_total_cur"
+                                    /></p>
                             </div>
                         </div>
                     </div>
@@ -589,7 +681,7 @@
                             padding-top: 10px;
                             clear: both;
                         }
-                                
+
                         /*Total Table*/
                         .row{
                             width: 100%;
@@ -612,8 +704,8 @@
                         .multicurrency-table td, p {
                             font-family: Arial, Helvetica, sans-serif;
                             font-size: 13px;
-                        }     
-                        
+                        }
+
                         .column,{
                             -webkit-box-flex: 1;
                         }
@@ -624,14 +716,14 @@
 
                         .column-2 {
                             width: 50%;
-                        }  
+                        }
                         /*Partner table - Product table*/
 
                         .partner-info{
                             font-weight: bold;
                         }
 
-                        .product-table, 
+                        .product-table,
                         .partner-table,
                         .total-table,
                         .taxes-table,
@@ -687,7 +779,7 @@
                             border-bottom: 1px solid rgb(202, 215, 226);
                         }
 
-                        .product-table tbody tr:nth-of-type(even), 
+                        .product-table tbody tr:nth-of-type(even),
                         .partner-table,
                         .taxes-table tbody tr:nth-of-type(even),
                         .message,

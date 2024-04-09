@@ -223,7 +223,6 @@ class AccountCheck(models.Model):
             ('expired', 'Expired'),
             ('returned', 'Returned'),
             ('rejected', 'Rejected'),
-            ('waiting_numeration', 'Waiting numeration'),
         ],
         default='draft',
         string='State',

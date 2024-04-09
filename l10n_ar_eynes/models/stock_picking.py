@@ -91,6 +91,7 @@ class StockPicking(models.Model):
         comodel_name='res.partner',
         string='Carrier Partner',
     )
+    shipping_number = fields.Integer(string='Shipping number')
 
     @api.onchange("carrier_id")
     def onchange_carrier(self):

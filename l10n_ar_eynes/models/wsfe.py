@@ -314,6 +314,7 @@ class WsfeConfig(models.Model):
         vat_data = helper.parse_vat_lines(invoice, vat_lines, self.vat_tax_ids)
         tribute_data = helper.parse_taxes_not_vat(invoice)
         associated_data = helper.parse_associated_voucher(invoice)
+        associated_period_data = helper.parse_associated_period(invoice)
         opcionals_data = helper.parse_optionals(invoice)
 
         number = self._get_next_number(ws, data['CbteTipo'], punto_vta)
@@ -334,8 +335,12 @@ class WsfeConfig(models.Model):
             cbt_desde=number,
             cbt_hasta=number,
             imp_total=data['total_amount'],
-            imp_tot_conc=data['no_taxed_amount'],
-            imp_neto=vat_data['base_vat_amount'],
+            imp_tot_conc=0.00
+            if invoice.denomination == 'c'
+            else data['no_taxed_amount'],
+            imp_neto=vat_data['base_vat_amount']
+            if invoice.denomination != 'c'
+            else (data['total_amount'] - tribute_data['tribute_total']),
             imp_iva=vat_data['total_vat_amount'],
             imp_trib=tribute_data['tribute_total'],
             imp_op_ex=data['exempt_amount'],
@@ -364,6 +369,10 @@ class WsfeConfig(models.Model):
                 nro=cbte_asoc['Nro'],
                 cuit=cbte_asoc['Cuit'],
                 fecha=cbte_asoc['CbteFch'],
+            )
+        for period_asoc in associated_period_data:
+            ws.AgregarPeriodoComprobantesAsociados(
+                fecha_desde=period_asoc['from'], fecha_hasta=period_asoc['to']
             )
         _logger.info("Adding optionals info")
         for opt in opcionals_data:

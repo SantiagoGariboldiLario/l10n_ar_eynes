@@ -220,10 +220,13 @@ class ResPartner(models.Model):
         ) - partner_perceptions_for_fiscal_position_period.mapped(
             'perception_id'
         )
-        if difference:
-            raise UserError(
-                _(
-                    'The perceptions for this partner must be updated: [%(perceptions_name)s]',
+        if difference and self.env.context.get(
+            'raise_padron_not_updated', False
+        ):
+            self.env.user.notify_warning(
+                message=_(
+                    'The perceptions for this partner must be updated: [%(perceptions_name)s].'
+                    'This invoice will not include this tax.',
                     perceptions_name=', '.join(
                         [diff.name for diff in difference]
                     ),
@@ -287,6 +290,9 @@ class ResPartner(models.Model):
                         "You must complete 'Type of taxpayer' field on Gross income configuration."
                     )
                 )
+
+        if len(self) == 1 and "vat" not in vals:
+            vals["vat"] = self.vat
         return super(ResPartner, self).write(vals)
 
     @api.model
