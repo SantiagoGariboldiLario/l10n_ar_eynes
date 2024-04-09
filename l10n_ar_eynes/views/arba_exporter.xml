@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
+    <record id="view_arba_generated_files_form" model="ir.ui.view">
+        <field name="name">arba.generated.files.form</field>
+        <field name="model">arba.generated.files</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="ARBA generated files" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <field name="code" />
+                        <field name="date_from" />
+                        <field name="date_to" />
+                        <label for="datas" string="Generated File" />
+                        <div class="oe_inline">
+                            <field name="datas" class="pr-3" />
+                            <field name="attachment_id" />
+                        </div>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <record id="view_arba_generated_files_tree" model="ir.ui.view">
         <field name="name">arba.generated.files.tree</field>
         <field name="model">arba.generated.files</field>
@@ -18,7 +40,7 @@
         <field name="name">ARBA generated files</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">arba.generated.files</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">tree,form</field>
     </record>
 
     <menuitem parent="menu_taxes_reports" id="menu_arba" name="ARBA" sequence="3" />
