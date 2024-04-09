@@ -686,11 +686,16 @@ class AccountPaymentOrder(models.Model):
             )
 
         if retention.tax_id.apply_custom_code:
+            payment_code_ctx = {
+                'income_lines': income_line_affected,
+                'debt_lines': debt_line_affected,
+                'payment_order': self,
+            }
             retentions = retention.tax_id._get_taxapps_from_code(
                 retention_data,
-                payment_order=self,
-                income_lines=income_line_affected,
-                debt_lines=debt_line_affected,
+                self.partner_id,
+                self,
+                origin_vals=payment_code_ctx,
             )
 
             for retention_vals in retentions:

@@ -621,12 +621,12 @@ msgstr "Subdiario de Impuestos"
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_customer_payment_order_action
 msgid "Account customer payment order"
-msgstr "Pagos de cliente"
+msgstr "Cobros a clientes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_payment_order
 msgid "Account payment order"
-msgstr "Pagos de Clientes"
+msgstr "Cobros a Clientes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_report_account_report_invoice
@@ -741,6 +741,11 @@ msgstr "Asistente para agregar nota débito"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.stock_picking_view_form_inherit_l10n_ar_eynes
 msgid "Add an internal note..."
 msgstr "Añadir una nota interna..."
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__shipping_number
+msgid "Shipping number"
+msgstr "Número de remito"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
@@ -967,7 +972,6 @@ msgstr "Aprobado"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_arciba_generated_files
-#: model:ir.ui.menu,name:l10n_ar_eynes.menu_action_arba_generated_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_arciba_generated_files_tree
 msgid "ArciBA generated files"
 msgstr "Archivos generados por ArciBA"
@@ -1577,12 +1581,12 @@ msgstr ""
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__cancel
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__fiscal_year_closing__state__canceled
 msgid "Cancelled"
-msgstr "Cancelado"
+msgstr "Anulado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__cancelled_issued_check_ids
 msgid "Cancelled Checks"
-msgstr "Cheques Cancelados"
+msgstr "Cheques Anulados"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
@@ -1603,6 +1607,14 @@ msgid ""
 msgstr ""
 "¡No puedo depositar! No puedes depositar el cheque %s                        porque"
 "La Fecha de Pago es mayor que la                        Fecha de Depósito."
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid ""
+"Cannot deposit! You cannot deposit check %s. Payment Date is not defined."
+msgstr ""
+"No puedes depositar! No puedes depositar el cheque %s. La fecha de pago no esta definida."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__dom_partner_id
@@ -2519,7 +2531,7 @@ msgstr "Notas de Débito"
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.account_customer_payment_order_menu
 msgid "Customer Payments"
-msgstr "Pagos de cliente"
+msgstr "Cobros a clientes"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order__access_url
@@ -9079,3 +9091,126 @@ msgstr "retiro"
 #, python-format
 msgid "in"
 msgstr "ingreso"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid "Perception Error\n"
+msgstr "Error de Percepción\n"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid "Retention Error\n"
+msgstr "Error de Retención\n"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"%(error)s"
+"Account %(account_name)s[%(account_code)s] must have "
+"an associated concept for %(tax)s. Please configure it!"
+msgstr ""
+"%(error)s"
+"La cuenta %(account_name)s[%(account_code)s] debe tener "
+"un concepto asociado en %(tax)s. Por favor configurelo!"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Perception Error!\n"
+"There is more than one Perception Application (%(perc_name)s) "
+"that corresponds to\nActivity: %(activity_name)s\n"
+"Concept: %(concept_name)s\n for "
+"the Account %(acc_name)s"
+msgstr ""
+"Error de Percepción!\n"
+"Hay más de una Aplicación de Percepción (%(perc_name)s) "
+"que corresponden a/nActividad: %(activity_name)s\n"
+"Concepto: %(concept_name)s\n para "
+"la Cuenta %(acc_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Perception Error!\n"
+"There is no configured a Perception Application (%(perc_name)s) "
+"that corresponds to\nActivity: %(activity_name)s\n"
+"Concept: %(concept_name)s\n for "
+"the Account %(acc_name)s"
+msgstr ""
+"Error de Percepción!\n"
+"No hay configurada una Aplicación de Percepción (%(perc_name)s) "
+"que corresponda a/nActividad: %(activity_name)s\n"
+"Concepto: %(concept_name)s\n para "
+"la Cuenta %(acc_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Retention Error!\n"
+"There is no configured a Retention Application "
+"(%(retention_name)s) that corresponds to\n"
+"Activity: %(activity)s \n"
+"Concept: %(concept)s\n"
+"for the Account %(account_name)s"
+msgstr ""
+"Error de Retención!\n"
+"No hay configurada una Aplicación de Retención "
+"(%(retention_name)s) que corresponda a\n"
+"Actividad: %(activity)s \n"
+"Concepto: %(concept)s\n"
+"para la Cuenta %(account_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_journal.py:0
+#, python-format
+msgid ""
+"Retention Error!\n"
+"There is more than one Retention Application "
+"(%(retention_name)s) configured that corresponds to\n"
+"Activity: %(activity)s\nConcept: %(concept)s\n"
+"for the Account %(account_name)s"
+msgstr ""
+"Error de Retención!\n"
+"Hay más de una Aplicación de Retención "
+"(%(retention_name)s) configurada que corresponde a\n"
+"Actividad: %(activity)s\nConcepto: %(concept)s\n"
+"para la Cuenta %(account_name)s"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid ""
+"Error trying to validate electronic invoice with ids [%(ids)s].\n"
+"Check WS Requests page or go to 'Informs -> Ws Requests -> %(name)s'."
+msgstr ""
+"Error al tratar de validar factura electrónica con ids [%(ids)s].\n"
+"Verifica la pagina de Solicitud  WS o ve a 'Informes -> Solicitudes WS -> %(name)s'."
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_bank_statement_line__payment_state
+#: model:ir.model.fields,field_description:account.field_account_invoice_report__payment_state
+#: model:ir.model.fields,field_description:account.field_account_move__payment_state
+#: model:ir.model.fields,field_description:account.field_account_payment__payment_state
+msgid "Payment Status"
+msgstr "Estado de cobro"
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_move__payment_state__not_paid
+msgid "Not Paid"
+msgstr "No cobrado"
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_move__payment_state__partial
+msgid "Partially Paid"
+msgstr "Cobrado parcialmente"
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_move__payment_state__paid
+msgid "Paid"
+msgstr "Cobrado"

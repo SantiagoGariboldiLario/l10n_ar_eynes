@@ -634,7 +634,7 @@ class AccountMove(models.Model):
             return any(line.tax_ids.mapped("is_exempt"))
 
         def _filter_untaxed(line):
-            return not line.tax_ids
+            return not _filter_exempt(line) and not _filter_taxed(line)
 
         def _filter_taxed(line):
             taxed = line.tax_ids.mapped(
@@ -897,94 +897,49 @@ class AccountMove(models.Model):
                 % ', '.join(r[1] for r in res)
             )
 
-    @api.model
-    def compute_perception(self, perception_data):
-        perception_id = perception_data['perception']
-        # Chequeamos si la Percepcion tiene seteado un state_id, que coincida
-        # con el state_id de la direccion de entrega del partner.
-        # Sino no se realiza la Percepcion
-        partner_model = self.env['res.partner']
-        destination_shipping = self.address_shipping_id or partner_model.browse(
-            self.partner_id.address_get(['delivery']).get('delivery')
-        )
-        source_shipping = self.env.user.company_id.partner_id
-        applicable = perception_id.check_applicable(
-            sit_iibb=perception_data['sit_iibb'],
-            from_padron=perception_data['from_padron'],
-            source_shipping_id=source_shipping,
-            destination_shipping_id=destination_shipping,
-        )
-        if not applicable:
-            return None
+    def _compute_base_perception(
+        self, perception, perception_data, origin_vals=None
+    ):
+        if not self:
+            return {}
+        origin_vals = origin_vals or {}
+        percent = perception_data['percent']
 
-        if perception_id.tax_id.apply_custom_code:
-            new_perception_lines = self.env['perception.tax.line']
+        concept_id = False
 
-            perceptions = perception_id.tax_id._get_taxapps_from_code(
-                perception_data, invoice=self
-            )
-
-            for perception_vals in perceptions:
-                concept_id = perception_vals.get('concept_id')
-                if not concept_id:
-                    raise ValidationError(
-                        _(
-                            "Concept must be setted in python code. Perception %s"
-                        )
-                        % perception_id.name
-                    )
-
-                if (
-                    perception_vals.get('amount', 0.0) == 0.0
-                    and perception_id.tax_id.state_id.code != 'R'
-                ):
-                    continue
-
-                # Creamos la percepcion.tax.line
-                perception_line_vals = perception_id._prepare_perception_vals(
-                    concept_id, perception_vals, self
-                )
-                # Creamos la perception.tax.line correspondiente
-                # Le pasamos manual=False para que se cree la account.invoice.tax
-                # con manual=False
-                new_perception_lines += (
-                    self.env['perception.tax.line']
-                    .with_context(manual=False)
-                    .new(perception_line_vals)
-                )
-            return new_perception_lines
-
-        # Chequeamos las percepciones a aplicar que matchean
-        # (esto corresponde a una percepcion pero que pueden
-        # existir varios conceptos y/o actividades)
-        perceptions = perception_id._compute_base_perception(
-            perception_data, self
-        )
-
-        # Creamos las lineas de percepcion
-        new_perception_lines = self.env['perception.tax.line']
-        for concept_id, vals in perceptions.items():
-            # Aplicamos la percepcion por Concepto
-            taxapp = vals['tax_app_id']
-
-            base, amount = taxapp.apply_perception(vals, perception_data)
-
-            if amount == 0.0:
+        # Por cada linea, nos fijamos la configuracion del producto
+        perceptions = {}
+        for line in self.invoice_line_ids:
+            taxapps = perception._get_taxapps(perception_data, line.account_id)
+            if taxapps is None:
                 continue
 
-            vals['amount'] = amount
-            vals['base'] = base
+            concept_id = taxapps.concept_id.id
 
-            # Creamos la percepcion.tax.line
-            perception_line_vals = perception_id._prepare_perception_vals(
-                concept_id, vals, self
-            )
-            new_perception_lines += (
-                self.env['perception.tax.line']
-                .with_context(manual=False)
-                .new(perception_line_vals)
-            )
-        return new_perception_lines
+            # Obtenemos toda la info contable de la linea de factura
+            # todas las cantidades y los impuestos de IVA aplicados
+            res = line._compute_all_vat_taxes()[line.id]
+
+            # Hacemos el computo de la Percepcion por linea de factura
+            base = taxapps.compute_base(percent, res)
+
+            if base == 0.0:
+                continue
+
+            # Luego vamos agrupando por Concepto (no por actividad)
+            if concept_id in perceptions:
+                perceptions[concept_id]['base'] += base
+                # perceptions[concept_id]['amount'] += amount
+                perceptions[concept_id]['lines'].append(line.id)
+            else:
+                perceptions[concept_id] = {
+                    'base': base,
+                    # 'amount': amount,
+                    'lines': [line.id],
+                    'reg_code': taxapps.reg_code,
+                    'tax_app_id': taxapps,
+                }
+        return perceptions
 
     def _reverse_move_vals(self, default_values, cancel=True):
         vals = super(AccountMove, self)._reverse_move_vals(
@@ -1023,6 +978,17 @@ class AccountMove(models.Model):
 
         return vals
 
+    def _get_perceptions_ctx(self):
+        """
+        Return values to compute perception in python code field
+        """
+        # TODO: Define values
+        return {
+            'invoice_date': self.invoice_date,
+            'amount_untaxed': self.amount_untaxed,
+            # 'invoice': self,
+        }
+
     @api.onchange('invoice_line_ids', 'disable_perceptions')
     def compute_perceptions(self):
         for rec in self:
@@ -1031,54 +997,25 @@ class AccountMove(models.Model):
                     rec.perception_ids.unlink()
                 else:
                     new_perception_lines = self.env['perception.tax.line']
+                    journal_obj = self.env['account.journal']
                     # Calculamos cada Percepcion configurada en el Partner
-                    partner_perceptions = (
-                        rec.partner_id._get_perceptions_to_apply(
-                            rec.invoice_date or datetime.date.today()
-                        )
+                    perception_ctx = rec._get_perceptions_ctx()
+                    perception_lst = journal_obj.get_applicable_perceptions(
+                        rec.partner_id,
+                        rec,
+                        origin_vals=perception_ctx,
+                        date=rec.invoice_date,
+                        address_shipping=rec.address_shipping_id,
                     )
-                    for partner_perc in partner_perceptions.values():
-                        excluded_percent = partner_perc['excluded_percent']
-
-                        # Chequeamos las fechas de eximision
-                        vdate = rec.invoice_date or datetime.date.today()
-
-                        first_day_of_year = datetime.date.min.replace(
-                            year=datetime.date.today().year
+                    # Creamos la perception.tax.line correspondiente
+                    # Le pasamos manual=False para que se cree la account.invoice.tax
+                    # con manual=False
+                    for perception_line_vals in perception_lst:
+                        new_perception_lines += (
+                            self.env['perception.tax.line']
+                            .with_context(manual=False)
+                            .new(perception_line_vals)
                         )
-                        last_day_of_year = datetime.date.max.replace(
-                            year=datetime.date.today().year
-                        )
-                        date_from = first_day_of_year
-                        date_to = last_day_of_year
-                        if partner_perc['ex_date_from']:
-                            date_from = partner_perc['ex_date_from']
-                        if partner_perc['ex_date_to']:
-                            date_to = partner_perc['ex_date_to']
-
-                        # TODO: Chequear cuando solo se llena uno de las dos fechas
-                        if (not date_from and not date_to) or (
-                            vdate >= date_from and vdate <= date_to
-                        ):
-                            if excluded_percent > 1.0 or excluded_percent < 0.0:
-                                raise ValidationError(
-                                    _(
-                                        "Perception Configuration Error!\n"
-                                        + "Excluded percent configured has to be "
-                                        + "between 0.0 and 1.0"
-                                    )
-                                )
-
-                            # Si esta totalmente eximido
-                            if excluded_percent == 1.0:
-                                continue
-                        else:
-                            partner_perc['excluded_percent'] = 0.0
-                        new_perception = rec.compute_perception(
-                            perception_data=partner_perc
-                        )
-                        if new_perception:
-                            new_perception_lines += new_perception
                     rec.perception_ids = new_perception_lines
             if rec.is_sale_document() or rec.is_purchase_document():
                 rec._onchange_perception_ids()
@@ -1377,9 +1314,14 @@ class AccountMove(models.Model):
 
     def _validate_electronic_invoices(self, soft=False):
         if self:
+            self.env.cr.commit()  # pylint: disable=invalid-commit
             posted_moves = self.env['account.move']
             with registry(self.env.cr.dbname).cursor() as new_cr:
                 env = api.Environment(new_cr, SUPERUSER_ID, self.env.context)
+                # Make sure to write all records with new cursor
+                # to avoid concurrency update error.
+                new_self = self.with_env(env)
+
                 request = env['ws.request'].create(
                     {
                         'nregs': len(self),
@@ -1387,10 +1329,9 @@ class AccountMove(models.Model):
                 )
                 new_cr.commit()  # pylint: disable=invalid-commit
 
-                ws = self._get_ws_conf()
+                ws = new_self._get_ws_conf()
 
-                for inv in self:
-                    inv = env['account.move'].browse(inv.id)
+                for inv in new_self:
                     if inv._check_must_be_fce():
                         inv._ensure_fce_values()
                     posted = inv._post(soft=soft)

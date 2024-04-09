@@ -1,3 +1,4 @@
+import json
 import logging
 
 from odoo import _, models
@@ -100,3 +101,9 @@ class AccountMove(models.Model):
             'journal_id': journal.id,
             'full_sequence': pretty_sequence,
         }
+
+    def select_default_voucher_type(self):
+        self._compute_voucher_type()
+        self.voucher_type_id = self.env['res.voucher.type'].search(
+            json.loads(self.voucher_type_domain)
+        )[0]

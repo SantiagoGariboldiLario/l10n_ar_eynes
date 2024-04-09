@@ -20,14 +20,13 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.1.8.1',
+    'version': '15.0.1.9.1',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
     'category': 'Accounting/Accounting',
     'depends': [
         'account',
-        'account_check_printing',
         'account_debit_note',
         'base',
         'contacts',
@@ -111,6 +110,7 @@
         'views/account_tax_views.xml',
         'views/res_document_type_views.xml',
         'views/res_voucher_type_views.xml',
+        'wizard/account_check_change_state.xml',
         'views/account_check_views.xml',
         'views/reason_rejected_check_views.xml',
         'views/retention_views.xml',
