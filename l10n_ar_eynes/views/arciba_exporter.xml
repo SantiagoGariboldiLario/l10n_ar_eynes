@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
+    <record id="view_arciba_generated_files_form" model="ir.ui.view">
+        <field name="name">arciba.generated.files.form</field>
+        <field name="model">arciba.generated.files</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Arciba generated files" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <field name="code" />
+                        <field name="date_from" />
+                        <field name="date_to" />
+                        <label for="datas" string="Generated File" />
+                        <div class="oe_inline">
+                            <field name="datas" class="pr-3" />
+                            <field name="attachment_id" />
+                        </div>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <record id="view_arciba_generated_files_tree" model="ir.ui.view">
         <field name="name">arciba.generated.files.tree</field>
         <field name="model">arciba.generated.files</field>
@@ -17,7 +39,7 @@
     <record id="action_arciba_generated_files" model="ir.actions.act_window">
         <field name="name">ArciBA generated files</field>
         <field name="res_model">arciba.generated.files</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">tree,form</field>
     </record>
 
     <menuitem

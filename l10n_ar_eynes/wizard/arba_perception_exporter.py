@@ -45,7 +45,7 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
         vals = {
             'date_from': self.date_from,
             'date_to': self.date_to,
-            'state': ('open', 'paid'),
+            'state': ('posted', 'paid'),
             'type': ('gross_income',),
         }
 
@@ -126,12 +126,12 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
     def _get_voucher_type(self, invoice_id):
         res = None
 
-        if invoice_id.type == 'out_invoice':
+        if invoice_id.move_type == 'out_invoice':
             if invoice_id.is_debit_note:
                 res = 'D'
             else:
                 res = 'F'
-        elif invoice_id.type == 'out_refund':
+        elif invoice_id.move_type == 'out_refund':
             res = 'C'
 
         if invoice_id.fiscal_type == 'electronic':
@@ -177,7 +177,7 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
             line = {
                 'cuit': f_cuit,
                 'fecha_percepcion': date,
-                'voucher_type': voucher_type,
+                'tipo_comprobante': voucher_type,
                 'letra_comprobante': line.invoice_id.denomination,
                 'numero_sucursal': internal_number_split[0],
                 'numero_emision': internal_number_split[1],

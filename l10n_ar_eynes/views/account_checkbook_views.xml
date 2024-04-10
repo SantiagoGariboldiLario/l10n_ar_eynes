@@ -28,23 +28,14 @@
                     <notebook>
                         <page name="checks" string="Checks">
                             <group>
-                                <field
-                                    name="draft_issued_check_ids"
-                                    widget="many2many_tags"
-                                    readonly="1"
-                                />
+                                <field name="draft_issued_check_ids" widget="many2many_tags" readonly="1" />
                                 <field
                                     name="cancelled_issued_check_ids"
                                     widget="many2many_tags"
                                     readonly="1"
                                 />
                                 <field name="issued_check_ids">
-                                    <tree
-                                        name="issued_checks"
-                                        create="false"
-                                        edit="false"
-                                        delete="false"
-                                    >
+                                    <tree name="issued_checks" create="false" edit="false" delete="false">
                                         <field name="number" />
                                         <field name="receiving_partner_id" />
                                         <field name="issue_date" />
@@ -83,7 +74,7 @@
         <field name="name">Checkbooks</field>
         <field name="res_model">account.payment.method.line</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('code', '=', 'check_printing')]</field>
+        <field name="domain">[('code', '=', 'checks')]</field>
         <field name="view_id" ref="account_checkbook_view_tree" />
     </record>
 </odoo>

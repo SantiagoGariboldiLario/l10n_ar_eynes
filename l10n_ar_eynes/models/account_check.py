@@ -213,6 +213,13 @@ class AccountCheck(models.Model):
                     )
         self.write({state: 'cancelled'})
 
+    def expired_check(self):
+        if self.internal_type == 'third_party':
+            state = 'third_party_check_state'
+        elif self.internal_type == 'issued':
+            state = 'issued_check_state'
+        self.write({state: 'expired'})
+
     # ISSUED CHECK FIELDS AND METHODS
     issued_check_state = fields.Selection(
         selection=[
@@ -223,7 +230,6 @@ class AccountCheck(models.Model):
             ('expired', 'Expired'),
             ('returned', 'Returned'),
             ('rejected', 'Rejected'),
-            ('waiting_numeration', 'Waiting numeration'),
         ],
         default='draft',
         string='State',
@@ -232,7 +238,7 @@ class AccountCheck(models.Model):
         comodel_name='account.payment.method.line',
         string='Checkbook ID',
         ondelete='restrict',
-        domain=[('payment_method_id.code', '=', 'check_printing')],
+        domain=[('payment_method_id.code', '=', 'checks')],
     )
     receiving_partner_id = fields.Many2one(
         comodel_name='res.partner', string='Receiving Entity'
