@@ -139,7 +139,7 @@ class AccountCheck(models.Model):
         string='Company',
         required=True,
         readonly=True,
-        default=lambda self: self.env.user.company_id.id,
+        default=lambda self: self.env.company.id,
     )
 
     @api.depends('amount', 'currency_rate')
