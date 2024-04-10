@@ -2760,6 +2760,11 @@ msgid "Deposit Account"
 msgstr "Cuenta de depósito"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Deposit Check"
+msgstr "Debitar cheque"
+
+#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
 msgid "Deposit Check"
 msgstr "Depositar cheque"
