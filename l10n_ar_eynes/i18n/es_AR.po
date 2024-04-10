@@ -2670,6 +2670,26 @@ msgid "Debit Notes"
 msgstr "Notas de Débito"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Debit account"
+msgstr "Cuenta de débito"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Debit date"
+msgstr "Fecha de débito"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Debit move"
+msgstr "Asiento de débito"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Debit slip"
+msgstr "Boleta de débito"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__debt_line_ids
 msgid "Debits"
 msgstr "Débitos"

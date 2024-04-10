@@ -117,18 +117,22 @@
                          <group>
                             <field
                                 name="deposit_date"
+                                string="Debit date"
                                 attrs="{'readonly': [('issued_check_state', '!=', 'paid')]}"
                             />
                             <field
                                 name="deposit_slip"
+                                string="Debit slip"
                                 attrs="{'readonly': [('issued_check_state', '!=', 'paid')]}"
                             />
                             <field
                                 name="deposit_move_id"
+                                string="Debit move"
                                 attrs="{'readonly': [('issued_check_state', '!=', 'paid')]}"
                             />
                             <field
                                 name="deposit_bank_id"
+                                string="Debit account"
                                 attrs="{'readonly': [('issued_check_state', '!=', 'paid')]}"
                             />
                         </group>
