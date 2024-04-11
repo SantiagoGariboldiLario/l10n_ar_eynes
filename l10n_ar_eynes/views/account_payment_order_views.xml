@@ -1156,10 +1156,16 @@
                                             <field name="amount" />
                                         </group>
                                         <group>
-                                            <field name="issue_date" />
+                                            <field
+                                                name="issue_date"
+                                                attrs="{'required': [('type', '=', 'deferred')]}"
+                                            />
                                             <field
                                                 name="payment_date"
-                                                attrs="{'invisible': [('type', '=', 'common')]}"
+                                                attrs="{
+                                                'invisible': [('type', '=', 'common')],
+                                                'required': [('type', '=', 'deferred')]
+                                                }"
                                             />
                                             <field name="clearing" />
                                             <field name="signatory" />
