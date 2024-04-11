@@ -64,6 +64,13 @@
                         type="action"
                         class="oe_highlight"
                     />
+                     <button
+                        string="Deposit Check"
+                        name="%(deposit_check_action)d"
+                        type="action"
+                        class="oe_highlight"
+                        attrs="{'invisible' : [('issued_check_state', '!=', 'waiting_accreditation')]}"
+                    />
                     <field
                         name="issued_check_state"
                         widget="statusbar"
@@ -98,6 +105,36 @@
                             />
                             <field name="crossed" />
                             <field name="not_order" />
+                        </group>
+                    </group>
+                    <group
+                        string="Check Deposit"
+                        attrs="{
+                            'invisible': [('issued_check_state','not in',('paid', 'rejected'))],
+                            'readonly': [('issued_check_state', '!=', 'paid')]
+                        }"
+                    >
+                         <group>
+                            <field
+                                name="deposit_date"
+                                string="Debit date"
+                                attrs="{'readonly': [('issued_check_state', '!=', 'paid')]}"
+                            />
+                            <field
+                                name="deposit_slip"
+                                string="Debit slip"
+                                attrs="{'readonly': [('issued_check_state', '!=', 'paid')]}"
+                            />
+                            <field
+                                name="deposit_move_id"
+                                string="Debit move"
+                                attrs="{'readonly': [('issued_check_state', '!=', 'paid')]}"
+                            />
+                            <field
+                                name="deposit_bank_id"
+                                string="Debit account"
+                                attrs="{'readonly': [('issued_check_state', '!=', 'paid')]}"
+                            />
                         </group>
                     </group>
                     <group string="Adittional Information">

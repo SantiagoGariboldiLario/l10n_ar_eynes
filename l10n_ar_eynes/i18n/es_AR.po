@@ -1602,19 +1602,10 @@ msgstr "Factura cancelada"
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid ""
-"Cannot deposit! You cannot deposit check %s                        because "
-"Payment Date is greater than                        Deposit Date."
-msgstr ""
-"¡No puedo depositar! No puedes depositar el cheque %s                        porque"
-"La Fecha de Pago es mayor que la                        Fecha de Depósito."
-
-#. module: l10n_ar_eynes
-#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
-#, python-format
-msgid ""
-"Cannot deposit! You cannot deposit check %s. Payment Date is not defined."
-msgstr ""
-"No puedes depositar! No puedes depositar el cheque %s. La fecha de pago no esta definida."
+"Cannot deposit! You cannot deposit the selected checks. Payment Date is not "
+"defined or exceeds Deposit Date. Checks with issues: %s"
+msgstr "¡No se puede depositar! No puede depositar los cheques seleccionados. La fecha de pago no está "
+" definida o excede la fecha de depósito. Cheques con errores: %s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__dom_partner_id
@@ -2679,6 +2670,26 @@ msgid "Debit Notes"
 msgstr "Notas de Débito"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Debit account"
+msgstr "Cuenta de débito"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Debit date"
+msgstr "Fecha de débito"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Debit move"
+msgstr "Asiento de débito"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Debit slip"
+msgstr "Boleta de débito"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__debt_line_ids
 msgid "Debits"
 msgstr "Débitos"
@@ -2769,6 +2780,11 @@ msgid "Deposit Account"
 msgstr "Cuenta de depósito"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Deposit Check"
+msgstr "Debitar cheque"
+
+#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
 msgid "Deposit Check"
 msgstr "Depositar cheque"
@@ -2776,8 +2792,8 @@ msgstr "Depositar cheque"
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
-msgid "Deposit Check %(check_number)s [%(voucher_number)s]"
-msgstr "Depositar cheque %(check_number)s [%(voucher_number)s]"
+msgid "Deposit Check %(check_number)s"
+msgstr "Depositar cheque %(check_number)s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
@@ -3299,21 +3315,27 @@ msgstr ""
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid ""
-"Error! The selected checks must be in wallet.\n"
-"Check %s is not in wallet"
+"Error! The selected checks must be in Waiting accreditation.\n"
+"Check %s is not in Waiting accreditation"
 msgstr ""
-"¡Error! Los cheques seleccionados deben estar en la cartera.\n"
-"El cheque %s no está en la billetera"
+"¡Error! Los cheques seleccionados deben estar en Esperando acreditación.\n"
+"El cheque %s no está en Esperando acreditación"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid ""
-"Error! The selected checks must to be in                     wallet.\n"
+"Error! The selected checks must be in wallet.\n"
 "Check %s is not in wallet"
 msgstr ""
-"¡Error! Los cheques seleccionados deben estar en la                     cartera.\n"
-"El cheque %s no está en la billetera"
+"¡Error! Los cheques seleccionados deben estar en la cartera.\n"
+"El cheque %s no está en cartera"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid "Error! The selected checks must be in wallet. Checks with issues: %s"
+msgstr "¡Error! Los cheques seleccionados deben estar en cartera. Cheques con error: %s"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
