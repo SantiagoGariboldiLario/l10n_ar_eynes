@@ -102,6 +102,7 @@
                     </group>
                     <group string="Adittional Information">
                         <group>
+                            <field name="company_id" />
                             <field name="clearing" />
                             <field name="signatory" />
                         </group>
@@ -141,6 +142,7 @@
                 <field name="type" />
                 <field name="checkbook_format" />
                 <field name="issued_check_state" string="State" />
+                <field name="company_id" />
             </tree>
         </field>
     </record>
@@ -298,6 +300,7 @@
                     </group>
                     <group string="Other Information">
                         <group>
+                            <field name="company_id" />
                             <field
                                 name="bank_id"
                                 string="Issuing Bank"
@@ -423,6 +426,7 @@
                 <field name="deposit_slip" />
                 <field name="amount" />
                 <field name="third_party_check_state" string="State" />
+                <field name="company_id" />
             </tree>
         </field>
     </record>
