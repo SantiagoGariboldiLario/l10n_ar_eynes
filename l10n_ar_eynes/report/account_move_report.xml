@@ -74,7 +74,7 @@
                                         Venta: </span>
                                     <span t-esc="o.invoice_payment_term_id.name" />
                                 </td>
-                                <td style="position: absolute; left: 550px;">
+                                <td>
                                     <span style="font-size: 18px; font-weight: bold;">Tel.: </span>
                                     <span t-esc="o.partner_id.phone" />
                                     <br />
@@ -371,7 +371,7 @@
                                 </td>
                                 <td
                                     width="33%"
-                                    style="font-weight: bold; font-size: 17px; position: absolute; left: 550px; top: 34px;"
+                                    style="font-weight: bold; font-size: 17px; padding-left: 50px; position: absolute; right: 57px;"
                                 >
                                     <span>N° <span t-esc="denomination" />
                                     </span>
