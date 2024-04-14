@@ -20,6 +20,7 @@ class DepositCheckwizard(models.TransientModel):
         comodel_name='res.partner.bank',
         string='Depositing Bank Account',
         required=True,
+        default=lambda self: self._get_bank_account(),
     )
     date = fields.Date(
         string='Deposit Date',
@@ -37,22 +38,65 @@ class DepositCheckwizard(models.TransientModel):
         journal_id = False
         voucher_obj = self.env['account.payment.order']
         model = self._context.get('active_model', False)
-        if model and model == 'account.third.check':
+        if model and model == 'account.check':
             ids = self.env.context.get('active_ids', [])
-            vouchers = (
-                self.env[model].browse(ids).read(['source_payment_order_id'])
-            )
-            if (
-                vouchers
-                and vouchers[0]
-                and 'source_payment_order_id' in vouchers[0]
-            ):
-                if vouchers[0]['source_payment_order_id']:
-                    payment_order_id = vouchers[0]['source_payment_order_id'][0]
-                    journal_id = voucher_obj.browse(payment_order_id).read(
-                        ['journal_id']
-                    )[0]['journal_id'][0]
+            checks = self.env[model].browse(ids)
+            check_type = checks.mapped('internal_type')
+            if len(check_type) > 1:
+                raise UserError(
+                    _(
+                        "You are trying to deposit issued checks an third party checks at the same time."
+                    )
+                )
+            if check_type[0] == 'third_party':
+                vouchers = checks.read(['source_payment_order_id'])
+                if (
+                    vouchers
+                    and vouchers[0]
+                    and 'source_payment_order_id' in vouchers[0]
+                ):
+                    if vouchers[0]['source_payment_order_id']:
+                        payment_order_id = vouchers[0][
+                            'source_payment_order_id'
+                        ][0]
+                        journal_id = voucher_obj.browse(payment_order_id).read(
+                            ['journal_id']
+                        )[0]['journal_id'][0]
+            else:
+                journals = checks.mapped('journal_id')
+                if len(journals) > 1:
+                    raise UserError(
+                        _(
+                            "You are trying to deposit issued checks from different banks at the same time."
+                        )
+                    )
+                journal_id = journals[0]
+
         return journal_id
+
+    def _get_bank_account(self):
+        bank_account = False
+        model = self._context.get('active_model', False)
+        if model and model == 'account.check':
+            ids = self.env.context.get('active_ids', [])
+            checks = self.env[model].browse(ids)
+            check_type = checks.mapped('internal_type')
+            if len(check_type) > 1:
+                raise UserError(
+                    _(
+                        "You are trying to deposit issued checks an third party checks at the same time."
+                    )
+                )
+            if check_type[0] == 'issued':
+                journals = checks.mapped('journal_id')
+                if len(journals) > 1:
+                    raise UserError(
+                        _(
+                            "You are trying to deposit issued checks from different banks at the same time."
+                        )
+                    )
+                bank_account = journals[0].bank_account_id
+        return bank_account
 
     def view_init(self, fields_list):
         """
