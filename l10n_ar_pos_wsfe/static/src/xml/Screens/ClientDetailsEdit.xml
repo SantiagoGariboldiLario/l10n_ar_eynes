@@ -27,6 +27,26 @@
                 </select>
             </div>
         </xpath>
+        <xpath expr="//div[hasclass('client-details-right')]" position="inside">
+            <div class="client-detail">
+                <span class="label">Doc Type *</span>
+                <select
+                    class="detail client-address-states needsclick"
+                    name="document_type_id"
+                    t-on-change="captureChange"
+                >
+                    <option value="">None</option>
+                    <t t-foreach="env.pos.all_doc_types" t-as="doc_type" t-key="doc_type.id">
+                        <option
+                            t-att-value="doc_type.id"
+                            t-att-selected="props.partner.document_type_id ? ((doc_type.id === props.partner.document_type_id[0]) ? true : undefined) : undefined"
+                        >
+                                <t t-esc="doc_type.name" />
+                        </option>
+                    </t>
+                </select>
+            </div>
+        </xpath>
     </t>
 
 </templates>
