@@ -17,7 +17,6 @@ class ChangeCheckStateWizard(models.TransientModel):
     new_state = fields.Selection(
         selection=[
             ('cancelled', 'Cancelled'),
-            ('rejected', 'Rejected'),
             ('expired', 'Expired'),
         ]
     )
@@ -38,11 +37,6 @@ class ChangeCheckStateWizard(models.TransientModel):
         if not self.issued_check:
             raise UserError(_('You must select a check.'))
 
-        if self.new_state == 'rejected':
-            if self.issued_check.internal_type == 'issued':
-                return self.reject_issued_check()
-            else:
-                return self.reject_third_check()
         if self.new_state == 'cancelled':
             if self.issued_check.internal_type == 'issued':
                 return self.issued_check.cancel_check(internal_type='issued')
@@ -52,16 +46,3 @@ class ChangeCheckStateWizard(models.TransientModel):
                 )
         if self.new_state == 'expired':
             return self.issued_check.expired_check()
-
-    def reject_issued_check(self):
-        if self.issued_check.issued_check_state == 'rejected':
-            raise UserError(_('This check is already rejected'))
-        return self.env.ref('l10n_ar_eynes.reject_issued_check_action')
-
-    def reject_third_check(self):
-        if not (
-            self.issued_check.third_party_check_state
-            in ('deposited', 'delivered')
-        ):
-            raise UserError(_('This check is already rejected'))
-        return self.env.ref('l10n_ar_eynes.reject_third_party_check_action')
