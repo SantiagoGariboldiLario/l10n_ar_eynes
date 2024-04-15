@@ -447,25 +447,31 @@ class AccountMove(models.Model):
         Update tax information based on perceptions.
         """
         if self.is_sale_document() or self.is_purchase_document():
-            perceptions_applied = self.env['account.tax']
-            for perception in self.perception_ids:
-                perceptions_applied += perception.perception_id.tax_id
+            if self.disable_perceptions and self.perception_ids:
+                self.perception_ids = False
+                self.env.user.notify_danger(
+                    message='Perceptions are disable for this invoice.'
+                )
+            else:
+                perceptions_applied = self.env['account.tax']
+                for perception in self.perception_ids:
+                    perceptions_applied += perception.perception_id.tax_id
 
-            for line in self.invoice_line_ids:
-                line.tax_ids = (
-                    line.tax_ids
-                    - line.tax_ids.filtered(
-                        lambda tax: tax.tax_group_id
-                        and tax.tax_group_id.group_type == 'perception'
-                    )
-                ) | perceptions_applied
+                for line in self.invoice_line_ids:
+                    line.tax_ids = (
+                        line.tax_ids
+                        - line.tax_ids.filtered(
+                            lambda tax: tax.tax_group_id
+                            and tax.tax_group_id.group_type == 'perception'
+                        )
+                    ) | perceptions_applied
 
-            if not self.env.context.get('is_reverse'):
-                self.with_context(
-                    override_perceptions=True
-                )._recompute_tax_lines()
+                if not self.env.context.get('is_reverse'):
+                    self.with_context(
+                        override_perceptions=True
+                    )._recompute_tax_lines()
 
-            self._recompute_dynamic_lines()
+                self._recompute_dynamic_lines()
 
     @api.onchange('invoice_date')
     def _onchange_currency_id(self):
