@@ -195,11 +195,30 @@ class DepositCheckwizard(models.TransientModel):
                         'ref': move_ref,
                     }
                 )
+                check_config = self.env['account.check.config'].search(
+                    [('deferred_account_id', '!=', False)], limit=1
+                )
+                if not check_config:
+                    raise UserError(
+                        _(
+                            "There is not check configuration. You need to set an account to do this operation."
+                        )
+                    )
+                debit_account = (
+                    self.bank_account_id.account_id.id
+                    if check.internal_type == 'issued'
+                    else check_config.deferred_account_id.id
+                )
+                credit_account = (
+                    account_check_id
+                    if check.internal_type == 'issued'
+                    else self.bank_account_id.account_id.id
+                )
                 AccountMoveLine.with_context(check_move_validity=False).create(
                     {
                         'name': _('Check Deposit'),
                         # 'centralisation': 'normal',
-                        'account_id': self.bank_account_id.account_id.id,
+                        'account_id': debit_account,
                         'move_id': move_id.id,
                         'journal_id': self.journal_id.id,
                         'date': deposit_date,
@@ -216,7 +235,7 @@ class DepositCheckwizard(models.TransientModel):
                     {
                         'name': _('Check Deposit'),
                         # 'centralisation': 'normal',
-                        'account_id': account_check_id,
+                        'account_id': credit_account,
                         'move_id': move_id.id,
                         'journal_id': self.journal_id.id,
                         'date': deposit_date,
@@ -249,6 +268,6 @@ class DepositCheckwizard(models.TransientModel):
                 # Se postea el asiento llamando a la funcion post de account_move.
                 # TODO: Se podria poner un check en el wizard
                 # para que elijan si postear el asiento o no.
-                move_id.post()
+                move_id._post()
 
         return {'type': 'ir.actions.act_window_close'}
