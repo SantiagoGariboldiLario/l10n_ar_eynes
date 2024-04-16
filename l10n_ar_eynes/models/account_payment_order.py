@@ -2438,7 +2438,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
     taxapp_id = fields.Many2one(
         comodel_name='retention.tax.application', string='Tax Application'
     )
-    reg_code = fields.Integer('Reg. Code')
+    reg_code = fields.Integer('Reg. Code', group_operator=None)
     date_applied = fields.Date(
         'Date Applied',
         help="This is the date of the real application of the retention",
