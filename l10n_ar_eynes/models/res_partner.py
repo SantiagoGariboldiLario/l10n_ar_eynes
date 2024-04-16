@@ -280,6 +280,54 @@ class ResPartner(models.Model):
         if not is_dst_cuit:
             self.dst_cuit_id = False
 
+    def _set_multicompany_account_fiscal_position(
+        self, property_account_position_id
+    ):
+        if property_account_position_id:
+            property_account_position_id = self.env[
+                'account.fiscal.position'
+            ].browse(property_account_position_id)
+            companies = self.env['res.company'].search([]) - self.env.company
+            for company in companies:
+                fiscal_position = (
+                    self.env['account.fiscal.position']
+                    .with_company(company)
+                    .search(
+                        [
+                            ('company_id', '=', company.id),
+                            ('name', '=', property_account_position_id.name),
+                        ]
+                    )
+                )
+                if fiscal_position:
+                    self.env['ir.property'].with_company(company).create(
+                        {
+                            'name': 'property_account_position_id',
+                            'res_id': 'res.partner,' + str(self.id),
+                            'company_id': company.id,
+                            'fields_id': self.env['ir.model.fields']
+                            .search(
+                                [
+                                    ('model', '=', 'res.partner'),
+                                    (
+                                        'relation',
+                                        '=',
+                                        'account.fiscal.position',
+                                    ),
+                                    (
+                                        'name',
+                                        '=',
+                                        'property_account_position_id',
+                                    ),
+                                ]
+                            )
+                            .id,
+                            'value_reference': 'account.fiscal.position,'
+                            + str(fiscal_position.id),
+                            'type': 'many2one',
+                        }
+                    )
+
     def write(self, vals):
         vals = self._parse_vat_string(vals)
         gross_income_ids = vals.get('gross_income_ids', [])
@@ -293,7 +341,12 @@ class ResPartner(models.Model):
 
         if len(self) == 1 and "vat" not in vals:
             vals["vat"] = self.vat
-        return super(ResPartner, self).write(vals)
+
+        res = super(ResPartner, self).write(vals)
+        self._set_multicompany_account_fiscal_position(
+            vals.get('property_account_position_id', False)
+        )
+        return res
 
     @api.model
     def create(self, vals):
@@ -306,7 +359,11 @@ class ResPartner(models.Model):
                             "You must complete 'Type of taxpayer' field on Gross income configuration."
                         )
                     )
-        return super(ResPartner, self).create(vals)
+        res = super(ResPartner, self).create(vals)
+        res._set_multicompany_account_fiscal_position(
+            vals.get('property_account_position_id', False)
+        )
+        return res
 
     def _parse_vat_string(self, vals):
         vat = vals.get('vat')
