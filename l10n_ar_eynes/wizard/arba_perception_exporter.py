@@ -153,6 +153,8 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
         lines = PerceptionTaxLine.browse(perception_ids)
         for line in lines:
             date = str(line.date)
+            date = date.split('-')
+            date = '{}/{}/{}'.format(date[2], date[1], date[0])
 
             voucher_type = self._get_voucher_type(line.invoice_id)
             if voucher_type == 'C':
@@ -181,9 +183,9 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
                 'letra_comprobante': line.invoice_id.denomination,
                 'numero_sucursal': internal_number_split[0],
                 'numero_emision': internal_number_split[1],
-                'monto_imponible': moneyfmt(
-                    Decimal(base) * sign, places=2, ndigits=10, dp=','
-                ),
+                # 'monto_imponible': moneyfmt(
+                #     Decimal(base) * sign, places=2, ndigits=10, dp=','
+                # ),
                 'importe_percepcion': moneyfmt(
                     Decimal(amount) * sign, places=2, ndigits=9, dp=','
                 ),
