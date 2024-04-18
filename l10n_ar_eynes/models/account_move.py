@@ -691,12 +691,6 @@ class AccountMove(models.Model):
             if move.is_sale_document() and move.id:
                 move.validate_denomination()
 
-        posted_moves = super(AccountMove, self)._post(soft=soft)
-        posted_moves._set_perception_date()
-
-        return posted_moves
-
-    def action_post(self):
         sale_invoices = self.filtered(lambda move: move.is_sale_document())
         electronic_invoices = sale_invoices.filtered(
             lambda move: move.fiscal_type == 'electronic'
@@ -710,6 +704,17 @@ class AccountMove(models.Model):
                         )._next()
                     }
                 )
+
+        posted_moves = super(AccountMove, self)._post(soft=soft)
+        posted_moves._set_perception_date()
+
+        return posted_moves
+
+    def action_post(self):
+        sale_invoices = self.filtered(lambda move: move.is_sale_document())
+        electronic_invoices = sale_invoices.filtered(
+            lambda move: move.fiscal_type == 'electronic'
+        )
 
         super(AccountMove, self - electronic_invoices).action_post()
 
