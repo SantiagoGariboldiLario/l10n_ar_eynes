@@ -124,6 +124,13 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
 
     @api.model
     def _get_voucher_type(self, invoice_id):
+        """
+        ARBA TABLE:
+        'F': Factura,
+        'R': Recibo,
+        'C': Nota de crédito
+        'D': Nota de débito
+        """
         res = None
 
         if invoice_id.move_type == 'out_invoice':
@@ -133,10 +140,6 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
                 res = 'F'
         elif invoice_id.move_type == 'out_refund':
             res = 'C'
-
-        if invoice_id.fiscal_type == 'electronic':
-            electronic_invoice = {'C': 'H', 'D': 'I', 'F': 'E'}
-            res = electronic_invoice.get(res)
 
         return res
 
@@ -162,6 +165,7 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
             else:
                 sign = 1
             internal_number_split = line.invoice_id.internal_number.split('-')
+
             cuit = line.partner_id.vat
             if cuit:
                 f_cuit = '{}-{}-{}'.format(cuit[:2], cuit[2:10], cuit[10])
@@ -180,8 +184,8 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
                 'cuit': f_cuit,
                 'fecha_percepcion': date,
                 'tipo_comprobante': voucher_type,
-                'letra_comprobante': line.invoice_id.denomination,
-                'numero_sucursal': internal_number_split[0],
+                'letra_comprobante': line.invoice_id.denomination.upper(),
+                'numero_sucursal': internal_number_split[0][-4:],
                 'numero_emision': internal_number_split[1],
                 # 'monto_imponible': moneyfmt(
                 #     Decimal(base) * sign, places=2, ndigits=10, dp=','
