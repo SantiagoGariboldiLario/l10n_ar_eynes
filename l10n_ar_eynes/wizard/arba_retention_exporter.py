@@ -9,7 +9,8 @@ import binascii
 import codecs
 import itertools
 import logging
-import re
+
+# import re
 import tempfile
 from decimal import Decimal
 
@@ -160,17 +161,19 @@ class ArbaRetentionExporterWizard(models.TransientModel):
 
         for line in retention_data_filtered:
             date = str(line['date'])
+            date = date.split('-')
+            date = '{}/{}/{}'.format(date[2], date[1], date[0])
 
             vat = ''
             _vat = line['partner_vat']
             if _vat:
                 vat = '{}-{}-{}'.format(_vat[:2], _vat[2:10], _vat[10])
 
-            certificate_no = '0000-00000000'
-            certificate = re.search(r'\d{4}-\d{8}$', line['certificate_no'])
-            if certificate:
-                certificate_no = certificate.group(0)
-            certificate_no_split = certificate_no.split('-')
+            # certificate_no = '0000-00000000'
+            # certificate = re.search(r'\d{4}-\d{8}$', line['certificate_no'])
+            # if certificate:
+            #     certificate_no = certificate.group(0)
+            # certificate_no_split = certificate_no.split('-')
 
             line = {
                 'cuit': vat,
@@ -178,11 +181,12 @@ class ArbaRetentionExporterWizard(models.TransientModel):
                 'importe_retencion': moneyfmt(
                     Decimal(line['amount']), places=2, ndigits=8, dp=','
                 ),
-                'numero_emision': certificate_no_split[1],
-                'numero_sucursal': certificate_no_split[0],
+                # 'numero_sucursal': certificate_no_split[0],
+                # 'numero_emision': certificate_no_split[1],
+                'numero_sucursal': '1',
+                'numero_emision': line['certificate_no'],
                 'tipo_operacion': 'A',
             }
-
             fixed_width.update(**line)
             head_regs.append(fixed_width.line)
 
