@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="debit_check_form_view" model="ir.ui.view">
+        <field name="name">debit.check.form.view</field>
+        <field name="model">debit.check.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Debit Checks">
+                <group colspan="8" col="8">
+                    <field name="multichecks" invisible="True" />
+                    <field name="deposit_date" />
+                    <field
+                        name="issued_checks"
+                        widget="many2many_checkboxes"
+                        colspan="8"
+                        attrs="{'invisible': [('multichecks', '=', False)]}"
+                    />
+                    <field name="issued_check_id" attrs="{'invisible': [('multichecks', '=', True)]}" />
+                </group>
+                <footer>
+                    <button
+                        type="object"
+                        string="Debit Checks"
+                        name="button_debit_checks"
+                        class="oe_highlight"
+                        icon="fa-check"
+                    />
+                    <button type="special" special="cancel" string="Cancel" icon="fa-times" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="debit_check_wizard_action" model="ir.actions.act_window">
+        <field name="name">Debit Checks</field>
+        <field name="res_model">debit.check.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="l10n_ar_eynes.model_account_check" />
+        <field name="binding_view_types">list</field>
+        <field name="binding_type">action</field>
+    </record>
+
+    <record id="debit_one_check_wizard_action" model="ir.actions.act_window">
+        <field name="name">Debit Checks</field>
+        <field name="res_model">debit.check.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'one_check': True}</field>
+    </record>
+
+</odoo>
