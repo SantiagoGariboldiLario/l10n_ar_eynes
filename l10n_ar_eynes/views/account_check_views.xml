@@ -65,6 +65,14 @@
                         class="oe_highlight"
                     />
                     <button
+                        name="%(reject_issued_check_action)d"
+                        string="Reject Check"
+                        type="action"
+                        class="oe_highlight"
+                        attrs="
+                            {'invisible' : [('issued_check_state', '=', 'rejected')]}"
+                    />
+                     <button
                         string="Debit Check"
                         name="%(debit_one_check_wizard_action)d"
                         type="action"
@@ -270,7 +278,13 @@
                         attrs="{'invisible': [('internal_type', '=', 'third_party'), ('third_party_check_state','in', ('draft', 'in_wallet'))]}"
                         confirm="You are going to delete an account move. Are you sure?"
                     />
-
+                    <button
+                        name="%(reject_third_party_check_action)d"
+                        string="Reject Check"
+                        type="action"
+                        class="oe_highlight"
+                        attrs="{'invisible' : [('third_party_check_state', 'not in', ('deposited', 'delivered'))]}"
+                    />
                     <field
                         name="third_party_check_state"
                         widget="statusbar"
