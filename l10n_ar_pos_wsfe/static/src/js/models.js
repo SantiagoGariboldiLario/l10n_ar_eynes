@@ -3,7 +3,7 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
 
     var models = require("point_of_sale.models");
 
-    models.load_fields("res.partner", ["property_account_position_id"]);
+    models.load_fields("res.partner", ["property_account_position_id", "document_type_id"]);
 
     models.load_models([
         {
@@ -12,6 +12,14 @@ odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
             fields: [],
             loaded: function (self, fiscal_positions) {
                 self.all_fiscal_positions = fiscal_positions;
+            },
+        },
+        {
+            model: "res.document.type",
+            label: "load_all_doc_types",
+            fields: [],
+            loaded: function (self, doc_types) {
+                self.all_doc_types = doc_types;
             },
         },
     ]);

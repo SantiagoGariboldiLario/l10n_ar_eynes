@@ -20,6 +20,7 @@ class DepositCheckwizard(models.TransientModel):
         comodel_name='res.partner.bank',
         string='Depositing Bank Account',
         required=True,
+        default=lambda self: self._get_bank_account(),
     )
     date = fields.Date(
         string='Deposit Date',
@@ -37,22 +38,65 @@ class DepositCheckwizard(models.TransientModel):
         journal_id = False
         voucher_obj = self.env['account.payment.order']
         model = self._context.get('active_model', False)
-        if model and model == 'account.third.check':
+        if model and model == 'account.check':
             ids = self.env.context.get('active_ids', [])
-            vouchers = (
-                self.env[model].browse(ids).read(['source_payment_order_id'])
-            )
-            if (
-                vouchers
-                and vouchers[0]
-                and 'source_payment_order_id' in vouchers[0]
-            ):
-                if vouchers[0]['source_payment_order_id']:
-                    payment_order_id = vouchers[0]['source_payment_order_id'][0]
-                    journal_id = voucher_obj.browse(payment_order_id).read(
-                        ['journal_id']
-                    )[0]['journal_id'][0]
+            checks = self.env[model].browse(ids)
+            check_type = checks.mapped('internal_type')
+            if len(check_type) > 1:
+                raise UserError(
+                    _(
+                        "You are trying to deposit issued checks an third party checks at the same time."
+                    )
+                )
+            if check_type[0] == 'third_party':
+                vouchers = checks.read(['source_payment_order_id'])
+                if (
+                    vouchers
+                    and vouchers[0]
+                    and 'source_payment_order_id' in vouchers[0]
+                ):
+                    if vouchers[0]['source_payment_order_id']:
+                        payment_order_id = vouchers[0][
+                            'source_payment_order_id'
+                        ][0]
+                        journal_id = voucher_obj.browse(payment_order_id).read(
+                            ['journal_id']
+                        )[0]['journal_id'][0]
+            else:
+                journals = checks.mapped('journal_id')
+                if len(journals) > 1:
+                    raise UserError(
+                        _(
+                            "You are trying to deposit issued checks from different banks at the same time."
+                        )
+                    )
+                journal_id = journals[0]
+
         return journal_id
+
+    def _get_bank_account(self):
+        bank_account = False
+        model = self._context.get('active_model', False)
+        if model and model == 'account.check':
+            ids = self.env.context.get('active_ids', [])
+            checks = self.env[model].browse(ids)
+            check_type = checks.mapped('internal_type')
+            if len(check_type) > 1:
+                raise UserError(
+                    _(
+                        "You are trying to deposit issued checks an third party checks at the same time."
+                    )
+                )
+            if check_type[0] == 'issued':
+                journals = checks.mapped('journal_id')
+                if len(journals) > 1:
+                    raise UserError(
+                        _(
+                            "You are trying to deposit issued checks from different banks at the same time."
+                        )
+                    )
+                bank_account = journals[0].bank_account_id
+        return bank_account
 
     def view_init(self, fields_list):
         """
@@ -195,11 +239,30 @@ class DepositCheckwizard(models.TransientModel):
                         'ref': move_ref,
                     }
                 )
+                check_config = self.env['account.check.config'].search(
+                    [('deferred_account_id', '!=', False)], limit=1
+                )
+                if not check_config:
+                    raise UserError(
+                        _(
+                            "There is not check configuration. You need to set an account to do this operation."
+                        )
+                    )
+                debit_account = (
+                    self.bank_account_id.account_id.id
+                    if check.internal_type == 'issued'
+                    else check_config.deferred_account_id.id
+                )
+                credit_account = (
+                    account_check_id
+                    if check.internal_type == 'issued'
+                    else self.bank_account_id.account_id.id
+                )
                 AccountMoveLine.with_context(check_move_validity=False).create(
                     {
                         'name': _('Check Deposit'),
                         # 'centralisation': 'normal',
-                        'account_id': self.bank_account_id.account_id.id,
+                        'account_id': debit_account,
                         'move_id': move_id.id,
                         'journal_id': self.journal_id.id,
                         'date': deposit_date,
@@ -216,7 +279,7 @@ class DepositCheckwizard(models.TransientModel):
                     {
                         'name': _('Check Deposit'),
                         # 'centralisation': 'normal',
-                        'account_id': account_check_id,
+                        'account_id': credit_account,
                         'move_id': move_id.id,
                         'journal_id': self.journal_id.id,
                         'date': deposit_date,
@@ -249,6 +312,6 @@ class DepositCheckwizard(models.TransientModel):
                 # Se postea el asiento llamando a la funcion post de account_move.
                 # TODO: Se podria poner un check en el wizard
                 # para que elijan si postear el asiento o no.
-                move_id.post()
+                move_id._post()
 
         return {'type': 'ir.actions.act_window_close'}

@@ -11,9 +11,14 @@ odoo.define("l10n_ar_pos_wsfe.ClientDetailsEdit", function (require) {
             constructor() {
                 super(...arguments);
                 this.intFields.push("property_account_position_id");
+                this.intFields.push("document_type_id");
+                this.props.partner.state_id = [];
+                this.props.partner.country_id = [];
                 const partner = this.props.partner;
                 this.changes.property_account_position_id =
                     partner.property_account_position_id && partner.property_account_position_id[0];
+                this.changes.vat = partner.vat && partner.vat[0];
+                this.changes.document_type_id = partner.document_type_id && partner.document_type_id[0];
             }
 
             saveChanges() {
@@ -23,6 +28,16 @@ odoo.define("l10n_ar_pos_wsfe.ClientDetailsEdit", function (require) {
                 ) {
                     return this.showPopup("ErrorPopup", {
                         title: _t("Fiscal Position Is Required"),
+                    });
+                }
+                if (!this.props.partner.vat && !this.changes.vat) {
+                    return this.showPopup("ErrorPopup", {
+                        title: _t("NIF Is Required"),
+                    });
+                }
+                if (!this.props.partner.document_type_id && !this.changes.document_type_id) {
+                    return this.showPopup("ErrorPopup", {
+                        title: _t("Doc type Is Required"),
                     });
                 }
                 return super.saveChanges();

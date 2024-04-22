@@ -11,7 +11,6 @@
                     <group>
                         <field name="company_id" invisible="1" />
                         <field name="bank_account_id" domain="[('company_id','=',company_id)]" />
-                        <field name="journal_id" domain="[('type','=','bank')]" />
                     </group>
                     <group>
                         <field name="date" />
@@ -32,16 +31,6 @@
         <field name="res_model">deposit.check.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-    </record>
-
-    <record id="deposit_check_action_tree_view" model="ir.actions.act_window">
-        <field name="name">Deposit check</field>
-        <field name="res_model">deposit.check.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
-        <field name="binding_model_id" ref="l10n_ar_eynes.model_account_check" />
-        <field name="binding_view_types">list</field>
-        <field name="binding_type">action</field>
     </record>
 
 </odoo>

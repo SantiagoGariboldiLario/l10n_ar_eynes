@@ -8,7 +8,7 @@ from io import BytesIO
 
 import qrcode
 
-from odoo import SUPERUSER_ID, _, api, fields, models, registry
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import file_open
 
@@ -447,25 +447,31 @@ class AccountMove(models.Model):
         Update tax information based on perceptions.
         """
         if self.is_sale_document() or self.is_purchase_document():
-            perceptions_applied = self.env['account.tax']
-            for perception in self.perception_ids:
-                perceptions_applied += perception.perception_id.tax_id
+            if self.disable_perceptions and self.perception_ids:
+                self.perception_ids = False
+                self.env.user.notify_danger(
+                    message='Perceptions are disable for this invoice.'
+                )
+            else:
+                perceptions_applied = self.env['account.tax']
+                for perception in self.perception_ids:
+                    perceptions_applied += perception.perception_id.tax_id
 
-            for line in self.invoice_line_ids:
-                line.tax_ids = (
-                    line.tax_ids
-                    - line.tax_ids.filtered(
-                        lambda tax: tax.tax_group_id
-                        and tax.tax_group_id.group_type == 'perception'
-                    )
-                ) | perceptions_applied
+                for line in self.invoice_line_ids:
+                    line.tax_ids = (
+                        line.tax_ids
+                        - line.tax_ids.filtered(
+                            lambda tax: tax.tax_group_id
+                            and tax.tax_group_id.group_type == 'perception'
+                        )
+                    ) | perceptions_applied
 
-            if not self.env.context.get('is_reverse'):
-                self.with_context(
-                    override_perceptions=True
-                )._recompute_tax_lines()
+                if not self.env.context.get('is_reverse'):
+                    self.with_context(
+                        override_perceptions=True
+                    )._recompute_tax_lines()
 
-            self._recompute_dynamic_lines()
+                self._recompute_dynamic_lines()
 
     @api.onchange('invoice_date')
     def _onchange_currency_id(self):
@@ -685,12 +691,6 @@ class AccountMove(models.Model):
             if move.is_sale_document() and move.id:
                 move.validate_denomination()
 
-        posted_moves = super(AccountMove, self)._post(soft=soft)
-        posted_moves._set_perception_date()
-
-        return posted_moves
-
-    def action_post(self):
         sale_invoices = self.filtered(lambda move: move.is_sale_document())
         electronic_invoices = sale_invoices.filtered(
             lambda move: move.fiscal_type == 'electronic'
@@ -705,9 +705,22 @@ class AccountMove(models.Model):
                     }
                 )
 
+        posted_moves = super(AccountMove, self)._post(soft=soft)
+        posted_moves._set_perception_date()
+
+        return posted_moves
+
+    def action_post(self):
+        sale_invoices = self.filtered(lambda move: move.is_sale_document())
+        electronic_invoices = sale_invoices.filtered(
+            lambda move: move.fiscal_type == 'electronic'
+        )
+
         super(AccountMove, self - electronic_invoices).action_post()
 
-        return electronic_invoices._validate_electronic_invoices()
+        return electronic_invoices.with_context(
+            force_pos_payment=True
+        )._validate_electronic_invoices()
 
     def validate_period(self):
         date = self.date or self.invoice_date or fields.Date.context_today(self)
@@ -1312,60 +1325,63 @@ class AccountMove(models.Model):
             )
         self.journal_id = pos_ar_id
 
+    def _create_ws_request(self):
+        request = self.env['ws.request'].create(
+            {
+                'nregs': len(self),
+            }
+        )
+        return request.id
+
     def _validate_electronic_invoices(self, soft=False):
         if self:
-            self.env.cr.commit()  # pylint: disable=invalid-commit
+            request_id = self._create_ws_request()
+            ws = self._get_ws_conf()
             posted_moves = self.env['account.move']
-            with registry(self.env.cr.dbname).cursor() as new_cr:
-                env = api.Environment(new_cr, SUPERUSER_ID, self.env.context)
-                # Make sure to write all records with new cursor
-                # to avoid concurrency update error.
-                new_self = self.with_env(env)
-
-                request = env['ws.request'].create(
-                    {
-                        'nregs': len(self),
-                    }
-                )
-                new_cr.commit()  # pylint: disable=invalid-commit
-
-                ws = new_self._get_ws_conf()
-
-                for inv in new_self:
-                    if inv._check_must_be_fce():
-                        inv._ensure_fce_values()
+            for inv in self:
+                if inv._check_must_be_fce():
+                    inv._ensure_fce_values()
+                try:
+                    ws.send_invoice_to_afip(inv, request_id)
+                except Exception:
+                    _logger.error(
+                        _("Error with AFIP trying to validate invoice.")
+                    )
+                else:
                     posted = inv._post(soft=soft)
                     if posted:
-                        try:
-                            ws.send_invoice_to_afip(inv, request)
-                        except Exception:
-                            new_cr.rollback()
-                        else:
-                            posted_moves += posted
-                            new_cr.commit()  # pylint: disable=invalid-commit
+                        posted_moves += posted
+                        order = self.env['pos.order'].search(
+                            [('account_move', '=', posted.id)]
+                        )
+                        if order and self.env.context.get(
+                            'force_pos_payment', False
+                        ):
+                            order._apply_invoice_payments()
 
-                errors = self - posted_moves
-                if errors:
-                    context = dict(self._context or {})
-                    context["message"] = _(
-                        "Error trying to validate electronic invoice with ids [%(ids)s].\n"
-                        "Check WS Requests page or go to 'Informs -> Ws Requests -> %(name)s'.",
-                        ids=', '.join(str(inv_id.id) for inv_id in errors),
-                        name=request.name,
-                    )
-                    view = self.env.ref("popup_messages.message_wizard")
-                    view_id = view and view.id or False
+            errors = self - posted_moves
+            if errors:
+                request = self.env['ws.request'].browse(request_id)
+                context = dict(self._context or {})
+                context["message"] = _(
+                    "Error trying to validate electronic invoice with ids [%(ids)s].\n"
+                    "Check WS Requests page or go to 'Informs -> Ws Requests -> %(name)s'.",
+                    ids=', '.join(str(inv_id.id) for inv_id in errors),
+                    name=request.name,
+                )
+                view = self.env.ref("popup_messages.message_wizard")
+                view_id = view and view.id or False
 
-                    return {
-                        'name': _('WSFE Error'),
-                        'type': 'ir.actions.act_window',
-                        'view_mode': 'form',
-                        'res_model': 'message.wizard',
-                        'views': [(view_id, 'form')],
-                        'view_id': view_id,
-                        'target': 'new',
-                        'context': context,
-                    }
+                return {
+                    'name': _('WSFE Error'),
+                    'type': 'ir.actions.act_window',
+                    'view_mode': 'form',
+                    'res_model': 'message.wizard',
+                    'views': [(view_id, 'form')],
+                    'view_id': view_id,
+                    'target': 'new',
+                    'context': context,
+                }
         return True
 
     def get_voucher_type(self):
