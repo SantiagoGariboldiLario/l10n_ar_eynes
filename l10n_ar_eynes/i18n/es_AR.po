@@ -5486,7 +5486,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__paid
 msgid "Paid"
-msgstr "Pagado"
+msgstr "Debitado"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
