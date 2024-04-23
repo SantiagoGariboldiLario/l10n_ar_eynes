@@ -1,6 +1,6 @@
 import time
 
-from odoo import _, api, fields, models
+from odoo import _, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -9,18 +9,10 @@ class DepositCheckwizard(models.TransientModel):
     _description = 'Deposit check wizard'
 
     voucher_number = fields.Char(string='Voucher Number', size=32)
-    journal_id = fields.Many2one(
-        comodel_name='account.journal',
-        string='Depositing Bank',
-        required=True,
-        domain=[('type', 'in', ('cash', 'bank'))],
-        default=lambda self: self._get_journal(),
-    )
     bank_account_id = fields.Many2one(
         comodel_name='res.partner.bank',
         string='Depositing Bank Account',
         required=True,
-        default=lambda self: self._get_bank_account(),
     )
     date = fields.Date(
         string='Deposit Date',
@@ -33,70 +25,6 @@ class DepositCheckwizard(models.TransientModel):
         required=True,
         default=lambda self: self.env.user.company_id.id,
     )
-
-    def _get_journal(self):
-        journal_id = False
-        voucher_obj = self.env['account.payment.order']
-        model = self._context.get('active_model', False)
-        if model and model == 'account.check':
-            ids = self.env.context.get('active_ids', [])
-            checks = self.env[model].browse(ids)
-            check_type = checks.mapped('internal_type')
-            if len(check_type) > 1:
-                raise UserError(
-                    _(
-                        "You are trying to deposit issued checks an third party checks at the same time."
-                    )
-                )
-            if check_type[0] == 'third_party':
-                vouchers = checks.read(['source_payment_order_id'])
-                if (
-                    vouchers
-                    and vouchers[0]
-                    and 'source_payment_order_id' in vouchers[0]
-                ):
-                    if vouchers[0]['source_payment_order_id']:
-                        payment_order_id = vouchers[0][
-                            'source_payment_order_id'
-                        ][0]
-                        journal_id = voucher_obj.browse(payment_order_id).read(
-                            ['journal_id']
-                        )[0]['journal_id'][0]
-            else:
-                journals = checks.mapped('journal_id')
-                if len(journals) > 1:
-                    raise UserError(
-                        _(
-                            "You are trying to deposit issued checks from different banks at the same time."
-                        )
-                    )
-                journal_id = journals[0]
-
-        return journal_id
-
-    def _get_bank_account(self):
-        bank_account = False
-        model = self._context.get('active_model', False)
-        if model and model == 'account.check':
-            ids = self.env.context.get('active_ids', [])
-            checks = self.env[model].browse(ids)
-            check_type = checks.mapped('internal_type')
-            if len(check_type) > 1:
-                raise UserError(
-                    _(
-                        "You are trying to deposit issued checks an third party checks at the same time."
-                    )
-                )
-            if check_type[0] == 'issued':
-                journals = checks.mapped('journal_id')
-                if len(journals) > 1:
-                    raise UserError(
-                        _(
-                            "You are trying to deposit issued checks from different banks at the same time."
-                        )
-                    )
-                bank_account = journals[0].bank_account_id
-        return bank_account
 
     def view_init(self, fields_list):
         """
@@ -113,15 +41,6 @@ class DepositCheckwizard(models.TransientModel):
                         _(
                             "Error! The selected checks must be in wallet.\n"
                             "Check %s is not in wallet"
-                        )
-                        % (check.number)
-                    )
-            else:
-                if check.issued_check_state != 'waiting_accreditation':
-                    raise UserError(
-                        _(
-                            "Error! The selected checks must be in Waiting accreditation.\n"
-                            "Check %s is not in Waiting accreditation"
                         )
                         % (check.number)
                     )
@@ -151,17 +70,14 @@ class DepositCheckwizard(models.TransientModel):
             _('Error! Bad Treasury configuration for this Company!')
         )
 
-    @api.onchange('bank_account_id')
-    def onchange_bank_account(self):
-        if not self.bank_account_id:
-            return
-        if self.bank_account_id.journal_id:
-            self.journal_id = self.bank_account_id.journal_id.id
-
     def _check_validations(self, checks, deposit_date):
         third_party = checks.filtered(
             lambda check: check.internal_type == 'third_party'
         )
+
+        if checks - third_party:
+            raise UserError(_("You can't do this operation for issued checks."))
+
         # Filter checks that are third-party and not in wallet
         third_party_not_in_wallet = third_party.filtered(
             lambda check: check.third_party_check_state != 'in_wallet'
@@ -178,9 +94,6 @@ class DepositCheckwizard(models.TransientModel):
         error_checks = third_party.filtered(
             lambda check: not check.payment_date
             or check.payment_date > deposit_date
-        ) + checks.filtered(
-            lambda check: check.type == 'deferred'
-            and (not check.payment_date or check.payment_date > deposit_date)
         )
         if error_checks:
             raise UserError(
@@ -233,7 +146,7 @@ class DepositCheckwizard(models.TransientModel):
                 move_id = self.env['account.move'].create(
                     {
                         'name': '/',
-                        'journal_id': self.journal_id.id,
+                        'journal_id': self.bank_account_id.journal_id.id,
                         'state': 'draft',
                         'date': deposit_date,
                         'ref': move_ref,
@@ -248,23 +161,14 @@ class DepositCheckwizard(models.TransientModel):
                             "There is not check configuration. You need to set an account to do this operation."
                         )
                     )
-                debit_account = (
-                    self.bank_account_id.account_id.id
-                    if check.internal_type == 'issued'
-                    else check_config.deferred_account_id.id
-                )
-                credit_account = (
-                    account_check_id
-                    if check.internal_type == 'issued'
-                    else self.bank_account_id.account_id.id
-                )
+
                 AccountMoveLine.with_context(check_move_validity=False).create(
                     {
                         'name': _('Check Deposit'),
                         # 'centralisation': 'normal',
-                        'account_id': debit_account,
+                        'account_id': self.bank_account_id.account_id.id,
                         'move_id': move_id.id,
-                        'journal_id': self.journal_id.id,
+                        'journal_id': self.bank_account_id.journal_id.id,
                         'date': deposit_date,
                         'debit': check.amount,
                         'credit': 0.0,
@@ -279,9 +183,9 @@ class DepositCheckwizard(models.TransientModel):
                     {
                         'name': _('Check Deposit'),
                         # 'centralisation': 'normal',
-                        'account_id': credit_account,
+                        'account_id': account_check_id,
                         'move_id': move_id.id,
-                        'journal_id': self.journal_id.id,
+                        'journal_id': self.bank_account_id.journal_id.id,
                         'date': deposit_date,
                         'debit': 0.0,
                         'credit': check.amount,
@@ -292,16 +196,6 @@ class DepositCheckwizard(models.TransientModel):
                     check.write(
                         {
                             'third_party_check_state': 'deposited',
-                            'deposit_bank_id': self.bank_account_id.id,
-                            'deposit_date': deposit_date,
-                            'deposit_slip': self.voucher_number,
-                            'deposit_move_id': move_id.id,
-                        }
-                    )
-                else:
-                    check.write(
-                        {
-                            'issued_check_state': 'paid',
                             'deposit_bank_id': self.bank_account_id.id,
                             'deposit_date': deposit_date,
                             'deposit_slip': self.voucher_number,
