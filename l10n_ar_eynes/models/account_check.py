@@ -255,11 +255,11 @@ class AccountCheck(models.Model):
         comodel_name='account.move', string='Clearance Account Move'
     )
     accredited = fields.Boolean(
-        string='Accredited', compute='_compute_accredit_state'
+        string='Debited', compute='_compute_debit_state'
     )
 
     @api.depends('clearance_move_id')
-    def _compute_accredit_state(self):
+    def _compute_debit_state(self):
         for check in self:
             check.accredited = False
             if check.internal_type == 'issued':
@@ -268,16 +268,18 @@ class AccountCheck(models.Model):
                 else:
                     check.accredited = False
 
-    def accredit_checks(self):
-        """method for checks accreditation"""
+    def debit_checks(self, date):
+        """method for checks debitation"""
+        AccountCheckConfig = self.env['account.check.config']
+        AccountMoveLine = self.env['account.move.line']
+
         for check in self:
             if check.issued_check_state != "waiting_accreditation":
                 raise ValidationError(
-                    _("Check %s can't be accredited!") % self.number
+                    _("Check %s can't be debited!") % self.number
                 )
 
         for check in self:
-            AccountCheckConfig = self.env['account.check.config']
             def_check_account = AccountCheckConfig.search(
                 [('company_id', '=', self.env.user.company_id.id)]
             ).deferred_account_id
@@ -291,9 +293,6 @@ class AccountCheck(models.Model):
                     )
                 )
 
-            current_date = time.strftime('%Y-%m-%d')
-
-            AccountMoveLine = self.env['account.move.line']
             name_ref = 'Clearance Check ' + check.number
             move_vals = {
                 'ref': name_ref,
@@ -306,7 +305,7 @@ class AccountCheck(models.Model):
             # Creamos la línea contable que iguala el pago del cheque
             check_move_line_vals = {
                 'journal_id': def_check_journal.id,
-                'date': current_date,
+                'date': date,
                 'name': name_ref,
                 'account_id': def_check_account.id,
                 'debit': check.amount,
@@ -323,17 +322,17 @@ class AccountCheck(models.Model):
                 # solo si tiene referenciada una chequera (checkbook_id)
                 bank_move_line_vals = {
                     'journal_id': def_check_journal.id,
-                    'date': current_date,
+                    'date': date,
                     'name': name_ref,
-                    'account_id': self.checkbook_id.bank_account_id.account_id.id,
-                    'credit': self.amount,
+                    'account_id': check.checkbook_id.bank_account_id.account_id.id,
+                    'credit': check.amount,
                     'move_id': move_id.id,
                 }
 
                 AccountMoveLine.with_context(check_move_validity=False).create(
                     bank_move_line_vals
                 )
-
+                move_id._post()
                 # move_lines_to_reconcile = []
                 # payment_move_line = move_line_obj.search([
                 #     ('issued_check_id', '=', check.id)])
@@ -342,7 +341,13 @@ class AccountCheck(models.Model):
                 # reconcile_recordset = move_line_obj.browse(move_lines_to_reconcile)
                 # reconcile_recordset.reconcile()
 
-        return self.write({"issued_check_state": "issued"})
+            check.write(
+                {
+                    'issued_check_state': 'paid',
+                    'deposit_date': date,
+                    'deposit_bank_id': check.checkbook_id.bank_account_id.id,
+                }
+            )
 
     def break_conciliation(self):
         for check in self.filtered(lambda rec: rec.internal_type == 'issued'):
@@ -368,7 +373,7 @@ class AccountCheck(models.Model):
         # Buscamos la cuenta contable para el asiento del cheque
         # Esta cuenta se corresponde con la cuenta de banco de donde
         # pertenece el cheque
-        if self.type == 'deferred':
+        if self.type in ['common', 'deferred']:
             # Buscamos la configuracion de cheques
             check_config_obj = self.env['account.check.config']
             config = check_config_obj.search(

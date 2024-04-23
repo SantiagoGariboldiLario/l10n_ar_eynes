@@ -9,7 +9,7 @@ from datetime import datetime
 from pyafipws.wsfev1 import WSFEv1
 from pysimplesoap.client import SoapFault
 
-from odoo import SUPERUSER_ID, _, api, fields, models, registry
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 from ..wsfetools.wsfe_helper import WSFEParser
@@ -392,7 +392,7 @@ class WsfeConfig(models.Model):
             'currency_rate': data['MonCotiz'],
         }
 
-    def send_invoice_to_afip(self, invoice, request):
+    def send_invoice_to_afip(self, invoice, request_id):
         self.ensure_one()
         if not self.cuit:
             raise UserError(_("Please configure the company VAT!"))
@@ -433,7 +433,7 @@ class WsfeConfig(models.Model):
         finally:
             req_vals.update(
                 {
-                    'request_id': request.id,
+                    'request_id': request_id,
                 }
             )
 
@@ -535,11 +535,9 @@ class WsfeConfig(models.Model):
                 )
             _logger.info("Transaction with AFIP finished.")
 
-        with registry(self.env.cr.dbname).cursor() as new_cr:
-            env = api.Environment(new_cr, SUPERUSER_ID, self.env.context)
-            env['ws.request.detail'].create(req_vals)
-            _logger.info("Request details saved.")
-            new_cr.commit()  # pylint: disable=invalid-commit
+        self.env['ws.request.detail'].create(req_vals)
+        _logger.info("Request details saved.")
+        self.env.cr.commit()  # pylint: disable=invalid-commit
 
         if error_msg or ws.Resultado != "A":
             raise UserError(error_msg)
