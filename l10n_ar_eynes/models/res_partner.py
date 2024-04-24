@@ -303,6 +303,7 @@ class ResPartner(models.Model):
                     Property = self.env['ir.property'].with_company(company)
                     property_account_position_field_id = (
                         self.env['ir.model.fields']
+                        .sudo()
                         .search(
                             [
                                 ('model', '=', 'res.partner'),
