@@ -300,7 +300,9 @@ class ResPartner(models.Model):
                     )
                 )
                 if fiscal_position:
-                    Property = self.env['ir.property'].with_company(company)
+                    Property = (
+                        self.env['ir.property'].sudo().with_company(company)
+                    )
                     property_account_position_field_id = (
                         self.env['ir.model.fields']
                         .sudo()
