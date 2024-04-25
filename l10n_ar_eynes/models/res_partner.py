@@ -315,37 +315,42 @@ class ResPartner(models.Model):
                         )
                         .id
                     )
-                    prev_property = Property.search(
-                        [
-                            ('company_id', '=', company.id),
-                            ('name', '=', 'property_account_position_id'),
-                            ('res_id', '=', 'res.partner,' + str(self.id)),
-                            (
-                                'fields_id',
-                                '=',
-                                property_account_position_field_id,
-                            ),
-                        ]
-                    )
-                    if prev_property:
-                        prev_property.write(
-                            {
-                                'value_reference': 'account.fiscal.position,'
-                                + str(fiscal_position.id),
-                            }
+                    for partner in self:
+                        prev_property = Property.search(
+                            [
+                                ('company_id', '=', company.id),
+                                ('name', '=', 'property_account_position_id'),
+                                (
+                                    'res_id',
+                                    '=',
+                                    'res.partner,' + str(partner.id),
+                                ),
+                                (
+                                    'fields_id',
+                                    '=',
+                                    property_account_position_field_id,
+                                ),
+                            ]
                         )
-                    else:
-                        Property.create(
-                            {
-                                'name': 'property_account_position_id',
-                                'res_id': 'res.partner,' + str(self.id),
-                                'company_id': company.id,
-                                'fields_id': property_account_position_field_id,
-                                'value_reference': 'account.fiscal.position,'
-                                + str(fiscal_position.id),
-                                'type': 'many2one',
-                            }
-                        )
+                        if prev_property:
+                            prev_property.write(
+                                {
+                                    'value_reference': 'account.fiscal.position,'
+                                    + str(fiscal_position.id),
+                                }
+                            )
+                        else:
+                            Property.create(
+                                {
+                                    'name': 'property_account_position_id',
+                                    'res_id': 'res.partner,' + str(partner.id),
+                                    'company_id': company.id,
+                                    'fields_id': property_account_position_field_id,
+                                    'value_reference': 'account.fiscal.position,'
+                                    + str(fiscal_position.id),
+                                    'type': 'many2one',
+                                }
+                            )
 
     def write(self, vals):
         vals = self._parse_vat_string(vals)
