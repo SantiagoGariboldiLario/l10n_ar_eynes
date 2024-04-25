@@ -9192,6 +9192,15 @@ msgid "This invoice was already entered."
 msgstr "Esta factura ya estaba ingresada."
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid ""
+"This invoice: %(name)s [id: %(id)s] has been informed to AFIP. You cannot "
+"validate it again. Try to syncronize it using the wizard from Action menu."
+msgstr "Esta factura: %(name)s [id: %(id)s] ya ha sido informada a AFIP. No la "
+"puede validar nuevamente. Pruebe sincronizarla usando el asistente desde el menú de Acción."
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_order_retention_line__date_applied
 msgid "This is the date of the real application of the retention"
 msgstr "Esta es la fecha de la aplicación real de la retención."
@@ -10127,27 +10136,6 @@ msgstr ""
 "cierre del diario contable"
 
 #. module: l10n_ar_eynes
-#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
-#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
-#, python-format
-msgid ""
-"You are trying to deposit issued checks an third party checks at the same "
-"time."
-msgstr ""
-"Está tratando de debitar cheques propios y depositar cheque de terceros al"
-" mismo tiempo"
-
-#. module: l10n_ar_eynes
-#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
-#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
-#, python-format
-msgid ""
-"You are trying to deposit issued checks from different banks at the same "
-"time."
-msgstr ""
-"Está tratando de debitar cheques propios de diferentes bancos al mismo tiempo."
-
-#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_cancel_picking_done_form
 msgid ""
 "You can cancel actual delivery and create a new one with same data to "
@@ -10155,6 +10143,30 @@ msgid ""
 msgstr ""
 "Puede cancelar la entrega actual y crear una nueva con los mismos datos para "
 "entregar los productos correctos. La nueva será renumerada."
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid ""
+"You can't cancel an electronic invoice that seems to be informed to AFIP. "
+"Try to syncronize it using the wizard from Action menu."
+msgstr "No puede cancelar una factura electrónica que parece haber sido informada a AFIP. "
+"Pruebe sincronizarla usando el asistende desde el menú de Acción."
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+#, python-format
+msgid "You can't do this operation for issued checks."
+msgstr "No puedes realizar esta acción para cheques emitidos."
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid ""
+"You can't set to Draft an electronic invoice that seems to be informed to "
+"AFIP. Try to syncronize it using the wizard from Action menu."
+msgstr "No puede restablecer a Borrador una factura electrónica que parece haber sido informada a AFIP. "
+"Pruebe sincronizarla usando el asistende desde el menú de Acción."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
