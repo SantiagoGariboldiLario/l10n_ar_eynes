@@ -4,6 +4,7 @@
 ##############################################################################
 
 import json
+import re
 import time
 
 from odoo import _, api, fields, models
@@ -69,10 +70,12 @@ class WsfeSinchronizeCoucher(models.TransientModel):
 
     @api.onchange('voucher_number')
     def change_voucher_number(self):
-        invoice_model = self.env['account.move']
+        AccountMove = self.env['account.move']
 
         voucher_type = self.voucher_type.afip_code
-        pos = int(self.pos_id.code)
+        pos = self.pos_id.code
+        if pos:
+            pos = int(re.sub("[^0-9]", "", pos))
         number = self.voucher_number
 
         if not voucher_type or not pos or not number:
@@ -120,9 +123,6 @@ class WsfeSinchronizeCoucher(models.TransientModel):
         else:
             doc_number = [self.document_number]
 
-        if invoice_model.search([('cae', '=', self.cae)]):
-            raise UserError(_('The voucher is already related to an invoice'))
-
         domain = [
             ('amount_total', '=', self.amount_total),
             ('amount_exempt', '=', self.amount_exempt),
@@ -131,7 +131,13 @@ class WsfeSinchronizeCoucher(models.TransientModel):
         ]
         if document_type and document_type.afip_code != '99':
             domain.append(('partner_id.vat', 'in', doc_number))
-        invoice_ids = invoice_model.search(domain)
+        invoice_ids = AccountMove.search(domain)
+
+        if AccountMove.search(
+            [('cae', '=', self.cae), ('id', 'not in', invoice_ids.ids)]
+        ):
+            raise UserError(_('The voucher is already related to an invoice'))
+
         if len(invoice_ids) == 1:
             self.invoice_id = invoice_ids and invoice_ids[0]
         else:
@@ -149,7 +155,9 @@ class WsfeSinchronizeCoucher(models.TransientModel):
                 _("WSFE Error!\n" "Sinchronize process is not correct!")
             )
 
-        pos = int(self.pos_id.code)
+        pos = self.pos_id.code
+        if pos:
+            pos = int(re.sub("[^0-9]", "", pos))
         number = self.voucher_number
         date_invoice = self.date_invoice
         invoice.wsfe_relate_invoice(
