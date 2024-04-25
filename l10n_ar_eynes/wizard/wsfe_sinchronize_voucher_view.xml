@@ -17,8 +17,8 @@
                     <group>
                     </group>
                 </group>
-                <group string="Respuesta AFIP">
-                    <!-- <group> -->
+                <field name="infook" invisible="1" />
+                <group string="Respuesta AFIP" attrs="{'invisible': [('infook','=',False)]}">
                         <group>
                             <field name="document_type" />
                             <field name="document_number" string="Documento" />
@@ -36,15 +36,17 @@
                             <!--<field name="amount_untaxed"/>-->
                             <!--<field name="currency"/>-->
                         </group>
-                    <!-- </group> -->
                 </group>
-                <field name="infook" invisible="1" />
+                <group string="Mensaje de error" attrs="{'invisible': [('infook','=',True)]}">
+                    <field name="error_msg" />
+                </group>
                 <group
                     name="invoice"
                     string="Invoice Relationship"
                     attrs="{'invisible': [('infook','=',False)]}"
                 >
-                    <field name="invoice_id" />
+                    <field name="invoice_id_domain" invisible="1" />
+                    <field name="invoice_id" domain="invoice_id_domain" />
                 </group>
                 <footer>
                     <button name="relate_invoice" string="Sincronizar" type="object" class="oe_highlight" />
