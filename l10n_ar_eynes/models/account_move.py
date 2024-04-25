@@ -740,6 +740,35 @@ class AccountMove(models.Model):
                 )
             )
 
+    def _check_electronic_invoice_informed_before(self):
+        if self.fiscal_type == 'internal':
+            return False
+        if self.cae or self.cae_due_date:
+            return True
+        return False
+
+    def button_cancel(self):
+        if self._check_electronic_invoice_informed_before():
+            raise UserError(
+                _(
+                    "You can't cancel an electronic invoice that seems to be informed to AFIP. "
+                    "Try to syncronize it using the wizard from Action menu."
+                )
+            )
+
+        return super(AccountMove, self).button_cancel()
+
+    def button_draft(self):
+        if self._check_electronic_invoice_informed_before():
+            raise UserError(
+                _(
+                    "You can't set to Draft an electronic invoice that seems to be informed to AFIP. "
+                    "Try to syncronize it using the wizard from Action menu."
+                )
+            )
+
+        return super(AccountMove, self).button_draft()
+
     def validate_denomination(self):
         if not self.denomination or self.denomination == 'not_defined':
             raise ValidationError(
@@ -753,7 +782,11 @@ class AccountMove(models.Model):
             AccountMove, self - sale_invoices
         )._compute_show_reset_to_draft_button()
         for move in sale_invoices:
-            move.show_reset_to_draft_button = False if move.cae else True
+            move.show_reset_to_draft_button = (
+                False
+                if move._check_electronic_invoice_informed_before()
+                else True
+            )
         return
 
     @api.model_create_multi
@@ -1339,25 +1372,44 @@ class AccountMove(models.Model):
             ws = self._get_ws_conf()
             posted_moves = self.env['account.move']
             for inv in self:
-                if inv._check_must_be_fce():
-                    inv._ensure_fce_values()
-                try:
-                    ws.send_invoice_to_afip(inv, request_id)
-                except Exception:
-                    _logger.error(
-                        _("Error with AFIP trying to validate invoice.")
+                if inv._check_electronic_invoice_informed_before():
+                    _logger.info("Invoice informed before.")
+                    self.env['ws.request.detail'].create(
+                        {
+                            'invoice_id': inv.id,
+                            'result': 'E',
+                            'request_id': request_id,
+                            'errors': _(
+                                "This invoice: %(name)s [id: %(id)s] has been informed to AFIP. "
+                                "You cannot validate it again. "
+                                "Try to syncronize it using the wizard from Action menu.",
+                                name=inv.display_name,
+                                id=inv.id,
+                            ),
+                        }
                     )
+                    self.env.cr.commit()  # pylint: disable=invalid-commit
                 else:
-                    posted = inv._post(soft=soft)
-                    if posted:
-                        posted_moves += posted
-                        order = self.env['pos.order'].search(
-                            [('account_move', '=', posted.id)]
+                    if inv._check_must_be_fce():
+                        inv._ensure_fce_values()
+                    try:
+                        ws.send_invoice_to_afip(inv, request_id)
+                    except Exception:
+                        _logger.error(
+                            _("Error with AFIP trying to validate invoice.")
                         )
-                        if order and self.env.context.get(
-                            'force_pos_payment', False
-                        ):
-                            order._apply_invoice_payments()
+                    else:
+                        posted = inv._post(soft=soft)
+                        if posted:
+                            posted_moves += posted
+                            # Para facturas que provienen desde el POS, tenemos que vincular los pagos:
+                            order = self.env['pos.order'].search(
+                                [('account_move', '=', posted.id)]
+                            )
+                            if order and self.env.context.get(
+                                'force_pos_payment', False
+                            ):
+                                order._apply_invoice_payments()
 
             errors = self - posted_moves
             if errors:
@@ -1416,7 +1468,7 @@ class AccountMove(models.Model):
         self, pos, number, voucher_type, date_invoice, cae, cae_due_date
     ):
         for inv in self:
-            name = '%04d-%08d' % (pos, number)
+            name = '%05d-%08d' % (pos, number)
             is_FCE = False
             if voucher_type in [
                 self.env.ref('l10n_ar_eynes.factura_credito_electronica_a'),
@@ -1451,5 +1503,6 @@ class AccountMove(models.Model):
 
             # Tomamos la factura y mandamos a realizar
             # el asiento contable.
-            inv._post(soft=False)
+            if inv.state == 'draft':
+                inv._post(soft=False)
             return

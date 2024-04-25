@@ -22,40 +22,83 @@ class WsfeSinchronizeCoucher(models.TransientModel):
     _name = "wsfe.sinchronize.voucher"
     _description = "WSFE Sinchronize Voucher"
 
-    def _get_def_config(self):
-        wsfe_conf_model = self.env['wsfe.config'].with_context(
-            company_id=self.env.user.company_id.id
-        )
-        return wsfe_conf_model.get_config()
-
     voucher_type = fields.Many2one(
         'res.voucher.type', 'Voucher Type', required=True
     )
     pos_id = fields.Many2one('account.journal', 'POS', required=True)
     pos_id_domain = fields.Char(compute='_compute_pos_id_domain')
     config_id = fields.Many2one(
-        'wsfe.config', 'Config', default=_get_def_config
+        'wsfe.config', 'Config', default=lambda self: self._get_def_config()
     )
     voucher_number = fields.Integer('Number', required=True)
+
     document_type = fields.Many2one(
-        'res.document.type', 'Document Type', readonly=True
+        'res.document.type',
+        'Document Type',
+        readonly=True,
+        compute='_compute_sync_values',
     )
-    document_number = fields.Char('Document Number', readonly=True)
-    date_invoice = fields.Date('Date Invoice', readonly=False)
-    amount_total = fields.Float(digits='Account', string="Total", readonly=True)
+    document_number = fields.Char(
+        'Document Number', readonly=True, compute='_compute_sync_values'
+    )
+    date_invoice = fields.Date(
+        'Date Invoice', readonly=False, compute='_compute_sync_values'
+    )
+    amount_total = fields.Float(
+        digits='Account',
+        string="Total",
+        readonly=True,
+        compute='_compute_sync_values',
+    )
     amount_no_taxed = fields.Float(
-        digits='Account', string="No Taxed", readonly=True
+        digits='Account',
+        string="No Taxed",
+        readonly=True,
+        compute='_compute_sync_values',
     )
-    amount_taxed = fields.Float(digits='Account', string="Taxed", readonly=True)
-    amount_tax = fields.Float(digits='Account', string="Tax", readonly=True)
+    amount_taxed = fields.Float(
+        digits='Account',
+        string="Taxed",
+        readonly=True,
+        compute='_compute_sync_values',
+    )
+    amount_tax = fields.Float(
+        digits='Account',
+        string="Tax",
+        readonly=True,
+        compute='_compute_sync_values',
+    )
     amount_exempt = fields.Float(
-        digits='Account', string="Amount Exempt", readonly=True
+        digits='Account',
+        string="Amount Exempt",
+        readonly=True,
+        compute='_compute_sync_values',
     )
-    cae = fields.Char('CAE', size=32, required=False, readonly=False)
-    cae_due_date = fields.Date('CAE Due Date', readonly=False)
-    date_process = fields.Datetime('Date Processed', readonly=True)
-    infook = fields.Boolean('Info OK', default=False)
+    cae = fields.Char(
+        'CAE',
+        size=32,
+        required=False,
+        readonly=False,
+        compute='_compute_sync_values',
+    )
+    cae_due_date = fields.Date(
+        'CAE Due Date', readonly=False, compute='_compute_sync_values'
+    )
+    date_process = fields.Datetime(
+        'Date Processed', readonly=True, compute='_compute_sync_values'
+    )
+    infook = fields.Boolean(
+        'Info OK', default=False, compute='_compute_sync_values'
+    )
+    invoice_id_domain = fields.Char(compute='_compute_sync_values')
     invoice_id = fields.Many2one('account.move', 'Invoice')
+    error_msg = fields.Text(compute='_compute_sync_values')
+
+    def _get_def_config(self):
+        wsfe_conf_model = self.env['wsfe.config'].with_context(
+            company_id=self.env.user.company_id.id
+        )
+        return wsfe_conf_model.get_config()
 
     @api.depends('config_id', 'voucher_type')
     def _compute_pos_id_domain(self):
@@ -68,93 +111,113 @@ class WsfeSinchronizeCoucher(models.TransientModel):
             domain = [('id', 'in', ids)]
             rec.pos_id_domain = json.dumps(domain)
 
-    @api.onchange('voucher_number')
-    def change_voucher_number(self):
-        AccountMove = self.env['account.move']
+    def _clean_values(self):
+        self.document_type = False
+        self.document_number = ''
+        self.date_invoice = False
+        self.amount_total = 0.0
+        self.amount_no_taxed = 0.0
+        self.amount_taxed = 0.0
+        self.amount_tax = 0.0
+        self.amount_exempt = 0.0
+        self.cae = ''
+        self.cae_due_date = False
+        self.date_process = False
+        self.infook = False
+        self.invoice_id_domain = '[]'
+        self.invoice_id = False
+        self.error_msg = ''
 
-        voucher_type = self.voucher_type.afip_code
-        pos = self.pos_id.code
-        if pos:
-            pos = int(re.sub("[^0-9]", "", pos))
-        number = self.voucher_number
+    @api.depends('voucher_number', 'pos_id', 'voucher_type')
+    def _compute_sync_values(self):
+        for rec in self:
+            if not rec.voucher_type or not rec.pos_id or not rec.voucher_number:
+                rec._clean_values()
+            else:
+                pos = rec.pos_id.code
+                if pos:
+                    pos = int(re.sub("[^0-9]", "", pos))
 
-        if not voucher_type or not pos or not number:
-            return
+                try:
+                    res = rec.config_id.get_voucher_info(
+                        pos, rec.voucher_type.afip_code, rec.voucher_number
+                    )
+                except Exception as e:
+                    rec._clean_values()
+                    rec.error_msg = str(e)
+                else:
+                    doc_ids = self.env['res.document.type'].search(
+                        [('afip_code', '=', res['DocTipo'])]
+                    )
+                    document_type = doc_ids and doc_ids[0] or False
 
-        res = self.config_id.get_voucher_info(pos, voucher_type, number)
+                    di = time.strftime(
+                        DEFAULT_SERVER_DATE_FORMAT,
+                        time.strptime(str(res['CbteFch']), '%Y%m%d'),
+                    )
+                    dd = time.strftime(
+                        DEFAULT_SERVER_DATE_FORMAT,
+                        time.strptime(str(res['FchVto']), '%Y%m%d'),
+                    )
+                    dpr = time.strftime(
+                        DEFAULT_SERVER_DATETIME_FORMAT,
+                        time.strptime(str(res['FchProceso']), '%Y%m%d%H%M%S'),
+                    )
 
-        doc_ids = self.env['res.document.type'].search(
-            [('afip_code', '=', res['DocTipo'])]
-        )
-        document_type = doc_ids and doc_ids[0] or False
+                    # TODO: Tandriamos que filtrar las invoices por
+                    # Tipo de Comprobante tambien para ello podemos agregar
+                    # un par de campos mas para usarlos como filtros,
+                    # por ejemplo, is_debit_note y type
+                    rec.document_type = document_type
+                    rec.document_number = str(res['DocNro'])
+                    rec.date_invoice = di  # str(res['CbteFch']),
+                    rec.amount_total = res['ImpTotal']
+                    rec.amount_no_taxed = res['ImpTotConc']
+                    rec.amount_taxed = res['ImpNeto']
+                    rec.amount_tax = float(res['ImpIVA']) + float(
+                        res['ImpTrib']
+                    )
+                    rec.amount_exempt = res['ImpOpEx']
+                    rec.cae = str(res['CodAutorizacion'])
+                    rec.cae_due_date = dd
+                    rec.date_process = dpr
+                    rec.infook = True
+                    rec.error_msg = ''
 
-        di = time.strftime(
-            DEFAULT_SERVER_DATE_FORMAT,
-            time.strptime(str(res['CbteFch']), '%Y%m%d'),
-        )
-        dd = time.strftime(
-            DEFAULT_SERVER_DATE_FORMAT,
-            time.strptime(str(res['FchVto']), '%Y%m%d'),
-        )
-        dpr = time.strftime(
-            DEFAULT_SERVER_DATETIME_FORMAT,
-            time.strptime(str(res['FchProceso']), '%Y%m%d%H%M%S'),
-        )
+                    if rec.document_number == '0':
+                        doc_number = [False, '0', '']
+                    else:
+                        doc_number = [rec.document_number]
 
-        # TODO: Tandriamos que filtrar las invoices por
-        # Tipo de Comprobante tambien para ello podemos agregar
-        # un par de campos mas para usarlos como filtros,
-        # por ejemplo, is_debit_note y type
-        self.document_type = document_type
-        self.document_number = str(res['DocNro'])
-        self.date_invoice = di  # str(res['CbteFch']),
-        self.amount_total = res['ImpTotal']
-        self.amount_no_taxed = res['ImpTotConc']
-        self.amount_taxed = res['ImpNeto']
-        self.amount_tax = res['ImpIVA'] + res['ImpTrib']
-        self.amount_exempt = res['ImpOpEx']
-        self.cae = str(res['CodAutorizacion'])
-        self.cae_due_date = dd
-        self.date_process = dpr
-        self.infook = True
+                    domain = [
+                        ('amount_total', '=', rec.amount_total),
+                        ('amount_exempt', '=', rec.amount_exempt),
+                        ('amount_untaxed', '=', rec.amount_taxed),
+                        ('state', '=', 'draft'),
+                    ]
+                    if document_type and document_type.afip_code != '99':
+                        domain.append(('partner_id.vat', 'in', doc_number))
+                    AccountMove = self.env['account.move']
+                    invoice_ids = AccountMove.search(domain)
+                    if AccountMove.search(
+                        [
+                            ('cae', '=', rec.cae),
+                            ('id', 'not in', invoice_ids.ids),
+                        ]
+                    ):
+                        raise UserError(
+                            _('The voucher is already related to an invoice')
+                        )
 
-        if self.document_number == '0':
-            doc_number = [False, '0', '']
-        else:
-            doc_number = [self.document_number]
-
-        domain = [
-            ('amount_total', '=', self.amount_total),
-            ('amount_exempt', '=', self.amount_exempt),
-            ('amount_untaxed', '=', self.amount_taxed),
-            ('state', '=', 'draft'),
-        ]
-        if document_type and document_type.afip_code != '99':
-            domain.append(('partner_id.vat', 'in', doc_number))
-        invoice_ids = AccountMove.search(domain)
-
-        if AccountMove.search(
-            [('cae', '=', self.cae), ('id', 'not in', invoice_ids.ids)]
-        ):
-            raise UserError(_('The voucher is already related to an invoice'))
-
-        if len(invoice_ids) == 1:
-            self.invoice_id = invoice_ids and invoice_ids[0]
-        else:
-            self.invoice_id = False
-
-        return {'domain': {'invoice_id': domain}}
+                    rec.invoice_id_domain = json.dumps(domain)
 
     def relate_invoice(self):
-
-        # Obtenemos los datos puestos por el usuario
-        invoice = self.invoice_id
-
-        if not self.infook:
+        if not self.infook or not self.invoice_id:
             raise UserError(
                 _("WSFE Error!\n" "Sinchronize process is not correct!")
             )
 
+        invoice = self.invoice_id
         pos = self.pos_id.code
         if pos:
             pos = int(re.sub("[^0-9]", "", pos))

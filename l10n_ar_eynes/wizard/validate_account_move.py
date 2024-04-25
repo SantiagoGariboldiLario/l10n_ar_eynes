@@ -68,19 +68,10 @@ class ValidateAccountMove(models.TransientModel):
         #         )
 
         (moves - electronic_invoices)._post(not self.force_post)
-        for inv in sale_invoices - electronic_invoices:
-            inv.write(
-                {
-                    'internal_number': inv.journal_id.get_sequence_from_invoice(
-                        inv
-                    )._next()
-                }
-            )
+
         afip_result = electronic_invoices._validate_electronic_invoices(
             not self.force_post
         )
-
-        (sale_invoices - electronic_invoices)._compute_name()
 
         if afip_result is True:
             afip_result = {'type': 'ir.actions.act_window_close'}
