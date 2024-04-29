@@ -195,7 +195,9 @@ class WsfeSinchronizeCoucher(models.TransientModel):
                         ('amount_untaxed', '=', rec.amount_taxed),
                         ('state', '=', 'draft'),
                     ]
-                    if document_type and document_type.afip_code != '99':
+                    if document_type and not (
+                        document_type.afip_code in ['99', '96']
+                    ):
                         domain.append(('partner_id.vat', 'in', doc_number))
                     AccountMove = self.env['account.move']
                     invoice_ids = AccountMove.search(domain)
