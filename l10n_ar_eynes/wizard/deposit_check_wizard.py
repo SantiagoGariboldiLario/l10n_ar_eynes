@@ -166,7 +166,7 @@ class DepositCheckwizard(models.TransientModel):
                     {
                         'name': _('Check Deposit'),
                         # 'centralisation': 'normal',
-                        'account_id': self.bank_account_id.account_id.id,
+                        'account_id': self.bank_account_id.journal_id.suspense_account_id.id,
                         'move_id': move_id.id,
                         'journal_id': self.bank_account_id.journal_id.id,
                         'date': deposit_date,
