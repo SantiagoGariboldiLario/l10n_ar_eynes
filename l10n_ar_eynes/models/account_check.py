@@ -142,6 +142,26 @@ class AccountCheck(models.Model):
         default=lambda self: self.env.company.id,
     )
 
+    @api.depends(
+        'payment_order_id.currency_id', 'source_payment_order_id.currency_id'
+    )
+    def _compute_currency(self):
+        for rec in self:
+            if rec.internal_type == 'issued':
+                rec.currency_id = rec.payment_order_id.currency_id
+            else:
+                rec.currency_id = rec.source_payment_order_id.currency_id
+
+    @api.depends(
+        'payment_order_id.payment_rate', 'source_payment_order_id.payment_rate'
+    )
+    def _compute_currency_rate(self):
+        for rec in self:
+            if rec.internal_type == 'issued':
+                rec.currency_rate = rec.payment_order_id.payment_rate
+            else:
+                rec.currency_rate = rec.source_payment_order_id.payment_rate
+
     @api.depends('amount', 'currency_rate')
     def _compute_amount_currency(self):
         for rec in self:
@@ -454,6 +474,7 @@ class AccountCheck(models.Model):
             ('cancelled', 'Cancelled'),
             ('rejected', 'Rejected'),
             ('returned', 'Returned'),
+            ('accredited', 'Accredited'),
         ],
         default='draft',
         string='State',
@@ -500,6 +521,10 @@ class AccountCheck(models.Model):
     signatory_account = fields.Char(string='Signatory account', size=64)
     deposit_slip = fields.Char(string='Deposit Slip', size=64)
     dest = fields.Char(string='Destiny', size=64)
+    accredit_move_id = fields.Many2one(
+        comodel_name='account.move', string='Accredit Move', readonly=True
+    )
+    accredit_date = fields.Date(string='Accredit Date', readonly=True)
 
     @api.depends('deposit_move_id')
     def _compute_deposit_journal_id(self):
@@ -670,26 +695,6 @@ class AccountCheck(models.Model):
         }
 
         return move_line
-
-    @api.depends(
-        'payment_order_id.currency_id', 'source_payment_order_id.currency_id'
-    )
-    def _compute_currency(self):
-        for rec in self:
-            if rec.internal_type == 'issued':
-                rec.currency_id = rec.payment_order_id.currency_id
-            else:
-                rec.currency_id = rec.source_payment_order_id.currency_id
-
-    @api.depends(
-        'payment_order_id.payment_rate', 'source_payment_order_id.payment_rate'
-    )
-    def _compute_currency_rate(self):
-        for rec in self:
-            if rec.internal_type == 'issued':
-                rec.currency_rate = rec.payment_order_id.payment_rate
-            else:
-                rec.currency_rate = rec.source_payment_order_id.payment_rate
 
     _sql_constraints = [
         (
