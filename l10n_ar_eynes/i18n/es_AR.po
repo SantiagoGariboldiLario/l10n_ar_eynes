@@ -8093,7 +8093,7 @@ msgstr "Excepciones de retenciones"
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__returned
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__reason_rejected_check__type__returned
 msgid "Returned"
-msgstr "Devuelto"
+msgstr "Vencido"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_operation_wizard_view
