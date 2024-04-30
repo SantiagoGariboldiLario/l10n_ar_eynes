@@ -1438,7 +1438,7 @@ msgstr "Importe total"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_mode_line__amount_currency
 msgid "Amount in Partner Currency"
-msgstr "Importe en moneda del contacto"
+msgstr "Importe en moneda extranjera"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__amount_secondary_currency
@@ -7039,7 +7039,7 @@ msgstr "Monto del pago en la moneda de la compañía"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment_mode_line__amount_currency
 msgid "Payment amount in the partner currency"
-msgstr "Monto del pago en la moneda del contacto"
+msgstr "Monto del pago en moneda extranjera"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_payment_mode_line
