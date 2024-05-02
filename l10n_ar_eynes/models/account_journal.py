@@ -288,9 +288,8 @@ class AccountJournal(models.Model):
                 raise ValidationError(
                     _(
                         "You are not allowed to have more than "
-                        "one PoS per shop with FCE Enabled. %s"
+                        "one PoS per shop with FCE Enabled."
                     )
-                    % self.shop_id
                 )
 
     def get_pos_number(self):
