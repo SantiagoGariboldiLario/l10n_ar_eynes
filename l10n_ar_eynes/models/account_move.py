@@ -955,7 +955,9 @@ class AccountMove(models.Model):
 
         # Por cada linea, nos fijamos la configuracion del producto
         perceptions = {}
-        for line in self.invoice_line_ids:
+        for line in self.invoice_line_ids.filtered(
+            lambda inv_line: inv_line.price_unit != 0
+        ):
             taxapps = perception._get_taxapps(perception_data, line.account_id)
             if taxapps is None:
                 continue
