@@ -37,7 +37,7 @@
                             <!--<field name="currency"/>-->
                         </group>
                 </group>
-                <group string="Mensaje de error" attrs="{'invisible': [('infook','=',True)]}">
+                <group string="Mensaje de error">
                     <field name="error_msg" />
                 </group>
                 <group

@@ -201,14 +201,19 @@ class WsfeSinchronizeCoucher(models.TransientModel):
 
                     AccountMove = self.env['account.move']
                     invoice_ids = AccountMove.search(domain)
-                    if AccountMove.search(
+                    if not invoice_ids:
+                        rec.error_msg = _(
+                            'Voucher not found with this data. Domain: %(domain)s',
+                            domain=domain,
+                        )
+                    elif AccountMove.search(
                         [
                             ('cae', '=', rec.cae),
                             ('id', 'not in', invoice_ids.ids),
                         ]
                     ):
-                        raise UserError(
-                            _('The voucher is already related to an invoice')
+                        rec.error_msg = _(
+                            'The voucher is already related to an invoice'
                         )
 
                     rec.invoice_id_domain = json.dumps(domain)
