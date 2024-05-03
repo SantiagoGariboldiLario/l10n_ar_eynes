@@ -232,7 +232,7 @@ class AccountCheck(models.Model):
             ('rejected', 'Rejected'),
         ],
         default='draft',
-        string='State',
+        string='Issued Check State',
     )
     checkbook_id = fields.Many2one(
         comodel_name='account.payment.method.line',
@@ -456,7 +456,7 @@ class AccountCheck(models.Model):
             ('returned', 'Returned'),
         ],
         default='draft',
-        string='State',
+        string='Third Party Check State',
     )
     deposit_bank_id = fields.Many2one(
         comodel_name='res.partner.bank', string='Deposit Account'

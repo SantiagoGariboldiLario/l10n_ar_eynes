@@ -51,6 +51,39 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <!-- ISSUED CHECK FILTERS AND GROUPS -->
+    <record id="issued_checks_filter" model="ir.ui.view">
+        <field name="name">issued.checks.filter</field>
+        <field name="model">account.check</field>
+        <field name="arch" type="xml">
+            <search string="Search Issued Check">
+                <filter name="draft" string="Draft" domain="[('issued_check_state','=','draft')]" />
+                <filter
+                    name="waiting_accreditation"
+                    string="Waiting accreditation"
+                    domain="[('issued_check_state', '=', 'waiting_accreditation')]"
+                />
+                <filter
+                    name="cancelled"
+                    string="Cancelled"
+                    domain="[('issued_check_state', '=', 'cancelled')]"
+                />
+                <filter name="paid" string="Paid" domain="[('issued_check_state','=','paid')]" />
+                <filter name="expired" string="Expired" domain="[('issued_check_state', '=', 'expired')]" />
+                <filter
+                    name="returned"
+                    string="Returned"
+                    domain="[('issued_check_state', '=', 'returned')]"
+                />
+                <filter
+                    name="rejected"
+                    string="Rejected"
+                    domain="[('issued_check_state', '=', 'rejected')]"
+                />
+            </search>
+        </field>
+    </record>
+
     <!-- ISSUED CHECK FORM VIEW-->
     <record id="account_issued_check_view_form" model="ir.ui.view">
         <field name="name">account.issued.check.view.form</field>
@@ -216,6 +249,7 @@
         <field name="res_model">account.check</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('internal_type', '=', 'issued')]</field>
+        <field name="search_view_id" ref="issued_checks_filter" />
         <field
             name="view_ids"
             eval="[(5, 0, 0),
@@ -248,6 +282,47 @@
         (0, 0, {'view_mode': 'calendar', 'view_id': ref('account_issued_check_view_calendar_issued')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('account_issued_check_view_form')})]"
         />
+    </record>
+
+    <!-- THIRD PARTY CHECK FILTERS AND GROUPS -->
+    <record id="third_party_checks_filter" model="ir.ui.view">
+        <field name="name">third.party.checks.filter</field>
+        <field name="model">account.check</field>
+        <field name="arch" type="xml">
+            <search string="Search Third Party Check">
+                <filter name="draft" string="Draft" domain="[('third_party_check_state','=','draft')]" />
+                <filter
+                    name="in_wallet"
+                    string="In wallet"
+                    domain="[('third_party_check_state', '=', 'in_wallet')]"
+                />
+                <filter
+                    name="cancelled"
+                    string="Cancelled"
+                    domain="[('third_party_check_state', '=', 'cancelled')]"
+                />
+                <filter
+                    name="deposited"
+                    string="Deposited"
+                    domain="[('third_party_check_state','=','deposited')]"
+                />
+                <filter
+                    name="delivered"
+                    string="Delivered"
+                    domain="[('third_party_check_state', '=', 'delivered')]"
+                />
+                <filter
+                    name="returned"
+                    string="Returned"
+                    domain="[('third_party_check_state', '=', 'returned')]"
+                />
+                <filter
+                    name="rejected"
+                    string="Rejected"
+                    domain="[('third_party_check_state', '=', 'rejected')]"
+                />
+            </search>
+        </field>
     </record>
 
     <!-- THIRD PARTY CHECK FORM VIEW-->
@@ -519,6 +594,7 @@
         <field name="res_model">account.check</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('internal_type', '=', 'third_party')]</field>
+        <field name="search_view_id" ref="third_party_checks_filter" />
         <field
             name="view_ids"
             eval="[(5, 0, 0),
