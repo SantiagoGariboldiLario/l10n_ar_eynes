@@ -297,7 +297,8 @@
                 <field
                     name="voucher_type_id"
                     attrs="{
-                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
+                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])],
+                        'required': [('move_type','in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])],
                     }"
                     domain="voucher_type_domain"
                     widget="selection"
