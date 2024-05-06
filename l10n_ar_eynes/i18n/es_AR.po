@@ -3556,7 +3556,7 @@ msgstr "Cuenta de depósito"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
 msgid "Deposit Check"
-msgstr "Debitar cheque"
+msgstr "Depositar cheque"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
@@ -8111,7 +8111,7 @@ msgstr "Excepciones de retenciones"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
 msgid "Returned"
-msgstr "Devuelto"
+msgstr "Vencido"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_operation_wizard_view

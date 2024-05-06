@@ -346,6 +346,13 @@
                         attrs="{'invisible' : ['|', ('third_party_check_state', '!=', 'in_wallet'), ('internal_type', '=', 'issued')]}"
                     />
                     <button
+                        string="Accredit Check"
+                        name="%(accredit_check_action)d"
+                        type="action"
+                        class="oe_highlight"
+                        attrs="{'invisible' : ['|', ('third_party_check_state', '!=', 'deposited'), ('internal_type', '=', 'issued')]}"
+                    />
+                    <button
                         name="check_to_wallet"
                         type='object'
                         string='Back to Wallet'
@@ -473,7 +480,7 @@
                     <group
                         string="Check Deposit"
                         attrs="{
-                            'invisible': [('third_party_check_state','not in',('deposited', 'rejected'))],
+                            'invisible': [('third_party_check_state','not in',('deposited', 'rejected', 'accredited'))],
                             'readonly': [('third_party_check_state', '!=', 'in_wallet')]
                         }"
                     >
@@ -493,6 +500,23 @@
                             <field
                                 name="deposit_bank_id"
                                 attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
+                            />
+                        </group>
+                    </group>
+                     <group
+                        string="Check Accreditation"
+                        attrs="{
+                            'invisible': [('third_party_check_state','!=','accredited')],
+                        }"
+                    >
+                        <group>
+                            <field
+                                name="accredit_date"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'deposited')]}"
+                            />
+                            <field
+                                name="accredit_move_id"
+                                attrs="{'readonly': [('third_party_check_state', '!=', 'deposited')]}"
                             />
                         </group>
                     </group>

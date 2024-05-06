@@ -111,6 +111,7 @@
         'views/res_document_type_views.xml',
         'views/res_voucher_type_views.xml',
         'wizard/account_check_change_state.xml',
+        'wizard/accredit_check_wizard_view.xml',
         'views/account_check_views.xml',
         'views/reason_rejected_check_views.xml',
         'views/retention_views.xml',
