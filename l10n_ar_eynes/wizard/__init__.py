@@ -6,7 +6,7 @@ from . import account_debit_note  # noqa
 
 from . import debit_check_wizard  # noqa
 from . import wsaa_load_config  # noqa
-from . import wsfe_sinchronize_voucher  # noqa
+from . import afip_sinchronize_voucher  # noqa
 from . import wsfe_massive_sinchronize  # noqa
 from . import validate_account_move  # noqa
 from . import account_change_currency  # noqa

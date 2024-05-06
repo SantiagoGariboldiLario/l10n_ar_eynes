@@ -129,7 +129,7 @@
         'views/stock_picking_view.xml',
         'views/stock_picking_type_view.xml',
         'views/certificate_request_view.xml',
-        "wizard/wsfe_sinchronize_voucher_view.xml",
+        "wizard/afip_sinchronize_voucher_view.xml",
         "wizard/wsfe_massive_sinchronize_view.xml",
         "wizard/create_sicore_file.xml",
         "wizard/report_exporter.xml",
