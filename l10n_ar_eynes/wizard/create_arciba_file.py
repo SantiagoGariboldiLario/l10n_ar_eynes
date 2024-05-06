@@ -68,20 +68,14 @@ class CreateArcibaFiles(models.TransientModel):
 
     @api.model
     def _get_partner_fiscal_position_code(self, inv):
-        fiscal_position_name = inv.fiscal_position_id.name
-        dict_types = {
-            'RI': 1,
-            'Responsable Inscripto': 1,
-            'Responsable inscripto': 1,
-            'Exento': 3,
-            'Monotributo': 4,
-            'Exterior': 0,
-        }
-        code_fiscal_position = dict_types.get(fiscal_position_name, False)
-        assert code_fiscal_position is not False, (
-            'Definition not found for fiscal_position_name: %s'
-            % fiscal_position_name
-        )
+        code_fiscal_position = inv.fiscal_position_id.afip_code
+        if not code_fiscal_position:
+            raise ValidationError(
+                _(
+                    "Fiscal position '%(name)s' doesn't have AFIP code configured",
+                    name=inv.fiscal_position_id.name,
+                )
+            )
         return code_fiscal_position
 
     def generate_fw_file(self, data_lst):
@@ -114,39 +108,39 @@ class CreateArcibaFiles(models.TransientModel):
         generated_file_rec = generated_files_model.create(
             {
                 'code': name,
-                'period_start': self.period_start,
-                'period_end': self.period_end,
+                'date_from': self.period_start,
+                'date_to': self.period_end,
             }
         )
 
         data_attach = {
             'name': name,
             'datas': binascii.b2a_base64(f.read().encode('latin-1')),
-            'datas_fname': name,
+            # 'datas_fname': name,
             'res_model': 'arciba.generated.files',
             'res_id': generated_file_rec.id,
         }
         doc = self.env['ir.attachment'].create(data_attach)
-        generated_file_rec.write({'attachment_id': data_attach.id})
+        generated_file_rec.write({'attachment_id': doc.id})
 
         close_window = {'type': 'ir.actions.act_window_close'}
-        download_file = {
-            'type': "ir.actions.act_url",
-            'url': '/web/binary/download_document?model=ir.attachment'
-            '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
-            'target': "self",
-            'no_destroy': False,
-        }
+        # download_file = {
+        #     'type': "ir.actions.act_url",
+        #     'url': '/web/binary/download_document?model=ir.attachment'
+        #     '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
+        #     'target': "self",
+        #     'no_destroy': False,
+        # }
 
-        res = {
-            'type': 'ir.actions.act_multi',
-            'actions': [
-                close_window,
-                download_file,
-            ],
-        }
+        # res = {
+        #     'type': 'ir.actions.act_url',
+        #     'actions': [
+        #         close_window,
+        #         download_file,
+        #     ],
+        # }
         f.close()
-        return res
+        return close_window
 
     def _get_invoice_iva_total(self, invoice):
         """
@@ -499,7 +493,7 @@ class CreateArcibaFiles(models.TransientModel):
             JOIN account_journal per ON p.perception_id = per.id
             JOIN account_tax at ON per.tax_id=at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
-            AND i.state in %(state)s
+            AND i.state = %(state)s
             AND at.inform_arciba=True
             AND at.type_tax_use LIKE 'sale'  -- Only perceptions applied
             AND i.move_type IN ('out_invoice')  -- Not including refunds(NC)
@@ -508,7 +502,7 @@ class CreateArcibaFiles(models.TransientModel):
         query_vals = {
             'period_start': self.period_start,
             'period_end': self.period_end,
-            'state': ('posted'),
+            'state': 'posted',
         }
         cr.execute(perception_query, query_vals)
         res = cr.fetchall()
@@ -542,7 +536,7 @@ class CreateArcibaFiles(models.TransientModel):
             JOIN account_journal ret ON p.retention_id = ret.id
             JOIN account_tax at ON ret.tax_id=at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
-            AND i.state in %(state)s
+            AND i.state = %(state)s
             AND at.inform_arciba=True
             AND at.type_tax_use LIKE 'purchase'  -- Only retentions applied
             AND i.move_type IN ('in_invoice')  -- Not including refunds(NC)
@@ -740,38 +734,38 @@ class CreateArcibaNcFile(models.TransientModel):
         generated_file_rec = generated_files_model.create(
             {
                 'code': name,
-                'period_start': self.period_start,
-                'period_end': self.period_end,
+                'date_from': self.period_start,
+                'date_to': self.period_end,
             }
         )
 
         data_attach = {
             'name': name,
             'datas': binascii.b2a_base64(f.read().encode('latin-1')),
-            'datas_fname': name,
+            # 'datas_fname': name,
             'res_model': 'arciba.generated.files',
             'res_id': generated_file_rec.id,
         }
         doc = self.env['ir.attachment'].create(data_attach)
-        generated_file_rec.write({'attachment_id': data_attach.id})
+        generated_file_rec.write({'attachment_id': doc.id})
 
         close_window = {'type': 'ir.actions.act_window_close'}
-        download_file = {
-            'type': "ir.actions.act_url",
-            'url': '/web/binary/download_document?model=ir.attachment'
-            '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
-            'target': "self",
-            'no_destroy': False,
-        }
+        # download_file = {
+        #     'type': "ir.actions.act_url",
+        #     'url': '/web/binary/download_document?model=ir.attachment'
+        #     '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
+        #     'target': "self",
+        #     'no_destroy': False,
+        # }
 
-        res = {
-            'type': 'ir.actions.act_multi',
-            'actions': [
-                close_window,
-                download_file,
-            ],
-        }
-        return res
+        # res = {
+        #     'type': 'ir.actions.act_url',
+        #     'actions': [
+        #         close_window,
+        #         download_file,
+        #     ],
+        # }
+        return close_window
 
     def create_files(self):
         """
@@ -791,7 +785,7 @@ class CreateArcibaNcFile(models.TransientModel):
             JOIN account_journal per ON p.perception_id = per.id
             JOIN account_tax at ON per.tax_id=at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
-            AND i.state in %(state)s
+            AND i.state = %(state)s
             AND at.inform_arciba=True
             AND at.type_tax_use LIKE 'sale'  -- Only perceptions applied
             AND i.move_type IN ('out_refund')  -- Only including refunds(NC)
@@ -800,7 +794,7 @@ class CreateArcibaNcFile(models.TransientModel):
         query_vals = {
             'period_start': self.period_start,
             'period_end': self.period_end,
-            'state': ('open', 'paid'),
+            'state': 'posted',
         }
 
         cr.execute(perception_query, query_vals)
