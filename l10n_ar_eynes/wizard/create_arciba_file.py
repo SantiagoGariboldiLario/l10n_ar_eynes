@@ -596,10 +596,10 @@ class CreateArcibaFiles(models.TransientModel):
             else:
                 raise ValidationError(
                     _(
-                        "No perceptions/retentions from %(start)s to %(end)s to inform eArciba."
-                    ),
-                    start=self.period_start,
-                    end=self.period_end,
+                        "No perceptions/retentions from %(start)s to %(end)s to inform eArciba.",
+                        start=self.period_start,
+                        end=self.period_end,
+                    )
                 )
         return res
 
