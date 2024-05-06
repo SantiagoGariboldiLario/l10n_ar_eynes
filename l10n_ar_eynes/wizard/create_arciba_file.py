@@ -508,7 +508,7 @@ class CreateArcibaFiles(models.TransientModel):
         query_vals = {
             'period_start': self.period_start,
             'period_end': self.period_end,
-            'state': ('open', 'paid'),
+            'state': ('posted'),
         }
         cr.execute(perception_query, query_vals)
         res = cr.fetchall()
