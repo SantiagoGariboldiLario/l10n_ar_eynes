@@ -50,8 +50,10 @@ class CreateArcibaFiles(models.TransientModel):
         code_document_type = dict_types.get(document_type_name, False)
         if not code_document_type:
             ValidationError(
-                _('Definition not found for document_type_name: %(doc_type)s'),
-                doc_type=document_type_name,
+                _(
+                    'Definition not found for document_type_name: %(doc_type)s',
+                    doc_type=document_type_name,
+                )
             )
         return code_document_type
 
@@ -61,7 +63,7 @@ class CreateArcibaFiles(models.TransientModel):
             'Local': 1,
             'Convenio Multilateral': 2,
             'No Inscripto': 4,
-            'Régimen Simpligicado': 5,
+            'Régimen Simplificado': 5,
         }
         code_iibb = dict_types.get(iibb, False)
         return code_iibb
@@ -155,9 +157,9 @@ class CreateArcibaFiles(models.TransientModel):
                 ValidationError(
                     _(
                         'Amount total must be greater than '
-                        'amount taxed on Invoice ID %(inv_id)s'
-                    ),
-                    inv_id=invoice.id,
+                        'amount taxed on Invoice ID %(inv_id)s',
+                        inv_id=invoice.id,
+                    )
                 )
             iva_partial = amount_total - amount_taxed
             iva_amount += iva_partial
@@ -176,10 +178,10 @@ class CreateArcibaFiles(models.TransientModel):
             if not inv:
                 errors.append(
                     _(
-                        'rtl #%(ret_id)s: Unable to get associated invoice (%(ret_name)s)'
-                    ),
-                    ret_id=ret.id,
-                    ret_name=ret.name,
+                        'rtl #%(ret_id)s: Unable to get associated invoice (%(ret_name)s)',
+                        ret_id=ret.id,
+                        ret_name=ret.name,
+                    )
                 )
                 continue
 
@@ -236,11 +238,11 @@ class CreateArcibaFiles(models.TransientModel):
                 errors.append(
                     _(
                         'rtl #%(ret_id)s: Percentage cannot be negative or '
-                        'more than 99.99 (%(ret_name)s) (Invoice ID %(inv_id)s)'
-                    ),
-                    ret_id=ret.id,
-                    ret_name=ret.name,
-                    inv_id=inv.id,
+                        'more than 99.99 (%(ret_name)s) (Invoice ID %(inv_id)s)',
+                        ret_id=ret.id,
+                        ret_name=ret.name,
+                        inv_id=inv.id,
+                    )
                 )
                 continue
 
@@ -268,11 +270,11 @@ class CreateArcibaFiles(models.TransientModel):
                 errors.append(
                     _(
                         'rtl #%(ret_id)s: IIBB Situation cannot be empty'
-                        ' (%(ret_name)s) (Partner %(part_name)s)'
-                    ),
-                    ret_id=ret.id,
-                    ret_name=ret.name,
-                    part_name=razon_social_retenido,
+                        ' (%(ret_name)s) (Partner %(part_name)s)',
+                        ret_id=ret.id,
+                        ret_name=ret.name,
+                        part_name=razon_social_retenido,
+                    )
                 )
 
             nro_insc_iibb = inv.partner_id.nro_insc_iibb or '00000000000'
@@ -334,10 +336,10 @@ class CreateArcibaFiles(models.TransientModel):
             if not inv:
                 errors.append(
                     _(
-                        'ptl #%(per_id)s: Unable to get associated invoice (%(inv_id)s)'
-                    ),
-                    per_id=perc.id,
-                    inv_id=inv.id,
+                        'ptl #%(per_id)s: Unable to get associated invoice (%(inv_id)s)',
+                        per_id=perc.id,
+                        inv_id=inv.id,
+                    )
                 )
                 continue
 
@@ -391,11 +393,11 @@ class CreateArcibaFiles(models.TransientModel):
                 errors.append(
                     _(
                         'ptl #%(per_id)s: Percentage cannot be negative or '
-                        'more than 99.99 (%(per_name)s) (Invoice ID %(inv_id)s)'
-                    ),
-                    per_id=perc.id,
-                    per_name=perc.name,
-                    inv_id=inv.id,
+                        'more than 99.99 (%(per_name)s) (Invoice ID %(inv_id)s)',
+                        per_id=perc.id,
+                        per_name=perc.name,
+                        inv_id=inv.id,
+                    )
                 )
                 continue
 
@@ -423,11 +425,11 @@ class CreateArcibaFiles(models.TransientModel):
                 errors.append(
                     _(
                         'ptl #%(per_id)s: IIBB Situation cannot be'
-                        ' empty (%(per_name)s) (Partner %(part_name)s)'
-                    ),
-                    per_id=perc.id,
-                    per_name=perc.name,
-                    part_name=razon_social_retenido,
+                        ' empty (%(per_name)s) (Partner %(part_name)s)',
+                        per_id=perc.id,
+                        per_name=perc.name,
+                        part_name=razon_social_retenido,
+                    )
                 )
 
             nro_insc_iibb = inv.partner_id.nro_insc_iibb or '00000000000'
@@ -620,10 +622,10 @@ class CreateArcibaNcFile(models.TransientModel):
             if not inv:
                 errors.append(
                     _(
-                        'ptl #%(per_id)s: Unable to get associated invoice (%(per_name)s)'
-                    ),
-                    per_id=perc.id,
-                    per_name=perc.name,
+                        'ptl #%(per_id)s: Unable to get associated invoice (%(per_name)s)',
+                        per_id=perc.id,
+                        per_name=perc.name,
+                    )
                 )
                 continue
 
@@ -667,11 +669,11 @@ class CreateArcibaNcFile(models.TransientModel):
                 errors.append(
                     _(
                         'ptl #%(per_id)s: Percentage cannot be negative or'
-                        ' more than 99.99 (%(per_name)s) (Invoice ID %(inv_id)s)'
-                    ),
-                    per_id=perc.id,
-                    per_name=perc.name,
-                    inv_id=inv.id,
+                        ' more than 99.99 (%(per_name)s) (Invoice ID %(inv_id)s)',
+                        per_id=perc.id,
+                        per_name=perc.name,
+                        inv_id=inv.id,
+                    )
                 )
                 continue
 
@@ -842,9 +844,9 @@ class CreateArcibaNcFile(models.TransientModel):
             else:
                 raise ValidationError(
                     _(
-                        "No perceptions/retentions from %(start)s to %(end)s to inform eArciba."
-                    ),
-                    start=self.period_start,
-                    end=self.period_end,
+                        "No perceptions/retentions from %(start)s to %(end)s to inform eArciba.",
+                        start=self.period_start,
+                        end=self.period_end,
+                    )
                 )
         return res
