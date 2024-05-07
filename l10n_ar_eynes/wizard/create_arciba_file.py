@@ -202,7 +202,7 @@ class CreateArcibaFiles(models.TransientModel):
             )  # Datetime->String: dd/mm/yyyy
 
             # Denomination
-            denomination_name = inv.denomination
+            denomination_name = inv.denomination.upper()
 
             # Internal number
             internal_number = inv.internal_number.replace('-', '')
@@ -277,8 +277,6 @@ class CreateArcibaFiles(models.TransientModel):
                     )
                 )
 
-            nro_insc_iibb = inv.partner_id.nro_insc_iibb or '00000000000'
-
             line = {
                 'type': 1,  # Retention
                 'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
@@ -294,7 +292,7 @@ class CreateArcibaFiles(models.TransientModel):
                 'tipo_doc_retenido': tipo_doc_retenido,
                 'nro_doc_retenido': nro_doc_retenido,
                 'sit_iibb_retenido': sit_iibb,
-                'nro_insc_iibb_retenido': nro_insc_iibb,
+                'nro_insc_iibb_retenido': nro_doc_retenido,
                 'pos_fiscal_retenido': pos_fiscal_retenido,
                 'razon_social_retenido': razon_social_retenido,
                 'importe_otros_conceptos': moneyfmt(
@@ -360,7 +358,7 @@ class CreateArcibaFiles(models.TransientModel):
             )  # Datetime->String: dd/mm/yyyy
 
             # Denomination
-            denomination_name = inv.denomination
+            denomination_name = inv.denomination.upper()
 
             # Internal number
             internal_number = inv.internal_number.replace('-', '')
@@ -432,8 +430,6 @@ class CreateArcibaFiles(models.TransientModel):
                     )
                 )
 
-            nro_insc_iibb = inv.partner_id.nro_insc_iibb or '00000000000'
-
             line = {
                 'type': 2,  # Perception
                 'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
@@ -449,7 +445,7 @@ class CreateArcibaFiles(models.TransientModel):
                 'tipo_doc_retenido': tipo_doc_retenido,
                 'nro_doc_retenido': nro_doc_retenido,
                 'sit_iibb_retenido': sit_iibb,
-                'nro_insc_iibb_retenido': nro_insc_iibb,
+                'nro_insc_iibb_retenido': nro_doc_retenido,
                 'pos_fiscal_retenido': pos_fiscal_retenido,
                 'razon_social_retenido': razon_social_retenido,
                 'importe_otros_conceptos': moneyfmt(
@@ -643,7 +639,7 @@ class CreateArcibaNcFile(models.TransientModel):
             )  # Datetime->String: dd/mm/yyyy
 
             # Denomination
-            denomination_name = inv.denomination
+            denomination_name = inv.denomination.upper()
 
             # Internal number
             internal_number = inv.internal_number.replace('-', '')
