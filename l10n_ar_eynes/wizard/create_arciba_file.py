@@ -60,10 +60,10 @@ class CreateArcibaFiles(models.TransientModel):
     @api.model
     def _get_partner_iibb_code(self, iibb):
         dict_types = {
-            'Local': 1,
-            'Convenio Multilateral': 2,
-            'No Inscripto': 4,
-            'Régimen Simplificado': 5,
+            self.env.ref('l10n_ar_eynes.iibb_situation_local'): 1,
+            self.env.ref('l10n_ar_eynes.iibb_situation_multilateral'): 2,
+            self.env.ref('l10n_ar_eynes.iibb_situation_not_inscribed'): 4,
+            self.env.ref('l10n_ar_eynes.iibb_situation_simplified_regime'): 5,
         }
         code_iibb = dict_types.get(iibb, False)
         return code_iibb
@@ -265,7 +265,7 @@ class CreateArcibaFiles(models.TransientModel):
             ret_partner = (
                 ret_partner[0] if len(ret_partner) > 1 else ret_partner
             )
-            sit_iibb = self._get_partner_iibb_code(ret_partner.sit_iibb.name)
+            sit_iibb = self._get_partner_iibb_code(ret_partner.sit_iibb)
             if not sit_iibb:
                 errors.append(
                     _(
@@ -420,7 +420,7 @@ class CreateArcibaFiles(models.TransientModel):
             perc_partner = (
                 perc_partner[0] if len(perc_partner) > 1 else perc_partner
             )
-            sit_iibb = self._get_partner_iibb_code(perc_partner.sit_iibb.name)
+            sit_iibb = self._get_partner_iibb_code(perc_partner.sit_iibb)
             if not sit_iibb:
                 errors.append(
                     _(
@@ -568,7 +568,7 @@ class CreateArcibaFiles(models.TransientModel):
             self.write({'notes': errors})
             ir_model_data = self.env['ir.model.data']
             form_res = ir_model_data.get_object_reference(
-                'l10n_ar_arciba', 'view_create_arciba_files'
+                'l10n_ar_eynes', 'view_create_arciba_files'
             )
             form_id = form_res and form_res[1] or False
             res = {
@@ -822,7 +822,7 @@ class CreateArcibaNcFile(models.TransientModel):
             self.write({'notes': errors})
             ir_model_data = self.env['ir.model.data']
             form_res = ir_model_data.get_object_reference(
-                'l10n_ar_arciba', 'view_create_arciba_nc_file'
+                'l10n_ar_eynes', 'view_create_arciba_nc_file'
             )
             form_id = form_res and form_res[1] or False
             res = {
