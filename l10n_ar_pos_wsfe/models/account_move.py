@@ -107,3 +107,17 @@ class AccountMove(models.Model):
         self.voucher_type_id = self.env['res.voucher.type'].search(
             json.loads(self.voucher_type_domain)
         )[0]
+
+    def _validate_electronic_invoices(self, soft=False):
+        res = super(AccountMove, self)._validate_electronic_invoices(soft=soft)
+
+        # Para facturas que provienen desde el POS, tenemos que vincular los pagos:
+        posted = self.filtered(lambda inv: inv.state == 'posted')
+        for inv in posted:
+            order = self.env['pos.order'].search(
+                [('account_move', '=', inv.id)]
+            )
+            if order and self.env.context.get('force_pos_payment', False):
+                order._apply_invoice_payments()
+
+        return res

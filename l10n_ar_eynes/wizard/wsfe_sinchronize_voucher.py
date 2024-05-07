@@ -9,7 +9,7 @@ import time
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, float_is_zero
 from odoo.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 
 
@@ -171,7 +171,7 @@ class WsfeSinchronizeCoucher(models.TransientModel):
                     rec.document_type = document_type
                     rec.document_number = str(res['DocNro'])
                     rec.date_invoice = di  # str(res['CbteFch']),
-                    rec.amount_total = res['ImpTotal']
+                    rec.amount_total = float(res['ImpTotal'])
                     rec.amount_no_taxed = res['ImpTotConc']
                     rec.amount_taxed = res['ImpNeto']
                     rec.amount_tax = float(res['ImpIVA']) + float(
@@ -190,26 +190,40 @@ class WsfeSinchronizeCoucher(models.TransientModel):
                         doc_number = [rec.document_number]
 
                     domain = [
-                        ('amount_total', '=', rec.amount_total),
-                        ('amount_exempt', '=', rec.amount_exempt),
-                        ('amount_untaxed', '=', rec.amount_taxed),
+                        ('move_type', 'in', ('out_invoice', 'out_refund')),
                         ('state', '=', 'draft'),
                     ]
-                    if document_type and document_type.afip_code != '99':
+                    if document_type and not (
+                        document_type.afip_code in ['99', '96']
+                    ):
                         domain.append(('partner_id.vat', 'in', doc_number))
+
                     AccountMove = self.env['account.move']
                     invoice_ids = AccountMove.search(domain)
-                    if AccountMove.search(
+                    invoice_ids = invoice_ids.filtered(
+                        lambda inv: float_is_zero(
+                            inv.amount_total - rec.amount_total,
+                            precision_rounding=inv.currency_id.rounding,
+                        )
+                    )
+                    rec.invoice_id_domain = json.dumps(
+                        [('id', 'in', invoice_ids.ids)]
+                    )
+                    if not invoice_ids:
+                        rec.error_msg = _(
+                            'Voucher not found with this data. Domain: %(domain)s',
+                            domain=domain,
+                        )
+                    elif AccountMove.search(
                         [
                             ('cae', '=', rec.cae),
                             ('id', 'not in', invoice_ids.ids),
                         ]
                     ):
-                        raise UserError(
-                            _('The voucher is already related to an invoice')
+                        rec.invoice_id_domain = json.dumps([('id', 'in', [])])
+                        rec.error_msg = _(
+                            'The voucher is already related to an invoice'
                         )
-
-                    rec.invoice_id_domain = json.dumps(domain)
 
     def relate_invoice(self):
         if not self.infook or not self.invoice_id:

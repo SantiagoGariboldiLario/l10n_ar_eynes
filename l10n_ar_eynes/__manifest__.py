@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.1.10.5',
+    'version': '15.0.1.11.2',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -111,6 +111,7 @@
         'views/res_document_type_views.xml',
         'views/res_voucher_type_views.xml',
         'wizard/account_check_change_state.xml',
+        'wizard/accredit_check_wizard_view.xml',
         'views/account_check_views.xml',
         'views/reason_rejected_check_views.xml',
         'views/retention_views.xml',

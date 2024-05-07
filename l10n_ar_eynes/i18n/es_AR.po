@@ -2163,6 +2163,8 @@ msgstr ""
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__cancelled
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__cancel
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__change_check_state_wizard__new_state__cancelled
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
 msgid "Cancelled"
 msgstr "Anulado"
 
@@ -3517,6 +3519,7 @@ msgstr "Definición no encontrada para document_type_name: %(doc_type)s"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__delivered
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
 msgid "Delivered"
 msgstr "Entregado"
 
@@ -3553,7 +3556,7 @@ msgstr "Cuenta de depósito"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
 msgid "Deposit Check"
-msgstr "Debitar cheque"
+msgstr "Depositar cheque"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
@@ -3607,6 +3610,7 @@ msgstr "Asistente para depositar cheques"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__deposited
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
 msgid "Deposited"
 msgstr "Depositado"
 
@@ -3907,6 +3911,8 @@ msgstr "Puerta"
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_order__state__draft
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__fiscal_year_closing__state__draft
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
 msgid "Draft"
 msgstr "Borrador"
 
@@ -4335,6 +4341,7 @@ msgstr "Tiempo de expiración"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__expired
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__change_check_state_wizard__new_state__expired
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
 msgid "Expired"
 msgstr "Vencido"
 
@@ -5139,6 +5146,7 @@ msgstr "En caso de rechazo del cheque de terceros."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__in_wallet
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
 msgid "In wallet"
 msgstr "En cartera"
 
@@ -5462,6 +5470,11 @@ msgstr "Cheque propio"
 #, python-format
 msgid "Issued Check %s"
 msgstr "Cheque emitido %s"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__issued_check_state
+msgid "Issued Check State"
+msgstr "Estado de Cheques Emitidos"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_issued_check_action
@@ -6884,6 +6897,7 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__paid
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
 msgid "Paid"
 msgstr "Debitado"
 
@@ -7726,6 +7740,8 @@ msgstr "Asistente para rechazar cheques de terceros"
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__rejected
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__reason_rejected_check__type__rejected
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__ws_request_detail__result__r
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
 msgid "Rejected"
 msgstr "Rechazado"
 
@@ -8092,8 +8108,10 @@ msgstr "Excepciones de retenciones"
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__returned
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__returned
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__reason_rejected_check__type__returned
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
 msgid "Returned"
-msgstr "Devuelto"
+msgstr "Vencido"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_operation_wizard_view
@@ -8230,6 +8248,11 @@ msgid "Scales"
 msgstr "Escalas"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
+msgid "Search Issued Check"
+msgstr "Buscar cheque propio"
+
+#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_payment_order_view_search
 msgid "Search Payment"
 msgstr "Buscar pago"
@@ -8238,6 +8261,11 @@ msgstr "Buscar pago"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_search
 msgid "Search Reports"
 msgstr "Buscar informes"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
+msgid "Search Third Party Check"
+msgstr "Buscar cheque de terceros"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax_subjournal__base_position__second
@@ -8519,8 +8547,6 @@ msgid "Start of period"
 msgstr "Comienzo del Período"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__issued_check_state
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__third_party_check_state
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__state
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__state
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_report_files__state
@@ -9110,6 +9136,11 @@ msgstr "Cheques de Tercero por Fecha de Pago"
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__internal_type__third_party
 msgid "Third Party"
 msgstr "Terceros"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__third_party_check_state
+msgid "Third Party Check State"
+msgstr "Estado de Cheques de Terceros"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_third_party_check_action
@@ -9949,6 +9980,7 @@ msgstr "Configuración WS Padron"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_accreditation
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
 msgid "Waiting accreditation"
 msgstr "Esperando débito"
 
@@ -10121,9 +10153,9 @@ msgstr "Vas a eliminar un movimiento de cuenta.¿Está seguro?"
 #: code:addons/l10n_ar_eynes/models/account_journal.py:0
 #, python-format
 msgid ""
-"You are not allowed to have more than one PoS per shop with FCE Enabled. %s"
+"You are not allowed to have more than one PoS per shop with FCE Enabled."
 msgstr ""
-"No se le permite tener más de un PoS por tienda con FCE habilitado. %s"
+"No se le permite tener más de un PoS por tienda con FCE habilitado."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/account_move.py:0

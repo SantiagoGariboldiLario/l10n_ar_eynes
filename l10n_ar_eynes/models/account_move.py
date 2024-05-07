@@ -995,7 +995,9 @@ class AccountMove(models.Model):
 
         # Por cada linea, nos fijamos la configuracion del producto
         perceptions = {}
-        for line in self.invoice_line_ids:
+        for line in self.invoice_line_ids.filtered(
+            lambda inv_line: inv_line.price_unit != 0
+        ):
             taxapps = perception._get_taxapps(perception_data, line.account_id)
             if taxapps is None:
                 continue
@@ -1442,14 +1444,6 @@ class AccountMove(models.Model):
                         posted = inv._post(soft=soft)
                         if posted:
                             posted_moves += posted
-                            # Para facturas que provienen desde el POS, tenemos que vincular los pagos:
-                            order = self.env['pos.order'].search(
-                                [('account_move', '=', posted.id)]
-                            )
-                            if order and self.env.context.get(
-                                'force_pos_payment', False
-                            ):
-                                order._apply_invoice_payments()
 
             errors = self - posted_moves
             if errors:

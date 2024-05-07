@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="account_check_accredit_form_view" model="ir.ui.view">
+        <field name="name">accredit.check.wizard.wizard.form</field>
+        <field name="model">accredit.check.wizard</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Check accredit">
+                <group>
+                    <group>
+                        <field name="date" />
+                    </group>
+                </group>
+                <footer>
+                    <button type="object" name="action_accredit" string="Accredit" class="oe_highlight" />
+                    or
+                    <button class="oe_link" special="cancel" string="Cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="accredit_check_action" model="ir.actions.act_window">
+        <field name="name">Accredit check</field>
+        <field name="res_model">accredit.check.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

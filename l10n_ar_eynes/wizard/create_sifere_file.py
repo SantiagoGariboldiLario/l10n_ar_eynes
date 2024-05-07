@@ -186,7 +186,7 @@ class ReportFilesGenerator(models.Model):
         JOIN account_tax at ON per.tax_id=at.id
         JOIN account_move i ON p.invoice_id=i.id
         WHERE p.date BETWEEN %(date_from)s AND %(date_to)s
-        AND i.state IN %(inv_state)s
+        AND i.state = %(inv_state)s
         AND at.retention_type in %(type)s AND at.type_tax_use LIKE 'purchase'
         AND p.company_id = %(company_id)s
         AND at.is_bank_settlement IS True
@@ -197,10 +197,7 @@ class ReportFilesGenerator(models.Model):
             'date_from': self.date_start,
             'date_to': self.date_stop,
             'type': ('gross_income',),
-            'inv_state': (
-                'open',
-                'paid',
-            ),
+            'inv_state': 'posted',
             'company_id': company_id,
         }
         cr.execute(perception_query, q_data_perception)
@@ -382,10 +379,7 @@ class ReportFilesGenerator(models.Model):
             'date_from': self.date_start,
             'date_to': self.date_stop,
             'type': ('gross_income',),
-            'inv_state': (
-                'open',
-                'paid',
-            ),
+            'inv_state': 'posted',
             'company_id': company_id,
         }
         cr.execute(perception_query, q_data)

@@ -122,9 +122,14 @@ class WSAATa(models.Model):
     def is_expired(self):
         if not self.expiration_time:
             return True
-        expiration_time = datetime.strptime(
-            self.expiration_time, '%Y-%m-%d %H:%M:%S.%f'
-        )
+        try:
+            expiration_time = datetime.strptime(
+                self.expiration_time, '%Y-%m-%d %H:%M:%S.%f'
+            )
+        except ValueError:
+            expiration_time = datetime.strptime(
+                self.expiration_time, '%Y-%m-%d %H:%M:%S'
+            )
         return datetime.now() > expiration_time
 
     def get_token_sign(self):

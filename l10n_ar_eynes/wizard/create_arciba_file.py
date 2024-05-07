@@ -50,38 +50,34 @@ class CreateArcibaFiles(models.TransientModel):
         code_document_type = dict_types.get(document_type_name, False)
         if not code_document_type:
             ValidationError(
-                _('Definition not found for document_type_name: %(doc_type)s'),
-                doc_type=document_type_name,
+                _(
+                    'Definition not found for document_type_name: %(doc_type)s',
+                    doc_type=document_type_name,
+                )
             )
         return code_document_type
 
     @api.model
     def _get_partner_iibb_code(self, iibb):
         dict_types = {
-            'Local': 1,
-            'Convenio Multilateral': 2,
-            'No Inscripto': 4,
-            'Régimen Simpligicado': 5,
+            self.env.ref('l10n_ar_eynes.iibb_situation_local'): 1,
+            self.env.ref('l10n_ar_eynes.iibb_situation_multilateral'): 2,
+            self.env.ref('l10n_ar_eynes.iibb_situation_not_inscribed'): 4,
+            self.env.ref('l10n_ar_eynes.iibb_situation_simplified_regime'): 5,
         }
         code_iibb = dict_types.get(iibb, False)
         return code_iibb
 
     @api.model
     def _get_partner_fiscal_position_code(self, inv):
-        fiscal_position_name = inv.fiscal_position_id.name
-        dict_types = {
-            'RI': 1,
-            'Responsable Inscripto': 1,
-            'Responsable inscripto': 1,
-            'Exento': 3,
-            'Monotributo': 4,
-            'Exterior': 0,
-        }
-        code_fiscal_position = dict_types.get(fiscal_position_name, False)
-        assert code_fiscal_position is not False, (
-            'Definition not found for fiscal_position_name: %s'
-            % fiscal_position_name
-        )
+        code_fiscal_position = inv.fiscal_position_id.afip_code
+        if not code_fiscal_position:
+            raise ValidationError(
+                _(
+                    "Fiscal position '%(name)s' doesn't have AFIP code configured",
+                    name=inv.fiscal_position_id.name,
+                )
+            )
         return code_fiscal_position
 
     def generate_fw_file(self, data_lst):
@@ -114,39 +110,39 @@ class CreateArcibaFiles(models.TransientModel):
         generated_file_rec = generated_files_model.create(
             {
                 'code': name,
-                'period_start': self.period_start,
-                'period_end': self.period_end,
+                'date_from': self.period_start,
+                'date_to': self.period_end,
             }
         )
 
         data_attach = {
             'name': name,
             'datas': binascii.b2a_base64(f.read().encode('latin-1')),
-            'datas_fname': name,
+            # 'datas_fname': name,
             'res_model': 'arciba.generated.files',
             'res_id': generated_file_rec.id,
         }
         doc = self.env['ir.attachment'].create(data_attach)
-        generated_file_rec.write({'attachment_id': data_attach.id})
+        generated_file_rec.write({'attachment_id': doc.id})
 
         close_window = {'type': 'ir.actions.act_window_close'}
-        download_file = {
-            'type': "ir.actions.act_url",
-            'url': '/web/binary/download_document?model=ir.attachment'
-            '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
-            'target': "self",
-            'no_destroy': False,
-        }
+        # download_file = {
+        #     'type': "ir.actions.act_url",
+        #     'url': '/web/binary/download_document?model=ir.attachment'
+        #     '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
+        #     'target': "self",
+        #     'no_destroy': False,
+        # }
 
-        res = {
-            'type': 'ir.actions.act_multi',
-            'actions': [
-                close_window,
-                download_file,
-            ],
-        }
+        # res = {
+        #     'type': 'ir.actions.act_url',
+        #     'actions': [
+        #         close_window,
+        #         download_file,
+        #     ],
+        # }
         f.close()
-        return res
+        return close_window
 
     def _get_invoice_iva_total(self, invoice):
         """
@@ -161,9 +157,9 @@ class CreateArcibaFiles(models.TransientModel):
                 ValidationError(
                     _(
                         'Amount total must be greater than '
-                        'amount taxed on Invoice ID %(inv_id)s'
-                    ),
-                    inv_id=invoice.id,
+                        'amount taxed on Invoice ID %(inv_id)s',
+                        inv_id=invoice.id,
+                    )
                 )
             iva_partial = amount_total - amount_taxed
             iva_amount += iva_partial
@@ -182,10 +178,10 @@ class CreateArcibaFiles(models.TransientModel):
             if not inv:
                 errors.append(
                     _(
-                        'rtl #%(ret_id)s: Unable to get associated invoice (%(ret_name)s)'
-                    ),
-                    ret_id=ret.id,
-                    ret_name=ret.name,
+                        'rtl #%(ret_id)s: Unable to get associated invoice (%(ret_name)s)',
+                        ret_id=ret.id,
+                        ret_name=ret.name,
+                    )
                 )
                 continue
 
@@ -242,11 +238,11 @@ class CreateArcibaFiles(models.TransientModel):
                 errors.append(
                     _(
                         'rtl #%(ret_id)s: Percentage cannot be negative or '
-                        'more than 99.99 (%(ret_name)s) (Invoice ID %(inv_id)s)'
-                    ),
-                    ret_id=ret.id,
-                    ret_name=ret.name,
-                    inv_id=inv.id,
+                        'more than 99.99 (%(ret_name)s) (Invoice ID %(inv_id)s)',
+                        ret_id=ret.id,
+                        ret_name=ret.name,
+                        inv_id=inv.id,
+                    )
                 )
                 continue
 
@@ -269,16 +265,16 @@ class CreateArcibaFiles(models.TransientModel):
             ret_partner = (
                 ret_partner[0] if len(ret_partner) > 1 else ret_partner
             )
-            sit_iibb = self._get_partner_iibb_code(ret_partner.sit_iibb.name)
+            sit_iibb = self._get_partner_iibb_code(ret_partner.sit_iibb)
             if not sit_iibb:
                 errors.append(
                     _(
                         'rtl #%(ret_id)s: IIBB Situation cannot be empty'
-                        ' (%(ret_name)s) (Partner %(part_name)s)'
-                    ),
-                    ret_id=ret.id,
-                    ret_name=ret.name,
-                    part_name=razon_social_retenido,
+                        ' (%(ret_name)s) (Partner %(part_name)s)',
+                        ret_id=ret.id,
+                        ret_name=ret.name,
+                        part_name=razon_social_retenido,
+                    )
                 )
 
             nro_insc_iibb = inv.partner_id.nro_insc_iibb or '00000000000'
@@ -340,10 +336,10 @@ class CreateArcibaFiles(models.TransientModel):
             if not inv:
                 errors.append(
                     _(
-                        'ptl #%(per_id)s: Unable to get associated invoice (%(inv_id)s)'
-                    ),
-                    per_id=perc.id,
-                    inv_id=inv.id,
+                        'ptl #%(per_id)s: Unable to get associated invoice (%(inv_id)s)',
+                        per_id=perc.id,
+                        inv_id=inv.id,
+                    )
                 )
                 continue
 
@@ -397,11 +393,11 @@ class CreateArcibaFiles(models.TransientModel):
                 errors.append(
                     _(
                         'ptl #%(per_id)s: Percentage cannot be negative or '
-                        'more than 99.99 (%(per_name)s) (Invoice ID %(inv_id)s)'
-                    ),
-                    per_id=perc.id,
-                    per_name=perc.name,
-                    inv_id=inv.id,
+                        'more than 99.99 (%(per_name)s) (Invoice ID %(inv_id)s)',
+                        per_id=perc.id,
+                        per_name=perc.name,
+                        inv_id=inv.id,
+                    )
                 )
                 continue
 
@@ -424,16 +420,16 @@ class CreateArcibaFiles(models.TransientModel):
             perc_partner = (
                 perc_partner[0] if len(perc_partner) > 1 else perc_partner
             )
-            sit_iibb = self._get_partner_iibb_code(perc_partner.sit_iibb.name)
+            sit_iibb = self._get_partner_iibb_code(perc_partner.sit_iibb)
             if not sit_iibb:
                 errors.append(
                     _(
                         'ptl #%(per_id)s: IIBB Situation cannot be'
-                        ' empty (%(per_name)s) (Partner %(part_name)s)'
-                    ),
-                    per_id=perc.id,
-                    per_name=perc.name,
-                    part_name=razon_social_retenido,
+                        ' empty (%(per_name)s) (Partner %(part_name)s)',
+                        per_id=perc.id,
+                        per_name=perc.name,
+                        part_name=razon_social_retenido,
+                    )
                 )
 
             nro_insc_iibb = inv.partner_id.nro_insc_iibb or '00000000000'
@@ -499,7 +495,7 @@ class CreateArcibaFiles(models.TransientModel):
             JOIN account_journal per ON p.perception_id = per.id
             JOIN account_tax at ON per.tax_id=at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
-            AND i.state in %(state)s
+            AND i.state = %(state)s
             AND at.inform_arciba=True
             AND at.type_tax_use LIKE 'sale'  -- Only perceptions applied
             AND i.move_type IN ('out_invoice')  -- Not including refunds(NC)
@@ -508,7 +504,7 @@ class CreateArcibaFiles(models.TransientModel):
         query_vals = {
             'period_start': self.period_start,
             'period_end': self.period_end,
-            'state': ('open', 'paid'),
+            'state': 'posted',
         }
         cr.execute(perception_query, query_vals)
         res = cr.fetchall()
@@ -542,7 +538,7 @@ class CreateArcibaFiles(models.TransientModel):
             JOIN account_journal ret ON p.retention_id = ret.id
             JOIN account_tax at ON ret.tax_id=at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
-            AND i.state in %(state)s
+            AND i.state = %(state)s
             AND at.inform_arciba=True
             AND at.type_tax_use LIKE 'purchase'  -- Only retentions applied
             AND i.move_type IN ('in_invoice')  -- Not including refunds(NC)
@@ -572,7 +568,7 @@ class CreateArcibaFiles(models.TransientModel):
             self.write({'notes': errors})
             ir_model_data = self.env['ir.model.data']
             form_res = ir_model_data.get_object_reference(
-                'l10n_ar_arciba', 'view_create_arciba_files'
+                'l10n_ar_eynes', 'view_create_arciba_files'
             )
             form_id = form_res and form_res[1] or False
             res = {
@@ -596,10 +592,10 @@ class CreateArcibaFiles(models.TransientModel):
             else:
                 raise ValidationError(
                     _(
-                        "No perceptions/retentions from %(start)s to %(end)s to inform eArciba."
-                    ),
-                    start=self.period_start,
-                    end=self.period_end,
+                        "No perceptions/retentions from %(start)s to %(end)s to inform eArciba.",
+                        start=self.period_start,
+                        end=self.period_end,
+                    )
                 )
         return res
 
@@ -626,10 +622,10 @@ class CreateArcibaNcFile(models.TransientModel):
             if not inv:
                 errors.append(
                     _(
-                        'ptl #%(per_id)s: Unable to get associated invoice (%(per_name)s)'
-                    ),
-                    per_id=perc.id,
-                    per_name=perc.name,
+                        'ptl #%(per_id)s: Unable to get associated invoice (%(per_name)s)',
+                        per_id=perc.id,
+                        per_name=perc.name,
+                    )
                 )
                 continue
 
@@ -673,11 +669,11 @@ class CreateArcibaNcFile(models.TransientModel):
                 errors.append(
                     _(
                         'ptl #%(per_id)s: Percentage cannot be negative or'
-                        ' more than 99.99 (%(per_name)s) (Invoice ID %(inv_id)s)'
-                    ),
-                    per_id=perc.id,
-                    per_name=perc.name,
-                    inv_id=inv.id,
+                        ' more than 99.99 (%(per_name)s) (Invoice ID %(inv_id)s)',
+                        per_id=perc.id,
+                        per_name=perc.name,
+                        inv_id=inv.id,
+                    )
                 )
                 continue
 
@@ -740,38 +736,38 @@ class CreateArcibaNcFile(models.TransientModel):
         generated_file_rec = generated_files_model.create(
             {
                 'code': name,
-                'period_start': self.period_start,
-                'period_end': self.period_end,
+                'date_from': self.period_start,
+                'date_to': self.period_end,
             }
         )
 
         data_attach = {
             'name': name,
             'datas': binascii.b2a_base64(f.read().encode('latin-1')),
-            'datas_fname': name,
+            # 'datas_fname': name,
             'res_model': 'arciba.generated.files',
             'res_id': generated_file_rec.id,
         }
         doc = self.env['ir.attachment'].create(data_attach)
-        generated_file_rec.write({'attachment_id': data_attach.id})
+        generated_file_rec.write({'attachment_id': doc.id})
 
         close_window = {'type': 'ir.actions.act_window_close'}
-        download_file = {
-            'type': "ir.actions.act_url",
-            'url': '/web/binary/download_document?model=ir.attachment'
-            '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
-            'target': "self",
-            'no_destroy': False,
-        }
+        # download_file = {
+        #     'type': "ir.actions.act_url",
+        #     'url': '/web/binary/download_document?model=ir.attachment'
+        #     '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
+        #     'target': "self",
+        #     'no_destroy': False,
+        # }
 
-        res = {
-            'type': 'ir.actions.act_multi',
-            'actions': [
-                close_window,
-                download_file,
-            ],
-        }
-        return res
+        # res = {
+        #     'type': 'ir.actions.act_url',
+        #     'actions': [
+        #         close_window,
+        #         download_file,
+        #     ],
+        # }
+        return close_window
 
     def create_files(self):
         """
@@ -791,7 +787,7 @@ class CreateArcibaNcFile(models.TransientModel):
             JOIN account_journal per ON p.perception_id = per.id
             JOIN account_tax at ON per.tax_id=at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
-            AND i.state in %(state)s
+            AND i.state = %(state)s
             AND at.inform_arciba=True
             AND at.type_tax_use LIKE 'sale'  -- Only perceptions applied
             AND i.move_type IN ('out_refund')  -- Only including refunds(NC)
@@ -800,7 +796,7 @@ class CreateArcibaNcFile(models.TransientModel):
         query_vals = {
             'period_start': self.period_start,
             'period_end': self.period_end,
-            'state': ('open', 'paid'),
+            'state': 'posted',
         }
 
         cr.execute(perception_query, query_vals)
@@ -826,7 +822,7 @@ class CreateArcibaNcFile(models.TransientModel):
             self.write({'notes': errors})
             ir_model_data = self.env['ir.model.data']
             form_res = ir_model_data.get_object_reference(
-                'l10n_ar_arciba', 'view_create_arciba_nc_file'
+                'l10n_ar_eynes', 'view_create_arciba_nc_file'
             )
             form_id = form_res and form_res[1] or False
             res = {
@@ -848,9 +844,9 @@ class CreateArcibaNcFile(models.TransientModel):
             else:
                 raise ValidationError(
                     _(
-                        "No perceptions/retentions from %(start)s to %(end)s to inform eArciba."
-                    ),
-                    start=self.period_start,
-                    end=self.period_end,
+                        "No perceptions/retentions from %(start)s to %(end)s to inform eArciba.",
+                        start=self.period_start,
+                        end=self.period_end,
+                    )
                 )
         return res
