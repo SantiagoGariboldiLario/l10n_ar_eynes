@@ -324,16 +324,16 @@ class AccountJournal(models.Model):
         for journal in self:
             if journal.fce_sequence_id:
                 sequence = journal.fce_sequence_id._get_current_sequence()
-                journal.sequence_number_next = sequence.number_next_actual
+                journal.fce_sequence_number_next = sequence.number_next_actual
             else:
-                journal.sequence_number_next = 1
+                journal.fce_sequence_number_next = 1
 
     def _inverse_fce_seq_number_next(self):
         '''Inverse 'sequence_number_next' to edit the current sequence next number.'''
         for journal in self:
             if journal.fce_sequence_id and journal.sequence_number_next:
                 sequence = journal.fce_sequence_id._get_current_sequence()
-                sequence.sudo().number_next = journal.sequence_number_next
+                sequence.sudo().number_next = journal.fce_sequence_number_next
 
     @api.depends(
         'nce_sequence_id.use_date_range', 'nce_sequence_id.number_next_actual'
@@ -345,16 +345,16 @@ class AccountJournal(models.Model):
         for journal in self:
             if journal.nce_sequence_id:
                 sequence = journal.nce_sequence_id._get_current_sequence()
-                journal.sequence_number_next = sequence.number_next_actual
+                journal.nce_sequence_number_next = sequence.number_next_actual
             else:
-                journal.sequence_number_next = 1
+                journal.nce_sequence_number_next = 1
 
     def _inverse_nce_seq_number_next(self):
         '''Inverse 'sequence_number_next' to edit the current sequence next number.'''
         for journal in self:
-            if journal.nce_sequence_id and journal.sequence_number_next:
+            if journal.nce_sequence_id and journal.nce_sequence_number_next:
                 sequence = journal.nce_sequence_id._get_current_sequence()
-                sequence.sudo().number_next = journal.sequence_number_next
+                sequence.sudo().number_next = journal.nce_sequence_number_next
 
     @api.depends(
         'nde_sequence_id.use_date_range', 'nde_sequence_id.number_next_actual'
@@ -366,16 +366,16 @@ class AccountJournal(models.Model):
         for journal in self:
             if journal.nde_sequence_id:
                 sequence = journal.nde_sequence_id._get_current_sequence()
-                journal.sequence_number_next = sequence.number_next_actual
+                journal.nde_sequence_number_next = sequence.number_next_actual
             else:
-                journal.sequence_number_next = 1
+                journal.nde_sequence_number_next = 1
 
     def _inverse_nde_seq_number_next(self):
         '''Inverse 'sequence_number_next' to edit the current sequence next number.'''
         for journal in self:
-            if journal.nde_sequence_id and journal.sequence_number_next:
+            if journal.nde_sequence_id and journal.nde_sequence_number_next:
                 sequence = journal.nde_sequence_id._get_current_sequence()
-                sequence.sudo().number_next = journal.sequence_number_next
+                sequence.sudo().number_next = journal.nde_sequence_number_next
 
     @api.constrains('fcred_is_fce_emitter', 'warehouse_id')
     def _check_no_more_than_one_pos_fce_per_company(self):
