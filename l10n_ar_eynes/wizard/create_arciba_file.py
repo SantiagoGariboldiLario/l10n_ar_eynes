@@ -566,11 +566,8 @@ class CreateArcibaFiles(models.TransientModel):
 
         if errors:
             self.write({'notes': errors})
-            ir_model_data = self.env['ir.model.data']
-            form_res = ir_model_data.get_object_reference(
-                'l10n_ar_eynes', 'view_create_arciba_files'
-            )
-            form_id = form_res and form_res[1] or False
+            form_res = self.env.ref('l10n_ar_eynes.view_create_arciba_files')
+            form_id = form_res and form_res.id or False
             res = {
                 'name': _('Arciba'),
                 'view_type': 'form',
@@ -677,8 +674,10 @@ class CreateArcibaNcFile(models.TransientModel):
                 )
                 continue
 
-            # Out Inv Interval Number
-            out_inv_internal_number = inv.origin.replace('-', '')
+            # Origin Voucher type
+            voucher_type_code = str(
+                inv.associated_inv_ids[0].get_voucher_type()
+            )
 
             line = {
                 'type': 2,  # Perception
@@ -690,7 +689,7 @@ class CreateArcibaNcFile(models.TransientModel):
                 'nro_cert_propio': '',  # In perceptions this field is blank
                 'tipo_comp_origen_retenc': "01",  # Invoice
                 'letra_comprobante': denomination_name,
-                'nro_comprobante': out_inv_internal_number[:1],
+                'nro_comprobante': voucher_type_code,
                 'nro_doc_retenido': nro_doc_retenido,
                 'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
                 'fecha_ret_per': date_val,
@@ -730,7 +729,7 @@ class CreateArcibaNcFile(models.TransientModel):
             f.write('\r\n')
 
         f.close()
-        f = open(head_filename, 'r', "latin-1")
+        f = codecs.open(head_filename, 'r', "latin-1")
 
         name = 'eARCIBA_NC_%s.txt' % self.period_start
         generated_file_rec = generated_files_model.create(
@@ -820,11 +819,8 @@ class CreateArcibaNcFile(models.TransientModel):
 
         if errors:
             self.write({'notes': errors})
-            ir_model_data = self.env['ir.model.data']
-            form_res = ir_model_data.get_object_reference(
-                'l10n_ar_eynes', 'view_create_arciba_nc_file'
-            )
-            form_id = form_res and form_res[1] or False
+            form_res = self.env.ref('l10n_ar_eynes.view_create_arciba_nc_file')
+            form_id = form_res and form_res.id or False
             res = {
                 'name': _('Arciba'),
                 'view_type': 'form',
