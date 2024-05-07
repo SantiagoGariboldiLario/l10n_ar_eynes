@@ -685,6 +685,49 @@ class AccountMove(models.Model):
                         )
                         p.write({'date': date})
 
+    def _get_fce_prefix(self):
+        voucher_type = int(self.voucher_type_id.afip_code)
+        if voucher_type in [
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.factura_credito_electronica_a'
+                ).afip_code
+            ),
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.factura_credito_electronica_b'
+                ).afip_code
+            ),
+        ]:
+            return 'FCE'
+        elif voucher_type in [
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.nota_credito_electronica_a'
+                ).afip_code
+            ),
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.nota_credito_electronica_b'
+                ).afip_code
+            ),
+        ]:
+            return 'NCE'
+        elif voucher_type in [
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.factura_debito_electronica_a'
+                ).afip_code
+            ),
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.factura_debito_electronica_b'
+                ).afip_code
+            ),
+        ]:
+            return 'NDE'
+        return ''
+
     def _post(self, soft=True):
         for move in self:
             move.validate_period()
@@ -697,13 +740,10 @@ class AccountMove(models.Model):
         )
         for inv in sale_invoices - electronic_invoices:
             if not inv.posted_before:
-                inv.write(
-                    {
-                        'internal_number': inv.journal_id.get_sequence_from_invoice(
-                            inv
-                        )._next()
-                    }
-                )
+                sequence = inv.journal_id.get_sequence_from_invoice(inv)._next()
+                if inv.is_FCE_invoice:
+                    sequence = inv._get_fce_prefix() + sequence
+                inv.write({'internal_number': sequence})
 
         posted_moves = super(AccountMove, self)._post(soft=soft)
         posted_moves._set_perception_date()

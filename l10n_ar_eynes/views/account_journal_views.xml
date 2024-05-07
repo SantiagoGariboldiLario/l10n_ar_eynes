@@ -191,6 +191,101 @@
                         }"
                     />
                 </div>
+
+                <label
+                    for="fce_sequence_number_next"
+                    attrs="{
+                        'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
+                    }"
+                />
+                <div>
+                    <field
+                        name="fce_sequence_number_next"
+                        attrs="{
+                            'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
+                        }"
+                        style="padding-right: 1.0em"
+                    />
+                    <field
+                        name="fce_sequence_id"
+                        attrs="{
+                            'invisible': [
+                                '|',
+                                '|',
+                                ('id', '=', False),
+                                ('type', 'not in', ('sale')),
+                                ('fiscal_type', '!=', 'internal')
+                            ],
+                        }"
+                    />
+                </div>
+                <label
+                    for="nce_sequence_number_next"
+                    attrs="{
+                        'invisible': [
+                            '|',
+                            ('type', 'not in', ('sale')),
+                            ('fiscal_type', 'not in', ('internal')),
+                            ('type', 'not in', ('receipt', 'payment', 'retentions')),
+                    ],
+                }"
+                />
+                <div>
+                    <field
+                        name="nce_sequence_number_next"
+                        attrs="{
+                            'invisible': [
+                                '|',
+                                ('type', 'not in', ('sale')),
+                                ('fiscal_type', 'not in', ('internal')),
+                                ('type', 'not in', ('receipt', 'payment', 'retentions')),
+                            ],
+                        }"
+                        style="padding-right: 1.0em"
+                    />
+                    <field
+                        name="nce_sequence_id"
+                        attrs="{
+                            'invisible': [
+                                '|',
+                                '|',
+                                ('id', '=', False),
+                                ('type', 'not in', ('receipt', 'payment', 'retentions', 'perceptions')),
+                                ('type', '=', 'sale'),
+                                ('fiscal_type', '!=', 'internal'),
+                            ],
+                        }"
+                    />
+                </div>
+
+                <label
+                    for="nde_sequence_number_next"
+                    attrs="{
+                        'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
+                    }"
+                />
+                <div>
+                    <field
+                        name="nde_sequence_number_next"
+                        attrs="{
+                            'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
+                        }"
+                        style="padding-right: 1.0em"
+                    />
+                    <field
+                        name="nde_sequence_id"
+                        attrs="{
+                            'invisible': [
+                                '|',
+                                '|',
+                                ('id', '=', False),
+                                ('type', 'not in', ('sale')),
+                                ('fiscal_type', '!=', 'internal')
+                            ],
+                        }"
+                    />
+                </div>
+
             </field>
 
         </field>
