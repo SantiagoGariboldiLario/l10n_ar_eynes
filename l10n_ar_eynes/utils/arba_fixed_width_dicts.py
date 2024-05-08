@@ -71,7 +71,7 @@ HEAD_LINES_PER = {
         'length': 11,
         'padding': '0',
         'required': True,
-        'start_pos': 38,
+        'start_pos': 50,
         'type': 'string',
     },
     'letra_comprobante': {
@@ -82,14 +82,14 @@ HEAD_LINES_PER = {
         'start_pos': 25,
         'type': 'string',
     },
-    # 'monto_imponible': {
-    #     'alignment': 'right',
-    #     'length': 12,
-    #     'padding': '0',
-    #     'required': True,
-    #     'start_pos': 38,
-    #     'type': 'string',
-    # },
+    'monto_imponible': {
+        'alignment': 'right',
+        'length': 12,
+        'padding': '0',
+        'required': True,
+        'start_pos': 38,
+        'type': 'string',
+    },
     'numero_emision': {
         'alignment': 'right',
         'length': 8,
@@ -119,7 +119,7 @@ HEAD_LINES_PER = {
         'length': 1,
         'padding': ' ',
         'required': True,
-        'start_pos': 49,
+        'start_pos': 61,
         'type': 'string',
     },
 }
