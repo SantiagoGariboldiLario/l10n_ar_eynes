@@ -27,6 +27,10 @@ def int2xlscol(number, state=None):
 
 
 def get_line_with_total(line):
+    """
+    Calculates the total of an invoice based on all the taxes and the base value
+    """
+
     line["total"] = sum(line["taxes"])
     return line
 
@@ -232,6 +236,13 @@ class SubjournalXlsx(models.AbstractModel):
         return res, c_taxes
 
     def get_query_vals(self, types, obj):
+        """
+        This function executes a big query to return every invoice in a time range and its data.
+        It may seem weird that the returned columns 'tax_line_id' and 'tax_ids' are very similar:
+        They are neccesary because the only way (with the current DB architecture) to know if an \
+        invoice has untaxed values is to check if both of theese columns are null.
+        """
+
         q = """
         WITH all_lines AS (
             SELECT  l.move_id AS move_id,
