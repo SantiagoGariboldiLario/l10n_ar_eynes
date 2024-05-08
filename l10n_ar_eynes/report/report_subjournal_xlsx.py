@@ -26,6 +26,11 @@ def int2xlscol(number, state=None):
     return state
 
 
+def get_line_with_total(line):
+    line["total"] = sum(line["taxes"])
+    return line
+
+
 class SubjournalXlsx(models.AbstractModel):
     _name = 'report.report_xlsx.move_line_list_subj'
     _inherit = 'report.report_xlsx.abstract'
@@ -131,14 +136,14 @@ class SubjournalXlsx(models.AbstractModel):
         return all_taxes
 
     def get_lines(self, types, obj, cols):
-        res = self.get_query_vals(types, obj)
+        query_vals = self.get_query_vals(types, obj)
         # TODO: FIX RAISE USERERROR
-        if not len(res):
+        if not len(query_vals):
             raise UserError(_('There were no moves for this period'))
 
         c_taxes = [0] * len(cols)
         lines = {}
-        for line in res:
+        for line in query_vals:
             sign = 1
             sign_no_taxed = 1
             based_sign = 1
@@ -183,7 +188,6 @@ class SubjournalXlsx(models.AbstractModel):
                 )
             else:
                 llines = lines[dict_hash]
-                llines['total'] += (line['credit'] - line['debit']) * based_sign
                 llines['no_taxed'] += (
                     not line['tax_line_id']
                     and not line['tax_ids']
@@ -216,16 +220,16 @@ class SubjournalXlsx(models.AbstractModel):
                     if lines[dict_hash]['taxes'][i] != 0:
                         c_taxes[i] += 1
 
-        res = [v for k, v in lines.items()]
-        res2 = sorted(
-            res,
+        res = [get_line_with_total(v) for k, v in lines.items()]
+        res.sort(
             key=lambda k: k['date'].strftime('%d/%m/%Y')
             + k['invoice_type']
             + k['invoice_number'][:4]
             + ('0' if k['partner'].startswith('Agrupado') else '1')
-            + k['invoice_number'],
+            + k['invoice_number']
         )
-        return res2, c_taxes
+
+        return res, c_taxes
 
     def get_query_vals(self, types, obj):
         q = """
