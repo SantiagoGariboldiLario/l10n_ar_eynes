@@ -475,7 +475,9 @@ class ReportFilesGenerator(models.Model):
                 'numero_sucursal': internal_number_split[0],
                 'numero_constancia': internal_number_split[1],
                 'tipo_comprobante': tipo_cbte,
-                'letra_comprobante': tax_line.invoice_id.denomination or '',
+                'letra_comprobante': (
+                    tax_line.invoice_id.denomination or ''
+                ).upper(),
                 'monto_percepcion': moneyfmt(
                     Decimal(tax_line.amount) * sign, places=2, ndigits=9, dp=','
                 ),
