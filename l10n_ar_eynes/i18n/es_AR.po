@@ -7604,7 +7604,7 @@ msgstr "Recibo"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__receivable_rejected_account_id
 msgid "Receivable Rejected Check Account"
-msgstr "Cuenta de cheque rechazada por cobrar"
+msgstr "Cuenta de cheques rechazados propios"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__receiving_partner_id
@@ -7748,7 +7748,7 @@ msgstr "Rechazado"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__rejected_account_id
 msgid "Rejected Check Account"
-msgstr "Cuenta de cheques rechazados"
+msgstr "Cuenta de cheques rechazados de terceros"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
