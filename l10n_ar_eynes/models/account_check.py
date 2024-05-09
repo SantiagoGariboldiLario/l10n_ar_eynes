@@ -317,6 +317,7 @@ class AccountCheck(models.Model):
             move_vals = {
                 'ref': name_ref,
                 'journal_id': def_check_journal.id,
+                'date': date,
             }
             move_id = self.env['account.move'].create(move_vals)
 
