@@ -14,9 +14,6 @@
                         </group>
                     </group>
                     <group>
-                        <field name="generate_rejection_journal_entry" />
-                    </group>
-                    <group>
                         <field name="note" />
                     </group>
                     <footer>
@@ -42,11 +39,7 @@
                 <sheet>
                     <group>
                         <field name="reject_date" />
-                        <field
-                            name="company_id"
-                            groups="base.group_multi_company"
-                            widget="selection"
-                        />
+                        <field name="company_id" groups="base.group_multi_company" widget="selection" />
                     </group>
                     <group>
                         <field

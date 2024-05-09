@@ -15,7 +15,7 @@ class RejectIssuedCheckWizard(models.TransientModel):
     )
     generate_rejection_journal_entry = fields.Boolean(
         string='Generate Rejection Journal Entry', default=True
-    )
+    )  # Este campo queda deprecado a partir del 9/5/24, aparentemente SIEMPRE se genera el asiento
 
     def action_reject(self):
         """action that rejects the issued check"""
