@@ -27,7 +27,6 @@ class AccountCheckConfig(models.Model):
     receivable_rejected_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Receivable Rejected Check Account',
-        domain=[('internal_type', '=', 'receivable')],
         help="Partner's account in debit note generation.",
         required=True,
     )
