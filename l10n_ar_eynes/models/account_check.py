@@ -194,34 +194,87 @@ class AccountCheck(models.Model):
                     )
         return super(AccountCheck, self).unlink()
 
-    def cancel_check(self, internal_type):
+    def cancel_check(self):
         """
         This method sets the checks state to 'cancelled'.
-
-        Args:
-            internal_type (selection): used to fiter 3rd party or issued
 
         Raises:
             UserError: Error coming from 3rd party check validation
             ValidationError: Error coming from issued check validation
         """
-        if internal_type == 'third_party':
+        AccountCheckConfig = self.env['account.check.config']
+        AccountMoveLine = self.env['account.move.line']
+        if self.internal_type == 'third_party':
             state = 'third_party_check_state'
-            for check in self.filtered(
-                lambda rec: rec.internal_type == internal_type
-            ):
-                if check.third_party_check_state != 'in_wallet':
+            for check in self:
+                if check.third_party_check_state == 'deposited':
                     raise UserError(
                         _(
-                            "Third Check Error! You cannot cancel check if it is "
-                            "not in Wallet"
+                            "Third Check Error! You cannot cancel check if it is deposited."
                         )
                     )
-        elif internal_type == 'issued':
+            for check in self:
+                rej_check_account = AccountCheckConfig.search(
+                    [('company_id', '=', self.env.user.company_id.id)]
+                ).rejected_account_id
+                if not rej_check_account:
+                    raise UserError(
+                        _(
+                            "Error! There is no Account configured for rejected third checks."
+                        )
+                    )
+                check_account = AccountCheckConfig.search(
+                    [('company_id', '=', self.env.user.company_id.id)]
+                ).account_id
+                if not check_account:
+                    raise UserError(
+                        _(
+                            "Error! There is no Account configured for third checks."
+                        )
+                    )
+                def_check_journal = AccountCheckConfig.search(
+                    [('company_id', '=', self.env.user.company_id.id)]
+                ).deferred_journal_id
+                if not def_check_journal:
+                    raise UserError(
+                        _(
+                            "Error! There is no Journal configured for deferred checks."
+                        )
+                    )
+
+                name_ref = 'Cancel Check ' + check.number
+                move_vals = {
+                    'ref': name_ref,
+                    'journal_id': def_check_journal.id,
+                    # 'date': date,
+                }
+                move_id = self.env['account.move'].create(move_vals)
+
+                AccountMoveLine.with_context(check_move_validity=False).create(
+                    {
+                        'journal_id': def_check_journal.id,
+                        # 'date': date,
+                        'name': name_ref,
+                        'account_id': rej_check_account.id,
+                        'debit': check.amount,
+                        'move_id': move_id.id,
+                    }
+                )
+
+                AccountMoveLine.with_context(check_move_validity=False).create(
+                    {
+                        'journal_id': def_check_journal.id,
+                        # 'date': date,
+                        'name': name_ref,
+                        'account_id': check_account.id,
+                        'credit': check.amount,
+                        'move_id': move_id.id,
+                    }
+                )
+                move_id._post()
+        elif self.internal_type == 'issued':
             state = 'issued_check_state'
-            for check in self.filtered(
-                lambda rec: rec.internal_type == internal_type
-            ):
+            for check in self:
                 if check.type == 'deferred' and check.accredited:
                     raise ValidationError(
                         _(
@@ -234,11 +287,11 @@ class AccountCheck(models.Model):
         self.write({state: 'cancelled'})
 
     def expired_check(self):
-        if self.internal_type == 'third_party':
-            state = 'third_party_check_state'
-        elif self.internal_type == 'issued':
-            state = 'issued_check_state'
-        self.write({state: 'expired'})
+        if self.internal_type == 'issued':
+            self.write({'issued_check_state': 'expired'})
+        else:
+            self.cancel_check()
+            self.write({'third_party_check_state': 'returned'})
 
     # ISSUED CHECK FIELDS AND METHODS
     issued_check_state = fields.Selection(
@@ -289,9 +342,12 @@ class AccountCheck(models.Model):
                     check.accredited = False
 
     def debit_checks(self, date):
-        """method for checks debitation"""
+        """Method for issued checks debitation."""
         AccountCheckConfig = self.env['account.check.config']
         AccountMoveLine = self.env['account.move.line']
+
+        if 'third_party' in self.mapped('internal_type'):
+            raise UserError(_("You can't debit a Thirt Party Check"))
 
         for check in self:
             if check.issued_check_state != "waiting_accreditation":
