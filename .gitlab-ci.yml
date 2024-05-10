@@ -6,7 +6,7 @@ lint-flake8:
   image: python:3.8-alpine
   stage: test
   tags:
-    - ssh_client
+    - ssh-client
   variables:
     FOLDER_NAME: "logs"
     LOG_NAME: "flake8.log"
@@ -29,7 +29,7 @@ lint-pylint:
   image: python:3.8-alpine
   stage: test
   tags:
-    - ssh_client
+    - ssh-client
   variables:
     FOLDER_NAME: "logs"
     LOG_NAME_NM: "pylint-not-mandatory.log"
