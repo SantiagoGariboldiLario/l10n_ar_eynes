@@ -18,6 +18,7 @@
                         <field name="deferred_account_id" />
                         <field name="receivable_rejected_account_id" />
                         <field name="rejected_account_id" />
+                        <field name="expired_issued_checks_account_id" />
                         <field name="rejected_issued_checks_journal_id" />
                         <field name="deferred_journal_id" />
                     </group>
@@ -38,6 +39,7 @@
                 <field name="deferred_account_id" />
                 <field name="receivable_rejected_account_id" />
                 <field name="rejected_account_id" />
+                <field name="expired_issued_checks_account_id" />
                 <field name="rejected_issued_checks_journal_id" />
                 <field name="deferred_journal_id" />
             </tree>

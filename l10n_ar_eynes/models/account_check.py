@@ -42,7 +42,10 @@ class AccountCheckConfig(models.Model):
         required=True,
         default=lambda self: self.env.user.company_id.id,
     )
-
+    expired_issued_checks_account_id = fields.Many2one(
+        comodel_name='account.account',
+        required=True,
+    )
     rejected_issued_checks_journal_id = fields.Many2one(
         comodel_name='account.journal',
         readonly=False,
@@ -212,35 +215,32 @@ class AccountCheck(models.Model):
                             "Third Check Error! You cannot cancel check if it is deposited."
                         )
                     )
+            rej_check_account = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).rejected_account_id
+            if not rej_check_account:
+                raise UserError(
+                    _(
+                        "Error! There is no Account configured for rejected third checks."
+                    )
+                )
+            check_account = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).account_id
+            if not check_account:
+                raise UserError(
+                    _("Error! There is no Account configured for third checks.")
+                )
+            def_check_journal = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).deferred_journal_id
+            if not def_check_journal:
+                raise UserError(
+                    _(
+                        "Error! There is no Journal configured for deferred checks."
+                    )
+                )
             for check in self:
-                rej_check_account = AccountCheckConfig.search(
-                    [('company_id', '=', self.env.user.company_id.id)]
-                ).rejected_account_id
-                if not rej_check_account:
-                    raise UserError(
-                        _(
-                            "Error! There is no Account configured for rejected third checks."
-                        )
-                    )
-                check_account = AccountCheckConfig.search(
-                    [('company_id', '=', self.env.user.company_id.id)]
-                ).account_id
-                if not check_account:
-                    raise UserError(
-                        _(
-                            "Error! There is no Account configured for third checks."
-                        )
-                    )
-                def_check_journal = AccountCheckConfig.search(
-                    [('company_id', '=', self.env.user.company_id.id)]
-                ).deferred_journal_id
-                if not def_check_journal:
-                    raise UserError(
-                        _(
-                            "Error! There is no Journal configured for deferred checks."
-                        )
-                    )
-
                 name_ref = 'Cancel Check ' + check.number
                 move_vals = {
                     'ref': name_ref,
@@ -287,6 +287,65 @@ class AccountCheck(models.Model):
 
     def expired_check(self):
         if self.internal_type == 'issued':
+            AccountCheckConfig = self.env['account.check.config']
+            AccountMoveLine = self.env['account.move.line']
+            rej_check_account = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).expired_issued_checks_account_id
+            if not rej_check_account:
+                raise UserError(
+                    _(
+                        "Error! There is no Account configured for rejected issued checks."
+                    )
+                )
+            check_account = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).receivable_rejected_account_id
+            if not check_account:
+                raise UserError(
+                    _(
+                        "Error! There is no Account configured for issued checks."
+                    )
+                )
+            def_check_journal = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).rejected_issued_checks_journal_id
+            if not def_check_journal:
+                raise UserError(
+                    _(
+                        "Error! There is no Journal configured for deferred checks."
+                    )
+                )
+            name_ref = 'Cancel Check ' + self.number
+            move_vals = {
+                'ref': name_ref,
+                'journal_id': def_check_journal.id,
+                # 'date': date,
+            }
+            move_id = self.env['account.move'].create(move_vals)
+
+            AccountMoveLine.with_context(check_move_validity=False).create(
+                {
+                    'journal_id': def_check_journal.id,
+                    # 'date': date,
+                    'name': name_ref,
+                    'account_id': check_account.id,
+                    'debit': self.amount,
+                    'move_id': move_id.id,
+                }
+            )
+
+            AccountMoveLine.with_context(check_move_validity=False).create(
+                {
+                    'journal_id': def_check_journal.id,
+                    # 'date': date,
+                    'name': name_ref,
+                    'account_id': rej_check_account.id,
+                    'credit': self.amount,
+                    'move_id': move_id.id,
+                }
+            )
+            move_id._post()
             self.write({'issued_check_state': 'expired'})
         else:
             self.cancel_check()
