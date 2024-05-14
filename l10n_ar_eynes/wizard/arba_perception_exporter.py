@@ -187,9 +187,9 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
                 'letra_comprobante': line.invoice_id.denomination.upper(),
                 'numero_sucursal': internal_number_split[0][-4:],
                 'numero_emision': internal_number_split[1],
-                # 'monto_imponible': moneyfmt(
-                #     Decimal(base) * sign, places=2, ndigits=10, dp=','
-                # ),
+                'monto_imponible': moneyfmt(
+                    Decimal(base) * sign, places=2, ndigits=10, dp=','
+                ),
                 'importe_percepcion': moneyfmt(
                     Decimal(amount) * sign, places=2, ndigits=9, dp=','
                 ),

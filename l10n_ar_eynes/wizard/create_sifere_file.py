@@ -9,7 +9,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 
 from ..utils.sicore_fixed_width import FixedWidth, moneyfmt
@@ -317,8 +317,8 @@ class ReportFilesGenerator(models.Model):
             else:
                 jurisdiction_code = jurisdiction.code
 
-            internal_number_split = tax_line.invoice_id.internal_number.split(
-                '-'
+            internal_number_split = (
+                tax_line.invoice_id.supplier_move_reference.split('-')
             )
             tipo_cbte = self._get_tipo_comprobante(tax_line.invoice_id)
             if tipo_cbte == 'C':
@@ -368,7 +368,7 @@ class ReportFilesGenerator(models.Model):
         JOIN account_tax at ON per.tax_id=at.id
         JOIN account_move i ON p.invoice_id=i.id
         WHERE p.date BETWEEN %(date_from)s AND %(date_to)s
-        AND i.state IN %(inv_state)s
+        AND i.state = %(inv_state)s
         AND at.retention_type in %(type)s AND at.type_tax_use LIKE 'purchase'
         AND p.company_id = %(company_id)s
         AND at.is_bank_settlement IS NOT True
@@ -398,12 +398,12 @@ class ReportFilesGenerator(models.Model):
     @api.model
     def _get_tipo_comprobante(self, invoice_id):
         res = None
-        if invoice_id.type == 'in_invoice':
+        if invoice_id.move_type == 'in_invoice':
             if invoice_id.is_debit_note:
                 res = 'D'
             else:
                 res = 'F'
-        elif invoice_id.type == 'in_refund':
+        elif invoice_id.move_type == 'in_refund':
             res = 'C'
         return res
 
@@ -439,11 +439,19 @@ class ReportFilesGenerator(models.Model):
                     nro_doc_percibido[2:10],
                     nro_doc_percibido[10],
                 )
+
+            if not tax_line.perception_id.tax_id.state_id:
+                raise UserError(
+                    _(
+                        "%(per_name)s doesn't have State configured",
+                        per_name=tax_line.perception_id.tax_id.name,
+                    )
+                )
             jurisdiction = SifereJurisdiction.search(
                 [('state', '=', tax_line.perception_id.tax_id.state_id.id)]
             )
+            jurisdiction_code = 0
             if not jurisdiction.code:
-                jurisdiction_code = 0
                 if not SifereConfig.ignore_jurisdiction:
                     errors.append(
                         {
@@ -454,9 +462,7 @@ class ReportFilesGenerator(models.Model):
             else:
                 jurisdiction_code = jurisdiction.code
 
-            internal_number_split = tax_line.invoice_id.internal_number.split(
-                '-'
-            )
+            internal_number_split = tax_line.invoice_id.name.split('-')
             tipo_cbte = self._get_tipo_comprobante(tax_line.invoice_id)
             if tipo_cbte == 'C':
                 sign = -1
@@ -469,7 +475,9 @@ class ReportFilesGenerator(models.Model):
                 'numero_sucursal': internal_number_split[0],
                 'numero_constancia': internal_number_split[1],
                 'tipo_comprobante': tipo_cbte,
-                'letra_comprobante': tax_line.invoice_id.denomination or '',
+                'letra_comprobante': (
+                    tax_line.invoice_id.denomination or ''
+                ).upper(),
                 'monto_percepcion': moneyfmt(
                     Decimal(tax_line.amount) * sign, places=2, ndigits=9, dp=','
                 ),

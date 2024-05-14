@@ -11,6 +11,10 @@ class AccountPaymentMethod(models.Model):
             'mode': 'multi',
             'domain': [('type', '=', 'bank')],
         }
+        res['checks'] = {
+            'mode': 'multi',
+            'domain': [('type', '=', 'bank')],
+        }
         return res
 
 
@@ -19,9 +23,7 @@ class AccountPaymentMethodLine(models.Model):
 
     number = fields.Integer('Number')
     type = fields.Selection(
-        selection=[
-            ('common', 'Common'),
-            ('deferred', 'Deferred')],
+        selection=[('common', 'Common'), ('deferred', 'Deferred')],
         string='Type',
     )
     format = fields.Selection(
