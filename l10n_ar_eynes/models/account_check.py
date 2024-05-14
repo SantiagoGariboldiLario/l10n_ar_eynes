@@ -65,6 +65,7 @@ class AccountCheckConfig(models.Model):
 
 class AccountCheck(models.Model):
     _name = 'account.check'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Check'
     _rec_name = 'number'
 
@@ -140,6 +141,9 @@ class AccountCheck(models.Model):
         required=True,
         readonly=True,
         default=lambda self: self.env.company.id,
+    )
+    reject_move_id = fields.Many2one(
+        comodel_name='account.move', string='Reject Account Move'
     )
 
     @api.depends(
@@ -253,6 +257,7 @@ class AccountCheck(models.Model):
         ],
         default='draft',
         string='Issued Check State',
+        tracking=True,
     )
     checkbook_id = fields.Many2one(
         comodel_name='account.payment.method.line',
@@ -479,6 +484,7 @@ class AccountCheck(models.Model):
         ],
         default='draft',
         string='Third Party Check State',
+        tracking=True,
     )
     deposit_bank_id = fields.Many2one(
         comodel_name='res.partner.bank', string='Deposit Account'
