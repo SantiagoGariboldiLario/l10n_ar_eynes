@@ -22,6 +22,7 @@
 import binascii
 import codecs
 import logging
+import re
 import tempfile
 import time
 from decimal import Decimal
@@ -78,6 +79,15 @@ class CreateArcibaFiles(models.TransientModel):
                     name=inv.fiscal_position_id.name,
                 )
             )
+        if (
+            code_fiscal_position
+            == self.env.ref('l10n_ar_eynes.fiscal_position_rem').afip_code
+        ):
+            code_fiscal_position = 4
+        elif code_fiscal_position in [
+            self.env.ref('l10n_ar_eynes.fiscal_position_se').afip_code,
+        ]:
+            code_fiscal_position = 3
         return code_fiscal_position
 
     def generate_fw_file(self, data_lst):
@@ -144,25 +154,25 @@ class CreateArcibaFiles(models.TransientModel):
         f.close()
         return close_window
 
-    def _get_invoice_iva_total(self, invoice):
+    def _get_invoice_tax_lines(self, invoice):
+        tax_line_ids = invoice.line_ids.filtered(lambda line: line.tax_line_id)
+        return tax_line_ids
+
+    def _get_invoice_vat_tax_lines(self, invoice):
+        tax_line_ids = self._get_invoice_tax_lines(invoice).filtered(
+            lambda line: line.tax_line_id.tax_group_id.group_type
+            == self.env.ref('l10n_ar_eynes.vat_tax_group').group_type
+        )
+        return tax_line_ids
+
+    def _get_invoice_iva_total(self, invoices):
         """
         Expects an invoice and return total amount of iva tax
         """
         iva_amount = 0
-        for i in invoice.invoice_line_ids:
-            res = i._compute_all_vat_taxes()
-            amount_total = res[i.id]['amount_total']
-            amount_taxed = res[i.id]['amount_taxed']
-            if amount_total < amount_taxed:
-                ValidationError(
-                    _(
-                        'Amount total must be greater than '
-                        'amount taxed on Invoice ID %(inv_id)s',
-                        inv_id=invoice.id,
-                    )
-                )
-            iva_partial = amount_total - amount_taxed
-            iva_amount += iva_partial
+        for inv in invoices:
+            iva_lines = self._get_invoice_vat_tax_lines(inv)
+            iva_amount += sum(iva_lines.mapped('price_unit'))
         return iva_amount
 
     @api.model
@@ -174,17 +184,7 @@ class CreateArcibaFiles(models.TransientModel):
         res = []
         errors = []
         for ret in ret_obj.browse(retention_ids):
-            inv = ret.invoice_id
-            if not inv:
-                errors.append(
-                    _(
-                        'rtl #%(ret_id)s: Unable to get associated invoice (%(ret_name)s)',
-                        ret_id=ret.id,
-                        ret_name=ret.name,
-                    )
-                )
-                continue
-
+            # **-------**  Datos desde la Retención: **--------**
             # Ret Date
             date_val = time.strptime(
                 str(ret.date), '%Y-%m-%d'
@@ -192,131 +192,161 @@ class CreateArcibaFiles(models.TransientModel):
             date_val = time.strftime(
                 '%d/%m/%Y', date_val
             )  # Datetime->String: dd/mm/yyyy
-
-            # Inv date
-            date_inv = time.strptime(
-                str(inv.invoice_date), '%Y-%m-%d'
-            )  # String(YYYY-MM-DD)->Datetime
-            date_inv = time.strftime(
-                '%d/%m/%Y', date_inv
-            )  # Datetime->String: dd/mm/yyyy
-
-            # Denomination
-            denomination_name = inv.denomination
-
-            # Internal number
-            internal_number = inv.internal_number.replace('-', '')
-
             # Nro Cert
             nro_cert_propio = ret.certificate_no or '0000000000000000'
-
-            # Invoice total
-            inv_amount_total = inv.amount_total
-
-            # Type of document partner
-            nro_doc_retenido = (
-                inv.partner_id.vat.replace('-', '')
-                if inv.partner_id.vat
-                else '00000000000'
-            )
-            tipo_doc_retenido = self._get_partner_document_type_code(
-                inv.partner_id
-            )
-
-            # Untaxed amount
-            amount_untaxed = inv.amount_untaxed
-
             # Ret / Per applied
             ret_per_applied = ret.amount
-
             # Ret / Per base
-            base_amount = ret.base
+            base_amount = ret.base_amount
 
+            # **-------**  Datos desde la Orden de Pago: **--------**
+            op = ret.payment_order_id
+            partner = op.partner_id
             # Alicuota
-            percentage = (ret_per_applied / float(base_amount)) * 100
+            percentage = (
+                self.env["res.partner.retention"]
+                .search(
+                    [
+                        ("retention_id", "=", ret.retention_id.id),
+                        ("partner_id", "=", partner.id),
+                        ("period", "=", self.period_start),
+                    ]
+                )
+                .percent
+            )
             if percentage < 0 or percentage > 99.99:
                 errors.append(
                     _(
                         'rtl #%(ret_id)s: Percentage cannot be negative or '
-                        'more than 99.99 (%(ret_name)s) (Invoice ID %(inv_id)s)',
+                        'more than 99.99 (%(ret_name)s) (OP ID %(op_id)s)',
                         ret_id=ret.id,
                         ret_name=ret.name,
-                        inv_id=inv.id,
+                        op_id=ret.voucher_number,
                     )
                 )
                 continue
-
-            # Iva Amount
-            inv_iva_amount = 0.0
-            if denomination_name in ('A', 'M'):
-                inv_iva_amount = self._get_invoice_iva_total(inv)
-
-            # Partner Data
-            pos_fiscal_retenido = self._get_partner_fiscal_position_code(inv)
-            razon_social_retenido = (
-                (inv.partner_id.name).replace('ñ', 'n').replace('Ñ', 'N')
-            )
-
-            # IIBB
-            ppids = ret.partner_id.retention_ids
-            ret_partner = ppids.filtered(
-                lambda x: x.retention_id == ret.retention_id
-            )
-            ret_partner = (
-                ret_partner[0] if len(ret_partner) > 1 else ret_partner
-            )
-            sit_iibb = self._get_partner_iibb_code(ret_partner.sit_iibb)
-            if not sit_iibb:
-                errors.append(
-                    _(
-                        'rtl #%(ret_id)s: IIBB Situation cannot be empty'
-                        ' (%(ret_name)s) (Partner %(part_name)s)',
-                        ret_id=ret.id,
-                        ret_name=ret.name,
-                        part_name=razon_social_retenido,
-                    )
+            elif percentage != 0.0:
+                # Type of document partner
+                nro_doc_retenido = (
+                    partner.vat.replace('-', '')
+                    if partner.vat
+                    else '00000000000'
                 )
+                tipo_doc_retenido = self._get_partner_document_type_code(
+                    partner
+                )
+                # Voucher date
+                voucher_date = time.strptime(
+                    str(op.date), '%Y-%m-%d'
+                )  # String(YYYY-MM-DD)->Datetime
+                voucher_date = time.strftime(
+                    '%d/%m/%Y', voucher_date
+                )  # Datetime->String: dd/mm/yyyy
+                # Internal number
+                voucher_number = re.sub(r"\D", "", op.number)
+                # Partner Data
+                pos_fiscal_retenido = (
+                    partner.property_account_position_id.afip_code
+                )
+                if (
+                    pos_fiscal_retenido
+                    == self.env.ref(
+                        'l10n_ar_eynes.fiscal_position_rem'
+                    ).afip_code
+                ):
+                    pos_fiscal_retenido = 4
+                elif pos_fiscal_retenido in [
+                    self.env.ref('l10n_ar_eynes.fiscal_position_se').afip_code,
+                ]:
+                    pos_fiscal_retenido = 3
 
-            nro_insc_iibb = inv.partner_id.nro_insc_iibb or '00000000000'
+                razon_social_retenido = (
+                    (partner.name).replace('ñ', 'n').replace('Ñ', 'N')
+                )
+                # IIBB
+                ppids = partner.retention_ids
+                ret_partner = ppids.filtered(
+                    lambda x: x.retention_id == ret.retention_id
+                )
+                ret_partner = (
+                    ret_partner[0] if len(ret_partner) > 1 else ret_partner
+                )
+                sit_iibb = self._get_partner_iibb_code(ret_partner.sit_iibb)
+                if not sit_iibb:
+                    errors.append(
+                        _(
+                            'rtl #%(ret_id)s: IIBB Situation cannot be empty'
+                            ' (%(ret_name)s) (Partner %(part_name)s)',
+                            ret_id=ret.id,
+                            ret_name=ret.name,
+                            part_name=razon_social_retenido,
+                        )
+                    )
 
-            line = {
-                'type': 1,  # Retention
-                'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
-                'fecha': date_val,
-                'tipo_comp_origen_retenc': "03",  # Account Voucher (We pay to supplier)
-                'letra_comprobante': denomination_name,
-                'numero_comprobante': internal_number,
-                'fecha_comprobante': date_inv,
-                'monto_comprobante': moneyfmt(
-                    Decimal(inv_amount_total), places=2, ndigits=13, dp=','
-                ),
-                'nro_cert_propio': str(nro_cert_propio),
-                'tipo_doc_retenido': tipo_doc_retenido,
-                'nro_doc_retenido': nro_doc_retenido,
-                'sit_iibb_retenido': sit_iibb,
-                'nro_insc_iibb_retenido': nro_insc_iibb,
-                'pos_fiscal_retenido': pos_fiscal_retenido,
-                'razon_social_retenido': razon_social_retenido,
-                'importe_otros_conceptos': moneyfmt(
-                    Decimal(amount_untaxed), places=2, ndigits=13, dp=','
-                ),
-                'importe_iva': moneyfmt(
-                    Decimal(inv_iva_amount), places=2, ndigits=13, dp=','
-                ),
-                'monto_sujeto_a_ret_per': moneyfmt(
-                    Decimal(base_amount), places=2, ndigits=13, dp=','
-                ),
-                'alicuota': moneyfmt(
-                    Decimal(percentage), places=2, ndigits=4, dp=','
-                ),
-                'ret_per_aplicada': moneyfmt(
-                    Decimal(ret_per_applied), places=2, ndigits=13, dp=','
-                ),
-                'monto_total_ret_per': moneyfmt(
-                    Decimal(ret_per_applied), places=2, ndigits=13, dp=','
-                ),
-            }
-            res.append(line)
+                # **-------**  Datos desde las Facturas: **--------**
+                op_lines = op.debt_line_ids.filtered(
+                    lambda line: line.amount != 0
+                )
+                invoices = op_lines.mapped('invoice_id')
+                if not len(invoices):
+                    errors.append(
+                        _(
+                            'rtl #%(ret_id)s: Unable to get associated invoice (%(ret_name)s)',
+                            ret_id=ret.id,
+                            ret_name=ret.name,
+                        )
+                    )
+                    continue
+                # Denomination
+                denomination_name = ''
+                # Invoice total
+                op_amount_total = sum(op_lines.mapped('amount'))
+                # Iva Amount
+                inv_iva_amount = 0.0
+                # # Monto de otros conceptos:
+                amount_others = op_amount_total - inv_iva_amount - base_amount
+
+                line = {
+                    'type': 1,  # Retention
+                    'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
+                    'fecha': date_val,
+                    'tipo_comp_origen_retenc': "03",  # Account Voucher (We pay to supplier)
+                    'letra_comprobante': denomination_name,
+                    'numero_comprobante': voucher_number,
+                    'fecha_comprobante': voucher_date,
+                    'monto_comprobante': moneyfmt(
+                        Decimal(op_amount_total), places=2, ndigits=13, dp=','
+                    ),
+                    'nro_cert_propio': str(nro_cert_propio),
+                    'tipo_doc_retenido': tipo_doc_retenido,
+                    'nro_doc_retenido': nro_doc_retenido,
+                    # 'sit_iibb_retenido': sit_iibb,
+                    'sit_iibb_retenido': 2,
+                    'nro_insc_iibb_retenido': nro_doc_retenido,
+                    'pos_fiscal_retenido': pos_fiscal_retenido,
+                    'razon_social_retenido': razon_social_retenido,
+                    'importe_otros_conceptos': moneyfmt(
+                        Decimal(amount_others), places=2, ndigits=13, dp=','
+                    ),
+                    'importe_iva': moneyfmt(
+                        Decimal(inv_iva_amount), places=2, ndigits=13, dp=','
+                    ),
+                    'monto_sujeto_a_ret_per': moneyfmt(
+                        Decimal(base_amount), places=2, ndigits=13, dp=','
+                    ),
+                    'alicuota': moneyfmt(
+                        Decimal(percentage), places=2, ndigits=4, dp=','
+                    ),
+                    'ret_per_aplicada': moneyfmt(
+                        Decimal(ret_per_applied), places=2, ndigits=13, dp=','
+                    ),
+                    'monto_total_ret_per': moneyfmt(
+                        Decimal(ret_per_applied), places=2, ndigits=13, dp=','
+                    ),
+                    'aceptacion': '',  # Para comprobantes mipyme
+                    'fecha_aceptacion': '',  # Para comprobantes mipyme
+                }
+                res.append(line)
         if not errors:
             return None, res
         else:
@@ -360,7 +390,7 @@ class CreateArcibaFiles(models.TransientModel):
             )  # Datetime->String: dd/mm/yyyy
 
             # Denomination
-            denomination_name = inv.denomination
+            denomination_name = inv.denomination.upper()
 
             # Internal number
             internal_number = inv.internal_number.replace('-', '')
@@ -378,9 +408,6 @@ class CreateArcibaFiles(models.TransientModel):
                 inv.partner_id
             )
 
-            # Untaxed amount
-            amount_untaxed = inv.amount_untaxed
-
             # Ret / Per applied
             ret_per_applied = perc.amount
 
@@ -388,7 +415,17 @@ class CreateArcibaFiles(models.TransientModel):
             base_amount = perc.base
 
             # Alicuota
-            percentage = (ret_per_applied / float(base_amount)) * 100
+            percentage = (
+                self.env["res.partner.perception"]
+                .search(
+                    [
+                        ("perception_id", "=", perc.perception_id.id),
+                        ("partner_id", "=", inv.partner_id.id),
+                        ("period", "=", self.period_start),
+                    ]
+                )
+                .percent
+            )
             if percentage < 0 or percentage > 99.99:
                 errors.append(
                     _(
@@ -400,78 +437,85 @@ class CreateArcibaFiles(models.TransientModel):
                     )
                 )
                 continue
+            elif percentage != 0.0:
+                # Iva Amount
+                inv_iva_amount = 0.0
+                if denomination_name in ('A', 'M'):
+                    inv_iva_amount = self._get_invoice_iva_total(inv)
 
-            # Iva Amount
-            inv_iva_amount = 0.0
-            if denomination_name in ('A', 'M'):
-                inv_iva_amount = self._get_invoice_iva_total(inv)
-
-            # Partner Data
-            pos_fiscal_retenido = self._get_partner_fiscal_position_code(inv)
-            razon_social_retenido = (
-                (inv.partner_id.name).replace('ñ', 'n').replace('Ñ', 'N')
-            )
-
-            # IIBB
-            ppids = perc.partner_id.perception_ids
-            perc_partner = ppids.filtered(
-                lambda x: x.perception_id == perc.perception_id
-            )
-            perc_partner = (
-                perc_partner[0] if len(perc_partner) > 1 else perc_partner
-            )
-            sit_iibb = self._get_partner_iibb_code(perc_partner.sit_iibb)
-            if not sit_iibb:
-                errors.append(
-                    _(
-                        'ptl #%(per_id)s: IIBB Situation cannot be'
-                        ' empty (%(per_name)s) (Partner %(part_name)s)',
-                        per_id=perc.id,
-                        per_name=perc.name,
-                        part_name=razon_social_retenido,
-                    )
+                amount_others = abs(
+                    round(inv_amount_total - inv_iva_amount - base_amount, 2)
                 )
 
-            nro_insc_iibb = inv.partner_id.nro_insc_iibb or '00000000000'
+                # Partner Data
+                pos_fiscal_retenido = self._get_partner_fiscal_position_code(
+                    inv
+                )
+                razon_social_retenido = (
+                    (inv.partner_id.name).replace('ñ', 'n').replace('Ñ', 'N')
+                )
 
-            line = {
-                'type': 2,  # Perception
-                'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
-                'fecha': date_val,
-                'tipo_comp_origen_retenc': "01",  # Invoice
-                'letra_comprobante': denomination_name,
-                'numero_comprobante': internal_number,
-                'fecha_comprobante': date_inv,
-                'monto_comprobante': moneyfmt(
-                    Decimal(inv_amount_total), places=2, ndigits=13, dp=','
-                ),
-                'nro_cert_propio': '',  # In perceptions this field is blank
-                'tipo_doc_retenido': tipo_doc_retenido,
-                'nro_doc_retenido': nro_doc_retenido,
-                'sit_iibb_retenido': sit_iibb,
-                'nro_insc_iibb_retenido': nro_insc_iibb,
-                'pos_fiscal_retenido': pos_fiscal_retenido,
-                'razon_social_retenido': razon_social_retenido,
-                'importe_otros_conceptos': moneyfmt(
-                    Decimal(amount_untaxed), places=2, ndigits=13, dp=','
-                ),
-                'importe_iva': moneyfmt(
-                    Decimal(inv_iva_amount), places=2, ndigits=13, dp=','
-                ),
-                'monto_sujeto_a_ret_per': moneyfmt(
-                    Decimal(base_amount), places=2, ndigits=13, dp=','
-                ),
-                'alicuota': moneyfmt(
-                    Decimal(percentage), places=2, ndigits=4, dp=','
-                ),
-                'ret_per_aplicada': moneyfmt(
-                    Decimal(ret_per_applied), places=2, ndigits=13, dp=','
-                ),
-                'monto_total_ret_per': moneyfmt(
-                    Decimal(ret_per_applied), places=2, ndigits=13, dp=','
-                ),
-            }
-            res.append(line)
+                # IIBB
+                ppids = perc.partner_id.perception_ids
+                perc_partner = ppids.filtered(
+                    lambda x: x.perception_id == perc.perception_id
+                )
+                perc_partner = (
+                    perc_partner[0] if len(perc_partner) > 1 else perc_partner
+                )
+                sit_iibb = self._get_partner_iibb_code(perc_partner.sit_iibb)
+                if not sit_iibb:
+                    errors.append(
+                        _(
+                            'ptl #%(per_id)s: IIBB Situation cannot be'
+                            ' empty (%(per_name)s) (Partner %(part_name)s)',
+                            per_id=perc.id,
+                            per_name=perc.name,
+                            part_name=razon_social_retenido,
+                        )
+                    )
+
+                line = {
+                    'type': 2,  # Perception
+                    'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
+                    'fecha': date_val,
+                    'tipo_comp_origen_retenc': "01",  # Invoice
+                    'letra_comprobante': denomination_name,
+                    'numero_comprobante': internal_number,
+                    'fecha_comprobante': date_inv,
+                    'monto_comprobante': moneyfmt(
+                        Decimal(inv_amount_total), places=2, ndigits=13, dp=','
+                    ),
+                    'nro_cert_propio': '',  # In perceptions this field is blank
+                    'tipo_doc_retenido': tipo_doc_retenido,
+                    'nro_doc_retenido': nro_doc_retenido,
+                    # 'sit_iibb_retenido': sit_iibb,
+                    'sit_iibb_retenido': 2,
+                    'nro_insc_iibb_retenido': nro_doc_retenido,
+                    'pos_fiscal_retenido': pos_fiscal_retenido,
+                    'razon_social_retenido': razon_social_retenido,
+                    'importe_otros_conceptos': moneyfmt(
+                        Decimal(amount_others), places=2, ndigits=13, dp=','
+                    ),
+                    'importe_iva': moneyfmt(
+                        Decimal(inv_iva_amount), places=2, ndigits=13, dp=','
+                    ),
+                    'monto_sujeto_a_ret_per': moneyfmt(
+                        Decimal(base_amount), places=2, ndigits=13, dp=','
+                    ),
+                    'alicuota': moneyfmt(
+                        Decimal(percentage), places=2, ndigits=4, dp=','
+                    ),
+                    'ret_per_aplicada': moneyfmt(
+                        Decimal(ret_per_applied), places=2, ndigits=13, dp=','
+                    ),
+                    'monto_total_ret_per': moneyfmt(
+                        Decimal(ret_per_applied), places=2, ndigits=13, dp=','
+                    ),
+                    'aceptacion': '',  # Para comprobantes mipyme
+                    'fecha_aceptacion': '',  # Para comprobantes mipyme
+                }
+                res.append(line)
 
         if not errors:
             return None, res
@@ -534,14 +578,13 @@ class CreateArcibaFiles(models.TransientModel):
         retention_query = """
             SELECT p.id
             FROM account_payment_order_retention_line p
-            JOIN account_move i ON p.invoice_id = i.id
+            JOIN account_payment_order op ON p.payment_order_id = op.id
             JOIN account_journal ret ON p.retention_id = ret.id
             JOIN account_tax at ON ret.tax_id=at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
-            AND i.state = %(state)s
+            AND op.state = %(state)s
             AND at.inform_arciba=True
             AND at.type_tax_use LIKE 'purchase'  -- Only retentions applied
-            AND i.move_type IN ('in_invoice')  -- Not including refunds(NC)
             ORDER BY p.date
         """
 
@@ -643,7 +686,7 @@ class CreateArcibaNcFile(models.TransientModel):
             )  # Datetime->String: dd/mm/yyyy
 
             # Denomination
-            denomination_name = inv.denomination
+            denomination_name = inv.denomination.upper()
 
             # Internal number
             internal_number = inv.internal_number.replace('-', '')
@@ -657,11 +700,18 @@ class CreateArcibaNcFile(models.TransientModel):
             # Ret / Per applied
             ret_per_applied = perc.amount
 
-            # Ret / Per base
-            base_amount = perc.base
-
             # Alicuota
-            percentage = (ret_per_applied / float(base_amount)) * 100
+            percentage = (
+                self.env["res.partner.perception"]
+                .search(
+                    [
+                        ("perception_id", "=", perc.perception_id.id),
+                        ("partner_id", "=", inv.partner_id.id),
+                        ("period", "=", self.period_start),
+                    ]
+                )
+                .percent
+            )
             if percentage < 0 or percentage > 99.99:
                 errors.append(
                     _(
