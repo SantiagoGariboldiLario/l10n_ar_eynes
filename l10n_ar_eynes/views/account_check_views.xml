@@ -57,6 +57,9 @@
         <field name="model">account.check</field>
         <field name="arch" type="xml">
             <search string="Search Issued Check">
+                <field name="number" />
+                <field name="bank_id" />
+                <field name="checkbook_id" />
                 <filter name="draft" string="Draft" domain="[('issued_check_state','=','draft')]" />
                 <filter
                     name="waiting_accreditation"
@@ -290,6 +293,9 @@
         <field name="model">account.check</field>
         <field name="arch" type="xml">
             <search string="Search Third Party Check">
+                <field name="number" />
+                <field name="bank_id" />
+                <field name="checkbook_id" />
                 <filter name="draft" string="Draft" domain="[('third_party_check_state','=','draft')]" />
                 <filter
                     name="in_wallet"
