@@ -1,5 +1,6 @@
 import datetime
 import logging
+import re
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -395,10 +396,7 @@ class AccountJournal(models.Model):
                 )
 
     def get_pos_number(self):
-        denomination = dict(self._fields['denomination'].selection).get(
-            self.denomination
-        )
-        return self.code.strip(denomination)
+        return int(re.sub("[^0-9]", "", self.code))
 
     @api.model
     def create(self, vals):

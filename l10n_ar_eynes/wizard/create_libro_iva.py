@@ -93,8 +93,6 @@ class LibroIVAExporterWizard(models.TransientModel):
         return u'{}'.format(qty) if qty < 10 else False
 
     def _get_amount_original_currency(self, invoice, amount, amount_cur):
-        if invoice.currency_id != self.env.ref('base.ARS'):
-            return ('%016.2f' % amount_cur).replace('.', '')
         return ('%016.2f' % amount).replace('.', '')
 
     def _get_fiscal_credit_currency(self, invoice):
@@ -684,7 +682,6 @@ class LibroIVAExporterWizard(models.TransientModel):
         if False in line:
             errors = '\n'.join(errors)
             return (False, errors)
-
         return (True, line)
 
     def _create_sale_aliq_line(self, invoice):
