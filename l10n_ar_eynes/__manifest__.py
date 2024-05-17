@@ -98,6 +98,7 @@
         'wizard/account_tax_subjournal_view.xml',
         'views/res_config_settigs_views.xml',
         "wizard/res_partner_afip_padron_wizard_view.xml",
+        'wizard/force_journal_change_view.xml',
         'views/res_partner_views.xml',
         # 'views/res_currency_rate_view.xml',
         'views/res_currency_view.xml',
