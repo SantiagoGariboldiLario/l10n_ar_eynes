@@ -93,7 +93,6 @@ class DepositCheckwizard(models.TransientModel):
         # Check conditions for third-party checks in wallet and deferred issued checks
         error_checks = third_party.filtered(
             lambda check: not check.payment_date
-            or check.payment_date > deposit_date
         )
         if error_checks:
             raise UserError(
