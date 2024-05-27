@@ -216,3 +216,10 @@ class AccountMoveLine(models.Model):
                 tax_amount += price_subtotal * tax.amount / 100
             price_subtotal += tax_amount
         return price_subtotal
+
+    def get_iva_tax(self):
+        iva = self.env.ref('l10n_ar_eynes.vat_tax_group')
+        for tax in self.tax_ids:
+            if iva.id == tax.tax_group_id.id:
+                return tax
+        return False
