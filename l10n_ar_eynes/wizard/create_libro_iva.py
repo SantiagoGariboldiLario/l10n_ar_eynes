@@ -905,7 +905,9 @@ class LibroIVAExporterWizard(models.TransientModel):
                     sale_errors.append(line[1])
 
         if aliquot_errors:
-            aliquot_errors.insert(0, _('\nSale Aliquot File Errors\n================\n'))
+            aliquot_errors.insert(
+                0, _('\nSale Aliquot File Errors\n================\n')
+            )
 
             suffix = ".libroivadigitalsalesaliquot"
             filename = "LIBRO_IVA_DIGITAL_VENTAS_ALICUOTAS.txt"
@@ -922,7 +924,7 @@ class LibroIVAExporterWizard(models.TransientModel):
 
         return (sale_errors, aliquot_errors)
 
-    def create_purchases_voucher_file(self, invoices):
+    def create_purchases_voucher_file(self, invoices):  # noqa
         import_aliquot_errors = []
         import_aliquots = []
         purchase_aliquot_errors = []
@@ -938,7 +940,9 @@ class LibroIVAExporterWizard(models.TransientModel):
             if line[0]:
                 aliquot_line = self._create_aliquot_purchase_line(invoice)
                 if invoice.iva_digital_operation_code in ['X', 'Z']:
-                    aliquot_import_line = (self._create_aliquot_import_purchase_line(invoice))
+                    aliquot_import_line = (
+                        self._create_aliquot_import_purchase_line(invoice)
+                    )
 
                     if aliquot_import_line[0]:
                         import_aliquots += aliquot_import_line[1]
@@ -958,7 +962,9 @@ class LibroIVAExporterWizard(models.TransientModel):
                     purchase_errors.append(line[1])
 
         if import_aliquot_errors:
-            import_aliquot_errors.insert(0, _('\nImport Aliquot File Errors\n================\n'))
+            import_aliquot_errors.insert(
+                0, _('\nImport Aliquot File Errors\n================\n')
+            )
 
             suffix = ".libroivadigitalimportaliquot"
             filename = "LIBRO_IVA_DIGITAL_IMPORTACION_BIENES_ALICUOTA.txt"
@@ -966,7 +972,9 @@ class LibroIVAExporterWizard(models.TransientModel):
                 self.create_attachment(suffix, filename, import_aliquots)
 
         if purchase_aliquot_errors:
-            purchase_aliquot_errors.insert(0, _('\nPurchase Aliquot File Errors\n================\n'))
+            purchase_aliquot_errors.insert(
+                0, _('\nPurchase Aliquot File Errors\n================\n')
+            )
 
             suffix = ".libroivadigitalpurchasesaliquot"
             filename = "LIBRO_IVA_DIGITAL_COMPRAS_ALICUOTAS.txt"
@@ -974,7 +982,9 @@ class LibroIVAExporterWizard(models.TransientModel):
                 self.create_attachment(suffix, filename, purchase_aliquots)
 
         if purchase_errors:
-            purchase_errors.insert(0, _('\nPurchase File Errors\n================\n'))
+            purchase_errors.insert(
+                0, _('\nPurchase File Errors\n================\n')
+            )
 
             suffix = ".libroivadigitalpurchases"
             filename = "LIBRO_IVA_DIGITAL_COMPRAS_CBTE.txt"
@@ -994,15 +1004,27 @@ class LibroIVAExporterWizard(models.TransientModel):
             ('state', 'in', ('posted', 'paid')),
         ]
 
-        invoices = AccountMove.search([('move_type', 'in', ('out_invoice', 'out_refund'))] + domain)
+        invoices = AccountMove.search(
+            [('move_type', 'in', ('out_invoice', 'out_refund'))] + domain
+        )
         sale_err, sale_aliquot_err = self.create_sales_voucher_file(invoices)
 
-        invoice_purchase_ids = AccountMove.search([('move_type', 'in', ('in_invoice', 'in_refund'))] + domain)
-        purchase_err, purchase_aliquot_err, import_aliquot_err = self.create_purchases_voucher_file(
-            invoice_purchase_ids
+        invoice_purchase_ids = AccountMove.search(
+            [('move_type', 'in', ('in_invoice', 'in_refund'))] + domain
         )
+        (
+            purchase_err,
+            purchase_aliquot_err,
+            import_aliquot_err,
+        ) = self.create_purchases_voucher_file(invoice_purchase_ids)
 
-        errors = sale_err + sale_aliquot_err + purchase_err + purchase_aliquot_err + import_aliquot_err
+        errors = (
+            sale_err
+            + sale_aliquot_err
+            + purchase_err
+            + purchase_aliquot_err
+            + import_aliquot_err
+        )
         if errors:
             self.write({'notes': '\n'.join(errors)})
 
@@ -1012,7 +1034,14 @@ class LibroIVAExporterWizard(models.TransientModel):
                 'res_model': 'libro.iva.exporter.wizard',
                 'target': 'new',
                 'type': 'ir.actions.act_window',
-                'views': [(self.env.ref('l10n_ar_eynes.libro_iva_exporter_view').id, 'form')],
+                'views': [
+                    (
+                        self.env.ref(
+                            'l10n_ar_eynes.libro_iva_exporter_view'
+                        ).id,
+                        'form',
+                    )
+                ],
             }
 
         return {
