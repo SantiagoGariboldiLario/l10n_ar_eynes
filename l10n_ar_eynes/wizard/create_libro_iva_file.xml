@@ -11,8 +11,7 @@
                 </p>
                 <separator colspan="4" />
                 <group>
-                    <field name="date_from" />
-                    <field name="date_to" />
+                    <field name="date_from" widget="month_year_format" />
                     <field name="company_id" />
                 </group>
                 <separator string="Validation Errors" colspan="4" />
