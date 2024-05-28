@@ -634,7 +634,7 @@ class AccountMove(models.Model):
             ).compute_perceptions()
         return
 
-    @api.depends('invoice_line_ids')
+    @api.depends('invoice_line_ids', 'invoice_line_ids.price_unit')
     def _compute_amount_custom(self):
         def _filter_exempt(line):
             return any(line.tax_ids.mapped("is_exempt"))
