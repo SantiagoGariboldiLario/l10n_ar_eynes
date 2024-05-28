@@ -60,12 +60,7 @@ class LibroIVAExporterWizard(models.TransientModel):
                 perception_id.perception_id.tax_id.jurisdiccion == jurisdiction
                 and perception_id.perception_id.tax_id.retention_type != 'vat'
             ):
-                if perception_id.__contains__('tax_currency'):
-                    amount += perception_id.tax_currency
-                else:
-                    amount += perception_id.amount
-        if invoice.__contains__('currency_rate'):
-            amount = amount * invoice.currency_rate
+                amount += perception_id.amount
         return ('%016.2f' % amount).replace('.', '')
 
     def _get_taxes_with_type(self, invoice, fee_type):
