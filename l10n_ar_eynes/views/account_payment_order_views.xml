@@ -181,7 +181,7 @@
                                         readonly="1"
                                         force_save="1"
                                         groups="base.group_multi_currency"
-                                        attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
+                                        invisible="True"
                                     />
                                     <field
                                         name="amount_currency"
@@ -854,7 +854,7 @@
                                         readonly="1"
                                         force_save="1"
                                         groups="base.group_multi_currency"
-                                        attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
+                                        invisible="True"
                                     />
                                     <field
                                         name="amount_currency"

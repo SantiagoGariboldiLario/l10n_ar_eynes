@@ -195,7 +195,7 @@
                                         domain="[('type', 'in', ['cash', 'bank']), ('company_id', '=', parent.company_id)]"
                                     />
                                 <field name="name" invisible="1" />
-                                <field name="currency_id" readonly="1" force_save="True" />
+                                <field name="currency_id" readonly="1" force_save="True" invisible="True" />
                                 <field name="date" />
                                 <field name="payment_order_id" invisible="1" />
                                 <field
