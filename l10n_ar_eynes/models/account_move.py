@@ -1476,7 +1476,7 @@ class AccountMove(models.Model):
 
     def get_pos(self):
         self.ensure_one()
-        return int(self.journal_id.get_pos_number())
+        return self.journal_id.get_pos_number()
 
     def get_currency_code(self):
         self.ensure_one()
