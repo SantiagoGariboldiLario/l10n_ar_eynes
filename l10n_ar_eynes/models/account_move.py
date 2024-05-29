@@ -267,6 +267,19 @@ class AccountMove(models.Model):
         ),
     ]
 
+    @api.constrains('invoice_date_due', 'invoice_date')
+    def _check_invoice_date_due_after_invoice(self):
+        if (
+            self.invoice_date
+            and self.invoice_date_due
+            and self.invoice_date_due < self.invoice_date
+        ):
+            raise ValidationError(
+                _(
+                    'The due date must be equal to or later than the invoice date.'
+                )
+            )
+
     @api.depends('supplier_move_reference')
     def _compute_name(self):
         invoices = self.filtered(lambda move: move.is_invoice())
@@ -634,7 +647,7 @@ class AccountMove(models.Model):
             ).compute_perceptions()
         return
 
-    @api.depends('invoice_line_ids')
+    @api.depends('invoice_line_ids', 'invoice_line_ids.price_unit')
     def _compute_amount_custom(self):
         def _filter_exempt(line):
             return any(line.tax_ids.mapped("is_exempt"))
@@ -1476,7 +1489,7 @@ class AccountMove(models.Model):
 
     def get_pos(self):
         self.ensure_one()
-        return int(self.journal_id.get_pos_number())
+        return self.journal_id.get_pos_number()
 
     def get_currency_code(self):
         self.ensure_one()

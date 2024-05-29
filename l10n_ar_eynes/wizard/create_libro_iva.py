@@ -4,7 +4,7 @@ import logging
 import tempfile
 from calendar import monthrange
 
-from odoo import _, api, fields, models
+from odoo import _, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -13,21 +13,16 @@ class LibroIVAExporterWizard(models.TransientModel):
     _name = 'libro.iva.exporter.wizard'
     _description = 'Libro IVA Digital Exporter Wizard'
 
-    date_from = fields.Date()
-    date_to = fields.Date()
-    company_id = fields.Many2one('res.company', 'Company')
+    date_from = fields.Date(required=True)
+    company_id = fields.Many2one('res.company', 'Company', required=True)
     notes = fields.Text('Notes', readonly=True)
     state = fields.Selection(
         [('init', 'Start'), ('done', 'Done')], 'State', default='init'
     )
 
-    @api.onchange('date_from')
-    def _onchange_date_from(self):
-        if self.date_from:
-            end_of_month = monthrange(
-                self.date_from.year, self.date_from.month
-            )[1]
-            self.date_to = self.date_from.replace(day=end_of_month)
+    def _get_date_to(self):
+        end_of_month = monthrange(self.date_from.year, self.date_from.month)[1]
+        return self.date_from.replace(day=end_of_month)
 
     # METHODS TO GET NEEDED FIELDS:
     def _get_invoice_tax_lines(self, invoice):
@@ -65,12 +60,7 @@ class LibroIVAExporterWizard(models.TransientModel):
                 perception_id.perception_id.tax_id.jurisdiccion == jurisdiction
                 and perception_id.perception_id.tax_id.retention_type != 'vat'
             ):
-                if perception_id.__contains__('tax_currency'):
-                    amount += perception_id.tax_currency
-                else:
-                    amount += perception_id.amount
-        if invoice.__contains__('currency_rate'):
-            amount = amount * invoice.currency_rate
+                amount += perception_id.amount
         return ('%016.2f' % amount).replace('.', '')
 
     def _get_taxes_with_type(self, invoice, fee_type):
@@ -93,8 +83,6 @@ class LibroIVAExporterWizard(models.TransientModel):
         return u'{}'.format(qty) if qty < 10 else False
 
     def _get_amount_original_currency(self, invoice, amount, amount_cur):
-        if invoice.currency_id != self.env.ref('base.ARS'):
-            return ('%016.2f' % amount_cur).replace('.', '')
         return ('%016.2f' % amount).replace('.', '')
 
     def _get_fiscal_credit_currency(self, invoice):
@@ -684,7 +672,6 @@ class LibroIVAExporterWizard(models.TransientModel):
         if False in line:
             errors = '\n'.join(errors)
             return (False, errors)
-
         return (True, line)
 
     def _create_sale_aliq_line(self, invoice):
@@ -867,7 +854,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             {
                 'code': filename,
                 'date_from': self.date_from,
-                'date_to': self.date_to,
+                'date_to': self._get_date_to(),
             }
         )
 
@@ -883,72 +870,61 @@ class LibroIVAExporterWizard(models.TransientModel):
             generated_file_rec.write({'attachment_id': new_attachment.id})
             f.close()
 
-    # GENERATE LINES AND FILES FOR SALES AND PURCHASES:
-    def create_sales_voucher_file(self, invoice_ids):
-        """
-        @param invoice_ids: account.move recordset
+    def create_sales_voucher_file(self, invoices):
+        aliquots = []
+        aliquot_errors = []
+        sales = []
+        sale_errors = []
 
-        @return: list with errors ocurred. The list always contains at least one item.
-        """
-        sale_regs = []
-        sale_file_errors = [_('\nSale File Errors\n================\n')]
-        sale_aliquot_regs = []
-        sale_aliquot_file_errors = [
-            _('\nSale Aliquot File Errors\n================\n')
-        ]
-
-        for invoice in invoice_ids:
+        for invoice in invoices:
             line = self._create_sale_line(invoice)
             if line[0]:
-                afip_line = ''.join(line[1])
                 aliquot_line = self._create_sale_aliq_line(invoice)
                 if aliquot_line[0]:
-                    sale_aliquot_regs += aliquot_line[1]
+                    aliquots += aliquot_line[1]
                 else:
-                    sale_aliquot_file_errors.append(aliquot_line[1])
+                    if aliquot_line[1]:
+                        aliquot_errors.append(aliquot_line[1])
 
-                sale_regs.append(afip_line)
+                sales.append(''.join(line[1]))
             else:
-                sale_file_errors.append(line[1])
+                if line[1]:
+                    sale_errors.append(line[1])
 
-        if len(sale_file_errors) <= 1:
-            suffix = ".libroivadigitalsales"
-            filename = "LIBRO_IVA_DIGITAL_VENTAS_CBTE.txt"
-            if sale_regs:
-                self.create_attachment(suffix, filename, sale_regs)
+        if aliquot_errors:
+            aliquot_errors.insert(
+                0, _('\nSale Aliquot File Errors\n================\n')
+            )
 
-        if len(sale_aliquot_file_errors) <= 1:
-            suffix = ".libroivadigitalsalesaliquot"
-            filename = "LIBRO_IVA_DIGITAL_VENTAS_ALICUOTAS.txt"
-            if sale_aliquot_regs:
-                self.create_attachment(suffix, filename, sale_aliquot_regs)
+        suffix = ".libroivadigitalsalesaliquot"
+        filename = "LIBRO_IVA_DIGITAL_VENTAS_ALICUOTAS.txt"
+        if aliquots:
+            self.create_attachment(suffix, filename, aliquots)
 
-        return (sale_file_errors, sale_aliquot_file_errors)
+        if sale_errors:
+            sale_errors.insert(0, _('\nSale File Errors\n================\n'))
 
-    def create_purchases_voucher_file(self, invoice_ids):
-        """
-        @param invoice_ids: account.move recordset
+        suffix = ".libroivadigitalsales"
+        filename = "LIBRO_IVA_DIGITAL_VENTAS_CBTE.txt"
+        if sales:
+            self.create_attachment(suffix, filename, sales)
 
-        @return: list with errors ocurred. The list always contains at least one item.
-        """
-        purchase_regs = []
-        purchase_file_errors = [_('\nPurchase File Errors\n================\n')]
-        purchase_aliquot_regs = []
-        purchase_aliquot_file_errors = [
-            _('\\Purchase Aliquot File Errors\n================\n')
-        ]
-        import_aliquot_regs = []
-        import_aliquot_file_errors = [
-            _('\\Import Aliquot File Errors\n================\n')
-        ]
+        return (sale_errors, aliquot_errors)
 
-        for invoice in invoice_ids:
-            tipo_responsable = invoice.fiscal_position_id.afip_code
-            if not tipo_responsable:
+    def create_purchases_voucher_file(self, invoices):  # noqa
+        import_aliquot_errors = []
+        import_aliquots = []
+        purchase_aliquot_errors = []
+        purchase_aliquots = []
+        purchase_errors = []
+        purchases = []
+
+        for invoice in invoices:
+            if not invoice.fiscal_position_id.afip_code:
                 continue
+
             line = self._create_purchase_line(invoice)
             if line[0]:
-                afip_line = ''.join(line[1])
                 aliquot_line = self._create_aliquot_purchase_line(invoice)
                 if invoice.iva_digital_operation_code in ['X', 'Z']:
                     aliquot_import_line = (
@@ -956,104 +932,109 @@ class LibroIVAExporterWizard(models.TransientModel):
                     )
 
                     if aliquot_import_line[0]:
-                        import_aliquot_regs += aliquot_import_line[1]
+                        import_aliquots += aliquot_import_line[1]
                     else:
-                        import_aliquot_file_errors.append(
-                            aliquot_import_line[1]
-                        )
+                        if aliquot_import_line[1]:
+                            import_aliquot_errors.append(aliquot_import_line[1])
 
                 if aliquot_line and aliquot_line[0]:
-                    purchase_aliquot_regs += aliquot_line[1]
+                    purchase_aliquots += aliquot_line[1]
                 elif aliquot_line and not aliquot_line[0]:
-                    purchase_aliquot_file_errors.append(aliquot_line[1])
+                    if aliquot_line[1]:
+                        purchase_aliquot_errors.append(aliquot_line[1])
 
-                purchase_regs.append(afip_line)
+                purchases.append(''.join(line[1]))
             else:
-                purchase_file_errors.append(line[1])
+                if line[1]:
+                    purchase_errors.append(line[1])
 
-        if len(purchase_file_errors) <= 1:
-            suffix = ".libroivadigitalpurchases"
-            filename = "LIBRO_IVA_DIGITAL_COMPRAS_CBTE.txt"
-            if purchase_regs:
-                self.create_attachment(suffix, filename, purchase_regs)
+        if import_aliquot_errors:
+            import_aliquot_errors.insert(
+                0, _('\nImport Aliquot File Errors\n================\n')
+            )
 
-        if len(purchase_aliquot_file_errors) <= 1:
-            suffix = ".libroivadigitalpurchasesaliquot"
-            filename = "LIBRO_IVA_DIGITAL_COMPRAS_ALICUOTAS.txt"
-            if purchase_aliquot_regs:
-                self.create_attachment(suffix, filename, purchase_aliquot_regs)
+        suffix = ".libroivadigitalimportaliquot"
+        filename = "LIBRO_IVA_DIGITAL_IMPORTACION_BIENES_ALICUOTA.txt"
+        if import_aliquots:
+            self.create_attachment(suffix, filename, import_aliquots)
 
-        if len(import_aliquot_file_errors) <= 1:
-            suffix = ".libroivadigitalimportaliquot"
-            filename = "LIBRO_IVA_DIGITAL_IMPORTACION_BIENES_ALICUOTA.txt"
-            if import_aliquot_regs:
-                self.create_attachment(suffix, filename, import_aliquot_regs)
+        if purchase_aliquot_errors:
+            purchase_aliquot_errors.insert(
+                0, _('\nPurchase Aliquot File Errors\n================\n')
+            )
 
-        return (
-            purchase_file_errors,
-            purchase_aliquot_file_errors,
-            import_aliquot_file_errors,
-        )
+        suffix = ".libroivadigitalpurchasesaliquot"
+        filename = "LIBRO_IVA_DIGITAL_COMPRAS_ALICUOTAS.txt"
+        if purchase_aliquots:
+            self.create_attachment(suffix, filename, purchase_aliquots)
+
+        if purchase_errors:
+            purchase_errors.insert(
+                0, _('\nPurchase File Errors\n================\n')
+            )
+
+        suffix = ".libroivadigitalpurchases"
+        filename = "LIBRO_IVA_DIGITAL_COMPRAS_CBTE.txt"
+        if purchases:
+            self.create_attachment(suffix, filename, purchases)
+
+        return (purchase_errors, purchase_aliquot_errors, import_aliquot_errors)
 
     # INIT:
     def create_files(self):
-        errors = []
+        AccountMove = self.env['account.move']
 
-        # SALES:
-        invoice_ids = self.env['account.move'].search(
-            [
-                ('date', '>=', self.date_from),
-                ('date', '<=', self.date_to),
-                ('state', 'in', ('posted', 'paid')),
-                ('move_type', 'in', ('out_invoice', 'out_refund')),
-                ('company_id', '=', self.company_id.id),
-            ]
-        )
-        sale_errors = self.create_sales_voucher_file(invoice_ids)
-        for sale_error in sale_errors:
-            if len(sale_error) > 1:
-                errors.extend(sale_error)
-        if (
-            len(sale_errors) > 2
-        ):  # sale_errors expects len == 2, sales and aliquot
-            errors.extend(sale_errors)
+        domain = [
+            ('company_id', '=', self.company_id.id),
+            ('date', '>=', self.date_from),
+            ('date', '<=', self._get_date_to()),
+            ('state', '=', 'posted'),
+        ]
 
-        # PURCHASES:
-        invoice_purchase_ids = self.env['account.move'].search(
-            [
-                ('date', '>=', self.date_from),
-                ('date', '<=', self.date_to),
-                ('state', 'in', ('posted', 'paid')),
-                ('move_type', 'in', ('in_invoice', 'in_refund')),
-                ('company_id', '=', self.company_id.id),
-            ]
+        invoices = AccountMove.search(
+            [('move_type', 'in', ('out_invoice', 'out_refund'))] + domain
         )
-        purchase_errors = self.create_purchases_voucher_file(
-            invoice_purchase_ids
-        )
-        for purchase_error in purchase_errors:
-            if len(purchase_error) > 1:
-                errors.extend(purchase_error)
+        sale_err, sale_aliquot_err = self.create_sales_voucher_file(invoices)
 
+        invoice_purchase_ids = AccountMove.search(
+            [('move_type', 'in', ('in_invoice', 'in_refund'))] + domain
+        )
+        (
+            purchase_err,
+            purchase_aliquot_err,
+            import_aliquot_err,
+        ) = self.create_purchases_voucher_file(invoice_purchase_ids)
+
+        errors = (
+            sale_err
+            + sale_aliquot_err
+            + purchase_err
+            + purchase_aliquot_err
+            + import_aliquot_err
+        )
         if errors:
             self.write({'notes': '\n'.join(errors)})
-            view_id = self.env.ref('l10n_ar_eynes.libro_iva_exporter_view')
-            if view_id:
-                view_id = view_id.id
 
             return {
                 'name': _('Libro IVA Digital Exporter'),
-                'res_model': 'libro.iva.exporter.wizard',
-                'type': 'ir.actions.act_window',
-                'views': [(view_id, 'form')],
-                'target': 'new',
                 'res_id': self.id,
+                'res_model': 'libro.iva.exporter.wizard',
+                'target': 'new',
+                'type': 'ir.actions.act_window',
+                'views': [
+                    (
+                        self.env.ref(
+                            'l10n_ar_eynes.libro_iva_exporter_view'
+                        ).id,
+                        'form',
+                    )
+                ],
             }
 
         return {
             'name': _('Libro IVA generated files'),
             'res_model': 'libroiva.generated.files',
             'type': 'ir.actions.act_window',
-            'view_type': 'form',
             'view_mode': 'tree,form',
+            'view_type': 'form',
         }

@@ -167,6 +167,22 @@ HEAD_LINES = {
         'padding': '0',
         'required': True,
     },
+    'aceptacion': {
+        'type': 'string',
+        'start_pos': 216,
+        'length': 1,
+        'alignment': 'right',
+        'padding': ' ',
+        'required': True,
+    },
+    'fecha_aceptacion': {
+        'type': 'string',
+        'start_pos': 217,
+        'length': 10,
+        'alignment': 'right',
+        'padding': ' ',
+        'required': True,
+    },
 }
 
 HEAD_LINES_NC = {

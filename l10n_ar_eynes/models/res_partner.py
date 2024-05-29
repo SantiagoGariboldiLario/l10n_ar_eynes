@@ -79,8 +79,32 @@ class ResPartner(models.Model):
         string='Gross Income',
     )
 
-    def parse_afip_values(self, values):
+    def _get_company_fiscal_position(self, fiscal_position_id, company):
+        company_fiscal_position = (
+            self.env['account.fiscal.position']
+            .with_company(company)
+            .search(
+                [
+                    ('company_id', '=', company.id),
+                    ('name', '=', fiscal_position_id.name),
+                ]
+            )
+        )
+        if not company_fiscal_position:
+            self.env.user.notify_warning(
+                message=_(
+                    'The Fiscal position %(fiscal_position)s selected for %(partner_name)s is not created '
+                    'in this Company: %(company_name)s. Please, be sure to create it and '
+                    'then relate it to this Partner. Meanwhile this field for that company '
+                    'is blank.',
+                    fiscal_position=fiscal_position_id.name,
+                    partner_name=self.name,
+                    company_name=company.name,
+                )
+            )
+        return company_fiscal_position
 
+    def parse_afip_values(self, values):
         state = self.env["res.country.state"].search(
             [
                 ("name", "ilike", values.provincia),
@@ -89,62 +113,32 @@ class ResPartner(models.Model):
             limit=1,
         )
 
-        if values.cat_iva == 1:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_ri"
-            ).id
-        elif values.cat_iva == 2:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_rni"
-            ).id
-        elif values.cat_iva == 3:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_nr"
-            ).id
-        elif values.cat_iva == 4:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_se"
-            ).id
-        elif values.cat_iva == 5:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_cf"
-            ).id
-        elif values.cat_iva == 6:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_rem"
-            ).id
-        elif values.cat_iva == 7:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_snc"
-            ).id
-        elif values.cat_iva == 8:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_pe"
-            ).id
-        elif values.cat_iva == 9:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_ce"
-            ).id
-        elif values.cat_iva == 10:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_lib"
-            ).id
-        elif values.cat_iva == 11:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_ri_ap"
-            ).id
-        elif values.cat_iva == 12:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_pce"
-            ).id
-        elif values.cat_iva == 13:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_ms"
-            ).id
-        elif values.cat_iva == 14:
-            fiscal_position_id = self.env.ref(
-                "l10n_ar_eynes.fiscal_position_pces"
-            ).id
+        fiscal_position_code_relation = {
+            1: self.env.ref("l10n_ar_eynes.fiscal_position_ri"),
+            2: self.env.ref("l10n_ar_eynes.fiscal_position_rni"),
+            3: self.env.ref("l10n_ar_eynes.fiscal_position_nr"),
+            4: self.env.ref("l10n_ar_eynes.fiscal_position_se"),
+            5: self.env.ref("l10n_ar_eynes.fiscal_position_cf"),
+            6: self.env.ref("l10n_ar_eynes.fiscal_position_rem"),
+            7: self.env.ref("l10n_ar_eynes.fiscal_position_snc"),
+            8: self.env.ref("l10n_ar_eynes.fiscal_position_pe"),
+            9: self.env.ref("l10n_ar_eynes.fiscal_position_ce"),
+            10: self.env.ref("l10n_ar_eynes.fiscal_position_lib"),
+            11: self.env.ref("l10n_ar_eynes.fiscal_position_ri_ap"),
+            12: self.env.ref("l10n_ar_eynes.fiscal_position_pce"),
+            13: self.env.ref("l10n_ar_eynes.fiscal_position_ms"),
+            14: self.env.ref("l10n_ar_eynes.fiscal_position_pces"),
+        }
+
+        fiscal_position_id = fiscal_position_code_relation.get(
+            values.cat_iva, None
+        )
+
+        if fiscal_position_id:
+            fiscal_position_id = fiscal_position_id.sudo()
+            fiscal_position_id = self._get_company_fiscal_position(
+                fiscal_position_id, self.env.company
+            )
 
         vals = {
             "name": values.denominacion,
@@ -152,7 +146,7 @@ class ResPartner(models.Model):
             "city": values.localidad,
             "zip": values.cod_postal,
             "country_id": self.env.ref("base.ar").id,
-            "property_account_position_id": fiscal_position_id or False,
+            "property_account_position_id": fiscal_position_id.id or False,
             "state_id": state.id or None,
             "last_update_from_afip": fields.Date.today(),
         }
@@ -289,49 +283,41 @@ class ResPartner(models.Model):
             ].browse(property_account_position_id)
             companies = self.env['res.company'].search([]) - self.env.company
             for company in companies:
-                fiscal_position = (
-                    self.env['account.fiscal.position']
-                    .with_company(company)
+                fiscal_position = self._get_company_fiscal_position(
+                    property_account_position_id, company
+                )
+
+                Property = self.env['ir.property'].sudo().with_company(company)
+                property_account_position_field_id = (
+                    self.env['ir.model.fields']
+                    .sudo()
                     .search(
                         [
-                            ('company_id', '=', company.id),
-                            ('name', '=', property_account_position_id.name),
+                            ('model', '=', 'res.partner'),
+                            ('relation', '=', 'account.fiscal.position'),
+                            ('name', '=', 'property_account_position_id'),
                         ]
                     )
+                    .id
                 )
-                if fiscal_position:
-                    Property = (
-                        self.env['ir.property'].sudo().with_company(company)
+                for partner in self:
+                    prev_property = Property.search(
+                        [
+                            ('company_id', '=', company.id),
+                            ('name', '=', 'property_account_position_id'),
+                            (
+                                'res_id',
+                                '=',
+                                'res.partner,' + str(partner.id),
+                            ),
+                            (
+                                'fields_id',
+                                '=',
+                                property_account_position_field_id,
+                            ),
+                        ]
                     )
-                    property_account_position_field_id = (
-                        self.env['ir.model.fields']
-                        .sudo()
-                        .search(
-                            [
-                                ('model', '=', 'res.partner'),
-                                ('relation', '=', 'account.fiscal.position'),
-                                ('name', '=', 'property_account_position_id'),
-                            ]
-                        )
-                        .id
-                    )
-                    for partner in self:
-                        prev_property = Property.search(
-                            [
-                                ('company_id', '=', company.id),
-                                ('name', '=', 'property_account_position_id'),
-                                (
-                                    'res_id',
-                                    '=',
-                                    'res.partner,' + str(partner.id),
-                                ),
-                                (
-                                    'fields_id',
-                                    '=',
-                                    property_account_position_field_id,
-                                ),
-                            ]
-                        )
+                    if fiscal_position:
                         if prev_property:
                             prev_property.write(
                                 {
@@ -351,6 +337,8 @@ class ResPartner(models.Model):
                                     'type': 'many2one',
                                 }
                             )
+                    else:
+                        prev_property.unlink()
 
     def write(self, vals):
         vals = self._parse_vat_string(vals)
