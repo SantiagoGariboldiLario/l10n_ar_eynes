@@ -108,7 +108,7 @@
                         type="action"
                         class="oe_highlight"
                         attrs="
-                            {'invisible' : [('issued_check_state', '=', 'rejected')]}"
+                            {'invisible' : [('issued_check_state', '!=', 'paid')]}"
                     />
                      <button
                         string="Debit Check"

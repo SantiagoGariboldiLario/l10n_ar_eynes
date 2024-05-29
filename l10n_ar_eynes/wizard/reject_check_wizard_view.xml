@@ -9,12 +9,8 @@
             <form>
                 <sheet>
                     <group>
-                        <group>
-                            <field name="reject_date" required="1" />
-                        </group>
-                    </group>
-                    <group>
-                        <field name="note" />
+                        <field name="reject_date" />
+                        <field name="reject_reason" />
                     </group>
                     <footer>
                         <button
