@@ -519,6 +519,11 @@
                                                     t-esc="(sub_total_per_product * (1 - line.discount/100)) / (1+ iva.amount/100) * (1+ iva.amount/100)"
                                                     t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
                                                 />
+                                                <span 
+                                                    t-elif="iva and iva.price_include"
+                                                    t-esc="line.price_unit"
+                                                    t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                                />
                                                 <span
                                                     t-else=""
                                                     t-esc="line.price_subtotal_to_PDF()"
