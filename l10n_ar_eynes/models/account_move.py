@@ -794,9 +794,11 @@ class AccountMove(models.Model):
             )
 
     def _check_electronic_invoice_informed_before(self):
-        if self.fiscal_type == 'internal':
-            return False
-        if self.cae or self.cae_due_date:
+        if self.filtered(
+            lambda move: move.is_sale_document(include_receipts=True)
+            and move.fiscal_type == 'electronic'
+            and (move.cae or move.cae_due_date)
+        ):
             return True
         return False
 
