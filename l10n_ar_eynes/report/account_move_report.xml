@@ -400,7 +400,7 @@
                                             />
                                                 <br />
                                                 <span class="partner-info">IIBB: </span><span
-                                                t-esc="o.partner_id.vat"
+                                                t-esc="o.partner_id.nro_insc_iibb or o.partner_id.vat"
                                             />
                                             </t>
                                             <br />
@@ -474,7 +474,7 @@
                                                 <span t-esc="line.quantity" />
                                             </td>
                                             <td>
-                                                <t t-set="iva" t-value="line.get_iva_tax()"/>
+                                                <t t-set="iva" t-value="line.get_iva_tax()" />
                                                 <span
                                                     t-if="iva and iva.price_include"
                                                     t-esc="line.price_unit_to_PDF() / (1 + (iva.amount/100))"
