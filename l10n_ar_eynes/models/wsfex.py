@@ -437,6 +437,29 @@ class WsfexConfig(models.Model):
 
         return True
 
+    def get_voucher_info(self, pos, voucher_type, number):
+        _logger.info(
+            'Requesting data of voucher %s-%s-%s' % (pos, voucher_type, number)
+        )
+        self.ensure_one()
+        ws = self.ws_auth()
+        ws.GetCMP(voucher_type, pos, number)
+        helper = WSFEXParser()
+        helper.parse_errors_raise(ws, _("get voucher info"))
+        ws.AnalizarXml('XmlResponse')
+        res = {
+            'DocTipo': '80',
+            'CbteFch': ws.ObtenerTagXml('Fecha_cbte'),
+            'FchVto': ws.ObtenerTagXml('Fch_venc_Cae'),
+            'FchProceso': ws.ObtenerTagXml('Fecha_cbte_cae'),
+            'DocNro': ws.ObtenerTagXml('Cuit_pais_cliente')
+            or ws.ObtenerTagXml('Id_impositivo'),
+            'ImpTotal': ws.ObtenerTagXml('Imp_total'),
+            'CodAutorizacion': ws.ObtenerTagXml('Cae'),
+        }
+        _logger.info('Voucher info: %s' % res)
+        return res
+
     def _get_next_id(self, ws):
         _logger.info("Checking last ID informed to AFIP")
         last_id = ws.GetLastID()
