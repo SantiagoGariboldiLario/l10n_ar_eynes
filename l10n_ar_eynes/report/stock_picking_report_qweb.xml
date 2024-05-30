@@ -30,7 +30,7 @@
         <field name="binding_type">report</field>
     </record>
 
-    <template id="weblearns_layout">
+    <template id="weblearns_layout_stock_picking">
         <div class="header">
             <table class="header-table">
                 <tr>
@@ -95,7 +95,7 @@
     <template id="stock_picking_report_qweb">
         <t t-foreach="docs" t-as="o">
             <t t-call="web.html_container">
-                <div t-call="l10n_ar_eynes.weblearns_layout">
+                <div t-call="l10n_ar_eynes.weblearns_layout_stock_picking">
                     <h4>Datos propios: </h4>
                     <table class="company-table">
                         <tr>
