@@ -1942,7 +1942,7 @@ class AccountPaymentOrder(models.Model):
         for voucher in self:
             # Cancelamos los cheques de tercero en recibos
             third_receipt_checks = voucher.third_party_check_receipt_ids
-            third_receipt_checks.cancel_check(internal_type='third_party')
+            third_receipt_checks.cancel_check()
 
             # Volvemos a cartera los cheques de tercero en pagos
             third_checks = voucher.third_party_check_ids
@@ -1950,7 +1950,7 @@ class AccountPaymentOrder(models.Model):
 
             # Cancelamos los cheques emitidos
             issued_checks = voucher.issued_check_ids
-            issued_checks.cancel_check(internal_type='issued')
+            issued_checks.cancel_check()
 
             voucher.retention_ids.write(
                 {

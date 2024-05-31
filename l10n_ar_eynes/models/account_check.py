@@ -210,9 +210,14 @@ class AccountCheck(models.Model):
         """
         AccountCheckConfig = self.env['account.check.config']
         AccountMoveLine = self.env['account.move.line']
-        if self.internal_type == 'third_party':
-            state = 'third_party_check_state'
-            for check in self:
+        third_party_checks = self.filtered(
+            lambda check: check.internal_type == 'third_party'
+        )
+        issued_checks = self.filtered(
+            lambda check: check.internal_type == 'issued'
+        )
+        if third_party_checks:
+            for check in third_party_checks:
                 if check.third_party_check_state == 'deposited':
                     raise UserError(
                         _(
@@ -244,7 +249,7 @@ class AccountCheck(models.Model):
                         "Error! There is no Journal configured for deferred checks."
                     )
                 )
-            for check in self:
+            for check in third_party_checks:
                 name_ref = 'Cancel Check ' + check.number
                 move_vals = {
                     'ref': name_ref,
@@ -275,9 +280,9 @@ class AccountCheck(models.Model):
                     }
                 )
                 move_id._post()
-        elif self.internal_type == 'issued':
-            state = 'issued_check_state'
-            for check in self:
+            third_party_checks.write({'third_party_check_state': 'cancelled'})
+        if issued_checks:
+            for check in issued_checks:
                 if check.type == 'deferred' and check.accredited:
                     raise ValidationError(
                         _(
@@ -287,7 +292,7 @@ class AccountCheck(models.Model):
                         )
                         % check.number
                     )
-        self.write({state: 'cancelled'})
+            issued_checks.write({'issued_check_state': 'cancelled'})
 
     def expired_check(self):
         if self.internal_type == 'issued':
