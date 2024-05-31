@@ -28,7 +28,12 @@
                         confirm="Are you sure to unreconcile and cancel this record ?"
                     />
                     <button name="action_cancel_draft" type="object" states="cancel" string="Set to Draft" />
-                    <button name="action_clean_lines" string="Limpiar imputaciones" type="object" />
+                    <button
+                        name="action_clean_lines"
+                        string="Limpiar imputaciones"
+                        states="draft"
+                        type="object"
+                    />
                     <field
                         name="state"
                         widget="statusbar"
