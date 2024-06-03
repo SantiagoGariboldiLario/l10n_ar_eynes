@@ -50,9 +50,9 @@ class CreateArcibaFiles(models.TransientModel):
         dict_types = {'CUIT': 3, 'CUIL': 2, 'CDI': 1}
         code_document_type = dict_types.get(document_type_name, False)
         if not code_document_type:
-            ValidationError(
+            raise ValidationError(
                 _(
-                    'Definition not found for document_type_name: %(doc_type)s',
+                    'Arciba Code not found for document_type_name: %(doc_type)s. You must use CUIT/CUIL',
                     doc_type=document_type_name,
                 )
             )
@@ -232,9 +232,13 @@ class CreateArcibaFiles(models.TransientModel):
                     if partner.vat
                     else '00000000000'
                 )
-                tipo_doc_retenido = self._get_partner_document_type_code(
-                    partner
-                )
+                try:
+                    tipo_doc_retenido = self._get_partner_document_type_code(
+                        partner
+                    )
+                except Exception as e:
+                    errors.append(str(e))
+                    continue
                 # Voucher date
                 voucher_date = time.strptime(
                     str(op.date), '%Y-%m-%d'
@@ -404,9 +408,13 @@ class CreateArcibaFiles(models.TransientModel):
                 if inv.partner_id.vat
                 else '00000000000'
             )
-            tipo_doc_retenido = self._get_partner_document_type_code(
-                inv.partner_id
-            )
+            try:
+                tipo_doc_retenido = self._get_partner_document_type_code(
+                    inv.partner_id
+                )
+            except Exception as e:
+                errors.append(str(e))
+                continue
 
             # Ret / Per applied
             ret_per_applied = perc.amount

@@ -3514,8 +3514,8 @@ msgstr "Percepciones definidas"
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
-msgid "Definition not found for document_type_name: %(doc_type)s"
-msgstr "Definición no encontrada para document_type_name: %(doc_type)s"
+msgid "Arciba Code not found for document_type_name: %(doc_type)s. You must use CUIT/CUIL"
+msgstr "Código ArciBA no encontrado para Tipo de documento: %(doc_type)s. Debería ser CUIT/CUIL"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__delivered
