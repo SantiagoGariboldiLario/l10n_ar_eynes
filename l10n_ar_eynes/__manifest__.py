@@ -88,6 +88,7 @@
         'views/certificate_request_view.xml',
         'views/ws_request_views.xml',
         'views/menuitems_AFIP.xml',
+        'views/menuitems_exporters.xml',
         'wizard/deposit_check_wizard_view.xml',
         'wizard/reject_check_wizard_view.xml',
         'wizard/account_change_currency_wizard_view.xml',
