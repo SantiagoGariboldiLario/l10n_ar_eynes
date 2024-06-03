@@ -641,7 +641,7 @@ class DstCuitCodes(models.Model):
     _description = "DST CUIT Codes"
     _order = 'name'
 
-    code = fields.Float('Code', digits=(12, 0), required=True)
+    code = fields.Char('Code', required=True)
     name = fields.Char('Desc', required=True, size=64)
     wsfex_config_id = fields.Many2one('wsfex.config')
 

@@ -538,7 +538,7 @@ class WsfexConfig(models.Model):
             nombre_cliente=data['partner_name'],
             cuit_pais_cliente=data['cuit_pais'],
             domicilio_cliente=data['partner_address'],
-            id_impositivo=data['DocNro'],
+            id_impositivo=data['partner_cuit'],
             moneda_id=data['MonId'],
             moneda_ctz=data['MonCotiz'],
             # obs_comerciales="",
