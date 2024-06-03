@@ -8403,7 +8403,7 @@ msgstr "Permisos de envío"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__shipping_number
 msgid "Shipping number"
-msgstr "Número de envío"
+msgstr "Número de remito"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_massive_sinchronize
