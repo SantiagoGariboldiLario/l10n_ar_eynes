@@ -724,10 +724,19 @@ class CreateArcibaNcFile(models.TransientModel):
                 )
                 continue
 
-            # Origin Voucher type
-            voucher_type_code = str(
-                inv.associated_inv_ids[0].get_voucher_type()
-            )
+            # Origin Voucher
+            origin_voucher = ''
+            if inv.associated_inv_ids:
+                origin_voucher = str(
+                    inv.associated_inv_ids[0].name.replace('-', '')[1:]
+                )
+            elif inv.inform_period_date_from:
+                origin_voucher = time.strptime(
+                    str(inv.inform_period_date_from), '%Y-%m-%d'
+                )  # String(YYYY-MM-DD)->Datetime
+                origin_voucher = time.strftime(
+                    '%d%m%Y', origin_voucher
+                )  # Datetime->String: ddmmyyyy
 
             line = {
                 'type': 2,  # Perception
@@ -739,7 +748,7 @@ class CreateArcibaNcFile(models.TransientModel):
                 'nro_cert_propio': '',  # In perceptions this field is blank
                 'tipo_comp_origen_retenc': "01",  # Invoice
                 'letra_comprobante': denomination_name,
-                'nro_comprobante': voucher_type_code,
+                'nro_comprobante': origin_voucher,
                 'nro_doc_retenido': nro_doc_retenido,
                 'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
                 'fecha_ret_per': date_val,
