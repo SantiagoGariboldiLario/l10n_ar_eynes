@@ -269,16 +269,17 @@ class AccountMove(models.Model):
 
     @api.constrains('invoice_date_due', 'invoice_date')
     def _check_invoice_date_due_after_invoice(self):
-        if (
-            self.invoice_date
-            and self.invoice_date_due
-            and self.invoice_date_due < self.invoice_date
-        ):
-            raise ValidationError(
-                _(
-                    'The due date must be equal to or later than the invoice date.'
+        for record in self:
+            if (
+                record.invoice_date
+                and record.invoice_date_due
+                and record.invoice_date_due < record.invoice_date
+            ):
+                raise ValidationError(
+                    _(
+                        'The due date must be equal to or later than the invoice date.'
+                    )
                 )
-            )
 
     @api.depends('supplier_move_reference')
     def _compute_name(self):
