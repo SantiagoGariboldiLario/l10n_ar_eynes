@@ -42,9 +42,4 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem
-        id="menu_libroiva_generated_files"
-        action="action_libro_IVA_generated_files"
-        parent="menu_libro_iva"
-    />
 </odoo>

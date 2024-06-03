@@ -42,10 +42,4 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem
-        id="menu_action_arciba_generated_files"
-        name="ArciBA generated files"
-        action="action_arciba_generated_files"
-        parent="menu_arciba"
-    />
 </odoo>
