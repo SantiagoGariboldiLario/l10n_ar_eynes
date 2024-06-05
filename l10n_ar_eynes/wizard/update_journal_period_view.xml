@@ -20,6 +20,7 @@
                         <tree create="false" delete="false" editable="bottom">
                             <field name="selected" />
                             <field name="journal_id" readonly="1" />
+                            <field name="journal_due_date" readonly="1" />
                         </tree>
                     </field>
                     <footer>
