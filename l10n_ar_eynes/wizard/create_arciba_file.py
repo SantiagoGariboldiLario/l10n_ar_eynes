@@ -397,7 +397,7 @@ class CreateArcibaFiles(models.TransientModel):
             denomination_name = inv.denomination.upper()
 
             # Internal number
-            internal_number = inv.internal_number.replace('-', '')
+            internal_number = inv.internal_number.replace('-', '')[1:]
 
             # Invoice total
             inv_amount_total = inv.amount_total
@@ -697,7 +697,7 @@ class CreateArcibaNcFile(models.TransientModel):
             denomination_name = inv.denomination.upper()
 
             # Internal number
-            internal_number = inv.internal_number.replace('-', '')
+            internal_number = inv.internal_number.replace('-', '')[1:]
 
             # Invoice total
             inv_amount_total = inv.amount_total
