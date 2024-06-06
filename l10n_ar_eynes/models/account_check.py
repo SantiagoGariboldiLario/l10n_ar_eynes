@@ -106,7 +106,6 @@ class AccountCheck(models.Model):
     )
     amount = fields.Float(string='Amount')
     issue_date = fields.Date(string='Issue Date')
-    reject_date = fields.Date(string='Reject Date')
     payment_date = fields.Date(
         string='Payment Date', help="Only if this check is post dated"
     )
@@ -119,7 +118,6 @@ class AccountCheck(models.Model):
     )
     origin = fields.Char(string='Origin', size=64)
     signatory = fields.Char(string='Signatory', size=64)
-    note = fields.Text(string="Note")
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         compute='_compute_currency',
@@ -144,8 +142,17 @@ class AccountCheck(models.Model):
         readonly=True,
         default=lambda self: self.env.company.id,
     )
+    reject_date = fields.Date(string='Reject Date')
     reject_move_id = fields.Many2one(
         comodel_name='account.move', string='Reject Account Move'
+    )
+    cancel_date = fields.Date(string='Cancelation Date')
+    cancel_move_id = fields.Many2one(
+        comodel_name='account.move', string='Cancelation Account Move'
+    )
+    expired_date = fields.Date(string='Expiration Date')
+    expired_move_id = fields.Many2one(
+        comodel_name='account.move', string='Expiration Account Move'
     )
 
     @api.depends(
@@ -200,7 +207,7 @@ class AccountCheck(models.Model):
                     )
         return super(AccountCheck, self).unlink()
 
-    def cancel_check(self):
+    def cancel_check(self, reason):
         """
         This method sets the checks state to 'cancelled'.
 
@@ -280,6 +287,12 @@ class AccountCheck(models.Model):
                     }
                 )
                 move_id._post()
+                check.write(
+                    {
+                        'cancel_date': fields.date.today(),
+                        'cancel_move_id': move_id.id,
+                    }
+                )
             third_party_checks.write({'third_party_check_state': 'cancelled'})
         if issued_checks:
             for check in issued_checks:
@@ -293,8 +306,16 @@ class AccountCheck(models.Model):
                         % check.number
                     )
             issued_checks.write({'issued_check_state': 'cancelled'})
+        if not self.env.context.get('is_expired', False):
+            for check in issued_checks + third_party_checks:
+                check.message_post(
+                    body=_(
+                        "Check Cancelled. Reason: %(reason)s. ",
+                        reason=reason,
+                    )
+                )
 
-    def expired_check(self):
+    def expired_check(self, reason):
         if self.internal_type == 'issued':
             AccountCheckConfig = self.env['account.check.config']
             AccountMoveLine = self.env['account.move.line']
@@ -355,21 +376,35 @@ class AccountCheck(models.Model):
                 }
             )
             move_id._post()
+            self.write(
+                {
+                    'expired_date': fields.date.today(),
+                    'expired_move_id': move_id.id,
+                }
+            )
             self.write({'issued_check_state': 'expired'})
+
         else:
-            self.cancel_check()
-            self.write({'third_party_check_state': 'returned'})
+            self.with_context(is_expired=True).cancel_check(reason)
+            self.write({'third_party_check_state': 'expired'})
+
+        self.message_post(
+            body=_(
+                "Check Expired. Reason: %(reason)s. ",
+                reason=reason,
+            )
+        )
 
     # ISSUED CHECK FIELDS AND METHODS
     issued_check_state = fields.Selection(
         selection=[
             ('draft', 'Draft'),
-            ('waiting_accreditation', 'Waiting accreditation'),
+            ('waiting_debit', 'Waiting debit'),
+            ('debited', 'Debited'),
             ('cancelled', 'Cancelled'),
-            ('paid', 'Paid'),
-            ('expired', 'Expired'),
             ('returned', 'Returned'),
             ('rejected', 'Rejected'),
+            ('expired', 'Expired'),
         ],
         default='draft',
         string='Issued Check State',
@@ -418,7 +453,7 @@ class AccountCheck(models.Model):
             raise UserError(_("You can't debit a Thirt Party Check"))
 
         for check in self:
-            if check.issued_check_state != "waiting_accreditation":
+            if check.issued_check_state != "waiting_debit":
                 raise ValidationError(
                     _("Check %s can't be debited!") % self.number
                 )
@@ -488,7 +523,7 @@ class AccountCheck(models.Model):
 
             check.write(
                 {
-                    'issued_check_state': 'paid',
+                    'issued_check_state': 'debited',
                     'deposit_date': date,
                     'deposit_bank_id': check.checkbook_id.bank_account_id.id,
                 }
@@ -509,7 +544,7 @@ class AccountCheck(models.Model):
             move.line_ids.remove_move_reconcile()
             move.button_cancel()
             move.unlink()
-            check.write({'issued_check_state': 'waiting_accreditation'})
+            check.write({'issued_check_state': 'waiting_debit'})
 
     @api.model
     def issued_create_voucher_move_line(self):
@@ -595,11 +630,11 @@ class AccountCheck(models.Model):
             ('draft', 'Draft'),
             ('in_wallet', 'In wallet'),
             ('deposited', 'Deposited'),
+            ('accredited', 'Accredited'),
             ('delivered', 'Delivered'),
             ('cancelled', 'Cancelled'),
             ('rejected', 'Rejected'),
-            ('returned', 'Returned'),
-            ('accredited', 'Accredited'),
+            ('expired', 'Expired'),
         ],
         default='draft',
         string='Third Party Check State',

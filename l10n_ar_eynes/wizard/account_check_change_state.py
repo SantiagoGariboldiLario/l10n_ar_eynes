@@ -38,6 +38,6 @@ class ChangeCheckStateWizard(models.TransientModel):
             raise UserError(_('You must select a check.'))
 
         if self.new_state == 'cancelled':
-            return self.check_id.cancel_check()
+            return self.check_id.cancel_check(self.reason)
         if self.new_state == 'expired':
-            return self.check_id.expired_check()
+            return self.check_id.expired_check(self.reason)

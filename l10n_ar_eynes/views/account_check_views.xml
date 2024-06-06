@@ -64,16 +64,16 @@
                 <field name="checkbook_id" />
                 <filter name="draft" string="Draft" domain="[('issued_check_state','=','draft')]" />
                 <filter
-                    name="waiting_accreditation"
+                    name="waiting_debit"
                     string="Waiting accreditation"
-                    domain="[('issued_check_state', '=', 'waiting_accreditation')]"
+                    domain="[('issued_check_state', '=', 'waiting_debit')]"
                 />
                 <filter
                     name="cancelled"
                     string="Cancelled"
                     domain="[('issued_check_state', '=', 'cancelled')]"
                 />
-                <filter name="paid" string="Paid" domain="[('issued_check_state','=','paid')]" />
+                <filter name="debited" string="Debited" domain="[('issued_check_state','=','debited')]" />
                 <filter name="expired" string="Expired" domain="[('issued_check_state', '=', 'expired')]" />
                 <filter
                     name="returned"
@@ -108,19 +108,19 @@
                         type="action"
                         class="oe_highlight"
                         attrs="
-                            {'invisible' : [('issued_check_state', '!=', 'paid')]}"
+                            {'invisible' : [('issued_check_state', '!=', 'debited')]}"
                     />
                      <button
                         string="Debit Check"
                         name="%(debit_one_check_wizard_action)d"
                         type="action"
                         class="oe_highlight"
-                        attrs="{'invisible' : [('issued_check_state', '!=', 'waiting_accreditation')]}"
+                        attrs="{'invisible' : [('issued_check_state', '!=', 'waiting_debit')]}"
                     />
                     <field
                         name="issued_check_state"
                         widget="statusbar"
-                        statusbar_visible="draft,waiting_accreditation,cancelled,paid,expired,rejected"
+                        statusbar_visible="draft,waiting_debit,debited,cancelled,returned,rejected,expired"
                         statusbar_colors='{"cancel":"red"}'
                         attrs="{'invisible' : [('internal_type', '=', 'third_party')]}"
                     />
@@ -145,10 +145,6 @@
                         <group>
                             <field name="issue_date" />
                             <field name="payment_date" attrs="{'invisible': [('type', '=', 'common')]}" />
-                            <field
-                                name="reject_date"
-                                attrs="{'invisible': [('issued_check_state', '!=', 'rejected')]}"
-                            />
                             <field name="crossed" />
                             <field name="not_order" />
                         </group>
@@ -156,26 +152,44 @@
                     <group
                         string="Check Deposit"
                         attrs="{
-                            'invisible': [('issued_check_state','not in',('paid', 'rejected'))],
-                            'readonly': [('issued_check_state', '!=', 'paid')]
+                            'invisible': [('issued_check_state','not in',('debited', 'rejected'))],
+                            'readonly': [('issued_check_state', '!=', 'debited')]
                         }"
                     >
                          <group>
                             <field
                                 name="deposit_date"
                                 string="Debit date"
-                                attrs="{'readonly': [('issued_check_state', '!=', 'paid')]}"
+                                attrs="{'readonly': [('issued_check_state', '!=', 'debited')]}"
                             />
                             <field
                                 name="clearance_move_id"
                                 string="Debit move"
-                                attrs="{'readonly': [('issued_check_state', '!=', 'paid')]}"
+                                attrs="{'readonly': [('issued_check_state', '!=', 'debited')]}"
                             />
                             <field
                                 name="deposit_bank_id"
                                 string="Debit account"
-                                attrs="{'readonly': [('issued_check_state', '!=', 'paid')]}"
+                                attrs="{'readonly': [('issued_check_state', '!=', 'debited')]}"
                             />
+                        </group>
+                    </group>
+                    <group string="Check Rejection">
+                         <group>
+                            <field name="reject_date" />
+                            <field name="reject_move_id" />
+                        </group>
+                    </group>
+                    <group string="Check Cancelation">
+                         <group>
+                            <field name="cancel_date" />
+                            <field name="cancel_move_id" />
+                        </group>
+                    </group>
+                    <group string="Check Expiration">
+                         <group>
+                            <field name="expired_date" />
+                            <field name="expired_move_id" />
                         </group>
                     </group>
                     <group string="Adittional Information">
@@ -189,12 +203,6 @@
                             <field name="payment_move_id" />
                             <field name="accredited" />
                         </group>
-                    </group>
-                    <group>
-                        <field
-                            name="note"
-                            attrs="{'invisible': [('issued_check_state', '!=', 'rejected')]}"
-                        />
                     </group>
                 </sheet>
                 <div class="oe_chatter">
@@ -325,9 +333,9 @@
                     domain="[('third_party_check_state', '=', 'delivered')]"
                 />
                 <filter
-                    name="returned"
-                    string="Returned"
-                    domain="[('third_party_check_state', '=', 'returned')]"
+                    name="expired"
+                    string="Expired"
+                    domain="[('third_party_check_state', '=', 'expired')]"
                 />
                 <filter
                     name="rejected"
@@ -383,7 +391,7 @@
                     <field
                         name="third_party_check_state"
                         widget="statusbar"
-                        statusbar_visible="in_wallet,deposited,delivered,rejected"
+                        statusbar_visible="draft,in_wallet,deposited,accredited,delivered,cancelled,rejected,expired"
                         statusbar_colors='{"cancel":"red"}'
                         attrs="{'invisible' : [('internal_type', '=', 'issued')]}"
                     />
@@ -546,15 +554,23 @@
                             />
                         </group>
                     </group>
-                    <group string="Additional Information">
-                        <div class="oe_clear" />
-                        <field
-                            name="note"
-                            attrs="{'readonly': [('third_party_check_state', '!=', 'in_wallet')]}"
-                            colspan="4"
-                            nolabel="1"
-                            placeholder="Additional Information..."
-                        />
+                    <group string="Check Rejection">
+                         <group>
+                            <field name="reject_date" />
+                            <field name="reject_move_id" />
+                        </group>
+                    </group>
+                    <group string="Check Cancelation">
+                         <group>
+                            <field name="cancel_date" />
+                            <field name="cancel_move_id" />
+                        </group>
+                    </group>
+                    <group string="Check Expiration">
+                         <group>
+                            <field name="expired_date" />
+                            <field name="expired_move_id" />
+                        </group>
                     </group>
                 </sheet>
                 <div class="oe_chatter">

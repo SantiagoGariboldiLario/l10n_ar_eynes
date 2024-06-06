@@ -6896,9 +6896,9 @@ msgid "Pagos"
 msgstr ""
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__paid
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__debited
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
-msgid "Paid"
+msgid "Debited"
 msgstr "Debitado"
 
 #. module: l10n_ar_eynes
@@ -8105,9 +8105,9 @@ msgid "Retentions Exceptions"
 msgstr "Excepciones de retenciones"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__returned
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__expired
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
-msgid "Returned"
+msgid "Expired"
 msgstr "Vencido"
 
 #. module: l10n_ar_eynes
@@ -9983,7 +9983,7 @@ msgid "WSPADRON Configuration"
 msgstr "Configuración WS Padron"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_accreditation
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_debit
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
 msgid "Waiting accreditation"
 msgstr "Esperando débito"

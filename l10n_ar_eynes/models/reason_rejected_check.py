@@ -12,7 +12,7 @@ class ReasonRejectedCheck(models.Model):
 
     name = fields.Char(string='Reason')
     type = fields.Selection(
-        [('rejected', 'Rejected'), ('returned', 'Returned')], string='Type'
+        [('rejected', 'Rejected'), ('expired', 'Expired')], string='Type'
     )
     code = fields.Char(string='Code')
     is_critical = fields.Boolean(string='Critical')

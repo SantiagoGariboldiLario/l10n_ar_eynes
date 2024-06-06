@@ -1469,9 +1469,9 @@ class AccountPaymentOrder(models.Model):
                 move_lines.append(res)
 
                 if check.type in ['common', 'deferred']:
-                    state = 'waiting_accreditation'
+                    state = 'waiting_debit'
                 else:
-                    state = 'paid'
+                    state = 'debited'
 
                 vals = {
                     'issued_check_state': state,
@@ -1942,7 +1942,9 @@ class AccountPaymentOrder(models.Model):
         for voucher in self:
             # Cancelamos los cheques de tercero en recibos
             third_receipt_checks = voucher.third_party_check_receipt_ids
-            third_receipt_checks.cancel_check()
+            third_receipt_checks.cancel_check(
+                reason=_("Payment Order Cancelled")
+            )
 
             # Volvemos a cartera los cheques de tercero en pagos
             third_checks = voucher.third_party_check_ids
@@ -1950,7 +1952,7 @@ class AccountPaymentOrder(models.Model):
 
             # Cancelamos los cheques emitidos
             issued_checks = voucher.issued_check_ids
-            issued_checks.cancel_check()
+            issued_checks.cancel_check(reason=_("Payment Order Cancelled"))
 
             voucher.retention_ids.write(
                 {
