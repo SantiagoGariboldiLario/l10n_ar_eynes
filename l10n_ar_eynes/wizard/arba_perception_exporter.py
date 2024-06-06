@@ -8,6 +8,7 @@
 import binascii
 import codecs
 import logging
+import re
 import tempfile
 from decimal import Decimal
 
@@ -164,7 +165,13 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
                 sign = -1
             else:
                 sign = 1
-            internal_number_split = line.invoice_id.internal_number.split('-')
+
+            pattern = re.compile(r'(FCE|NCE|NDE)')
+            inv_name = line.invoice_id.name
+            match = pattern.search(inv_name)
+            if match:
+                inv_name = inv_name.replace(match.group(), '')
+            pos, number = inv_name.split('-')
 
             if line.partner_id.document_type_id not in [
                 self.env.ref('l10n_ar_eynes.document_cuit'),
@@ -196,8 +203,8 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
                 'fecha_percepcion': date,
                 'tipo_comprobante': voucher_type,
                 'letra_comprobante': line.invoice_id.denomination.upper(),
-                'numero_sucursal': internal_number_split[0][-4:],
-                'numero_emision': internal_number_split[1],
+                'numero_sucursal': pos[-4:],
+                'numero_emision': number,
                 'monto_imponible': moneyfmt(
                     Decimal(base) * sign, places=2, ndigits=10, dp=','
                 ),
