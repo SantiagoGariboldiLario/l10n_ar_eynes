@@ -50,9 +50,9 @@ class CreateArcibaFiles(models.TransientModel):
         dict_types = {'CUIT': 3, 'CUIL': 2, 'CDI': 1}
         code_document_type = dict_types.get(document_type_name, False)
         if not code_document_type:
-            ValidationError(
+            raise ValidationError(
                 _(
-                    'Definition not found for document_type_name: %(doc_type)s',
+                    'Arciba Code not found for document_type_name: %(doc_type)s. You must use CUIT/CUIL',
                     doc_type=document_type_name,
                 )
             )
@@ -232,9 +232,13 @@ class CreateArcibaFiles(models.TransientModel):
                     if partner.vat
                     else '00000000000'
                 )
-                tipo_doc_retenido = self._get_partner_document_type_code(
-                    partner
-                )
+                try:
+                    tipo_doc_retenido = self._get_partner_document_type_code(
+                        partner
+                    )
+                except Exception as e:
+                    errors.append(str(e))
+                    continue
                 # Voucher date
                 voucher_date = time.strptime(
                     str(op.date), '%Y-%m-%d'
@@ -393,7 +397,7 @@ class CreateArcibaFiles(models.TransientModel):
             denomination_name = inv.denomination.upper()
 
             # Internal number
-            internal_number = inv.internal_number.replace('-', '')
+            internal_number = inv.internal_number.replace('-', '')[1:]
 
             # Invoice total
             inv_amount_total = inv.amount_total
@@ -404,9 +408,13 @@ class CreateArcibaFiles(models.TransientModel):
                 if inv.partner_id.vat
                 else '00000000000'
             )
-            tipo_doc_retenido = self._get_partner_document_type_code(
-                inv.partner_id
-            )
+            try:
+                tipo_doc_retenido = self._get_partner_document_type_code(
+                    inv.partner_id
+                )
+            except Exception as e:
+                errors.append(str(e))
+                continue
 
             # Ret / Per applied
             ret_per_applied = perc.amount
@@ -689,7 +697,7 @@ class CreateArcibaNcFile(models.TransientModel):
             denomination_name = inv.denomination.upper()
 
             # Internal number
-            internal_number = inv.internal_number.replace('-', '')
+            internal_number = inv.internal_number.replace('-', '')[1:]
 
             # Invoice total
             inv_amount_total = inv.amount_total
@@ -724,10 +732,19 @@ class CreateArcibaNcFile(models.TransientModel):
                 )
                 continue
 
-            # Origin Voucher type
-            voucher_type_code = str(
-                inv.associated_inv_ids[0].get_voucher_type()
-            )
+            # Origin Voucher
+            origin_voucher = ''
+            if inv.associated_inv_ids:
+                origin_voucher = str(
+                    inv.associated_inv_ids[0].name.replace('-', '')[1:]
+                )
+            elif inv.inform_period_date_from:
+                origin_voucher = time.strptime(
+                    str(inv.inform_period_date_from), '%Y-%m-%d'
+                )  # String(YYYY-MM-DD)->Datetime
+                origin_voucher = time.strftime(
+                    '%d%m%Y', origin_voucher
+                )  # Datetime->String: ddmmyyyy
 
             line = {
                 'type': 2,  # Perception
@@ -739,7 +756,7 @@ class CreateArcibaNcFile(models.TransientModel):
                 'nro_cert_propio': '',  # In perceptions this field is blank
                 'tipo_comp_origen_retenc': "01",  # Invoice
                 'letra_comprobante': denomination_name,
-                'nro_comprobante': voucher_type_code,
+                'nro_comprobante': origin_voucher,
                 'nro_doc_retenido': nro_doc_retenido,
                 'codigo_norma': 29,  # NUEVO: PADRÓN DE REGIMENES GENERALES
                 'fecha_ret_per': date_val,

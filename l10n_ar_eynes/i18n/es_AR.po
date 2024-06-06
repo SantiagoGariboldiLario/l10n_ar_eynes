@@ -1521,7 +1521,7 @@ msgstr "Aprobado"
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_action_arciba_generated_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_arciba_generated_files_tree
 msgid "ArciBA generated files"
-msgstr "Archivos generados por ArciBA"
+msgstr "Archivos e-ArciBA generados"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
@@ -2959,7 +2959,7 @@ msgstr "Crear RECPAM"
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_sifere_export
 msgid "Create SIFERE Reports"
-msgstr "Crear reportes SIFERE"
+msgstr "Generación de archivos SIFERE"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__create_uid
@@ -3514,8 +3514,8 @@ msgstr "Percepciones definidas"
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
-msgid "Definition not found for document_type_name: %(doc_type)s"
-msgstr "Definición no encontrada para document_type_name: %(doc_type)s"
+msgid "Arciba Code not found for document_type_name: %(doc_type)s. You must use CUIT/CUIL"
+msgstr "Código ArciBA no encontrado para Tipo de documento: %(doc_type)s. Debería ser CUIT/CUIL"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__delivered
@@ -4350,14 +4350,14 @@ msgstr "Vencido"
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_arba_perception_report
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.arba_perception_exporter_wizard_view
 msgid "Export ARBA Perceptions"
-msgstr "Exportar percepciones ARBA"
+msgstr "Generación de archivos Percepciones ARBA"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_create_arba_retention_file
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_arba_retention_report
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.arba_retention_exporter_wizard_view
 msgid "Export ARBA Retentions"
-msgstr "Exportar Retenciones ARBA"
+msgstr "Generación de archivos Retenciones ARBA"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
@@ -5945,7 +5945,7 @@ msgstr ""
 #: model:ir.ui.menu,name:l10n_ar_eynes.libroiva_exporter_menu
 #, python-format
 msgid "Libro IVA Digital Exporter"
-msgstr "Exportador Libro IVA Digital"
+msgstr "Generación de archivos Libro IVA Digital"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_libro_iva_exporter_wizard
@@ -5960,7 +5960,7 @@ msgstr "Asistente para Exportador Libro IVA Digital"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_iva_generated_files_tree_view
 #, python-format
 msgid "Libro IVA generated files"
-msgstr "Archivos generados para Libro IVA"
+msgstr "Archivos Libro IVA generados"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale_line__limit
@@ -8148,7 +8148,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_generate_sicore_files
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_sicore_report
 msgid "SICORE Files Generation"
-msgstr ""
+msgstr "Generación de archivos SICORE"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
@@ -8407,7 +8407,7 @@ msgstr "Permisos de envío"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__shipping_number
 msgid "Shipping number"
-msgstr "Número de envío"
+msgstr "Número de remito"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_massive_sinchronize
@@ -8434,7 +8434,7 @@ msgstr "Configuración de Sicore"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sicore_generated_files_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sicore_generated_files_tree
 msgid "Sicore generated files"
-msgstr "Sicore archivos generados"
+msgstr "Archivos SICORE generados"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_sifere_config
@@ -9779,7 +9779,7 @@ msgstr "Verificacion requerida"
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_sifere_reports
 msgid "View SIFERE Reports"
-msgstr "Ver informes de SIFERE"
+msgstr "Archivos SIFERE generados"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_method_line__format__virtual
@@ -10382,7 +10382,7 @@ msgstr "Generación de archivos E-Arciba"
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_generate_arciba_nc_files
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_arciba_nc_report
 msgid "e-ARCIBA NC File Generation"
-msgstr "e-Arciba NC Generación de archivos"
+msgstr "Generación de archivos e-Arciba NC"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form

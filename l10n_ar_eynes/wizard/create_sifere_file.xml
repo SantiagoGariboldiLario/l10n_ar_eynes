@@ -25,17 +25,8 @@
                         <field name="period_end" />
                     </group>
                     <footer>
-                        <button
-                            name="create_files"
-                            string="Generar"
-                            type="object"
-                            class="btn-primary"
-                        />
-                        <button
-                            special="cancel"
-                            string="Cancelar"
-                            class="btn-default"
-                        />
+                        <button name="create_files" string="Generar" type="object" class="btn-primary" />
+                        <button special="cancel" string="Cancelar" class="btn-default" />
                     </footer>
                 </form>
             </field>
@@ -48,28 +39,6 @@
             <field name="view_mode">form</field>
             <field name="target">new</field>
         </record>
-
-        <!-- MENU ITEMS -->
-        <menuitem
-            id="menu_parent_exporters_sifere"
-            name="SIFERE"
-            parent="menu_taxes_reports"
-            sequence="2"
-        />
-
-        <menuitem
-            name="Create SIFERE Reports"
-            parent="menu_parent_exporters_sifere"
-            action="wizard_create_sifere_files_action"
-            id="menu_sifere_export"
-        />
-
-        <menuitem
-            name="View SIFERE Reports"
-            parent="menu_parent_exporters_sifere"
-            action="report_files_sifere"
-            id="menu_sifere_reports"
-        />
 
     </data>
 </odoo>

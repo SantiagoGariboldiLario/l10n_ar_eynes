@@ -166,6 +166,17 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
                 sign = 1
             internal_number_split = line.invoice_id.internal_number.split('-')
 
+            if line.partner_id.document_type_id not in [
+                self.env.ref('l10n_ar_eynes.document_cuit'),
+                self.env.ref('l10n_ar_eynes.document_cuil'),
+            ]:
+                raise ValidationError(
+                    _(
+                        '%(partner)s has no CUIT/CUIL, it might have another kind of document.'
+                        'Please, set a valid CUIT or CUIL',
+                        partner=line.partner_id.name,
+                    )
+                )
             cuit = line.partner_id.vat
             if cuit:
                 f_cuit = '{}-{}-{}'.format(cuit[:2], cuit[2:10], cuit[10])

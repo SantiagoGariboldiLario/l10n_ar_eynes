@@ -269,16 +269,17 @@ class AccountMove(models.Model):
 
     @api.constrains('invoice_date_due', 'invoice_date')
     def _check_invoice_date_due_after_invoice(self):
-        if (
-            self.invoice_date
-            and self.invoice_date_due
-            and self.invoice_date_due < self.invoice_date
-        ):
-            raise ValidationError(
-                _(
-                    'The due date must be equal to or later than the invoice date.'
+        for record in self:
+            if (
+                record.invoice_date
+                and record.invoice_date_due
+                and record.invoice_date_due < record.invoice_date
+            ):
+                raise ValidationError(
+                    _(
+                        'The due date must be equal to or later than the invoice date.'
+                    )
                 )
-            )
 
     @api.depends('supplier_move_reference')
     def _compute_name(self):
@@ -794,13 +795,34 @@ class AccountMove(models.Model):
             )
 
     def _check_electronic_invoice_informed_before(self):
-        if self.fiscal_type == 'internal':
-            return False
-        if self.cae or self.cae_due_date:
+        if self.filtered(
+            lambda move: move.is_sale_document(include_receipts=True)
+            and move.fiscal_type == 'electronic'
+            and (move.cae or move.cae_due_date)
+        ):
             return True
         return False
 
+    def _check_closed_journal_moves(self):
+        closed_journal_moves = self.filtered(
+            lambda move: move.date < move.journal_id.due_date
+        )
+
+        if closed_journal_moves:
+            message = _("Moves before journal due date can't be cancelled.\n")
+            journals = closed_journal_moves.mapped('journal_id')
+            for journal in journals:
+                message += _(
+                    'Journal: %(journal_name)s --> %(date)s',
+                    journal_name=journal.name,
+                    date=journal.due_date,
+                )
+            raise ValidationError(message)
+        return True
+
     def button_cancel(self):
+        self._check_closed_journal_moves()
+
         if self._check_electronic_invoice_informed_before():
             raise UserError(
                 _(
@@ -812,6 +834,8 @@ class AccountMove(models.Model):
         return super(AccountMove, self).button_cancel()
 
     def button_draft(self):
+        self._check_closed_journal_moves()
+
         if self._check_electronic_invoice_informed_before():
             raise UserError(
                 _(

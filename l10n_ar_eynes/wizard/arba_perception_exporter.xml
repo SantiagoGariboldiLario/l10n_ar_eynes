@@ -13,12 +13,7 @@
                 <field name="date_to" />
             </group>
             <footer>
-                <button
-                        name="create_file"
-                        type="object"
-                        string="Create File"
-                        class="oe_highlight"
-                    />
+                <button name="create_file" type="object" string="Create File" class="oe_highlight" />
                 or
                 <button string="Cancel" special="cancel" class="oe_link" />
             </footer>
@@ -34,9 +29,4 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem
-        parent="menu_arba"
-        id="menu_arba_perception_report"
-        action="action_create_arba_perception_file"
-    />
 </odoo>

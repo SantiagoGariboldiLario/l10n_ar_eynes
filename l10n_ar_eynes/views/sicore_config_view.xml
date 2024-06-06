@@ -44,13 +44,6 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem
-        id="menu_action_sicore_generated_files"
-        name="Sicore generated files"
-        action="action_sicore_generated_files"
-        parent="menu_sicore"
-    />
-
     <record id="view_sicore_config_tree" model="ir.ui.view">
         <field name="name">sicore.config.tree</field>
         <field name="model">sicore.config</field>

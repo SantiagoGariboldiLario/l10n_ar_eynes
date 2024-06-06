@@ -6,7 +6,7 @@ from . import account_debit_note  # noqa
 
 from . import debit_check_wizard  # noqa
 from . import wsaa_load_config  # noqa
-from . import wsfe_sinchronize_voucher  # noqa
+from . import afip_sinchronize_voucher  # noqa
 from . import wsfe_massive_sinchronize  # noqa
 from . import validate_account_move  # noqa
 from . import account_change_currency  # noqa
@@ -28,3 +28,4 @@ from . import cancel_picking_done
 from . import fiscal_year_closing_operation_wizard  # noqa
 from . import account_check_change_state  # noqa
 from . import accredit_check_wizard
+from . import force_journal_change

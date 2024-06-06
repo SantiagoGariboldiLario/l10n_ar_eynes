@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.1.12.1',
+    'version': '15.0.1.14.4',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -88,6 +88,7 @@
         'views/certificate_request_view.xml',
         'views/ws_request_views.xml',
         'views/menuitems_AFIP.xml',
+        'views/menuitems_exporters.xml',
         'wizard/deposit_check_wizard_view.xml',
         'wizard/reject_check_wizard_view.xml',
         'wizard/account_change_currency_wizard_view.xml',
@@ -98,6 +99,7 @@
         'wizard/account_tax_subjournal_view.xml',
         'views/res_config_settigs_views.xml',
         "wizard/res_partner_afip_padron_wizard_view.xml",
+        'wizard/force_journal_change_view.xml',
         'views/res_partner_views.xml',
         # 'views/res_currency_rate_view.xml',
         'views/res_currency_view.xml',
@@ -130,7 +132,7 @@
         'views/stock_picking_view.xml',
         'views/stock_picking_type_view.xml',
         'views/certificate_request_view.xml',
-        "wizard/wsfe_sinchronize_voucher_view.xml",
+        "wizard/afip_sinchronize_voucher_view.xml",
         "wizard/wsfe_massive_sinchronize_view.xml",
         "wizard/create_sicore_file.xml",
         "wizard/report_exporter.xml",
