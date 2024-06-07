@@ -28,7 +28,7 @@ class RejectIssuedCheckWizard(models.TransientModel):
         if check:
             AccountMoveLine = self.env['account.move.line']
 
-            if check.issued_check_state != 'paid':
+            if check.issued_check_state != 'debited':
                 raise UserError(_('ERROR! This check is not Debited!'))
 
             config = self.env['account.check.config'].search(
