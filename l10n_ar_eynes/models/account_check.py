@@ -330,7 +330,7 @@ class AccountCheck(models.Model):
                 )
             check_account = AccountCheckConfig.search(
                 [('company_id', '=', self.env.user.company_id.id)]
-            ).receivable_rejected_account_id
+            ).deferred_account_id
             if not check_account:
                 raise UserError(
                     _(
