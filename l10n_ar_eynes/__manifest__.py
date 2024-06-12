@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.1.14.5',
+    'version': '15.0.1.14.6',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -79,7 +79,6 @@
         "views/fiscal_year_closing_views.xml",
         # 'views/fyc_workflow.xml',
         "views/inflation_index_views.xml",
-        "views/menuitems.xml",
         'views/ws_views.xml',
         'views/wsaa_views.xml',
         "views/wsfe_views.xml",
@@ -87,8 +86,6 @@
         'views/ws_padron_views.xml',
         'views/certificate_request_view.xml',
         'views/ws_request_views.xml',
-        'views/menuitems_AFIP.xml',
-        'views/menuitems_exporters.xml',
         'wizard/deposit_check_wizard_view.xml',
         'wizard/reject_check_wizard_view.xml',
         'wizard/account_change_currency_wizard_view.xml',
@@ -150,6 +147,9 @@
         'wizard/create_libro_iva_file.xml',
         'views/libro_iva_generated_files.xml',
         "report/account_move_report.xml",
+        'views/menuitems.xml',
+        'views/menuitems_AFIP.xml',
+        'views/menuitems_exporters.xml',
         'security/ir.model.access.csv',
     ],
     "demo": [

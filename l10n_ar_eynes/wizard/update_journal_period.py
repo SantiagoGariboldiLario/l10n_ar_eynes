@@ -76,4 +76,5 @@ class UpdateJournalPeriodWizardLine(models.TransientModel):
     journal_id = fields.Many2one(
         string='Journal', comodel_name='account.journal'
     )
+    journal_due_date = fields.Date(related='journal_id.due_date')
     selected = fields.Boolean(string='Selected', default=False)
