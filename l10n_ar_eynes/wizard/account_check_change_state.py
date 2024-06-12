@@ -10,7 +10,7 @@ class ChangeCheckStateWizard(models.TransientModel):
     _name = 'change.check.state.wizard'
     _description = 'Change Check State'
 
-    issued_check = fields.Many2one(
+    check_id = fields.Many2one(
         comodel_name='account.check',
         default=lambda self: self._get_default_check(),
     )
@@ -34,15 +34,10 @@ class ChangeCheckStateWizard(models.TransientModel):
     def change_stage(self):
         if not self.new_state:
             raise UserError(_('You must select the new state for this check.'))
-        if not self.issued_check:
+        if not self.check_id:
             raise UserError(_('You must select a check.'))
 
         if self.new_state == 'cancelled':
-            if self.issued_check.internal_type == 'issued':
-                return self.issued_check.cancel_check(internal_type='issued')
-            else:
-                return self.issued_check.cancel_check(
-                    internal_type='third_party'
-                )
+            return self.check_id.cancel_check(self.reason)
         if self.new_state == 'expired':
-            return self.issued_check.expired_check()
+            return self.check_id.expired_check(self.reason)

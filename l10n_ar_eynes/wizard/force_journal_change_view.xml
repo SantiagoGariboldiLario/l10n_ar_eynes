@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <record id="account_check_deposit_form_view" model="ir.ui.view">
+    <record id="force_journal_change_form_view" model="ir.ui.view">
         <field name="name">force.journal.change.wizard.form</field>
         <field name="model">force.journal.change.wizard</field>
         <field name="type">form</field>
