@@ -14,12 +14,7 @@
                     </group>
                 </group>
                 <footer>
-                    <button
-                        name="sinchronize"
-                        string="Sichronize"
-                        type="object"
-                        class="oe_highlight"
-                    />
+                    <button name="sinchronize" string="Sichronize" type="object" class="oe_highlight" />
                     or
                     <button class="oe_link" special="cancel" string="Cancel" />
                 </footer>
@@ -35,13 +30,5 @@
         <field name="target">new</field>
         <field name="context">{}</field>
     </record>
-
-    <menuitem
-        id="wsfe_massive_sinchronize"
-        name="Massive Sinchronize"
-        parent="base_afipws_config"
-        sequence="40"
-        action="action_wsfe_massive_sinchronize"
-    />
 
 </odoo>

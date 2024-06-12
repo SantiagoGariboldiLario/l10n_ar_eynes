@@ -2,11 +2,7 @@
 <odoo>
     <!-- **************************** AFIP WEBSERVICES **************************** -->
     <!-- ROOT AFIP Configuration Menuitem -->
-    <menuitem
-        id="base_afipws_config"
-        name="AFIP WebServices"
-        parent="account.menu_finance_configuration"
-    />
+    <menuitem id="base_afipws_config" name="AFIP WebServices" parent="account.menu_finance_configuration" />
 
     <!-- 1st LEVEL -->
     <menuitem
@@ -49,12 +45,16 @@
         action="action_wsaa_certificate_request"
     />
 
-    <!-- ROOT AFIP Reports Menuitem -->
     <menuitem
-        id="base_afipws_reports"
-        name="AFIP WebServices"
-        parent="account.menu_finance_reports"
+        id="wsfe_massive_sinchronize"
+        name="Massive Sinchronize"
+        parent="base_afipws_config"
+        sequence="40"
+        action="action_wsfe_massive_sinchronize"
     />
+
+    <!-- ROOT AFIP Reports Menuitem -->
+    <menuitem id="base_afipws_reports" name="AFIP WebServices" parent="account.menu_finance_reports" />
 
     <!-- 1st LEVEL -->
     <menuitem
