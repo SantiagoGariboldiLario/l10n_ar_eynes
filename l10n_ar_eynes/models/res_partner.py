@@ -283,10 +283,6 @@ class ResPartner(models.Model):
             ].browse(property_account_position_id)
             companies = self.env['res.company'].search([]) - self.env.company
             for company in companies:
-                fiscal_position = self._get_company_fiscal_position(
-                    property_account_position_id, company
-                )
-
                 Property = self.env['ir.property'].sudo().with_company(company)
                 property_account_position_field_id = (
                     self.env['ir.model.fields']
@@ -301,6 +297,9 @@ class ResPartner(models.Model):
                     .id
                 )
                 for partner in self:
+                    fiscal_position = partner._get_company_fiscal_position(
+                        property_account_position_id, company
+                    )
                     prev_property = Property.search(
                         [
                             ('company_id', '=', company.id),
