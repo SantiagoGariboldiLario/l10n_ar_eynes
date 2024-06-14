@@ -699,8 +699,12 @@ class CreateArcibaNcFile(models.TransientModel):
             # Internal number
             internal_number = inv.internal_number.replace('-', '')[1:]
 
-            # Invoice total
-            inv_amount_total = inv.amount_total
+            # Perception base
+            inv_base = (
+                perc.base
+                if not inv.is_multi_currency
+                else perc.base_secondary_currency
+            )
 
             # Type of document partner
             nro_doc_retenido = inv.partner_id.vat.replace('-', '')
@@ -751,7 +755,7 @@ class CreateArcibaNcFile(models.TransientModel):
                 'nro_nc': internal_number,
                 'fecha_nc': date_inv,
                 'monto_nc': moneyfmt(
-                    Decimal(inv_amount_total), places=2, ndigits=13, dp=','
+                    Decimal(inv_base), places=2, ndigits=13, dp=','
                 ),
                 'nro_cert_propio': '',  # In perceptions this field is blank
                 'tipo_comp_origen_retenc': "01",  # Invoice
