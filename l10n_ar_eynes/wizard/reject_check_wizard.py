@@ -74,7 +74,7 @@ class RejectIssuedCheckWizard(models.TransientModel):
             AccountMoveLine.with_context(check_move_validity=False).create(
                 {
                     'name': _('Check Rejected'),
-                    'account_id': check.deposit_bank_id.account_id.id,
+                    'account_id': config.receivable_rejected_account_id.id,
                     'move_id': move_id.id,
                     'journal_id': journal.id,
                     'date': self.reject_date,
