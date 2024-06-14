@@ -1132,7 +1132,7 @@ msgstr "Línea de concepto de orden de pago de cuenta"
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_tax_subjournal_action
 msgid "Account Tax Subjournal"
-msgstr "Subdiario de Impuestos"
+msgstr "Subdiario de IVA"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_customer_payment_order_action
@@ -8769,7 +8769,7 @@ msgstr "Impuestos"
 #: model:ir.ui.menu,name:l10n_ar_eynes.account_tax_subjournal_menu
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_tax_subjournal_view_form
 msgid "Taxes Subjournal"
-msgstr "Subdiario de impuestos"
+msgstr "Subdiario de IVA"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/wsfe.py:0
