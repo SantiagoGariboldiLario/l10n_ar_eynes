@@ -13,11 +13,9 @@ odoo.define("l10n_ar_pos_wsfe.ClientDetailsEdit", function (require) {
                 this.intFields.push("property_account_position_id");
                 this.intFields.push("document_type_id");
                 this.props.partner.state_id = [];
-                this.props.partner.country_id = [];
                 const partner = this.props.partner;
                 this.changes.property_account_position_id =
                     partner.property_account_position_id && partner.property_account_position_id[0];
-                this.changes.vat = partner.vat && partner.vat[0];
                 this.changes.document_type_id = partner.document_type_id && partner.document_type_id[0];
             }
 
