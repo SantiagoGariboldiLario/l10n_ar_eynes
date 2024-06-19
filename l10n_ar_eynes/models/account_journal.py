@@ -396,7 +396,10 @@ class AccountJournal(models.Model):
                 )
 
     def get_pos_number(self):
-        return int(re.sub("[^0-9]", "", self.code))
+        num = re.sub("[^0-9]", "", self.code)
+        if not num:
+            num = 0
+        return int(num)
 
     @api.model
     def create(self, vals):
@@ -453,7 +456,7 @@ class AccountJournal(models.Model):
                     'name': vals['name'],
                     'implementation': vals.get('implementation', 'no_gap'),
                     'active': True,
-                    'prefix': vals.get('prefix', self.get_pos_number() + '-'),
+                    'prefix': vals.get('prefix', '%s-' % self.get_pos_number()),
                     'padding': vals.get('padding', 8),
                     'number_next_actual': vals['number_next_actual'],
                 }

@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '15.0.1.13.0',
+    'version': '15.0.1.14.7',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -79,7 +79,6 @@
         "views/fiscal_year_closing_views.xml",
         # 'views/fyc_workflow.xml',
         "views/inflation_index_views.xml",
-        "views/menuitems.xml",
         'views/ws_views.xml',
         'views/wsaa_views.xml',
         "views/wsfe_views.xml",
@@ -87,7 +86,6 @@
         'views/ws_padron_views.xml',
         'views/certificate_request_view.xml',
         'views/ws_request_views.xml',
-        'views/menuitems_AFIP.xml',
         'wizard/deposit_check_wizard_view.xml',
         'wizard/reject_check_wizard_view.xml',
         'wizard/account_change_currency_wizard_view.xml',
@@ -131,7 +129,7 @@
         'views/stock_picking_view.xml',
         'views/stock_picking_type_view.xml',
         'views/certificate_request_view.xml',
-        "wizard/wsfe_sinchronize_voucher_view.xml",
+        "wizard/afip_sinchronize_voucher_view.xml",
         "wizard/wsfe_massive_sinchronize_view.xml",
         "wizard/create_sicore_file.xml",
         "wizard/report_exporter.xml",
@@ -150,6 +148,9 @@
         'views/libro_iva_generated_files.xml',
         "report/account_move_report.xml",
         'report/stock_picking_report_qweb.xml',
+        'views/menuitems.xml',
+        'views/menuitems_AFIP.xml',
+        'views/menuitems_exporters.xml',
         'security/ir.model.access.csv',
     ],
     "demo": [

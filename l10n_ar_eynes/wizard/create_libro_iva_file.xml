@@ -40,7 +40,4 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem id="menu_libro_iva" parent="menu_taxes_reports" sequence="5" name="Libro IVA Digital" />
-
-    <menuitem id="libroiva_exporter_menu" parent="menu_libro_iva" action="action_export_libro_iva" />
 </odoo>

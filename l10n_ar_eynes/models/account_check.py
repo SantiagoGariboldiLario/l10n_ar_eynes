@@ -27,7 +27,6 @@ class AccountCheckConfig(models.Model):
     receivable_rejected_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Receivable Rejected Check Account',
-        domain=[('internal_type', '=', 'receivable')],
         help="Partner's account in debit note generation.",
         required=True,
     )
@@ -43,7 +42,10 @@ class AccountCheckConfig(models.Model):
         required=True,
         default=lambda self: self.env.user.company_id.id,
     )
-
+    expired_issued_checks_account_id = fields.Many2one(
+        comodel_name='account.account',
+        required=True,
+    )
     rejected_issued_checks_journal_id = fields.Many2one(
         comodel_name='account.journal',
         readonly=False,
@@ -65,6 +67,7 @@ class AccountCheckConfig(models.Model):
 
 class AccountCheck(models.Model):
     _name = 'account.check'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Check'
     _rec_name = 'number'
 
@@ -103,7 +106,6 @@ class AccountCheck(models.Model):
     )
     amount = fields.Float(string='Amount')
     issue_date = fields.Date(string='Issue Date')
-    reject_date = fields.Date(string='Reject Date')
     payment_date = fields.Date(
         string='Payment Date', help="Only if this check is post dated"
     )
@@ -116,7 +118,6 @@ class AccountCheck(models.Model):
     )
     origin = fields.Char(string='Origin', size=64)
     signatory = fields.Char(string='Signatory', size=64)
-    note = fields.Text(string="Note")
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         compute='_compute_currency',
@@ -140,6 +141,18 @@ class AccountCheck(models.Model):
         required=True,
         readonly=True,
         default=lambda self: self.env.company.id,
+    )
+    reject_date = fields.Date(string='Reject Date')
+    reject_move_id = fields.Many2one(
+        comodel_name='account.move', string='Reject Account Move'
+    )
+    cancel_date = fields.Date(string='Cancelation Date')
+    cancel_move_id = fields.Many2one(
+        comodel_name='account.move', string='Cancelation Account Move'
+    )
+    expired_date = fields.Date(string='Expiration Date')
+    expired_move_id = fields.Many2one(
+        comodel_name='account.move', string='Expiration Account Move'
     )
 
     @api.depends(
@@ -194,34 +207,95 @@ class AccountCheck(models.Model):
                     )
         return super(AccountCheck, self).unlink()
 
-    def cancel_check(self, internal_type):
+    def cancel_check(self, reason):
         """
         This method sets the checks state to 'cancelled'.
-
-        Args:
-            internal_type (selection): used to fiter 3rd party or issued
 
         Raises:
             UserError: Error coming from 3rd party check validation
             ValidationError: Error coming from issued check validation
         """
-        if internal_type == 'third_party':
-            state = 'third_party_check_state'
-            for check in self.filtered(
-                lambda rec: rec.internal_type == internal_type
-            ):
-                if check.third_party_check_state != 'in_wallet':
+        AccountCheckConfig = self.env['account.check.config']
+        AccountMoveLine = self.env['account.move.line']
+        third_party_checks = self.filtered(
+            lambda check: check.internal_type == 'third_party'
+        )
+        issued_checks = self.filtered(
+            lambda check: check.internal_type == 'issued'
+        )
+        if third_party_checks:
+            for check in third_party_checks:
+                if check.third_party_check_state == 'deposited':
                     raise UserError(
                         _(
-                            "Third Check Error! You cannot cancel check if it is "
-                            "not in Wallet"
+                            "Third Check Error! You cannot cancel check if it is deposited."
                         )
                     )
-        elif internal_type == 'issued':
-            state = 'issued_check_state'
-            for check in self.filtered(
-                lambda rec: rec.internal_type == internal_type
-            ):
+            rej_check_account = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).rejected_account_id
+            if not rej_check_account:
+                raise UserError(
+                    _(
+                        "Error! There is no Account configured for rejected third checks."
+                    )
+                )
+            check_account = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).account_id
+            if not check_account:
+                raise UserError(
+                    _("Error! There is no Account configured for third checks.")
+                )
+            def_check_journal = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).deferred_journal_id
+            if not def_check_journal:
+                raise UserError(
+                    _(
+                        "Error! There is no Journal configured for deferred checks."
+                    )
+                )
+            for check in third_party_checks:
+                name_ref = 'Cancel Check ' + check.number
+                move_vals = {
+                    'ref': name_ref,
+                    'journal_id': def_check_journal.id,
+                    # 'date': date,
+                }
+                move_id = self.env['account.move'].create(move_vals)
+
+                AccountMoveLine.with_context(check_move_validity=False).create(
+                    {
+                        'journal_id': def_check_journal.id,
+                        # 'date': date,
+                        'name': name_ref,
+                        'account_id': rej_check_account.id,
+                        'debit': check.amount,
+                        'move_id': move_id.id,
+                    }
+                )
+
+                AccountMoveLine.with_context(check_move_validity=False).create(
+                    {
+                        'journal_id': def_check_journal.id,
+                        # 'date': date,
+                        'name': name_ref,
+                        'account_id': check_account.id,
+                        'credit': check.amount,
+                        'move_id': move_id.id,
+                    }
+                )
+                move_id._post()
+                check.write(
+                    {
+                        'cancel_date': fields.date.today(),
+                        'cancel_move_id': move_id.id,
+                    }
+                )
+            third_party_checks.write({'third_party_check_state': 'cancelled'})
+        if issued_checks:
+            for check in issued_checks:
                 if check.type == 'deferred' and check.accredited:
                     raise ValidationError(
                         _(
@@ -231,28 +305,110 @@ class AccountCheck(models.Model):
                         )
                         % check.number
                     )
-        self.write({state: 'cancelled'})
+            issued_checks.write({'issued_check_state': 'cancelled'})
+        if not self.env.context.get('is_expired', False):
+            for check in issued_checks + third_party_checks:
+                check.message_post(
+                    body=_(
+                        "Check Cancelled. Reason: %(reason)s. ",
+                        reason=reason,
+                    )
+                )
 
-    def expired_check(self):
-        if self.internal_type == 'third_party':
-            state = 'third_party_check_state'
-        elif self.internal_type == 'issued':
-            state = 'issued_check_state'
-        self.write({state: 'expired'})
+    def expired_check(self, reason):
+        if self.internal_type == 'issued':
+            AccountCheckConfig = self.env['account.check.config']
+            AccountMoveLine = self.env['account.move.line']
+            rej_check_account = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).expired_issued_checks_account_id
+            if not rej_check_account:
+                raise UserError(
+                    _(
+                        "Error! There is no Account configured for rejected issued checks."
+                    )
+                )
+            check_account = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).deferred_account_id
+            if not check_account:
+                raise UserError(
+                    _(
+                        "Error! There is no Account configured for issued checks."
+                    )
+                )
+            def_check_journal = AccountCheckConfig.search(
+                [('company_id', '=', self.env.user.company_id.id)]
+            ).rejected_issued_checks_journal_id
+            if not def_check_journal:
+                raise UserError(
+                    _(
+                        "Error! There is no Journal configured for deferred checks."
+                    )
+                )
+            name_ref = 'Cancel Check ' + self.number
+            move_vals = {
+                'ref': name_ref,
+                'journal_id': def_check_journal.id,
+                # 'date': date,
+            }
+            move_id = self.env['account.move'].create(move_vals)
+
+            AccountMoveLine.with_context(check_move_validity=False).create(
+                {
+                    'journal_id': def_check_journal.id,
+                    # 'date': date,
+                    'name': name_ref,
+                    'account_id': check_account.id,
+                    'debit': self.amount,
+                    'move_id': move_id.id,
+                }
+            )
+
+            AccountMoveLine.with_context(check_move_validity=False).create(
+                {
+                    'journal_id': def_check_journal.id,
+                    # 'date': date,
+                    'name': name_ref,
+                    'account_id': rej_check_account.id,
+                    'credit': self.amount,
+                    'move_id': move_id.id,
+                }
+            )
+            move_id._post()
+            self.write(
+                {
+                    'expired_date': fields.date.today(),
+                    'expired_move_id': move_id.id,
+                }
+            )
+            self.write({'issued_check_state': 'expired'})
+
+        else:
+            self.with_context(is_expired=True).cancel_check(reason)
+            self.write({'third_party_check_state': 'expired'})
+
+        self.message_post(
+            body=_(
+                "Check Expired. Reason: %(reason)s. ",
+                reason=reason,
+            )
+        )
 
     # ISSUED CHECK FIELDS AND METHODS
     issued_check_state = fields.Selection(
         selection=[
             ('draft', 'Draft'),
-            ('waiting_accreditation', 'Waiting accreditation'),
+            ('waiting_debit', 'Waiting debit'),
+            ('debited', 'Debited'),
             ('cancelled', 'Cancelled'),
-            ('paid', 'Paid'),
-            ('expired', 'Expired'),
             ('returned', 'Returned'),
             ('rejected', 'Rejected'),
+            ('expired', 'Expired'),
         ],
         default='draft',
         string='Issued Check State',
+        tracking=True,
     )
     checkbook_id = fields.Many2one(
         comodel_name='account.payment.method.line',
@@ -289,12 +445,15 @@ class AccountCheck(models.Model):
                     check.accredited = False
 
     def debit_checks(self, date):
-        """method for checks debitation"""
+        """Method for issued checks debitation."""
         AccountCheckConfig = self.env['account.check.config']
         AccountMoveLine = self.env['account.move.line']
 
+        if 'third_party' in self.mapped('internal_type'):
+            raise UserError(_("You can't debit a Thirt Party Check"))
+
         for check in self:
-            if check.issued_check_state != "waiting_accreditation":
+            if check.issued_check_state != "waiting_debit":
                 raise ValidationError(
                     _("Check %s can't be debited!") % self.number
                 )
@@ -364,7 +523,7 @@ class AccountCheck(models.Model):
 
             check.write(
                 {
-                    'issued_check_state': 'paid',
+                    'issued_check_state': 'debited',
                     'deposit_date': date,
                     'deposit_bank_id': check.checkbook_id.bank_account_id.id,
                 }
@@ -385,7 +544,7 @@ class AccountCheck(models.Model):
             move.line_ids.remove_move_reconcile()
             move.button_cancel()
             move.unlink()
-            check.write({'issued_check_state': 'waiting_accreditation'})
+            check.write({'issued_check_state': 'waiting_debit'})
 
     @api.model
     def issued_create_voucher_move_line(self):
@@ -471,14 +630,15 @@ class AccountCheck(models.Model):
             ('draft', 'Draft'),
             ('in_wallet', 'In wallet'),
             ('deposited', 'Deposited'),
+            ('accredited', 'Accredited'),
             ('delivered', 'Delivered'),
             ('cancelled', 'Cancelled'),
             ('rejected', 'Rejected'),
-            ('returned', 'Returned'),
-            ('accredited', 'Accredited'),
+            ('expired', 'Expired'),
         ],
         default='draft',
         string='Third Party Check State',
+        tracking=True,
     )
     deposit_bank_id = fields.Many2one(
         comodel_name='res.partner.bank', string='Deposit Account'

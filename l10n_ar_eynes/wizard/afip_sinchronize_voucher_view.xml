@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <record id="view_wsfe_sinchronize_voucher" model="ir.ui.view">
-        <field name="name">WSFE Sincronizador</field>
-        <field name="model">wsfe.sinchronize.voucher</field>
+    <record id="view_afip_sinchronize_voucher" model="ir.ui.view">
+        <field name="name">AFIP Sincronizador</field>
+        <field name="model">afip.sinchronize.voucher</field>
         <field name="type">form</field>
         <field name="arch" type="xml">
-            <form string="WSFE Sincronizador">
+            <form string="AFIP Sincronizador">
                 <group string="Datos de consulta">
                     <group>
-                        <field name="config_id" invisible="1" />
+                        <field name="wsfe_config_id" invisible="1" />
+                        <field name="wsfex_config_id" invisible="1" />
                         <field name="voucher_type" widget="selection" />
                         <field name="pos_id_domain" invisible="1" />
-                        <field name="pos_id" domain="pos_id_domain" />
+                        <field name="pos_id" domain="pos_id_domain" widget="selection" />
                         <field name="voucher_number" />
                     </group>
                     <group>
@@ -40,14 +41,6 @@
                 <group string="Mensaje de error">
                     <field name="error_msg" />
                 </group>
-                <group
-                    name="invoice"
-                    string="Invoice Relationship"
-                    attrs="{'invisible': [('infook','=',False)]}"
-                >
-                    <field name="invoice_id_domain" invisible="1" />
-                    <field name="invoice_id" domain="invoice_id_domain" />
-                </group>
                 <footer>
                     <button name="relate_invoice" string="Sincronizar" type="object" class="oe_highlight" />
                     o
@@ -57,10 +50,11 @@
         </field>
     </record>
 
-    <record id="action_wsfe_sinchronize_voucher" model="ir.actions.act_window">
+    <record id="action_afip_sinchronize_voucher" model="ir.actions.act_window">
         <field name="binding_model_id" ref="account.model_account_move" />
-        <field name="name">WSFE Sincronizador</field>
-        <field name="res_model">wsfe.sinchronize.voucher</field>
+        <field name="binding_view_types">form</field>
+        <field name="name">AFIP Sincronizador</field>
+        <field name="res_model">afip.sinchronize.voucher</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>

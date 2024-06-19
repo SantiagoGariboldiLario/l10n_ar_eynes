@@ -1132,7 +1132,7 @@ msgstr "Línea de concepto de orden de pago de cuenta"
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_tax_subjournal_action
 msgid "Account Tax Subjournal"
-msgstr "Subdiario de Impuestos"
+msgstr "Subdiario de IVA"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.account_customer_payment_order_action
@@ -1521,7 +1521,7 @@ msgstr "Aprobado"
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_action_arciba_generated_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_arciba_generated_files_tree
 msgid "ArciBA generated files"
-msgstr "Archivos generados por ArciBA"
+msgstr "Archivos e-ArciBA generados"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
@@ -2172,16 +2172,6 @@ msgstr "Anulado"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_method_line__cancelled_issued_check_ids
 msgid "Cancelled Checks"
 msgstr "Cheques Anulados"
-
-#. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Cancelled Debit Note"
-msgstr "Nota de débito canceladas"
-
-#. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Cancelled Invoice"
-msgstr "Factura cancelada"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
@@ -2880,7 +2870,7 @@ msgid ""
 "Could not match any user available journals with fiscal position '%(fiscal_pos)s'\n"
 "Please check if there are any journals with this parameters in users > preferences > available journals"
 msgstr ""
-"No se encontrar diarios disponibles en el usuario con posicion fiscal '%(fiscal_pos)s' y tipo fiscal '%(fiscal_type)s'\n"
+"No se encontrar diarios disponibles en el usuario con posicion fiscal '%(fiscal_pos)s'\n"
 "Por favor, revisar si existen diarios disponibles con estos paramentros en usuarios > preferencias > diarios disponibles"
 
 #. module: l10n_ar_eynes
@@ -2959,7 +2949,7 @@ msgstr "Crear RECPAM"
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_sifere_export
 msgid "Create SIFERE Reports"
-msgstr "Crear reportes SIFERE"
+msgstr "Generación de archivos SIFERE"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_change_currency__create_uid
@@ -3173,7 +3163,6 @@ msgstr "Método de crédito"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__res_voucher_type__doc_type__cn
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 msgid "Credit Note"
 msgstr "Nota de Credito"
 
@@ -3404,11 +3393,6 @@ msgid "Debit Checks"
 msgstr "Debitar cheques"
 
 #. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Debit Nore"
-msgstr "Nota de débito"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__is_debit_note
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__debit_note_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__is_debit_note
@@ -3457,7 +3441,9 @@ msgid "Debit move"
 msgstr "Asiento de débito"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__debited
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__accredited
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
 msgid "Debited"
 msgstr "Debitado"
 
@@ -3514,8 +3500,8 @@ msgstr "Percepciones definidas"
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
 #, python-format
-msgid "Definition not found for document_type_name: %(doc_type)s"
-msgstr "Definición no encontrada para document_type_name: %(doc_type)s"
+msgid "Arciba Code not found for document_type_name: %(doc_type)s. You must use CUIT/CUIL"
+msgstr "Código ArciBA no encontrado para Tipo de documento: %(doc_type)s. Debería ser CUIT/CUIL"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__delivered
@@ -3917,16 +3903,6 @@ msgid "Draft"
 msgstr "Borrador"
 
 #. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Draft Debit Nore"
-msgstr "Borrador de nota de débito"
-
-#. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Draft Invoice"
-msgstr "Factura borrador"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_import_journal_creation__due_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__due_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__date_due
@@ -4006,7 +3982,6 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_report_qweb
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 msgid ""
 "El total de este comprobante expresado en la moneda de curso legal - Pesos "
 "Argentinos - asciende a $"
@@ -4341,6 +4316,8 @@ msgstr "Tiempo de expiración"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__expired
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__change_check_state_wizard__new_state__expired
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__expired
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
 msgid "Expired"
 msgstr "Vencido"
@@ -4350,14 +4327,14 @@ msgstr "Vencido"
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_arba_perception_report
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.arba_perception_exporter_wizard_view
 msgid "Export ARBA Perceptions"
-msgstr "Exportar percepciones ARBA"
+msgstr "Generación de archivos Percepciones ARBA"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_create_arba_retention_file
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_arba_retention_report
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.arba_retention_exporter_wizard_view
 msgid "Export ARBA Retentions"
-msgstr "Exportar Retenciones ARBA"
+msgstr "Generación de archivos Retenciones ARBA"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
@@ -5287,7 +5264,6 @@ msgstr "Código RRHH no válido."
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__invoice_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__invoice_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_shipping_permission__invoice_id
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 #, python-format
 msgid "Invoice"
 msgstr "Factura"
@@ -5945,7 +5921,7 @@ msgstr ""
 #: model:ir.ui.menu,name:l10n_ar_eynes.libroiva_exporter_menu
 #, python-format
 msgid "Libro IVA Digital Exporter"
-msgstr "Exportador Libro IVA Digital"
+msgstr "Generación de archivos Libro IVA Digital"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_libro_iva_exporter_wizard
@@ -5960,7 +5936,7 @@ msgstr "Asistente para Exportador Libro IVA Digital"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_iva_generated_files_tree_view
 #, python-format
 msgid "Libro IVA generated files"
-msgstr "Archivos generados para Libro IVA"
+msgstr "Archivos Libro IVA generados"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_scale_line__limit
@@ -6132,11 +6108,6 @@ msgstr "Mensajes"
 #: model:ir.model,name:l10n_ar_eynes.model_account_payment_order_issued_check_line
 msgid "Model to communicate issued checks with payment orders"
 msgstr "Modelo para comunicar cheques emitidos con órdenes de pago"
-
-#. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Moneda:"
-msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__fcred_minimum_amount
@@ -6896,12 +6867,6 @@ msgid "Pagos"
 msgstr ""
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__paid
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
-msgid "Paid"
-msgstr "Debitado"
-
-#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
@@ -7604,7 +7569,7 @@ msgstr "Recibo"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__receivable_rejected_account_id
 msgid "Receivable Rejected Check Account"
-msgstr "Cuenta de cheque rechazada por cobrar"
+msgstr "Cuenta de cheques rechazados propios"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__receiving_partner_id
@@ -7748,7 +7713,7 @@ msgstr "Rechazado"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__rejected_account_id
 msgid "Rejected Check Account"
-msgstr "Cuenta de cheques rechazados"
+msgstr "Cuenta de cheques rechazados de terceros"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
@@ -8106,12 +8071,10 @@ msgstr "Excepciones de retenciones"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__returned
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__returned
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__reason_rejected_check__type__returned
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
 msgid "Returned"
-msgstr "Vencido"
+msgstr "Devuelto"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_operation_wizard_view
@@ -8144,7 +8107,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_generate_sicore_files
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_sicore_report
 msgid "SICORE Files Generation"
-msgstr ""
+msgstr "Generación de archivos SICORE"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
@@ -8403,7 +8366,7 @@ msgstr "Permisos de envío"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_stock_picking__shipping_number
 msgid "Shipping number"
-msgstr "Número de envío"
+msgstr "Número de remito"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsfe_massive_sinchronize
@@ -8430,7 +8393,7 @@ msgstr "Configuración de Sicore"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sicore_generated_files_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_sicore_generated_files_tree
 msgid "Sicore generated files"
-msgstr "Sicore archivos generados"
+msgstr "Archivos SICORE generados"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_sifere_config
@@ -8669,7 +8632,6 @@ msgstr "Cuenta provisoria"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_report_qweb
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 msgid "Tasa de cambio:"
 msgstr ""
 
@@ -8765,7 +8727,7 @@ msgstr "Impuestos"
 #: model:ir.ui.menu,name:l10n_ar_eynes.account_tax_subjournal_menu
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_tax_subjournal_view_form
 msgid "Taxes Subjournal"
-msgstr "Subdiario de impuestos"
+msgstr "Subdiario de IVA"
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/models/wsfe.py:0
@@ -9758,16 +9720,6 @@ msgid "Vat Date"
 msgstr "Fecha de IVA"
 
 #. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Vendor Bill"
-msgstr "Factura de proveedor"
-
-#. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Vendor Credit Note"
-msgstr "Nota de crédito de proveedor"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__verification_required
 msgid "Verification required"
 msgstr "Verificacion requerida"
@@ -9775,7 +9727,7 @@ msgstr "Verificacion requerida"
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_sifere_reports
 msgid "View SIFERE Reports"
-msgstr "Ver informes de SIFERE"
+msgstr "Archivos SIFERE generados"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_payment_method_line__format__virtual
@@ -9979,7 +9931,7 @@ msgid "WSPADRON Configuration"
 msgstr "Configuración WS Padron"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_accreditation
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__waiting_debit
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
 msgid "Waiting accreditation"
 msgstr "Esperando débito"
@@ -10378,7 +10330,7 @@ msgstr "Generación de archivos E-Arciba"
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_generate_arciba_nc_files
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_arciba_nc_report
 msgid "e-ARCIBA NC File Generation"
-msgstr "e-Arciba NC Generación de archivos"
+msgstr "Generación de archivos e-Arciba NC"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form

@@ -13,23 +13,22 @@ from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, float_is_zero
 from odoo.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 
 
-class WsfeSinchronizeCoucher(models.TransientModel):
+class AFIPSinchronizeVoucher(models.TransientModel):
     """
     This wizard is used to get information about a voucher
-    informed to AFIP through WSFE
+    informed to AFIP through WSFE or WSFEX
     """
 
-    _name = "wsfe.sinchronize.voucher"
-    _description = "WSFE Sinchronize Voucher"
+    _name = "afip.sinchronize.voucher"
+    _description = "AFIP Sinchronize Voucher"
 
     voucher_type = fields.Many2one(
         'res.voucher.type', 'Voucher Type', required=True
     )
     pos_id = fields.Many2one('account.journal', 'POS', required=True)
     pos_id_domain = fields.Char(compute='_compute_pos_id_domain')
-    config_id = fields.Many2one(
-        'wsfe.config', 'Config', default=lambda self: self._get_def_config()
-    )
+    wsfe_config_id = fields.Many2one('wsfe.config', 'Config')
+    wsfex_config_id = fields.Many2one('wsfex.config', 'Config')
     voucher_number = fields.Integer('Number', required=True)
 
     document_type = fields.Many2one(
@@ -90,25 +89,51 @@ class WsfeSinchronizeCoucher(models.TransientModel):
     infook = fields.Boolean(
         'Info OK', default=False, compute='_compute_sync_values'
     )
-    invoice_id_domain = fields.Char(compute='_compute_sync_values')
     invoice_id = fields.Many2one('account.move', 'Invoice')
     error_msg = fields.Text(compute='_compute_sync_values')
 
-    def _get_def_config(self):
-        wsfe_conf_model = self.env['wsfe.config'].with_context(
-            company_id=self.env.user.company_id.id
-        )
-        return wsfe_conf_model.get_config()
+    @api.model
+    def default_get(self, fields):
+        defaults = super(AFIPSinchronizeVoucher, self).default_get(fields)
 
-    @api.depends('config_id', 'voucher_type')
+        invoice_id = self.env.context.get('active_id')
+        active_invoice = self.env['account.move'].browse(invoice_id)
+        defaults.update(
+            {
+                'invoice_id': invoice_id,
+                'wsfex_config_id': False,
+                'wsfe_config_id': False,
+                'voucher_type': active_invoice.voucher_type_id.id,
+            }
+        )
+        if active_invoice.local:
+            defaults.update(
+                {
+                    'wsfe_config_id': self.env['wsfe.config']
+                    .with_context(company_id=self.env.company.id)
+                    .get_config(),
+                }
+            )
+        else:
+            defaults.update(
+                {
+                    'wsfex_config_id': self.env['wsfex.config']
+                    .with_context(company_id=self.env.company.id)
+                    .get_config(),
+                }
+            )
+
+        return defaults
+
+    @api.depends('wsfe_config_id', 'wsfex_config_id', 'voucher_type')
     def _compute_pos_id_domain(self):
         for rec in self:
-            wsfe_conf = rec.config_id
-            ids = [
-                p.id for p in wsfe_conf.point_of_sale_ids.mapped('journal_id')
+            ws_conf = rec.wsfe_config_id or rec.wsfex_config_id
+            ids = [p.id for p in ws_conf.point_of_sale_ids.mapped('journal_id')]
+            domain = [
+                ('id', 'in', ids),
+                ('denomination', '=', rec.voucher_type.denomination),
             ]
-            rec.voucher_type.denomination or False
-            domain = [('id', 'in', ids)]
             rec.pos_id_domain = json.dumps(domain)
 
     def _clean_values(self):
@@ -124,22 +149,25 @@ class WsfeSinchronizeCoucher(models.TransientModel):
         self.cae_due_date = False
         self.date_process = False
         self.infook = False
-        self.invoice_id_domain = '[]'
-        self.invoice_id = False
         self.error_msg = ''
 
     @api.depends('voucher_number', 'pos_id', 'voucher_type')
     def _compute_sync_values(self):
         for rec in self:
-            if not rec.voucher_type or not rec.pos_id or not rec.voucher_number:
-                rec._clean_values()
-            else:
+            rec._clean_values()
+            if rec.voucher_type and rec.pos_id and rec.voucher_number:
                 pos = rec.pos_id.code
                 if pos:
                     pos = int(re.sub("[^0-9]", "", pos))
 
+                rec.error_msg = rec._check_invoice_number_not_posted(
+                    pos, rec.voucher_number
+                )
+
+                webservice = rec.wsfe_config_id or rec.wsfex_config_id
+
                 try:
-                    res = rec.config_id.get_voucher_info(
+                    res = webservice.get_voucher_info(
                         pos, rec.voucher_type.afip_code, rec.voucher_number
                     )
                 except Exception as e:
@@ -159,74 +187,73 @@ class WsfeSinchronizeCoucher(models.TransientModel):
                         DEFAULT_SERVER_DATE_FORMAT,
                         time.strptime(str(res['FchVto']), '%Y%m%d'),
                     )
-                    dpr = time.strftime(
-                        DEFAULT_SERVER_DATETIME_FORMAT,
-                        time.strptime(str(res['FchProceso']), '%Y%m%d%H%M%S'),
-                    )
+                    dpr = False
+                    if res['FchProceso']:
+                        dpr = time.strftime(
+                            DEFAULT_SERVER_DATETIME_FORMAT,
+                            time.strptime(
+                                str(res['FchProceso']), '%Y%m%d%H%M%S'
+                            ),
+                        )
 
-                    # TODO: Tandriamos que filtrar las invoices por
-                    # Tipo de Comprobante tambien para ello podemos agregar
-                    # un par de campos mas para usarlos como filtros,
-                    # por ejemplo, is_debit_note y type
                     rec.document_type = document_type
                     rec.document_number = str(res['DocNro'])
-                    rec.date_invoice = di  # str(res['CbteFch']),
+                    rec.date_invoice = di
                     rec.amount_total = float(res['ImpTotal'])
-                    rec.amount_no_taxed = res['ImpTotConc']
-                    rec.amount_taxed = res['ImpNeto']
-                    rec.amount_tax = float(res['ImpIVA']) + float(
-                        res['ImpTrib']
+                    rec.amount_no_taxed = res.get('ImpTotConc', 0)
+                    rec.amount_taxed = res.get('ImpNeto', 0)
+                    rec.amount_tax = float(res.get('ImpIVA', 0)) + float(
+                        res.get('ImpTrib', 0)
                     )
-                    rec.amount_exempt = res['ImpOpEx']
+                    rec.amount_exempt = res.get('ImpOpEx', 0)
                     rec.cae = str(res['CodAutorizacion'])
                     rec.cae_due_date = dd
                     rec.date_process = dpr
                     rec.infook = True
-                    rec.error_msg = ''
-
-                    if rec.document_number == '0':
-                        doc_number = [False, '0', '']
-                    else:
-                        doc_number = [rec.document_number]
 
                     domain = [
                         ('move_type', 'in', ('out_invoice', 'out_refund')),
                         ('state', '=', 'draft'),
                     ]
-                    if document_type and not (
-                        document_type.afip_code in ['99', '96']
+                    if (
+                        rec.invoice_id.local
+                        and rec.document_type
+                        and not (rec.document_type.afip_code in ['99', '96'])
                     ):
+                        if rec.document_number == '0':
+                            doc_number = [False, '0', '']
+                        else:
+                            doc_number = [rec.document_number]
                         domain.append(('partner_id.vat', 'in', doc_number))
-
-                    AccountMove = self.env['account.move']
-                    invoice_ids = AccountMove.search(domain)
+                    invoice_ids = self.env['account.move'].search(domain)
                     invoice_ids = invoice_ids.filtered(
                         lambda inv: float_is_zero(
                             inv.amount_total - rec.amount_total,
                             precision_rounding=inv.currency_id.rounding,
                         )
                     )
-                    rec.invoice_id_domain = json.dumps(
-                        [('id', 'in', invoice_ids.ids)]
-                    )
-                    if not invoice_ids:
+                    if rec.invoice_id not in invoice_ids:
                         rec.error_msg = _(
-                            'Voucher not found with this data. Domain: %(domain)s',
-                            domain=domain,
-                        )
-                    elif AccountMove.search(
-                        [
-                            ('cae', '=', rec.cae),
-                            ('id', 'not in', invoice_ids.ids),
-                        ]
-                    ):
-                        rec.invoice_id_domain = json.dumps([('id', 'in', [])])
-                        rec.error_msg = _(
-                            'The voucher is already related to an invoice'
+                            "The selected invoice doesn't match with the AFIP data obtained."
                         )
 
+    def _check_invoice_number_not_posted(self, pos, number):
+        voucher_number = '%05d-%08d' % (pos, number)
+        invoices_same_type = self.env['account.move'].search(
+            [
+                ('voucher_type_id', '=', self.voucher_type.id),
+                ('state', '=', 'posted'),
+                ('name', 'ilike', voucher_number),
+            ]
+        )
+        if invoices_same_type:
+            return _(
+                "The selected voucher number is already related to a posted invoice."
+            )
+        return ''
+
     def relate_invoice(self):
-        if not self.infook or not self.invoice_id:
+        if (not self.infook or not self.invoice_id) or self.error_msg:
             raise UserError(
                 _("WSFE Error!\n" "Sinchronize process is not correct!")
             )

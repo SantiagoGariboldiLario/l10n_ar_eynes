@@ -110,7 +110,9 @@
                         <span>C.U.I.T: <span t-esc="o.company_id.vat" />
                         </span>
                         <br />
-                        <span>Ing. Brutos: <span t-esc="o.company_id.vat" />
+                        <span>Ing. Brutos: <span
+                                t-esc="o.company_id.partner_id.nro_insc_iibb or o.company_id.vat"
+                            />
                         </span>
                         <br />
                         <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
@@ -400,7 +402,7 @@
                                             />
                                                 <br />
                                                 <span class="partner-info">IIBB: </span><span
-                                                t-esc="o.partner_id.vat"
+                                                t-esc="o.partner_id.nro_insc_iibb or o.partner_id.vat"
                                             />
                                             </t>
                                             <br />
@@ -474,7 +476,7 @@
                                                 <span t-esc="line.quantity" />
                                             </td>
                                             <td>
-                                                <t t-set="iva" t-value="line.get_iva_tax()"/>
+                                                <t t-set="iva" t-value="line.get_iva_tax()" />
                                                 <span
                                                     t-if="iva and iva.price_include"
                                                     t-esc="line.price_unit_to_PDF() / (1 + (iva.amount/100))"
@@ -519,7 +521,7 @@
                                                     t-esc="(sub_total_per_product * (1 - line.discount/100)) / (1+ iva.amount/100) * (1+ iva.amount/100)"
                                                     t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
                                                 />
-                                                <span 
+                                                <span
                                                     t-elif="iva and iva.price_include"
                                                     t-esc="line.price_unit"
                                                     t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"

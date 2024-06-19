@@ -9,15 +9,8 @@
             <form>
                 <sheet>
                     <group>
-                        <group>
-                            <field name="reject_date" required="1" />
-                        </group>
-                    </group>
-                    <group>
-                        <field name="generate_rejection_journal_entry" />
-                    </group>
-                    <group>
-                        <field name="note" />
+                        <field name="reject_date" />
+                        <field name="reject_reason" />
                     </group>
                     <footer>
                         <button
@@ -42,24 +35,8 @@
                 <sheet>
                     <group>
                         <field name="reject_date" />
-                        <field
-                            name="company_id"
-                            groups="base.group_multi_company"
-                            widget="selection"
-                        />
+                        <field name="reject_reason" />
                     </group>
-                    <group>
-                        <field
-                            name="journal_id"
-                            domain="[('type', '=', 'sale'),('company_id','=',company_id)]"
-                        />
-                    </group>
-                    <field name="expense_line_ids">
-                        <tree editable="bottom">
-                            <field name="product_id" />
-                            <field name="price" />
-                        </tree>
-                    </field>
                     <footer>
                         <button
                             name="action_reject"

@@ -27,7 +27,7 @@
         <field name="model">arciba.generated.files</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="ArciBA generated files" create="false" edit="false">
+            <tree create="false" edit="false">
                 <field name="code" />
                 <field name="date_from" />
                 <field name="date_to" />
@@ -42,10 +42,4 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem
-        id="menu_action_arciba_generated_files"
-        name="ArciBA generated files"
-        action="action_arciba_generated_files"
-        parent="menu_arciba"
-    />
 </odoo>

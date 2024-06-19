@@ -27,7 +27,7 @@
         <field name="model">arba.generated.files</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="ARBA generated files" create="false" edit="false">
+            <tree create="false" edit="false">
                 <field name="code" />
                 <field name="date_from" />
                 <field name="date_to" />
@@ -43,12 +43,4 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem parent="menu_taxes_reports" id="menu_arba" name="ARBA" sequence="3" />
-
-    <menuitem
-        id="menu_action_arba_generated_files"
-        name="ARBA generated files"
-        action="action_arba_generated_files"
-        parent="menu_arba"
-    />
 </odoo>

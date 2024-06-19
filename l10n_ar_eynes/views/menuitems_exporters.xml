@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Level 1 -->
+    <menuitem
+        parent="account.menu_finance_reports"
+        id="menu_taxes_reports"
+        name="Taxes"
+        groups="account.group_account_user"
+    />
+
+    <!-- Level 2 -->
+    <menuitem parent="menu_taxes_reports" id="menu_sicore" name="SICORE" sequence="1" />
+
+    <menuitem parent="menu_taxes_reports" id="menu_parent_exporters_sifere" name="SIFERE" sequence="2" />
+
+    <menuitem parent="menu_taxes_reports" id="menu_arba" name="ARBA" sequence="3" />
+
+    <menuitem parent="menu_taxes_reports" id="menu_arciba" name="e-ARCIBA" sequence="4" />
+
+    <menuitem parent="menu_taxes_reports" id="menu_libro_iva" name="Libro IVA Digital" sequence="5" />
+
+    <!-- Level 3 -->
+    <menuitem
+        parent="menu_sicore"
+        id="menu_sicore_report"
+        name="Sicore files generation"
+        action="action_generate_sicore_files"
+    />
+
+    <menuitem
+        parent="menu_sicore"
+        id="menu_action_sicore_generated_files"
+        name="Sicore generated files"
+        action="action_sicore_generated_files"
+    />
+
+    <menuitem
+        parent="menu_parent_exporters_sifere"
+        id="menu_sifere_export"
+        name="Create SIFERE Reports"
+        action="wizard_create_sifere_files_action"
+    />
+
+    <menuitem
+        parent="menu_parent_exporters_sifere"
+        id="menu_sifere_reports"
+        name="View SIFERE Reports"
+        action="report_files_sifere"
+    />
+
+    <menuitem
+        parent="menu_arba"
+        id="menu_action_arba_generated_files"
+        name="ARBA generated files"
+        action="action_arba_generated_files"
+    />
+
+    <menuitem parent="menu_arba" id="menu_arba_retention_report" action="action_create_arba_retention_file" />
+
+    <menuitem
+        parent="menu_arba"
+        id="menu_arba_perception_report"
+        action="action_create_arba_perception_file"
+    />
+
+    <menuitem
+        parent="menu_arciba"
+        id="menu_action_arciba_generated_files"
+        name="ArciBA generated files"
+        action="action_arciba_generated_files"
+    />
+
+    <menuitem parent="menu_arciba" id="menu_arciba_report" action="action_generate_arciba_files" />
+
+    <menuitem parent="menu_arciba" id="menu_arciba_nc_report" action="action_generate_arciba_nc_files" />
+
+    <menuitem
+        parent="menu_libro_iva"
+        id="menu_libroiva_generated_files"
+        action="action_libro_IVA_generated_files"
+    />
+
+    <menuitem parent="menu_libro_iva" id="libroiva_exporter_menu" action="action_export_libro_iva" />
+
+</odoo>
