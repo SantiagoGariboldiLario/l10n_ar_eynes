@@ -2174,16 +2174,6 @@ msgid "Cancelled Checks"
 msgstr "Cheques Anulados"
 
 #. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Cancelled Debit Note"
-msgstr "Nota de débito canceladas"
-
-#. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Cancelled Invoice"
-msgstr "Factura cancelada"
-
-#. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
 #, python-format
 msgid ""
@@ -2880,7 +2870,7 @@ msgid ""
 "Could not match any user available journals with fiscal position '%(fiscal_pos)s'\n"
 "Please check if there are any journals with this parameters in users > preferences > available journals"
 msgstr ""
-"No se encontrar diarios disponibles en el usuario con posicion fiscal '%(fiscal_pos)s' y tipo fiscal '%(fiscal_type)s'\n"
+"No se encontrar diarios disponibles en el usuario con posicion fiscal '%(fiscal_pos)s'\n"
 "Por favor, revisar si existen diarios disponibles con estos paramentros en usuarios > preferencias > diarios disponibles"
 
 #. module: l10n_ar_eynes
@@ -3173,7 +3163,6 @@ msgstr "Método de crédito"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__res_voucher_type__doc_type__cn
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 msgid "Credit Note"
 msgstr "Nota de Credito"
 
@@ -3404,11 +3393,6 @@ msgid "Debit Checks"
 msgstr "Debitar cheques"
 
 #. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Debit Nore"
-msgstr "Nota de débito"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__is_debit_note
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__debit_note_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__is_debit_note
@@ -3457,7 +3441,9 @@ msgid "Debit move"
 msgstr "Asiento de débito"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__debited
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__accredited
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
 msgid "Debited"
 msgstr "Debitado"
 
@@ -3917,16 +3903,6 @@ msgid "Draft"
 msgstr "Borrador"
 
 #. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Draft Debit Nore"
-msgstr "Borrador de nota de débito"
-
-#. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Draft Invoice"
-msgstr "Factura borrador"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_import_journal_creation__due_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_journal__due_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__date_due
@@ -4006,7 +3982,6 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_report_qweb
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 msgid ""
 "El total de este comprobante expresado en la moneda de curso legal - Pesos "
 "Argentinos - asciende a $"
@@ -4341,6 +4316,8 @@ msgstr "Tiempo de expiración"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__expired
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__change_check_state_wizard__new_state__expired
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__expired
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
 msgid "Expired"
 msgstr "Vencido"
@@ -5287,7 +5264,6 @@ msgstr "Código RRHH no válido."
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__invoice_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_sinchronize_voucher__invoice_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_shipping_permission__invoice_id
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 #, python-format
 msgid "Invoice"
 msgstr "Factura"
@@ -6134,11 +6110,6 @@ msgid "Model to communicate issued checks with payment orders"
 msgstr "Modelo para comunicar cheques emitidos con órdenes de pago"
 
 #. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Moneda:"
-msgstr ""
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__fcred_minimum_amount
 msgid "Monto Minimo (FCE)"
 msgstr ""
@@ -6894,12 +6865,6 @@ msgstr "Línea de POS para configuracion WS"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.payment_order
 msgid "Pagos"
 msgstr ""
-
-#. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__debited
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
-msgid "Debited"
-msgstr "Debitado"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -8105,12 +8070,6 @@ msgid "Retentions Exceptions"
 msgstr "Excepciones de retenciones"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__third_party_check_state__expired
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.third_party_checks_filter
-msgid "Expired"
-msgstr "Vencido"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_check__issued_check_state__returned
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__reason_rejected_check__type__returned
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.issued_checks_filter
@@ -8673,7 +8632,6 @@ msgstr "Cuenta provisoria"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_report_qweb
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
 msgid "Tasa de cambio:"
 msgstr ""
 
@@ -9760,16 +9718,6 @@ msgstr "IVA"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__vat_date
 msgid "Vat Date"
 msgstr "Fecha de IVA"
-
-#. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Vendor Bill"
-msgstr "Factura de proveedor"
-
-#. module: l10n_ar_eynes
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_invoice_document
-msgid "Vendor Credit Note"
-msgstr "Nota de crédito de proveedor"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_document_type__verification_required

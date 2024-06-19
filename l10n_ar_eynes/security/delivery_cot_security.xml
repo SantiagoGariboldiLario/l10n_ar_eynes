@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-	<data>
-        <record model="ir.module.category" id="module_category_cot_user">
-            <field name="name">COT User</field>
-            <field name="sequence">16</field>
-        </record>
+    <record model="ir.module.category" id="module_category_cot_user">
+        <field name="name">COT User</field>
+        <field name="sequence">16</field>
+    </record>
 
-        <record id="group_cot_user" model="res.groups">
-            <field name="name">COT User</field>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]" />
-            <field name="category_id" ref="module_category_cot_user" />
-        </record>
-    </data>
+    <record id="group_cot_user" model="res.groups">
+        <field name="name">COT User</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]" />
+        <field name="category_id" ref="module_category_cot_user" />
+    </record>
 </odoo>

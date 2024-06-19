@@ -106,11 +106,7 @@
                 <field name="code" />
                 <field name="type" />
                 <field name="name" />
-                <field
-                    name="company_id"
-                    groups="base.group_multi_company"
-                    options="{'no_create': True}"
-                />
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" />
             </tree>
         </field>
     </record>
@@ -175,7 +171,7 @@
         <field name="name">account.payment.order.retention.line.view.tree</field>
         <field name="model">account.payment.order.retention.line</field>
         <field name="arch" type="xml">
-            <tree string="">
+            <tree>
                 <field name="date" />
                 <field name="date_applied" />
                 <field name="reg_code" />

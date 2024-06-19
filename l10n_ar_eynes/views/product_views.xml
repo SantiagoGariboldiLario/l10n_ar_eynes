@@ -51,7 +51,7 @@
         <field name="name">cot.nomenclature.view.tree</field>
         <field name="model">cot.nomenclature</field>
         <field name="arch" type="xml">
-            <tree string="COT Nomenclature">
+            <tree>
                 <field name="code" />
                 <field name="name" />
             </tree>

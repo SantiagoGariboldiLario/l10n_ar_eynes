@@ -25,7 +25,7 @@
         <field name="model">inflation.index</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="Inflation Indexes" editable="top">
+            <tree editable="top">
                 <field name="coefficient" />
                 <field name="date" widget='month_year_format' />
             </tree>

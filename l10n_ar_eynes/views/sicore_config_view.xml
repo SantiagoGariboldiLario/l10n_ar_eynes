@@ -5,7 +5,7 @@
         <field name="model">sicore.generated.files</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="Sicore generated files" create="false" edit="false">
+            <tree create="false" edit="false">
                 <field name="code" />
                 <field name="period_start" />
                 <field name="period_end" />
@@ -49,7 +49,7 @@
         <field name="model">sicore.config</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="Configuration">
+            <tree>
                 <field name="name" />
             </tree>
         </field>
@@ -68,7 +68,7 @@
                     <notebook>
                         <page string="Fiscal Positions">
                             <field name="fiscal_position_ids">
-                                <tree string="Fiscal Positions">
+                                <tree>
                                     <field name="fiscal_position" />
                                     <field name="code" />
                                 </tree>

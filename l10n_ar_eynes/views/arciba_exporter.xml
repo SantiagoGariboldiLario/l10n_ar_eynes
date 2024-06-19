@@ -27,7 +27,7 @@
         <field name="model">arciba.generated.files</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="ArciBA generated files" create="false" edit="false">
+            <tree create="false" edit="false">
                 <field name="code" />
                 <field name="date_from" />
                 <field name="date_to" />
