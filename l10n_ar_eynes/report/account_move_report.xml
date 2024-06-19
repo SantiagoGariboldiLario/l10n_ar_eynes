@@ -522,6 +522,11 @@
                                                     t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
                                                 />
                                                 <span
+                                                    t-elif="iva and iva.price_include"
+                                                    t-esc="line.price_unit"
+                                                    t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                                                />
+                                                <span
                                                     t-else=""
                                                     t-esc="line.price_subtotal_to_PDF()"
                                                     t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"

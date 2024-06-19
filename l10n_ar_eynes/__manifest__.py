@@ -147,6 +147,7 @@
         'wizard/create_libro_iva_file.xml',
         'views/libro_iva_generated_files.xml',
         "report/account_move_report.xml",
+        'report/stock_picking_report_qweb.xml',
         'views/menuitems.xml',
         'views/menuitems_AFIP.xml',
         'views/menuitems_exporters.xml',

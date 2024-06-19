@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data noupdate="0">
+        <record id="paperformat_stock_picking_report_qweb" model="report.paperformat">
+            <field name="name">Stock Picking Report Qweb L10n-Eynes</field>
+            <field name="default" eval="False" />
+            <field name="format">A4</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">55</field>
+            <field name="margin_bottom">20</field>
+            <field name="margin_right">5</field>
+            <field name="margin_left">5</field>
+            <field name="header_line" eval="False" />
+            <field name="header_spacing">5</field>
+            <field name="dpi">90</field>
+        </record>
+    </data>
+
+    <record id="stock_picking_qweb_l10n" model="ir.actions.report">
+        <field name="name">Remito</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ar_eynes.stock_picking_report_qweb</field>
+        <field name="report_file">l10n_ar_eynes.stock_picking_report_qweb</field>
+        <field name="paperformat_id" ref="l10n_ar_eynes.paperformat_stock_picking_report_qweb" />
+        <field name="print_report_name">(object.name)</field>
+        <field name="binding_model_id" ref="model_stock_picking" />
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="weblearns_layout_stock_picking">
+        <div class="header">
+            <table class="header-table">
+                <tr>
+                    <td class="view-limits" style="width: 40%;">
+                        <div style="height: 10%;"/>
+                        <img
+                            class="logo"
+                            t-attf-src="data:image/png;base64,#{o.company_id.logo}"
+                        /> 
+                        <div style="height: 10%;"/>
+                    </td>
+                    <td class="view-limits" style="width: 60%;">
+                        <div style="height: 90%; width: 90%; margin-left: 20px;">
+                            <div class="view-limits" style="width: 100%; height: 70%;">
+                                REMITO: <span t-esc="o.name"/><br/>
+                                Fecha de envio: <br/>
+                                <span t-esc="o.date_done"/>
+                            </div>
+                            <div class="view-limits" style="width: 100%; height: 30%;">
+                                <table style="width: 100%; height: 100%;">
+                                    <tr>
+                                        <td class="view-limits">
+                                            Orden:<br/>
+                                            <span t-esc="o.origin"/>
+                                        </td>
+                                        <td class="view-limits" style="width: 50%; height: 100%;">
+                                            Peso total:<br/>
+                                            <span t-esc="o.weight"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>  
+                    </td>
+                </tr>
+            </table>
+            <style>
+                .header-table{
+                    height: 200px;
+                    width: 100%;
+                }
+
+                .logo{
+                    height: 70%;
+                    width: 90%;
+                    margin-left: 10px;
+                    object-fit: cover;
+                }
+
+                /*.view-limits{
+                    border: 2px solid #000;
+                }*/
+
+            </style>
+        </div>
+        <t t-raw="0" />
+        <div class="footer">
+
+        </div>
+    </template>
+
+    <template id="stock_picking_report_qweb">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="web.html_container">
+                <div t-call="l10n_ar_eynes.weblearns_layout_stock_picking">
+                    <h4>Datos propios: </h4>
+                    <table class="company-table">
+                        <tr>
+                            <td width="50%">
+                                <span>Nombre: </span><span
+                                    t-esc="o.company_id.name"
+                                />
+                                <br />
+                                <span>CUIT: </span><span
+                                    t-esc="o.company_id.vat"
+                                />
+                                <br />
+                                <span>Direccion: </span><span
+                                    t-esc="o.company_id.street"
+                                />
+                                <br />
+                                <span>Ciudad: </span><span t-esc="o.company_id.city"/> - <span t-esc="o.company_id.state_id.name"/>
+                            </td>
+                            <td width="50%">
+                                <span>IIBB x</span>
+                                <br />
+                                <span>Fecha de inicio de actividad: 11/11/1111</span>
+                                <br />
+                                <span>IVA </span>
+                            </td>
+                        </tr>
+                    </table>
+                    <h4>Datos de entrega: </h4>
+                    <table class="partner-table">
+                        <tr>
+                            <td width="50%">
+                                <span>Cliente: </span><span
+                                    t-esc="o.partner_id.name"
+                                />
+                                <br />
+                                <span>Direccion: </span><span t-esc="o.partner_id.city"/> <span t-esc="o.partner_id.state_id.name"/>
+                                <br />
+                                <span>Pais: </span><span
+                                    t-esc="o.partner_id.country_id.name"
+                                />
+                            </td>
+                            <td width="50%">
+                                <span>Calle: </span><span t-esc="o.partner_id.street"/> <span t-esc="o.partner_id.num"/>
+                                <br />
+                                <span>Telefono: </span><span
+                                    t-esc="o.partner_id.phone"
+                                />
+                                <br />
+                                <span>Mail: </span><span
+                                    t-esc="o.partner_id.email"
+                                />
+                            </td>
+                        </tr>
+                    </table>
+                    <!--Products-->
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th class="product-description-column" width="50%">
+                                    Producto
+                                </th>
+                                <!-- <th>
+                                    Uni.
+                                </th> -->
+                                <th>
+                                    Cant. cont.
+                                </th>
+                                <th>
+                                    UdM
+                                </th>
+                                <th>
+                                    Precio
+                                </th>
+                                <th>
+                                    Subtotal
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="o.move_ids_without_package" t-as="line">
+
+                                <td class="product-description-column">
+                                    [<span t-esc="line.product_id.default_code" />] <span t-esc="line.product_id.name"/>
+                                </td>
+
+                                <td>
+                                    <span t-esc="line.quantity_done" />
+                                </td>
+
+                                <td>
+                                    <span t-esc="line.product_uom.name" />
+                                </td>
+                                <td>
+                                    <span t-esc="line.sale_line_id.price_unit" t-options="{'widget': 'monetary', 'display_currency': line.sale_line_id.currency_id}"/>
+                                </td>
+                                <td>
+                                    <span t-esc="line.sale_line_id.price_subtotal" t-options="{'widget': 'monetary', 'display_currency': line.sale_line_id.currency_id}"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <style>
+                    .partner-table,
+                    .company-table,
+                    .product-table{
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 1.2em;
+                        margin: 25px 0;
+                        border-radius: 5px 5px 5px 5px;
+                        overflow: hidden;
+                        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+                        margin-bottom: 0px;
+                        margin-top: 20px;
+                    }
+
+                    .partner-table th,
+                    .partner-table td,
+                    .company-table th,
+                    .company-table td {
+                        padding: 10px 10px;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 14px;
+                        font-weight: bold;
+                    }
+
+                    .partner-table,
+                    .company-table,
+                    .product-table tbody tr:nth-of-type(even){
+                        background-color: #f3f3f3;
+                    }
+
+                    .product-table {
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px;
+                    }
+
+                    .product-table thead tr{
+                        background-color: rgb(202, 215, 226);
+                        color: black;
+                        font-weight: bold;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px;
+                    }
+
+                    .product-table th,
+                    .product-table td {
+                        padding: 5px 5px;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px;
+                        text-align: right;
+                    }
+
+                    .product-table tbody tr {
+                        border-bottom: 1px solid rgb(202, 215, 226);
+                    }
+
+                    .product-table tbody tr:last-of-type {
+                        border-bottom: 2px solid rgb(202, 215, 226);
+                    }
+
+                    .product-description-column {
+                        text-align: left !important;
+                    }
+                    </style>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
