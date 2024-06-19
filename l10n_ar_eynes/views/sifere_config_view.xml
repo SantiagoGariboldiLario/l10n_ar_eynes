@@ -5,7 +5,7 @@
         <field name="model">sifere.config</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="Configuration">
+            <tree>
                 <field name="name" />
             </tree>
         </field>
@@ -22,15 +22,12 @@
                         <field name="name" />
                     </h1>
                     <group>
-                        <field
-                            name="ignore_jurisdiction"
-                            string="Ignore jurisdiction errors?"
-                        />
+                        <field name="ignore_jurisdiction" string="Ignore jurisdiction errors?" />
                     </group>
                     <notebook>
                         <page string="Jurisdictions">
                             <field name="jurisdiction_ids">
-                                <tree string="Jurisdictions">
+                                <tree>
                                     <field name="state" />
                                     <field name="code" />
                                 </tree>

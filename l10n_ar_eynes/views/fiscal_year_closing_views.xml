@@ -120,7 +120,7 @@
                                             nolabel="1"
                                             attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
                                         >
-                                            <tree string="Account mappings" editable="top">
+                                            <tree editable="top">
                                                 <field
                                                     name="source_account_type_id"
                                                     widget="account_hierarchy_selection"
@@ -165,7 +165,7 @@
                                             nolabel="1"
                                             attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"
                                         >
-                                            <tree string="Accounts to close" editable="top">
+                                            <tree editable="top">
                                                 <field
                                                     name="source_account_type_id"
                                                     widget="account_hierarchy_selection"
@@ -246,7 +246,6 @@
         <field name="type">tree</field>
         <field name="arch" type="xml">
             <tree
-                string="Fiscal Year Closings"
                 decoration-danger="state == 'new'"
                 decoration-primary="state == 'draft'"
                 decoration-success="state == 'in_progress'"
