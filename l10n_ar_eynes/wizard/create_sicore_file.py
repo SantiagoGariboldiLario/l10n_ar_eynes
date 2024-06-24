@@ -31,7 +31,11 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 from ..utils.sicore_fixed_width import FixedWidth, moneyfmt
-from ..utils.sicore_fixed_width_dicts import HEAD_LINES, HEAD_LINES_EXTERIOR, HEAD_LINES_PADRON
+from ..utils.sicore_fixed_width_dicts import (
+    HEAD_LINES,
+    HEAD_LINES_EXTERIOR,
+    HEAD_LINES_PADRON,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -133,16 +137,26 @@ class CreateSicoreFiles(models.TransientModel):
     def _generate_retention_file(self, retention_ids, exterior=False):
         head_file_errors = []
         head_regs = []
-        fixed_width = FixedWidth(HEAD_LINES) if not exterior else FixedWidth(HEAD_LINES_EXTERIOR)
+        fixed_width = (
+            FixedWidth(HEAD_LINES)
+            if not exterior
+            else FixedWidth(HEAD_LINES_EXTERIOR)
+        )
         is_local = not exterior
 
-        tax_lines = self.env['account.payment.order.retention.line'].browse(retention_ids)
+        tax_lines = self.env['account.payment.order.retention.line'].browse(
+            retention_ids
+        )
 
         # Filtrar lineas según si es local o no, para sacar los archivos separados.
         if is_local:
-            filtered_tax_lines = tax_lines.filtered(lambda line: line.partner_id.property_account_position_id.local)
+            filtered_tax_lines = tax_lines.filtered(
+                lambda line: line.partner_id.property_account_position_id.local
+            )
         else:
-            filtered_tax_lines = tax_lines.filtered(lambda line: not line.partner_id.property_account_position_id.local)
+            filtered_tax_lines = tax_lines.filtered(
+                lambda line: not line.partner_id.property_account_position_id.local
+            )
 
         for tax_line in filtered_tax_lines:
             line_ident = 'Retention Tax Line #%s of Voucher #%s (%s)' % (
@@ -160,22 +174,13 @@ class CreateSicoreFiles(models.TransientModel):
             nro_doc_retenido = tax_line.partner_id.vat
 
             # First search in number then in reference
-            m = tax_line.payment_order_id.number or ''
-            m2 = tax_line.payment_order_id.reference or ''
-            if not m and not m2:
-                err = (
-                    '%s: Número de comprobante mal formado. Deberia ser XXXX-XXXXXXXX'
-                    % line_ident
-                )
+            internal_number = tax_line.payment_order_id.number or ''
+            if not internal_number:
+                err = '%s: Número de comprobante no encontrado.' % line_ident
                 head_file_errors.append(err)
                 continue
             else:
-                if m:
-                    internal_number = int(
-                        m.replace('OP', '').replace(' ', '').replace('-', '')
-                    )
-                if m2:
-                    internal_number = int(m2.replace('-', ''))
+                internal_number = int(re.sub(r"\D", "", internal_number))
 
             date_emited = tax_line.date.strftime('%d/%m/%Y')
 
@@ -244,12 +249,18 @@ class CreateSicoreFiles(models.TransientModel):
                 'codigo_condicion': '01',  # Inscripto (HARD: Segun longport)
                 'sujetos_suspend': '',  # Beneficiarios en el exterior
                 'importe_retencion': self._format_monetary(ret_aplicada),
-                'porcentaje_exclusion': self._format_monetary(porcentaje_exclusion),
-                'fecha_emision_boletin': date_emited if porcentaje_exclusion != 0 else "",  # Solo si hay exclusion
+                'porcentaje_exclusion': self._format_monetary(
+                    porcentaje_exclusion
+                ),
+                'fecha_emision_boletin': date_emited
+                if porcentaje_exclusion != 0
+                else "",  # Solo si hay exclusion
                 'tipo_documento_retenido': tipo_doc_retenido,
                 'numero_documento_retenido': nro_doc_retenido,
                 'numero_certificado_original': nro_cert_propio,
-                'denominacion_ordenante': '' if is_local else tax_line.partner_id.name[:30],
+                'denominacion_ordenante': ''
+                if is_local
+                else tax_line.partner_id.name[:30],
                 'acrecentamiento': '' if is_local else '0',  # Segun longport
                 'cuit_pais_retenido': '' if is_local else '',  # TODO
                 'cuit_ordenante': '' if is_local else '',  # TODO
@@ -341,9 +352,21 @@ class CreateSicoreFiles(models.TransientModel):
             )
 
         retention_ids = [retention_ids[0] for retention_ids in res]
-        retention_errors_local, success_local = self._generate_retention_file(retention_ids)
-        retention_errors_ext, success_ext = self._generate_retention_file(retention_ids, exterior=True)
-        created = "LOCAL & EXT" if success_local and success_ext else "LOCAL" if success_local else "EXT" if success_ext else "No success"
+        retention_errors_local, success_local = self._generate_retention_file(
+            retention_ids
+        )
+        retention_errors_ext, success_ext = self._generate_retention_file(
+            retention_ids, exterior=True
+        )
+        created = (
+            "LOCAL & EXT"
+            if success_local and success_ext
+            else "LOCAL"
+            if success_local
+            else "EXT"
+            if success_ext
+            else "No success"
+        )
 
         if retention_errors_local or retention_errors_ext:
             errors += _('Retention File Errors\n================\n')
