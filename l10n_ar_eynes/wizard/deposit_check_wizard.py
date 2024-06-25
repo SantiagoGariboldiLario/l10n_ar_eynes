@@ -13,6 +13,9 @@ class DepositCheckwizard(models.TransientModel):
         comodel_name='res.partner.bank',
         string='Depositing Bank Account',
         required=True,
+        domain=lambda self: [
+            ('partner_id', '=', self.env.company.partner_id.id),
+        ],
     )
     date = fields.Date(
         string='Deposit Date',
