@@ -287,12 +287,20 @@ class AccountCheck(models.Model):
                     }
                 )
                 move_id._post()
-                check.write(
-                    {
-                        'cancel_date': fields.date.today(),
-                        'cancel_move_id': move_id.id,
-                    }
-                )
+                if self.env.context.get('is_expired', False):
+                    check.write(
+                        {
+                            'expired_date': fields.date.today(),
+                            'expired_move_id': move_id.id,
+                        }
+                    )
+                else:
+                    check.write(
+                        {
+                            'cancel_date': fields.date.today(),
+                            'cancel_move_id': move_id.id,
+                        }
+                    )
             third_party_checks.write({'third_party_check_state': 'cancelled'})
         if issued_checks:
             for check in issued_checks:
@@ -380,10 +388,9 @@ class AccountCheck(models.Model):
                 {
                     'expired_date': fields.date.today(),
                     'expired_move_id': move_id.id,
+                    'issued_check_state': 'expired',
                 }
             )
-            self.write({'issued_check_state': 'expired'})
-
         else:
             self.with_context(is_expired=True).cancel_check(reason)
             self.write({'third_party_check_state': 'expired'})
