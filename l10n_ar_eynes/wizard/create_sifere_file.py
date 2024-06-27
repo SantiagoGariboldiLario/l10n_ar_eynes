@@ -468,6 +468,11 @@ class ReportFilesGenerator(models.Model):
                 sign = -1
             else:
                 sign = 1
+            amount = (
+                tax_line.amount_secondary_currency
+                if tax_line.invoice_id.is_multi_currency
+                else tax_line.amount
+            )
             line = {
                 'codigo_jurisdiccion': jurisdiction_code,
                 'cuit': nro_doc_percibido,
@@ -479,7 +484,7 @@ class ReportFilesGenerator(models.Model):
                     tax_line.invoice_id.denomination or ''
                 ).upper(),
                 'monto_percepcion': moneyfmt(
-                    Decimal(tax_line.amount) * sign, places=2, ndigits=9, dp=','
+                    Decimal(amount) * sign, places=2, ndigits=9, dp=','
                 ),
             }
 
