@@ -133,6 +133,31 @@ class WsPOSLine(models.Model):
         store="True",
     )
 
+    @api.constrains('journal_id')
+    def _check_no_repeat_journal(self):
+        found = self.env['ws.pos.line'].search(
+            [
+                ('journal_id', '=', self.journal_id.id),
+                '|',
+                '&',
+                ('wsfe_config_id', '=', self.wsfe_config_id.id),
+                ('wsfex_config_id', '!=', False),
+                '&',
+                ('wsfe_config_id', '!=', False),
+                ('wsfex_config_id', '=', self.wsfex_config_id.id),
+            ]
+        )
+        found -= self
+        if found:
+            raise ValidationError(
+                _(
+                    """
+                    This journal %(journal)s is already linked to this this Webservice.
+                    """,
+                    journal=self.journal_id.name,
+                )
+            )
+
     @api.model
     def write(self, vals):
         if self.journal_id:
