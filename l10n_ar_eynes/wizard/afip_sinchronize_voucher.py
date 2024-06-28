@@ -156,9 +156,11 @@ class AFIPSinchronizeVoucher(models.TransientModel):
         for rec in self:
             rec._clean_values()
             if rec.voucher_type and rec.pos_id and rec.voucher_number:
-                pos = rec.pos_id.code
-                if pos:
-                    pos = int(re.sub("[^0-9]", "", pos))
+                ws_conf = rec.wsfe_config_id or rec.wsfex_config_id
+                ws_pos = ws_conf.point_of_sale_ids.filtered(
+                    lambda pos: pos.journal_id == self.pos_id
+                )
+                pos = int(ws_pos.code)
 
                 rec.error_msg = rec._check_invoice_number_not_posted(
                     pos, rec.voucher_number

@@ -1513,6 +1513,12 @@ class AccountMove(models.Model):
 
     def get_pos(self):
         self.ensure_one()
+        if self.fiscal_type == 'electronic':
+            ws_conf = self._get_ws_conf()
+            ws_pos = ws_conf.point_of_sale_ids.filtered(
+                lambda pos: pos.journal_id == self.journal_id
+            )
+            return int(ws_pos.code)
         return self.journal_id.get_pos_number()
 
     def get_currency_code(self):
