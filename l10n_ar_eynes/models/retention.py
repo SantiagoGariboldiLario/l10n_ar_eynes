@@ -277,6 +277,7 @@ class RetentionTaxApplication(models.Model):
         date_start, date_finish = self._get_month_date_span_from_date(po_date)
         prev_pos = AccountPaymentOrder.search(
             [
+                ('company_id', '=', self.env.company.id),
                 ('partner_id', '=', partner.id),
                 ('state', '=', 'posted'),
                 ('date', '>=', date_start),
