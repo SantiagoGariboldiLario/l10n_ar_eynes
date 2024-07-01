@@ -30,8 +30,7 @@ def get_line_with_total(line):
     """
     Calculates the total of an invoice based on all the taxes and the base value
     """
-
-    line["total"] = sum(line["taxes"])
+    line['total'] = sum(line['taxes']) + line['no_taxed']
     return line
 
 
