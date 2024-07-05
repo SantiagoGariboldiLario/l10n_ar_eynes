@@ -286,7 +286,7 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
 
         accounts = AccountAccount.search(
             [
-                ('user_type_id', '=', group.id),
+                ('account_type', '=', group),
                 ('company_id', 'in', [company_id, False]),
             ]
         )
@@ -326,7 +326,7 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
                     destination_account.id
                 ] = destination_account_totals.get(destination_account.id, 0)
 
-            group = mapping.source_account_type_id
+            group = mapping.source_account_type
             accounts = self._get_accounts_from_group(group, closing)
             for account in accounts:
                 balance = self._get_balance(account, fiscal_year)

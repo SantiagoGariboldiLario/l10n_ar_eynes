@@ -13,58 +13,53 @@
                     string="Force Jornal Change"
                     class="oe_highlight"
                     type="action"
-                    attrs="{'invisible': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]}"
+                    invisible="[('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]"
                 />
             </header>
 
             <xpath expr="//sheet/div[hasclass('oe_title')]/span[hasclass('o_form_label')]" position="replace">
                 <span
                     class="o_form_label"
-                    attrs="{'invisible': ['|', ('move_type', '=', 'entry'), ('debit_origin_id', '!=', False)]}"
+                    invisible="['|', ('move_type', '=', 'entry'), ('debit_origin_id', '!=', False)]"
                 >
                     <field name="move_type" readonly="1" nolabel="1" />
                 </span>
                 <span
                     class="o_form_label"
-                    attrs="{'invisible': ['|', ('move_type', '=', 'entry'), ('debit_origin_id', '=', False)]}"
+                    invisible="['|', ('move_type', '=', 'entry'), ('debit_origin_id', '=', False)]"
                 >
                     <span>Debit Note</span>
                 </span>
             </xpath>
 
-            <xpath expr="//sheet/div[hasclass('oe_title')]/h1[1]" position="attributes">
-                <attribute name="attrs">{'invisible': 1}</attribute>
+            <xpath expr="//sheet/div[hasclass('oe_title')]/h1[1]/field[@name='name']" position="attributes">
+                <attribute name="invisible">True</attribute>
             </xpath>
 
-            <xpath expr="//h1[hasclass('mt0')]" position="replace">
-                <h1 class="mt0">
+            <xpath expr="//sheet/div[hasclass('oe_title')]/h1[1]" position="inside">
+                <h1>
                     <field
                         name="denomination"
                         force_save="1"
                         readonly="1"
-                        attrs="{
-                            'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
-                        }"
+                        invisible="[('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]"
                     />
                     <field
                         name="name"
                         class="oe_inline"
                         readonly="1"
                         force_save="1"
-                        attrs="{'invisible': [('state', '=', 'draft')]}"
+                        invisible="[('state', '=', 'draft')]"
                     />
                     <field
                         name="supplier_move_reference"
                         class="oe_inline"
-                        attrs="{
-                            'invisible': [
-                                '|',
-                                ('state', '!=', 'draft'),
-                                ('move_type','not in', ('in_invoice', 'in_refund'))
-                            ],
-                            'required': [('move_type','in',('in_invoice', 'in_refund'))]
-
-                        }"
+                        invisible="[
+                            '|',
+                            ('state', '!=', 'draft'),
+                            ('move_type','not in', ('in_invoice', 'in_refund'))
+                        ]"
+                        required="[('move_type','in',('in_invoice', 'in_refund'))]"
                     />
                 </h1>
             </xpath>
@@ -73,12 +68,12 @@
                 <widget
                     name="web_ribbon"
                     title="COBRADO"
-                    attrs="{'invisible': ['|', ('payment_state', '!=', 'paid'), ('move_type', 'not in', ('out_invoice', 'out_refund', 'out_receipt'))]}"
+                    invisible="['|', ('payment_state', '!=', 'paid'), ('move_type', 'not in', ('out_invoice', 'out_refund', 'out_receipt'))]"
                 />
                 <widget
                     name="web_ribbon"
                     title="PAGADO"
-                    attrs="{'invisible': ['|', ('payment_state', '!=', 'paid'), ('move_type', 'not in', ('in_invoice', 'in_refund', 'in_receipt'))]}"
+                    invisible="['|', ('payment_state', '!=', 'paid'), ('move_type', 'not in', ('in_invoice', 'in_refund', 'in_receipt'))]"
                 />
             </xpath>
 
@@ -86,13 +81,13 @@
             <xpath expr="//group[@id='header_right_group']/div[2]" position="replace">
                 <div
                     class="d-flex"
-                    attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"
+                    invisible="[('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]"
                 >
                     <field
                         name="invoice_date_due"
                         force_save="1"
                         placeholder="Date"
-                        attrs="{'readonly': [('invoice_payment_term_id', '!=', False)]}"
+                        readonly="[('invoice_payment_term_id', '!=', False)]"
                     />
                     <span class="o_form_label mx-3 oe_edit_only"> or </span>
                     <field name="invoice_payment_term_id" placeholder="Terms" />
@@ -100,28 +95,24 @@
             </xpath>
 
             <xpath expr="//field[@name='partner_id']" position="attributes">
-                <attribute name="attrs">
-                    {
-                    'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice',
-                    'out_refund'))],
-                    'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice',
-                    'out_refund'))],
-                    }
+                <attribute name="required">
+                    [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]
+                </attribute>
+                <attribute name="invisible">
+                    [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]
                 </attribute>
             </xpath>
 
             <xpath expr="//field[@name='partner_bank_id']" position="attributes">
-                <attribute name="attrs">
-                    {
-                    'invisible': [('move_type', 'in', ('in_invoice', 'in_refund'))]
-                    }
+                <attribute name="invisible">
+                    [('move_type', 'in', ('in_invoice', 'in_refund'))]
                 </attribute>
             </xpath>
 
             <xpath expr="//field[@name='partner_bank_id']" position="after">
                 <field
                     name="disable_perceptions"
-                    attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))]}"
+                    invisible="[('move_type', 'not in', ('out_invoice', 'out_refund'))]"
                 />
             </xpath>
 
@@ -130,9 +121,9 @@
                     name="currency_rate"
                     placeholder="Currency Rate"
                     class="oe_inline"
-                    attrs="{'invisible': [('is_multi_currency','=', False)]}"
+                    invisible="[('is_multi_currency','=', False)]"
                 />
-                <p attrs="{'invisible': [('currency_preciated', '=', False)]}">
+                <p invisible="[('currency_preciated', '=', False)]">
                     <i>Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
                 </p>
                 <button
@@ -140,7 +131,7 @@
                     aria-label="Opened"
                     type="action"
                     class="btn-link"
-                    states="draft"
+                    invisible="state != 'draft'"
                     groups="account.group_account_user"
                 >
                     <i
@@ -151,9 +142,7 @@
                 </button>
                 <field
                     name="fiscal_type"
-                    attrs="{
-                        'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))],
-                    }"
+                    invisible="[('move_type', 'not in', ('out_invoice', 'out_refund'))]"
                 />
                 <field name="currency_preciated" invisible="1" />
                 <field name="is_multi_currency" invisible="1" />
@@ -162,21 +151,15 @@
 
             <field name="fiscal_position_id" position="after">
                 <field name="currency_converted" invisible="1" />
-                <field
-                    name="secondary_currency_id"
-                    attrs="{'invisible': [('is_multi_currency', '=', False)]}"
-                />
-                <field
-                    name="secondary_currency_rate"
-                    attrs="{'invisible': [('is_multi_currency', '=', False)]}"
-                />
+                <field name="secondary_currency_id" invisible="[('is_multi_currency', '=', False)]" />
+                <field name="secondary_currency_rate" invisible="[('is_multi_currency', '=', False)]" />
             </field>
 
             <xpath expr="//group[@class='oe_invoice_lines_tab']/group[1]" position="replace">
                 <!-- If the invoice has same currency than the company -->
                 <group
                     colspan="8"
-                    attrs="{'invisible': [('secondary_currency_id', '!=', False), ('is_multi_currency','=', True)]}"
+                    invisible="[('secondary_currency_id', '!=', False), ('is_multi_currency','=', True)]"
                 >
                     <field
                         name="narration"
@@ -189,7 +172,7 @@
                 <!-- otherwise -->
                 <group
                     colspan="4"
-                    attrs="{'invisible': ['|',('secondary_currency_id', '=', False), ('is_multi_currency','=', False)]}"
+                    invisible="['|',('secondary_currency_id', '=', False), ('is_multi_currency','=', False)]"
                 >
                     <field
                         name="narration"
@@ -202,20 +185,14 @@
                 <group
                     colspan="4"
                     class="oe_subtotal_footer oe_right"
-                    attrs="{'invisible': ['|',('secondary_currency_id', '=', False), ('is_multi_currency','=', False)]}"
+                    invisible="['|',('secondary_currency_id', '=', False), ('is_multi_currency','=', False)]"
                 >
-                    <field name="amount_taxed_cur" attrs="{'invisible': [('amount_taxed_cur', '=', 0)]}" />
-                    <field
-                        name="amount_no_taxed_cur"
-                        attrs="{'invisible': [('amount_no_taxed_cur', '=', 0)]}"
-                    />
-                    <field name="amount_exempt_cur" attrs="{'invisible': [('amount_exempt_cur', '=', 0)]}" />
+                    <field name="amount_taxed_cur" invisible="[('amount_taxed_cur', '=', 0)]" />
+                    <field name="amount_no_taxed_cur" invisible="[('amount_no_taxed_cur', '=', 0)]" />
+                    <field name="amount_exempt_cur" invisible="[('amount_exempt_cur', '=', 0)]" />
                     <!-- <field name="amount_untaxed_cur" class="oe_subtotal_footer_separator" /> -->
-                    <field name="amount_tax_cur" attrs="{'invisible': [('amount_tax_cur', '=', 0)]}" />
-                    <field
-                        name="amount_perception_curr"
-                        attrs="{'invisible': [('amount_perception_curr', '=', 0)]}"
-                    />
+                    <field name="amount_tax_cur" invisible="[('amount_tax_cur', '=', 0)]" />
+                    <field name="amount_perception_curr" invisible="[('amount_perception_curr', '=', 0)]" />
                     <field name="amount_total_cur" class="oe_subtotal_footer_separator" />
                     <i>- Amounts in Secondary Currency</i>
                 </group>
@@ -226,12 +203,11 @@
                 expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']"
                 position="attributes"
             >
-                <attribute name="attrs">
-                    {
-                    'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice',
-                    'out_refund'))],
-                    'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
-                    }
+                <attribute name="readonly">
+                    [('move_type', 'in', ('out_invoice', 'out_refund'))]
+                </attribute>
+                <attribute name="required">
+                    [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]
                 </attribute>
             </xpath>
 
@@ -242,61 +218,51 @@
                 <field
                     name="denomination"
                     force_save="1"
-                    attrs="{
-                        'required': [('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
-                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))],
-                        'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))]
-                    }"
+                    required="[('move_type', 'in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]"
+                    invisibl=" [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]"
+                    readonly="[('move_type', 'in', ('out_invoice', 'out_refund'))]"
                 />
                 <field
                     name="cae"
                     string="CAE"
-                    attrs="{
-                        'readonly': [('move_type','in', ['out_refund', 'out_invoice'])],
-                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
-                    }"
+                    readonly="[('move_type','in', ['out_refund', 'out_invoice'])]"
+                    invisible="[('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]"
                 />
                 <field
                     name="cae_due_date"
-                    attrs="{
-                        'readonly': [('move_type','in', ['out_refund', 'out_invoice'])],
-                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]
-                    }"
+                    readonly="[('move_type','in', ['out_refund', 'out_invoice'])]"
+                    invisible="[('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]"
                 />
                 <field name="iva_digital_operation_code" />
                 <field name="local" invisible="1" />
                 <field
                     name="export_type_id"
                     widget="selection"
-                    attrs="{
-                        'required': [
-                            ('move_type', 'in', ('out_invoice', 'out_refund')),
-                            ('local','=',False)
-                        ],
-                        'invisible': [
-                            '|',
-                            '&amp;',
-                            ('move_type', 'in', ('out_invoice', 'out_refund')),
-                            ('local','=', True),
-                            ('move_type', 'not in', ('out_invoice', 'out_refund')),
-                        ],
-                    }"
+                    required="[
+                        ('move_type', 'in', ('out_invoice', 'out_refund')),
+                        ('local','=',False)
+                    ]"
+                    invisible="[
+                        '|',
+                        '&amp;',
+                        ('move_type', 'in', ('out_invoice', 'out_refund')),
+                        ('local','=', True),
+                        ('move_type', 'not in', ('out_invoice', 'out_refund')),
+                    ]"
                 />
                 <field
                     name="dst_country_id"
-                    attrs="{
-                        'required': [
-                            ('move_type', 'in', ('out_invoice', 'out_refund')),
-                            ('local','=',False)
-                        ],
-                        'invisible': [
-                            '|',
-                            '&amp;',
-                            ('move_type', 'in', ('out_invoice', 'out_refund')),
-                            ('local','=', True),
-                            ('move_type', 'not in', ('out_invoice', 'out_refund')),
-                        ],
-                    }"
+                    required="[
+                        ('move_type', 'in', ('out_invoice', 'out_refund')),
+                        ('local','=',False)
+                    ]"
+                    invisible="[
+                        '|',
+                        '&amp;',
+                        ('move_type', 'in', ('out_invoice', 'out_refund')),
+                        ('local','=', True),
+                        ('move_type', 'not in', ('out_invoice', 'out_refund')),
+                    ]"
                 />
             </xpath>
 
@@ -305,10 +271,8 @@
                 <field name="voucher_type_domain" invisible="True" />
                 <field
                     name="voucher_type_id"
-                    attrs="{
-                        'invisible': [('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])],
-                        'required': [('move_type','in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])],
-                    }"
+                    invisible="[('move_type','not in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]"
+                    required="[('move_type','in', ['out_refund', 'out_invoice', 'in_refund', 'in_invoice'])]"
                     domain="voucher_type_domain"
                     widget="selection"
                 />
@@ -319,20 +283,14 @@
                     <separator string="Associated Invoices" />
                     <group>
                         <field name="inform_period" />
-                        <field
-                            name="inform_period_date_from"
-                            attrs="{'invisible': [('inform_period', '=', False)]}"
-                        />
-                        <field
-                            name="inform_period_date_to"
-                            attrs="{'invisible': [('inform_period', '=', False)]}"
-                        />
+                        <field name="inform_period_date_from" invisible="[('inform_period', '=', False)]" />
+                        <field name="inform_period_date_to" invisible="[('inform_period', '=', False)]" />
                     </group>
                     <field
                         name="associated_inv_ids"
                         nolabel="1"
                         domain="[('state', '=', 'posted'), ('partner_id', '=', partner_id)]"
-                        attrs="{'invisible': [('inform_period', '=', True)]}"
+                        invisible="[('inform_period', '=', True)]"
                     >
                         <tree>
                             <field name="partner_id" groups="base.group_user" />
@@ -351,9 +309,7 @@
             <page name="other_info" position="before">
                 <page
                     string="Perceptions"
-                    attrs="{
-                        'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]
-                    }"
+                    invisible="[('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))]"
                 >
                     <field
                         name="perception_ids"
@@ -377,18 +333,18 @@
                             <field name="amount" />
                             <field
                                 name="base_secondary_currency"
-                                attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
+                                column_invisible="[('parent.is_multi_currency','=',False)]"
                             />
                             <field
                                 name="amount_secondary_currency"
-                                attrs="{'column_invisible':[('parent.is_multi_currency','=',False)]}"
+                                column_invisible="[('parent.is_multi_currency','=',False)]"
                             />
                             <field name="state_id" />
                         </tree>
                     </field>
                 </page>
 
-                <page string="FCRED" attrs="{'invisible': [('is_FCE_invoice','=', False)]}">
+                <page string="FCRED" invisible="[('is_FCE_invoice','=', False)]">
                     <group string="Optionals">
                         <field name="optional_ids" nolabel="1">
                             <tree editable="bottom">
@@ -405,11 +361,11 @@
 
                 <page
                     string="Export Invoice"
-                    attrs="{'invisible': [
+                    invisible="[
                         '|',
                         ('local','=', True),
                         ('move_type', 'not in', ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))
-                        ]}"
+                        ]"
                 >
                     <group string="Shipping Permissions">
                         <field name="shipping_perm_ids" nolabel="1" widget="one2many_list">
@@ -423,7 +379,7 @@
 
                 <page
                     string="WS Requests"
-                    attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))]}"
+                    invisible="[('move_type', 'not in', ('out_invoice', 'out_refund'))]"
                 >
                     <field name="ws_request_ids" readonly="1">
                         <tree>
@@ -441,7 +397,7 @@
             <xpath expr="//field[@name='line_ids']/form/group/field[@name='currency_id']" position="after">
                 <field
                     name="currency_rate"
-                    attrs="{'invisible': [('currency_id', '=', False)]}"
+                    invisible="[('currency_id', '=', False)]"
                     groups="base.group_multi_currency"
                 />
             </xpath>

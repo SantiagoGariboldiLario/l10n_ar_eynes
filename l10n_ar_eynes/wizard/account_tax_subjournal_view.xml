@@ -31,18 +31,14 @@
                                 <field name="grouped" />
                                 <field
                                     name="grouped_max_amount"
-                                    attrs="{'invisible': [('grouped', '=', False)],
-                                    'required': [('grouped', '!=', False)]}"
+                                    invisible="[('grouped', '=', False)]"
+                                    required="[('grouped', '!=', False)]"
                                 />
                             </group>
                         </page>
                     </notebook>
                     <footer>
-                        <button
-                            name="create_report"
-                            string="Print Report"
-                            type="object"
-                        />
+                        <button name="create_report" string="Print Report" type="object" />
                         <button special="cancel" string="Cancel" />
                     </footer>
                 </sheet>

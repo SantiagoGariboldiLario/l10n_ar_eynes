@@ -14,9 +14,7 @@
                         <field name="actual_currency_rate" class="oe_inline" /> -
                         <field name="actual_currency_id" class="oe_inline" />
                         <field name="actual_currency_preciated" invisible="1" />
-                        <p
-                            attrs="{'invisible': [('actual_currency_preciated', '=', False)]}"
-                        >
+                        <p invisible="not actual_currency_preciated">
                             <i>Cuidado, la moneda es preciada!.</i>
                         </p>
                     </div>
@@ -32,11 +30,8 @@
                         <field name="new_currency_rate" class="oe_inline" /> -
                         <field name="new_currency_id" class="oe_inline" />
                         <field name="new_currency_preciated" invisible="1" />
-                        <p
-                            attrs="{'invisible': [('new_currency_preciated', '=', False)]}"
-                        >
-                            <i
-                            >Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
+                        <p invisible="not new_currency_preciated">
+                            <i>Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
                         </p>
                     </div>
                 </group>

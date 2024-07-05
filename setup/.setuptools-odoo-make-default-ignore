@@ -1,2 +1,5 @@
 # addons listed in this file are ignored by
 # setuptools-odoo-make-default (one addon per line)
+l10n_ar_eynes
+l10n_ar_padron_ws_consumer
+l10n_ar_pos_wsfe

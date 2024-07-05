@@ -13,9 +13,9 @@
                         name="issued_checks"
                         widget="many2many_checkboxes"
                         colspan="8"
-                        attrs="{'invisible': [('multichecks', '=', False)]}"
+                        invisible="not multichecks"
                     />
-                    <field name="issued_check_id" attrs="{'invisible': [('multichecks', '=', True)]}" />
+                    <field name="issued_check_id" invisible="multichecks" />
                 </group>
                 <footer>
                     <button

@@ -9,15 +9,12 @@
                 <button
                     name="%(act_stock_cancel_done_picking)d"
                     string="Cancel"
-                    states="done"
+                    invisible="state != 'done'"
                     type="action"
                 />
             </xpath>
             <xpath expr="//field[@name='priority']" position="after">
-                <field
-                    name="renum_pick_id"
-                    attrs="{'invisible': [('picking_type_code', '!=', 'outgoing')]}"
-                />
+                <field name="renum_pick_id" invisible="[('picking_type_code', '!=', 'outgoing')]" />
             </xpath>
             <xpath expr="//field[@name='origin']" position="after">
                 <field name="name_original" />
@@ -25,17 +22,20 @@
             <xpath expr="//field[@name='scheduled_date']" position="after">
                 <field
                     name="cot_date"
-                    attrs="{'invisible' : ['|',('voucher','=', False),('pick_type','!=','outgoing')]}"
+                    invisible="['|',('voucher','=', False),('pick_type','!=','outgoing')]"
                 />
                 <field name="pick_type" invisible="False" />
             </xpath>
             <xpath expr="//field[@name='group_id']" position="after">
-                <field name="shipping_number" attrs="{'invisible': [('picking_type_code', '!=', 'incoming')], 'readonly': False}"/>
+                <field
+                    name="shipping_number"
+                    invisible="[('picking_type_code', '!=', 'incoming')]"
+                    readonly="False"
+                />
             </xpath>
-            <field name="carrier_id" readonly="1" />
             <field name="partner_id" invisible="False" />
             <field name="origin" position="after">
-                <field name="is_origin" attrs="{'readonly' : [('voucher','!=', False)]}" />
+                <field name="is_origin" readonly="[('voucher','!=', False)]" />
             </field>
             <xpath expr="/form/header/field[@name='state']" position="before">
                 <button
@@ -43,52 +43,43 @@
                     type="object"
                     string="Generate COT"
                     class="oe_highlight"
-                    attrs="{
-                        'invisible': [
-                            '|',
-                            '|',
-                            '|',
-                            ('pick_type', '!=', 'outgoing'),
-                            ('state', '!=', 'done'),
-                            ('voucher', '!=', False),
-                            ('carrier_id', '=', False),
-                        ]
-                    }"
+                    invisible="[
+                        '|',
+                        '|',
+                        '|',
+                        ('pick_type', '!=', 'outgoing'),
+                        ('state', '!=', 'done'),
+                        ('voucher', '!=', False),
+                        ('carrier_id', '=', False),
+                    ]"
                     groups="l10n_ar_eynes.group_check_cot"
                 />
             </xpath>
             <xpath expr="/form/sheet/notebook/page[@name='extra']" position="after">
                 <page
                     string="COT"
-                    attrs="{'invisible': [
-                        '|',
-                        ('picking_type_code', '=', 'production'),
-                        ('picking_type_code', '=', 'incoming'),
-                        ]}"
+                    invisible="[
+                        ('picking_type_code', '=', 'production') or
+                        ('picking_type_code', '=', 'incoming')
+                    ]"
                 >
                     <group col="2" colspan="2" string="COT Information">
                         <group>
-                            <field name="declared_value" attrs="{'readonly': [('voucher','!=', False)]}" />
-                            <field name="dimension" attrs="{'readonly': [('voucher','!=', False)]}" />
+                            <field name="declared_value" readonly="[('voucher','!=', False)]" />
+                            <field name="dimension" readonly="[('voucher','!=', False)]" />
                             <field name="cot" readonly="1" />
                             <field
                                 name="voucher"
                                 groups="l10n_ar_eynes.group_check_cot"
-                                attrs="{'invisible': [('pick_type','!=','outgoing')]}"
+                                invisible="[('pick_type','!=','outgoing')]"
                             />
                         </group>
                         <group>
-                            <field name="cot_date_transfer" attrs="{'readonly': [('state','=','done')]}" />
-                            <field name="carrier_id" attrs="{'readonly': [('state','=','done')]}" />
-                            <field name="truck_license_plate" attrs="{'readonly': [('state','=','done')]}" />
-                            <field
-                                name="trailer_license_plate"
-                                attrs="{'readonly': [('state','=','done')]}"
-                            />
-                            <field
-                                name="express_id"
-                                attrs="{'invisible': [('voucher','=', False)], 'readonly': True}"
-                            />
+                            <field name="cot_date_transfer" readonly="[('state','=','done')]" />
+                            <field name="carrier_id" readonly="[('state','=','done')]" />
+                            <field name="truck_license_plate" readonly="[('state','=','done')]" />
+                            <field name="trailer_license_plate" readonly="[('state','=','done')]" />
+                            <field name="express_id" invisible="[('voucher','=', False)]" readonly="True" />
                             <field name="dom_partner_id" invisible="True" />
                             <!-- Solo sirve con WS -->
                         </group>

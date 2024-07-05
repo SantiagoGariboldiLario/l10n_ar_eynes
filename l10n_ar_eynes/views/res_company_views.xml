@@ -7,25 +7,18 @@
         <field name="inherit_id" ref="base.view_company_form" />
         <field name="arch" type="xml">
             <field name="street2" position="after">
-                <field name="num" placeholder="Number" attrs="{'readonly': False}" />
+                <field name="num" placeholder="Number" readonly="False" />
             </field>
             <field name="city" position="before">
-                <field name="floor" placeholder="Floor" attrs="{'readonly': False}" />
-                <field name="door" placeholder="Door" attrs="{'readonly': False}" />
-                <field
-                    name="apartment"
-                    placeholder="Apartment"
-                    attrs="{'readonly': False}"
-                />
+                <field name="floor" placeholder="Floor" readonly="False" />
+                <field name="door" placeholder="Door" readonly="False" />
+                <field name="apartment" placeholder="Apartment" readonly="False" />
             </field>
             <xpath expr="//field[@name='sequence']" position="after">
                 <field name="fcred_cbu_emitter" />
                 <field name="fcred_minimum_amount" />
                 <field name="fcred_is_fce_emitter" />
-                <field
-                    name="fcred_pos_ar_id"
-                    attrs="{'required': [('fcred_is_fce_emitter','=', True)]}"
-                />
+                <field name="fcred_pos_ar_id" required="fcred_is_fce_emitter" />
             </xpath>
         </field>
     </record>

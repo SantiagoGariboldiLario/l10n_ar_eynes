@@ -3,25 +3,30 @@
     <record id="retentions_tax_group" model="account.tax.group">
         <field name="name">Retentions</field>
         <field name="group_type">retention</field>
+        <field name="country_id" eval="ref('base.ar')" />
     </record>
 
     <record id="perceptions_tax_group" model="account.tax.group">
         <field name="name">Perceptions</field>
         <field name="group_type">perception</field>
+        <field name="country_id" eval="ref('base.ar')" />
     </record>
 
     <record id="vat_tax_group" model="account.tax.group">
         <field name="name">Vat</field>
         <field name="group_type">vat</field>
+        <field name="country_id" eval="ref('base.ar')" />
     </record>
 
     <record id="internal_tax_group" model="account.tax.group">
         <field name="name">Internal</field>
         <field name="group_type">internals</field>
+        <field name="country_id" eval="ref('base.ar')" />
     </record>
 
     <record id="other_tax_group" model="account.tax.group">
         <field name="name">Other</field>
         <field name="group_type">others</field>
+        <field name="country_id" eval="ref('base.ar')" />
     </record>
 </odoo>

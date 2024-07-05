@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '17.0.0.0.0',
+    'version': '17.0.1.0.0',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -30,28 +30,27 @@
         'account_debit_note',
         'base',
         'contacts',
-        'date_range',
         'delivery',
+        'date_range',
         'hr',
         'mail',
-        'month_year_widget',  # To pick only month and year in date fields
-        'multi_step_wizard',
-        'om_fiscal_year',
+        # 'month_year_widget',  # To pick only month and year in date fields
+        # 'multi_step_wizard',
+        # 'om_fiscal_year',
         'popup_messages',
         'purchase',
         'report_xlsx',
         'sale',
-        'stock',
+        'stock_delivery',
         'uom',
-        'web_domain_field',  # To handle dynamic domains
-        'web_notify',
-        'report_qweb_element_page_visibility',
+        # 'web_domain_field',  # To handle dynamic domains
+        # 'web_notify',
+        # 'report_qweb_element_page_visibility',
     ],
     'data': [
         "data/decimal_precision_data.xml",
         'security/cot_security.xml',
         'security/delivery_cot_security.xml',
-        # "data/ir_actions_url_data.xml",
         "data/ir_config_parameter.xml",
         'data/fiscal_position_data.xml',
         'data/account_tax_group_data.xml',
@@ -77,7 +76,6 @@
         "wizard/wsaa_config_renewal.xml",
         "views/account_views.xml",
         "views/fiscal_year_closing_views.xml",
-        # 'views/fyc_workflow.xml',
         "views/inflation_index_views.xml",
         'views/ws_views.xml',
         'views/wsaa_views.xml',
@@ -95,10 +93,9 @@
         'report/payment_order.xml',
         'wizard/account_tax_subjournal_view.xml',
         'views/res_config_settigs_views.xml',
-        "wizard/res_partner_afip_padron_wizard_view.xml",
+        # "wizard/res_partner_afip_padron_wizard_view.xml",
         'wizard/force_journal_change_view.xml',
         'views/res_partner_views.xml',
-        # 'views/res_currency_rate_view.xml',
         'views/res_currency_view.xml',
         'views/account_journal_views.xml',
         'views/account_payment_order_views.xml',
@@ -174,5 +171,5 @@
             "pyafipws",
         ]
     },
-    'post_init_hook': 'post_init_hook',
+    # 'post_init_hook': 'post_init_hook',
 }

@@ -7,48 +7,36 @@
         <field name="arch" type="xml">
 
             <notebook position="inside">
-                <page name="pos_info" string="POS information" attrs="{'invisible': [('type','!=','sale')]}">
+                <page name="pos_info" string="POS information" invisible="[('type','!=','sale')]">
                     <group>
                         <group>
-                            <field name="denomination" attrs="{'required':[('type','=','sale')]}" />
-                            <field
-                                name="fiscal_position_id"
-                                attrs="{'required':[('type','=','sale')]}"
-                                invisible="1"
-                            />
+                            <field name="denomination" required="[('type','=','sale')]" />
+                            <field name="fiscal_position_id" required="[('type','=','sale')]" invisible="1" />
                             <field
                                 name="fiscal_position_ids"
                                 widget="many2many_tags"
-                                attrs="{'required':[('type','=','sale')]}"
+                                required="[('type','=','sale')]"
                             />
                             <field name="image_filename" invisible="True" />
                             <field name="image" widget="image" filename="image_filename" />
                         </group>
                         <group>
-                            <field name="activity_start_date" attrs="{'required':[('type','=','sale')]}" />
-                            <field name="warehouse_id" attrs="{'required':[('type','=','sale')]}" />
+                            <field name="activity_start_date" required="[('type','=','sale')]" />
+                            <field name="warehouse_id" required="[('type','=','sale')]" />
                         </group>
                     </group>
                 </page>
 
-                <page
-                    name="perceptions"
-                    string="Perceptions"
-                    attrs="{'invisible': [('type','!=','perceptions')]}"
-                >
+                <page name="perceptions" string="Perceptions" invisible="[('type','!=','perceptions')]">
                     <group string="Tax Information">
-                        <field name="tax_id" select="1" attrs="{'required':[('type', '=', 'perceptions')]}" />
+                        <field name="tax_id" select="1" required="[('type', '=', 'perceptions')]" />
                         <field name="type_tax_use" select="1" />
                     </group>
                 </page>
 
-                <page
-                    name="retentions"
-                    string="Retentions"
-                    attrs="{'invisible': [('type','!=','retentions')]}"
-                >
+                <page name="retentions" string="Retentions" invisible="[('type','!=','retentions')]">
                     <group string="Tax Information">
-                        <field name="tax_id" select="1" attrs="{'required':[('type', '=', 'retentions')]}" />
+                        <field name="tax_id" select="1" required="[('type', '=', 'retentions')]" />
                         <field name="type_tax_use" select="1" />
                     </group>
                 </page>
@@ -57,20 +45,16 @@
             <xpath expr="//field[@name='type']" position="after">
                 <field
                     name="fiscal_type"
-                    attrs="{
-                        'invisible': [('type', '!=', 'sale')],
-                        'required': [('type', '=', 'sale')]
-                    }"
+                    invisible="[('type', '!=', 'sale')]"
+                    required="[('type', '=', 'sale')]"
                 />
-                <field name="fcred_is_fce_emitter" attrs="{'invisible': [('type', '!=', 'sale')]}" />
-                <field name="due_date" attrs="{'readonly': [('id', '!=', False)]}" />
+                <field name="fcred_is_fce_emitter" invisible="[('type', '!=', 'sale')]" />
+                <field name="due_date" readonly="[('id', '!=', False)]" />
             </xpath>
 
             <xpath expr="//page[@name='advanced_settings']" position="attributes">
-                <attribute name="attrs">
-                    {
-                        'invisible': [('type', 'in', ('perceptions', 'retentions'))],
-                    }
+                <attribute name="invisible">
+                    [('type', 'in', ('perceptions', 'retentions'))]
                 </attribute>
             </xpath>
 
@@ -82,207 +66,169 @@
             </xpath>
 
             <xpath expr="//field[@name='profit_account_id']" position="attributes">
-                <attribute name="attrs">
-                    {
-                        'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks'))],
-                    }
+                <attribute name="invisible">
+                    ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks'))]
                 </attribute>
             </xpath>
 
             <xpath expr="//field[@name='loss_account_id']" position="attributes">
-                <attribute name="attrs">
-                    {'invisible': ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks'))]}
+                <attribute name="invisible">
+                    ['!', ('type', 'in', ('cash', 'bank', 'third_party_checks'))]
                 </attribute>
             </xpath>
 
             <field name="code" position="after">
-                <field name="afip_code" attrs="{'invisible': [('type', '!=', 'retentions')]}" />
+                <field name="afip_code" invisible="[('type', '!=', 'retentions')]" />
                 <label
                     for="sequence_number_next"
-                    attrs="{
-                        'invisible': [
-                            '|',
-                            ('type', 'not in', ('sale')),
-                            ('fiscal_type', 'not in', ('internal')),
-                            ('type', 'not in', ('receipt', 'payment', 'retentions')),
-                    ],
-                }"
+                    invisible="[
+                        '|',
+                        ('type', 'not in', ('sale')),
+                        ('fiscal_type', 'not in', ('internal')),
+                        ('type', 'not in', ('receipt', 'payment', 'retentions')),
+                    ]"
                 />
                 <div>
                     <field
                         name="sequence_number_next"
-                        attrs="{
-                            'invisible': [
-                                '|',
-                                ('type', 'not in', ('sale')),
-                                ('fiscal_type', 'not in', ('internal')),
-                                ('type', 'not in', ('receipt', 'payment', 'retentions')),
-                            ],
-                        }"
+                        invisible="[
+                            '|',
+                            ('type', 'not in', ('sale')),
+                            ('fiscal_type', 'not in', ('internal')),
+                            ('type', 'not in', ('receipt', 'payment', 'retentions')),
+                        ]"
                         style="padding-right: 1.0em"
                     />
                     <field
                         name="sequence_id"
-                        attrs="{
-                            'invisible': [
-                                '|',
-                                '|',
-                                ('id', '=', False),
-                                ('type', 'not in', ('receipt', 'payment', 'retentions', 'perceptions')),
-                                ('type', '=', 'sale'),
-                                ('fiscal_type', '!=', 'internal'),
-                            ],
-                        }"
+                        invisible="[
+                            '|',
+                            '|',
+                            ('id', '=', False),
+                            ('type', 'not in', ('receipt', 'payment', 'retentions', 'perceptions')),
+                            ('type', '=', 'sale'),
+                            ('fiscal_type', '!=', 'internal'),
+                        ]"
                     />
                 </div>
 
                 <label
                     for="cn_sequence_number_next"
-                    attrs="{
-                        'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
-                    }"
+                    invisible="['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]"
                 />
                 <div>
                     <field
                         name="cn_sequence_number_next"
-                        attrs="{
-                            'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
-                        }"
+                        invisible="['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]"
                         style="padding-right: 1.0em"
                     />
                     <field
                         name="cn_sequence_id"
-                        attrs="{
-                            'invisible': [
-                                '|',
-                                '|',
-                                ('id', '=', False),
-                                ('type', 'not in', ('sale')),
-                                ('fiscal_type', '!=', 'internal')
-                            ],
-                        }"
+                        invisible="[
+                            '|',
+                            '|',
+                            ('id', '=', False),
+                            ('type', 'not in', ('sale')),
+                            ('fiscal_type', '!=', 'internal')
+                        ]"
                     />
                 </div>
 
                 <label
                     for="dn_sequence_number_next"
-                    attrs="{
-                        'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
-                    }"
+                    invisible="['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]"
                 />
                 <div>
                     <field
                         name="dn_sequence_number_next"
-                        attrs="{
-                            'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
-                        }"
+                        invisible="['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]"
                         style="padding-right: 1.0em"
                     />
                     <field
                         name="dn_sequence_id"
-                        attrs="{
-                            'invisible': [
-                                '|',
-                                '|',
-                                ('id', '=', False),
-                                ('type', 'not in', ('sale')),
-                                ('fiscal_type', '!=', 'internal')
-                            ],
-                        }"
+                        invisible="[
+                            '|',
+                            '|',
+                            ('id', '=', False),
+                            ('type', 'not in', ('sale')),
+                            ('fiscal_type', '!=', 'internal')
+                        ]"
                     />
                 </div>
 
                 <label
                     for="fce_sequence_number_next"
-                    attrs="{
-                        'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
-                    }"
+                    invisible="['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]"
                 />
                 <div>
                     <field
                         name="fce_sequence_number_next"
-                        attrs="{
-                            'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
-                        }"
+                        invisible="['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]"
                         style="padding-right: 1.0em"
                     />
                     <field
                         name="fce_sequence_id"
-                        attrs="{
-                            'invisible': [
-                                '|',
-                                '|',
-                                ('id', '=', False),
-                                ('type', 'not in', ('sale')),
-                                ('fiscal_type', '!=', 'internal')
-                            ],
-                        }"
+                        invisible="[
+                            '|',
+                            '|',
+                            ('id', '=', False),
+                            ('type', 'not in', ('sale')),
+                            ('fiscal_type', '!=', 'internal')
+                        ]"
                     />
                 </div>
                 <label
                     for="nce_sequence_number_next"
-                    attrs="{
-                        'invisible': [
-                            '|',
-                            ('type', 'not in', ('sale')),
-                            ('fiscal_type', 'not in', ('internal')),
-                            ('type', 'not in', ('receipt', 'payment', 'retentions')),
-                    ],
-                }"
+                    invisible="[
+                        '|',
+                        ('type', 'not in', ('sale')),
+                        ('fiscal_type', 'not in', ('internal')),
+                        ('type', 'not in', ('receipt', 'payment', 'retentions')),
+                    ]"
                 />
                 <div>
                     <field
                         name="nce_sequence_number_next"
-                        attrs="{
-                            'invisible': [
-                                '|',
-                                ('type', 'not in', ('sale')),
-                                ('fiscal_type', 'not in', ('internal')),
-                                ('type', 'not in', ('receipt', 'payment', 'retentions')),
-                            ],
-                        }"
+                        invisible="[
+                            '|',
+                            ('type', 'not in', ('sale')),
+                            ('fiscal_type', 'not in', ('internal')),
+                            ('type', 'not in', ('receipt', 'payment', 'retentions')),
+                        ]"
                         style="padding-right: 1.0em"
                     />
                     <field
                         name="nce_sequence_id"
-                        attrs="{
-                            'invisible': [
-                                '|',
-                                '|',
-                                ('id', '=', False),
-                                ('type', 'not in', ('receipt', 'payment', 'retentions', 'perceptions')),
-                                ('type', '=', 'sale'),
-                                ('fiscal_type', '!=', 'internal'),
-                            ],
-                        }"
+                        invisible="[
+                            '|',
+                            '|',
+                            ('id', '=', False),
+                            ('type', 'not in', ('receipt', 'payment', 'retentions', 'perceptions')),
+                            ('type', '=', 'sale'),
+                            ('fiscal_type', '!=', 'internal'),
+                        ]"
                     />
                 </div>
 
                 <label
                     for="nde_sequence_number_next"
-                    attrs="{
-                        'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
-                    }"
+                    invisible="['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]"
                 />
                 <div>
                     <field
                         name="nde_sequence_number_next"
-                        attrs="{
-                            'invisible': ['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]
-                        }"
+                        invisible="['|', ('type', 'not in', ('sale')), ('fiscal_type', '!=', 'internal')]"
                         style="padding-right: 1.0em"
                     />
                     <field
                         name="nde_sequence_id"
-                        attrs="{
-                            'invisible': [
-                                '|',
-                                '|',
-                                ('id', '=', False),
-                                ('type', 'not in', ('sale')),
-                                ('fiscal_type', '!=', 'internal')
-                            ],
-                        }"
+                        invisible="[
+                            '|',
+                            '|',
+                            ('id', '=', False),
+                            ('type', 'not in', ('sale')),
+                            ('fiscal_type', '!=', 'internal')
+                        ]"
                     />
                 </div>
 

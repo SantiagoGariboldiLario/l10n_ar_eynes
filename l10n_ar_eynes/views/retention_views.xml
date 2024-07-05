@@ -31,8 +31,7 @@
                                 <tree>
                                     <field name="name" />
                                     <field name="code" />
-                                    <field name="internal_type" />
-                                    <field name="user_type_id" />
+                                    <field name="account_type" />
                                 </tree>
                             </field>
                         </page>

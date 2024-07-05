@@ -9,21 +9,21 @@
                     <button
                         name="to_declared"
                         type="object"
-                        states="generated"
+                        invisible="state != 'generated'"
                         string="Declare"
                         class="oe_highlight"
                     />
                     <button
                         name="to_generated"
                         type="object"
-                        states="declared"
+                        invisible="state != 'declared'"
                         string="Un-Declare"
                         class="oe_highlight"
                     />
                     <button
                         name="regenerate"
                         type="object"
-                        attrs="{'invisible': [('state', 'in', 'declared')]}"
+                        invisible="[('state', 'in', 'declared')]"
                         string="Regenerate"
                         class="oe_highlight"
                     />
@@ -43,7 +43,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Errors" attrs="{'invisible': [('error_ids', '=', [])]}">
+                        <page string="Errors" invisible="[('error_ids', '=', [])]">
                             <field name="error_ids">
                                 <tree decoration-danger="type=='error'">
                                     <button

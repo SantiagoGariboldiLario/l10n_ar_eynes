@@ -133,7 +133,7 @@ class AccountJournal(models.Model):
         "allowing finding the right account.",
         string='Suspense Account',
         domain=lambda self: "[('deprecated', '=', False), ('company_id', '=', company_id), \
-                             ('user_type_id.type', 'not in', ('receivable', 'payable'))]",
+                             ('account_type', 'not in', ('asset_receivable', 'liability_payable'))]",
     )
 
     # RETENTIONS AND PERCEPTIONS FIELDS

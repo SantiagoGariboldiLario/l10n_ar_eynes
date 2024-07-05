@@ -26,22 +26,14 @@
                         <field name="company_id" />
                         <field name="homologation" />
                         <field name="url" />
-                        <span
-                            class="text-danger"
-                            attrs="{'invisible': [('homologation', '=', True)]}"
-                        >
+                        <span class="text-danger" invisible="[('homologation', '=', True)]">
                             Homologation server disable. All AFIP requests will be sent to the real AFIP server.
                             Be sure that you are on Production server.
                         </span>
                     </group>
                     <notebook colspan="4">
                         <page string="Authorized Services">
-                            <field
-                                name="service_ids"
-                                colspan="4"
-                                nolabel="1"
-                                readonly="1"
-                            >
+                            <field name="service_ids" colspan="4" nolabel="1" readonly="1">
                                 <tree>
                                     <field name="name" />
                                     <field name="expiration_time" />
@@ -66,7 +58,7 @@
                                     }"
                                     class="oe_stat_button"
                                     icon="fa-download"
-                                    attrs="{'invisible': [('certificate', '=', False)]}"
+                                    invisible="[('certificate', '=', False)]"
                                     name="download_file"
                                 >
                                     <div><strong>Download</strong></div>
@@ -81,12 +73,7 @@
                                     <div><strong>Load Certificate</strong></div>
                                 </button>
                             </div>
-                            <field
-                                name="certificate"
-                                colspan="4"
-                                nolabel="1"
-                                height="200"
-                            />
+                            <field name="certificate" colspan="4" nolabel="1" height="200" />
 
                             <separator string="Key" class="oe_inline" />
                             <div class="oe_right">
@@ -98,7 +85,7 @@
                                     }"
                                     class="oe_stat_button"
                                     icon="fa-download"
-                                    attrs="{'invisible': [('key', '=', False)]}"
+                                    invisible="[('key', '=', False)]"
                                     name="download_file"
                                 >
                                     <div><strong>Download</strong></div>

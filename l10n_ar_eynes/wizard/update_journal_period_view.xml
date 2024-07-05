@@ -14,7 +14,7 @@
                     <field
                         name="journal_ids"
                         mode="tree"
-                        attrs="{'invisible': [('selection_type','!=','some')]}"
+                        invisible="[('selection_type','!=','some')]"
                         class="custom-control custom-checkbox"
                     >
                         <tree create="false" delete="false" editable="bottom">

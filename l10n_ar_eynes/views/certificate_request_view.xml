@@ -25,9 +25,7 @@
                         name="generate_certificate_request"
                         string="Generate Request"
                         class="oe_highlight"
-                        attrs="{
-                        'invisible': [('key', '=', False)],
-                        }"
+                        invisible="[('key', '=', False)]"
                         type="object"
                     />
                     <field name="state" widget="statusbar" />
@@ -55,7 +53,7 @@
                                 }"
                                 class="oe_stat_button"
                                 icon="fa-refresh"
-                                attrs="{'invisible': [('old_certificate', '=', False)]}"
+                                invisible="[('old_certificate', '=', False)]"
                                 name="gather_from_cert"
                             >
                                 <div class="pull-right"><strong>Gather from<br
@@ -68,7 +66,7 @@
                                 }"
                                 class="oe_stat_button"
                                 icon="fa-refresh"
-                                attrs="{'invisible': [('certificate', '=', False)]}"
+                                invisible="[('certificate', '=', False)]"
                                 name="gather_from_cert"
                             >
                                 <div class="pull-right"><strong>Gather from<br
@@ -93,11 +91,10 @@
                                     }"
                                     class="oe_stat_button"
                                     icon="fa-download"
-                                    attrs="{'invisible': [('key', '=', False)]}"
+                                    invisible="[('key', '=', False)]"
                                     name="download_file"
                                 >
-                                    <div class="pull-right"><strong
-                                        >Download</strong></div>
+                                    <div class="pull-right"><strong>Download</strong></div>
                                 </button>
                                 <button
                                     type="object"
@@ -106,8 +103,7 @@
                                     icon="fa-key"
                                     name="generate_key"
                                 >
-                                    <div class="pull-right"><strong
-                                        >Generate Key</strong></div>
+                                    <div class="pull-right"><strong>Generate Key</strong></div>
                                 </button>
                                 <button
                                     type="action"
@@ -116,8 +112,7 @@
                                     icon="fa-key"
                                     name="%(key_renewal_wizard_action)d"
                                 >
-                                    <div class="pull-right"><strong
-                                        >Load Key</strong></div>
+                                    <div class="pull-right"><strong>Load Key</strong></div>
                                 </button>
                             </div>
                             <field name="key" colspan="4" nolabel="1" height="200" />
@@ -133,11 +128,10 @@
                                     class="oe_stat_button"
                                     id="wsaa_certificate_request_download"
                                     icon="fa-download"
-                                    attrs="{'invisible': [('old_certificate', '=', False)]}"
+                                    invisible="[('old_certificate', '=', False)]"
                                     name="download_file"
                                 >
-                                    <div class="pull-right"><strong
-                                        >Download</strong></div>
+                                    <div class="pull-right"><strong>Download</strong></div>
                                 </button>
                                 <button
                                     type="action"
@@ -147,16 +141,10 @@
                                     icon="fa-certificate"
                                     name="%(certificate_renewal_wizard_action)d"
                                 >
-                                    <div class="pull-right"><strong
-                                        >Load Old Certificate</strong></div>
+                                    <div class="pull-right"><strong>Load Old Certificate</strong></div>
                                 </button>
                             </div>
-                            <field
-                                name="old_certificate"
-                                colspan="4"
-                                nolabel="1"
-                                height="200"
-                            />
+                            <field name="old_certificate" colspan="4" nolabel="1" height="200" />
                         </page>
                         <page string="Certificate Request">
                             <div class="oe_right">
@@ -169,19 +157,13 @@
                                     class="oe_stat_button"
                                     id="wsaa_certificate_request_download"
                                     icon="fa-download"
-                                    attrs="{'invisible': [('cert_request', '=', False)]}"
+                                    invisible="[('cert_request', '=', False)]"
                                     name="download_file"
                                 >
-                                    <div class="pull-right"><strong
-                                        >Download</strong></div>
+                                    <div class="pull-right"><strong>Download</strong></div>
                                 </button>
                             </div>
-                            <field
-                                name="cert_request"
-                                colspan="4"
-                                nolabel="1"
-                                height="200"
-                            />
+                            <field name="cert_request" colspan="4" nolabel="1" height="200" />
                         </page>
                         <page string="Certificate">
                             <div class="oe_right">
@@ -194,11 +176,10 @@
                                     class="oe_stat_button"
                                     id="wsaa_certificate_request_download"
                                     icon="fa-download"
-                                    attrs="{'invisible': [('certificate', '=', False)]}"
+                                    invisible="[('certificate', '=', False)]"
                                     name="download_file"
                                 >
-                                    <div class="pull-right"><strong
-                                        >Download</strong></div>
+                                    <div class="pull-right"><strong>Download</strong></div>
                                 </button>
                                 <button
                                     type="action"
@@ -207,16 +188,10 @@
                                     icon="fa-certificate"
                                     name="%(certificate_renewal_wizard_action)d"
                                 >
-                                    <div class="pull-right"><strong
-                                        >Load Certificate</strong></div>
+                                    <div class="pull-right"><strong>Load Certificate</strong></div>
                                 </button>
                             </div>
-                            <field
-                                name="certificate"
-                                colspan="4"
-                                nolabel="1"
-                                height="200"
-                            />
+                            <field name="certificate" colspan="4" nolabel="1" height="200" />
                         </page>
                     </notebook>
                 </sheet>

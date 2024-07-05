@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina - Padron WS Consumer',
-    'version': '15.0.2.0.0',
+    'version': '17.0.0.0.0',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
