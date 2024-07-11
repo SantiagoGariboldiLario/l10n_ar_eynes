@@ -85,6 +85,12 @@ class AccountJournal(models.Model):
             ('electronic', 'Electronic Invoice'),
         ],
         store=True,
+        default='internal',
+        help="""
+        'internal' (Default): Invoices that doesn't need to be informed to AFIP.
+        'electronic': Invoices that will be send and authorized by AFIP (RECE point of sale). To allow this
+        feature you must link this journal on WSFE configuration (POS Table)
+        """,
     )
     image = fields.Binary("Image", attachment=True)
     image_filename = fields.Char()

@@ -5,7 +5,7 @@
         <field name="name">Retention Journals</field>
         <field name="res_model">account.journal</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('type', '=', 'retentions')]</field>
+        <field name="domain">type == 'retentions'</field>
         <field name="context">{'default_type':'retentions'}</field>
     </record>
 
@@ -13,16 +13,11 @@
         <field name="name">Perception Journals</field>
         <field name="res_model">account.journal</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('type', '=', 'perceptions')]</field>
+        <field name="domain">type == 'perceptions'</field>
         <field name="context">{'default_type':'perceptions'}</field>
     </record>
 
-    <menuitem
-        id="taxes_submenu"
-        name="Taxes"
-        parent="account.menu_finance_configuration"
-        sequence="3"
-    >
+    <menuitem id="taxes_submenu" name="Taxes" parent="account.menu_finance_configuration" sequence="3">
         <menuitem
             id="account.menu_action_tax_form"
             name="Taxes"
@@ -37,12 +32,7 @@
         parent="account.menu_finance_configuration"
         sequence="3"
     >
-        <menuitem
-            id="retentions_menu"
-            name="Retentions"
-            action="action_retention_journals"
-            sequence="1"
-        />
+        <menuitem id="retentions_menu" name="Retentions" action="action_retention_journals" sequence="1" />
         <menuitem
             id="retention_concepts_menu"
             name="Concepts"
@@ -81,11 +71,7 @@
         parent="account.menu_finance_configuration"
         sequence="3"
     >
-        <menuitem
-            id="perceptions_menu"
-            name="Perceptions"
-            action="action_perception_journals"
-        />
+        <menuitem id="perceptions_menu" name="Perceptions" action="action_perception_journals" />
         <menuitem
             id="perception_tax_line_menu_applied"
             name="Perception Applied"
@@ -96,11 +82,7 @@
             name="Perception Supported"
             action="supported_perceptions_action"
         />
-        <menuitem
-            id="perception_concepts_menu"
-            name="Concepts"
-            action="action_perception_concept_tree"
-        />
+        <menuitem id="perception_concepts_menu" name="Concepts" action="action_perception_concept_tree" />
         <menuitem
             id="perception_activities_menu"
             name="Activities"
