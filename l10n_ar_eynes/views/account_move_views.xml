@@ -338,7 +338,7 @@
 
                 <page
                     string="Export Invoice"
-                    invisible="local or move_type not in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund'))"
+                    invisible="local or move_type not in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')"
                 >
                     <group>
                         <field
@@ -350,7 +350,7 @@
                             name="dst_country_id"
                             required="not local and move_type in ('out_invoice', 'out_refund')"
                         />
-                    </ group>
+                    </group>
                     <group string="Shipping Permissions">
                         <field name="shipping_perm_ids" nolabel="1" widget="one2many_list">
                             <tree editable="bottom">
@@ -382,7 +382,6 @@
                     name="currency_rate"
                     invisible="not currency_id"
                     groups="base.group_multi_currency"
-                    readonly="state != 'draft'"
                 />
             </xpath>
 

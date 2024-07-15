@@ -250,7 +250,6 @@
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
                                         readonly="1"
-                                        groups="account.group_account_user"
                                         force_save="True"
                                     />
                                     <field
@@ -910,7 +909,6 @@
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
                                         readonly="True"
-                                        groups="account.group_account_user"
                                         force_save="True"
                                     />
                                     <field
