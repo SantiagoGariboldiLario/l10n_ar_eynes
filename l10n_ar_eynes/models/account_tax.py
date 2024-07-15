@@ -334,6 +334,7 @@ class AccountTax(models.Model):
         is_refund=False,
         handle_price_include=True,
         include_caba_tags=False,
+        fixed_multiplicator=1,
     ):
         res = super(AccountTax, self).compute_all(
             price_unit,
@@ -344,6 +345,7 @@ class AccountTax(models.Model):
             is_refund,
             handle_price_include,
             include_caba_tags,
+            fixed_multiplicator,
         )
         for tax in self:
             res_tax_vals = res.get('taxes', [])
