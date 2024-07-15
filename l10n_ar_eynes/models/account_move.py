@@ -415,7 +415,7 @@ class AccountMove(models.Model):
             )
             if not journals:
                 self.journal_id = False
-                self._onchange_journal()
+                self._inverse_journal_id()
                 return {
                     'warning': {
                         'title': _('Journal not found'),
@@ -430,7 +430,7 @@ class AccountMove(models.Model):
                     'domain': {'journal_id': [('id', 'in', [])]},
                 }
             self.journal_id = journals[0]
-            self._onchange_journal()
+            self._inverse_journal_id()
             self.suitable_journal_ids = journals
 
     @api.onchange('partner_id')
