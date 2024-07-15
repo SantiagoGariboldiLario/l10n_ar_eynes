@@ -503,7 +503,6 @@ class AccountMove(models.Model):
         if self.is_invoice(include_receipts=True):
             for line in self._get_lines_onchange_currency():
                 line.currency_rate = self.currency_rate
-                line._onchange_currency()
             self.compute_perceptions()
 
     @api.onchange('date')

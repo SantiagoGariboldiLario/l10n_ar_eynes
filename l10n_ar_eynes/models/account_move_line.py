@@ -19,12 +19,6 @@ class AccountMoveLine(models.Model):
         help="Compute the counter part accounts of "
         "this journal item for this journal entry. This can be needed in reports.",
     )
-    currency_rate = fields.Float(
-        'Currency Rate',
-        digits=(12, 6),
-        readonly=False,
-        help="It is the currency rate",
-    )
 
     @api.depends('move_id.line_ids')
     def _compute_counterpart(self):
