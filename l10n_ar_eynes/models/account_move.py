@@ -63,17 +63,13 @@ class AccountMove(models.Model):
     address_shipping_id = fields.Many2one(
         comodel_name='res.partner',
         name='Shipping Address',
-        readonly=True,
         required=False,
-        states={'draft': [('readonly', False)]},
     )
     is_debit_note = fields.Boolean('Debit Note', default=False)
     perception_ids = fields.One2many(
         'perception.tax.line',
         'invoice_id',
         string='Perception',
-        readonly=True,
-        states={'draft': [('readonly', False)]},
     )
     cae = fields.Char(
         string='CAE',
@@ -94,8 +90,6 @@ class AccountMove(models.Model):
         column1='invoice_id',
         column2='associated_invoice_id',
         string='Assoiciated Invoices',
-        readonly=True,
-        states={'draft': [('readonly', False)]},
     )
     voucher_type_id = fields.Many2one(
         comodel_name='res.voucher.type',
@@ -161,8 +155,6 @@ class AccountMove(models.Model):
     currency_rate = fields.Float(
         string='Currency Rate',
         digits=(12, 6),
-        readonly=True,
-        states={'draft': [('readonly', False)]},
         default=lambda x: 1.00,
         help="It is the preciated currency rate of the invoice",
     )
@@ -181,15 +173,11 @@ class AccountMove(models.Model):
     secondary_currency_id = fields.Many2one(
         'res.currency',
         string='Secondary Currency',
-        readonly=True,
-        states={'draft': [('readonly', False)]},
         default=lambda x: x.env.user.company_id.currency_id,
     )
     secondary_currency_rate = fields.Float(
         string='Secondary Currency Rate',
         digits=(12, 6),
-        readonly=True,
-        states={'draft': [('readonly', False)]},
         default=lambda x: 1.00,
         help="It is the old currency rate of the last change of currency",
     )
@@ -254,7 +242,6 @@ class AccountMove(models.Model):
         currency_field="secondary_currency_id",
         string='FOB',
     )
-    vat_date = fields.Date()
     inform_period = fields.Boolean(default=False)
     inform_period_date_from = fields.Date()
     inform_period_date_to = fields.Date()
@@ -480,12 +467,12 @@ class AccountMove(models.Model):
                         )
                     ) | perceptions_applied
 
-                if not self.env.context.get('is_reverse'):
-                    self.with_context(
-                        override_perceptions=True
-                    )._recompute_tax_lines()
+                # if not self.env.context.get('is_reverse'):
+                #     self.with_context(
+                #         override_perceptions=True
+                #     )._recompute_tax_lines()
 
-                self._recompute_dynamic_lines()
+                # self._recompute_dynamic_lines()
 
     @api.onchange('invoice_date')
     def _onchange_currency_id(self):
@@ -519,9 +506,16 @@ class AccountMove(models.Model):
                 line._onchange_currency()
             self.compute_perceptions()
 
-    @api.onchange('date', 'currency_id')
-    def _onchange_currency(self):
-        super()._onchange_currency()
+    @api.onchange('date')
+    def _onchange_date(self):
+        super()._onchange_date()
+        self._onchange_currency_id()
+        self._onchange_currency_rate()
+        return
+
+    @api.onchange('currency_id')
+    def _inverse_currency_id(self):
+        super()._inverse_currency_id()
         self._onchange_currency_id()
         self._onchange_currency_rate()
         return
@@ -640,8 +634,6 @@ class AccountMove(models.Model):
 
     @api.onchange('invoice_date')
     def _onchange_invoice_date(self):
-        super()._onchange_invoice_date()
-        self.vat_date = self.invoice_date
         if self.is_sale_document():
             self.with_context(
                 raise_padron_not_updated=True
@@ -1145,29 +1137,29 @@ class AccountMove(models.Model):
             if rec.is_sale_document() or rec.is_purchase_document():
                 rec._onchange_perception_ids()
 
-    def _recompute_tax_lines(
-        self,
-        recompute_tax_base_amount=False,
-        tax_rep_lines_to_recompute=None,
-    ):
-        modify_self = self.with_context(
-            inverse_currency_rate=self.currency_rate
-        )
-        super(AccountMove, modify_self)._recompute_tax_lines(
-            recompute_tax_base_amount,
-            tax_rep_lines_to_recompute,
-        )
-        if self.is_purchase_document() or self.env.context.get(
-            'override_perceptions', False
-        ):
-            for perception in self.perception_ids:
-                move_line = self.line_ids.filtered(
-                    lambda line: line.tax_line_id
-                    == perception.perception_id.tax_id
-                )
-                vals = self._prepare_tax_line_vals(perception)
-                move_line.update(vals)
-        return
+    # def _recompute_tax_lines(
+    #     self,
+    #     recompute_tax_base_amount=False,
+    #     tax_rep_lines_to_recompute=None,
+    # ):
+    #     modify_self = self.with_context(
+    #         inverse_currency_rate=self.currency_rate
+    #     )
+    #     super(AccountMove, modify_self)._recompute_tax_lines(
+    #         recompute_tax_base_amount,
+    #         tax_rep_lines_to_recompute,
+    #     )
+    #     if self.is_purchase_document() or self.env.context.get(
+    #         'override_perceptions', False
+    #     ):
+    #         for perception in self.perception_ids:
+    #             move_line = self.line_ids.filtered(
+    #                 lambda line: line.tax_line_id
+    #                 == perception.perception_id.tax_id
+    #             )
+    #             vals = self._prepare_tax_line_vals(perception)
+    #             move_line.update(vals)
+    #     return
 
     def _generate_qr_afip_url(self):
         voucher_type = self.get_voucher_type()

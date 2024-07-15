@@ -149,7 +149,6 @@ class AccountPaymentOrder(models.Model):
         comodel_name='res.partner',
         string='Partner',
         default=default_partner,
-        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     account_id = fields.Many2one(
         comodel_name='account.account',
@@ -170,7 +169,6 @@ class AccountPaymentOrder(models.Model):
         required=True,
         domain=domain_journal,
         default=default_journal,
-        states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
     )
     move_id = fields.Many2one(
         comodel_name='account.move',
@@ -188,10 +186,6 @@ class AccountPaymentOrder(models.Model):
         default=lambda self: self._context.get(
             'date', fields.Date.context_today(self)
         ),
-        states={
-            'cancel': [('readonly', True)],
-            'posted': [('readonly', True)],
-        },
     )
     date_due = fields.Date(string="Due Date")
     state = fields.Selection(
@@ -282,10 +276,6 @@ class AccountPaymentOrder(models.Model):
         comodel_name='account.payment.mode.line',
         inverse_name='payment_order_id',
         string='Payments Lines',
-        states={
-            'cancel': [('readonly', True)],
-            'posted': [('readonly', True)],
-        },
     )
     line_ids = fields.One2many(
         comodel_name='account.payment.order.line',
@@ -298,10 +288,6 @@ class AccountPaymentOrder(models.Model):
         string='Credits',
         domain=[('type', '=', 'income')],
         context={'default_type': 'income'},
-        states={
-            'cancel': [('readonly', True)],
-            'posted': [('readonly', True)],
-        },
     )
     debt_line_ids = fields.One2many(
         comodel_name='account.payment.order.line',
@@ -309,20 +295,12 @@ class AccountPaymentOrder(models.Model):
         string='Debits',
         domain=[('type', '=', 'debt')],
         context={'default_type': 'debt'},
-        states={
-            'cancel': [('readonly', True)],
-            'posted': [('readonly', True)],
-        },
     )
     payment_rate_currency_id = fields.Many2one(
         comodel_name='res.currency',
         string='Payment Rate Currency',
         default=default_payment_rate_currency,
         required=True,
-        states={
-            'cancel': [('readonly', True)],
-            'posted': [('readonly', True)],
-        },
     )
     payment_rate = fields.Float(
         string='Exchange Rate',
@@ -354,19 +332,11 @@ class AccountPaymentOrder(models.Model):
         string='Issued Checks',
         required=False,
         domain=[('internal_type', '=', 'issued')],
-        states={
-            'cancel': [('readonly', True)],
-            'posted': [('readonly', True)],
-        },
     )
     issued_check_line_ids = fields.One2many(
         comodel_name='account.payment.order.issued.check.line',
         inverse_name='payment_order_id',
         string='Issued Checks',
-        states={
-            'cancel': [('readonly', True)],
-            'posted': [('readonly', True)],
-        },
     )
     third_party_check_receipt_ids = fields.One2many(
         comodel_name='account.check',
@@ -374,10 +344,6 @@ class AccountPaymentOrder(models.Model):
         string='Third party checks',
         required=False,
         domain=[('internal_type', '=', 'third_party')],
-        states={
-            'cancel': [('readonly', True)],
-            'posted': [('readonly', True)],
-        },
     )
     third_party_check_ids = fields.Many2many(
         comodel_name='account.check',
@@ -385,10 +351,6 @@ class AccountPaymentOrder(models.Model):
         column1='dest_payment_order_id',
         column2='third_check_id',
         string='Third Checks',
-        states={
-            'cancel': [('readonly', True)],
-            'posted': [('readonly', True)],
-        },
     )
     # RETENTION FIELDS
     retention_ids = fields.One2many(
@@ -396,9 +358,6 @@ class AccountPaymentOrder(models.Model):
         inverse_name='payment_order_id',
         string='Retentions',
         readonly=True,
-        states={
-            'draft': [('readonly', False)],
-        },
     )
     date_effective = fields.Date(
         string='Effective Date',
