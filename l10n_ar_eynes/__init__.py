@@ -4,13 +4,11 @@ from . import controllers
 from . import utils
 from . import wsfetools
 from . import report
-from odoo import api, SUPERUSER_ID
 
 
 def _install_language(env):
-    es_ar = env['res.lang'].search([('code', '=', 'es_AR')])
-    # TODO: aca al instalar es_ar es vacío, no lo encuentra
-    env["base.language.install"].create(
+    es_ar = env.ref('base.lang_es_AR')
+    env['base.language.install'].create(
         {
             'overwrite': True,
             'lang_ids': [(6, 0, [es_ar.id])],
