@@ -240,14 +240,11 @@ class WsfeConfig(models.Model):
 
     def _get_vat_array(self, invoice):
         invoice_vat_lines = invoice.line_ids.filtered(
-            lambda x: x.price_unit
-            and x.tax_line_id
+            lambda x: x.tax_line_id
             and x.tax_group_id
             and x.tax_group_id.group_type == 'vat'
         )
-
         self._check_vat_taxes_configured(invoice_vat_lines)
-
         return invoice_vat_lines
 
     def _get_next_number(self, ws, tipo_cbte, pto_vta):
