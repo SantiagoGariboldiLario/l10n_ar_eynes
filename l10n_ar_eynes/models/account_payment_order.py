@@ -1007,11 +1007,11 @@ class AccountPaymentOrder(models.Model):
     def gather_income_lines(self):
         self.ensure_one()
         self._check_partner_set()
-        account_type = self.type == 'payment' and 'payable' or 'receivable'
+        account_type = self.type == 'payment' and 'liability_payable' or 'asset_receivable'
         domain = [
             ('debit', '!=', 0),
             ('credit', '=', 0),
-            ('account_id.internal_type', '=', account_type),
+            ('account_id.account_type', '=', account_type),
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
             ('move_id.state', '=', 'posted'),
@@ -1029,15 +1029,11 @@ class AccountPaymentOrder(models.Model):
         domain = [
             ('debit', '=', 0),
             ('credit', '!=', 0),
-            ('account_id.internal_type', '=', account_type),
+            ('account_id.account_type', '=', account_type),
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
             ('move_id.state', '=', 'posted'),
         ]
-        # if self.is_multi_currency:
-        #     domain += [('currency_id', '=', self.currency_id.id)]
-        # else:
-        #     domain += [('currency_id', 'in', (self.currency_id.id, False))]
 
         moves = self.env['account.move.line'].search(domain)
         lines = self._prepare_income_debt_lines('debt', moves)
