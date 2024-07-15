@@ -245,17 +245,15 @@ class AccountJournal(models.Model):
     def _compute_default_account_type(self):
         super(AccountJournal, self)._compute_default_account_type()
         default_account_id_types = {
-            'receipt': 'account.data_account_type_revenue',
-            'payment': 'account.data_account_type_expenses',
+            'receipt': 'income%',
+            'payment': 'expense%',
         }
 
         for journal in self.filtered(
             lambda j: j.type in ('payment', 'receipt')
         ):
             if journal.type in default_account_id_types:
-                journal.default_account_type = self.env.ref(
-                    default_account_id_types[journal.type]
-                ).id
+                journal.default_account_type = default_account_id_types.get(journal.type, '%')
             else:
                 journal.default_account_type = False
         return
