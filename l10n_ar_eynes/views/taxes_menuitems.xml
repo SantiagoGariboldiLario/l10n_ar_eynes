@@ -5,7 +5,7 @@
         <field name="name">Retention Journals</field>
         <field name="res_model">account.journal</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">type == 'retentions'</field>
+        <field name="domain">[('type', '=', 'retentions')]</field>
         <field name="context">{'default_type':'retentions'}</field>
     </record>
 
@@ -13,7 +13,7 @@
         <field name="name">Perception Journals</field>
         <field name="res_model">account.journal</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">type == 'perceptions'</field>
+        <field name="domain">[('type', '=', 'perceptions')]</field>
         <field name="context">{'default_type':'perceptions'}</field>
     </record>
 
