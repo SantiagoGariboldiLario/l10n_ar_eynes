@@ -521,15 +521,22 @@ class AccountMove(models.Model):
 
     @api.onchange('invoice_payment_term_id', 'invoice_date')
     def _onchange_payment_term_date_invoice(self):
-        date_invoice = self.invoice_date
-        if not date_invoice:
-            date_invoice = fields.Date.context_today(self)
+        date_invoice = self.invoice_date or fields.Date.context_today(self)
         if self.invoice_payment_term_id:
-            pterm = self.invoice_payment_term_id
-            pterm_list = pterm.with_context(
+            pterm_lines_vals = self.invoice_payment_term_id.with_context(
                 currency_id=self.company_id.currency_id.id
-            ).compute(value=1, date_ref=date_invoice)[0]
-            self.invoice_date_due = pterm_list[0]
+            )._compute_terms(
+                date_ref=date_invoice,
+                currency=self.company_id.currency_id,
+                company=self.company_id,
+                tax_amount=1,
+                tax_amount_currency=1,
+                sign=1,
+                untaxed_amount=1,
+                untaxed_amount_currency=1,
+            ).get('line_ids', [])
+            dates = [term['date'] for term in pterm_lines_vals]
+            self.invoice_date_due = min(dates)
         elif self.invoice_date_due and (date_invoice > self.invoice_date_due):
             self.invoice_date_due = date_invoice
 
