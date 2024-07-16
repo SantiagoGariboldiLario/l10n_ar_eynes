@@ -352,7 +352,7 @@ class AccountMove(models.Model):
 
             for line in invoice.line_ids - invoice.invoice_line_ids:
                 if not (
-                    line.account_internal_type in ['payable', 'receivable']
+                    line.account_internal_type in ['liability_payable', 'asset_receivable']
                 ):
                     amount = line.credit or line.debit
                     if (

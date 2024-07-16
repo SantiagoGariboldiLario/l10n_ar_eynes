@@ -1025,7 +1025,7 @@ class AccountPaymentOrder(models.Model):
     def gather_debt_lines(self):
         self.ensure_one()
         self._check_partner_set()
-        account_type = self.type == 'payment' and 'payable' or 'receivable'
+        account_type = self.type == 'payment' and 'liability_payable' or 'asset_receivable'
         domain = [
             ('debit', '=', 0),
             ('credit', '!=', 0),
@@ -1082,11 +1082,11 @@ class AccountPaymentOrder(models.Model):
         ttype = self.env.context.get('type', 'bank')
         total_credit = total_debit = 0.0
         if ttype == 'payment':
-            account_type = 'payable'
+            account_type = 'liability_payable'
             total_debit = self.amount or 0.0
         else:
             total_credit = self.amount or 0.0
-            account_type = 'receivable'
+            account_type = 'asset_receivable'
 
         line_ids = getattr(self, onchange_attr)
         the_line = False
@@ -1104,7 +1104,7 @@ class AccountPaymentOrder(models.Model):
         if not self.env.context.get('move_line_ids', False):
             ids = MoveLine.search(
                 [
-                    ('account_id.internal_type', '=', account_type),
+                    ('account_id.account_type', '=', account_type),
                     ('reconciled', '=', False),
                     ('partner_id', '=', self.partner_id.id),
                     ('move_id', '=', line_ids.invoice_id.id),

@@ -301,7 +301,7 @@ class RetentionTaxApplication(models.Model):
         debt_untax_mls_ok = []
         for ml in debt_untax_mls:
             amls_w_tax = ml.move_id.mapped('line_ids').filtered(
-                lambda ml: ml.account_id.internal_type in ['payable']
+                lambda ml: ml.account_id.account_type in ['payable']
             )
             domain = [
                 ('payment_order_id', 'in', prev_pos.ids),
@@ -324,7 +324,7 @@ class RetentionTaxApplication(models.Model):
         income_untax_mls_ok = []
         for ml in income_untax_mls:
             amls_w_tax = ml.move_id.mapped('line_ids').filtered(
-                lambda ml: ml.account_id.internal_type in ['payable']
+                lambda ml: ml.account_id.account_type in ['payable']
             )
             domain = [
                 ('payment_order_id', 'in', prev_pos.ids),

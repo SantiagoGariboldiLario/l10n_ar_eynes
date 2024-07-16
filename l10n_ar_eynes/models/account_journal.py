@@ -587,7 +587,7 @@ class AccountJournal(models.Model):
 
     def _parse_move_lines(self, move):
         not_payable_moves = move.line_ids.filtered(
-            lambda ml: ml.account_id.internal_type != 'payable'
+            lambda ml: ml.account_id.account_type != 'liability_payable'
         )
         tax_mls = not_payable_moves.filtered(lambda ml: ml.tax_line_id)
         taxed_mls = not_payable_moves.filtered(lambda ml: ml.tax_ids)

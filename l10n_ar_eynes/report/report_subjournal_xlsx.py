@@ -286,7 +286,7 @@ class SubjournalXlsx(models.AbstractModel):
             WHERE i.move_type IN %(inv_type)s
                 AND i.state = 'posted'
                 AND i.date BETWEEN %(date_from)s AND %(date_to)s
-                AND a.internal_type NOT IN ('payable', 'receivable')
+                AND a.account_type NOT IN ('liability_payable', 'asset_receivable')
                 AND l.company_id = %(company_id)s
         ),
         grouped_invoice AS (
