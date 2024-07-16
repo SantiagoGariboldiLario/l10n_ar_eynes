@@ -75,12 +75,6 @@
                 action="create_checkbook_wizard_action"
                 sequence="2"
             />
-            <menuitem
-                id="menu_treasury_reason_rejected_check"
-                name="Reasons for rejected checks"
-                action="reason_rejected_check_action"
-                sequence="3"
-            />
         </menuitem>
     </menuitem>
 
