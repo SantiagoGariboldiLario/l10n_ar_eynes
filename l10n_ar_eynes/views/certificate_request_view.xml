@@ -25,7 +25,7 @@
                         name="generate_certificate_request"
                         string="Generate Request"
                         class="oe_highlight"
-                        invisible="[('key', '=', False)]"
+                        invisible="not key"
                         type="object"
                     />
                     <field name="state" widget="statusbar" />
@@ -53,7 +53,7 @@
                                 }"
                                 class="oe_stat_button"
                                 icon="fa-refresh"
-                                invisible="[('old_certificate', '=', False)]"
+                                invisible="not old_certificate"
                                 name="gather_from_cert"
                             >
                                 <div class="pull-right"><strong>Gather from<br
@@ -66,7 +66,7 @@
                                 }"
                                 class="oe_stat_button"
                                 icon="fa-refresh"
-                                invisible="[('certificate', '=', False)]"
+                                invisible="not certificate"
                                 name="gather_from_cert"
                             >
                                 <div class="pull-right"><strong>Gather from<br
@@ -91,7 +91,7 @@
                                     }"
                                     class="oe_stat_button"
                                     icon="fa-download"
-                                    invisible="[('key', '=', False)]"
+                                    invisible="not key"
                                     name="download_file"
                                 >
                                     <div class="pull-right"><strong>Download</strong></div>
@@ -128,7 +128,7 @@
                                     class="oe_stat_button"
                                     id="wsaa_certificate_request_download"
                                     icon="fa-download"
-                                    invisible="[('old_certificate', '=', False)]"
+                                    invisible="not old_certificate"
                                     name="download_file"
                                 >
                                     <div class="pull-right"><strong>Download</strong></div>
@@ -157,7 +157,7 @@
                                     class="oe_stat_button"
                                     id="wsaa_certificate_request_download"
                                     icon="fa-download"
-                                    invisible="[('cert_request', '=', False)]"
+                                    invisible="not cert_request"
                                     name="download_file"
                                 >
                                     <div class="pull-right"><strong>Download</strong></div>
@@ -176,7 +176,7 @@
                                     class="oe_stat_button"
                                     id="wsaa_certificate_request_download"
                                     icon="fa-download"
-                                    invisible="[('certificate', '=', False)]"
+                                    invisible="not certificate"
                                     name="download_file"
                                 >
                                     <div class="pull-right"><strong>Download</strong></div>

@@ -23,7 +23,7 @@
                     <button
                         name="regenerate"
                         type="object"
-                        invisible="[('state', 'in', 'declared')]"
+                        invisible="state == 'declared'"
                         string="Regenerate"
                         class="oe_highlight"
                     />
@@ -43,7 +43,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Errors" invisible="[('error_ids', '=', [])]">
+                        <page string="Errors" invisible="error_ids == []">
                             <field name="error_ids">
                                 <tree decoration-danger="type=='error'">
                                     <button

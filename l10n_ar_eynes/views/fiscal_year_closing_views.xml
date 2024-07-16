@@ -11,7 +11,7 @@
                         name="action_draft"
                         string="Continue"
                         type="object"
-                        invisible="[('state', '!=', 'new')]"
+                        invisible="state != 'new'"
                     />
                     <button
                         name="%(action_fiscal_year_closing)d"
@@ -47,15 +47,15 @@
                             name="company_id"
                             select="1"
                             required="1"
-                            readonly="[('state', '!=', 'new')]"
+                            readonly="state != 'new'"
                         />
-                        <field name="name" select="2" readonly="[('state', '!=', 'new')]" />
+                        <field name="name" select="2" readonly="state != 'new'" />
                     </group>
                     <group string="Fiscal Years" colspan="4">
-                        <field name="closing_id" readonly="[('state', '!=', 'new')]" />
-                        <field name="opening_id" readonly="[('state', '!=', 'new')]" />
+                        <field name="closing_id" readonly="state != 'new'" />
+                        <field name="opening_id" readonly="state != 'new'" />
                     </group>
-                    <group invisible="[('state', '=', 'new')]" colspan="4">
+                    <group invisible="state == 'new'" colspan="4">
                         <notebook>
                             <page string="General">
                                 <group string="Operations">
@@ -64,70 +64,70 @@
                                         <separator string="Move Created by the Operation" />
                                         <field
                                             name="create_loss_profit_move"
-                                            readonly="[('state', 'in', ('done', 'cancel'))]"
+                                            readonly="state in ('done', 'cancel')"
                                         />
                                         <field name="loss_profit_move_id" />
                                         <field
                                             name="create_closing_move"
-                                            readonly="[('state', 'in', ('done', 'cancel'))]"
+                                            readonly="state in ('done', 'cancel')"
                                         />
                                         <field name="closing_move_id" />
                                         <field
                                             name="create_opening_move"
-                                            readonly="[('state', 'in', ('done', 'cancel'))]"
+                                            readonly="state in ('done', 'cancel')"
                                         />
                                         <field name="opening_move_id" />
                                         <field
                                             name="create_recpam"
-                                            readonly="[('state', 'in', ('done', 'cancel'))]"
+                                            readonly="state in ('done', 'cancel')"
                                         />
                                         <field name="recpam_move_id" />
                                     </group>
                                     <group string="Checks">
                                         <field
                                             name="check_invalid_period_moves"
-                                            readonly="[('state', 'in', ('done', 'cancel'))]"
+                                            readonly="state in ('done', 'cancel')"
                                         />
                                         <field
                                             name="check_draft_moves"
-                                            readonly="[('state', 'in', ('done', 'cancel'))]"
+                                            readonly="state in ('done', 'cancel')"
                                         />
                                         <field
                                             name="check_unbalanced_moves"
-                                            readonly="[('state', 'in', ('done', 'cancel'))]"
+                                            readonly="state in ('done', 'cancel')"
                                         />
                                     </group>
                                 </group>
                             </page>
-                            <page string="Configuration" invisible="[('state', '=', 'new')]">
+                            <page string="Configuration" invisible="state == 'new'">
                                 <notebook>
                                     <page string="Loss and Profit">
                                         <group>
                                             <group>
                                                 <field
                                                     name="loss_profit_description"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                                 <field
                                                     name="loss_profit_journal_id"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                             </group>
                                             <group>
                                                 <field
                                                     name="loss_profit_date_range_id"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                                 <field
                                                     name="loss_profit_date"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                             </group>
                                         </group>
                                         <field
                                             name="loss_profit_account_mapping_ids"
                                             nolabel="1"
-                                            readonly="[('state', 'in', ('done', 'cancel'))]"
+                                            readonly="state in ('done', 'cancel')"
                                         >
                                             <tree editable="top">
                                                 <field
@@ -151,28 +151,28 @@
                                             <group>
                                                 <field
                                                     name="closing_description"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                                 <field
                                                     name="closing_journal_id"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                             </group>
                                             <group>
                                                 <field
                                                     name="closing_date_range_id"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                                 <field
                                                     name="closing_date"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                             </group>
                                         </group>
                                         <field
                                             name="closing_account_mapping_ids"
                                             nolabel="1"
-                                            readonly="[('state', 'in', ('done', 'cancel'))]"
+                                            readonly="state in ('done', 'cancel')"
                                         >
                                             <tree editable="top">
                                                 <field
@@ -195,21 +195,21 @@
                                             <group>
                                                 <field
                                                     name="opening_description"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                                 <field
                                                     name="opening_journal_id"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                             </group>
                                             <group>
                                                 <field
                                                     name="opening_date_range_id"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                                 <field
                                                     name="opening_date"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                             </group>
                                         </group>
@@ -219,19 +219,19 @@
                                             <group>
                                                 <field
                                                     name="recpam_description"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
+                                                    readonly="state in ('done', 'cancel')"
                                                 />
                                                 <field
                                                     name="recpam_account_id"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
-                                                    required="[('create_recpam', '=', True)]"
+                                                    readonly="state in ('done', 'cancel')"
+                                                    required="create_recpam"
                                                 />
                                             </group>
                                             <group>
                                                 <field
                                                     name="recpam_journal_id"
-                                                    readonly="[('state', 'in', ('done', 'cancel'))]"
-                                                    required="[('create_recpam', '=', True)]"
+                                                    readonly="state in ('done', 'cancel')"
+                                                    required="create_recpam"
                                                 />
                                             </group>
                                         </group>

@@ -14,7 +14,7 @@
                         class="oe_highlight"
                         string="Get AFIP tables"
                         type="object"
-                        invisible="[('url', '=', False)]"
+                        invisible="not url"
                     />
                 </group>
 

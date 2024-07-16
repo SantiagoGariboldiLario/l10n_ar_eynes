@@ -20,12 +20,8 @@
             </group>
 
             <xpath expr="//field[@name='country_id']" position="attributes">
-                <attribute name="readonly">
-                    [('type', '=', 'contact'), ('parent_id', '!=', False)]
-                </attribute>
-                <attribute name="required">
-                    [('dst_cuit', '=', True)]
-                </attribute>
+                <attribute name="readonly">type == 'contact' and parent_id</attribute>
+                <attribute name="required">dst_cuit</attribute>
             </xpath>
 
             <xpath expr="//field[@name='vat']" position="before">
@@ -33,8 +29,8 @@
                 <field name="document_type_id" placeholder="Document Type..." widget="selection" />
                 <field
                     name="dst_cuit_id"
-                    invisible="[('dst_cuit', '!=', True)]"
-                    required="[('dst_cuit', '=', True)]"
+                    invisible="not dst_cuit"
+                    required="dst_cuit"
                     options="{'no_create': True}"
                 />
                 <field name="supplier_rank" invisible="1" />
@@ -100,7 +96,7 @@
                             <field name="company_id" invisible="1" />
                         </tree>
                     </field>
-                    <group string="Advance Payment Retentions" invisible="[('supplier_rank', '=', 0)]">
+                    <group string="Advance Payment Retentions" invisible="supplier_rank == 0">
                         <field name="advance_retention_ids" nolabel="1">
                             <tree editable="bottom">
                                 <field name="retention_id" />

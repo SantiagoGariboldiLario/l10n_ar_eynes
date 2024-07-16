@@ -13,7 +13,7 @@
             <notebook position="inside">
                 <page
                     string="Retentions"
-                    invisible="[('tax_group_name', 'not in', ('Retentions', 'Retenciones'))]"
+                    invisible="tax_group_name not in ('Retentions', 'Retenciones')"
                 >
                     <group>
                         <group string="Jurisdiction Information">
@@ -21,26 +21,26 @@
                             <field
                                 name="state_id"
                                 select="1"
-                                invisible="[('jurisdiccion','!=','provincial')]"
-                                required="[('jurisdiccion','=','provincial')]"
+                                invisible="jurisdiccion != 'provincial'"
+                                required="jurisdiccion == 'provincial'"
                             />
                             <field
                                 name="applicable_state"
-                                invisible="[('jurisdiccion','!=','provincial')]"
-                                required="[('jurisdiccion','=','provincial')]"
+                                invisible="jurisdiccion != 'provincial'"
+                                required="jurisdiccion == 'provincial'"
                             />
                             <field
                                 name="from_register_ARBA"
-                                invisible="[('jurisdiccion','!=','provincial')]"
+                                invisible="jurisdiccion != 'provincial'"
                             />
                             <field
                                 name="from_register_AGIP"
-                                invisible="[('jurisdiccion','!=','provincial')]"
+                                invisible="jurisdiccion != 'provincial'"
                             />
                         </group>
                         <group
                             string="Usability Configuration"
-                            invisible="[('jurisdiccion','!=','provincial')]"
+                            invisible="jurisdiccion != 'provincial'"
                         >
                             <field name="check_sit_iibb" />
                             <field name="always_apply_padron" />
@@ -90,11 +90,11 @@
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
                                     <field name="aliq_type" required="1" />
-                                    <field name="percent" invisible="[('aliq_type', '=', 'scale')]" />
+                                    <field name="percent" invisible="aliq_type == 'scale'" />
                                     <field
                                         name="scale_id"
-                                        required="[('aliq_type', '=', 'scale')]"
-                                        invisible="[('aliq_type', '=', 'percent')]"
+                                        required="aliq_type == 'scale'"
+                                        invisible="aliq_type == 'percent'"
                                     />
                                     <field name="name" />
                                     <field name="reg_code" />
@@ -106,7 +106,7 @@
                             name="gi_application_ids"
                             nolabel="1"
                             colspan="4"
-                            invisible="[('retention_type','!=','gross_income') or apply_custom_code]"
+                            invisible="retention_type != 'gross_income' or apply_custom_code"
                             context="{'default_type':'gross_income'}"
                         >
                             <tree>
@@ -132,11 +132,11 @@
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
                                     <field name="aliq_type" required="1" />
-                                    <field name="percent" invisible="[('aliq_type', '=', 'scale')]" />
+                                    <field name="percent" invisible="aliq_type == 'scale'" />
                                     <field
                                         name="scale_id"
-                                        required="[('aliq_type', '=', 'scale')]"
-                                        invisible="[('aliq_type', '=', 'percent')]"
+                                        required="aliq_type == 'scale'"
+                                        invisible="aliq_type == 'percent'"
                                     />
                                     <field name="name" />
                                     <field name="reg_code" />
@@ -149,7 +149,7 @@
                             name="profit_application_ids"
                             nolabel="1"
                             colspan="4"
-                            invisible="[('retention_type','!=','profit') or apply_custom_code]"
+                            invisible="retention_type != 'profit' or apply_custom_code"
                             context="{'default_type':'profit'}"
                         >
                             <tree>
@@ -174,11 +174,11 @@
                                     <field name="calculation_base" required="1" />
                                     <field name="tax_minimum" />
                                     <field name="aliq_type" required="1" />
-                                    <field name="percent" invisible="[('aliq_type', '=', 'scale')]" />
+                                    <field name="percent" invisible="aliq_type == 'scale'" />
                                     <field
                                         name="scale_id"
-                                        required="[('aliq_type', '=', 'scale')]"
-                                        invisible="[('aliq_type', '=', 'percent')]"
+                                        required="aliq_type == 'scale'"
+                                        invisible="aliq_type == 'percent'"
                                     />
                                     <field name="name" />
                                     <field name="reg_code" />
@@ -201,7 +201,7 @@
 
                 <page
                     string="Perceptions"
-                    invisible="[('tax_group_name', 'not in', ('Perceptions', 'Percepciones'))]"
+                    invisible="tax_group_name not in ('Perceptions', 'Percepciones')"
                 >
                     <group>
                         <group string="Jurisdiction Information">
@@ -209,19 +209,19 @@
                             <field
                                 name="state_id"
                                 select="1"
-                                invisible="[('jurisdiccion','!=','provincial')]"
-                                required="[('jurisdiccion','=','provincial')]"
+                                invisible="jurisdiccion != 'provincial'"
+                                required="jurisdiccion == 'provincial'"
                             />
                             <field
                                 name="applicable_state"
-                                invisible="[('jurisdiccion','!=','provincial')]"
-                                required="[('jurisdiccion','=','provincial')]"
+                                invisible="jurisdiccion != 'provincial'"
+                                required="jurisdiccion == 'provincial'"
                             />
                             <field name="from_register_ARBA" />
                             <field name="from_register_AGIP" />
                         </group>
                         <group string="Usability Configuration">
-                            <field name="check_sit_iibb" invisible="[('jurisdiccion','!=','provincial')]" />
+                            <field name="check_sit_iibb" invisible="jurisdiccion != 'provincial'" />
                             <field name="is_bank_settlement" />
                             <field name="always_apply_padron" />
                             <field name="inform_arba" />
@@ -245,7 +245,7 @@
                             name="perc_vat_application_ids"
                             nolabel="1"
                             colspan="6"
-                            invisible="('retention_type','!=','vat') or apply_custom_code"
+                            invisible="retention_type != 'vat' or apply_custom_code"
                             context="{'default_type':'vat'}"
                         >
                             <tree>
@@ -278,7 +278,7 @@
                             name="perc_gi_application_ids"
                             nolabel="1"
                             colspan="4"
-                            invisible="[('retention_type','!=','gross_income') or apply_custom_code]"
+                            invisible="retention_type != 'gross_income' or apply_custom_code"
                             context="{'default_type':'gross_income'}"
                         >
                             <tree>
@@ -313,7 +313,7 @@
                             name="perc_profit_application_ids"
                             nolabel="1"
                             colspan="4"
-                            invisible="('retention_type','!=','profit') or apply_custom_code"
+                            invisible="retention_type != 'profit' or apply_custom_code"
                             context="{'default_type':'profit'}"
                         >
                             <tree>
@@ -355,13 +355,6 @@
                     </group>
                 </page>
             </notebook>
-            <xpath expr="//notebook" position="after">
-                <div class="oe_chatter">
-                    <field name="message_follower_ids" widget="mail_followers" />
-                    <field name="activity_ids" widget="mail_activity" />
-                    <field name="message_ids" widget="mail_thread" options="{'display_log_button': True}" />
-                </div>
-            </xpath>
         </field>
     </record>
 

@@ -107,21 +107,20 @@
                         string="Reject Check"
                         type="action"
                         class="oe_highlight"
-                        invisible="[('issued_check_state', '!=', 'debited')]"
+                        invisible="issued_check_state != 'debited'"
                     />
                      <button
                         string="Debit Check"
                         name="%(debit_one_check_wizard_action)d"
                         type="action"
                         class="oe_highlight"
-                        invisible="[('issued_check_state', '!=', 'waiting_debit')]"
+                        invisible="issued_check_state != 'waiting_debit'"
                     />
                     <field
                         name="issued_check_state"
                         widget="statusbar"
                         statusbar_visible="draft,waiting_debit,debited,cancelled,returned,rejected,expired"
                         statusbar_colors='{"cancel":"red"}'
-                        invisible="[('internal_type', '=', 'third_party')]"
                     />
                 </header>
                 <sheet>
@@ -143,31 +142,31 @@
                         </group>
                         <group>
                             <field name="issue_date" />
-                            <field name="payment_date" invisible="[('type', '=', 'common')]" />
+                            <field name="payment_date" invisible="type == 'common'" />
                             <field name="crossed" />
                             <field name="not_order" />
                         </group>
                     </group>
                     <group
                         string="Check Deposit"
-                        invisible="[('issued_check_state','not in',('debited', 'rejected'))]"
-                        readonly="[('issued_check_state', '!=', 'debited')]"
+                        invisible="issued_check_state not in ('debited', 'rejected')"
+                        readonly="issued_check_state != 'debited'"
                     >
                          <group>
                             <field
                                 name="deposit_date"
                                 string="Debit date"
-                                readonly="[('issued_check_state', '!=', 'debited')]"
+                                readonly="issued_check_state != 'debited'"
                             />
                             <field
                                 name="clearance_move_id"
                                 string="Debit move"
-                                readonly="[('issued_check_state', '!=', 'debited')]"
+                                readonly="issued_check_state != 'debited'"
                             />
                             <field
                                 name="deposit_bank_id"
                                 string="Debit account"
-                                readonly="[('issued_check_state', '!=', 'debited')]"
+                                readonly="issued_check_state != 'debited'"
                             />
                         </group>
                     </group>
@@ -361,21 +360,21 @@
                         name="%(deposit_check_action)d"
                         type="action"
                         class="oe_highlight"
-                        invisible="['|', ('third_party_check_state', '!=', 'in_wallet'), ('internal_type', '=', 'issued')]"
+                        invisible="third_party_check_state != 'in_wallet'"
                     />
                     <button
                         string="Accredit Check"
                         name="%(accredit_check_action)d"
                         type="action"
                         class="oe_highlight"
-                        invisible="['|', ('third_party_check_state', '!=', 'deposited'), ('internal_type', '=', 'issued')]"
+                        invisible="third_party_check_state != 'deposited'"
                     />
                     <button
                         name="check_to_wallet"
                         type='object'
                         string='Back to Wallet'
                         class="btn-secondary"
-                        invisible="[('internal_type', '=', 'third_party'), ('third_party_check_state','in', ('draft', 'in_wallet'))]"
+                        invisible="third_party_check_state in ('draft', 'in_wallet')"
                         confirm="You are going to delete an account move. Are you sure?"
                     />
                     <button
@@ -383,14 +382,13 @@
                         string="Reject Check"
                         type="action"
                         class="oe_highlight"
-                        invisible="[('third_party_check_state', 'not in', ('deposited', 'delivered'))]"
+                        invisible="third_party_check_state not in ('deposited', 'delivered')"
                     />
                     <field
                         name="third_party_check_state"
                         widget="statusbar"
                         statusbar_visible="draft,in_wallet,deposited,accredited,delivered,cancelled,rejected,expired"
                         statusbar_colors='{"cancel":"red"}'
-                        invisible="[('internal_type', '=', 'issued')]"
                     />
                 </header>
                 <sheet>
@@ -407,8 +405,8 @@
                             <field name="source_partner_id" readonly="1" />
                             <field
                                 name="destiny_partner_id"
-                                invisible="[('third_party_check_state', 'not in', ('delivered', 'rejected'))]"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                invisible="third_party_check_state not in ('delivered', 'rejected')"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field name="checkbook_format" readonly="1" />
                             <field name="internal_type" readonly="1" />
@@ -416,21 +414,21 @@
                         <group>
                             <field
                                 name="reception_date"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="issue_date"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="endorsement_date"
-                                invisible="[('third_party_check_state', 'not in', ('in_wallet', 'delivered', 'rejected'))]"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                invisible="third_party_check_state not in ('in_wallet', 'delivered', 'rejected')"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="payment_date"
-                                invisible="[('type', '=', 'common')]"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                invisible="type == 'common'"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                         </group>
                     </group>
@@ -440,86 +438,86 @@
                             <field
                                 name="bank_id"
                                 string="Issuing Bank"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="bank_branch"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
-                            <field name="zip" readonly="[('third_party_check_state', '!=', 'in_wallet')]" />
+                            <field name="zip" readonly="third_party_check_state != 'in_wallet'" />
                             <field
                                 name="origin"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="crossed"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="not_order"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="dest"
-                                invisible="[('third_party_check_state','!=','delivered')]"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                invisible="third_party_check_state != 'delivered'"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                         </group>
                         <group>
                             <field
                                 name="clearing"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="signatory"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="signatory_vat"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="signatory_account"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                         </group>
                     </group>
                     <group
                         string="Check Deposit"
-                        invisible="[('third_party_check_state','not in',('deposited', 'rejected', 'accredited'))]"
-                        readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                        invisible="third_party_check_state not in ('deposited', 'rejected', 'accredited')"
+                        readonly="third_party_check_state != 'in_wallet'"
                     >
                         <group>
                             <field
                                 name="deposit_date"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="deposit_slip"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="deposit_move_id"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                             <field
                                 name="deposit_bank_id"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                         </group>
                     </group>
                      <group
                         string="Check Accreditation"
-                        invisible="[('third_party_check_state','!=','accredited')]"
+                        invisible="third_party_check_state != 'accredited'"
                     >
                         <group>
                             <field
                                 name="accredit_date"
-                                readonly="[('third_party_check_state', '!=', 'deposited')]"
+                                readonly="third_party_check_state != 'deposited'"
                             />
                             <field
                                 name="accredit_move_id"
-                                readonly="[('third_party_check_state', '!=', 'deposited')]"
+                                readonly="third_party_check_state != 'deposited'"
                             />
                         </group>
                     </group>
@@ -529,8 +527,8 @@
                             <field name="debit_note_id" readonly="1" />
                             <field
                                 name="reject_date"
-                                invisible="[('third_party_check_state', '!=', 'rejected')]"
-                                readonly="[('third_party_check_state', '!=', 'in_wallet')]"
+                                invisible="third_party_check_state != 'rejected'"
+                                readonly="third_party_check_state != 'in_wallet'"
                             />
                         </group>
                     </group>
@@ -631,7 +629,7 @@
         <field name="name">Third Party Checks</field>
         <field name="res_model">account.check</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('internal_type', '=', 'third_party')]</field>
+        <field name="domain">internal_type == 'third_party'</field>
         <field name="search_view_id" ref="third_party_checks_filter" />
         <field
             name="view_ids"
@@ -645,7 +643,7 @@
         <field name="name">Third Checks by Payment Date</field>
         <field name="res_model">account.check</field>
         <field name="view_mode">calendar,form</field>
-        <field name="domain">[('internal_type', '=', 'third_party')]</field>
+        <field name="domain">internal_type == 'third_party'</field>
         <field
             name="view_ids"
             eval="[(5, 0, 0),
@@ -658,7 +656,7 @@
         <field name="name">Third Checks by Issue Date</field>
         <field name="res_model">account.check</field>
         <field name="view_mode">calendar,form</field>
-        <field name="domain">[('internal_type', '=', 'third_party')]</field>
+        <field name="domain">internal_type == 'third_party'</field>
         <field
             name="view_ids"
             eval="[(5, 0, 0),

@@ -26,7 +26,7 @@
                         <field name="company_id" />
                         <field name="homologation" />
                         <field name="url" />
-                        <span class="text-danger" invisible="[('homologation', '=', True)]">
+                        <span class="text-danger" invisible="homologation">
                             Homologation server disable. All AFIP requests will be sent to the real AFIP server.
                             Be sure that you are on Production server.
                         </span>
@@ -58,7 +58,7 @@
                                     }"
                                     class="oe_stat_button"
                                     icon="fa-download"
-                                    invisible="[('certificate', '=', False)]"
+                                    invisible="not certificate"
                                     name="download_file"
                                 >
                                     <div><strong>Download</strong></div>
@@ -85,7 +85,7 @@
                                     }"
                                     class="oe_stat_button"
                                     icon="fa-download"
-                                    invisible="[('key', '=', False)]"
+                                    invisible="not key"
                                     name="download_file"
                                 >
                                     <div><strong>Download</strong></div>
