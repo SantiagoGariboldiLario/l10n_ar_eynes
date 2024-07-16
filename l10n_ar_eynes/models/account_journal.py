@@ -233,14 +233,6 @@ class AccountJournal(models.Model):
         inverse='_inverse_nde_seq_number_next',
     )
 
-    @api.constrains('image')
-    def _check_image_type(self):
-        for record in self:
-            if record.image:
-                image_type = record.image_filename.split('.')[-1]
-                if image_type not in ['png', 'jpg', 'jpeg']:
-                    raise ValidationError(_("Only images are allowed."))
-
     @api.depends('type')
     def _compute_default_account_type(self):
         super(AccountJournal, self)._compute_default_account_type()
