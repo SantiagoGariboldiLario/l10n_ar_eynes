@@ -203,6 +203,7 @@ class AccountPaymentOrder(models.Model):
         comodel_name='res.currency',
         string='Currency',
         compute='_compute_default_journal_currency',
+        store=True
     )
     amount = fields.Float(
         string='Tax Amount',
@@ -844,15 +845,6 @@ class AccountPaymentOrder(models.Model):
         self._payment_rate()
         self.action_clean_lines()
 
-    # @api.depends('date')
-    # def _compute_period(self):
-    #     for rec in self:
-    #         if not rec.date:
-    #             continue
-    #         period_obj = rec.env['date.period']
-    #         period = period_obj._get_period(rec.date)
-    #         rec.period_id = period.id
-
     @api.onchange('date')
     def _payment_rate(self):
         rate = self.currency_id._get_rates(self.company_id, self.date)[
@@ -932,10 +924,6 @@ class AccountPaymentOrder(models.Model):
 
     def get_payment_lines_amount(self):
         return sum(self.payment_mode_line_ids.mapped('amount'))
-
-    # def payment_order_amount_hook(self):
-    #     amount = self.get_payment_lines_amount()
-    #     return amount
 
     @api.onchange('payment_mode_line_ids')
     def onchange_payment_line(self):
@@ -1070,6 +1058,7 @@ class AccountPaymentOrder(models.Model):
                 'date_due': line.date_maturity,
                 'amount_unreconciled': amount_unreconciled,
                 'currency_id': self.currency_id.id,
+                'original_currency_id': self.company_id.currency_id.id,
                 'type': lines_type,
             }
             res.append(line_data)
@@ -1498,9 +1487,7 @@ class AccountPaymentOrder(models.Model):
             'move_id': move_id,
             'journal_id': self.journal_id.id,
             'partner_id': self.partner_id.id,
-            'currency_id': company_currency != current_currency
-            and current_currency.id
-            or False,
+            'currency_id': current_currency.id,
             'amount_currency': company_currency != current_currency
             and sign * amount_currency
             or 0.0,
@@ -1749,26 +1736,17 @@ class AccountPaymentOrder(models.Model):
                             "pay is not valid anymore."
                         )
                     )
-                # currency_rate_difference = (
-                # line.move_line_id.amount_residual - amount)
-            move_line_analytic_account_id = (
-                line.account_analytic_id
-                and line.account_analytic_id.id
-                or False
-            )
+
             move_line = {
                 'journal_id': self.journal_id.id,
                 'name': line.name or '/',
                 'account_id': line.account_id.id,
                 'move_id': move_id,
                 'partner_id': self.partner_id.id,
-                'currency_id': line.original_currency_id != company_currency
-                and line.original_currency_id.id
-                or False,
+                'currency_id': line.original_currency_id.id,
                 'amount_currency': line.amount_currency
                 and line.amount_currency * sign * -1
                 or 0,
-                'analytic_account_id': move_line_analytic_account_id,
                 'quantity': 1,
                 'credit': 0.0,
                 'debit': 0.0,
@@ -1811,9 +1789,6 @@ class AccountPaymentOrder(models.Model):
                 'move_id': move_id,
                 'partner_id': self.partner_id.id,
                 'currency_id': False,
-                'analytic_account_id': line.account_analytic_id
-                and line.account_analytic_id.id
-                or False,
                 'quantity': 1,
                 'credit': 0.0,
                 'debit': 0.0,
@@ -1872,12 +1847,7 @@ class AccountPaymentOrder(models.Model):
                     sign * -1 * self.writeoff_amount / self.payment_rate
                 )
                 or 0.0,
-                'currency_id': company_currency != current_currency
-                and current_currency.id
-                or False,
-                'analytic_account_id': self.analytic_id
-                and self.analytic_id.id
-                or False,
+                'currency_id': current_currency.id,
             }
         return move_line
 
@@ -2102,13 +2072,11 @@ class AccountPaymentOrderLine(models.Model):
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         string='Currency',
-        compute='_compute_currency_id',
         readonly=True,
     )
     original_currency_id = fields.Many2one(
         comodel_name='res.currency',
         string='Currency',
-        compute='_compute_currency_id',
         readonly=True,
     )
     invoice_id = fields.Many2one(
@@ -2155,16 +2123,6 @@ class AccountPaymentOrderLine(models.Model):
             line.amount_unreconciled_currency = (
                 sign * move_line.amount_residual_currency
             )
-
-    def _compute_currency_id(self):
-        for line in self:
-            line.original_currency_id = (
-                line.payment_order_id.currency_id
-                or line.payment_order_id.company_currency
-            )
-            if line.payment_order_id:
-                # line.currency_id = line.payment_order_id.currency_id
-                line.currency_id = line.payment_order_id.company_currency
 
     @api.onchange('reconcile')
     def amount_full_conciliation(self):

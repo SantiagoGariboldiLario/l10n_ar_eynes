@@ -168,16 +168,15 @@
                                 <tree editable="bottom" decoration-muted="amount == 0">
                                     <field
                                         name="payment_mode_id"
-                                        invisible="0"
                                         required="True"
                                         domain="[('type', 'in', ['cash', 'bank']), ('company_id', '=', parent.company_id),
                                         '|',('currency_id', '=', False), ('currency_id', '=', parent.currency_id)]"
                                     />
-                                    <field name="name" invisible="1" />
+                                    <field name="name" column_invisible="1" />
                                     <field name="date" />
-                                    <field name="payment_order_id" invisible="1" />
-                                    <field name="name" invisible="0" />
-                                    <field name="company_currency" invisible="1" readonly="1" />
+                                    <field name="payment_order_id" column_invisible="1" />
+                                    <field name="name" />
+                                    <field name="company_currency" column_invisible="1" readonly="1" />
                                     <field
                                         name="amount"
                                         sum="Total"
@@ -189,7 +188,7 @@
                                         readonly="1"
                                         force_save="1"
                                         groups="base.group_multi_currency"
-                                        invisible="True"
+                                        column_invisible="True"
                                     />
                                     <field
                                         name="amount_currency"
@@ -228,8 +227,8 @@
                                     decoration-muted="amount == 0"
                                     decoration-success="amount == amount_unreconciled"
                                 >
-                                    <field name="move_invoice_id" invisible="1" />
-                                    <field name="state" invisible="1" />
+                                    <field name="move_invoice_id" column_invisible="1" />
+                                    <field name="state" column_invisible="1" />
                                     <field
                                         name="invoice_id"
                                         force_save="true"
@@ -261,8 +260,8 @@
                                     />
                                     <field name="date_original" readonly="1" force_save="True" />
                                     <field name="date_due" readonly="1" force_save="True" />
-                                    <field name="currency_id" invisible="1" />
-                                    <field name="original_currency_id" invisible="1" />
+                                    <field name="currency_id" column_invisible="1" />
+                                    <field name="original_currency_id" column_invisible="1" />
                                     <field
                                         name="amount_original"
                                         readonly="1"
@@ -335,9 +334,9 @@
                                     decoration-muted="amount == 0"
                                     decoration-success="amount == amount_unreconciled"
                                 >
-                                    <field name="type" invisible="1" />
-                                    <field name="move_invoice_id" invisible="1" />
-                                    <field name="original_currency_id" invisible="1" />
+                                    <field name="type" column_invisible="1" />
+                                    <field name="move_invoice_id" column_invisible="1" />
+                                    <field name="original_currency_id" column_invisible="1" />
                                     <field name="state" invisible="1" />
                                     <field
                                         name="invoice_id"
@@ -365,7 +364,7 @@
                                     />
                                     <field name="date_original" readonly="1" force_save="True" />
                                     <field name="date_due" readonly="1" force_save="True" />
-                                    <field name="currency_id" invisible="1" />
+                                    <field name="currency_id" column_invisible="1" />
                                     <field
                                         name="amount_original"
                                         readonly="1"
@@ -452,12 +451,12 @@
                                     <field name="source_partner_id" invisible="1" />
                                     <group>
                                         <group>
-                                            <field name="source_payment_order_id" invisible="1" />
+                                            <field name="source_payment_order_id" column_invisible="1" />
                                             <field
                                                 name="journal_id"
                                                 domain="[('type', '=', 'third_party_checks')]"
                                             />
-                                            <field name="internal_type" invisible="1" />
+                                            <field name="internal_type" column_invisible="1" />
                                             <field name="number" />
                                             <field name="type" />
                                             <field name="checkbook_format" />
@@ -523,21 +522,21 @@
                                 readonly="not disable_retentions or state != 'draft'"
                             >
                                 <tree>
-                                    <field name="currency_id" invisible="1" />
-                                    <field name="name" invisible="1" />
-                                    <field name="state_id" invisible="1" />
+                                    <field name="currency_id" column_invisible="1" />
+                                    <field name="name" column_invisible="1" />
+                                    <field name="state_id" column_invisible="1" />
                                     <field name="date" />
                                     <field name="retention_id" string="Retention Type" />
-                                    <field name="taxapp_id" invisible="1" />
+                                    <field name="taxapp_id" column_invisible="1" />
                                     <field name="date_applied" />
                                     <field name="concept_id" />
                                     <field name="invoice_ref" />
-                                    <field name="invoice_id" invisible="1" />
-                                    <field name="manual" invisible="1" />
-                                    <field name="reg_code" invisible="1" />
-                                    <field name="excluded_percent" invisible="1" />
-                                    <field name="exclusion_date_certificate" invisible="1" />
-                                    <field name="partner_id" invisible="1" />
+                                    <field name="invoice_id" column_invisible="1" />
+                                    <field name="manual" column_invisible="1" />
+                                    <field name="reg_code" column_invisible="1" />
+                                    <field name="excluded_percent" column_invisible="1" />
+                                    <field name="exclusion_date_certificate" column_invisible="1" />
+                                    <field name="partner_id" column_invisible="1" />
                                     <field name="certificate_no" />
                                     <field name="base" />
                                     <field name="base_amount" />
@@ -554,7 +553,7 @@
                                         options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                     />
-                                    <field name="account_id" invisible="1" />
+                                    <field name="account_id" column_invisible="1" />
                                 </tree>
                                 <form>
                                     <h1>
@@ -566,7 +565,7 @@
                                     </h1>
                                     <group>
                                         <group string="Information" name="info">
-                                            <field name="state_id" invisible="1" />
+                                            <field name="state_id" column_invisible="1" />
                                             <field
                                                 name="retention_id"
                                                 domain="[('type', '=', 'retentions'),('type_tax_use', '=', 'sale')]"
@@ -825,7 +824,6 @@
                                 <tree editable="bottom" decoration-muted="amount == 0">
                                     <field
                                         name="payment_mode_id"
-                                        invisible="0"
                                         required="True"
                                         domain="[('type', 'in', ['cash', 'bank']),
                                         ('company_id', '=', parent.company_id),
@@ -833,9 +831,9 @@
                                         ]"
                                     />
                                     <field name="date" />
-                                    <field name="payment_order_id" invisible="1" />
-                                    <field name="name" invisible="0" />
-                                    <field name="company_currency" invisible="1" readonly="1" />
+                                    <field name="payment_order_id" column_invisible="1" />
+                                    <field name="name" />
+                                    <field name="company_currency" column_invisible="1" readonly="1" />
                                     <field
                                         name="amount"
                                         sum="Total"
@@ -847,7 +845,7 @@
                                         readonly="1"
                                         force_save="1"
                                         groups="base.group_multi_currency"
-                                        invisible="True"
+                                        column_invisible="True"
                                     />
                                     <field
                                         name="amount_currency"
@@ -886,9 +884,9 @@
                                     decoration-muted="amount == 0"
                                     decoration-success="amount == amount_unreconciled"
                                 >
-                                    <field name="type" invisible="1" />
-                                    <field name="move_invoice_id" invisible="1" />
-                                    <field name="state" invisible="1" />
+                                    <field name="type" column_invisible="1" />
+                                    <field name="move_invoice_id" column_invisible="1" />
+                                    <field name="state" column_invisible="1" />
                                     <field
                                         name="invoice_id"
                                         force_save="true"
@@ -920,8 +918,8 @@
                                     />
                                     <field name="date_original" readonly="1" force_save="True" />
                                     <field name="date_due" readonly="1" force_save="True" />
-                                    <field name="currency_id" invisible="1" />
-                                    <field name="original_currency_id" invisible="1" />
+                                    <field name="currency_id" column_invisible="1" />
+                                    <field name="original_currency_id" column_invisible="1" />
                                     <field
                                         name="amount_original"
                                         readonly="1"
@@ -994,8 +992,8 @@
                                     decoration-muted="amount == 0"
                                     decoration-success="amount == amount_unreconciled"
                                 >
-                                    <field name="move_invoice_id" invisible="1" />
-                                    <field name="state" invisible="1" />
+                                    <field name="move_invoice_id" column_invisible="1" />
+                                    <field name="state" column_invisible="1" />
                                     <field
                                         name="invoice_id"
                                         force_save="true"
@@ -1027,8 +1025,8 @@
                                     />
                                     <field name="date_original" readonly="1" force_save="True" />
                                     <field name="date_due" readonly="1" force_save="True" />
-                                    <field name="currency_id" invisible="1" />
-                                    <field name="original_currency_id" invisible="1" />
+                                    <field name="currency_id" column_invisible="1" />
+                                    <field name="original_currency_id" column_invisible="1" />
                                     <field
                                         name="amount_original"
                                         readonly="1"
@@ -1044,7 +1042,7 @@
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
                                     />
-                                    <field name="reconcile" readonly="1" force_save="True" invisible="1" />
+                                    <field name="reconcile" readonly="1" force_save="True" column_invisible="1" />
                                     <field
                                         name="amount"
                                         sum="Total Allocation"
@@ -1176,7 +1174,7 @@
                                 context="{'tree_view_ref': 'l10n_ar_eynes.account_third_party_check_view_tree'}"
                             >
                                 <tree>
-                                    <field name="currency_id" invisible="1" />
+                                    <field name="currency_id" column_invisible="1" />
                                     <field name="number" />
                                     <field name="source_partner_id" />
                                     <field name="issue_date" />
@@ -1191,7 +1189,7 @@
                                         column_invisible="not parent.is_multi_currency"
                                         sum="Total Amount"
                                     />
-                                    <field name="third_party_check_state" invisible="1" />
+                                    <field name="third_party_check_state" column_invisible="1" />
                                 </tree>
                             </field>
                         </page>
@@ -1204,21 +1202,21 @@
                                 readonly="not disable_retentions or state != 'draft'"
                             >
                                 <tree>
-                                    <field name="currency_id" invisible="1" />
-                                    <field name="name" invisible="1" />
-                                    <field name="state_id" invisible="1" />
+                                    <field name="currency_id" column_invisible="1" />
+                                    <field name="name" column_invisible="1" />
+                                    <field name="state_id" column_invisible="1" />
                                     <field name="date" />
                                     <field name="retention_id" string="Retention Type" />
-                                    <field name="taxapp_id" invisible="1" />
+                                    <field name="taxapp_id" column_invisible="1" />
                                     <field name="date_applied" />
                                     <field name="concept_id" />
                                     <field name="invoice_ref" />
-                                    <field name="invoice_id" invisible="1" />
-                                    <field name="manual" invisible="1" />
-                                    <field name="reg_code" invisible="1" />
-                                    <field name="excluded_percent" invisible="1" />
-                                    <field name="exclusion_date_certificate" invisible="1" />
-                                    <field name="partner_id" invisible="1" />
+                                    <field name="invoice_id" column_invisible="1" />
+                                    <field name="manual" column_invisible="1" />
+                                    <field name="reg_code" column_invisible="1" />
+                                    <field name="excluded_percent" column_invisible="1" />
+                                    <field name="exclusion_date_certificate" column_invisible="1" />
+                                    <field name="partner_id" column_invisible="1" />
                                     <field name="certificate_no" />
                                     <field name="base" />
                                     <field name="base_amount" />
@@ -1235,7 +1233,7 @@
                                         options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                     />
-                                    <field name="account_id" invisible="1" />
+                                    <field name="account_id" column_invisible="1" />
                                 </tree>
                                 <form>
                                     <h1>
@@ -1283,7 +1281,7 @@
                                     >
                                         <field name="retention_move_line_ids">
                                             <tree>
-                                                <field name="payment_order_line_id" invisible="1" />
+                                                <field name="payment_order_line_id" column_invisible="1" />
                                                 <field name="payment_order_reference" string="OP reference" />
                                                 <field name="move_name" string="Name" force_save="1" />
                                                 <field name="move_type" string="Type" force_save="1" />
