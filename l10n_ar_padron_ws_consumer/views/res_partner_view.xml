@@ -17,14 +17,12 @@
                 <field name="coeficient" />
                 <field name="coeficient_percent" />
                 <field name="risk" />
-                <field name="period" widget='month_year_format' />
             </xpath>
 
             <xpath
                 expr="//field[@name='retention_ids']/tree/field[@name='percent']"
                 position="before"
             >
-                <field name="period" widget='month_year_format' />
             </xpath>
 
         </field>

@@ -536,6 +536,7 @@ class ResPartnerRetention(models.Model):
     percent = fields.Float(
         string='Percent', compute='_compute_retention_percent', store=True
     )
+    period = fields.Date()
     excluded_percent = fields.Float('Percentage of Exclusion')
     ex_date_from = fields.Date('From date')
     ex_date_to = fields.Date('To date')
@@ -661,6 +662,7 @@ class ResPartnerPerception(models.Model):
     )
     activity_id = fields.Many2one('perception.activity', 'Activity')
     percent = fields.Float('Percent', required=True)
+    period = fields.Date()
     excluded_percent = fields.Float('Percentage of Exclusion')
     ex_date_from = fields.Date('From date')
     ex_date_to = fields.Date('To date')

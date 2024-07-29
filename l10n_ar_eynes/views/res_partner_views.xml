@@ -58,6 +58,7 @@
                         <tree editable="bottom">
                             <field name="perception_id" domain="[('type_tax_use','=','sale')]" />
                             <field name="activity_id" />
+                            <field name="period" widget='month_year_format' />
                             <field name="percent" />
                             <field name="excluded_percent" />
                             <field name="ex_date_from" />
@@ -85,6 +86,7 @@
                     <field name="retention_ids" nolabel="1">
                         <tree editable="bottom">
                             <field name="retention_id" domain="[('type_tax_use','=','purchase')]" />
+                            <field name="period" widget='month_year_format' />
                             <field name="percent" />
                             <field name="excluded_percent" />
                             <field name="ex_date_from" />

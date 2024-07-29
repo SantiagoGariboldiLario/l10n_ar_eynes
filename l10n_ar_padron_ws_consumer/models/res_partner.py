@@ -15,7 +15,6 @@ _logger = logging.getLogger(__name__)
 class ResPartnerPerception(models.Model):
     _inherit = "res.partner.perception"
 
-    period = fields.Date()
     coeficient = fields.Float(digits=(12, 4))
     coeficient_percent = fields.Float(digits=(12, 2))
     risk = fields.Selection(
@@ -43,7 +42,6 @@ class ResPartnerPerception(models.Model):
 class ResPartnerRetention(models.Model):
     _inherit = "res.partner.retention"
 
-    period = fields.Date()
     is_multilateral = fields.Boolean()
 
     _sql_constraints = [
