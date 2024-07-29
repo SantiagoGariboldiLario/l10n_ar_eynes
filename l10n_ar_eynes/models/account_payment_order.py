@@ -1761,7 +1761,7 @@ class AccountPaymentOrder(models.Model):
                         'account_tax_id': self.tax_id.id,
                     }
                 )
-            
+
             if line.move_line_id.id:
                 rec_lst_ids.append(move_line)
 
