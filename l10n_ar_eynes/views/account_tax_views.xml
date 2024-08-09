@@ -50,7 +50,7 @@
                         </group>
                     </group>
 
-                    <group colspan="4" col="6" string="Tax Application">
+                    <group col="6" string="Tax Application">
                         <field name="retention_type" />
                         <field name="apply_custom_code" />
                         <field
@@ -105,7 +105,7 @@
                         <field
                             name="gi_application_ids"
                             nolabel="1"
-                            colspan="4"
+                            colspan="6"
                             invisible="retention_type != 'gross_income' or apply_custom_code"
                             context="{'default_type':'gross_income'}"
                         >
@@ -148,7 +148,7 @@
                         <field
                             name="profit_application_ids"
                             nolabel="1"
-                            colspan="4"
+                            colspan="6"
                             invisible="retention_type != 'profit' or apply_custom_code"
                             context="{'default_type':'profit'}"
                         >
@@ -229,7 +229,7 @@
                         </group>
                     </group>
 
-                    <group colspan="4" col="6" string="Tax Application">
+                    <group col="6" string="Tax Application">
                         <field name="retention_type" />
                         <field name="apply_custom_code" />
                         <separator name="tax_application" />
@@ -242,27 +242,32 @@
                             nolabel="1"
                         />
                         <field
-                            name="perc_vat_application_ids"
+                            name="perception_application_ids"
                             nolabel="1"
                             colspan="6"
-                            invisible="retention_type != 'vat' or apply_custom_code"
-                            context="{'default_type':'vat'}"
+                            invisible="apply_custom_code"
+                            context="{'default_perception_tax_id': id}"
                         >
                             <tree>
+                                <field name="perception_tax_id" column_invisible="True" />
                                 <field name="reg_code" />
-                                <field name="concept_id" />
-                                <field name="activity_id" />
+                                <field name="concept_id_domain" column_invisible="True"  />
+                                <field name="concept_id" domain="concept_id_domain" />
+                                <field name="activity_id_domain" column_invisible="True"  />
+                                <field name="activity_id" domain="activity_id_domain" />
                                 <field name="tax_allowance" />
                                 <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
                                 <field name="percent" />
-                                <field name="type" invisible="1" />
                             </tree>
                             <form string="VAT Tax Application">
                                 <group>
-                                    <field name="concept_id" domain="[('type', '=', 'vat')]" />
-                                    <field name="activity_id" domain="[('type', '=', 'vat')]" />
+                                    <field name="perception_tax_id" invisible="True" />
+                                    <field name="concept_id_domain" invisible="True"  />
+                                    <field name="concept_id" domain="concept_id_domain" />
+                                    <field name="activity_id_domain" invisible="True"  />
+                                    <field name="activity_id" domain="activity_id_domain" />
                                     <field name="tax_allowance" />
                                     <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
@@ -270,80 +275,10 @@
                                     <field name="percent" />
                                     <field name="name" />
                                     <field name="reg_code" />
-                                    <field name="type" invisible="1" />
-                                </group>
-                            </form>
-                        </field>
-                        <field
-                            name="perc_gi_application_ids"
-                            nolabel="1"
-                            colspan="4"
-                            invisible="retention_type != 'gross_income' or apply_custom_code"
-                            context="{'default_type':'gross_income'}"
-                        >
-                            <tree>
-                                <field name="reg_code" />
-                                <field name="concept_id" />
-                                <field name="activity_id" />
-                                <field name="tax_allowance" />
-                                <field name="exclude_tax_allowance" />
-                                <field name="calculation_base" required="1" />
-                                <field name="tax_minimum" />
-                                <field name="percent" />
-                                <field name="sit_iibb" />
-                                <field name="type" invisible="1" />
-                            </tree>
-                            <form string="Gross Income Tax Application">
-                                <group>
-                                    <field name="concept_id" domain="[('type', '=', 'gross_income')]" />
-                                    <field name="activity_id" domain="[('type', '=', 'gross_income')]" />
-                                    <field name="tax_allowance" />
-                                    <field name="exclude_tax_allowance" />
-                                    <field name="calculation_base" required="1" />
-                                    <field name="tax_minimum" />
-                                    <field name="percent" />
-                                    <field name="name" />
-                                    <field name="reg_code" />
-                                    <field name="sit_iibb" />
-                                    <field name="type" invisible="1" />
-                                </group>
-                            </form>
-                        </field>
-                        <field
-                            name="perc_profit_application_ids"
-                            nolabel="1"
-                            colspan="4"
-                            invisible="retention_type != 'profit' or apply_custom_code"
-                            context="{'default_type':'profit'}"
-                        >
-                            <tree>
-                                <field name="reg_code" />
-                                <field name="concept_id" />
-                                <field name="activity_id" />
-                                <field name="tax_allowance" />
-                                <field name="exclude_tax_allowance" />
-                                <field name="calculation_base" required="1" />
-                                <field name="tax_minimum" />
-                                <field name="percent" />
-                                <field name="type" invisible="1" />
-                            </tree>
-                            <form string="Profit Tax Application">
-                                <group>
-                                    <field name="concept_id" domain="[('type', '=', 'profit')]" />
-                                    <field name="activity_id" domain="[('type', '=', 'profit')]" />
-                                    <field name="tax_allowance" />
-                                    <field name="exclude_tax_allowance" />
-                                    <field name="calculation_base" required="1" />
-                                    <field name="tax_minimum" />
-                                    <field name="percent" />
-                                    <field name="name" />
-                                    <field name="reg_code" />
-                                    <field name="type" invisible="1" />
                                 </group>
                             </form>
                         </field>
                     </group>
-
                     <group string="Other information">
                         <group>
                             <field name="general_resolution" string="General Resolution Associated" />

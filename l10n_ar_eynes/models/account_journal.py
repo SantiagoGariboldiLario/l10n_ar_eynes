@@ -811,278 +811,278 @@ class AccountJournal(models.Model):
             _logger.info(msg)
         return retentions
 
-    def _get_taxapps(self, perception_data, account):
-        tax_app_obj = self.env['perception.tax.application']
-        sit_iibb = perception_data['sit_iibb']
-        activity_id = perception_data['activity_id']
+    # def _get_taxapps(self, perception_data, account):
+    #     tax_app_obj = self.env['perception.tax.application']
+    #     sit_iibb = perception_data['sit_iibb']
+    #     activity_id = perception_data['activity_id']
 
-        # Obtenemos la actividad configurada para esta Percepcion en el partner
-        activity = self.env['perception.activity'].browse(activity_id)
+    #     # Obtenemos la actividad configurada para esta Percepcion en el partner
+    #     activity = self.env['perception.activity'].browse(activity_id)
 
-        concepts = self._get_concepts_from_account(account, perception=self)
+    #     concepts = self._get_concepts_from_account(account, perception=self)
 
-        # Si algun concepto no esta sujeto a percepcion, continuamos
-        no_subject = False
-        for concept in concepts:
-            if concept and concept.no_subject:
-                no_subject = True
+    #     # Si algun concepto no esta sujeto a percepcion, continuamos
+    #     no_subject = False
+    #     for concept in concepts:
+    #         if concept and concept.no_subject:
+    #             no_subject = True
 
-        if no_subject:
-            return
+    #     if no_subject:
+    #         return
 
-        concept_name = ' '.join(map(lambda a: a.name, concepts))
-        activity_name = activity and activity.name or ''
-        concept_ids = concepts and list(map(lambda a: a.id, concepts)) or []
+    #     concept_name = ' '.join(map(lambda a: a.name, concepts))
+    #     activity_name = activity and activity.name or ''
+    #     concept_ids = concepts and list(map(lambda a: a.id, concepts)) or []
 
-        # Buscamos las taxapps que concuerden
-        tapp_domain = [
-            ('perception_tax_id', '=', self.tax_id.id),
-            ('concept_id', 'in', concept_ids),
-        ]
-        if activity:
-            tapp_domain.append(('activity_id', '=', activity and activity.id))
-        iibb_domain = []
+    #     # Buscamos las taxapps que concuerden
+    #     tapp_domain = [
+    #         ('perception_tax_id', '=', self.tax_id.id),
+    #         ('concept_id', 'in', concept_ids),
+    #     ]
+    #     if activity:
+    #         tapp_domain.append(('activity_id', '=', activity and activity.id))
+    #     iibb_domain = []
 
-        if self.type == 'gross_income':
-            iibb_domain.append(
-                ('sit_iibb', '=', sit_iibb.id if sit_iibb else False)
-            )
-        taxapps = tax_app_obj.search(tapp_domain + iibb_domain)
+    #     if self.type == 'gross_income':
+    #         iibb_domain.append(
+    #             ('sit_iibb', '=', sit_iibb.id if sit_iibb else False)
+    #         )
+    #     taxapps = tax_app_obj.search(tapp_domain + iibb_domain)
 
-        # Si no se encuentra con la situacion de iibb,
-        # buscamos normalmente, aplica regla general
-        if not taxapps:
-            tapp_domain.append(('sit_iibb', '=', False))
-            taxapps = tax_app_obj.search(tapp_domain)
+    #     # Si no se encuentra con la situacion de iibb,
+    #     # buscamos normalmente, aplica regla general
+    #     if not taxapps:
+    #         tapp_domain.append(('sit_iibb', '=', False))
+    #         taxapps = tax_app_obj.search(tapp_domain)
 
-        if not taxapps:
-            raise ValidationError(
-                _(
-                    "Perception Error!\n"
-                    "There is no configured a Perception Application (%(perc_name)s) "
-                    "that corresponds to\nActivity: %(activity_name)s\n"
-                    "Concept: %(concept_name)s\n for "
-                    "the Account %(acc_name)s",
-                    perc_name=self.name,
-                    activity_name=activity_name,
-                    concept_name=concept_name,
-                    acc_name=account.name,
-                )
-            )
+    #     if not taxapps:
+    #         raise ValidationError(
+    #             _(
+    #                 "Perception Error!\n"
+    #                 "There is no configured a Perception Application (%(perc_name)s) "
+    #                 "that corresponds to\nActivity: %(activity_name)s\n"
+    #                 "Concept: %(concept_name)s\n for "
+    #                 "the Account %(acc_name)s",
+    #                 perc_name=self.name,
+    #                 activity_name=activity_name,
+    #                 concept_name=concept_name,
+    #                 acc_name=account.name,
+    #             )
+    #         )
 
-        if len(taxapps) > 1:
-            raise ValidationError(
-                _(
-                    "Perception Error!\n"
-                    "There is more than one Perception Application (%(perc_name)s) "
-                    "that corresponds to\nActivity: %(activity_name)s\n"
-                    "Concept: %(concept_name)s\n for "
-                    "the Account %(acc_name)s",
-                    perc_name=self.name,
-                    activity_name=activity_name,
-                    concept_name=concept_name,
-                    acc_name=account.name,
-                )
-            )
-        return taxapps
+    #     if len(taxapps) > 1:
+    #         raise ValidationError(
+    #             _(
+    #                 "Perception Error!\n"
+    #                 "There is more than one Perception Application (%(perc_name)s) "
+    #                 "that corresponds to\nActivity: %(activity_name)s\n"
+    #                 "Concept: %(concept_name)s\n for "
+    #                 "the Account %(acc_name)s",
+    #                 perc_name=self.name,
+    #                 activity_name=activity_name,
+    #                 concept_name=concept_name,
+    #                 acc_name=account.name,
+    #             )
+    #         )
+    #     return taxapps
 
-    def _prepare_perception_vals(
-        self, concept_id, vals, origin, origin_vals=None
-    ):
-        origin_vals = origin_vals or {}
-        taxapp = vals.get('tax_app_id', False)
-        invoice = False
-        if origin and origin._name == 'account.move':
-            invoice = origin
-        return {
-            'name': self.name,
-            'concept_id': concept_id,
-            'invoice_id': invoice.id if invoice else False,
-            'base': vals['base'],
-            'amount': vals['amount'],
-            'manual': False,  # La creamos por sistema
-            'reg_code': vals['reg_code'],
-            'tax_app_id': taxapp.id if taxapp else taxapp,
-            'perception_id': self.id,
-            'state_id': self.state_id and self.state_id.id or False,
-            'partner_id': invoice.partner_id.id if invoice else False,
-        }
+    # def _prepare_perception_vals(
+    #     self, concept_id, vals, origin, origin_vals=None
+    # ):
+    #     origin_vals = origin_vals or {}
+    #     taxapp = vals.get('tax_app_id', False)
+    #     invoice = False
+    #     if origin and origin._name == 'account.move':
+    #         invoice = origin
+    #     return {
+    #         'name': self.name,
+    #         'concept_id': concept_id,
+    #         'invoice_id': invoice.id if invoice else False,
+    #         'base': vals['base'],
+    #         'amount': vals['amount'],
+    #         'manual': False,  # La creamos por sistema
+    #         'reg_code': vals['reg_code'],
+    #         'tax_app_id': taxapp.id if taxapp else taxapp,
+    #         'perception_id': self.id,
+    #         'state_id': self.state_id and self.state_id.id or False,
+    #         'partner_id': invoice.partner_id.id if invoice else False,
+    #     }
 
-    @api.model
-    def compute_perception(
-        self,
-        perception_data,
-        partner,
-        origin,
-        origin_vals=None,
-        address_shipping=False,
-    ):
-        origin_vals = origin_vals or {}
-        perception_id = perception_data['perception']
-        # Chequeamos si la Percepcion tiene seteado un state_id, que coincida
-        # con el state_id de la direccion de entrega del partner.
-        # Sino no se realiza la Percepcion
-        partner_model = self.env['res.partner']
-        destination_shipping = address_shipping or partner_model.browse(
-            partner.address_get(['delivery']).get('delivery')
-        )
-        source_shipping = self.env.user.company_id.partner_id
-        applicable = perception_id.check_applicable(
-            sit_iibb=perception_data['sit_iibb'],
-            from_padron=perception_data['from_padron'],
-            source_shipping_id=source_shipping,
-            destination_shipping_id=destination_shipping,
-        )
-        if not applicable:
-            return None
+    # @api.model
+    # def compute_perception(
+    #     self,
+    #     perception_data,
+    #     partner,
+    #     origin,
+    #     origin_vals=None,
+    #     address_shipping=False,
+    # ):
+    #     origin_vals = origin_vals or {}
+    #     perception_id = perception_data['perception']
+    #     # Chequeamos si la Percepcion tiene seteado un state_id, que coincida
+    #     # con el state_id de la direccion de entrega del partner.
+    #     # Sino no se realiza la Percepcion
+    #     partner_model = self.env['res.partner']
+    #     destination_shipping = address_shipping or partner_model.browse(
+    #         partner.address_get(['delivery']).get('delivery')
+    #     )
+    #     source_shipping = self.env.user.company_id.partner_id
+    #     applicable = perception_id.check_applicable(
+    #         sit_iibb=perception_data['sit_iibb'],
+    #         from_padron=perception_data['from_padron'],
+    #         source_shipping_id=source_shipping,
+    #         destination_shipping_id=destination_shipping,
+    #     )
+    #     if not applicable:
+    #         return None
 
-        new_perception_lst = []
-        if perception_id.tax_id.apply_custom_code:
-            self.env['perception.tax.line']
+    #     new_perception_lst = []
+    #     if perception_id.tax_id.apply_custom_code:
+    #         self.env['perception.tax.line']
 
-            perceptions = perception_id.tax_id._get_taxapps_from_code(
-                perception_data,
-                partner,
-                origin,
-                origin_vals=origin_vals,
-            )
+    #         perceptions = perception_id.tax_id._get_taxapps_from_code(
+    #             perception_data,
+    #             partner,
+    #             origin,
+    #             origin_vals=origin_vals,
+    #         )
 
-            for perception_vals in perceptions:
-                concept_id = perception_vals.get('concept_id')
-                if not concept_id:
-                    raise ValidationError(
-                        _(
-                            "Concept must be setted in python code. Perception %s"
-                        )
-                        % perception_id.name
-                    )
+    #         for perception_vals in perceptions:
+    #             concept_id = perception_vals.get('concept_id')
+    #             if not concept_id:
+    #                 raise ValidationError(
+    #                     _(
+    #                         "Concept must be setted in python code. Perception %s"
+    #                     )
+    #                     % perception_id.name
+    #                 )
 
-                if (
-                    perception_vals.get('amount', 0.0) == 0.0
-                    and perception_id.tax_id.state_id.code != 'R'
-                ):
-                    continue
+    #             if (
+    #                 perception_vals.get('amount', 0.0) == 0.0
+    #                 and perception_id.tax_id.state_id.code != 'R'
+    #             ):
+    #                 continue
 
-                # Creamos la percepcion.tax.line
-                perception_line_vals = perception_id._prepare_perception_vals(
-                    concept_id,
-                    perception_vals,
-                    origin,
-                    origin_vals=origin_vals,
-                )
-                new_perception_lst.append(perception_line_vals)
-            return new_perception_lst
+    #             # Creamos la percepcion.tax.line
+    #             perception_line_vals = perception_id._prepare_perception_vals(
+    #                 concept_id,
+    #                 perception_vals,
+    #                 origin,
+    #                 origin_vals=origin_vals,
+    #             )
+    #             new_perception_lst.append(perception_line_vals)
+    #         return new_perception_lst
 
-        # Chequeamos las percepciones a aplicar que matchean
-        # (esto corresponde a una percepcion pero que pueden
-        # existir varios conceptos y/o actividades)
-        perceptions = origin._compute_base_perception(
-            perception_id,
-            perception_data,
-            origin_vals=origin_vals,
-        )
-        # Creamos las lineas de percepcion
-        self.env['perception.tax.line']
-        for concept_id, vals in perceptions.items():
-            # Aplicamos la percepcion por Concepto
-            taxapp = vals['tax_app_id']
+    #     # Chequeamos las percepciones a aplicar que matchean
+    #     # (esto corresponde a una percepcion pero que pueden
+    #     # existir varios conceptos y/o actividades)
+    #     perceptions = origin._compute_base_perception(
+    #         perception_id,
+    #         perception_data,
+    #         origin_vals=origin_vals,
+    #     )
+    #     # Creamos las lineas de percepcion
+    #     self.env['perception.tax.line']
+    #     for concept_id, vals in perceptions.items():
+    #         # Aplicamos la percepcion por Concepto
+    #         taxapp = vals['tax_app_id']
 
-            base, amount = taxapp.apply_perception(vals, perception_data)
+    #         base, amount = taxapp.apply_perception(vals, perception_data)
 
-            if amount == 0.0:
-                continue
+    #         if amount == 0.0:
+    #             continue
 
-            vals['amount'] = amount
-            vals['base'] = base
+    #         vals['amount'] = amount
+    #         vals['base'] = base
 
-            # Creamos la percepcion.tax.line
-            perception_line_vals = perception_id._prepare_perception_vals(
-                concept_id,
-                vals,
-                origin,
-                origin_vals=origin_vals,
-            )
-            new_perception_lst.append(perception_line_vals)
-        return new_perception_lst
+    #         # Creamos la percepcion.tax.line
+    #         perception_line_vals = perception_id._prepare_perception_vals(
+    #             concept_id,
+    #             vals,
+    #             origin,
+    #             origin_vals=origin_vals,
+    #         )
+    #         new_perception_lst.append(perception_line_vals)
+    #     return new_perception_lst
 
-    @api.model
-    def get_applicable_perceptions(
-        self,
-        partner,
-        origin,
-        origin_vals=False,
-        date=False,
-        address_shipping=False,
-    ):
-        """
-        Compute and get perceptions from partner and date
-        Use origin and origin_vals to compute percepction with custom values
+    # @api.model
+    # def get_applicable_perceptions(
+    #     self,
+    #     partner,
+    #     origin,
+    #     origin_vals=False,
+    #     date=False,
+    #     address_shipping=False,
+    # ):
+    #     """
+    #     Compute and get perceptions from partner and date
+    #     Use origin and origin_vals to compute percepction with custom values
 
-        `origin_vals` will be used when calling the origin
-        functions to have a reference in case origin is an unregistered instance.
+    #     `origin_vals` will be used when calling the origin
+    #     functions to have a reference in case origin is an unregistered instance.
 
-        @param partner:  Partner
-        @type  partner:  res.partner
+    #     @param partner:  Partner
+    #     @type  partner:  res.partner
 
-        @param origin:  instance to origin model or record
-        @type  origin:  odoo.model
+    #     @param origin:  instance to origin model or record
+    #     @type  origin:  odoo.model
 
-        @param origin_vals: values to compute perceptions
-        @type  origin_vals:  dict
+    #     @param origin_vals: values to compute perceptions
+    #     @type  origin_vals:  dict
 
-        @return:  Perceptions vals
-        @rtype :  dict
-        """
-        origin_vals = origin_vals or {}
-        # Calculamos cada Percepcion configurada en el Partner
-        partner_perceptions = partner._get_perceptions_to_apply(
-            date or datetime.date.today()
-        )
-        perception_lst = []
-        for partner_perc in partner_perceptions.values():
-            excluded_percent = partner_perc['excluded_percent']
+    #     @return:  Perceptions vals
+    #     @rtype :  dict
+    #     """
+    #     origin_vals = origin_vals or {}
+    #     # Calculamos cada Percepcion configurada en el Partner
+    #     partner_perceptions = partner._get_perceptions_to_apply(
+    #         date or datetime.date.today()
+    #     )
+    #     perception_lst = []
+    #     for partner_perc in partner_perceptions.values():
+    #         excluded_percent = partner_perc['excluded_percent']
 
-            # Chequeamos las fechas de eximision
-            vdate = date or datetime.date.today()
+    #         # Chequeamos las fechas de eximision
+    #         vdate = date or datetime.date.today()
 
-            first_day_of_year = datetime.date.min.replace(
-                year=datetime.date.today().year
-            )
-            last_day_of_year = datetime.date.max.replace(
-                year=datetime.date.today().year
-            )
-            date_from = first_day_of_year
-            date_to = last_day_of_year
-            if partner_perc['ex_date_from']:
-                date_from = partner_perc['ex_date_from']
-            if partner_perc['ex_date_to']:
-                date_to = partner_perc['ex_date_to']
+    #         first_day_of_year = datetime.date.min.replace(
+    #             year=datetime.date.today().year
+    #         )
+    #         last_day_of_year = datetime.date.max.replace(
+    #             year=datetime.date.today().year
+    #         )
+    #         date_from = first_day_of_year
+    #         date_to = last_day_of_year
+    #         if partner_perc['ex_date_from']:
+    #             date_from = partner_perc['ex_date_from']
+    #         if partner_perc['ex_date_to']:
+    #             date_to = partner_perc['ex_date_to']
 
-            # TODO: Chequear cuando solo se llena uno de las dos fechas
-            if (not date_from and not date_to) or (
-                vdate >= date_from and vdate <= date_to
-            ):
-                if excluded_percent > 1.0 or excluded_percent < 0.0:
-                    raise ValidationError(
-                        _(
-                            "Perception Configuration Error!\n"
-                            + "Excluded percent configured has to be "
-                            + "between 0.0 and 1.0"
-                        )
-                    )
+    #         # TODO: Chequear cuando solo se llena uno de las dos fechas
+    #         if (not date_from and not date_to) or (
+    #             vdate >= date_from and vdate <= date_to
+    #         ):
+    #             if excluded_percent > 1.0 or excluded_percent < 0.0:
+    #                 raise ValidationError(
+    #                     _(
+    #                         "Perception Configuration Error!\n"
+    #                         + "Excluded percent configured has to be "
+    #                         + "between 0.0 and 1.0"
+    #                     )
+    #                 )
 
-                # Si esta totalmente eximido
-                if excluded_percent == 1.0:
-                    continue
-            else:
-                partner_perc['excluded_percent'] = 0.0
-            new_perception_lst = self.compute_perception(
-                partner_perc,
-                partner,
-                origin,
-                origin_vals=origin_vals,
-                address_shipping=address_shipping,
-            )
-            if new_perception_lst:
-                perception_lst.extend(new_perception_lst)
-        return perception_lst
+    #             # Si esta totalmente eximido
+    #             if excluded_percent == 1.0:
+    #                 continue
+    #         else:
+    #             partner_perc['excluded_percent'] = 0.0
+    #         new_perception_lst = self.compute_perception(
+    #             partner_perc,
+    #             partner,
+    #             origin,
+    #             origin_vals=origin_vals,
+    #             address_shipping=address_shipping,
+    #         )
+    #         if new_perception_lst:
+    #             perception_lst.extend(new_perception_lst)
+    #     return perception_lst

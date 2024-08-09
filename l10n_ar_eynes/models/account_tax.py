@@ -1,6 +1,6 @@
 import logging
 
-from odoo import _, api, exceptions, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools.safe_eval import safe_eval, wrap_module
 
@@ -19,7 +19,7 @@ def create_diff_html(diff):
 
 class AccountTax(models.Model):
     _name = 'account.tax'
-    _inherit = ['account.tax', 'mail.thread', 'mail.activity.mixin']
+    _inherit = 'account.tax'
 
     afip_code = fields.Char(string="AFIP Code", size=4)
     check_sit_iibb = fields.Boolean(
@@ -112,23 +112,10 @@ class AccountTax(models.Model):
         help="Check this if this Tax represent Tax Exempts",
     )
     # PERCEPTION FIELDS:
-    perc_vat_application_ids = fields.One2many(
+    perception_application_ids = fields.One2many(
         'perception.tax.application',
         'perception_tax_id',
-        'VAT Tax Application for Perceptions',
-        domain=[('type', '=', 'vat')],
-    )
-    perc_profit_application_ids = fields.One2many(
-        'perception.tax.application',
-        'perception_tax_id',
-        'Profit Tax Application for Perceptions',
-        domain=[('type', '=', 'profit')],
-    )
-    perc_gi_application_ids = fields.One2many(
-        'perception.tax.application',
-        'perception_tax_id',
-        'Gross Income Tax Application for Perceptions',
-        domain=[('type', '=', 'gross_income')],
+        'Tax Application for Perceptions',
     )
     apply_custom_code = fields.Boolean(default=False)
     python_code = fields.Text(
@@ -347,16 +334,16 @@ class AccountTax(models.Model):
             include_caba_tags,
             fixed_multiplicator,
         )
-        for tax in self:
-            res_tax_vals = res.get('taxes', [])
-            for res_tax in res_tax_vals:
-                if tax.id == res_tax['id']:
-                    res_tax.update(
-                        {
-                            'tax_group_name': tax.tax_group_name,
-                            'is_exempt': tax.is_exempt,
-                        }
-                    )
+        res_tax_vals = res.get('taxes', [])
+        for res_tax in res_tax_vals:
+            tax = self.env['account.tax'].browse(res_tax['id'])
+            if tax:
+                res_tax.update(
+                    {
+                        'tax_group_name': tax.tax_group_name,
+                        'is_exempt': tax.is_exempt,
+                    }
+                )
         return res
 
     def get_perception_account(self, is_refund):
@@ -367,12 +354,12 @@ class AccountTax(models.Model):
         ).filtered(lambda x: x.repartition_type == 'tax')
 
         if not tax_repartition_lines:
-            raise exceptions.ValidationError(
+            raise ValidationError(
                 _("No tax repartition lines where found")
             )
 
         if len(tax_repartition_lines) != 1:
-            raise exceptions.ValidationError(
+            raise ValidationError(
                 _("There should only be one repartition line")
             )
 
@@ -383,7 +370,7 @@ class AccountTax(models.Model):
             lambda x: x.repartition_type == 'tax' and x.account_id
         )
         if not tax_repartition_lines:
-            raise exceptions.ValidationError(
+            raise ValidationError(
                 _(
                     "No tax repartition lines account where found for '%(ret_name)s'\n"
                     "Add one on Taxes > '%(ret_name)s' > Invoice Repartition Lines",
@@ -392,12 +379,12 @@ class AccountTax(models.Model):
             )
 
         if len(tax_repartition_lines) != 1:
-            raise exceptions.ValidationError(
+            raise ValidationError(
                 _("There should only be one repartition line for '%s'")
                 % self.name
             )
         return tax_repartition_lines[0].account_id
-
+    
     # def _message_create(self, values_list):
     # model = values_list.get('model', None)
     # if model and model == 'account.tax':

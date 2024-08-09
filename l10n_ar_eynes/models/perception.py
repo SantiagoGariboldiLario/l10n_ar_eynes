@@ -3,25 +3,13 @@
 #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 ##############################################################################
 
-import json
 import logging
+from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
-
-
-class AccountAccount(models.Model):
-    _name = 'account.account'
-    _inherit = 'account.account'
-
-    perception_concept_ids = fields.Many2many(
-        comodel_name='perception.concept',
-        relation='account_perception_concept_rel',
-        column1='account_id',
-        column2='concept_id',
-        string='Concepts',
-    )
 
 
 class PerceptionTaxLine(models.Model):
@@ -59,27 +47,20 @@ class PerceptionTaxLine(models.Model):
         digits='Account',
         compute='_compute_base_amount_second_cur',
     )
+    perception_id_domain = fields.Binary(compute='_compute_perception_id_domain')
     perception_id = fields.Many2one(
-        'account.journal',
-        string='Perception Configuration',
+        'account.tax',
+        string='Perception Tax',
         required=True,
         help="Perception configuration used for this perception tax, "
         "where all the configuration resides. Accounts, Tax Codes, etc.",
-    )
-    perception_id_domain = fields.Char(compute='_compute_perception_id_domain')
-    base_amount = fields.Float(
-        'Base Code Amount',
-        digits='Account',
-    )
-    tax_amount = fields.Float(
-        'Tax Code Amount',
-        digits='Account',
     )
     company_id = fields.Many2one(
         comodel_name="res.company",
         default=lambda self: self._default_company_id(),
         readonly=True,
         required=True,
+        store=True
     )
     partner_id = fields.Many2one(
         'res.partner',
@@ -94,6 +75,8 @@ class PerceptionTaxLine(models.Model):
     state_id = fields.Many2one(
         'res.country.state',
         string="State/Province",
+        related='perception_id.state_id',
+        store=True
     )
     aml_id = fields.Many2one(
         'account.move.line',
@@ -115,16 +98,14 @@ class PerceptionTaxLine(models.Model):
         for rec in self:
             domain = [
                 ('type', '=', 'perceptions'),
-                ('company_id', '=', self.env.user.company_id.id),
+                ('company_id', '=', self.env.company.id),
             ]
             if self.invoice_id:
                 if self.invoice_id.move_type.startswith('in_'):
                     domain.append(('tax_id.type_tax_use', '=', 'purchase'))
                 else:
                     domain.append(('tax_id.type_tax_use', '=', 'sale'))
-            rec.perception_id_domain = json.dumps(domain)
-
-        return domain
+            rec.perception_id_domain = domain
 
     def _compute_base_amount_second_cur(self):
         for rec in self:
@@ -135,37 +116,47 @@ class PerceptionTaxLine(models.Model):
                 rec.base_secondary_currency = rec.base * currency_rate
                 rec.amount_secondary_currency = rec.amount * currency_rate
 
-    @api.onchange('perception_id')
-    def _onchange_perception(self):
-        res = {}
-        if self.perception_id:
-            res['domain'] = {
-                'concept_id': [
-                    ('type', '=', self.perception_id.tax_id.retention_type)
-                ],
-            }
-        self.name = self.perception_id.name
-        self.state_id = self.perception_id.state_id.id
-        return res
+    @api.model_create_multi
+    def create(self, vals):
+        for line_vals in vals:
+            invoice_id = line_vals.get('invoice_id', False)
+            if not line_vals.get('partner_id', False) and invoice_id:
+                invoice = self.env['account.move'].browse(invoice_id)
+                line_vals['partner_id'] = invoice.partner_id.id
 
-    def compute_all(self, currency=None):
-        if len(self) == 0:
-            company_id = self.env.user.company_id
-        else:
-            company_id = self[0].company_id
-        if not currency:
-            currency = company_id.currency_id
-        taxes = []
-        taxes.append(
-            {
-                'id': self.perception_id.tax_id.id,
-                'name': self.name,
-                'amount': self.amount,
-                'base': self.base,
-            }
-        )
+        return super(PerceptionTaxLine, self).create(vals)
+    
+    # @api.onchange('perception_id')
+    # def _onchange_perception(self):
+    #     res = {}
+    #     if self.perception_id:
+    #         res['domain'] = {
+    #             'concept_id': [
+    #                 ('type', '=', self.perception_id.tax_id.retention_type)
+    #             ],
+    #         }
+    #     self.name = self.perception_id.name
+    #     self.state_id = self.perception_id.state_id.id
+    #     return res
 
-        return taxes
+    # def compute_all(self, currency=None):
+    #     if len(self) == 0:
+    #         company_id = self.env.user.company_id
+    #     else:
+    #         company_id = self[0].company_id
+    #     if not currency:
+    #         currency = company_id.currency_id
+    #     taxes = []
+    #     taxes.append(
+    #         {
+    #             'id': self.perception_id.tax_id.id,
+    #             'name': self.name,
+    #             'amount': self.amount,
+    #             'base': self.base,
+    #         }
+    #     )
+
+    #     return taxes
 
     @api.model
     def get_readeable_name(self):
@@ -178,27 +169,27 @@ class PerceptionTaxLine(models.Model):
         name = u"RTL(#{})[{}-{}]".format(ptl_id, ptl_name, ptl_partner_name)
         return name
 
-    def _compute(self, invoice, base, amount):
-        """
-        self: perception.tax.line
-        invoice: account.invoice
-        """
-        # Nos fijamos la currency de la invoice
-        currency = invoice.currency_id.with_context(
-            date=invoice.invoice_date or fields.Date.context_today(invoice)
-        )
-        company_currency = invoice.company_id.currency_id
-        if invoice.type in ('out_invoice', 'in_invoice'):
-            base_amount = currency.compute(base, company_currency, round=False)
-            tax_amount = currency.compute(amount, company_currency, round=False)
-        else:  # invoice is out_refund
-            base_amount = currency.compute(
-                base * -1, company_currency, round=False
-            )
-            tax_amount = currency.compute(
-                amount * -1, company_currency, round=False
-            )
-        return (tax_amount, base_amount)
+    # def _compute(self, invoice, base, amount):
+    #     """
+    #     self: perception.tax.line
+    #     invoice: account.invoice
+    #     """
+    #     # Nos fijamos la currency de la invoice
+    #     currency = invoice.currency_id.with_context(
+    #         date=invoice.invoice_date or fields.Date.context_today(invoice)
+    #     )
+    #     company_currency = invoice.company_id.currency_id
+    #     if invoice.type in ('out_invoice', 'in_invoice'):
+    #         base_amount = currency.compute(base, company_currency, round=False)
+    #         tax_amount = currency.compute(amount, company_currency, round=False)
+    #     else:  # invoice is out_refund
+    #         base_amount = currency.compute(
+    #             base * -1, company_currency, round=False
+    #         )
+    #         tax_amount = currency.compute(
+    #             amount * -1, company_currency, round=False
+    #         )
+    #     return (tax_amount, base_amount)
 
 
 class PerceptionVatTax(models.Model):
@@ -222,10 +213,6 @@ class PerceptionVatTax(models.Model):
 class PerceptionConcept(models.Model):
     _name = "perception.concept"
     _description = "Perception Concepts"
-
-    @api.model
-    def _get_company(self):
-        return self.env.user.company_id
 
     name = fields.Char('Description', size=256, required=True)
     code = fields.Char('Code', size=32)
@@ -259,14 +246,14 @@ class PerceptionConcept(models.Model):
         readonly=True,
     )
 
+    @api.model
+    def _get_company(self):
+        return self.env.company
+
 
 class PerceptionActivity(models.Model):
     _name = "perception.activity"
     _description = "Perception Gross Income Activity"
-
-    @api.model
-    def _get_company(self):
-        return self.env.user.company_id
 
     name = fields.Char('Description', size=256, required=True)
     code = fields.Char('Code', size=32)
@@ -288,18 +275,21 @@ class PerceptionActivity(models.Model):
         readonly=True,
     )
 
+    @api.model
+    def _get_company(self):
+        return self.env.company
+
 
 class PerceptionTaxApplication(models.Model):
     _name = "perception.tax.application"
 
     name = fields.Char('Description', size=128)
     reg_code = fields.Integer('Reg. Code')
-    concept_id = fields.Many2one('perception.concept', 'Concept')
-    activity_id = fields.Many2one('perception.activity', 'Activity')
-    perception_tax_id = fields.Many2one(
-        comodel_name='account.tax',
-        string='Retention',
-    )
+    concept_id_domain = fields.Binary(string='Concept filter ',compute='_compute_concept_domain')
+    concept_id = fields.Many2one('perception.concept')
+    activity_id_domain = fields.Binary(string='Activity filter ',compute='_compute_activity_domain')
+    activity_id = fields.Many2one('perception.activity')
+    perception_tax_id = fields.Many2one(comodel_name='account.tax')
     # Minimo No Imponible
     tax_allowance = fields.Float(
         'Tax Allowance',
@@ -339,15 +329,6 @@ class PerceptionTaxApplication(models.Model):
         digits='Account',
         help="Percent to Apply if the Partner is inscripted in the Tax",
     )
-    type = fields.Selection(
-        [
-            ('vat', 'VAT'),
-            ('gross_income', 'Gross Income'),
-            ('profit', 'Profit'),
-        ],
-        'Type',
-        required=True,
-    )
     sit_iibb = fields.Many2one(
         comodel_name='iibb.situation', string='Situation of IIBB'
     )
@@ -360,73 +341,195 @@ class PerceptionTaxApplication(models.Model):
         ),
     ]
 
-    @api.model
-    def _compute_proportional_vat(
-        self, percent, line_vals, tax_application=False
-    ):
-        vat_tax = {}
-        base = 0.0
-        tax_application = tax_application or self
-        for t in tax_application.vat_tax_ids:
-            vat_tax[t.tax_id.id] = t.rate
+    @api.depends('perception_tax_id')
+    def _compute_concept_domain(self):
+        for rec in self:
+            if rec.perception_tax_id:
+                rec.concept_id_domain = [('type','=',rec.perception_tax_id.retention_type)]  # do what you want inside this
+            else:
+                rec.concept_id_domain = [()] # do what you want inside this
+    
+    @api.depends('perception_tax_id')
+    def _compute_activity_domain(self):
+        for rec in self:
+            if rec.perception_tax_id:
+                rec.activity_id_domain = [('type','=',rec.perception_tax_id.retention_type)]  # do what you want inside this
+            else:
+                rec.activity_id_domain = [()] # do what you want inside this
 
-        if line_vals.get('vat_taxes'):
-            for tax_id, vals in line_vals['vat_taxes'].items():
-                if tax_id in vat_tax:
-                    base += vals['base_amount'] * vat_tax[tax_id]
+    # @api.model
+    # def _compute_proportional_vat(
+    #     self, percent, line_vals, tax_application=False
+    # ):
+    #     vat_tax = {}
+    #     base = 0.0
+    #     tax_application = tax_application or self
+    #     for t in tax_application.vat_tax_ids:
+    #         vat_tax[t.tax_id.id] = t.rate
 
-        amount = round(base * (percent / 100.0), 2)
-        return amount
+    #     if line_vals.get('vat_taxes'):
+    #         for tax_id, vals in line_vals['vat_taxes'].items():
+    #             if tax_id in vat_tax:
+    #                 base += vals['base_amount'] * vat_tax[tax_id]
 
-    def compute_base(self, percent, line_vals):
-        self.ensure_one()
-        tax_application = self
-
-        # TODO: De acuerdo al calculation_base,
-        # llamamos a la funcion correspondiente
-        if tax_application.calculation_base in (
-            'proportional_vat',
-            'amount_taxed',
+    #     amount = round(base * (percent / 100.0), 2)
+    #     return amount
+                
+    def check_applicable(
+        self,
+        invoice,
+        sit_iibb=False,
+        from_padron=False,
+        excluded_percent=0.0
         ):
-            base = line_vals['amount_taxed']
-        elif tax_application.calculation_base == 'amount_total':
-            base = line_vals['amount_total']
-        elif tax_application.calculation_base == 'amount_no_taxed':
-            base = line_vals['amount_no_taxed']
-        elif tax_application.calculation_base == 'amount_untaxed':
-            base = line_vals['amount_untaxed']
-        # elif tax_application.calculation_base == 'other':
-        #     base = self._compute_user_defined_base(
-        #         cr, uid, invoice, tax_application.user_defined_base, context)
-        else:
-            return 0.0, 0.0
+        self.ensure_one()
 
+        if not self.perception_tax_id.active:
+            return False
+
+        if excluded_percent == 1.0:
+            return False
+
+        if not self.perception_tax_id.state_id:
+            return True
+
+        if self.perception_tax_id.applicable_state == 'always':
+            return True
+
+        if self.perception_tax_id.always_apply_padron and from_padron:
+            return True
+
+        # Chequeamos la situacion de IIBB, si es CM,
+        # directamente retornamos True
+        if self.perception_tax_id.check_sit_iibb:
+            _logger.info("Chequeo de situacion IIBB activado")
+            multilateral = self.env.ref(
+                "l10n_ar_eynes.iibb_situation_multilateral"
+            )
+            if sit_iibb == multilateral:
+                _logger.info(
+                    "Partner es Convenio Multilateral, "
+                    f"aplica Retencion {self.name}"
+                )
+                return True
+
+        partner_state = False
+        retention_state = self.perception_tax_id.state_id.id
+        destination_shipping = invoice.address_shipping_id or self.env['res.partner'].browse(
+            invoice.partner_id.address_get(['delivery']).get('delivery')
+        )
+        source_shipping = invoice.company_id.partner_id
+        if self.perception_tax_id.applicable_state == 'dest':
+            partner_state = destination_shipping.state_id.id
+            if not partner_state:
+                raise UserError(
+                    _(
+                        'There is no State/Province configured for '
+                        f'the Supplier while computing {self.name}'
+                    )
+                )
+        elif self.perception_tax_id.applicable_state == 'source':
+            partner_state = source_shipping.state_id.id
+            if not partner_state:
+                raise UserError(
+                    _('There is no State/Province configured for this Company')
+                )
+        # Hacemos el chequeo de los states
+        return retention_state == partner_state
+
+    def get_perception_data(self, partner, invoice_date):
+        perception = self.perception_tax_id
+        # Partimos de la configuración básica de la aplicación de la percepción
+        data = {
+            'activity_id': self.activity_id.id,
+            'excluded_percent': 0.0,
+            'percent': self.percent,
+            'ex_date_to': False,
+            'ex_date_from': False,
+            'sit_iibb': False,
+            'from_padron': False,
+        }
+
+        # Aplicamos la modificación de alícuotas, exclusiones, etc según los datos del padrón:
+        invoice_date = invoice_date or fields.Date.today()
+        partner_perception_lines = partner.perception_ids.filtered(
+            lambda line: line.perception_id == perception
+        )
+        if self.activity_id:
+            partner_perception_lines.filtered(
+                lambda line: not line.activity_id or line.activity_id == self.activity_id
+            )
+        partner_perception_period = (
+            partner_perception_lines.filtered(
+                lambda line: not line.period
+                or (
+                    line.period
+                    <= invoice_date
+                    <= (
+                        (line.period + relativedelta(months=1))
+                        - relativedelta(days=1)
+                    )
+                )
+            )
+        )
+        if not partner_perception_period and partner_perception_lines:
+            partner_perception_periods = partner_perception_lines.filtered(
+                lambda line: not line.period
+                or (
+                    line.period
+                    <= invoice_date
+                )
+            )
+            max_period = max(partner_perception_periods.mapped('period'))
+            partner_perception_period = partner_perception_periods.filtered(
+                lambda line: line.period == max_period
+            )
+        if partner_perception_period:
+            data.update({
+                'excluded_percent': partner_perception_period.excluded_percent,
+                'percent': partner_perception_period.percent,
+                'ex_date_to': partner_perception_period.ex_date_to,
+                'ex_date_from': partner_perception_period.ex_date_from,
+                'sit_iibb': partner_perception_period.sit_iibb,
+                'from_padron': partner_perception_period.from_padron,
+            })
+
+        return data
+
+    def compute_base(self, lines):
+        self.ensure_one()
+        base = 0.0
+        if self.calculation_base in ('proportional_vat', 'amount_taxed'):
+            base = sum(lines.mapped('amount_taxed'))  # TODO
+        elif self.calculation_base == 'amount_total':
+            base = sum(lines.mapped('price_total'))
+        elif self.calculation_base == 'amount_no_taxed':
+            base = sum(lines.mapped('amount_no_taxed'))  # TODO
+        elif self.calculation_base == 'amount_untaxed':
+            base = sum(lines.mapped('price_subtotal'))
+
+        if base < self.tax_allowance:
+            return 0.0
+        
+        if self.exclude_tax_allowance:
+            base -= self.tax_allowance
         return base
 
-    def apply_perception(self, vals, perception_data):
+    def apply_perception(self, perception_data):
         percent = perception_data['percent']
         excluded_percent = perception_data['excluded_percent']
 
-        # Si la alicuota que esta en la ficha del partner es negativa,
-        # se toma la de la regla que se aplica.
-        # Si es 0.0, se toma ese valor, 0.0.
-        if percent < 0:
-            percent = self.percent
-
-        base = vals['base']
+        base = self.compute_base(perception_data['lines'])
+        if base == 0.0:
+            return 0.0, 0.0
         sign = -1 if base < 0 else 1
         base = base * sign
-        if base < self.tax_allowance:
-            return 0.0, 0.0
-
-        if self.exclude_tax_allowance:
-            base -= self.tax_allowance
-
-        # TODO: Testear proportional_vat
-        if self.calculation_base == 'proportional_vat':
-            amount = self._compute_proportional_vat(percent, vals)
-        else:
-            amount = round(base * (percent / 100.0), 2)
+        # # TODO: Testear proportional_vat
+        # if self.calculation_base == 'proportional_vat':
+        #     amount = self._compute_proportional_vat(percent, vals)
+        # else:
+        #     amount = round(base * (percent / 100.0), 2)
+        amount = round(base * (percent / 100.0), 2)
 
         # Chequeamos contra el minimo a percibir
         if amount < self.tax_minimum:

@@ -31,159 +31,146 @@ class AccountMoveLine(models.Model):
                 counterpart = list(counterpart)[0:2] + ["..."]
             self.counterpart = ",".join(counterpart)
 
-    def _compute_all_vat_taxes(self):
-        invoice = self.move_id
-        currency = invoice.currency_id.with_context(
-            date=invoice.invoice_date or fields.Date.context_today(invoice)
+    @api.depends('tax_ids', 'currency_id', 'partner_id', 'analytic_distribution', 'balance', 'partner_id', 'move_id.partner_id', 'price_unit', 'quantity')
+    def _compute_all_tax(self):
+        super(AccountMoveLine, self)._compute_all_tax()
+        product_with_perception_lines = self.filtered(lambda aml:
+            aml.display_type == 'product' and aml.move_id.is_invoice(True) 
+            and 'perception' in aml.tax_ids.tax_group_id.mapped('group_type')
         )
-        company_currency = invoice.company_id.currency_id
+        invoices = product_with_perception_lines.mapped('move_id')
+        for inv in invoices:
+            if not inv.disable_perceptions:
+                sign = -1 if inv.is_inbound() else 1
+                inv_product_with_perception_lines = product_with_perception_lines.filtered(lambda aml: aml.move_id == inv)
+                perceptions = inv_product_with_perception_lines.tax_ids.filtered(lambda tax: tax.tax_group_id.group_type == 'perception')
+                for perception in perceptions:
+                    lines_with_perception = inv_product_with_perception_lines.filtered(lambda aml: perception in aml.tax_ids)
+                    perception_total_base = sum(self.move_id.perception_ids.filtered(lambda ptl: ptl.perception_id == perception).mapped('base'))
+                    perception_total_amount = sum(self.move_id.perception_ids.filtered(lambda ptl: ptl.perception_id == perception).mapped('amount'))
+                    line_perception_base = inv.currency_id.round(perception_total_base / len(lines_with_perception))
+                    line_perception_amount = inv.currency_id.round(perception_total_amount / len(lines_with_perception))
+                    for aml in lines_with_perception:
+                        for key in aml.compute_all_tax:
+                            if aml.compute_all_tax[key].get('name', '') == perception.name:
+                                aml.compute_all_tax[key]['balance'] = sign * line_perception_amount
+                                aml.compute_all_tax[key]['amount_currency'] = sign * line_perception_amount
+                                aml.compute_all_tax[key]['tax_base_amount'] = line_perception_base
 
-        result = {}
-        for line in self:
-            result[line.id] = {
-                'price_unit': 0.0,
-                'amount_untaxed': 0.0,
-                'amount_total': 0.0,
-                'amount_no_taxed': 0.0,
-                'amount_exempt': 0.0,
-                'vat_taxes': {},
-            }
+    # def _get_computed_price_unit(self):
+    #     modify_self = self.with_context(
+    #         currency_rate=self.move_id.currency_rate
+    #     )
+    #     return super(AccountMoveLine, modify_self)._get_computed_price_unit()
 
-            # Obtenemos los valores de la linea de factura
-            line_taxes = {}
-            taxes = line.tax_ids.compute_all(
-                (line.price_unit * (1 - (line.discount or 0.0) / 100.0)),
-                invoice.currency_id,
-                line.quantity,
-                line.product_id,
-                invoice.partner_id,
-            )
+    # def _get_price_total_and_subtotal(
+    #     self,
+    #     price_unit=None,
+    #     quantity=None,
+    #     discount=None,
+    #     currency=None,
+    #     product=None,
+    #     partner=None,
+    #     taxes=None,
+    #     move_type=None,
+    # ):
+    #     modify_self = self.with_context(
+    #         currency_rate=self.move_id.currency_rate
+    #     )
+    #     res = super(AccountMoveLine, modify_self)._get_price_total_and_subtotal(
+    #         price_unit=price_unit,
+    #         quantity=quantity,
+    #         discount=discount,
+    #         currency=currency,
+    #         product=product,
+    #         partner=partner,
+    #         taxes=taxes,
+    #         move_type=move_type,
+    #     )
+    #     return res
 
-            amount_tax = 0.0
-            amount_base = 0.0
-            amount_exempt = 0.0
-            for tax in taxes['taxes']:
-                if not tax['tax_group_name'].lower() == 'vat':
-                    continue
+    # def _get_fields_onchange_subtotal(
+    #     self,
+    #     price_subtotal=None,
+    #     move_type=None,
+    #     currency=None,
+    #     company=None,
+    #     date=None,
+    # ):
+    #     modify_self = self.with_context(
+    #         inverse_currency_rate=self.move_id.currency_rate
+    #     )
+    #     return super(
+    #         AccountMoveLine, modify_self
+    #     )._get_fields_onchange_subtotal(
+    #         price_subtotal=price_subtotal,
+    #         move_type=move_type,
+    #         currency=currency,
+    #         company=company,
+    #         date=date,
+    #     )
 
-                val = {}
-                val['invoice_line_id'] = line.id
-                val['name'] = tax['name']
-                val['amount'] = tax['amount']
-                val['base'] = tax['base']
-                val['base_amount'] = currency.compute(
-                    val['base'], company_currency, round=False
-                )
-                val['tax_amount'] = currency.compute(
-                    val['amount'], company_currency, round=False
-                )
-                val['account_id'] = tax['account_id'] or line.account_id.id
-                amount_tax += tax['amount']
-                if tax['is_exempt']:
-                    amount_exempt += val['base']
-                else:
-                    amount_base += val['base']
+    # def _get_fields_onchange_balance(
+    #     self,
+    #     quantity=None,
+    #     discount=None,
+    #     amount_currency=None,
+    #     move_type=None,
+    #     currency=None,
+    #     taxes=None,
+    #     price_subtotal=None,
+    #     force_computation=False,
+    # ):
+    #     modify_self = self.with_context(
+    #         currency_rate=self.move_id.currency_rate
+    #     )
+    #     return super(AccountMoveLine, modify_self)._get_fields_onchange_balance(
+    #         quantity=quantity,
+    #         discount=discount,
+    #         amount_currency=amount_currency,
+    #         move_type=move_type,
+    #         currency=currency,
+    #         taxes=taxes,
+    #         price_subtotal=price_subtotal,
+    #         force_computation=force_computation,
+    #     )
 
-                line_taxes[tax['id']] = val
+    # @api.onchange('amount_currency')
+    # def _onchange_amount_currency(self):
+    #     modify_self = self.with_context(
+    #         inverse_currency_rate=self.move_id.currency_rate
+    #     )
+    #     return super(AccountMoveLine, modify_self)._onchange_amount_currency()
 
-            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+    @api.depends('product_id', 'product_uom_id', 'partner_id', 'move_id.invoice_date', 'move_id.disable_perceptions', 'quantity')
+    def _compute_tax_ids(self):
+        super(AccountMoveLine, self)._compute_tax_ids()
 
-            result[line.id]['price_unit'] = price
-            result[line.id]['amount_untaxed'] = line.price_subtotal
-            result[line.id]['amount_total'] = amount_tax + line.price_subtotal
-            result[line.id]['amount_no_taxed'] = (
-                line.price_subtotal - amount_base - amount_exempt
-            )
-            result[line.id]['amount_exempt'] = amount_exempt
-            result[line.id]['amount_taxed'] = amount_base
-            result[line.id]['vat_taxes'] = line_taxes
+    def _get_computed_taxes(self):
+        tax_ids = super(AccountMoveLine, self)._get_computed_taxes()
+        if self.move_id.is_sale_document(include_receipts=True):
+            perceptions_applications = perceptions = self.env['perception.tax.application']
+            if self.account_id and not self.move_id.disable_perceptions:
+                perceptions_applications = self.account_id.get_perceptions_applications()
 
-        return result
-
-    def _get_computed_price_unit(self):
-        modify_self = self.with_context(
-            currency_rate=self.move_id.currency_rate
-        )
-        return super(AccountMoveLine, modify_self)._get_computed_price_unit()
-
-    def _get_price_total_and_subtotal(
-        self,
-        price_unit=None,
-        quantity=None,
-        discount=None,
-        currency=None,
-        product=None,
-        partner=None,
-        taxes=None,
-        move_type=None,
-    ):
-        modify_self = self.with_context(
-            currency_rate=self.move_id.currency_rate
-        )
-        res = super(AccountMoveLine, modify_self)._get_price_total_and_subtotal(
-            price_unit=price_unit,
-            quantity=quantity,
-            discount=discount,
-            currency=currency,
-            product=product,
-            partner=partner,
-            taxes=taxes,
-            move_type=move_type,
-        )
-        return res
-
-    def _get_fields_onchange_subtotal(
-        self,
-        price_subtotal=None,
-        move_type=None,
-        currency=None,
-        company=None,
-        date=None,
-    ):
-        modify_self = self.with_context(
-            inverse_currency_rate=self.move_id.currency_rate
-        )
-        return super(
-            AccountMoveLine, modify_self
-        )._get_fields_onchange_subtotal(
-            price_subtotal=price_subtotal,
-            move_type=move_type,
-            currency=currency,
-            company=company,
-            date=date,
-        )
-
-    def _get_fields_onchange_balance(
-        self,
-        quantity=None,
-        discount=None,
-        amount_currency=None,
-        move_type=None,
-        currency=None,
-        taxes=None,
-        price_subtotal=None,
-        force_computation=False,
-    ):
-        modify_self = self.with_context(
-            currency_rate=self.move_id.currency_rate
-        )
-        return super(AccountMoveLine, modify_self)._get_fields_onchange_balance(
-            quantity=quantity,
-            discount=discount,
-            amount_currency=amount_currency,
-            move_type=move_type,
-            currency=currency,
-            taxes=taxes,
-            price_subtotal=price_subtotal,
-            force_computation=force_computation,
-        )
-
-    @api.onchange('amount_currency')
-    def _onchange_amount_currency(self):
-        modify_self = self.with_context(
-            inverse_currency_rate=self.move_id.currency_rate
-        )
-        return super(AccountMoveLine, modify_self)._onchange_amount_currency()
+            if self.partner_id:
+                perceptions = self.env['account.tax']
+                for application in perceptions_applications:
+                    perception = application.perception_tax_id
+                    if perception in self.partner_id.property_account_position_id.perception_ids:
+                        perception_data = (
+                            application.get_perception_data(self.partner_id, self.move_id.invoice_date)
+                        )
+                        applicable = application.check_applicable(
+                            invoice=self.move_id,
+                            sit_iibb=perception_data['sit_iibb'],
+                            from_padron=perception_data['from_padron'],
+                            excluded_percent=perception_data['excluded_percent']
+                        )
+                        if applicable:
+                            perceptions += perception
+                tax_ids += perceptions
+        return tax_ids
 
     def price_unit_to_PDF(self):
         price_unit = self.price_unit

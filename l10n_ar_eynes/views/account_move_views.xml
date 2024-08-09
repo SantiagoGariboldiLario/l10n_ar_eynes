@@ -295,11 +295,11 @@
                         readonly="state != 'draft'"
                     >
                         <tree editable="bottom">
-                            <field name="name" invisible="1" />
-                            <field name="partner_id" invisible="1" />
-                            <field name="company_id" invisible="1" />
+                            <field name="name" column_invisible="True" />
+                            <field name="partner_id" column_invisible="True" />
+                            <field name="company_id" column_invisible="True" />
                             <field name="date" />
-                            <field name="perception_id_domain" invisible="1" />
+                            <field name="perception_id_domain" column_invisible="True" />
                             <field
                                 name="perception_id"
                                 string="Perception Type"

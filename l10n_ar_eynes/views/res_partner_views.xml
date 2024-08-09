@@ -56,7 +56,7 @@
                 >
                     <field name="perception_ids" nolabel="1">
                         <tree editable="bottom">
-                            <field name="perception_id" domain="[('type_tax_use','=','sale')]" />
+                            <field name="perception_id" />
                             <field name="activity_id" />
                             <field name="period" widget='month_year_format' />
                             <field name="percent" />

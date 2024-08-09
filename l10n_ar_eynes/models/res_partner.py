@@ -1,7 +1,5 @@
 import logging
 
-from dateutil.relativedelta import relativedelta
-
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
@@ -173,76 +171,6 @@ class ResPartner(models.Model):
             raise UserError(f'ERROR: {ws.ErrMsg}') from e
         values = self.parse_afip_values(ws)
         return values
-
-    def _get_perceptions_to_apply(self, invoice_date):
-        # Buscamos las percepciones a aplicar segun la posicion fiscal
-        perceptions = {}
-        for perc in self.property_account_position_id.perception_ids:
-            perception = {
-                'perception': perc,
-                'activity_id': False,
-                'excluded_percent': False,
-                'percent': -1.0,
-                'ex_date_to': False,
-                'ex_date_from': False,
-                'sit_iibb': False,
-                'from_padron': False,
-            }
-
-            perceptions[perc.id] = perception
-
-        # Ahora buscamos a ver si tiene alguna excepcion
-        partner_perceptions = {}
-        partner_perceptions_for_fiscal_position = self.perception_ids.filtered(
-            lambda perception: perception.perception_id.id in perceptions.keys()
-        )
-        partner_perceptions_for_fiscal_position_period = (
-            partner_perceptions_for_fiscal_position.filtered(
-                lambda perception: not perception.period
-                or (
-                    perception.period
-                    <= invoice_date
-                    <= (
-                        (perception.period + relativedelta(months=1))
-                        - relativedelta(days=1)
-                    )
-                )
-            )
-        )
-        difference = partner_perceptions_for_fiscal_position.mapped(
-            'perception_id'
-        ) - partner_perceptions_for_fiscal_position_period.mapped(
-            'perception_id'
-        )
-        if difference and self.env.context.get(
-            'raise_padron_not_updated', False
-        ):
-            self.env.user.notify_warning(
-                message=_(
-                    'The perceptions for this partner must be updated: [%(perceptions_name)s].'
-                    'This invoice will not include this tax.',
-                    perceptions_name=', '.join(
-                        [diff.name for diff in difference]
-                    ),
-                )
-            )
-        for p_perc in partner_perceptions_for_fiscal_position_period:
-            perception = {
-                'perception': p_perc.perception_id,
-                'activity_id': p_perc.activity_id.id,
-                'excluded_percent': p_perc.excluded_percent,
-                'percent': p_perc.percent,
-                'ex_date_to': p_perc.ex_date_to,
-                'ex_date_from': p_perc.ex_date_from,
-                'sit_iibb': p_perc.sit_iibb,
-                'from_padron': p_perc.from_padron,
-            }
-
-            partner_perceptions[p_perc.perception_id.id] = perception
-
-        # Actualizamos el diccionario de retenciones
-        perceptions.update(partner_perceptions)
-        return perceptions
 
     @api.constrains('vat', 'document_type_id')
     def check_vat_duplicated(self):
@@ -652,12 +580,13 @@ class ResPartnerPerception(models.Model):
     _rec_name = 'perception_id'
 
     perception_id = fields.Many2one(
-        'account.journal',
+        'account.tax',
         'Perception',
         required=True,
         domain=lambda self: [
-            ('type', '=', 'perceptions'),
+            ('tax_group_id.group_type', '=', 'perception'),
             ('company_id', '=', self.env.user.company_id.id),
+            ('type_tax_use','=','sale'),
         ],
     )
     activity_id = fields.Many2one('perception.activity', 'Activity')
@@ -679,13 +608,3 @@ class ResPartnerPerception(models.Model):
     )
     from_padron = fields.Boolean(string="From Padron")
 
-    # _sql_constraints = [('perception_partner_unique',
-    #                      'unique(partner_id, perception_id)',
-    #                      'There must be only one perception of this ' +
-    #                      'type configured for the partner')]
-
-    @api.onchange('perception_id')
-    def perception_id_change(self):
-        perception_type = self.perception_id.type
-        domain = [('type', '=', perception_type)]
-        return {'domain': {'activity_id': domain}}
