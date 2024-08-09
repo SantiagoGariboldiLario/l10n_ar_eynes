@@ -32,7 +32,7 @@ class AccountMoveLine(models.Model):
             self.counterpart = ",".join(counterpart)
 
     @api.depends('tax_ids', 'currency_id', 'partner_id', 'analytic_distribution', 'balance', 'partner_id', 'move_id.partner_id', 'price_unit', 'quantity')
-    def _compute_all_tax(self): 
+    def _compute_all_tax(self):
         # pylint: disable=missing-return
         super(AccountMoveLine, self)._compute_all_tax()
         product_with_perception_lines = self.filtered(
