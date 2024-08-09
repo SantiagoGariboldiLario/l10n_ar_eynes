@@ -375,7 +375,7 @@ class PerceptionTaxApplication(models.Model):
     #     amount = round(base * (percent / 100.0), 2)
     #     return amount
 
-    def check_applicable( self, invoice, sit_iibb=False, from_padron=False, excluded_percent=0.0):
+    def check_applicable(self, invoice, sit_iibb=False, from_padron=False, excluded_percent=0.0):
         self.ensure_one()
 
         if not self.perception_tax_id.active:
