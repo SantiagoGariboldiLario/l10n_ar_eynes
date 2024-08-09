@@ -34,9 +34,10 @@ class AccountMoveLine(models.Model):
     @api.depends('tax_ids', 'currency_id', 'partner_id', 'analytic_distribution', 'balance', 'partner_id', 'move_id.partner_id', 'price_unit', 'quantity')
     def _compute_all_tax(self):
         super(AccountMoveLine, self)._compute_all_tax()
-        product_with_perception_lines = self.filtered(lambda aml:
-            aml.display_type == 'product' and aml.move_id.is_invoice(True) 
-            and 'perception' in aml.tax_ids.tax_group_id.mapped('group_type')
+        product_with_perception_lines = self.filtered(
+            lambda aml:
+                aml.display_type == 'product' and aml.move_id.is_invoice(True)
+                and 'perception' in aml.tax_ids.tax_group_id.mapped('group_type')
         )
         invoices = product_with_perception_lines.mapped('move_id')
         for inv in invoices:

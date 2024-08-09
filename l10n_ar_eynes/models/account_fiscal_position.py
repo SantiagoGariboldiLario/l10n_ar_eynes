@@ -29,7 +29,7 @@ class AccountFiscalPosition(models.Model):
         domain=lambda self: [
             ('tax_group_id.group_type', '=', 'retentions'),
             ('company_id', '=', self.env.company.id),
-            ('type_tax_use','=','sale'),
+            ('type_tax_use', '=', 'sale'),
         ],
         help="These are the retentions that will be applied to Suppliers "
         + "belonging to this Fiscal Position. Exceptions to this have to be "
@@ -44,7 +44,7 @@ class AccountFiscalPosition(models.Model):
         domain=lambda self: [
             ('tax_group_id.group_type', '=', 'perception'),
             ('company_id', '=', self.env.company.id),
-            ('type_tax_use','=','sale'),
+            ('type_tax_use', '=', 'sale'),
         ],
         help="These are the perceptions that will be applied to Suppliers "
         "belonging to this Fiscal Position. Exceptions to this have to be "

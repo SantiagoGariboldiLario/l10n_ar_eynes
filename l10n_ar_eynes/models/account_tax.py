@@ -384,7 +384,7 @@ class AccountTax(models.Model):
                 % self.name
             )
         return tax_repartition_lines[0].account_id
-    
+
     # def _message_create(self, values_list):
     # model = values_list.get('model', None)
     # if model and model == 'account.tax':

@@ -586,7 +586,7 @@ class ResPartnerPerception(models.Model):
         domain=lambda self: [
             ('tax_group_id.group_type', '=', 'perception'),
             ('company_id', '=', self.env.user.company_id.id),
-            ('type_tax_use','=','sale'),
+            ('type_tax_use', '=', 'sale'),
         ],
     )
     activity_id = fields.Many2one('perception.activity', 'Activity')
@@ -607,4 +607,3 @@ class ResPartnerPerception(models.Model):
         store=True,
     )
     from_padron = fields.Boolean(string="From Padron")
-

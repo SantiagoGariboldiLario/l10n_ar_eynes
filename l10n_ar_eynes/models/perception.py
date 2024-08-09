@@ -6,7 +6,7 @@
 import logging
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -125,7 +125,7 @@ class PerceptionTaxLine(models.Model):
                 line_vals['partner_id'] = invoice.partner_id.id
 
         return super(PerceptionTaxLine, self).create(vals)
-    
+
     # @api.onchange('perception_id')
     # def _onchange_perception(self):
     #     res = {}
@@ -285,9 +285,9 @@ class PerceptionTaxApplication(models.Model):
 
     name = fields.Char('Description', size=128)
     reg_code = fields.Integer('Reg. Code')
-    concept_id_domain = fields.Binary(string='Concept filter ',compute='_compute_concept_domain')
+    concept_id_domain = fields.Binary(string='Concept filter ', compute='_compute_concept_domain')
     concept_id = fields.Many2one('perception.concept')
-    activity_id_domain = fields.Binary(string='Activity filter ',compute='_compute_activity_domain')
+    activity_id_domain = fields.Binary(string='Activity filter ', compute='_compute_activity_domain')
     activity_id = fields.Many2one('perception.activity')
     perception_tax_id = fields.Many2one(comodel_name='account.tax')
     # Minimo No Imponible
@@ -345,17 +345,17 @@ class PerceptionTaxApplication(models.Model):
     def _compute_concept_domain(self):
         for rec in self:
             if rec.perception_tax_id:
-                rec.concept_id_domain = [('type','=',rec.perception_tax_id.retention_type)]  # do what you want inside this
+                rec.concept_id_domain = [('type', '=', rec.perception_tax_id.retention_type)]
             else:
-                rec.concept_id_domain = [()] # do what you want inside this
-    
+                rec.concept_id_domain = [()]
+
     @api.depends('perception_tax_id')
     def _compute_activity_domain(self):
         for rec in self:
             if rec.perception_tax_id:
-                rec.activity_id_domain = [('type','=',rec.perception_tax_id.retention_type)]  # do what you want inside this
+                rec.activity_id_domain = [('type', '=', rec.perception_tax_id.retention_type)]
             else:
-                rec.activity_id_domain = [()] # do what you want inside this
+                rec.activity_id_domain = [()]
 
     # @api.model
     # def _compute_proportional_vat(
@@ -374,14 +374,8 @@ class PerceptionTaxApplication(models.Model):
 
     #     amount = round(base * (percent / 100.0), 2)
     #     return amount
-                
-    def check_applicable(
-        self,
-        invoice,
-        sit_iibb=False,
-        from_padron=False,
-        excluded_percent=0.0
-        ):
+
+    def check_applicable( self, invoice, sit_iibb=False, from_padron=False, excluded_percent=0.0):
         self.ensure_one()
 
         if not self.perception_tax_id.active:
@@ -510,7 +504,7 @@ class PerceptionTaxApplication(models.Model):
 
         if base < self.tax_allowance:
             return 0.0
-        
+
         if self.exclude_tax_allowance:
             base -= self.tax_allowance
         return base
