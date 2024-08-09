@@ -449,6 +449,7 @@ class AccountMove(models.Model):
         """ Computed field used for custom widget's rendering.
             Only set on invoices.
         """
+        # pylint: disable=missing-return
         super(AccountMove, self)._compute_tax_totals()
         for move in self:
             if move.is_invoice(include_receipts=True):
