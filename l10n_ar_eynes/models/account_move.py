@@ -759,7 +759,7 @@ class AccountMove(models.Model):
                 inv.write({'internal_number': sequence})
 
         posted_moves = super(AccountMove, self)._post(soft=soft)
-        posted_moves._set_perception_date()
+        # posted_moves._set_perception_date()
 
         return posted_moves
 

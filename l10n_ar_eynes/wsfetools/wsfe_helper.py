@@ -174,7 +174,7 @@ class WSFEParser(WSParser):
 
         tribute_total = 0
         for perception in invoice.perception_ids:
-            code = int(PCODES[perception.perception_id.tax_id.jurisdiccion])
+            code = int(PCODES[perception.perception_id.jurisdiccion])
             perc = {
                 'Id': code,
                 'BaseImp': perception.base,
