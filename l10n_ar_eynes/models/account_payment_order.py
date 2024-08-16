@@ -1472,7 +1472,7 @@ class AccountPaymentOrder(models.Model):
         if credit < 0:
             debit = -credit
             credit = 0.0
-        sign = debit - credit < 0 and -1 or 1
+        # sign = debit - credit < 0 and -1 or 1
         move_line = {
             'name': name or '/',
             'debit': debit,
