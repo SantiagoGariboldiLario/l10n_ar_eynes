@@ -1251,7 +1251,7 @@ class AccountPaymentOrder(models.Model):
         # But for the operations made by _convert_amount, we always need to give the date in the context  # noqa
         ctx = {
             'date': self.date,
-            'skip_invoice_line_sync': True,
+            'check_move_validity': False,
         }
         # Create the account move record.
         move_recordset = self.env['account.move'].with_context(**ctx).create(
@@ -1283,12 +1283,7 @@ class AccountPaymentOrder(models.Model):
         elif self.type == 'purchase':
             line_total = line_total + self.amount
         # Create one move line per voucher line where amount is not 0.0
-        line_total, new_rec_lst_ids = self.with_context(
-            **ctx
-        ).voucher_move_line_create(
-            line_total, move_id, company_currency, current_currency
-        )
-        rec_list_ids.extend(new_rec_lst_ids)
+        line_total, amls_to_reconcile = self.with_context(**ctx).voucher_move_line_create(line_total, move_id)
 
         # Create the writeoff line if needed
         ml_writeoff = self.writeoff_move_line_get(
@@ -1299,6 +1294,7 @@ class AccountPaymentOrder(models.Model):
 
         self.env['account.move.line'].with_context(**ctx).create(rec_list_ids)
         # We post the voucher.
+        move_recordset.action_post()
         self.write(
             {
                 'move_id': move_id,
@@ -1306,7 +1302,10 @@ class AccountPaymentOrder(models.Model):
                 'number': name,
             }
         )
-        move_recordset.action_post()
+        # We automatically reconcile the account move lines.
+        for move_lines in amls_to_reconcile:
+            if len(move_lines) >= 2:
+                move_lines.reconcile()
 
         # Borramos las lineas que estan en 0
         for line in self.line_ids:
@@ -1483,11 +1482,9 @@ class AccountPaymentOrder(models.Model):
             'journal_id': self.journal_id.id,
             'partner_id': self.partner_id.id,
             'currency_id': current_currency.id,
-            'amount_currency': company_currency != current_currency
-            and sign * amount_currency
-            or 0.0,
             'date': self.date,
             'date_maturity': self.date_due,
+            'reconciled': False,
         }
         return move_line
 
@@ -1695,9 +1692,7 @@ class AccountPaymentOrder(models.Model):
         }
         return (move_line, move_line_counterpart)
 
-    def voucher_move_line_create(
-        self, line_total, move_id, company_currency, current_currency
-    ):
+    def voucher_move_line_create(self, line_total, move_id):
         tot_line = line_total
         rec_lst_ids = []
 
@@ -1731,39 +1726,38 @@ class AccountPaymentOrder(models.Model):
                         )
                     )
 
-            move_line = {
+            move_line_val = {
                 'journal_id': self.journal_id.id,
                 'name': line.name or '/',
                 'account_id': line.account_id.id,
                 'move_id': move_id,
                 'partner_id': self.partner_id.id,
                 'currency_id': line.original_currency_id.id,
-                'amount_currency': line.amount_currency
-                and line.amount_currency * sign * -1
-                or 0,
                 'credit': 0.0,
                 'debit': 0.0,
                 'date': self.date,
+                'reconciled': False,
             }
             if amount < 0:
                 amount = -amount
 
             if line.type == 'debt':
                 tot_line += amount
-                move_line['debit'] = amount
+                move_line_val['debit'] = amount
             else:
                 tot_line -= amount
-                move_line['credit'] = amount
+                move_line_val['credit'] = amount
 
             if self.tax_id and self.type in ('sale', 'purchase'):
-                move_line.update(
+                move_line_val.update(
                     {
                         'account_tax_id': self.tax_id.id,
                     }
                 )
-
-            if line.move_line_id.id:
-                rec_lst_ids.append(move_line)
+            new_aml = self.env['account.move.line'].create(move_line_val)
+            if line.move_line_id:
+                # Save relation to original aml to make reconcilation.
+                rec_lst_ids.append(line.move_line_id + new_aml)
 
         for line in self.concept_line_ids:
             if not line.amount:
@@ -1774,7 +1768,7 @@ class AccountPaymentOrder(models.Model):
             else:
                 amount = line.amount * (-1)
 
-            move_line = {
+            move_line_val = {
                 'journal_id': self.journal_id.id,
                 'name': line.name or '/',
                 'account_id': line.account_id.id,
@@ -1789,13 +1783,13 @@ class AccountPaymentOrder(models.Model):
             if amount < 0:
                 amount = -amount
                 tot_line -= amount
-                move_line['credit'] = amount
+                move_line_val['credit'] = amount
             else:
                 tot_line += amount
-                move_line['debit'] = amount
+                move_line_val['debit'] = amount
 
-            # Creamos la linea
-            rec_lst_ids.append(move_line)
+            new_aml = self.env['account.move.line'].create(move_line_val)
+            rec_lst_ids.append(new_aml)
 
         return tot_line, rec_lst_ids
 
