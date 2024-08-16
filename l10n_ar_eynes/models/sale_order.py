@@ -66,7 +66,7 @@ class SaleOrder(models.Model):
         ctx['check_move_validity'] = False
         for invoice in invoice_ids:
             invoice._onchange_currency_id()
-            invoice.with_context(**ctx).compute_perceptions()
+            invoice._update_perceptions_amounts()
             # invoice._check_balanced()
         return invoice_ids
 
