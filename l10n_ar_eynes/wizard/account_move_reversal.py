@@ -35,15 +35,15 @@ class AccountMoveReversal(models.TransientModel):
         )
         return vals
 
-    def reverse_moves(self):
-        action = super(AccountMoveReversal, self).reverse_moves()
+    # def refund_moves(self):
+    #     action = super(AccountMoveReversal, self).refund_moves()
 
-        move_ids = action.get('res_id')
-        if not move_ids:
-            for domain in action.get('domain'):
-                if domain[0] == 'id':
-                    move_ids = domain[2]
-        moves = self.env['account.move'].browse(move_ids)
-        moves.with_context(is_reverse=True).compute_perceptions()
+    #     move_ids = action.get('res_id')
+    #     if not move_ids:
+    #         for domain in action.get('domain'):
+    #             if domain[0] == 'id':
+    #                 move_ids = domain[2]
+    #     moves = self.env['account.move'].browse(move_ids)
+    #     moves.with_context(is_reverse=True).compute_perceptions()
 
-        return action
+    #     return action

@@ -153,11 +153,11 @@ class WSFEParser(WSParser):
             code = int(afip_tax.code)
             if code not in vat_dict:
                 vat_dict[code] = {
-                    'Importe': tax_line.credit or tax_line.credit,
+                    'Importe': tax_line.credit or tax_line.debit,
                     'BaseImp': tax_line.tax_base_amount,
                 }
             else:
-                vat_dict[code]['Importe'] += tax_line.credit or tax_line.credit
+                vat_dict[code]['Importe'] += tax_line.credit or tax_line.debit
                 vat_dict[code]['BaseImp'] += tax_line.tax_base_amount
 
         vals = {
