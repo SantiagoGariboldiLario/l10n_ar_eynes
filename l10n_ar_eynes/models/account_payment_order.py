@@ -1252,6 +1252,7 @@ class AccountPaymentOrder(models.Model):
         ctx = {
             'date': self.date,
             'check_move_validity': False,
+            'skip_invoice_sync': True,
         }
         # Create the account move record.
         move_recordset = self.env['account.move'].with_context(**ctx).create(
@@ -1284,6 +1285,35 @@ class AccountPaymentOrder(models.Model):
             line_total = line_total + self.amount
         # Create one move line per voucher line where amount is not 0.0
         line_total, amls_to_reconcile = self.with_context(**ctx).voucher_move_line_create(line_total, move_id)
+
+        for line in self.concept_line_ids:
+            if not line.amount:
+                continue
+
+            if line.payment_order_id.type == 'payment':
+                amount = line.amount
+            else:
+                amount = line.amount * (-1)
+
+            move_line_val = {
+                'journal_id': self.journal_id.id,
+                'name': line.name or '/',
+                'account_id': line.account_id.id,
+                'move_id': move_id,
+                'partner_id': self.partner_id.id,
+                'currency_id': self.currency_id.id,
+                'credit': 0.0,
+                'debit': 0.0,
+                'date': self.date,
+            }
+            if amount < 0:
+                amount = -amount
+                line_total -= amount
+                move_line_val['credit'] = amount
+            else:
+                line_total += amount
+                move_line_val['debit'] = amount
+            rec_list_ids.append(move_line_val)
 
         # Create the writeoff line if needed
         ml_writeoff = self.writeoff_move_line_get(
@@ -1758,38 +1788,6 @@ class AccountPaymentOrder(models.Model):
             if line.move_line_id:
                 # Save relation to original aml to make reconcilation.
                 rec_lst_ids.append(line.move_line_id + new_aml)
-
-        for line in self.concept_line_ids:
-            if not line.amount:
-                continue
-
-            if line.payment_order_id.type == 'payment':
-                amount = line.amount
-            else:
-                amount = line.amount * (-1)
-
-            move_line_val = {
-                'journal_id': self.journal_id.id,
-                'name': line.name or '/',
-                'account_id': line.account_id.id,
-                'move_id': move_id,
-                'partner_id': self.partner_id.id,
-                'currency_id': False,
-                'quantity': 1,
-                'credit': 0.0,
-                'debit': 0.0,
-                'date': self.date,
-            }
-            if amount < 0:
-                amount = -amount
-                tot_line -= amount
-                move_line_val['credit'] = amount
-            else:
-                tot_line += amount
-                move_line_val['debit'] = amount
-
-            new_aml = self.env['account.move.line'].create(move_line_val)
-            rec_lst_ids.append(new_aml)
 
         return tot_line, rec_lst_ids
 
