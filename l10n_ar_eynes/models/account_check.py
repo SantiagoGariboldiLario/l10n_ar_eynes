@@ -33,7 +33,6 @@ class AccountCheckConfig(models.Model):
     rejected_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Rejected Check Account',
-        domain=[('internal_type', 'not in', ('receivable', 'payable'))],
         required=True,
     )
     company_id = fields.Many2one(
