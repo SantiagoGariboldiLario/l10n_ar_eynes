@@ -698,6 +698,13 @@ class AccountMove(models.Model):
                 )
             )
 
+    def add_perceptions(self):
+        if self.env.context.get('from_so', False):
+            for move in self:
+                move._update_perceptions_amounts()
+                move.line_ids._compute_all_tax()
+                move._compute_tax_totals()
+
     def _get_fce_prefix(self):
         voucher_type = int(self.voucher_type_id.afip_code)
         if voucher_type in [
