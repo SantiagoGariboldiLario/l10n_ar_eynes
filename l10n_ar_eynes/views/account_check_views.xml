@@ -629,7 +629,7 @@
         <field name="name">Third Party Checks</field>
         <field name="res_model">account.check</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">internal_type == 'third_party'</field>
+        <field name="domain">[('internal_type', '=', 'third_party')]</field>
         <field name="search_view_id" ref="third_party_checks_filter" />
         <field
             name="view_ids"
@@ -643,7 +643,7 @@
         <field name="name">Third Checks by Payment Date</field>
         <field name="res_model">account.check</field>
         <field name="view_mode">calendar,form</field>
-        <field name="domain">internal_type == 'third_party'</field>
+        <field name="domain">[('internal_type', '=', 'third_party')]</field>
         <field
             name="view_ids"
             eval="[(5, 0, 0),
@@ -656,7 +656,7 @@
         <field name="name">Third Checks by Issue Date</field>
         <field name="res_model">account.check</field>
         <field name="view_mode">calendar,form</field>
-        <field name="domain">internal_type == 'third_party'</field>
+        <field name="domain">[('internal_type', '=', 'third_party')]</field>
         <field
             name="view_ids"
             eval="[(5, 0, 0),
