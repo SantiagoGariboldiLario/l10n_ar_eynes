@@ -1,7 +1,7 @@
 import logging
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools.safe_eval import safe_eval, wrap_module
 
 _logger = logging.getLogger(__name__)
@@ -634,6 +634,74 @@ class AccountTax(models.Model):
         }
         return result
 
+    def check_applicable(
+        self,
+        sit_iibb=False,
+        from_padron=False,
+        source_shipping_id=False,
+        destination_shipping_id=False,
+    ):
+        self.ensure_one()
+
+        Partner = self.env['res.partner']
+
+        if not self.active:
+            return False
+
+        if not self.state_id:
+            return True
+        if self.applicable_state == 'always':
+            return True
+
+        if self.always_apply_padron and from_padron:
+            return True
+
+        # Chequeamos la situacion de IIBB, si es CM,
+        # directamente retornamos True
+        if self.check_sit_iibb:
+            _logger.info("Chequeo de situacion IIBB activado")
+            multilateral = self.env.ref(
+                "l10n_ar_eynes.iibb_situation_multilateral"
+            )
+            if sit_iibb == multilateral:
+                _logger.info(
+                    "Partner es Convenio Multilateral, "
+                    f"aplica Retencion {self.name}"
+                )
+                return True
+
+        partner_state = False
+        retention_state = self.state_id.id
+
+        if self.applicable_state == 'dest':
+            partner_state = Partner.browse(
+                destination_shipping_id.address_get(['delivery']).get(
+                    'delivery'
+                )
+            ).state_id.id
+            if not partner_state:
+                raise UserError(
+                    _(
+                        'There is no State/Province configured for '
+                        f'the Supplier while computing Retention: {self.name}'
+                    )
+                )
+
+        elif self.applicable_state == 'source':
+            user = self.env.user
+            partner = user.company_id.partner_id
+            partner_state = Partner.browse(
+                source_shipping_id.address_get(['delivery']).get('delivery')
+                or partner.address_get(['delivery']).get('delivery')
+            ).state_id.id
+
+            if not partner_state:
+                raise UserError(
+                    _('There is no State/Province configured for this Company')
+                )
+        # Hacemos el chequeo de los states
+        return retention_state == partner_state
+    
     # def _message_create(self, values_list):
     # model = values_list.get('model', None)
     # if model and model == 'account.tax':
