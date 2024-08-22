@@ -558,7 +558,7 @@ class AccountPaymentOrder(models.Model):
         retentions = {}
         for partner_ret in list(partner_retentions.values()):
             retention = partner_ret.get('retention')
-            if not retention.tax_id.active:
+            if not retention.active:
                 _logger.info(
                     "Skipping %s because its account.tax is inactive"
                     % retention.name
@@ -637,7 +637,7 @@ class AccountPaymentOrder(models.Model):
         debt_line_affected = self.debt_line_ids.filtered(
             lambda line: line.amount
         )
-        if retention.tax_id.jurisdiccion == 'provincial':
+        if retention.jurisdiccion == 'provincial':
             income_line_affected = income_line_affected.filtered(
                 lambda po_line: _filter_po_line_applicable(po_line)
             )
@@ -645,13 +645,13 @@ class AccountPaymentOrder(models.Model):
                 lambda po_line: _filter_po_line_applicable(po_line)
             )
 
-        if retention.tax_id.apply_custom_code:
+        if retention.apply_custom_code:
             payment_code_ctx = {
                 'income_lines': income_line_affected,
                 'debt_lines': debt_line_affected,
                 'payment_order': self,
             }
-            retentions = retention.tax_id._get_taxapps_from_code(
+            retentions = retention._get_taxapps_from_code(
                 retention_data,
                 self.partner_id,
                 self,
@@ -668,7 +668,7 @@ class AccountPaymentOrder(models.Model):
 
                 if (
                     retention_vals.get('amount', 0.0) == 0.0
-                    and retention.tax_id.state_id.code != 'R'
+                    and retention.state_id.code != 'R'
                 ):
                     continue
 
@@ -779,7 +779,7 @@ class AccountPaymentOrder(models.Model):
                 'move_line_ids': [(6, 0, all_concepts[key]['move_lines'].ids)],
                 'concept_id': concept,
                 'date': self.date,
-                'account_id': retention.tax_id.get_retention_account().id,
+                'account_id': retention.get_retention_account().id,
                 'base': base,
                 'amount': amount,
                 'base_amount': payment_order_base,
@@ -2280,17 +2280,17 @@ class AccountPaymentOrderRetentionLine(models.Model):
         compute='_compute_amount_currency',
         string='Amount Currency',
     )
+    retention_id_domain = fields.Binary(compute='_compute_retention_id_domain')
     retention_id = fields.Many2one(
-        comodel_name='account.journal',
-        string='Retention Configuration',
+        comodel_name='account.tax',
+        string='Retention Tax',
         required=True,
-        domain=[('type', '=', 'retentions')],
         help="Retention configuration used for this retention tax, where "
         "all the configuration resides. Accounts, Tax Codes, etc.",
     )
     retention_type = fields.Selection(
         string='Retention Type',
-        related='retention_id.tax_id.retention_type',
+        related='retention_id.retention_type',
     )
     base_amount = fields.Float(
         string='Base Code Amount',
@@ -2390,6 +2390,20 @@ class AccountPaymentOrderRetentionLine(models.Model):
         compute='_compute_actual_payment_retention',
         store=False,
     )
+
+    @api.depends('payment_order_id')
+    def _compute_retention_id_domain(self):
+        for line in self:
+            domain = [
+                ('tax_group_id.group_type', '=', 'retention'),
+                ('company_id', '=', self.env.company.id),
+            ]
+            if line.payment_order_id:
+                if line.payment_order_id.type in ('purchase', 'payment'):
+                    domain.append(('type_tax_use', '=', 'purchase'))
+                else:
+                    domain.append(('type_tax_use', '=', 'sale'))
+            line.retention_id_domain = domain
 
     def create_retention_lines(self):
         """This method creates the retention move lines and return the ID's"""

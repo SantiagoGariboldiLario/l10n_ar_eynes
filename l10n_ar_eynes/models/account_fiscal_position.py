@@ -27,9 +27,9 @@ class AccountFiscalPosition(models.Model):
         column2='retention_id',
         string='Retentions',
         domain=lambda self: [
-            ('tax_group_id.group_type', '=', 'retentions'),
+            ('tax_group_id.group_type', '=', 'retention'),
             ('company_id', '=', self.env.company.id),
-            ('type_tax_use', '=', 'sale'),
+            ('type_tax_use', '=', 'purchase'),
         ],
         help="These are the retentions that will be applied to Suppliers "
         + "belonging to this Fiscal Position. Exceptions to this have to be "

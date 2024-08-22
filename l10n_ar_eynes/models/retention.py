@@ -7,19 +7,6 @@ from odoo.exceptions import ValidationError
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DSDF
 
 
-class AccountAccount(models.Model):
-    _name = 'account.account'
-    _inherit = 'account.account'
-
-    retention_concept_ids = fields.Many2many(
-        comodel_name='retention.concept',
-        relation='account_retention_concept_rel',
-        column1='account_id',
-        column2='concept_id',
-        string='Concepts',
-    )
-
-
 class RetentionConcept(models.Model):
     _name = "retention.concept"
     _description = "Retention Profit Concepts"
@@ -135,7 +122,9 @@ class RetentionTaxApplication(models.Model):
 
     name = fields.Char('Description', size=128)
     reg_code = fields.Integer('Reg. Code')
+    concept_id_domain = fields.Binary(string='Concept filter ', compute='_compute_concept_domain')
     concept_id = fields.Many2one('retention.concept', 'Concept')
+    activity_id_domain = fields.Binary(string='Activity filter ', compute='_compute_activity_domain')
     activity_id = fields.Many2one('retention.activity', 'Activity')
     retention_tax_id = fields.Many2one(
         comodel_name='account.tax',
@@ -181,6 +170,7 @@ class RetentionTaxApplication(models.Model):
         selection=[('percent', 'Percent'), ('scale', 'Scale')],
         string='Aliquot Type',
         required=True,
+        default='percent'
     )
     percent = fields.Float(
         'Percent',
@@ -188,15 +178,6 @@ class RetentionTaxApplication(models.Model):
         help="Percent to Apply if the Partner is inscripted in the Tax",
     )
     scale_id = fields.Many2one('retention.scale', 'Scale')
-    type = fields.Selection(
-        selection=[
-            ('vat', 'VAT'),
-            ('gross_income', 'Gross Income'),
-            ('profit', 'Profit'),
-        ],
-        string='Type',
-        required=True,
-    )
     sit_iibb = fields.Selection(
         selection=[
             ('1', 'Local'),
@@ -221,6 +202,22 @@ class RetentionTaxApplication(models.Model):
         ),
     ]
 
+    @api.depends('retention_tax_id')
+    def _compute_concept_domain(self):
+        for rec in self:
+            if rec.retention_tax_id:
+                rec.concept_id_domain = [('type', '=', rec.retention_tax_id.retention_type)]
+            else:
+                rec.concept_id_domain = [()]
+
+    @api.depends('retention_tax_id')
+    def _compute_activity_domain(self):
+        for rec in self:
+            if rec.retention_tax_id:
+                rec.activity_id_domain = [('type', '=', rec.retention_tax_id.retention_type)]
+            else:
+                rec.activity_id_domain = [()]
+    
     def _default_company_id(self):
         return self.env.company.id
 
@@ -370,7 +367,7 @@ class RetentionTaxApplication(models.Model):
         # Buscamos las retenciones
         domain = [
             ('partner_id', '=', partner.id),
-            ('retention_id.tax_id.retention_type', '=', 'profit'),
+            ('retention_id.retention_type', '=', 'profit'),
             ('concept_id', '=', concept.id),
             ('date', '>=', date_start),
             ('date', '<=', date_finish),

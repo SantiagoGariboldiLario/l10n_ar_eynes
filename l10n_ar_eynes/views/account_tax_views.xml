@@ -62,16 +62,19 @@
                             nolabel="1"
                         />
                         <field
-                            name="vat_application_ids"
+                            name="retention_application_ids"
                             nolabel="1"
                             colspan="6"
-                            invisible="('retention_type','!=','vat') or apply_custom_code"
-                            context="{'default_type':'vat'}"
+                            invisible="apply_custom_code"
+                            context="{'default_perception_tax_id': id}"
                         >
                             <tree>
+                                <field name="retention_tax_id" column_invisible="True" />
                                 <field name="reg_code" />
-                                <field name="concept_id" />
-                                <field name="activity_id" />
+                                <field name="concept_id_domain" column_invisible="True"  />
+                                <field name="concept_id" domain="concept_id_domain" />
+                                <field name="activity_id_domain" column_invisible="True"  />
+                                <field name="activity_id" domain="activity_id_domain" />
                                 <field name="tax_allowance" />
                                 <field name="exclude_tax_allowance" />
                                 <field name="calculation_base" required="1" />
@@ -79,12 +82,14 @@
                                 <field name="aliq_type" required="1" />
                                 <field name="percent" />
                                 <field name="scale_id" />
-                                <field name="type" invisible="1" />
                             </tree>
-                            <form string="VAT Tax Application">
+                            <form>
                                 <group>
-                                    <field name="concept_id" domain="[('type', '=', 'vat')]" />
-                                    <field name="activity_id" domain="[('type', '=', 'vat')]" />
+                                    <field name="retention_tax_id" invisible="True" />
+                                    <field name="concept_id_domain" invisible="True"  />
+                                    <field name="concept_id" domain="concept_id_domain" />
+                                    <field name="activity_id_domain" invisible="True"  />
+                                    <field name="activity_id" domain="activity_id_domain" />
                                     <field name="tax_allowance" />
                                     <field name="exclude_tax_allowance" />
                                     <field name="calculation_base" required="1" />
@@ -98,91 +103,6 @@
                                     />
                                     <field name="name" />
                                     <field name="reg_code" />
-                                    <field name="type" invisible="1" />
-                                </group>
-                            </form>
-                        </field>
-                        <field
-                            name="gi_application_ids"
-                            nolabel="1"
-                            colspan="6"
-                            invisible="retention_type != 'gross_income' or apply_custom_code"
-                            context="{'default_type':'gross_income'}"
-                        >
-                            <tree>
-                                <field name="reg_code" />
-                                <field name="concept_id" />
-                                <field name="activity_id" />
-                                <field name="tax_allowance" />
-                                <field name="exclude_tax_allowance" />
-                                <field name="calculation_base" required="1" />
-                                <field name="tax_minimum" />
-                                <field name="aliq_type" required="1" />
-                                <field name="percent" />
-                                <field name="scale_id" />
-                                <field name="sit_iibb" />
-                                <field name="type" invisible="1" />
-                            </tree>
-                            <form string="Gross Income Tax Application">
-                                <group>
-                                    <field name="concept_id" domain="[('type', '=', 'gross_income')]" />
-                                    <field name="activity_id" domain="[('type', '=', 'gross_income')]" />
-                                    <field name="tax_allowance" />
-                                    <field name="exclude_tax_allowance" />
-                                    <field name="calculation_base" required="1" />
-                                    <field name="tax_minimum" />
-                                    <field name="aliq_type" required="1" />
-                                    <field name="percent" invisible="aliq_type == 'scale'" />
-                                    <field
-                                        name="scale_id"
-                                        required="aliq_type == 'scale'"
-                                        invisible="aliq_type == 'percent'"
-                                    />
-                                    <field name="name" />
-                                    <field name="reg_code" />
-                                    <field name="sit_iibb" />
-                                    <field name="type" invisible="1" />
-                                </group>
-                            </form>
-                        </field>
-                        <field
-                            name="profit_application_ids"
-                            nolabel="1"
-                            colspan="6"
-                            invisible="retention_type != 'profit' or apply_custom_code"
-                            context="{'default_type':'profit'}"
-                        >
-                            <tree>
-                                <field name="reg_code" />
-                                <field name="concept_id" />
-                                <field name="activity_id" />
-                                <field name="tax_allowance" />
-                                <field name="exclude_tax_allowance" />
-                                <field name="calculation_base" required="1" />
-                                <field name="tax_minimum" />
-                                <field name="aliq_type" required="1" />
-                                <field name="percent" />
-                                <field name="scale_id" />
-                                <field name="type" invisible="1" />
-                            </tree>
-                            <form string="Profit Tax Application">
-                                <group>
-                                    <field name="concept_id" domain="[('type', '=', 'profit')]" />
-                                    <field name="activity_id" domain="[('type', '=', 'profit')]" />
-                                    <field name="tax_allowance" />
-                                    <field name="exclude_tax_allowance" />
-                                    <field name="calculation_base" required="1" />
-                                    <field name="tax_minimum" />
-                                    <field name="aliq_type" required="1" />
-                                    <field name="percent" invisible="aliq_type == 'scale'" />
-                                    <field
-                                        name="scale_id"
-                                        required="aliq_type == 'scale'"
-                                        invisible="aliq_type == 'percent'"
-                                    />
-                                    <field name="name" />
-                                    <field name="reg_code" />
-                                    <field name="type" invisible="1" />
                                 </group>
                             </form>
                         </field>
@@ -261,7 +181,7 @@
                                 <field name="tax_minimum" />
                                 <field name="percent" />
                             </tree>
-                            <form string="VAT Tax Application">
+                            <form>
                                 <group>
                                     <field name="perception_tax_id" invisible="True" />
                                     <field name="concept_id_domain" invisible="True"  />

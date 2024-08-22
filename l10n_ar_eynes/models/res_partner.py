@@ -456,9 +456,13 @@ class ResPartnerRetention(models.Model):
 
     partner_id = fields.Many2one(comodel_name='res.partner', string='Partner')
     retention_id = fields.Many2one(
-        comodel_name='account.journal',
+        comodel_name='account.tax',
         string='Retention',
-        domain=[('type', '=', 'retentions')],
+        domain=lambda self: [
+            ('tax_group_id.group_type', '=', 'retention'),
+            ('company_id', '=', self.env.company.id),
+            ('type_tax_use','=','purchase'),
+        ],
         required=True,
     )
     percent = fields.Float(
@@ -495,17 +499,14 @@ class ResPartnerRetention(models.Model):
     @api.depends(
         'retention_id',
         'partner_id.retention_activity_id',
-        'retention_id.tax_id.vat_application_ids',
-        'retention_id.tax_id.gi_application_ids',
-        'retention_id.tax_id.profit_application_ids',
+        'retention_id.retention_application_ids',
     )
     def _compute_retention_percent(self):
         for p_retention in self:
-            ret_id = p_retention.retention_id
             ret_activity = p_retention.partner_id.retention_activity_id
-            ret_tax = ret_id.tax_id
+            ret_tax = p_retention.retention_id
             ret_tax_type = ret_tax.retention_type
-            if ret_id and not ret_tax_type:
+            if ret_tax and not ret_tax_type:
                 raise ValidationError(
                     _(
                         "Please configure retention_type in the "
@@ -547,9 +548,13 @@ class ResPartnerAdvanceRetention(models.Model):
     _description = "Retention advanced defined in Partner"
 
     retention_id = fields.Many2one(
-        comodel_name='account.journal',
+        comodel_name='account.tax',
         string='Retention',
-        domain=[('type', '=', 'retentions')],
+        domain=lambda self: [
+            ('tax_group_id.group_type', '=', 'retention'),
+            ('company_id', '=', self.env.company.id),
+            ('type_tax_use','=','purchase'),
+        ],
         required=True,
     )
     concept_id = fields.Many2one(
@@ -585,7 +590,7 @@ class ResPartnerPerception(models.Model):
         required=True,
         domain=lambda self: [
             ('tax_group_id.group_type', '=', 'perception'),
-            ('company_id', '=', self.env.user.company_id.id),
+            ('company_id', '=', self.env.company.id),
             ('type_tax_use', '=', 'sale'),
         ],
     )

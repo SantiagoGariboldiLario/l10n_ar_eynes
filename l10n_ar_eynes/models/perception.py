@@ -98,10 +98,10 @@ class PerceptionTaxLine(models.Model):
         for rec in self:
             domain = [
                 ('type', '=', 'perceptions'),
-                ('company_id', '=', self.env.company.id),
+                ('company_id', '=', rec.env.company.id),
             ]
-            if self.invoice_id:
-                if self.invoice_id.move_type.startswith('in_'):
+            if rec.invoice_id:
+                if rec.invoice_id.move_type.startswith('in_'):
                     domain.append(('tax_id.type_tax_use', '=', 'purchase'))
                 else:
                     domain.append(('tax_id.type_tax_use', '=', 'sale'))

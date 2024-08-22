@@ -85,7 +85,7 @@
                     </group>
                     <field name="retention_ids" nolabel="1">
                         <tree editable="bottom">
-                            <field name="retention_id" domain="[('type_tax_use','=','purchase')]" />
+                            <field name="retention_id" />
                             <field name="period" widget='month_year_format' />
                             <field name="percent" />
                             <field name="excluded_percent" />

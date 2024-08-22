@@ -24,6 +24,13 @@ class AccountAccount(models.Model):
     recpam_type = fields.Selection(
         [('reexpressed', 'Reexpressed'), ('no_reexpressed', 'No Reexpressed')], 'RECPAM'
     )
+    retention_concept_ids = fields.Many2many(
+        comodel_name='retention.concept',
+        relation='account_retention_concept_rel',
+        column1='account_id',
+        column2='concept_id',
+        string='Concepts',
+    )
 
     def get_perceptions_applications(self):
         self.ensure_one()

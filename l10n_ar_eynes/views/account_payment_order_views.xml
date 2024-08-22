@@ -526,7 +526,8 @@
                                     <field name="name" column_invisible="1" />
                                     <field name="state_id" column_invisible="1" />
                                     <field name="date" />
-                                    <field name="retention_id" string="Retention Type" />
+                                    <field name="retention_id_domain" column_invisible="1" />
+                                    <field name="retention_id" domain="retention_id_domain" />
                                     <field name="taxapp_id" column_invisible="1" />
                                     <field name="date_applied" />
                                     <field name="concept_id" />
@@ -565,10 +566,11 @@
                                     </h1>
                                     <group>
                                         <group string="Information" name="info">
-                                            <field name="state_id" column_invisible="1" />
+                                            <field name="state_id" invisible="1" />
+                                            <field name="retention_id_domain" invisible="1" />
                                             <field
                                                 name="retention_id"
-                                                domain="[('type', '=', 'retentions'),('type_tax_use', '=', 'sale')]"
+                                                domain="retention_id_domain"
                                                 readonly="not parent.disable_retentions"
                                             />
                                             <field
@@ -1206,7 +1208,11 @@
                                     <field name="name" column_invisible="1" />
                                     <field name="state_id" column_invisible="1" />
                                     <field name="date" />
-                                    <field name="retention_id" string="Retention Type" />
+                                    <field name="retention_id_domain" column_invisible="1" />
+                                    <field
+                                        name="retention_id"
+                                        domain="retention_id_domain"
+                                    />
                                     <field name="taxapp_id" column_invisible="1" />
                                     <field name="date_applied" />
                                     <field name="concept_id" />
@@ -1246,9 +1252,10 @@
                                     <group>
                                         <group string="Information" name="info">
                                             <field name="state_id" invisible="1" />
+                                            <field name="retention_id_domain" invisible="1" />
                                             <field
                                                 name="retention_id"
-                                                domain="[('type', '=', 'retentions'),('type_tax_use', '=', 'purchase')]"
+                                                domain="retention_id_domain"
                                                 readonly="not parent.disable_retentions"
                                             />
                                             <field
