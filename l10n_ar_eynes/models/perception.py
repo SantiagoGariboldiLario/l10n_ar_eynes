@@ -97,14 +97,14 @@ class PerceptionTaxLine(models.Model):
     def _compute_perception_id_domain(self):
         for rec in self:
             domain = [
-                ('type', '=', 'perceptions'),
+                ('tax_group_id.group_type', '=', 'perception'),
                 ('company_id', '=', rec.env.company.id),
             ]
             if rec.invoice_id:
                 if rec.invoice_id.move_type.startswith('in_'):
-                    domain.append(('tax_id.type_tax_use', '=', 'purchase'))
+                    domain.append(('type_tax_use', '=', 'purchase'))
                 else:
-                    domain.append(('tax_id.type_tax_use', '=', 'sale'))
+                    domain.append(('type_tax_use', '=', 'sale'))
             rec.perception_id_domain = domain
 
     def _compute_base_amount_second_cur(self):
@@ -119,6 +119,9 @@ class PerceptionTaxLine(models.Model):
     @api.model_create_multi
     def create(self, vals):
         for line_vals in vals:
+            perception_id = line_vals.get('perception_id', False)
+            if not line_vals.get('name', False) and perception_id:
+                line_vals['name'] = self.env['account.tax'].browse(perception_id).name
             invoice_id = line_vals.get('invoice_id', False)
             if not line_vals.get('partner_id', False) and invoice_id:
                 invoice = self.env['account.move'].browse(invoice_id)
