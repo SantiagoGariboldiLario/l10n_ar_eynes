@@ -217,7 +217,7 @@ class RetentionTaxApplication(models.Model):
                 rec.activity_id_domain = [('type', '=', rec.retention_tax_id.retention_type)]
             else:
                 rec.activity_id_domain = [()]
-    
+
     def _default_company_id(self):
         return self.env.company.id
 

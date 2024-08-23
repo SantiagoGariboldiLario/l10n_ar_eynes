@@ -701,7 +701,7 @@ class AccountTax(models.Model):
                 )
         # Hacemos el chequeo de los states
         return retention_state == partner_state
-    
+
     # def _message_create(self, values_list):
     # model = values_list.get('model', None)
     # if model and model == 'account.tax':

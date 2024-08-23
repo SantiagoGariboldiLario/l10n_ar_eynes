@@ -461,7 +461,7 @@ class ResPartnerRetention(models.Model):
         domain=lambda self: [
             ('tax_group_id.group_type', '=', 'retention'),
             ('company_id', '=', self.env.company.id),
-            ('type_tax_use','=','purchase'),
+            ('type_tax_use', '=', 'purchase'),
         ],
         required=True,
     )
@@ -553,7 +553,7 @@ class ResPartnerAdvanceRetention(models.Model):
         domain=lambda self: [
             ('tax_group_id.group_type', '=', 'retention'),
             ('company_id', '=', self.env.company.id),
-            ('type_tax_use','=','purchase'),
+            ('type_tax_use', '=', 'purchase'),
         ],
         required=True,
     )
