@@ -48,8 +48,8 @@ class AccountMoveLine(models.Model):
                 perceptions = inv_product_with_perception_lines.tax_ids.filtered(lambda tax: tax.tax_group_id.group_type == 'perception')
                 for perception in perceptions:
                     lines_with_perception = inv_product_with_perception_lines.filtered(lambda aml: perception in aml.tax_ids)
-                    perception_total_base = sum(self.move_id.perception_ids.filtered(lambda ptl: ptl.perception_id == perception).mapped('base'))
-                    perception_total_amount = sum(self.move_id.perception_ids.filtered(lambda ptl: ptl.perception_id == perception).mapped('amount'))
+                    perception_total_base = sum(inv.perception_ids.filtered(lambda ptl: ptl.perception_id == perception).mapped('base'))
+                    perception_total_amount = sum(inv.perception_ids.filtered(lambda ptl: ptl.perception_id == perception).mapped('amount'))
                     line_perception_base = inv.currency_id.round(perception_total_base / len(lines_with_perception))
                     line_perception_amount = inv.currency_id.round(perception_total_amount / len(lines_with_perception))
                     for aml in lines_with_perception:

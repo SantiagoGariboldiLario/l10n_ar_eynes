@@ -698,10 +698,45 @@ class AccountMove(models.Model):
                 )
             )
 
+    def _link_perception_move_lines(self):
+        for invoice in self.filtered(lambda move: move.is_invoice(include_receipts=True)):
+            # TODO: Agregar la logica necesaria para cuando tenemos que eliminar las lineas contables de
+            # percepciones. Reveer este método más adelante. Tal vez sirve para proveedores o cuando se
+            # desactiva el cálculo automático .
+            # if not invoice.perception_ids:
+            #     to_delete = invoice.line_ids.filtered(lambda aml: aml.tax_line_id.tax_group_id.group_type == 'perception')
+            #     self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
+            sign = -1 if invoice.is_inbound() else 1
+            to_create = []
+            for perception in invoice.perception_ids.mapped('perception_id'):
+                if not invoice.line_ids.filtered(lambda aml: aml.tax_line_id == perception):
+                    repartition_type = 'invoice' if invoice.is_inbound() else 'refund'
+                    tax_repartition_line = self.env['account.tax.repartition.line'].search([
+                        ('tax_id', '=', perception.id),
+                        ('repartition_type', '=', 'tax'),
+                        ('document_type', '=', repartition_type),
+
+                    ])
+                    amount = sum(invoice.perception_ids.filtered(lambda line: line.perception_id == perception).mapped('amount'))
+                    base = sum(invoice.perception_ids.filtered(lambda line: line.perception_id == perception).mapped('base'))
+                    to_create.append({
+                        'move_id': invoice.id,
+                        'name': perception.name,
+                        'balance': sign * amount,
+                        'amount_currency': sign * amount,
+                        'tax_base_amount': base,
+                        'display_type': 'tax',
+                        'tax_line_id': perception.id,
+                        'tax_repartition_line_id': tax_repartition_line.id,
+                        'account_id': tax_repartition_line.account_id.id,
+                    })
+            self.env['account.move.line'].create(to_create)
+
     def add_perceptions(self):
         if self.env.context.get('from_so', False):
             for move in self:
                 move._update_perceptions_amounts()
+                move._link_perception_move_lines()
                 move.line_ids._compute_all_tax()
                 move._compute_tax_totals()
 
