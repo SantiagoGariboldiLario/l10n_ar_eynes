@@ -18,16 +18,10 @@
             </header>
 
             <xpath expr="//sheet/div[hasclass('oe_title')]/span[hasclass('o_form_label')]" position="replace">
-                <span
-                    class="o_form_label"
-                    invisible="move_type == 'entry' or debit_origin_id"
-                >
+                <span class="o_form_label" invisible="move_type == 'entry' or debit_origin_id">
                     <field name="move_type" readonly="1" nolabel="1" />
                 </span>
-                <span
-                    class="o_form_label"
-                    invisible="move_type == 'entry' or not debit_origin_id"
-                >
+                <span class="o_form_label" invisible="move_type == 'entry' or not debit_origin_id">
                     <span>Debit Note</span>
                 </span>
             </xpath>
@@ -95,7 +89,7 @@
                     move_type in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')
                 </attribute>
                 <attribute name="invisible">
-                   move_type not in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')
+                    move_type not in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')
                 </attribute>
             </xpath>
 
@@ -133,13 +127,8 @@
                     <i
                         title="Update Currency: Will convert the amount lines to the new currency set"
                         class="fa fa-fw fa-refresh"
-                    />
-                    Update Currency
-                </button>
-                <field
-                    name="fiscal_type"
-                    invisible="move_type not in ('out_invoice', 'out_refund')"
-                />
+                    /> Update Currency </button>
+                <field name="fiscal_type" invisible="move_type not in ('out_invoice', 'out_refund')" />
                 <field name="currency_preciated" invisible="1" />
                 <field name="is_multi_currency" invisible="1" />
                 <field name="company_currency_id" invisible="1" string="Company Currency" />
@@ -147,50 +136,44 @@
 
             <field name="fiscal_position_id" position="after">
                 <field name="currency_converted" invisible="1" />
-                <field 
-                    name="secondary_currency_id" 
-                    invisible="not is_multi_currency" 
+                <field
+                    name="secondary_currency_id"
+                    invisible="not is_multi_currency"
                     readonly="state != 'draft'"
                 />
-                <field 
-                    name="secondary_currency_rate" 
-                    invisible="not is_multi_currency" 
+                <field
+                    name="secondary_currency_rate"
+                    invisible="not is_multi_currency"
                     readonly="state != 'draft'"
                 />
             </field>
 
             <xpath expr="//group[@class='oe_invoice_lines_tab']/group[1]" position="replace">
                 <!-- If the invoice has same currency than the company -->
-                <group
-                    colspan="8"
-                    invisible="is_multi_currency"
-                >
-                    <field
-                        name="narration"
-                        placeholder="Terms and Conditions"
-                        class="oe_inline text-break"
-                        nolabel="1"
-                    />
+                <group colspan="8" invisible="is_multi_currency">
+                    <span colspan="2">
+                        <field
+                            name="narration"
+                            placeholder="Terms and Conditions"
+                            class="oe_inline text-break"
+                            nolabel="1"
+                        />
+                    </span>
                 </group>
 
                 <!-- otherwise -->
-                <group
-                    colspan="4"
-                    invisible="not is_multi_currency"
-                >
-                    <field
-                        name="narration"
-                        placeholder="Terms and Conditions"
-                        class="oe_inline text-break"
-                        nolabel="1"
-                    />
+                <group colspan="4" invisible="not is_multi_currency">
+                    <span colspan="2">
+                        <field
+                            name="narration"
+                            placeholder="Terms and Conditions"
+                            class="oe_inline text-break"
+                            nolabel="1"
+                        />
+                    </span>
                 </group>
 
-                <group
-                    colspan="4"
-                    class="oe_subtotal_footer oe_right"
-                    invisible="not is_multi_currency"
-                >
+                <group colspan="4" class="oe_subtotal_footer oe_right" invisible="not is_multi_currency">
                     <field name="amount_taxed_cur" invisible="amount_taxed_cur == 0" />
                     <field name="amount_no_taxed_cur" invisible="amount_no_taxed_cur == 0" />
                     <field name="amount_exempt_cur" invisible="amount_exempt_cur == 0" />
@@ -361,10 +344,7 @@
                     </group>
                 </page>
 
-                <page
-                    string="WS Requests"
-                    invisible="move_type not in ('out_invoice', 'out_refund')"
-                >
+                <page string="WS Requests" invisible="move_type not in ('out_invoice', 'out_refund')">
                     <field name="ws_request_ids" readonly="1">
                         <tree>
                             <field name="request_id" />
@@ -378,11 +358,7 @@
             </page>
 
             <xpath expr="//field[@name='line_ids']/form/group/field[@name='currency_id']" position="after">
-                <field
-                    name="currency_rate"
-                    invisible="not currency_id"
-                    groups="base.group_multi_currency"
-                />
+                <field name="currency_rate" invisible="not currency_id" groups="base.group_multi_currency" />
             </xpath>
 
         </field>
@@ -413,7 +389,8 @@
             'default_is_debit_note': True
             }</field>
         <field name="search_view_id" ref="account.view_account_invoice_filter" />
-        <field name="help">With Customer Debit Notes you can manage the debit notes for your customers.
+        <field name="help">With Customer Debit Notes you can manage the debit notes for your
+            customers.
             A debit note is a document that increases the value of the debt or account balance,
             either by an error in billing, interest for late payment, or any other circumstance that
             means the increase in the balance of an account.</field>
