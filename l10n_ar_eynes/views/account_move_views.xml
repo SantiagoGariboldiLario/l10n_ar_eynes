@@ -128,6 +128,7 @@
                         title="Update Currency: Will convert the amount lines to the new currency set"
                         class="fa fa-fw fa-refresh"
                     /> Update Currency </button>
+                <span></span>
                 <field name="fiscal_type" invisible="move_type not in ('out_invoice', 'out_refund')" />
                 <field name="currency_preciated" invisible="1" />
                 <field name="is_multi_currency" invisible="1" />
