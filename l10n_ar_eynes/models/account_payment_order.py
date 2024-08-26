@@ -2588,7 +2588,6 @@ class AccountPaymentOrderRetentionLine(models.Model):
         if not retention.date:
             retention_vals['date'] = voucher.date
 
-        company_currency = voucher.company_id.currency_id.id
         current_currency = self.currency_id.id
 
         tax_amount_in_company_currency = retention.amount
