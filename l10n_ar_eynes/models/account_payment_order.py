@@ -1470,9 +1470,10 @@ class AccountPaymentOrder(models.Model):
         """We validate that every retention has a sequence
         before so it doesn't modify sequence number
         """
-        retentions_without_sequence = self.retention_ids.mapped(
-            'retention_id'
-        ).filtered(lambda ret: not ret.sequence_id.id)
+        ret_tax = self.retention_ids.mapped('retention_id')
+        retentions_without_sequence = self.env['account.journal'].search([
+            ('tax_id', 'in', ret_tax.ids)
+        ]).filtered(lambda ret: not ret.sequence_id.id)
         if retentions_without_sequence:
             raise ValidationError(
                 _("This journals doesnt have a sequence established:\n%s")
@@ -2561,11 +2562,11 @@ class AccountPaymentOrderRetentionLine(models.Model):
     def onchange_retention_id(self):
         res = {}
         if self.retention_id:
-            self.account_id = self.retention_id.tax_id.get_retention_account()
+            self.account_id = self.retention_id.get_retention_account()
             self.name = self.retention_id.name
             res['domain'] = {
                 'concept_id': [
-                    ('type', '=', self.retention_id.tax_id.retention_type)
+                    ('type', '=', self.retention_id.retention_type)
                 ],
             }
         return res
@@ -2617,15 +2618,11 @@ class AccountPaymentOrderRetentionLine(models.Model):
             'debit': debit,
             'credit': credit,
             'account_id': retention.account_id.id,
-            'tax_line_id': retention.retention_id.tax_id.id,
+            'tax_line_id': retention.retention_id.id,
             'journal_id': voucher.journal_id.id,
             'partner_id': voucher.partner_id.id,
-            'currency_id': company_currency != current_currency
-            and current_currency
-            or False,
-            'amount_currency': company_currency != current_currency
-            and sign * retention.amount_currency
-            or 0.0,
+            'currency_id': current_currency,
+            'amount_currency': sign * (debit or credit),
             'date': voucher.date,
             'date_maturity': voucher.date_due,
         }
@@ -2633,7 +2630,10 @@ class AccountPaymentOrderRetentionLine(models.Model):
         return move_line
 
     def apply_retention_sequence(self):
-        if not self.retention_id.sequence_id:
+        retention_journal = self.env['account.journal'].search([
+            ('tax_id', '=', self.retention_id.id)
+        ])
+        if not retention_journal.sequence_id.id:
             raise ValidationError(
                 _(
                     "This journal '%s' does not have a sequence.\n"
@@ -2641,7 +2641,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 )
                 % self.retention_id.name
             )
-        number = self.retention_id.sequence_id._next()
+        number = retention_journal.sequence_id._next()
         self.write({'certificate_no': number})
 
     @api.model
