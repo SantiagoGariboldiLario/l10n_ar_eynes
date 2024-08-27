@@ -40,7 +40,7 @@ repos:
       - id: oca-fix-manifest-website
         args: ["https://gitlab.eynes.com.ar/localization/l10n_ar_eynes"]
   - repo: https://github.com/myint/autoflake
-    rev: v1.4
+    rev: v2.0.0
     hooks:
       - id: autoflake
         args:
@@ -117,10 +117,9 @@ repos:
           - --output
           - requirements.txt
           - --header
-          - "# generated from manifests external_dependencies\n# pylint:
-            pointless-statement"
+          - "# generated from manifests external_dependencies\n# pylint: pointless-statement"
   - repo: https://github.com/PyCQA/flake8
-    rev: 3.9.2
+    rev: 5.0.4
     hooks:
       - id: flake8
         name: flake8
