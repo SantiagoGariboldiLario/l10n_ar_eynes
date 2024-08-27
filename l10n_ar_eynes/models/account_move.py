@@ -996,15 +996,28 @@ class AccountMove(models.Model):
             ('reconciled', '=', False),
         ]
         if self.is_sale_document():
-            move_line_domain += [
-                ('debit', '>', 0),
-                ('credit', '=', 0),
-            ]
+            if self.move_type == 'out_refund':
+                move_line_domain += [
+                    ('debit', '=', 0),
+                    ('credit', '>', 0),
+                ]
+            else:
+                move_line_domain += [
+                    ('debit', '>', 0),
+                    ('credit', '=', 0),
+                ]
         else:
-            move_line_domain += [
-                ('debit', '=', 0),
-                ('credit', '>', 0),
-            ]
+            if self.move_type == 'in_refund':
+                move_line_domain += [
+                    ('debit', '>', 0),
+                    ('credit', '=', 0),
+                ]
+            else:
+                move_line_domain += [
+                    ('debit', '=', 0),
+                    ('credit', '>', 0),
+                ]
+
         move_lines = self.env['account.move.line'].search(move_line_domain)
 
         po_move_lines = []
@@ -1035,9 +1048,15 @@ class AccountMove(models.Model):
             po_vals['payment_rate'] = self.currency_rate
 
         if self.is_sale_document():
-            po_vals['income_line_ids'] = po_move_lines
+            if self.move_type == 'out_refund':
+                po_vals['debt_line_ids'] = po_move_lines
+            else:
+                po_vals['income_line_ids'] = po_move_lines
         else:
-            po_vals['debt_line_ids'] = po_move_lines
+            if self.move_type == 'in_refund':
+                po_vals['income_line_ids'] = po_move_lines
+            else:
+                po_vals['debt_line_ids'] = po_move_lines
 
         return po_vals
 
