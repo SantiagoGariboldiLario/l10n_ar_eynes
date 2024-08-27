@@ -445,7 +445,7 @@ class WsfeConfig(models.Model):
             error_msg = '\n'.join(err for err in ws.Errores)
             events_msg = '\n'.join(evn for evn in ws.Eventos)
             obs_msg = '\n'.join(obs for obs in ws.Observaciones)
-            if ws.Resultado == "R":
+            if ws.Resultado == "R" or not ws.Resultado:
                 _logger.warning("AFIP Validation Error. Invoice not approved.")
                 req_vals.update(
                     {
