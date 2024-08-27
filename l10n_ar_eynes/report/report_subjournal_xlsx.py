@@ -146,7 +146,7 @@ class SubjournalXlsx(models.AbstractModel):
         self.env.cr.execute(q)
         ids = [id[0] for id in self.env.cr.fetchall()]
 
-        if line["tax_line_id"] not in ids and line["tax_ids"] not in ids:
+        if not line["tax_line_id"] and not line["tax_ids"]:
             return (line["debit"] - line["credit"]) * sign * sign_no_taxed
         else:
             return 0.0
