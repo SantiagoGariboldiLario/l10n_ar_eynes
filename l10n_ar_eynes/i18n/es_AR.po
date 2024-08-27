@@ -8777,6 +8777,12 @@ msgstr ""
 "impuestos gubernamentales. Es usado para cuestiones legales"
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid "The amount to validate cannot be $0."
+msgstr "El monto a validar no puede ser $0."
+
+#. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/fiscal_year_closing_operation_wizard.py:0
 #, python-format
 msgid "The closing date must be defined"
