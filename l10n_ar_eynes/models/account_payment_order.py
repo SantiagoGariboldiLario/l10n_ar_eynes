@@ -1915,6 +1915,10 @@ class AccountPaymentOrder(models.Model):
         template = self.env.ref(
             'l10n_ar_eynes.mail_template_data_payment_order'
         )
+        template_supplier = self.env.ref(
+            'l10n_ar_eynes.mail_template_data_payment_order_suppliers'
+        )
+
 
         payment_order_pdf = IrAttachment.search(
             [
@@ -1955,10 +1959,16 @@ class AccountPaymentOrder(models.Model):
             attachments.append(retention_certificate_pdf.id)
 
         ctx = self.env.context.copy()
+        if self.type == 'payment':
+            default_use_template = bool(template_supplier.id)
+            default_template_id = template_supplier.id
+        else:
+            default_use_template = bool(template.id)
+            default_template_id = template.id
         ctx.update(
             {
-                'default_use_template': bool(template.id),
-                'default_template_id': template.id,
+                'default_use_template': default_use_template,
+                'default_template_id': default_template_id,
                 'default_composition_mode': 'comment',
                 'custom_layout': 'mail.mail_notification_light',
                 'default_attachment_ids': attachments,
