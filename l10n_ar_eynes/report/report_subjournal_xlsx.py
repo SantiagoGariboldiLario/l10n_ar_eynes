@@ -285,7 +285,11 @@ class SubjournalXlsx(models.AbstractModel):
             ON i.company_id = lc.id
             WHERE i.move_type IN %(inv_type)s
                 AND i.state = 'posted'
-                AND i.date BETWEEN %(date_from)s AND %(date_to)s
+                AND
+        """
+        q += 'i.date' if obj.based_on == 'purchase' else 'i.invoice_date'
+        q += """
+                BETWEEN %(date_from)s AND %(date_to)s
                 AND a.account_type NOT IN ('liability_payable', 'asset_receivable')
                 AND l.company_id = %(company_id)s
         ),
