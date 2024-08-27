@@ -649,7 +649,7 @@ class AccountMove(models.Model):
 
     @api.onchange('invoice_date', 'currency_id', 'currency_rate', 'invoice_line_ids')
     def _update_perceptions_amounts(self):
-        if self.is_sale_document(): 
+        if self.is_sale_document():
             if self.partner_id and not self.disable_perceptions:
                 perception_base_lines = self.invoice_line_ids.filtered(lambda line: 'perception' in line.tax_ids.tax_group_id.mapped('group_type'))
                 perception_application_data = {}
@@ -756,7 +756,7 @@ class AccountMove(models.Model):
         if self.is_purchase_document(include_receipts=True):
             self.invoice_line_ids._compute_tax_ids()
             self._link_perception_move_lines()
-    
+
     def add_perceptions(self):
         if self.env.context.get('from_so', False):
             for move in self:
