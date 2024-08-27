@@ -864,10 +864,36 @@ class AccountMove(models.Model):
             )
 
     def _check_electronic_invoice_informed_before(self):
+        if self.env['ws.request.detail'].search(
+            [
+                ('invoice_id', 'in', self.ids),
+            ]
+        ):
+            return True
+        return False
+
+    def unlink(self):
+        if self._check_electronic_invoice_informed_before():
+            raise UserError(
+                _(
+                "You can't delete an electronic invoice that was sent to AFIP."
+                "If you have any problems, please contact our support service."
+                )
+            )
+        return super(AccountMove, self).unlink()
+
+    def _check_electronic_invoice_approved_before(self):
         if self.filtered(
             lambda move: move.is_sale_document(include_receipts=True)
             and move.fiscal_type == 'electronic'
             and (move.cae or move.cae_due_date)
+        ):
+            return True
+        if self.env['ws.request.detail'].search(
+            [
+                ('invoice_id', 'in', self.ids),
+                ('result', '=', 'A'),
+            ]
         ):
             return True
         return False
@@ -892,7 +918,7 @@ class AccountMove(models.Model):
     def button_cancel(self):
         self._check_closed_journal_moves()
 
-        if self._check_electronic_invoice_informed_before():
+        if self._check_electronic_invoice_approved_before():
             raise UserError(
                 _(
                     "You can't cancel an electronic invoice that seems to be informed to AFIP. "
@@ -905,7 +931,7 @@ class AccountMove(models.Model):
     def button_draft(self):
         self._check_closed_journal_moves()
 
-        if self._check_electronic_invoice_informed_before():
+        if self._check_electronic_invoice_approved_before():
             raise UserError(
                 _(
                     "You can't set to Draft an electronic invoice that seems to be informed to AFIP. "
@@ -930,7 +956,7 @@ class AccountMove(models.Model):
         for move in sale_invoices:
             move.show_reset_to_draft_button = (
                 False
-                if move._check_electronic_invoice_informed_before()
+                if move._check_electronic_invoice_approved_before()
                 else True
             )
         return
@@ -1535,7 +1561,7 @@ class AccountMove(models.Model):
             ws = self._get_ws_conf()
             posted_moves = self.env['account.move']
             for inv in self:
-                if inv._check_electronic_invoice_informed_before():
+                if inv._check_electronic_invoice_approved_before():
                     _logger.info("Invoice informed before.")
                     self.env['ws.request.detail'].create(
                         {

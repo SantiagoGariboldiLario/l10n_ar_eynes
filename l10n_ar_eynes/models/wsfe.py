@@ -389,6 +389,48 @@ class WsfeConfig(models.Model):
             'currency_rate': data['MonCotiz'],
         }
 
+    def _handle_FCE_prefix(self, voucher_type):
+        if voucher_type in [
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.factura_credito_electronica_a'
+                ).afip_code
+            ),
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.factura_credito_electronica_b'
+                ).afip_code
+            ),
+        ]:
+            return 'FCE'
+        elif voucher_type in [
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.nota_credito_electronica_a'
+                ).afip_code
+            ),
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.nota_credito_electronica_b'
+                ).afip_code
+            ),
+        ]:
+            return 'NCE'
+        elif voucher_type in [
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.factura_debito_electronica_a'
+                ).afip_code
+            ),
+            int(
+                self.env.ref(
+                    'l10n_ar_eynes.factura_debito_electronica_b'
+                ).afip_code
+            ),
+        ]:
+            return 'NDE'
+        return ''
+
     def send_invoice_to_afip(self, invoice, request_id):
         self.ensure_one()
         if not self.cuit:
@@ -410,7 +452,6 @@ class WsfeConfig(models.Model):
             xml_request = ws.XmlRequest
             _logger.info("Data sent to AFIP:")
             _logger.info(xml_request)
-            req_vals.update({'xml_request': xml_request})
         except SoapFault as soap_fault:
             error_msg = "%s: %s" % (
                 soap_fault.faultcode,
@@ -430,108 +471,75 @@ class WsfeConfig(models.Model):
         finally:
             req_vals.update(
                 {
+                    'xml_request': xml_request,
+                    'result': ws.Resultado,
                     'request_id': request_id,
                 }
             )
 
-        if error_msg:
-            req_vals.update(
-                {
-                    'result': 'E',
-                    'errors': error_msg,
-                }
-            )
-        else:
-            error_msg = '\n'.join(err for err in ws.Errores)
-            events_msg = '\n'.join(evn for evn in ws.Eventos)
-            obs_msg = '\n'.join(obs for obs in ws.Observaciones)
-            if ws.Resultado == "R" or not ws.Resultado:
-                _logger.warning("AFIP Validation Error. Invoice not approved.")
-                req_vals.update(
-                    {
-                        'result': 'E',
-                        'errors': error_msg,
-                        'events': events_msg,
-                        'observations': obs_msg,
-                    }
-                )
-            else:
-                _logger.info("Mission accomplished!")
-                req_vals.update(
-                    {
-                        'result': ws.Resultado,
-                        'errors': error_msg,
-                        'events': events_msg,
-                        'observations': obs_msg,
-                        'cae': ws.CAE or "",
-                        'cae_due_date': ws.Vencimiento
-                        and datetime.strptime(ws.Vencimiento, "%Y%m%d").date()
-                        or False,
-                    }
-                )
+        error_msg = error_msg + '\n'.join(err for err in ws.Errores)
+        events_msg = '\n'.join(evn for evn in ws.Eventos)
+        obs_msg = '\n'.join(obs for obs in ws.Observaciones)
 
-                inv_name = "%s-%s" % (
+        cae_due_date = False
+        try:
+            cae_due_date = (
+                ws.Vencimiento
+                and datetime.strptime(ws.Vencimiento, "%Y%m%d").date()
+            )
+        except Exception as e:
+            error_msg += str(e)
+            error_msg += '. CAE Due Date not saved \n'
+
+        invoice_date = False
+        try:
+            invoice_date = (
+                ws.FechaCbte
+                and datetime.strptime(ws.FechaCbte, "%Y%m%d").date()
+            )
+        except Exception as e:
+            error_msg += str(e)
+            error_msg += '. Invoice Date not saved \n'
+
+        if not ws.Resultado or ws.Resultado == "R":
+            _logger.warning("AFIP Validation Error. Invoice not approved.")
+        else:
+            _logger.info("Mission accomplished!")
+
+            inv_name = False
+            try:
+                inv_name = "%s%s-%s" % (
+                    self._handle_FCE_prefix(req_vals['voucher_type']),
                     str(ws.PuntoVenta).zfill(5),
                     str(ws.CbteNro).zfill(8),
                 )
+            except Exception as e:
+                error_msg += str(e)
+                error_msg += '. Invoice number not saved \n'
 
-                if req_vals['voucher_type'] in [
-                    int(
-                        self.env.ref(
-                            'l10n_ar_eynes.factura_credito_electronica_a'
-                        ).afip_code
-                    ),
-                    int(
-                        self.env.ref(
-                            'l10n_ar_eynes.factura_credito_electronica_b'
-                        ).afip_code
-                    ),
-                ]:
-                    inv_name = 'FCE' + inv_name
-                elif req_vals['voucher_type'] in [
-                    int(
-                        self.env.ref(
-                            'l10n_ar_eynes.nota_credito_electronica_a'
-                        ).afip_code
-                    ),
-                    int(
-                        self.env.ref(
-                            'l10n_ar_eynes.nota_credito_electronica_b'
-                        ).afip_code
-                    ),
-                ]:
-                    inv_name = 'NCE' + inv_name
-                elif req_vals['voucher_type'] in [
-                    int(
-                        self.env.ref(
-                            'l10n_ar_eynes.factura_debito_electronica_a'
-                        ).afip_code
-                    ),
-                    int(
-                        self.env.ref(
-                            'l10n_ar_eynes.factura_debito_electronica_b'
-                        ).afip_code
-                    ),
-                ]:
-                    inv_name = 'NDE' + inv_name
+            inv_vals = {
+                'cae': ws.CAE or "",
+                'cae_due_date': cae_due_date,
+                'internal_number': inv_name,
+                'name': inv_name,
+                'invoice_date': invoice_date,
+            }
+            invoice.write(inv_vals)
+            _logger.info(
+                "Approved\n UPDATED invoice id: %s fields: %s"
+                % (invoice.id, inv_vals)
+            )
+        _logger.info("Transaction with AFIP finished.")
 
-                inv_vals = {
-                    'cae': ws.CAE,
-                    'cae_due_date': datetime.strptime(
-                        ws.Vencimiento, "%Y%m%d"
-                    ).date(),
-                    'internal_number': inv_name,
-                    'name': inv_name,
-                    'invoice_date': datetime.strptime(
-                        ws.FechaCbte, "%Y%m%d"
-                    ).date(),
-                }
-                invoice.write(inv_vals)
-                _logger.info(
-                    "Approved\n UPDATED invoice fields: %s" % (inv_vals)
-                )
-            _logger.info("Transaction with AFIP finished.")
-
+        req_vals.update(
+            {
+                'errors': error_msg,
+                'events': events_msg,
+                'observations': obs_msg,
+                'cae': ws.CAE or "",
+                'cae_due_date': cae_due_date,
+            }
+        )
         self.env['ws.request.detail'].create(req_vals)
         _logger.info("Request details saved.")
         self.env.cr.commit()  # pylint: disable=invalid-commit
