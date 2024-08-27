@@ -4,7 +4,7 @@ from datetime import date, datetime
 
 import requests
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 from ..utils.helpers import get_current_period
@@ -60,6 +60,13 @@ class ResPartner(models.Model):
     _inherit = "res.partner"
 
     last_padron_update = fields.Date()
+
+    @api.model_create_multi
+    def create(self, vals):
+        res = super(ResPartner, self).create(vals)
+        self.with_context(active_ids=res.ids).do_update_from_padron()
+        return res
+
 
     def _get_padron_url(self):
         padron_url = self.env["ir.config_parameter"].get_param("padron_url", "")
@@ -459,7 +466,13 @@ class ResPartner(models.Model):
                     }
                 )
                 total_updates = perceptions + retentions + coeficients
-                new_values = set([value for value in [value["P"] + " - " + value["M"] for value in total_updates]])
+                new_values = {
+                    value
+                    for value in [
+                        value["P"] + " - " + value["M"]
+                        for value in total_updates
+                    ]
+                }
                 updates.update(new_values)
             return {
                 'type': 'ir.actions.client',
@@ -467,8 +480,11 @@ class ResPartner(models.Model):
                 'params': {
                     'type': 'info',
                     'sticky': True,
-                    'message': ("Se actualizaron los siguientes Padrones: " + " | ".join([value for value in updates])),
-                }
+                    'message': (
+                        "Se actualizaron los siguientes Padrones: "
+                        + " | ".join([value for value in updates])
+                    ),
+                },
             }
         else:
             _logger.info(_("No partners to check. All updated."))
