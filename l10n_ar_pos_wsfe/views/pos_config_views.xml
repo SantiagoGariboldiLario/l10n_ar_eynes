@@ -5,13 +5,7 @@
         <field name="model">pos.config</field>
         <field name="inherit_id" ref="point_of_sale.pos_config_view_form" />
         <field name="arch" type="xml">
-            <xpath expr="//label[@for='invoice_journal_id']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <field name="invoice_journal_id" position="attributes">
-                <attribute name="attrs">{'invisible': True, 'required': False}</attribute>
-            </field>
-            <xpath expr="//label[@for='invoice_journal_id']" position="before">
+            <xpath expr="//field[@name='name']" position="after">
                 <label
                     string="Invoice Journals"
                     for="invoice_manual_journal_ids"
@@ -43,6 +37,7 @@
                     }"
                 />
             </xpath>
+
         </field>
     </record>
 
