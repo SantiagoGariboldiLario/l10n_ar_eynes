@@ -526,7 +526,8 @@ class PerceptionTaxApplication(models.Model):
         #     amount = self._compute_proportional_vat(percent, vals)
         # else:
         #     amount = round(base * (percent / 100.0), 2)
-        
+
+        amount = base * percent / 100.0
         # Con la presentación de AGIP tuvimos problemas de redondeo. Cuando el importe a percibir
         # era xx.xx5 round() redondeaba para arriba y necesitábamos que redondee para abajo.
         # Explicación en --> https://stackoverflow.com/a/38239630

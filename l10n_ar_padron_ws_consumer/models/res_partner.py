@@ -67,7 +67,6 @@ class ResPartner(models.Model):
         self.with_context(active_ids=res.ids).do_update_from_padron()
         return res
 
-
     def _get_padron_url(self):
         padron_url = self.env["ir.config_parameter"].get_param("padron_url", "")
 

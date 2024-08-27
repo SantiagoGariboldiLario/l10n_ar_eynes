@@ -1922,7 +1922,6 @@ class AccountPaymentOrder(models.Model):
             'l10n_ar_eynes.mail_template_data_payment_order_suppliers'
         )
 
-
         payment_order_pdf = IrAttachment.search(
             [
                 ('res_model', '=', 'account.payment.order'),

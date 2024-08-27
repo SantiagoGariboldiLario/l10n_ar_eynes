@@ -144,7 +144,7 @@ class SubjournalXlsx(models.AbstractModel):
             WHERE tax_group_id = (SELECT id FROM account_tax_group WHERE group_type LIKE 'vat')
         """
         self.env.cr.execute(q)
-        ids = [id[0] for id in self.env.cr.fetchall()]
+        # ids = [id[0] for id in self.env.cr.fetchall()]
 
         if not line["tax_line_id"] and not line["tax_ids"]:
             return (line["debit"] - line["credit"]) * sign * sign_no_taxed

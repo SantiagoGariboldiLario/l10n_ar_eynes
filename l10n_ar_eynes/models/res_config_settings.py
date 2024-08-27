@@ -43,7 +43,6 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
     )
 
-
     def set_values(self):
         res = super().set_values()
         return res

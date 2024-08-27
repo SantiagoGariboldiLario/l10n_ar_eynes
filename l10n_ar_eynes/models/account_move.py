@@ -876,8 +876,8 @@ class AccountMove(models.Model):
         if self._check_electronic_invoice_informed_before():
             raise UserError(
                 _(
-                "You can't delete an electronic invoice that was sent to AFIP."
-                "If you have any problems, please contact our support service."
+                    "You can't delete an electronic invoice that was sent to AFIP."
+                    "If you have any problems, please contact our support service."
                 )
             )
         return super(AccountMove, self).unlink()

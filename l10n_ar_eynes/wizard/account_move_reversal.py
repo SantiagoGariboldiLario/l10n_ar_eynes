@@ -30,7 +30,6 @@ class AccountMoveReversal(models.TransientModel):
             ('afip_code', '>' if move.is_FCE_invoice else '<', 200)
         ], limit=1)
 
-
     def _prepare_default_reversal(self, move):
         vals = super(AccountMoveReversal, self)._prepare_default_reversal(move)
         vals.update(
