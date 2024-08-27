@@ -696,6 +696,12 @@
                         string="Set to Draft"
                     />
                     <button
+                        name="action_clean_lines"
+                        string="Limpiar imputaciones"
+                        invisible="state != 'draft'"
+                        type="object"
+                    />
+                    <button
                         name="send_email"
                         string="Send by e-mail"
                         type="object"

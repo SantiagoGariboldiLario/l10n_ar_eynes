@@ -838,6 +838,7 @@ class AccountPaymentOrder(models.Model):
         for rec in self:
             rec.income_line_ids = [(5, 0, 0)]
             rec.debt_line_ids = [(5, 0, 0)]
+            rec.retention_ids = [(5, 0, 0)]
             rec.message = ''
 
     @api.onchange('journal_id')
