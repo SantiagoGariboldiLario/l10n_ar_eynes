@@ -110,10 +110,12 @@
                         <span>C.U.I.T: <span t-esc="o.company_id.vat" />
                         </span>
                         <br />
-                        <span>Ing. Brutos: <span
-                                t-esc="o.company_id.partner_id.nro_insc_iibb or o.company_id.vat"
+                        <t t-if="o.partner_id.nro_insc_iibb">
+                            <br />
+                            <span class="partner-info">Ing. Brutos: </span><span
+                                t-esc="o.company_id.partner_id.nro_insc_iibb"
                             />
-                        </span>
+                        </t>
                         <br />
                         <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
                         </span>
@@ -402,7 +404,7 @@
                                             />
                                                 <t t-if="o.partner_id.nro_insc_iibb">
                                                     <br />
-                                                    <span class="partner-info">IIBB: </span><span
+                                                    <span class="partner-info">Ing. Brutos: </span><span
                                                     t-esc="o.partner_id.nro_insc_iibb"
                                                 />
                                                 </t>
