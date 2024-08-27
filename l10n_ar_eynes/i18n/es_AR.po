@@ -7807,6 +7807,18 @@ msgid "Request Information"
 msgstr "Informacion de solicitud"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_config_settings__special_partner_required_fields
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__is_checked_special_partner_required_fields
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__is_checked_special_partner_required_fields
+msgid "Required Document Type, NIF, and Fiscal Position on partners"
+msgstr "Tipo de Documento, NIF y Posición Fiscal requeridos en contactos"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
+msgid "Required Fields for Partners"
+msgstr "Campos Requeridos para Contactos"
+
+#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Residual Amount"
 msgstr "Monto restante"
@@ -8333,6 +8345,11 @@ msgstr "Nombre de servicio"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfex_config__services_date_difference
 msgid "Services and Products"
 msgstr "Productos y Servicios"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
+msgid "Set Document Type, NIF, and Fiscal Position to be required on partners"
+msgstr "Establecer como requeridos Tipo de Documento, NIF y Posición Fiscal en contactos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_bank_statement_line__is_FCE_invoice
