@@ -1148,11 +1148,7 @@ class AccountPaymentOrder(models.Model):
         )
 
         if res:
-            old_lines = getattr(self, onchange_attr)
             setattr(self, onchange_attr, [(0, 0, x) for x in res])
-            setattr(
-                self, onchange_attr, getattr(self, onchange_attr) + old_lines
-            )
             setattr(
                 self, onchange_attr, getattr(self, onchange_attr) - line_ids
             )
@@ -2077,6 +2073,20 @@ class AccountPaymentOrderLine(models.Model):
     )
     ref = fields.Char(string='Reference', size=64)
     voucher_type_id = fields.Many2one(related='move_invoice_id.voucher_type_id')
+
+    @api.constrains('payment_order_id', 'move_line_id')
+    def _check_voucher_not_duplicated(self):
+        for line in self:
+            if (
+                self.env['account.payment.order.line'].search(
+                    [
+                        ('payment_order_id', '=', line.payment_order_id.id),
+                        ('move_line_id', '=', line.move_line_id.id),
+                    ]
+                )
+                - line
+            ):
+                raise ValidationError(_('Inovice duplicated.'))
 
     @api.onchange('amount')
     def onchange_amount(self):
