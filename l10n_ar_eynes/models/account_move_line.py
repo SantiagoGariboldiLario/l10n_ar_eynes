@@ -173,6 +173,8 @@ class AccountMoveLine(models.Model):
                         if applicable:
                             perceptions += perception
                 tax_ids += perceptions
+        if self.move_id.is_purchase_document(include_receipts=True) and self.move_id.perception_ids:
+            tax_ids += self.move_id.perception_ids.mapped('perception_id')
         return tax_ids
 
     def price_unit_to_PDF(self):

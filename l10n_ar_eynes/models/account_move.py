@@ -609,57 +609,6 @@ class AccountMove(models.Model):
         if int(self.voucher_type_id.afip_code) > AFIP_FCE_CODE_START:
             self.is_FCE_invoice = True
 
-    @api.onchange('invoice_date', 'currency_id', 'currency_rate', 'invoice_line_ids')
-    def _update_perceptions_amounts(self):
-        if self.is_sale_document() and self.partner_id and not self.disable_perceptions:
-            perception_base_lines = self.invoice_line_ids.filtered(lambda line: 'perception' in line.tax_ids.tax_group_id.mapped('group_type'))
-            perception_application_data = {}
-            for line in perception_base_lines:
-                perceptions_applications = line.account_id.get_perceptions_applications()
-                for application in perceptions_applications:
-                    line_perception_application_data = application.get_perception_data(self.partner_id, self.invoice_date)
-                    applicable = application.check_applicable(
-                        invoice=self,
-                        sit_iibb=line_perception_application_data['sit_iibb'],
-                        from_padron=line_perception_application_data['from_padron'],
-                        excluded_percent=line_perception_application_data['excluded_percent']
-                    )
-                    if applicable:
-                        perception_application_data.setdefault(application, {'lines': self.env['account.move.line']})
-                        perception_application_data[application].update(line_perception_application_data)
-                        perception_application_data[application].update({
-                            'lines': perception_application_data[application]['lines'] + line
-                        })
-
-            perception_tax_line_vals = []
-            for application in perception_application_data.keys():
-                application_data = perception_application_data[application]
-                base, amount = application.apply_perception(application_data)
-                if base > 0 and amount > 0:
-                    perception_tax_line_vals.append({
-                        'name': application.perception_tax_id.name,
-                        'date': self.invoice_date,
-                        'invoice_id': self.id,
-                        'partner_id': self.partner_id.id,
-                        'base': base,
-                        'amount': amount,
-                        'perception_id': application.perception_tax_id.id,
-                        'manual': False,
-                        'tax_app_id': application.id,
-                        'reg_code': application.reg_code,
-                        'concept_id': application.concept_id.id,
-                    })
-
-            new_perception_lines = self.env['perception.tax.line']
-            for perception_tax_line_vals in perception_tax_line_vals:
-                new_perception_lines += (
-                    self.env['perception.tax.line']
-                    .new(perception_tax_line_vals)
-                )
-            self.perception_ids = new_perception_lines
-        else:
-            self.perception_ids.unlink()
-
     @api.depends('invoice_line_ids', 'invoice_line_ids.price_unit')
     def _compute_amount_custom(self):
         def _filter_exempt(line):
@@ -698,40 +647,116 @@ class AccountMove(models.Model):
                 )
             )
 
+    @api.onchange('invoice_date', 'currency_id', 'currency_rate', 'invoice_line_ids')
+    def _update_perceptions_amounts(self):
+        if self.is_sale_document(): 
+            if self.partner_id and not self.disable_perceptions:
+                perception_base_lines = self.invoice_line_ids.filtered(lambda line: 'perception' in line.tax_ids.tax_group_id.mapped('group_type'))
+                perception_application_data = {}
+                for line in perception_base_lines:
+                    perceptions_applications = line.account_id.get_perceptions_applications()
+                    for application in perceptions_applications:
+                        line_perception_application_data = application.get_perception_data(self.partner_id, self.invoice_date)
+                        applicable = application.check_applicable(
+                            invoice=self,
+                            sit_iibb=line_perception_application_data['sit_iibb'],
+                            from_padron=line_perception_application_data['from_padron'],
+                            excluded_percent=line_perception_application_data['excluded_percent']
+                        )
+                        if applicable:
+                            perception_application_data.setdefault(application, {'lines': self.env['account.move.line']})
+                            perception_application_data[application].update(line_perception_application_data)
+                            perception_application_data[application].update({
+                                'lines': perception_application_data[application]['lines'] + line
+                            })
+
+                perception_tax_line_vals = []
+                for application in perception_application_data.keys():
+                    application_data = perception_application_data[application]
+                    base, amount = application.apply_perception(application_data)
+                    if base > 0 and amount > 0:
+                        perception_tax_line_vals.append({
+                            'name': application.perception_tax_id.name,
+                            'date': self.invoice_date,
+                            'invoice_id': self.id,
+                            'partner_id': self.partner_id.id,
+                            'base': base,
+                            'amount': amount,
+                            'perception_id': application.perception_tax_id.id,
+                            'manual': False,
+                            'tax_app_id': application.id,
+                            'reg_code': application.reg_code,
+                            'concept_id': application.concept_id.id,
+                        })
+
+                new_perception_lines = self.env['perception.tax.line']
+                for perception_tax_line_vals in perception_tax_line_vals:
+                    new_perception_lines += (
+                        self.env['perception.tax.line']
+                        .new(perception_tax_line_vals)
+                    )
+                self.perception_ids = new_perception_lines
+            else:
+                self.perception_ids.unlink()
+
     def _link_perception_move_lines(self):
         for invoice in self.filtered(lambda move: move.is_invoice(include_receipts=True)):
-            # TODO: Agregar la logica necesaria para cuando tenemos que eliminar las lineas contables de
-            # percepciones. Reveer este método más adelante. Tal vez sirve para proveedores o cuando se
-            # desactiva el cálculo automático .
-            # if not invoice.perception_ids:
-            #     to_delete = invoice.line_ids.filtered(lambda aml: aml.tax_line_id.tax_group_id.group_type == 'perception')
-            #     self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
-            sign = -1 if invoice.is_inbound() else 1
-            to_create = []
-            for perception in invoice.perception_ids.mapped('perception_id'):
-                if not invoice.line_ids.filtered(lambda aml: aml.tax_line_id == perception):
-                    repartition_type = 'invoice' if invoice.is_inbound() else 'refund'
-                    tax_repartition_line = self.env['account.tax.repartition.line'].search([
-                        ('tax_id', '=', perception.id),
-                        ('repartition_type', '=', 'tax'),
-                        ('document_type', '=', repartition_type),
+            if not invoice.perception_ids:
+                to_delete = invoice.line_ids.filtered(
+                    lambda aml:
+                        aml.tax_line_id.tax_group_id.group_type == 'perception'
+                ).ids
+                self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
+            else:
+                sign = -1 if invoice.is_inbound() else 1
+                to_create = []
+                for perception in invoice.perception_ids.mapped('perception_id'):
+                    if not invoice.line_ids.filtered(lambda aml: aml.tax_line_id == perception):
+                        repartition_type = 'invoice' if invoice.is_inbound() else 'refund'
+                        tax_repartition_line = self.env['account.tax.repartition.line'].search([
+                            ('tax_id', '=', perception.id),
+                            ('repartition_type', '=', 'tax'),
+                            ('document_type', '=', repartition_type),
 
-                    ])
-                    amount = sum(invoice.perception_ids.filtered(lambda line: line.perception_id == perception).mapped('amount'))
-                    base = sum(invoice.perception_ids.filtered(lambda line: line.perception_id == perception).mapped('base'))
-                    to_create.append({
-                        'move_id': invoice.id,
-                        'name': perception.name,
-                        'balance': sign * amount,
-                        'amount_currency': sign * amount,
-                        'tax_base_amount': base,
-                        'display_type': 'tax',
-                        'tax_line_id': perception.id,
-                        'tax_repartition_line_id': tax_repartition_line.id,
-                        'account_id': tax_repartition_line.account_id.id,
-                    })
-            self.env['account.move.line'].create(to_create)
+                        ])
+                        if not tax_repartition_line.account_id:
+                            raise UserError(
+                                _(
+                                    'You need to configure an Account for %(perc_name)s. Go to configuration -> '
+                                    'Taxes -> %(perc_name)s and complete this field for Distribution for '
+                                    'Invoices and Distribution for Refunds',
+                                    perc_name=perception.name
+                                )
+                            )
+                        amount = sum(
+                            invoice.perception_ids.filtered(
+                                lambda line: line.perception_id == perception).mapped('amount')
+                        )
+                        base = sum(
+                            invoice.perception_ids.filtered(
+                                lambda line: line.perception_id == perception).mapped('base')
+                        )
+                        if base > 0 and amount > 0:
+                            to_create.append({
+                                'move_id': invoice.id,
+                                'name': perception.name,
+                                'balance': sign * amount,
+                                'amount_currency': sign * amount,
+                                'tax_base_amount': base,
+                                'display_type': 'tax',
+                                'tax_line_id': perception.id,
+                                'tax_repartition_line_id': tax_repartition_line.id,
+                                'account_id': tax_repartition_line.account_id.id,
+                            })
+                for val in to_create:
+                    invoice.line_ids += self.env['account.move.line'].new(val)
 
+    @api.onchange('perception_ids')
+    def _onchange_perception_ids(self):
+        if self.is_purchase_document(include_receipts=True):
+            self.invoice_line_ids._compute_tax_ids()
+            self._link_perception_move_lines()
+    
     def add_perceptions(self):
         if self.env.context.get('from_so', False):
             for move in self:
