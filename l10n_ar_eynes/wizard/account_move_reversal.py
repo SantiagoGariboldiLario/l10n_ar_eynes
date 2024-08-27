@@ -23,6 +23,14 @@ class AccountMoveReversal(models.TransientModel):
             res['refund_method'] = 'refund'
         return res
 
+    def _get_voucher_type(self, move):
+        return self.env['res.voucher.type'].search([
+            ('denomination', '=', move.denomination),
+            ('doc_type', '=', 'cn'),
+            ('afip_code', '>' if move.is_FCE_invoice else '<', 200)
+        ], limit=1)
+
+
     def _prepare_default_reversal(self, move):
         vals = super(AccountMoveReversal, self)._prepare_default_reversal(move)
         vals.update(
@@ -31,6 +39,7 @@ class AccountMoveReversal(models.TransientModel):
                 'currency_id': move.currency_id.id,
                 'currency_rate': move.currency_rate,
                 'is_multi_currency': move.is_multi_currency,
+                'voucher_type_id': self._get_voucher_type(move).id,
             }
         )
         return vals
