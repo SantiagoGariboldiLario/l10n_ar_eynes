@@ -27,7 +27,7 @@
                 />
                 <field name="pick_type" invisible="False" />
             </xpath>
-            <xpath expr="//field[@name='group_id']" position="after">
+            <xpath expr="//field[@name='location_dest_id']" position="after">
                 <field
                     name="shipping_number"
                     invisible="picking_type_code != 'incoming'"

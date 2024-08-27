@@ -39,6 +39,13 @@
                         invisible="state != 'draft'"
                         type="object"
                     />
+                    <button
+                        name="send_email"
+                        string="Send by e-mail"
+                        type="object"
+                        invisible="state != 'posted'"
+                        class="oe_highlight"
+                    />
                     <field
                         name="state"
                         widget="statusbar"
