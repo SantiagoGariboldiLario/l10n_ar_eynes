@@ -831,7 +831,7 @@ class AccountMove(models.Model):
         return posted_moves
 
     def action_post(self):
-        if self.amount_total == 0:
+        if self.move_type in ('out_invoice', 'out_refund') and self.amount_total == 0:
             raise ValidationError(_('The amount to validate cannot be $0.'))
 
         sale_invoices = self.filtered(lambda move: move.is_sale_document())
