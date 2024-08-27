@@ -151,6 +151,7 @@ class AccountChangeCurrency(models.TransientModel):
                 'tax_base_amount': line.tax_base_amount,
                 'tax_repartition_line_id': line.tax_repartition_line_id.id,
                 'full_reconcile_id': line.full_reconcile_id.id,
+                'sale_line_ids': line.sale_line_ids,
                 # 'matched_debit_ids': ,
                 # 'matched_credit_ids': ,
                 # 'analytic_line_ids': ,
