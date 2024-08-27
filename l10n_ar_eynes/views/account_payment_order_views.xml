@@ -255,7 +255,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        readonly="1"
+                                        invisible="True"
                                         force_save="True"
                                     />
                                     <field
@@ -359,7 +359,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        readonly="True"
+                                        invisible="True"
                                         force_save="True"
                                     />
                                     <field
@@ -921,7 +921,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        readonly="True"
+                                        invisible="True"
                                         force_save="True"
                                     />
                                     <field
@@ -1028,7 +1028,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        readonly="True"
+                                        invisible="True"
                                         force_save="True"
                                     />
                                     <field

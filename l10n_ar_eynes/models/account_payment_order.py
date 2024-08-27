@@ -1004,8 +1004,9 @@ class AccountPaymentOrder(models.Model):
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
             ('move_id.state', '=', 'posted'),
-            ('currency_id', '=', self.currency_id.id),
         ]
+        if self.is_multi_currency:
+            domain += [('currency_id', '=', self.currency_id.id)]
 
         moves = self.env['account.move.line'].search(domain)
         lines = self._prepare_income_debt_lines('income', moves)
@@ -1023,6 +1024,8 @@ class AccountPaymentOrder(models.Model):
             ('partner_id', '=', self.partner_id.id),
             ('move_id.state', '=', 'posted'),
         ]
+        if self.is_multi_currency:
+            domain += [('currency_id', '=', self.currency_id.id)]
 
         moves = self.env['account.move.line'].search(domain)
         lines = self._prepare_income_debt_lines('debt', moves)
