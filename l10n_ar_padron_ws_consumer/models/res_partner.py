@@ -394,97 +394,115 @@ class ResPartner(models.Model):
         """
         self.env.cr.execute(query)
 
-    def do_update_from_padron(self, padron_name=None, padron_type=None):
-        if padron_name is None:
-            padron_name = []
-
-        if padron_type is None:
-            padron_type = []
-
-        self._cleanup_old_padron_values()
-
-        _logger.info('Update Padron')
-
-        valid_document_types = [
-            self.env.ref("l10n_ar_eynes.document_cuit").id,
-            self.env.ref("l10n_ar_eynes.document_cuit_country").id,
-        ]
-        padron_url = self._get_padron_url()
-        current_period = get_current_period()
-        domain = [
-            ('document_type_id', 'in', valid_document_types),
-            ('parent_id', '=', False),
-            ('vat', '!=', False),
-        ]
-        partner_ids = self.env.context.get('active_ids', [])
-        if partner_ids:
-            domain_append = [('id', 'in', partner_ids)]
-        else:
-            domain_append = [
-                '|',
-                ('last_padron_update', '=', False),
-                ('last_padron_update', '<', current_period),
-            ]
-        domain = domain + domain_append
-        res_partner_obj = self.env["res.partner"]
-        partners = res_partner_obj.search(domain)
-        _logger.info('Getting Padron Information')
-        if partners:
-            updates = set()
-            response = self._get_padron_values(
-                partners, padron_url, padron_name, padron_type
+    def _valid_padron_ws_conf(self):
+        services = (
+            self.env['wsaa.config']
+            .search(
+                [
+                    ('homologation', '=', False),
+                ]
             )
-            _logger.info('Padron Information Fetched')
-            for vat, partner_values in response.items():
-                perceptions = [
-                    d
-                    for d in partner_values
-                    if d["T"] == "P" and d["P"] != "SALT"
-                ]
-                retentions = [d for d in partner_values if d["T"] == "R"]
-                coeficients = [
-                    d
-                    for d in partner_values
-                    if d["T"] == "C" or (d["T"] == "P" and d["P"] == "SALT")
-                ]
-                ivas = [d for d in partner_values if d["T"] == "I"]
+            .mapped('service_ids.name')
+        )
+        return any(
+            service.name == 'ws_sr_constancia_inscripcion'
+            for service in services
+        )
 
-                partner_id = res_partner_obj.search(
-                    [
-                        ("vat", "=", vat),
-                        ('parent_id', '=', False),
-                    ],
-                    limit=1,
+    def do_update_from_padron(self, padron_name=None, padron_type=None):
+        if self._valid_padron_ws_conf():
+            if padron_name is None:
+                padron_name = []
+
+            if padron_type is None:
+                padron_type = []
+
+            self._cleanup_old_padron_values()
+
+            _logger.info('Update Padron')
+
+            valid_document_types = [
+                self.env.ref("l10n_ar_eynes.document_cuit").id,
+                self.env.ref("l10n_ar_eynes.document_cuit_country").id,
+            ]
+            padron_url = self._get_padron_url()
+            current_period = get_current_period()
+            domain = [
+                ('document_type_id', 'in', valid_document_types),
+                ('parent_id', '=', False),
+                ('vat', '!=', False),
+            ]
+            partner_ids = self.env.context.get('active_ids', [])
+            if partner_ids:
+                domain_append = [('id', 'in', partner_ids)]
+            else:
+                domain_append = [
+                    '|',
+                    ('last_padron_update', '=', False),
+                    ('last_padron_update', '<', current_period),
+                ]
+            domain = domain + domain_append
+            res_partner_obj = self.env["res.partner"]
+            partners = res_partner_obj.search(domain)
+            _logger.info('Getting Padron Information')
+            if partners:
+                updates = set()
+                response = self._get_padron_values(
+                    partners, padron_url, padron_name, padron_type
                 )
-                self._update_partner_perceptions(partner_id, perceptions)
-                self._update_partner_retentions(partner_id, retentions)
-                self._update_partner_coeficients(partner_id, coeficients)
-                self._update_partner_ivas(partner_id, ivas)
-                partner_id.write(
-                    {
-                        "last_padron_update": current_period,
-                    }
-                )
-                total_updates = perceptions + retentions + coeficients
-                new_values = {
-                    value
-                    for value in [
-                        value["P"] + " - " + value["M"]
-                        for value in total_updates
+                _logger.info('Padron Information Fetched')
+                for vat, partner_values in response.items():
+                    perceptions = [
+                        d
+                        for d in partner_values
+                        if d["T"] == "P" and d["P"] != "SALT"
                     ]
+                    retentions = [d for d in partner_values if d["T"] == "R"]
+                    coeficients = [
+                        d
+                        for d in partner_values
+                        if d["T"] == "C" or (d["T"] == "P" and d["P"] == "SALT")
+                    ]
+                    ivas = [d for d in partner_values if d["T"] == "I"]
+
+                    partner_id = res_partner_obj.search(
+                        [
+                            ("vat", "=", vat),
+                            ('parent_id', '=', False),
+                        ],
+                        limit=1,
+                    )
+                    self._update_partner_perceptions(partner_id, perceptions)
+                    self._update_partner_retentions(partner_id, retentions)
+                    self._update_partner_coeficients(partner_id, coeficients)
+                    self._update_partner_ivas(partner_id, ivas)
+                    partner_id.write(
+                        {
+                            "last_padron_update": current_period,
+                        }
+                    )
+                    total_updates = perceptions + retentions + coeficients
+                    new_values = {
+                        value
+                        for value in [
+                            value["P"] + " - " + value["M"]
+                            for value in total_updates
+                        ]
+                    }
+                    updates.update(new_values)
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'type': 'info',
+                        'sticky': True,
+                        'message': (
+                            "Se actualizaron los siguientes Padrones: "
+                            + " | ".join([value for value in updates])
+                        ),
+                    },
                 }
-                updates.update(new_values)
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'type': 'info',
-                    'sticky': True,
-                    'message': (
-                        "Se actualizaron los siguientes Padrones: "
-                        + " | ".join([value for value in updates])
-                    ),
-                },
-            }
+            else:
+                _logger.info(_("No partners to check. All updated."))
         else:
-            _logger.info(_("No partners to check. All updated."))
+            _logger.info('Consulta del Padron Desactivada. Configurar el WS')
