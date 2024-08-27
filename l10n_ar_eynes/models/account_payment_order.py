@@ -1986,7 +1986,11 @@ class AccountPaymentOrder(models.Model):
         }
 
     _sql_constraints = [
-        ("unique_number", "unique(type, number)", _("Number must be unique")),
+        (
+            "unique_number",
+            "unique(type, number, journal_id)",
+            _("Number must be unique"),
+        ),
     ]
 
 
