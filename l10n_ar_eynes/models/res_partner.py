@@ -56,6 +56,11 @@ class ResPartner(models.Model):
     fcred_transfer = fields.Selection(
         selection=[("SCA", "SCA"), ("ADC", "ADC")], string='SCA/ADC (FCE)?'
     )
+    is_checked_special_partner_required_fields = fields.Boolean(
+        string="Required Document Type, NIF, and Fiscal Position on partners",
+        default=lambda self: self.env["ir.config_parameter"].sudo().get_param("l10n_ar_eynes.special_partner_required_fields"),
+        store=False
+    )
     perception_ids = fields.One2many(
         'res.partner.perception',
         'partner_id',

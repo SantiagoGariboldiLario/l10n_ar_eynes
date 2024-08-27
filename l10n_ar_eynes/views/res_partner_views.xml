@@ -26,7 +26,13 @@
 
             <xpath expr="//field[@name='vat']" position="before">
                 <field name="dst_cuit" invisible="1" />
-                <field name="document_type_id" placeholder="Document Type..." widget="selection" />
+                <field name="is_checked_special_partner_required_fields" invisible="1" />
+                <field 
+                    name="document_type_id"
+                    placeholder="Document Type..."
+                    widget="selection"
+                    required="is_checked_special_partner_required_fields"
+                />
                 <field
                     name="dst_cuit_id"
                     invisible="not dst_cuit"
@@ -39,6 +45,7 @@
 
             <xpath expr="//field[@name='vat']" position="attributes">
                 <attribute name="string">NIF</attribute>
+                <attribute name="required" eval="is_checked_special_partner_required_fields" />
             </xpath>
 
             <xpath expr="//field[@name='vat']" position="after">
@@ -47,6 +54,10 @@
 
             <xpath expr="//field[@name='property_account_position_id']" position="after">
                 <field name="fcred_transfer" />
+            </xpath>
+
+            <xpath expr="//field[@name='property_account_position_id']" position="attributes">
+                <attribute name="required" eval="is_checked_special_partner_required_fields" />
             </xpath>
 
             <page name="accounting" position="after">

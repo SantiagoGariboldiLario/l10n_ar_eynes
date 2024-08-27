@@ -4464,7 +4464,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.actions.report,name:l10n_ar_eynes.account_move_report
 msgid "Factura QWEB"
-msgstr ""
+msgstr "Factura AFIP"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.payment_order
@@ -7807,6 +7807,18 @@ msgid "Request Information"
 msgstr "Informacion de solicitud"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_config_settings__special_partner_required_fields
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__is_checked_special_partner_required_fields
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__is_checked_special_partner_required_fields
+msgid "Required Document Type, NIF, and Fiscal Position on partners"
+msgstr "Tipo de Documento, NIF y Posición Fiscal requeridos en contactos"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
+msgid "Required Fields for Partners"
+msgstr "Campos Requeridos para Contactos"
+
+#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
 msgid "Residual Amount"
 msgstr "Monto restante"
@@ -8335,6 +8347,11 @@ msgid "Services and Products"
 msgstr "Productos y Servicios"
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
+msgid "Set Document Type, NIF, and Fiscal Position to be required on partners"
+msgstr "Establecer como requeridos Tipo de Documento, NIF y Posición Fiscal en contactos"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_bank_statement_line__is_FCE_invoice
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_move__is_FCE_invoice
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_payment__is_FCE_invoice
@@ -8775,6 +8792,12 @@ msgid ""
 msgstr ""
 "Número de identificación tributaria. Completar si el contacto está sujeto a "
 "impuestos gubernamentales. Es usado para cuestiones legales"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#, python-format
+msgid "The amount to validate cannot be $0."
+msgstr "El monto a validar no puede ser $0."
 
 #. module: l10n_ar_eynes
 #: code:addons/l10n_ar_eynes/wizard/fiscal_year_closing_operation_wizard.py:0
@@ -10575,3 +10598,43 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} Órden de Pago (Ref {{ object.number or 'n/a' "
 "}})"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__reject_move_id
+msgid "Reject Account Move"
+msgstr "Asiento de rechazo"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Check Rejection"
+msgstr "Cheque rechazado"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Check Cancelation"
+msgstr "Cheque anulado"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__cancel_date
+msgid "Cancelation Date"
+msgstr "Fecha de anulación"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__cancel_move_id
+msgid "Cancelation Account Move"
+msgstr "Asiento de anulación"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
+msgid "Check Expiration"
+msgstr "Cheque vencido"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__expired_date
+msgid "Expiration Date"
+msgstr "Fecha de vencimiento"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__expired_move_id
+msgid "Expiration Account Move"
+msgstr "Asiento de vencimiento"

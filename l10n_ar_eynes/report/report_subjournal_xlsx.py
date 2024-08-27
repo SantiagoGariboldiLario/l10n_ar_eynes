@@ -135,8 +135,21 @@ class SubjournalXlsx(models.AbstractModel):
                 all_taxes.append(base_vals)
                 i += 1
 
-        # self.columns = all_taxes
         return all_taxes
+
+    def get_no_taxed(self, line, sign, sign_no_taxed):
+        q = """
+            SELECT id
+            FROM account_tax
+            WHERE tax_group_id = (SELECT id FROM account_tax_group WHERE group_type LIKE 'vat')
+        """
+        self.env.cr.execute(q)
+        # ids = [id[0] for id in self.env.cr.fetchall()]
+
+        if not line["tax_line_id"] and not line["tax_ids"]:
+            return (line["debit"] - line["credit"]) * sign * sign_no_taxed
+        else:
+            return 0.0
 
     def get_lines(self, types, obj, cols):
         query_vals = self.get_query_vals(types, obj)
@@ -177,12 +190,7 @@ class SubjournalXlsx(models.AbstractModel):
                     )
 
                 line['taxes'] = [0] * len(cols)
-                line['no_taxed'] = (
-                    not line['tax_line_id']
-                    and not line['tax_ids']
-                    and (line['debit'] - line['credit']) * sign * sign_no_taxed
-                    or 0.0
-                )
+                line["no_taxed"] = self.get_no_taxed(line, sign, sign_no_taxed)
                 line['total'] = (line['credit'] - line['debit']) * based_sign
                 line['invoice_type'] = self.get_invoice_type(
                     line['invoice_type'],
@@ -190,12 +198,8 @@ class SubjournalXlsx(models.AbstractModel):
                     line['is_debit_note'],
                 )
             else:
-                llines = lines[dict_hash]
-                llines['no_taxed'] += (
-                    not line['tax_line_id']
-                    and not line['tax_ids']
-                    and (line['debit'] - line['credit']) * sign * sign_no_taxed
-                    or 0.0
+                lines[dict_hash]['no_taxed'] += self.get_no_taxed(
+                    line, sign, sign_no_taxed
                 )
 
             for i, tax in enumerate(cols):
@@ -285,7 +289,11 @@ class SubjournalXlsx(models.AbstractModel):
             ON i.company_id = lc.id
             WHERE i.move_type IN %(inv_type)s
                 AND i.state = 'posted'
-                AND i.date BETWEEN %(date_from)s AND %(date_to)s
+                AND
+        """
+        q += 'i.date' if obj.based_on == 'purchase' else 'i.invoice_date'
+        q += """
+                BETWEEN %(date_from)s AND %(date_to)s
                 AND a.account_type NOT IN ('liability_payable', 'asset_receivable')
                 AND l.company_id = %(company_id)s
         ),

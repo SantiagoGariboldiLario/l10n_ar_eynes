@@ -838,6 +838,7 @@ class AccountPaymentOrder(models.Model):
         for rec in self:
             rec.income_line_ids = [(5, 0, 0)]
             rec.debt_line_ids = [(5, 0, 0)]
+            rec.retention_ids = [(5, 0, 0)]
             rec.message = ''
 
     @api.onchange('journal_id')
@@ -1003,8 +1004,9 @@ class AccountPaymentOrder(models.Model):
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
             ('move_id.state', '=', 'posted'),
-            ('currency_id', '=', self.currency_id.id),
         ]
+        if self.is_multi_currency:
+            domain += [('currency_id', '=', self.currency_id.id)]
 
         moves = self.env['account.move.line'].search(domain)
         lines = self._prepare_income_debt_lines('income', moves)
@@ -1022,6 +1024,8 @@ class AccountPaymentOrder(models.Model):
             ('partner_id', '=', self.partner_id.id),
             ('move_id.state', '=', 'posted'),
         ]
+        if self.is_multi_currency:
+            domain += [('currency_id', '=', self.currency_id.id)]
 
         moves = self.env['account.move.line'].search(domain)
         lines = self._prepare_income_debt_lines('debt', moves)
@@ -1148,11 +1152,7 @@ class AccountPaymentOrder(models.Model):
         )
 
         if res:
-            old_lines = getattr(self, onchange_attr)
             setattr(self, onchange_attr, [(0, 0, x) for x in res])
-            setattr(
-                self, onchange_attr, getattr(self, onchange_attr) + old_lines
-            )
             setattr(
                 self, onchange_attr, getattr(self, onchange_attr) - line_ids
             )
@@ -1918,6 +1918,9 @@ class AccountPaymentOrder(models.Model):
         template = self.env.ref(
             'l10n_ar_eynes.mail_template_data_payment_order'
         )
+        template_supplier = self.env.ref(
+            'l10n_ar_eynes.mail_template_data_payment_order_suppliers'
+        )
 
         payment_order_pdf = IrAttachment.search(
             [
@@ -1958,10 +1961,16 @@ class AccountPaymentOrder(models.Model):
             attachments.append(retention_certificate_pdf.id)
 
         ctx = self.env.context.copy()
+        if self.type == 'payment':
+            default_use_template = bool(template_supplier.id)
+            default_template_id = template_supplier.id
+        else:
+            default_use_template = bool(template.id)
+            default_template_id = template.id
         ctx.update(
             {
-                'default_use_template': bool(template.id),
-                'default_template_id': template.id,
+                'default_use_template': default_use_template,
+                'default_template_id': default_template_id,
                 'default_composition_mode': 'comment',
                 'custom_layout': 'mail.mail_notification_light',
                 'default_attachment_ids': attachments,
@@ -1979,7 +1988,11 @@ class AccountPaymentOrder(models.Model):
         }
 
     _sql_constraints = [
-        ("unique_number", "unique(type, number)", _("Number must be unique")),
+        (
+            "unique_number",
+            "unique(type, number, journal_id)",
+            _("Number must be unique"),
+        ),
     ]
 
 
@@ -2077,6 +2090,20 @@ class AccountPaymentOrderLine(models.Model):
     )
     ref = fields.Char(string='Reference', size=64)
     voucher_type_id = fields.Many2one(related='move_invoice_id.voucher_type_id')
+
+    @api.constrains('payment_order_id', 'move_line_id')
+    def _check_voucher_not_duplicated(self):
+        for line in self:
+            if (
+                self.env['account.payment.order.line'].search(
+                    [
+                        ('payment_order_id', '=', line.payment_order_id.id),
+                        ('move_line_id', '=', line.move_line_id.id),
+                    ]
+                )
+                - line
+            ):
+                raise ValidationError(_('Inovice duplicated.'))
 
     @api.onchange('amount')
     def onchange_amount(self):

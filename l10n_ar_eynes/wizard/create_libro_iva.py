@@ -188,42 +188,41 @@ class LibroIVAExporterWizard(models.TransientModel):
         return pos
 
     def _get_invoice_number(self, invoice, errors):
-        internal_number_formatted_aux = ''
-        try:
-            if invoice.iva_digital_operation_code in ['X', 'Z']:
-                internal_number = ''
-            elif invoice.is_sale_document():
-                internal_number = invoice.internal_number
-            else:
-                internal_number = invoice.supplier_move_reference
+        import_clearance = ''.rjust(16, ' ')
+        if invoice.is_sale_document():
+            internal_number = invoice.internal_number
+        else:
+            internal_number = invoice.supplier_move_reference
+        if invoice.iva_digital_operation_code in ['X', 'Z']:
+            import_clearance = internal_number.rjust(16, ' ')
+            internal_number = '0'
+        else:
             if '-' in internal_number:
                 internal_number = internal_number.split('-')[1]
-            internal_number_formatted = '%.20s' % internal_number.rjust(20, '0')
             try:
-                int(internal_number_formatted)
-            except Exception:
-                internal_number_formatted_aux = internal_number_formatted
-                internal_number_formatted = '00000000000000000000'
-        except Exception as e:
-            _logger.error(
-                'Error on field %s: %s' % ('account_move.internal_number', e)
-            )
-            internal_number_formatted = False
-            errors.append(
-                _(
-                    'Invoice %(name)s of %(type)s: Wrong %(field)s',
-                    name=invoice.name,
-                    type=(
-                        _('suppliers')
-                        if invoice.move_type.startswith('in_')
-                        else _('customers')
-                    ),
-                    field=self.env['account.move']
-                    ._fields['internal_number']
-                    .string,
+                int(internal_number)
+            except Exception as e:
+                internal_number = '0'
+                _logger.error(
+                    'Error on field %s: %s'
+                    % ('account_move.internal_number', e)
                 )
-            )
-        return internal_number_formatted, internal_number_formatted_aux
+                errors.append(
+                    _(
+                        'Invoice %(name)s of %(type)s: Wrong %(field)s',
+                        name=invoice.name,
+                        type=(
+                            _('suppliers')
+                            if invoice.move_type.startswith('in_')
+                            else _('customers')
+                        ),
+                        field=self.env['account.move']
+                        ._fields['internal_number']
+                        .string,
+                    )
+                )
+        internal_number = '%.20s' % internal_number.rjust(20, '0')
+        return internal_number, import_clearance
 
     def _get_partner_doc_type(self, invoice, errors):
         try:
@@ -409,10 +408,9 @@ class LibroIVAExporterWizard(models.TransientModel):
         errors = []
         pos = self._get_invoice_point_of_sale(invoice, errors)
         voucher_type = self._get_invoice_voucher_type(invoice, errors)
-        (
-            internal_number_formatted,
-            internal_number_formatted_aux,
-        ) = self._get_invoice_number(invoice, errors)
+        internal_number_formatted, import_clearance = self._get_invoice_number(
+            invoice, errors
+        )
 
         if null:
             line = [
@@ -443,10 +441,9 @@ class LibroIVAExporterWizard(models.TransientModel):
         voucher_type = self._get_invoice_voucher_type(invoice, errors)
         partner_document_type = self._get_partner_doc_type(invoice, errors)
         partner_vat = self._get_partner_vat(invoice, errors)
-        (
-            internal_number_formatted,
-            internal_number_formatted_aux,
-        ) = self._get_invoice_number(invoice, errors)
+        internal_number_formatted, import_clearance = self._get_invoice_number(
+            invoice, errors
+        )
 
         try:
             tax_base = tax_line.tax_base_amount
@@ -512,59 +509,16 @@ class LibroIVAExporterWizard(models.TransientModel):
 
     def _format_aliquot_import_line(self, tax_line, invoice):
         errors = []
-        voucher_type = self._get_invoice_voucher_type(invoice, errors)
-        pos = self._get_invoice_point_of_sale(invoice, errors)
-        (
-            internal_number_formatted,
-            internal_number_formatted_aux,
-        ) = self._get_invoice_number(invoice, errors)
+        internal_number_formatted, import_clearance = self._get_invoice_number(
+            invoice, errors
+        )
 
-        try:
-            if invoice.iva_digital_operation_code in ['X', 'Z']:
-                import_clearance = '%.16s' % str(
-                    internal_number_formatted
-                ).ljust(16, ' ')
-                # Here import_clearance could be internal_number_formatted_aux or
-                # We need to add clearence_id.name field to account.move
-            else:
-                import_clearance = '%.16s' % ''.ljust(16, ' ')
-        except Exception as e:
-            _logger.error(
-                'Error on field %s: %s' % ('account_move.clearance_id', e)
-            )
-            if invoice.__contains__('import_clearance'):
-                import_clearance = False
-            import_clearance = '%.16s' % ''.ljust(16, ' ')
-            errors.append(
-                _(
-                    'Invoice %(name)s of %(type)s: Wrong %(field)s',
-                    name=invoice.name,
-                    type=(
-                        _('suppliers')
-                        if invoice.move_type.startswith('in_')
-                        else _('customers')
-                    ),
-                    field=self.env['account.move']
-                    ._fields['import_clearance']
-                    .string,
-                )
-            )
-
-        if invoice.iva_digital_operation_code in ['X', 'Z']:
-            line = [
-                import_clearance,
-                ('%016.2f' % tax_line.tax_base_amount).replace('.', ''),
-                ('%.4s' % str(pos).rjust(4, '0')),
-                ('%016.2f' % tax_line.price_unit).replace('.', ''),
-            ]
-        else:
-            line = [
-                import_clearance,
-                voucher_type,
-                ('%016.2f' % tax_line.price_unit).replace('.', ''),
-                ('%.4s' % str(pos).rjust(4, '0')),
-                ('%016.2f' % tax_line.tax_base_amount).replace('.', ''),
-            ]
+        line = [
+            import_clearance,
+            ('%016.2f' % tax_line.tax_base_amount).replace('.', ''),
+            ('%.4s' % str(tax_line.tax_line_id.afip_code).rjust(4, '0')),
+            ('%016.2f' % tax_line.price_unit).replace('.', ''),
+        ]
         if False in line:
             errors = '\n'.join(errors)
             return (False, errors)
@@ -576,10 +530,9 @@ class LibroIVAExporterWizard(models.TransientModel):
         date = self._get_invoice_date(invoice, errors)
         voucher_type = self._get_invoice_voucher_type(invoice, errors)
         pos = self._get_invoice_point_of_sale(invoice, errors)
-        (
-            internal_number_formatted,
-            internal_number_formatted_aux,
-        ) = self._get_invoice_number(invoice, errors)
+        internal_number_formatted, import_clearance = self._get_invoice_number(
+            invoice, errors
+        )
         partner_document_type = self._get_partner_doc_type(invoice, errors)
         partner_vat = self._get_partner_vat(invoice, errors)
         partner_name = self._get_partner_name(invoice, errors)
@@ -703,10 +656,9 @@ class LibroIVAExporterWizard(models.TransientModel):
         date = self._get_invoice_date(invoice, errors)
         voucher_type = self._get_invoice_voucher_type(invoice, errors)
         pos = self._get_invoice_point_of_sale(invoice, errors)
-        (
-            internal_number_formatted,
-            internal_number_formatted_aux,
-        ) = self._get_invoice_number(invoice, errors)
+        internal_number_formatted, import_clearance = self._get_invoice_number(
+            invoice, errors
+        )
         partner_document_type = self._get_partner_doc_type(invoice, errors)
         partner_vat = self._get_partner_vat(invoice, errors)
         partner_name = self._get_partner_name(invoice, errors)
@@ -720,37 +672,6 @@ class LibroIVAExporterWizard(models.TransientModel):
         has_iva_exempt = self._check_invoice_is_exempt(invoice)
         if has_iva_exempt:
             operation_code = 'E'
-
-        try:
-            if invoice.iva_digital_operation_code in ['X', 'Z']:
-                import_clearance = '%.16s' % str(
-                    internal_number_formatted
-                ).ljust(16, ' ')
-                # Here import_clearance could be internal_number_formatted_aux or
-                # We need to add clearence_id.name field to account.move
-            else:
-                import_clearance = '%.16s' % ''.ljust(16, ' ')
-        except Exception as e:
-            _logger.error(
-                'Error on field %s: %s' % ('account_move.clearance_id', e)
-            )
-            if invoice.__contains__('import_clearance'):
-                import_clearance = False
-            import_clearance = '%.16s' % ''.ljust(16, ' ')
-            errors.append(
-                _(
-                    'Invoice %(name)s of %(type)s: Wrong %(field)s',
-                    name=invoice.name,
-                    type=(
-                        _('suppliers')
-                        if invoice.move_type.startswith('in_')
-                        else _('customers')
-                    ),
-                    field=self.env['account.move']
-                    ._fields['import_clearance']
-                    .string,
-                )
-            )
 
         amount_iva = self._get_perception_with_type_iva(invoice)
 
@@ -829,7 +750,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         aliquot_lines = []
         errors = []
 
-        for tax_line in self._get_invoice_not_vat_tax_lines(invoice):
+        for tax_line in self._get_invoice_vat_tax_lines(invoice):
             line = self._format_aliquot_import_line(tax_line, invoice)
             if line[0]:
                 aliquot_line = ''.join(line[1])
@@ -920,9 +841,6 @@ class LibroIVAExporterWizard(models.TransientModel):
         purchases = []
 
         for invoice in invoices:
-            if not invoice.fiscal_position_id.afip_code:
-                continue
-
             line = self._create_purchase_line(invoice)
             if line[0]:
                 aliquot_line = self._create_aliquot_purchase_line(invoice)
@@ -930,7 +848,6 @@ class LibroIVAExporterWizard(models.TransientModel):
                     aliquot_import_line = (
                         self._create_aliquot_import_purchase_line(invoice)
                     )
-
                     if aliquot_import_line[0]:
                         import_aliquots += aliquot_import_line[1]
                     else:
@@ -999,6 +916,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         invoice_purchase_ids = AccountMove.search(
             [('move_type', 'in', ('in_invoice', 'in_refund'))] + domain
         )
+
         (
             purchase_err,
             purchase_aliquot_err,

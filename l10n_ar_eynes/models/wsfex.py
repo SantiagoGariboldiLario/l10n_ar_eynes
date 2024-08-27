@@ -607,7 +607,6 @@ class WsfexConfig(models.Model):
             xml_request = ws.XmlRequest
             _logger.info("Data sent to AFIP:")
             _logger.info(xml_request)
-            req_vals.update({'xml_request': xml_request})
         except SoapFault as soap_fault:
             error_msg = "%s: %s" % (
                 soap_fault.faultcode,
@@ -627,66 +626,78 @@ class WsfexConfig(models.Model):
         finally:
             req_vals.update(
                 {
+                    'xml_request': xml_request,
+                    'result': ws.Resultado,
                     'request_id': request_id,
                 }
             )
 
-        if error_msg:
-            req_vals.update(
-                {
-                    'result': 'E',
-                    'errors': error_msg,
-                }
-            )
-        else:
-            error_msg = '' if '0: ok' in ws.ErrMsg.lower() else ws.ErrMsg
-            obs_msg = '' if '0: ok' in ws.Obs.lower() else ws.Obs
-            events_msg = ''
-            for event in ws.Eventos:
-                events_msg += '' if '0: ok' in event.lower() else event
-            if ws.Resultado in ["A"] or ws.CAE:
-                _logger.info("Mission accomplished!")
-                cae_due_date = (
-                    ws.Vencimiento
-                    and datetime.strptime(ws.Vencimiento, "%d/%m/%Y").date()
-                    or False
-                )
-                req_vals.update(
-                    {
-                        'result': ws.Resultado,
-                        'errors': error_msg,
-                        'events': events_msg,
-                        'observations': obs_msg,
-                        'cae': ws.CAE or "",
-                        'cae_due_date': cae_due_date,
-                    }
-                )
+        error_msg = (
+            error_msg + '' if '0: ok' in ws.ErrMsg.lower() else ws.ErrMsg
+        )
+        obs_msg = '' if '0: ok' in ws.Obs.lower() else ws.Obs
+        events_msg = ''
+        for event in ws.Eventos:
+            events_msg += '' if '0: ok' in event.lower() else event
 
+        cae_due_date = False
+        try:
+            cae_due_date = (
+                ws.Vencimiento
+                and datetime.strptime(ws.Vencimiento, "%Y%m%d").date()
+            )
+        except Exception as e:
+            error_msg += str(e)
+            error_msg += '. CAE Due Date not saved \n'
+
+        invoice_date = False
+        try:
+            invoice_date = (
+                ws.FechaCbte
+                and datetime.strptime(ws.FechaCbte, "%Y%m%d").date()
+            )
+        except Exception as e:
+            error_msg += str(e)
+            error_msg += '. Invoice Date not saved \n'
+
+        if not ws.Resultado or ws.Resultado == "R":
+            _logger.warning("AFIP Validation Error. Invoice not approved.")
+        else:
+            _logger.info("Mission accomplished!")
+
+            inv_name = ''
+            try:
                 inv_name = "%s-%s" % (
                     str(req_vals['pos_ar']).zfill(5),
                     str(ws.CbteNro).zfill(8),
                 )
+            except Exception as e:
+                error_msg += str(e)
+                error_msg += '. Invoice number not saved \n'
+
                 inv_vals = {
-                    'cae': ws.CAE,
+                    'cae': ws.CAE or "",
                     'cae_due_date': cae_due_date,
                     'internal_number': inv_name,
                     'name': inv_name,
+                    'invoice_date': invoice_date,
                 }
                 invoice.write(inv_vals)
                 _logger.info(
-                    "Approved\n UPDATED invoice fields: %s" % (inv_vals)
-                )
-            else:
-                _logger.warning("AFIP Validation Error. Invoice not approved.")
-                req_vals.update(
-                    {
-                        'result': 'E',
-                        'errors': error_msg,
-                        'events': events_msg,
-                        'observations': obs_msg,
-                    }
+                    "Approved\n UPDATED invoice id: %s fields: %s"
+                    % (invoice.id, inv_vals)
                 )
             _logger.info("Transaction with AFIP finished.")
+
+            req_vals.update(
+                {
+                    'errors': error_msg,
+                    'events': events_msg,
+                    'observations': obs_msg,
+                    'cae': ws.CAE or "",
+                    'cae_due_date': cae_due_date,
+                }
+            )
 
         self.env['ws.request.detail'].create(req_vals)
         _logger.info("Request details saved.")

@@ -39,6 +39,13 @@
                         invisible="state != 'draft'"
                         type="object"
                     />
+                    <button
+                        name="send_email"
+                        string="Send by e-mail"
+                        type="object"
+                        invisible="state != 'posted'"
+                        class="oe_highlight"
+                    />
                     <field
                         name="state"
                         widget="statusbar"
@@ -248,7 +255,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        readonly="1"
+                                        invisible="True"
                                         force_save="True"
                                     />
                                     <field
@@ -352,7 +359,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        readonly="True"
+                                        invisible="True"
                                         force_save="True"
                                     />
                                     <field
@@ -696,6 +703,12 @@
                         string="Set to Draft"
                     />
                     <button
+                        name="action_clean_lines"
+                        string="Limpiar imputaciones"
+                        invisible="state != 'draft'"
+                        type="object"
+                    />
+                    <button
                         name="send_email"
                         string="Send by e-mail"
                         type="object"
@@ -908,7 +921,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        readonly="True"
+                                        invisible="True"
                                         force_save="True"
                                     />
                                     <field
@@ -1015,7 +1028,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        readonly="True"
+                                        invisible="True"
                                         force_save="True"
                                     />
                                     <field
