@@ -536,11 +536,17 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
             LEFT JOIN account_account AS ac ON mvl.account_id = ac.id
             JOIN account_move m ON m.id=mvl.move_id
             WHERE ac.recpam_type = 'reexpressed'
+            AND mvl.date >= %(date_from)s
+            AND mvl.date <= %(date_to)s
             GROUP BY mvl.account_id;
         """
         if not coefficient:
             coefficient = self.get_coefficient(date_from, date_to, fiscal_year)
-        vals = {'coefficient': coefficient}
+        vals = {
+            'coefficient': coefficient,
+            'date_from': date_from,
+            'date_to': date_to,
+        }
         self.env.cr.execute(query, vals)
         res = self.env.cr.dictfetchall()
         return res
