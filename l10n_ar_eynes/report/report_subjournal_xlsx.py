@@ -135,18 +135,21 @@ class SubjournalXlsx(models.AbstractModel):
                 all_taxes.append(base_vals)
                 i += 1
 
-        # self.columns = all_taxes
         return all_taxes
 
     def get_no_taxed(self, line, sign, sign_no_taxed):
-        q = "SELECT id FROM account_tax WHERE tax_group_id = (SELECT id FROM account_tax_group WHERE group_type LIKE 'vat')"
+        q = """
+            SELECT id
+            FROM account_tax
+            WHERE tax_group_id = (SELECT id FROM account_tax_group WHERE group_type LIKE 'vat')
+        """
         self.env.cr.execute(q)
-        ids = self.env.cr.fetchall()
+        ids = [id[0] for id in self.env.cr.fetchall()]
 
         if line["tax_line_id"] not in ids and line["tax_ids"] not in ids:
             return (line["debit"] - line["credit"]) * sign * sign_no_taxed
         else:
-            0.0
+            return 0.0
 
     def get_lines(self, types, obj, cols):
         query_vals = self.get_query_vals(types, obj)
@@ -193,6 +196,10 @@ class SubjournalXlsx(models.AbstractModel):
                     line['invoice_type'],
                     line['denomination'],
                     line['is_debit_note'],
+                )
+            else:
+                lines[dict_hash]['no_taxed'] += self.get_no_taxed(
+                    line, sign, sign_no_taxed
                 )
 
             for i, tax in enumerate(cols):
