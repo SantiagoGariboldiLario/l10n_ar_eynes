@@ -160,6 +160,10 @@ class ResPartner(models.Model):
                 domain.append(
                     ("padron_state_id", '=', self.env.ref('base.state_ar_s').id)
                 )
+            elif padron_name == "ENTR":
+                domain.append(
+                    ("padron_state_id", '=', self.env.ref('base.state_ar_e').id)
+                )
 
             if padron_type == 'perceptions':
                 domain.append(("code", 'like', 'PIE_'))
