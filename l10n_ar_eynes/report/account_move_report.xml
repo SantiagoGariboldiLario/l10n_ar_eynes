@@ -701,6 +701,10 @@
                                         t-esc="o.amount_total_cur"
                                     /></p>
                             </div>
+                            <div t-if="o.narration and o.narration != '&lt;p&gt;&lt;br&gt;&lt;/p&gt;'">
+                                <strong>Términos y condiciones</strong>
+                                <span t-esc="o.narration" />
+                            </div>
                         </div>
                     </div>
                     <style>
