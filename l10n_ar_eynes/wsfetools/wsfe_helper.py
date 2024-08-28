@@ -252,3 +252,64 @@ class WSFEParser(WSParser):
                     )
                 )
         return optionals
+
+    def get_cae_due_date(self, ws, error_msg):
+        cae_due_date = False
+        try:
+            if ws.Vencimiento:
+                cae_due_date = datetime.strptime(
+                    ws.Vencimiento, "%Y%m%d"
+                ).date()
+        except Exception as e:
+            error_msg += str(e)
+            error_msg += '. CAE Due Date not saved \n'
+        return cae_due_date, error_msg
+
+    def get_invoice_date(self, ws, error_msg):
+        invoice_date = False
+        try:
+            if ws.FechaCbte:
+                invoice_date = datetime.strptime(ws.FechaCbte, "%Y%m%d").date()
+        except Exception as e:
+            error_msg += str(e)
+            error_msg += '. Invoice Date not saved \n'
+        return invoice_date, error_msg
+
+    def get_invoice_name(self, env, voucher_type, ws, error_msg):
+        invoice_name = False
+        try:
+            invoice_name = "%s%s-%s" % (
+                self.handle_FCE_prefix(env, voucher_type),
+                str(ws.PuntoVenta).zfill(5),
+                str(ws.CbteNro).zfill(8),
+            )
+        except Exception as e:
+            error_msg += str(e)
+            error_msg += '. Invoice number not saved \n'
+        return invoice_name, error_msg
+
+    def handle_FCE_prefix(self, env, voucher_type):
+        if voucher_type in [
+            int(
+                env.ref('l10n_ar_eynes.factura_credito_electronica_a').afip_code
+            ),
+            int(
+                env.ref('l10n_ar_eynes.factura_credito_electronica_b').afip_code
+            ),
+        ]:
+            return 'FCE'
+        elif voucher_type in [
+            int(env.ref('l10n_ar_eynes.nota_credito_electronica_a').afip_code),
+            int(env.ref('l10n_ar_eynes.nota_credito_electronica_b').afip_code),
+        ]:
+            return 'NCE'
+        elif voucher_type in [
+            int(
+                env.ref('l10n_ar_eynes.factura_debito_electronica_a').afip_code
+            ),
+            int(
+                env.ref('l10n_ar_eynes.factura_debito_electronica_b').afip_code
+            ),
+        ]:
+            return 'NDE'
+        return ''

@@ -4,6 +4,7 @@
 ##############################################################################
 
 import logging
+from datetime import datetime
 
 from odoo import _
 from odoo.exceptions import UserError
@@ -157,3 +158,37 @@ class WSFEXParser(WSParser):
                 }
             )
         return permissions
+
+    def get_cae_due_date(self, ws, error_msg):
+        cae_due_date = False
+        try:
+            if ws.Vencimiento:
+                cae_due_date = datetime.strptime(
+                    ws.Vencimiento, "%d/%m/%Y"
+                ).date()
+        except Exception as e:
+            error_msg += str(e)
+            error_msg += '. CAE Due Date not saved \n'
+        return cae_due_date, error_msg
+
+    def get_invoice_date(self, ws, error_msg):
+        invoice_date = False
+        try:
+            if ws.FechaCbte:
+                invoice_date = datetime.strptime(ws.FechaCbte, "%Y%m%d").date()
+        except Exception as e:
+            error_msg += str(e)
+            error_msg += '. Invoice Date not saved \n'
+        return invoice_date, error_msg
+
+    def get_invoice_name(self, ws, pos, error_msg):
+        invoice_name = False
+        try:
+            invoice_name = "%s-%s" % (
+                str(pos).zfill(5),
+                str(ws.CbteNro).zfill(8),
+            )
+        except Exception as e:
+            error_msg += str(e)
+            error_msg += '. Invoice number not saved \n'
+        return invoice_name, error_msg

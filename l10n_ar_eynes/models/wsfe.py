@@ -4,7 +4,6 @@
 ##############################################################################
 
 import logging
-from datetime import datetime
 
 from pyafipws.wsfev1 import WSFEv1
 from pysimplesoap.client import SoapFault
@@ -389,48 +388,6 @@ class WsfeConfig(models.Model):
             'currency_rate': data['MonCotiz'],
         }
 
-    def _handle_FCE_prefix(self, voucher_type):
-        if voucher_type in [
-            int(
-                self.env.ref(
-                    'l10n_ar_eynes.factura_credito_electronica_a'
-                ).afip_code
-            ),
-            int(
-                self.env.ref(
-                    'l10n_ar_eynes.factura_credito_electronica_b'
-                ).afip_code
-            ),
-        ]:
-            return 'FCE'
-        elif voucher_type in [
-            int(
-                self.env.ref(
-                    'l10n_ar_eynes.nota_credito_electronica_a'
-                ).afip_code
-            ),
-            int(
-                self.env.ref(
-                    'l10n_ar_eynes.nota_credito_electronica_b'
-                ).afip_code
-            ),
-        ]:
-            return 'NCE'
-        elif voucher_type in [
-            int(
-                self.env.ref(
-                    'l10n_ar_eynes.factura_debito_electronica_a'
-                ).afip_code
-            ),
-            int(
-                self.env.ref(
-                    'l10n_ar_eynes.factura_debito_electronica_b'
-                ).afip_code
-            ),
-        ]:
-            return 'NDE'
-        return ''
-
     def send_invoice_to_afip(self, invoice, request_id):
         self.ensure_one()
         if not self.cuit:
@@ -441,7 +398,7 @@ class WsfeConfig(models.Model):
         req_vals = {
             'invoice_id': invoice.id,
         }
-        error_msg = ""
+        error_msg = xml_request = ""
         try:
             ws = self.ws_auth()
 
@@ -477,45 +434,35 @@ class WsfeConfig(models.Model):
                 }
             )
 
-        error_msg = error_msg + '\n'.join(err for err in ws.Errores)
-        events_msg = '\n'.join(evn for evn in ws.Eventos)
-        obs_msg = '\n'.join(obs for obs in ws.Observaciones)
-
-        cae_due_date = False
+        helper = WSFEParser()
         try:
-            cae_due_date = (
-                ws.Vencimiento
-                and datetime.strptime(ws.Vencimiento, "%Y%m%d").date()
-            )
+            error_msg += '\n'.join(err for err in ws.Errores)
         except Exception as e:
-            error_msg += str(e)
-            error_msg += '. CAE Due Date not saved \n'
+            _logger.info(str(e))
 
-        invoice_date = False
+        obs_msg = ''
         try:
-            invoice_date = (
-                ws.FechaCbte
-                and datetime.strptime(ws.FechaCbte, "%Y%m%d").date()
-            )
+            obs_msg = '\n'.join(obs for obs in ws.Observaciones)
         except Exception as e:
-            error_msg += str(e)
-            error_msg += '. Invoice Date not saved \n'
+            _logger.info(str(e))
+
+        events_msg = ''
+        try:
+            events_msg = '\n'.join(evn for evn in ws.Eventos)
+        except Exception as e:
+            _logger.info(str(e))
+
+        cae_due_date, error_msg = helper.get_cae_due_date(ws, error_msg)
+        invoice_date, error_msg = helper.get_invoice_date(ws, error_msg)
 
         if not ws.Resultado or ws.Resultado == "R":
             _logger.warning("AFIP Validation Error. Invoice not approved.")
         else:
             _logger.info("Mission accomplished!")
 
-            inv_name = False
-            try:
-                inv_name = "%s%s-%s" % (
-                    self._handle_FCE_prefix(req_vals['voucher_type']),
-                    str(ws.PuntoVenta).zfill(5),
-                    str(ws.CbteNro).zfill(8),
-                )
-            except Exception as e:
-                error_msg += str(e)
-                error_msg += '. Invoice number not saved \n'
+            inv_name, error_msg = helper.get_invoice_name(
+                self.env, req_vals['voucher_type'], ws, error_msg
+            )
 
             inv_vals = {
                 'cae': ws.CAE or "",

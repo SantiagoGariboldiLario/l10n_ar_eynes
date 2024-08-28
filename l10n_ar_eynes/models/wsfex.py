@@ -4,7 +4,6 @@
 ##############################################################################
 
 import logging
-from datetime import datetime
 
 from pyafipws.wsfexv1 import WSFEXv1
 from pysimplesoap.client import SoapFault
@@ -595,7 +594,7 @@ class WsfexConfig(models.Model):
         req_vals = {
             'invoice_id': invoice.id,
         }
-        error_msg = ""
+        error_msg = xml_request = ""
         try:
             ws = self.ws_auth()
 
@@ -632,72 +631,61 @@ class WsfexConfig(models.Model):
                 }
             )
 
-        error_msg = (
-            error_msg + '' if '0: ok' in ws.ErrMsg.lower() else ws.ErrMsg
-        )
-        obs_msg = '' if '0: ok' in ws.Obs.lower() else ws.Obs
+        try:
+            error_msg += '' if '0: ok' in ws.ErrMsg.lower() else ws.ErrMsg
+        except Exception as e:
+            _logger.info(str(e))
+
+        obs_msg = ''
+        try:
+            obs_msg = '' if '0: ok' in ws.Obs.lower() else ws.Obs
+        except Exception as e:
+            _logger.info(str(e))
+
         events_msg = ''
-        for event in ws.Eventos:
-            events_msg += '' if '0: ok' in event.lower() else event
-
-        cae_due_date = False
         try:
-            cae_due_date = (
-                ws.Vencimiento
-                and datetime.strptime(ws.Vencimiento, "%Y%m%d").date()
-            )
+            for event in ws.Eventos:
+                events_msg += '' if '0: ok' in event.lower() else event
         except Exception as e:
-            error_msg += str(e)
-            error_msg += '. CAE Due Date not saved \n'
+            _logger.info(str(e))
 
-        invoice_date = False
-        try:
-            invoice_date = (
-                ws.FechaCbte
-                and datetime.strptime(ws.FechaCbte, "%Y%m%d").date()
-            )
-        except Exception as e:
-            error_msg += str(e)
-            error_msg += '. Invoice Date not saved \n'
+        helper = WSFEXParser()
+
+        cae_due_date = helper.get_cae_due_date(ws, error_msg)
+        invoice_date = helper.get_invoice_date(ws, error_msg)
 
         if not ws.Resultado or ws.Resultado == "R":
             _logger.warning("AFIP Validation Error. Invoice not approved.")
         else:
             _logger.info("Mission accomplished!")
 
-            inv_name = ''
-            try:
-                inv_name = "%s-%s" % (
-                    str(req_vals['pos_ar']).zfill(5),
-                    str(ws.CbteNro).zfill(8),
-                )
-            except Exception as e:
-                error_msg += str(e)
-                error_msg += '. Invoice number not saved \n'
-
-                inv_vals = {
-                    'cae': ws.CAE or "",
-                    'cae_due_date': cae_due_date,
-                    'internal_number': inv_name,
-                    'name': inv_name,
-                    'invoice_date': invoice_date,
-                }
-                invoice.write(inv_vals)
-                _logger.info(
-                    "Approved\n UPDATED invoice id: %s fields: %s"
-                    % (invoice.id, inv_vals)
-                )
-            _logger.info("Transaction with AFIP finished.")
-
-            req_vals.update(
-                {
-                    'errors': error_msg,
-                    'events': events_msg,
-                    'observations': obs_msg,
-                    'cae': ws.CAE or "",
-                    'cae_due_date': cae_due_date,
-                }
+            inv_name = helper.get_invoice_name(
+                ws, req_vals['pos_ar'], error_msg
             )
+
+            inv_vals = {
+                'cae': ws.CAE or "",
+                'cae_due_date': cae_due_date,
+                'internal_number': inv_name,
+                'name': inv_name,
+                'invoice_date': invoice_date,
+            }
+            invoice.write(inv_vals)
+            _logger.info(
+                "Approved\n UPDATED invoice id: %s fields: %s"
+                % (invoice.id, inv_vals)
+            )
+        _logger.info("Transaction with AFIP finished.")
+
+        req_vals.update(
+            {
+                'errors': error_msg,
+                'events': events_msg,
+                'observations': obs_msg,
+                'cae': ws.CAE or "",
+                'cae_due_date': cae_due_date,
+            }
+        )
 
         self.env['ws.request.detail'].create(req_vals)
         _logger.info("Request details saved.")
