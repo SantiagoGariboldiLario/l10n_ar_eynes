@@ -561,8 +561,7 @@ class AccountCheck(models.Model):
         # pertenece el cheque
         if self.type in ['common', 'deferred']:
             # Buscamos la configuracion de cheques
-            check_config_obj = self.env['account.check.config']
-            config = check_config_obj.search(
+            config = self.env['account.check.config'].search(
                 [('company_id', '=', voucher.company_id.id)]
             )
             if not len(config):
@@ -585,17 +584,12 @@ class AccountCheck(models.Model):
                 )
             )
 
-        # TODO: Chequear que funcione bien en
-        # multicurrency estas dos lineas de abajo
-        company_currency = voucher.company_id.currency_id.id
-        current_currency = self.currency_id.id
         self.checkbook_id.bank_account_id.currency_id.id
-        amount_in_company_currency = self.amount
         debit = credit = 0.0
         if voucher.type in ('purchase', 'payment'):
-            credit = amount_in_company_currency
+            credit = self.amount
         elif voucher.type in ('sale', 'receipt'):
-            debit = amount_in_company_currency
+            debit = self.amount
         if debit < 0:
             credit = -debit
             debit = 0.0
@@ -619,12 +613,8 @@ class AccountCheck(models.Model):
             'account_id': account_id,
             'journal_id': voucher.journal_id.id,
             'partner_id': voucher.partner_id.id,
-            'currency_id': company_currency != current_currency
-            and current_currency
-            or False,
-            'amount_currency': company_currency != current_currency
-            and sign * self.amount_currency
-            or 0.0,
+            'currency_id': voucher.currency_id.id,
+            'amount_currency': sign * self.amount_currency,
             'date': voucher.date,
             'date_maturity': date_maturity,
         }
@@ -809,10 +799,8 @@ class AccountCheck(models.Model):
 
     @api.model
     def third_party_create_voucher_move_line(self, voucher):
-        check_config_obj = self.env['account.check.config']
-
         # Buscamos la configuracion de cheques
-        config = check_config_obj.search(
+        config = self.env['account.check.config'].search(
             [('company_id', '=', voucher.company_id.id)]
         )
         if not len(config):
@@ -822,8 +810,8 @@ class AccountCheck(models.Model):
 
         # TODO: Chequear que funcione bien en
         # multicurrency estas dos lineas de abajo
-        company_currency = voucher.company_id.currency_id.id
-        current_currency = self.currency_id.id
+        voucher.company_id.currency_id.id
+        self.currency_id.id
 
         # amount_in_company_currency = (
         #     voucher._convert_paid_amount_in_company_currency(self.amount)
@@ -851,12 +839,8 @@ class AccountCheck(models.Model):
             'account_id': config.account_id.id,
             'journal_id': voucher.journal_id.id,
             'partner_id': voucher.partner_id.id,
-            'currency_id': company_currency != current_currency
-            and current_currency
-            or False,
-            'amount_currency': company_currency != current_currency
-            and sign * self.amount_currency
-            or 0.0,
+            'currency_id': voucher.currency_id.id,
+            'amount_currency': sign * self.amount_currency,
             'date': voucher.date,
             'date_maturity': self.payment_date or self.issue_date,
         }
