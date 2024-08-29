@@ -31,8 +31,8 @@ class PosOrder(models.Model):
     @api.model
     def _order_fields(self, ui_order):
         res = super(PosOrder, self)._order_fields(ui_order)
-        res['invoice_journal_id'] = ui_order['invoice_journal_id']
-        res['is_wsfe'] = ui_order['inv_electronic_mode']
+        res['invoice_journal_id'] = ui_order.get('invoice_journal_id')
+        res['is_wsfe'] = ui_order.get('inv_electronic_mode')
         return res
 
     def _prepare_invoice_vals(self):
@@ -51,8 +51,8 @@ class PosOrder(models.Model):
     def _hook_recompute_account_move(self, new_move):
         ctx = dict(self.env.context)
         ctx['check_move_validity'] = False
-        new_move.with_context(**ctx)._onchange_invoice_date()
-        new_move.with_context(**ctx).compute_perceptions()
+        # new_move.with_context(**ctx)._onchange_invoice_date() # Existe en l10n_ar_eynes v15 pero se borró
+        # new_move.with_context(**ctx).compute_perceptions()  # Metodo comentado en l10n_ar_eynes
         new_move._onchange_payment_term_date_invoice()
         new_move.select_default_voucher_type()
         return
