@@ -203,7 +203,7 @@ class AccountPaymentOrder(models.Model):
         comodel_name='res.currency',
         string='Currency',
         compute='_compute_default_journal_currency',
-        store=True
+        store=True,
     )
     amount = fields.Float(
         string='Tax Amount',
@@ -996,7 +996,9 @@ class AccountPaymentOrder(models.Model):
     def gather_income_lines(self):
         self.ensure_one()
         self._check_partner_set()
-        account_type = self.type == 'payment' and 'liability_payable' or 'asset_receivable'
+        account_type = (
+            self.type == 'payment' and 'liability_payable' or 'asset_receivable'
+        )
         domain = [
             ('debit', '!=', 0),
             ('credit', '=', 0),
@@ -1015,7 +1017,9 @@ class AccountPaymentOrder(models.Model):
     def gather_debt_lines(self):
         self.ensure_one()
         self._check_partner_set()
-        account_type = self.type == 'payment' and 'liability_payable' or 'asset_receivable'
+        account_type = (
+            self.type == 'payment' and 'liability_payable' or 'asset_receivable'
+        )
         domain = [
             ('debit', '=', 0),
             ('credit', '!=', 0),
@@ -1255,8 +1259,10 @@ class AccountPaymentOrder(models.Model):
             'skip_invoice_sync': True,
         }
         # Create the account move record.
-        move_recordset = self.env['account.move'].with_context(**ctx).create(
-            self.account_move_get()
+        move_recordset = (
+            self.env['account.move']
+            .with_context(**ctx)
+            .create(self.account_move_get())
         )
         # Get the name of the account_move just created
         name = move_recordset.name
@@ -1284,7 +1290,9 @@ class AccountPaymentOrder(models.Model):
         elif self.type == 'purchase':
             line_total = line_total + self.amount
         # Create one move line per voucher line where amount is not 0.0
-        line_total, amls_to_reconcile = self.with_context(**ctx).voucher_move_line_create(line_total, move_id)
+        line_total, amls_to_reconcile = self.with_context(
+            **ctx
+        ).voucher_move_line_create(line_total, move_id)
 
         for line in self.concept_line_ids:
             if not line.amount:
@@ -1471,9 +1479,11 @@ class AccountPaymentOrder(models.Model):
         before so it doesn't modify sequence number
         """
         ret_tax = self.retention_ids.mapped('retention_id')
-        retentions_without_sequence = self.env['account.journal'].search([
-            ('tax_id', 'in', ret_tax.ids)
-        ]).filtered(lambda ret: not ret.sequence_id.id)
+        retentions_without_sequence = (
+            self.env['account.journal']
+            .search([('tax_id', 'in', ret_tax.ids)])
+            .filtered(lambda ret: not ret.sequence_id.id)
+        )
         if retentions_without_sequence:
             raise ValidationError(
                 _("This journals doesnt have a sequence established:\n%s")
@@ -1729,7 +1739,6 @@ class AccountPaymentOrder(models.Model):
 
         date = self.read(['date'])[0]['date']
         self = self.with_context(date=date)
-        # voucher_currency = self.journal_id.currency_id or self.company_id.currency_id  # noqa
         prec = self.env['decimal.precision'].precision_get('account')
         for line in self.line_ids:
             if not line.amount and not (
@@ -1797,13 +1806,9 @@ class AccountPaymentOrder(models.Model):
     ):
         move_line = {}
 
-        current_currency_obj = (
-            self.currency_id or self.journal_id.company_id.currency_id
-        )
-
-        if not current_currency_obj.is_zero(line_total):
-            diff = line_total
-            account_id = False
+        if not self.currency_id.is_zero(line_total):
+            # fallback on account of voucher
+            account_id = self.account_id.id
             write_off_name = ''
             if self.payment_option == 'with_writeoff':
                 account_id = self.writeoff_acc_id.id
@@ -1815,9 +1820,6 @@ class AccountPaymentOrder(models.Model):
                     )
                 else:
                     account_id = self.partner_id.property_account_payable_id.id
-            else:
-                # fallback on account of voucher
-                account_id = self.account_id.id
             sign = self.type == 'payment' and -1 or 1
             move_line = {
                 'name': write_off_name or name,
@@ -1825,14 +1827,10 @@ class AccountPaymentOrder(models.Model):
                 'move_id': move_id,
                 'partner_id': self.partner_id.id,
                 'date': self.date,
-                'credit': diff > 0 and diff or 0.0,
-                'debit': diff < 0 and -diff or 0.0,
-                'amount_currency': company_currency != current_currency
-                and current_currency.round(
-                    sign * -1 * self.writeoff_amount / self.payment_rate
-                )
-                or 0.0,
-                'currency_id': current_currency.id,
+                'credit': line_total > 0 and line_total or 0.0,
+                'debit': line_total < 0 and -line_total or 0.0,
+                'amount_currency': sign * line_total,
+                'currency_id': self.currency_id.id,
             }
         return move_line
 
@@ -2592,9 +2590,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
             self.account_id = self.retention_id.get_retention_account()
             self.name = self.retention_id.name
             res['domain'] = {
-                'concept_id': [
-                    ('type', '=', self.retention_id.retention_type)
-                ],
+                'concept_id': [('type', '=', self.retention_id.retention_type)],
             }
         return res
 
@@ -2656,9 +2652,9 @@ class AccountPaymentOrderRetentionLine(models.Model):
         return move_line
 
     def apply_retention_sequence(self):
-        retention_journal = self.env['account.journal'].search([
-            ('tax_id', '=', self.retention_id.id)
-        ])
+        retention_journal = self.env['account.journal'].search(
+            [('tax_id', '=', self.retention_id.id)]
+        )
         if not retention_journal.sequence_id.id:
             raise ValidationError(
                 _(
