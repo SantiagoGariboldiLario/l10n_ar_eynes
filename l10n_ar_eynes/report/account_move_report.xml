@@ -469,8 +469,8 @@
                                     <tbody>
                                         <tr t-foreach="o.invoice_line_ids" t-as="line">
                                             <t t-set="iva_tax_amount" t-value="" />
-                                            <t
-                                            t-if="not line.display_type"
+                                        <t
+                                            t-if="line.display_type == 'product'"
                                             name="account_invoice_line_accountable"
                                         >
                                             <td class="product-description-column">
