@@ -461,6 +461,7 @@ class SubjournalXlsx(models.AbstractModel):
             ('A3', 'Perido', date_format),
             ('B3', wizard_obj.date_from.strftime('%m/%Y'), date_format),
         ]
+
         for data in company_data:
             sheet.write(data[0], data[1], data[2])
 
@@ -483,7 +484,8 @@ class SubjournalXlsx(models.AbstractModel):
             sheet.write('C' + str(p), line['partner'], cell_format)
             sheet.write('D' + str(p), line['state'], cell_format)
             sheet.write('E' + str(p), line['vat'], cell_format)
-            sheet.write('F' + str(p), line['fiscal_position'], cell_format)
+            sheet.write('F' + str(p), line["fiscal_position"][self.env.lang]
+                        if self.env.lang in line["fiscal_position"] else line["fiscal_position"]["en_US"], cell_format)
             sheet.write('G' + str(p), line['invoice_type'], cell_format)
             sheet.write('H' + str(p), line['invoice_number'], cell_format)
             i = 8
