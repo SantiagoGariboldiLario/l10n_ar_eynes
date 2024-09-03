@@ -651,15 +651,15 @@ class WsfexConfig(models.Model):
 
         helper = WSFEXParser()
 
-        cae_due_date = helper.get_cae_due_date(ws, error_msg)
-        invoice_date = helper.get_invoice_date(ws, error_msg)
+        cae_due_date, error_msg = helper.get_cae_due_date(ws, error_msg)
+        invoice_date, error_msg = helper.get_invoice_date(ws, error_msg)
 
         if not ws.Resultado or ws.Resultado == "R":
             _logger.warning("AFIP Validation Error. Invoice not approved.")
         else:
             _logger.info("Mission accomplished!")
 
-            inv_name = helper.get_invoice_name(
+            inv_name, error_msg = helper.get_invoice_name(
                 ws, req_vals['pos_ar'], error_msg
             )
 
