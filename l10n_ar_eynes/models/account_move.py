@@ -2,11 +2,12 @@ import base64
 import datetime
 import json
 import logging
-import qrcode
 import urllib.parse
 from base64 import b64encode
 from collections import defaultdict
 from io import BytesIO
+
+import qrcode
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -21,6 +22,52 @@ AFIP_FCE_CODE_START = 200
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    amount_exempt = fields.Monetary(
+        string='Except',
+        compute='_compute_amount_custom',
+        store=True,
+    )
+    amount_no_taxed = fields.Monetary(
+        string='No Taxed',
+        compute='_compute_amount_custom',
+        store=True,
+    )
+    amount_taxed = fields.Monetary(
+        string='Taxed',
+        compute='_compute_amount_custom',
+        store=True,
+    )
+    internal_number = fields.Char(
+        string='Internal Number',
+        copy=False,
+    )
+    supplier_move_reference = fields.Char(
+        string='Supplier Invoice Reference',
+        copy=False,
+    )
+    # *******************************************************************************************************
+    #                        Facturación según estándares fiscales de Argentina:
+    # *******************************************************************************************************
+    associated_inv_ids = fields.Many2many(
+        comodel_name='account.move',
+        relation='inv_associated_inv_rel',
+        column1='invoice_id',
+        column2='associated_invoice_id',
+        string='Assoiciated Invoices',
+    )
+    cae = fields.Char(
+        string='CAE',
+        size=32,
+        required=False,
+        copy=False,
+        help='Codigo de Autorizacion Electronico assigned by AFIP.',
+    )
+    cae_due_date = fields.Date(
+        'CAE Due Date',
+        required=False,
+        copy=False,
+        help='Fecha de vencimiento del CAE',
+    )
     denomination = fields.Selection(
         selection=[
             ("a", "A"),
@@ -36,7 +83,48 @@ class AccountMove(models.Model):
         compute='_compute_move_denomination',
         store=True,
     )
-    disable_perceptions = fields.Boolean(default=False)
+    fiscal_type = fields.Selection(
+        selection=[
+            ('internal', 'Internal Invoice'),
+            ('electronic', 'Electronic Invoice'),
+        ],
+        related='journal_id.fiscal_type',
+        store=True,
+    )
+    inform_period = fields.Boolean(default=False)
+    inform_period_date_from = fields.Date()
+    inform_period_date_to = fields.Date()
+    is_debit_note = fields.Boolean('Debit Note', default=False)
+    local = fields.Boolean(related='fiscal_position_id.local')
+    voucher_type_domain = fields.Char(compute="_compute_voucher_type")
+    voucher_type_id = fields.Many2one(
+        comodel_name='res.voucher.type',
+        string='Voucher type',
+        compute='_compute_voucher_type',
+        store=True,
+        readonly=False,
+    )
+    # FACTURA DE CRÉDITO ELECTRONICA:
+    is_FCE_invoice = fields.Boolean(
+        string="Is FCE?",
+        default=False,
+        help="Set True if this invoice must be treated as Electronic Invoice of Credit.",
+    )
+    optional_ids = fields.One2many(
+        'account.move.optional',
+        'invoice_id',
+        'Optionals',
+    )
+    # FACTURA DE EXPORTACIÓN:
+    dst_country_id = fields.Many2one('wsfex.dst.country.codes', 'Dest Country')
+    dst_cuit_id = fields.Many2one('dst.cuit.codes', 'Country CUIT')
+    export_type_id = fields.Many2one('wsfex.export.type.codes', 'Export Type')
+    shipping_perm_ids = fields.One2many(
+        'wsfex.shipping.permission',
+        'invoice_id',
+        'Shipping Permissions',
+    )
+    # REPORTE LIBRO IVA DIGITAL:
     iva_digital_operation_code = fields.Selection(
         [
             ('A', 'No Alcanzado'),
@@ -52,101 +140,27 @@ class AccountMove(models.Model):
         'Operation Code',
         default='NC',
     )
-    internal_number = fields.Char(
-        string='Internal Number',
-        copy=False,
+    # RESULTADO WEBSERVICES:
+    ws_request_ids = fields.One2many(
+        comodel_name='ws.request.detail', inverse_name='invoice_id'
     )
-    supplier_move_reference = fields.Char(
-        string='Supplier Invoice Reference',
-        copy=False,
-    )
+    # *******************************************************************************************************
+    #                                             Percepciones:
+    # *******************************************************************************************************
     address_shipping_id = fields.Many2one(
         comodel_name='res.partner',
         name='Shipping Address',
         required=False,
     )
-    is_debit_note = fields.Boolean('Debit Note', default=False)
+    disable_perceptions = fields.Boolean(default=False)
     perception_ids = fields.One2many(
         'perception.tax.line',
         'invoice_id',
         string='Perception',
     )
-    cae = fields.Char(
-        string='CAE',
-        size=32,
-        required=False,
-        copy=False,
-        help='Codigo de Autorizacion Electronico assigned by AFIP.',
-    )
-    cae_due_date = fields.Date(
-        'CAE Due Date',
-        required=False,
-        copy=False,
-        help='Fecha de vencimiento del CAE',
-    )
-    associated_inv_ids = fields.Many2many(
-        comodel_name='account.move',
-        relation='inv_associated_inv_rel',
-        column1='invoice_id',
-        column2='associated_invoice_id',
-        string='Assoiciated Invoices',
-    )
-    voucher_type_id = fields.Many2one(
-        comodel_name='res.voucher.type',
-        string='Voucher type',
-        compute='_compute_voucher_type',
-        store=True,
-        readonly=False,
-    )
-    voucher_type_domain = fields.Char(compute="_compute_voucher_type")
-    ws_request_ids = fields.One2many(
-        comodel_name='ws.request.detail', inverse_name='invoice_id'
-    )
-    local = fields.Boolean(related='fiscal_position_id.local')
-    fiscal_type = fields.Selection(
-        selection=[
-            ('internal', 'Internal Invoice'),
-            ('electronic', 'Electronic Invoice'),
-        ],
-        related='journal_id.fiscal_type',
-        store=True,
-    )
-    is_FCE_invoice = fields.Boolean(
-        string="Is FCE?",
-        default=False,
-        help="Set True if this invoice must be treated as Electronic Invoice of Credit.",
-    )
-    amount_no_taxed = fields.Monetary(
-        string='No Taxed',
-        compute='_compute_amount_custom',
-        store=True,
-    )
-    amount_taxed = fields.Monetary(
-        string='Taxed',
-        compute='_compute_amount_custom',
-        store=True,
-    )
-    amount_exempt = fields.Monetary(
-        string='Except',
-        compute='_compute_amount_custom',
-        store=True,
-    )
-    # Campos para facturas de exportacion. Aca ninguno es requerido,
-    # eso lo hacemos en la vista ya que depende de
-    # si es o no factura de exportacion
-    export_type_id = fields.Many2one('wsfex.export.type.codes', 'Export Type')
-    dst_country_id = fields.Many2one('wsfex.dst.country.codes', 'Dest Country')
-    shipping_perm_ids = fields.One2many(
-        'wsfex.shipping.permission',
-        'invoice_id',
-        'Shipping Permissions',
-    )
-    optional_ids = fields.One2many(
-        'account.move.optional',
-        'invoice_id',
-        'Optionals',
-    )
-    dst_cuit_id = fields.Many2one('dst.cuit.codes', 'Country CUIT')
+    # *******************************************************************************************************
+    #                                             Multimoneda:
+    # *******************************************************************************************************
     currency_preciated = fields.Boolean(
         related='currency_id.preciated',
         string="Currency Preciated",
@@ -164,87 +178,56 @@ class AccountMove(models.Model):
         help="""Fields with internal purpose only that depicts
                 if the invoice is a multi currency one or not""",
     )
-    currency_converted = fields.Boolean(
-        'Invoice Converted',
-        default=False,
-        help="""If this invoice was fill as multicurrency and then
-                converted to local currency, this will be checked""",
-    )
-    secondary_currency_id = fields.Many2one(
-        'res.currency',
-        string='Secondary Currency',
-        default=lambda x: x.env.user.company_id.currency_id,
-    )
-    secondary_currency_rate = fields.Float(
-        string='Secondary Currency Rate',
-        digits=(12, 6),
-        default=lambda x: 1.00,
-        help="It is the old currency rate of the last change of currency",
-    )
-    company_currency_id = fields.Many2one(
-        'res.currency',
-        string='Currency',
-        default=lambda x: x.env.user.company_id.currency_id,
-    )
+    # MONTOS EN MONEDA (currency_id):
     amount_exempt_cur = fields.Monetary(
         compute='_compute_amount_all_cur',
         store=True,
         readonly=True,
-        currency_field="secondary_currency_id",
+        currency_field="company_currency_id",
         string='Amount Exempt',
     )
     amount_no_taxed_cur = fields.Monetary(
         compute='_compute_amount_all_cur',
         store=True,
         readonly=True,
-        currency_field="secondary_currency_id",
+        currency_field="company_currency_id",
         string='No Taxed',
     )
     amount_taxed_cur = fields.Monetary(
         compute='_compute_amount_all_cur',
         store=True,
         readonly=True,
-        currency_field="secondary_currency_id",
+        currency_field="company_currency_id",
         string='Taxed',
     )
-    amount_untaxed_cur = fields.Monetary(
+    amount_subtotal_cur = fields.Monetary(
         compute='_compute_amount_all_cur',
         store=True,
         readonly=True,
-        currency_field="secondary_currency_id",
+        currency_field="company_currency_id",
         string='Untaxed',
     )
     amount_tax_cur = fields.Monetary(
         compute='_compute_amount_all_cur',
         store=True,
         readonly=True,
-        currency_field="secondary_currency_id",
+        currency_field="company_currency_id",
         string='Tax',
     )
     amount_perception_curr = fields.Monetary(
         compute='_compute_amount_all_cur',
         store=True,
         readonly=True,
-        currency_field="secondary_currency_id",
+        currency_field="company_currency_id",
         string='Perceptions',
     )
     amount_total_cur = fields.Monetary(
         compute='_compute_amount_all_cur',
         store=True,
         readonly=True,
-        currency_field="secondary_currency_id",
+        currency_field="company_currency_id",
         string='Total',
     )
-    amount_fob_cur = fields.Monetary(
-        compute='_compute_amount_all_cur',
-        store=True,
-        readonly=True,
-        currency_field="secondary_currency_id",
-        string='FOB',
-    )
-    inform_period = fields.Boolean(default=False)
-    inform_period_date_from = fields.Date()
-    inform_period_date_to = fields.Date()
 
     _sql_constraints = [
         (
@@ -306,13 +289,11 @@ class AccountMove(models.Model):
             move.denomination = denomination
 
     @api.depends(
-        'invoice_line_ids',
-        'invoice_line_ids.price_unit',
-        'invoice_line_ids.tax_ids',
-        'invoice_line_ids.quantity',
-        'invoice_line_ids.discount',
         'currency_rate',
-        'perception_ids',
+        'tax_totals',
+        'amount_taxed',
+        'amount_no_taxed',
+        'amount_exempt',
     )
     def _compute_amount_all_cur(self):
         for invoice in self:
@@ -320,55 +301,54 @@ class AccountMove(models.Model):
                 'amount_taxed_cur': 0.0,  # Gravado
                 'amount_no_taxed_cur': 0.0,  # No gravado
                 'amount_exempt_cur': 0.0,  # Exento
-                'amount_untaxed_cur': 0.0,  # Subtotal sin impuestos
-                'amount_tax_cur': 0.0,  # IVA
+                'amount_subtotal_cur': 0.0,  # Subtotal sin impuestos
                 'amount_perception_curr': 0.0,  # Percepciones
+                'amount_tax_cur': 0.0,  # IVA
                 'amount_total_cur': 0.0,  # Total
-                'amount_fob_cur': 0.0,  # ??
             }
 
-            secondary_currency = invoice.secondary_currency_id
-            if (
-                not secondary_currency
-                or secondary_currency == invoice.currency_id
-            ):
-                invoice.update(res)
-                continue
-
-            for line in invoice.invoice_line_ids:
-                amount = line.credit or line.debit
-                res['amount_untaxed_cur'] += amount
-                has_vat_tax = line.tax_ids.filtered(
-                    lambda tax: tax.tax_group_id
-                    and tax.tax_group_id.group_type == 'vat'
+            if invoice.company_currency_id != invoice.currency_id:
+                res['amount_taxed_cur'] = (
+                    invoice.amount_taxed * invoice.currency_rate
                 )
-                if has_vat_tax.filtered(lambda tax: tax.is_exempt):
-                    res['amount_exempt_cur'] += amount
-                elif has_vat_tax:
-                    res['amount_taxed_cur'] += amount
-                else:
-                    res['amount_no_taxed_cur'] += amount
-                res['amount_total_cur'] += amount
+                res['amount_no_taxed_cur'] = (
+                    invoice.amount_no_taxed * invoice.currency_rate
+                )
+                res['amount_exempt_cur'] = (
+                    invoice.amount_exempt * invoice.currency_rate
+                )
 
-            for line in invoice.line_ids - invoice.invoice_line_ids:
-                if not (
-                    line.account_internal_type in ['liability_payable', 'asset_receivable']
-                ):
-                    amount = line.credit or line.debit
-                    if (
-                        line.tax_line_id.tax_group_id
-                        and line.tax_line_id.tax_group_id.group_type == 'vat'
-                    ):
-                        res['amount_tax_cur'] += amount
-                    if (
-                        line.tax_line_id.tax_group_id
-                        and line.tax_line_id.tax_group_id.group_type
-                        == 'perception'
-                    ):
-                        res['amount_perception_curr'] += amount
-                    res['amount_total_cur'] += amount
+                res['amount_total_cur'] += res['amount_taxed_cur']
+                res['amount_total_cur'] += res['amount_no_taxed_cur']
+                res['amount_total_cur'] += res['amount_exempt_cur']
 
-            invoice.update({field: val for field, val in res.items()})
+                for subtotal in invoice.tax_totals['groups_by_subtotal']:
+                    for tax in invoice.tax_totals['groups_by_subtotal'][
+                        subtotal
+                    ]:
+                        group = self.env['account.tax.group'].browse(
+                            tax['tax_group_id']
+                        )
+                        if group.group_type == 'vat':
+                            res['amount_subtotal_cur'] = (
+                                tax['tax_group_base_amount']
+                                * invoice.currency_rate
+                            )
+                            res['amount_tax_cur'] = (
+                                tax['tax_group_amount'] * invoice.currency_rate
+                            )
+
+                            res['amount_total_cur'] += res['amount_tax_cur']
+                        elif group.group_type == 'perception':
+                            res['amount_perception_curr'] = (
+                                tax['tax_group_amount'] * invoice.currency_rate
+                            )
+
+                            res['amount_total_cur'] += res[
+                                'amount_perception_curr'
+                            ]
+
+            invoice.update(res)
 
     def get_highest_pos_sequence(
         self, journal, move_type, is_debit_note=False, is_fce=False
@@ -443,11 +423,11 @@ class AccountMove(models.Model):
         'invoice_payment_term_id',
         'partner_id',
         'currency_id',
-        'perception_ids'
+        'perception_ids',
     )
     def _compute_tax_totals(self):
-        """ Computed field used for custom widget's rendering.
-            Only set on invoices.
+        """Computed field used for custom widget's rendering.
+        Only set on invoices.
         """
         # pylint: disable=missing-return
         super(AccountMove, self)._compute_tax_totals()
@@ -458,18 +438,38 @@ class AccountMove(models.Model):
                     groups_by_subtotal = defaultdict(list)
                     for subtotal in totals['groups_by_subtotal']:
                         for tax in totals['groups_by_subtotal'][subtotal]:
-                            group = self.env['account.tax.group'].browse(tax['tax_group_id'])
+                            group = self.env['account.tax.group'].browse(
+                                tax['tax_group_id']
+                            )
                             if group.group_type == 'perception':
                                 old_amount = tax['tax_group_amount']
                                 base = sum(move.perception_ids.mapped('base'))
-                                amount = sum(move.perception_ids.mapped('amount'))
+                                amount = sum(
+                                    move.perception_ids.mapped('amount')
+                                )
                                 tax['tax_group_base_amount'] = base
                                 tax['tax_group_amount'] = amount
-                                tax['formatted_tax_group_amount'] = formatLang(self.env, base, currency_obj=move.currency_id)
-                                tax['formatted_tax_group_base_amount'] = formatLang(self.env, amount, currency_obj=move.currency_id)
+                                tax['formatted_tax_group_amount'] = formatLang(
+                                    self.env,
+                                    base,
+                                    currency_obj=move.currency_id,
+                                )
+                                tax[
+                                    'formatted_tax_group_base_amount'
+                                ] = formatLang(
+                                    self.env,
+                                    amount,
+                                    currency_obj=move.currency_id,
+                                )
                                 groups_by_subtotal[subtotal].append(tax)
-                                totals['amount_total'] = totals['amount_total'] - old_amount + amount
-                                totals['formatted_amount_total'] = formatLang(self.env, totals['amount_total'], currency_obj=move.currency_id)
+                                totals['amount_total'] = (
+                                    totals['amount_total'] - old_amount + amount
+                                )
+                                totals['formatted_amount_total'] = formatLang(
+                                    self.env,
+                                    totals['amount_total'],
+                                    currency_obj=move.currency_id,
+                                )
                             else:
                                 groups_by_subtotal[subtotal].append(tax)
                     totals['groups_by_subtotal'] = groups_by_subtotal
@@ -486,7 +486,7 @@ class AccountMove(models.Model):
             company_currency = company.currency_id
             currency = self.currency_id
             if currency != company_currency:
-                curr_rate = currency._get_currency_rate(company, date_invoice)
+                curr_rate = currency.get_currency_rate(company, date_invoice)
                 self.is_multi_currency = True
                 if currency.preciated:
                     self.currency_rate = curr_rate.inverse_company_rate
@@ -499,43 +499,38 @@ class AccountMove(models.Model):
         self._onchange_payment_term_date_invoice()
         return
 
-    @api.onchange('currency_rate')
-    def _onchange_currency_rate(self):
-        if self.is_invoice(include_receipts=True):
-            for line in self._get_lines_onchange_currency():
-                line.currency_rate = self.currency_rate
-            # self.compute_perceptions()
-
     @api.onchange('date')
     def _onchange_date(self):
-        super()._onchange_date()
+        super(AccountMove, self)._onchange_date()
         self._onchange_currency_id()
-        self._onchange_currency_rate()
         return
 
     @api.onchange('currency_id')
     def _inverse_currency_id(self):
-        super()._inverse_currency_id()
+        super(AccountMove, self)._inverse_currency_id()
         self._onchange_currency_id()
-        self._onchange_currency_rate()
         return
 
     @api.onchange('invoice_payment_term_id', 'invoice_date')
     def _onchange_payment_term_date_invoice(self):
         date_invoice = self.invoice_date or fields.Date.context_today(self)
         if self.invoice_payment_term_id:
-            pterm_lines_vals = self.invoice_payment_term_id.with_context(
-                currency_id=self.company_id.currency_id.id
-            )._compute_terms(
-                date_ref=date_invoice,
-                currency=self.company_id.currency_id,
-                company=self.company_id,
-                tax_amount=1,
-                tax_amount_currency=1,
-                sign=1,
-                untaxed_amount=1,
-                untaxed_amount_currency=1,
-            ).get('line_ids', [])
+            pterm_lines_vals = (
+                self.invoice_payment_term_id.with_context(
+                    currency_id=self.company_id.currency_id.id
+                )
+                ._compute_terms(
+                    date_ref=date_invoice,
+                    currency=self.company_id.currency_id,
+                    company=self.company_id,
+                    tax_amount=1,
+                    tax_amount_currency=1,
+                    sign=1,
+                    untaxed_amount=1,
+                    untaxed_amount_currency=1,
+                )
+                .get('line_ids', [])
+            )
             dates = [term['date'] for term in pterm_lines_vals]
             self.invoice_date_due = min(dates)
         elif self.invoice_date_due and (date_invoice > self.invoice_date_due):
@@ -647,107 +642,154 @@ class AccountMove(models.Model):
                 )
             )
 
-    @api.onchange('invoice_date', 'currency_id', 'currency_rate', 'invoice_line_ids')
+    @api.onchange(
+        'invoice_date', 'currency_id', 'currency_rate', 'invoice_line_ids'
+    )
     def _update_perceptions_amounts(self):
         if self.is_sale_document():
             if self.partner_id and not self.disable_perceptions:
-                perception_base_lines = self.invoice_line_ids.filtered(lambda line: 'perception' in line.tax_ids.tax_group_id.mapped('group_type'))
+                perception_base_lines = self.invoice_line_ids.filtered(
+                    lambda line: 'perception'
+                    in line.tax_ids.tax_group_id.mapped('group_type')
+                )
                 perception_application_data = {}
                 for line in perception_base_lines:
-                    perceptions_applications = line.account_id.get_perceptions_applications()
+                    perceptions_applications = (
+                        line.account_id.get_perceptions_applications()
+                    )
                     for application in perceptions_applications:
-                        line_perception_application_data = application.get_perception_data(self.partner_id, self.invoice_date)
+                        line_perception_application_data = (
+                            application.get_perception_data(
+                                self.partner_id, self.invoice_date
+                            )
+                        )
                         applicable = application.check_applicable(
                             invoice=self,
-                            sit_iibb=line_perception_application_data['sit_iibb'],
-                            from_padron=line_perception_application_data['from_padron'],
-                            excluded_percent=line_perception_application_data['excluded_percent']
+                            sit_iibb=line_perception_application_data[
+                                'sit_iibb'
+                            ],
+                            from_padron=line_perception_application_data[
+                                'from_padron'
+                            ],
+                            excluded_percent=line_perception_application_data[
+                                'excluded_percent'
+                            ],
                         )
                         if applicable:
-                            perception_application_data.setdefault(application, {'lines': self.env['account.move.line']})
-                            perception_application_data[application].update(line_perception_application_data)
-                            perception_application_data[application].update({
-                                'lines': perception_application_data[application]['lines'] + line
-                            })
+                            perception_application_data.setdefault(
+                                application,
+                                {'lines': self.env['account.move.line']},
+                            )
+                            perception_application_data[application].update(
+                                line_perception_application_data
+                            )
+                            perception_application_data[application].update(
+                                {
+                                    'lines': perception_application_data[
+                                        application
+                                    ]['lines']
+                                    + line
+                                }
+                            )
 
                 perception_tax_line_vals = []
                 for application in perception_application_data.keys():
                     application_data = perception_application_data[application]
-                    base, amount = application.apply_perception(application_data)
+                    base, amount = application.apply_perception(
+                        application_data
+                    )
                     if base > 0 and amount > 0:
-                        perception_tax_line_vals.append({
-                            'name': application.perception_tax_id.name,
-                            'date': self.invoice_date,
-                            'invoice_id': self.id,
-                            'partner_id': self.partner_id.id,
-                            'base': base,
-                            'amount': amount,
-                            'perception_id': application.perception_tax_id.id,
-                            'manual': False,
-                            'tax_app_id': application.id,
-                            'reg_code': application.reg_code,
-                            'concept_id': application.concept_id.id,
-                        })
+                        perception_tax_line_vals.append(
+                            {
+                                'name': application.perception_tax_id.name,
+                                'date': self.invoice_date,
+                                'invoice_id': self.id,
+                                'partner_id': self.partner_id.id,
+                                'base': base,
+                                'amount': amount,
+                                'perception_id': application.perception_tax_id.id,
+                                'manual': False,
+                                'tax_app_id': application.id,
+                                'reg_code': application.reg_code,
+                                'concept_id': application.concept_id.id,
+                            }
+                        )
 
                 new_perception_lines = self.env['perception.tax.line']
                 for perception_tax_line_vals in perception_tax_line_vals:
-                    new_perception_lines += (
-                        self.env['perception.tax.line']
-                        .new(perception_tax_line_vals)
+                    new_perception_lines += self.env['perception.tax.line'].new(
+                        perception_tax_line_vals
                     )
                 self.perception_ids = new_perception_lines
             else:
                 self.perception_ids.unlink()
 
     def _link_perception_move_lines(self):
-        for invoice in self.filtered(lambda move: move.is_invoice(include_receipts=True)):
+        for invoice in self.filtered(
+            lambda move: move.is_invoice(include_receipts=True)
+        ):
             if not invoice.perception_ids:
                 to_delete = invoice.line_ids.filtered(
-                    lambda aml:
-                        aml.tax_line_id.tax_group_id.group_type == 'perception'
+                    lambda aml: aml.tax_line_id.tax_group_id.group_type
+                    == 'perception'
                 ).ids
-                self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
+                self.env['account.move.line'].browse(to_delete).with_context(
+                    dynamic_unlink=True
+                ).unlink()
             else:
                 sign = -1 if invoice.is_inbound() else 1
                 to_create = []
-                for perception in invoice.perception_ids.mapped('perception_id'):
-                    if not invoice.line_ids.filtered(lambda aml: aml.tax_line_id == perception):
-                        repartition_type = 'invoice' if invoice.is_inbound() else 'refund'
-                        tax_repartition_line = self.env['account.tax.repartition.line'].search([
-                            ('tax_id', '=', perception.id),
-                            ('repartition_type', '=', 'tax'),
-                            ('document_type', '=', repartition_type),
-
-                        ])
+                for perception in invoice.perception_ids.mapped(
+                    'perception_id'
+                ):
+                    if not invoice.line_ids.filtered(
+                        lambda aml: aml.tax_line_id == perception
+                    ):
+                        repartition_type = (
+                            'invoice' if invoice.is_inbound() else 'refund'
+                        )
+                        tax_repartition_line = self.env[
+                            'account.tax.repartition.line'
+                        ].search(
+                            [
+                                ('tax_id', '=', perception.id),
+                                ('repartition_type', '=', 'tax'),
+                                ('document_type', '=', repartition_type),
+                            ]
+                        )
                         if not tax_repartition_line.account_id:
                             raise UserError(
                                 _(
                                     'You need to configure an Account for %(perc_name)s. Go to configuration -> '
                                     'Taxes -> %(perc_name)s and complete this field for Distribution for '
                                     'Invoices and Distribution for Refunds',
-                                    perc_name=perception.name
+                                    perc_name=perception.name,
                                 )
                             )
                         amount = sum(
                             invoice.perception_ids.filtered(
-                                lambda line: line.perception_id == perception).mapped('amount')
+                                lambda line: line.perception_id == perception
+                            ).mapped('amount')
                         )
                         base = sum(
                             invoice.perception_ids.filtered(
-                                lambda line: line.perception_id == perception).mapped('base')
+                                lambda line: line.perception_id == perception
+                            ).mapped('base')
                         )
                         if base > 0 and amount > 0:
-                            to_create.append({
-                                'move_id': invoice.id,
-                                'name': perception.name,
-                                'balance': sign * amount,
-                                'amount_currency': sign * amount,
-                                'tax_base_amount': base,
-                                'display_type': 'tax',
-                                'tax_line_id': perception.id,
-                                'tax_repartition_line_id': tax_repartition_line.id,
-                                'account_id': tax_repartition_line.account_id.id,
-                            })
+                            to_create.append(
+                                {
+                                    'move_id': invoice.id,
+                                    'name': perception.name,
+                                    'balance': sign * amount,
+                                    'amount_currency': sign * amount,
+                                    'tax_base_amount': base,
+                                    'display_type': 'tax',
+                                    'tax_line_id': perception.id,
+                                    'tax_repartition_line_id': tax_repartition_line.id,
+                                    'account_id': tax_repartition_line.account_id.id,
+                                }
+                            )
                 for val in to_create:
                     invoice.line_ids += self.env['account.move.line'].new(val)
 
@@ -831,7 +873,10 @@ class AccountMove(models.Model):
         return posted_moves
 
     def action_post(self):
-        if self.move_type in ('out_invoice', 'out_refund') and self.amount_total == 0:
+        if (
+            self.move_type in ('out_invoice', 'out_refund')
+            and self.amount_total == 0
+        ):
             raise ValidationError(_('The amount to validate cannot be $0.'))
 
         sale_invoices = self.filtered(lambda move: move.is_sale_document())

@@ -128,28 +128,21 @@
                         title="Update Currency: Will convert the amount lines to the new currency set"
                         class="fa fa-fw fa-refresh"
                     /> Update Currency </button>
-                <span></span>
+                <span />
                 <field name="fiscal_type" invisible="move_type not in ('out_invoice', 'out_refund')" />
                 <field name="currency_preciated" invisible="1" />
                 <field name="is_multi_currency" invisible="1" />
-                <field name="company_currency_id" invisible="1" string="Company Currency" />
             </div>
 
             <field name="fiscal_position_id" position="after">
-                <field name="currency_converted" invisible="1" />
                 <field
-                    name="secondary_currency_id"
-                    invisible="not is_multi_currency"
-                    readonly="state != 'draft'"
-                />
-                <field
-                    name="secondary_currency_rate"
+                    name="company_currency_id"
                     invisible="not is_multi_currency"
                     readonly="state != 'draft'"
                 />
             </field>
 
-            <xpath expr="//group[@class='oe_invoice_lines_tab']/group[1]" position="replace">
+            <xpath expr="//group[hasclass('oe_invoice_lines_tab')]/group[1]" position="replace">
                 <!-- If the invoice has same currency than the company -->
                 <group colspan="8" invisible="is_multi_currency">
                     <span colspan="2">
@@ -179,8 +172,8 @@
                     <field name="amount_no_taxed_cur" invisible="amount_no_taxed_cur == 0" />
                     <field name="amount_exempt_cur" invisible="amount_exempt_cur == 0" />
                     <!-- <field name="amount_untaxed_cur" class="oe_subtotal_footer_separator" /> -->
-                    <field name="amount_tax_cur" invisible="amount_tax_cur == 0" />
                     <field name="amount_perception_curr" invisible="amount_perception_curr == 0" />
+                    <field name="amount_tax_cur" invisible="amount_tax_cur == 0" />
                     <field name="amount_total_cur" class="oe_subtotal_footer_separator" />
                     <i>- Amounts in Secondary Currency</i>
                 </group>
