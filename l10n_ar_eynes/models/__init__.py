@@ -17,7 +17,6 @@ from . import account_tax  # noqa
 from . import delivery_carrier  # noqa
 from . import iibb_situation  # noqa
 from . import product  # noqa
-from . import reason_rejected_check  # noqa
 from . import res_company  # noqa
 from . import res_config_settings  # noqa
 from . import res_country_state  # noqa
