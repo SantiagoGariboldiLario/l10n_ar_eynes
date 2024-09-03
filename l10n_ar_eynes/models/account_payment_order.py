@@ -1662,76 +1662,76 @@ class AccountPaymentOrder(models.Model):
     def _convert_amount(self, amount):
         return self.currency_id.compute(amount, self.company_id.currency_id)
 
-    def _get_exchange_lines(
-        self, line, move_id, amount_residual, company_currency, current_currency
-    ):
-        if amount_residual > 0:
-            account_id = (
-                line.payment_order_id.company_id.expense_currency_exchange_account_id
-            )
-            if not account_id:
-                action_id = self.env.ref('account.action_account_form').id
-                msg = _(
-                    "You should configure the 'Loss Exchange Rate "
-                    "Account' to manage automatically the booking of "
-                    "accounting entries related to differences "
-                    "between exchange rates."
-                )
-                raise RedirectWarning(
-                    msg, action_id, _('Go to the configuration panel')
-                )
-        else:
-            account_id = (
-                line.payment_order_id.company_id.income_currency_exchange_account_id
-            )
-            if not account_id:
-                action_id = self.env.ref('account.action_account_form').id
-                msg = _(
-                    "You should configure the 'Gain Exchange Rate "
-                    "Account' to manage automatically the booking of "
-                    "accounting entries related to differences "
-                    "between exchange rates."
-                )
-                raise RedirectWarning(
-                    msg, action_id, _('Go to the configuration panel')
-                )
-        # Even if the amount_currency is never filled, we need to pass the foreign currency because otherwise  # noqa
-        # the receivable/payable account may have a secondary currency, which render this field mandatory  # noqa
-        if line.account_id.currency_id:
-            account_currency_id = line.account_id.currency_id
-        else:
-            account_currency_id = (
-                company_currency != current_currency
-                and current_currency
-                or False
-            )
-        move_line = {
-            'journal_id': line.payment_order_id.journal_id.id,
-            'name': _('change') + ': ' + (line.name or '/'),
-            'account_id': line.account_id.id,
-            'move_id': move_id,
-            'partner_id': line.payment_order_id.partner_id.id,
-            'currency_id': account_currency_id.id,
-            'amount_currency': 0.0,
-            'quantity': 1,
-            'credit': amount_residual > 0 and amount_residual or 0.0,
-            'debit': amount_residual < 0 and -amount_residual or 0.0,
-            'date': line.payment_order_id.date,
-        }
-        move_line_counterpart = {
-            'journal_id': line.payment_order_id.journal_id.id,
-            'name': _('change') + ': ' + (line.name or '/'),
-            'account_id': account_id.id,
-            'move_id': move_id,
-            'amount_currency': 0.0,
-            'partner_id': line.payment_order_id.partner_id.id,
-            'currency_id': account_currency_id.id,
-            'quantity': 1,
-            'debit': amount_residual > 0 and amount_residual or 0.0,
-            'credit': amount_residual < 0 and -amount_residual or 0.0,
-            'date': line.payment_order_id.date,
-        }
-        return (move_line, move_line_counterpart)
+    # def _get_exchange_lines(
+    #     self, line, move_id, amount_residual, company_currency, current_currency
+    # ):
+    #     if amount_residual > 0:
+    #         account_id = (
+    #             line.payment_order_id.company_id.expense_currency_exchange_account_id
+    #         )
+    #         if not account_id:
+    #             action_id = self.env.ref('account.action_account_form').id
+    #             msg = _(
+    #                 "You should configure the 'Loss Exchange Rate "
+    #                 "Account' to manage automatically the booking of "
+    #                 "accounting entries related to differences "
+    #                 "between exchange rates."
+    #             )
+    #             raise RedirectWarning(
+    #                 msg, action_id, _('Go to the configuration panel')
+    #             )
+    #     else:
+    #         account_id = (
+    #             line.payment_order_id.company_id.income_currency_exchange_account_id
+    #         )
+    #         if not account_id:
+    #             action_id = self.env.ref('account.action_account_form').id
+    #             msg = _(
+    #                 "You should configure the 'Gain Exchange Rate "
+    #                 "Account' to manage automatically the booking of "
+    #                 "accounting entries related to differences "
+    #                 "between exchange rates."
+    #             )
+    #             raise RedirectWarning(
+    #                 msg, action_id, _('Go to the configuration panel')
+    #             )
+    #     # Even if the amount_currency is never filled, we need to pass the foreign currency because otherwise  # noqa
+    #     # the receivable/payable account may have a secondary currency, which render this field mandatory  # noqa
+    #     if line.account_id.currency_id:
+    #         account_currency_id = line.account_id.currency_id
+    #     else:
+    #         account_currency_id = (
+    #             company_currency != current_currency
+    #             and current_currency
+    #             or False
+    #         )
+    #     move_line = {
+    #         'journal_id': line.payment_order_id.journal_id.id,
+    #         'name': _('change') + ': ' + (line.name or '/'),
+    #         'account_id': line.account_id.id,
+    #         'move_id': move_id,
+    #         'partner_id': line.payment_order_id.partner_id.id,
+    #         'currency_id': account_currency_id.id,
+    #         'amount_currency': 0.0,
+    #         'quantity': 1,
+    #         'credit': amount_residual > 0 and amount_residual or 0.0,
+    #         'debit': amount_residual < 0 and -amount_residual or 0.0,
+    #         'date': line.payment_order_id.date,
+    #     }
+    #     move_line_counterpart = {
+    #         'journal_id': line.payment_order_id.journal_id.id,
+    #         'name': _('change') + ': ' + (line.name or '/'),
+    #         'account_id': account_id.id,
+    #         'move_id': move_id,
+    #         'amount_currency': 0.0,
+    #         'partner_id': line.payment_order_id.partner_id.id,
+    #         'currency_id': account_currency_id.id,
+    #         'quantity': 1,
+    #         'debit': amount_residual > 0 and amount_residual or 0.0,
+    #         'credit': amount_residual < 0 and -amount_residual or 0.0,
+    #         'date': line.payment_order_id.date,
+    #     }
+    #     return (move_line, move_line_counterpart)
 
     def voucher_move_line_create(self, line_total, move_id):
         tot_line = line_total
