@@ -44,7 +44,7 @@ class SaleOrder(models.Model):
         company_currency = company.currency_id
         currency = self.currency_id
         if currency != company_currency:
-            curr_rate = currency._get_currency_rate(company, date_invoice)
+            curr_rate = currency.get_currency_rate(company, date_invoice)
             if currency.preciated:
                 currency_rate = curr_rate.inverse_company_rate
             else:

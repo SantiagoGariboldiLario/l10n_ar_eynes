@@ -19,17 +19,9 @@ class ResCurrency(models.Model):
     preciated = fields.Boolean('Currency preciated', default=False)
 
     def _get_conversion_rate(self, from_currency, to_currency, company, date):
-        # Creo que esto del voucher esta deprecado, se utiliza otro metodo para
-        # hacer las conversiones en el voucher, revisar.
-
-        # vsc_rate = self._context.get('voucher_special_currency_rate')
-        # vsc_cid = self._context.get('voucher_special_currency')
-
-        # if vsc_rate and vsc_cid == to_currency.id:
-        #     return vsc_rate
-
-        # Give custom rate for currencies. If a currency is preciated
-        # the rate will be assumed to be preciated
+        """
+        Estas modificaciones se realizaron para que funcione el wizard account_change_currency
+        """
         currency1, rate1 = self._context.get('currency1', (False, False))
         currency2, rate2 = self._context.get('currency2', (False, False))
 
@@ -48,7 +40,7 @@ class ResCurrency(models.Model):
         )
         return res
 
-    def _get_currency_rate(self, company, date):
+    def get_currency_rate(self, company, date):
         self.ensure_one()
         domain = [
             ('currency_id', '=', self.id),
