@@ -115,8 +115,8 @@
                             <span class="partner-info">Ing. Brutos: </span><span
                                 t-esc="o.company_id.partner_id.nro_insc_iibb"
                             />
+                            <br />
                         </t>
-                        <br />
                         <span>Email: <span t-esc="o.journal_id.warehouse_id.partner_id.email" />
                         </span>
                         <br />
