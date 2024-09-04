@@ -371,7 +371,7 @@ class SubjournalXlsx(models.AbstractModel):
 
         self._cr.execute(q, q_vals)
 
-       # Obtenemos el resultado de la consulta
+        # Obtenemos el resultado de la consulta
         return self._cr.dictfetchall()
 
     def _report_xls_fields(self):
