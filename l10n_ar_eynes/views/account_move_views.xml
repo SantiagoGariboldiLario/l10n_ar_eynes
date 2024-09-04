@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
     <record id="account_move_view_form_inherit_l10n_ar_eynes" model="ir.ui.view">
@@ -17,7 +17,8 @@
                 />
             </header>
 
-            <xpath expr="//sheet/div[hasclass('oe_title')]/span[hasclass('o_form_label')]" position="replace">
+            <xpath expr="//sheet/div[hasclass('oe_title')]/span[hasclass('o_form_label')]"
+                position="replace">
                 <span class="o_form_label" invisible="move_type == 'entry' or debit_origin_id">
                     <field name="move_type" readonly="1" nolabel="1" />
                 </span>
@@ -26,7 +27,8 @@
                 </span>
             </xpath>
 
-            <xpath expr="//sheet/div[hasclass('oe_title')]/h1[1]/field[@name='name']" position="attributes">
+            <xpath expr="//sheet/div[hasclass('oe_title')]/h1[1]/field[@name='name']"
+                position="attributes">
                 <attribute name="invisible">True</attribute>
             </xpath>
 
@@ -128,7 +130,7 @@
                         title="Update Currency: Will convert the amount lines to the new currency set"
                         class="fa fa-fw fa-refresh"
                     /> Update Currency </button>
-                <span />
+                <span invisible="state != 'draft'" />
                 <field name="fiscal_type" invisible="move_type not in ('out_invoice', 'out_refund')" />
                 <field name="currency_preciated" invisible="1" />
                 <field name="is_multi_currency" invisible="1" />
@@ -167,7 +169,8 @@
                     </span>
                 </group>
 
-                <group colspan="4" class="oe_subtotal_footer oe_right" invisible="not is_multi_currency">
+                <group colspan="4" class="oe_subtotal_footer oe_right"
+                    invisible="not is_multi_currency">
                     <field name="amount_taxed_cur" invisible="amount_taxed_cur == 0" />
                     <field name="amount_no_taxed_cur" invisible="amount_no_taxed_cur == 0" />
                     <field name="amount_exempt_cur" invisible="amount_exempt_cur == 0" />
@@ -338,7 +341,8 @@
                     </group>
                 </page>
 
-                <page string="WS Requests" invisible="move_type not in ('out_invoice', 'out_refund')">
+                <page string="WS Requests"
+                    invisible="move_type not in ('out_invoice', 'out_refund')">
                     <field name="ws_request_ids" readonly="1">
                         <tree>
                             <field name="request_id" />
@@ -351,8 +355,10 @@
 
             </page>
 
-            <xpath expr="//field[@name='line_ids']/form/group/field[@name='currency_id']" position="after">
-                <field name="currency_rate" invisible="not currency_id" groups="base.group_multi_currency" />
+            <xpath expr="//field[@name='line_ids']/form/group/field[@name='currency_id']"
+                position="after">
+                <field name="currency_rate" invisible="not currency_id"
+                    groups="base.group_multi_currency" />
             </xpath>
 
         </field>
