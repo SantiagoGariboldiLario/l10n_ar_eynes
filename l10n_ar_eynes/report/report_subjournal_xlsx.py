@@ -231,15 +231,7 @@ class SubjournalXlsx(models.AbstractModel):
         invoice has untaxed values is to check if both of theese columns are null.
         """
 
-        inv_type = tuple(types)
-        company_id = obj.company_id.id
-        date_from = "'" + str(obj.date_from) + "'"
-        date_to = "'" + str(obj.date_to) + "'"
-        grouped = obj.grouped
-        grouped_max = obj.grouped_max_amount
-        fiscal_id = self.env.ref('l10n_ar_eynes.fiscal_position_cf').id
-
-        q = f"""
+        q = """
         WITH all_lines AS (
             SELECT  l.move_id AS move_id,
                     lc.name AS company_id,
@@ -280,16 +272,16 @@ class SubjournalXlsx(models.AbstractModel):
             ON account_move_line_id=l.id
             INNER JOIN res_company lc
             ON i.company_id = lc.id
-            WHERE i.move_type IN {inv_type}
+            WHERE i.move_type IN %(inv_type)s
                 AND i.state = 'posted'
                 AND
         """
         q += 'i.date' if obj.based_on == 'purchase' else 'i.invoice_date'
-        q += f"""
-                BETWEEN {date_from} AND {date_to}
-                AND a.account_type NOT LIKE '%payable'
-                AND a.account_type NOT LIKE '%receivable'
-                AND l.company_id = {company_id}
+        q += """
+                BETWEEN %(date_from)s AND %(date_to)s
+                AND a.account_type NOT LIKE '%%payable'
+                AND a.account_type NOT LIKE '%%receivable'
+                AND l.company_id = %(company_id)s
         ),
         grouped_invoice AS (
             SELECT invoice_id, ABS(SUM(debit - credit)) AS invoice_total
@@ -325,9 +317,9 @@ class SubjournalXlsx(models.AbstractModel):
             NULL AS tax_ids
         FROM all_lines al
         JOIN grouped_invoice gi ON gi.invoice_id = al.invoice_id
-        WHERE al.fpid = {fiscal_id}
-            AND gi.invoice_total < {grouped_max}
-            AND {grouped}
+        WHERE al.fpid = %(fiscal_id)s
+            AND gi.invoice_total < %(grouped_max)s
+            AND %(grouped)s
         GROUP BY al.date, al.tax_line_id, al.fpid,
             al.invoice_type, al.pos, al.fiscal_position, al.company_id
 
@@ -361,15 +353,25 @@ class SubjournalXlsx(models.AbstractModel):
             al.tax_ids AS tax_ids
         FROM all_lines al
         JOIN grouped_invoice gi ON gi.invoice_id = al.invoice_id
-        WHERE al.fpid = {fiscal_id}
-            OR gi.invoice_total >= {grouped_max}
-            OR NOT {grouped}
+        WHERE al.fpid = %(fiscal_id)s
+            OR gi.invoice_total >= %(grouped_max)s
+            OR NOT %(grouped)s
 
         ORDER BY date, pos, invoice_id, invoice_type
         """
+        q_vals = {
+            'inv_type': tuple(types),
+            'company_id': obj.company_id.id,
+            'date_from': obj.date_from,
+            'date_to': obj.date_to,
+            'grouped': obj.grouped,
+            'grouped_max': obj.grouped_max_amount,
+            'fiscal_id': self.env.ref('l10n_ar_eynes.fiscal_position_cf').id,
+        }
 
-        self._cr.execute(q)
-        # Obtenemos el resultado de la consulta
+        self._cr.execute(q, q_vals)
+
+       # Obtenemos el resultado de la consulta
         return self._cr.dictfetchall()
 
     def _report_xls_fields(self):
