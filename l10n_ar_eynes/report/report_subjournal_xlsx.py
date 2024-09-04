@@ -137,21 +137,9 @@ class SubjournalXlsx(models.AbstractModel):
 
         return all_taxes
 
-    def get_no_taxed(self, line, sign, sign_no_taxed):
-        q = """
-            SELECT id
-            FROM account_tax
-            WHERE tax_group_id = (SELECT id FROM account_tax_group WHERE group_type LIKE 'vat')
-        """
-        self.env.cr.execute(q)
-        # ids = [id[0] for id in self.env.cr.fetchall()]
-
-        if not line["tax_line_id"] and not line["tax_ids"]:
-            return (line["debit"] - line["credit"]) * sign * sign_no_taxed
-        else:
-            return 0.0
-
     def get_lines(self, types, obj, cols):
+        AccountMove = self.env["account.move"]
+
         query_vals = self.get_query_vals(types, obj)
         # TODO: FIX RAISE USERERROR
         if not len(query_vals):
@@ -159,15 +147,13 @@ class SubjournalXlsx(models.AbstractModel):
 
         c_taxes = [0] * len(cols)
         lines = {}
+
         for line in query_vals:
             sign = 1
-            sign_no_taxed = 1
             based_sign = 1
 
             if line['invoice_type'] in ('out_refund', 'in_refund'):
                 sign = -1
-            if line['invoice_type'] in ('out_invoice', 'in_refund'):
-                sign_no_taxed = -1
             if obj.based_on == 'purchase':
                 based_sign = -1
 
@@ -177,8 +163,21 @@ class SubjournalXlsx(models.AbstractModel):
                 line['pos'],
                 line['invoice_id'],
             )
+
             if dict_hash not in lines:
                 lines[dict_hash] = line
+
+                # TODO: Optimizar bypasseando ORM o buscando todo en una llamada
+                account_move = AccountMove.search(
+                    [("id", "=", line["invoice_id"])]
+                )
+
+                line["no_taxed"] = (
+                    account_move.amount_no_taxed_cur
+                    if account_move.amount_no_taxed_cur != 0
+                    else account_move.amount_no_taxed
+                ) * sign
+                # # #
 
                 if line['invoice_id'] == -1:
                     line['partner'] = 'Agrupado %s monto menor a %s' % (
@@ -190,16 +189,11 @@ class SubjournalXlsx(models.AbstractModel):
                     )
 
                 line['taxes'] = [0] * len(cols)
-                line["no_taxed"] = self.get_no_taxed(line, sign, sign_no_taxed)
                 line['total'] = (line['credit'] - line['debit']) * based_sign
                 line['invoice_type'] = self.get_invoice_type(
                     line['invoice_type'],
                     line['denomination'],
                     line['is_debit_note'],
-                )
-            else:
-                lines[dict_hash]['no_taxed'] += self.get_no_taxed(
-                    line, sign, sign_no_taxed
                 )
 
             for i, tax in enumerate(cols):
@@ -213,15 +207,6 @@ class SubjournalXlsx(models.AbstractModel):
                             ) * based_sign
                         elif tax['type'] == 'base':
                             lines[dict_hash]['taxes'][i] = (
-                                line['tax_amount'] * sign
-                            )
-                    else:
-                        if tax['type'] == 'tax':
-                            lines[dict_hash]['taxes'][i] += (
-                                line['credit'] - line['debit']
-                            ) * based_sign
-                        elif tax['type'] == 'base':
-                            lines[dict_hash]['taxes'][i] += (
                                 line['tax_amount'] * sign
                             )
                     if lines[dict_hash]['taxes'][i] != 0:
@@ -259,7 +244,7 @@ class SubjournalXlsx(models.AbstractModel):
                     i.is_debit_note AS is_debit_note,
                     i.denomination AS denomination,
                     CASE WHEN pos.name IS NOT NULL
-                    THEN pos.name
+                    THEN pos.name::text
                     ELSE split_part(i.name, '-', 1) END AS pos,
                     l.id AS line_id,
                     l.tax_line_id AS tax_line_id,
@@ -294,7 +279,8 @@ class SubjournalXlsx(models.AbstractModel):
         q += 'i.date' if obj.based_on == 'purchase' else 'i.invoice_date'
         q += """
                 BETWEEN %(date_from)s AND %(date_to)s
-                AND a.account_type NOT IN ('liability_payable', 'asset_receivable')
+                AND a.account_type NOT LIKE '%%payable'
+                AND a.account_type NOT LIKE '%%receivable'
                 AND l.company_id = %(company_id)s
         ),
         grouped_invoice AS (
@@ -373,17 +359,18 @@ class SubjournalXlsx(models.AbstractModel):
 
         ORDER BY date, pos, invoice_id, invoice_type
         """
-        final_consumer = self.env.ref('l10n_ar_eynes.fiscal_position_cf')
         q_vals = {
             'inv_type': tuple(types),
-            'date_from': obj.date_from,
             'company_id': obj.company_id.id,
+            'date_from': obj.date_from,
             'date_to': obj.date_to,
             'grouped': obj.grouped,
             'grouped_max': obj.grouped_max_amount,
-            'fiscal_id': final_consumer.id,
+            'fiscal_id': self.env.ref('l10n_ar_eynes.fiscal_position_cf').id,
         }
+
         self._cr.execute(q, q_vals)
+
         # Obtenemos el resultado de la consulta
         return self._cr.dictfetchall()
 
@@ -476,6 +463,7 @@ class SubjournalXlsx(models.AbstractModel):
             ('A3', 'Perido', date_format),
             ('B3', wizard_obj.date_from.strftime('%m/%Y'), date_format),
         ]
+
         for data in company_data:
             sheet.write(data[0], data[1], data[2])
 
@@ -498,7 +486,8 @@ class SubjournalXlsx(models.AbstractModel):
             sheet.write('C' + str(p), line['partner'], cell_format)
             sheet.write('D' + str(p), line['state'], cell_format)
             sheet.write('E' + str(p), line['vat'], cell_format)
-            sheet.write('F' + str(p), line['fiscal_position'], cell_format)
+            sheet.write('F' + str(p), line["fiscal_position"][self.env.lang]
+                        if self.env.lang in line["fiscal_position"] else line["fiscal_position"]["en_US"], cell_format)
             sheet.write('G' + str(p), line['invoice_type'], cell_format)
             sheet.write('H' + str(p), line['invoice_number'], cell_format)
             i = 8
