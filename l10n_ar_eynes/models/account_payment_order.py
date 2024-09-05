@@ -1000,8 +1000,7 @@ class AccountPaymentOrder(models.Model):
             self.type == 'payment' and 'liability_payable' or 'asset_receivable'
         )
         domain = [
-            ('debit', '!=', 0),
-            ('credit', '=', 0),
+            ('balance', '>', 0),
             ('account_id.account_type', '=', account_type),
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
@@ -1021,8 +1020,7 @@ class AccountPaymentOrder(models.Model):
             self.type == 'payment' and 'liability_payable' or 'asset_receivable'
         )
         domain = [
-            ('debit', '=', 0),
-            ('credit', '!=', 0),
+            ('balance', '<', 0),
             ('account_id.account_type', '=', account_type),
             ('reconciled', '=', False),
             ('partner_id', '=', self.partner_id.id),
@@ -1258,22 +1256,20 @@ class AccountPaymentOrder(models.Model):
             'check_move_validity': False,
             'skip_invoice_sync': True,
         }
-        # Create the account move record.
+
         move_recordset = (
             self.env['account.move']
             .with_context(**ctx)
             .create(self.account_move_get())
         )
-        # Get the name of the account_move just created
         name = move_recordset.name
         move_id = move_recordset.id
+
         line_total = 0.0
         rec_list_ids = []
         if self.type in ('payment', 'receipt'):
             # Creamos las lineas contables de todas las formas de pago, etc  # noqa
-            move_line_vals = self.create_move_lines(
-                move_id, company_currency, current_currency
-            )
+            move_line_vals = self.create_move_lines(move_id)
             for vals in move_line_vals:
                 line_total += vals['debit'] - vals['credit']
                 rec_list_ids.append(vals)
@@ -1324,9 +1320,7 @@ class AccountPaymentOrder(models.Model):
             rec_list_ids.append(move_line_val)
 
         # Create the writeoff line if needed
-        ml_writeoff = self.writeoff_move_line_get(
-            line_total, move_id, name, company_currency, current_currency
-        )
+        ml_writeoff = self.writeoff_move_line_get(line_total, move_id, name)
         if ml_writeoff:
             rec_list_ids.append(ml_writeoff)
 
@@ -1352,23 +1346,9 @@ class AccountPaymentOrder(models.Model):
         return True
 
     def _get_company_currency(self):
-        '''
-        Get the currency of the actual company.
-        :param voucher_id: Id of the voucher what
-          i want to obtain company currency.
-        :return: currency id of the company of the voucher
-        :rtype: int
-        '''
         return self.journal_id.company_id.currency_id
 
     def _get_current_currency(self):
-        '''
-        Get the currency of the voucher.
-        :param voucher_id: Id of the voucher what
-          i want to obtain current currency.
-        :return: currency id of the voucher
-        :rtype: int
-        '''
         return self.currency_id or self._get_company_currency()
 
     def account_move_get(self):
@@ -1496,9 +1476,7 @@ class AccountPaymentOrder(models.Model):
         name,
         journal_id,
         amount,
-        company_currency,
         amount_currency,
-        current_currency,
         sign,
     ):
         debit = credit = 0.0
@@ -1513,7 +1491,7 @@ class AccountPaymentOrder(models.Model):
         if credit < 0:
             debit = -credit
             credit = 0.0
-        # sign = debit - credit < 0 and -1 or 1
+        sign = debit - credit < 0 and -1 or 1
         move_line = {
             'name': name or '/',
             'debit': debit,
@@ -1522,14 +1500,16 @@ class AccountPaymentOrder(models.Model):
             'move_id': move_id,
             'journal_id': self.journal_id.id,
             'partner_id': self.partner_id.id,
-            'currency_id': current_currency.id,
+            'currency_id': self._get_current_currency().id,
             'date': self.date,
             'date_maturity': self.date_due,
             'reconciled': False,
+            'amount_currency': sign * amount_currency,
+            'currency_rate': self.payment_rate,
         }
         return move_line
 
-    def create_move_lines(self, move_id, company_currency, current_currency):
+    def create_move_lines(self, move_id):
         total_debit = total_credit = 0.0
         # TODO: is there any other alternative then the voucher type ??
         # ANSWER: We can have payment and receipt "In Advance".
@@ -1559,9 +1539,7 @@ class AccountPaymentOrder(models.Model):
                     pml.name,
                     pml.payment_mode_id,
                     pml.amount,
-                    company_currency,
                     pml.amount_currency,
-                    current_currency,
                     sign,
                 )
             )
@@ -1753,9 +1731,8 @@ class AccountPaymentOrder(models.Model):
                 )
             ):
                 continue
-            sign = line.type == 'debt' and -1 or 1
-            amount = sign * (line.untax_amount or line.amount)
-            # currency_rate_difference = 0.0
+            sign = line.type == 'debt' and 1 or -1
+            amount = line.amount
             if line.amount == line.amount_unreconciled:
                 if not line.move_line_id:
                     raise UserError(
@@ -1772,21 +1749,23 @@ class AccountPaymentOrder(models.Model):
                 'account_id': line.account_id.id,
                 'move_id': move_id,
                 'partner_id': self.partner_id.id,
-                'currency_id': line.original_currency_id.id,
+                'currency_id': line.currency_id.id,
                 'credit': 0.0,
                 'debit': 0.0,
                 'date': self.date,
                 'reconciled': False,
+                'amount_currency': 0.0,
             }
-            if amount < 0:
-                amount = -amount
 
             if line.type == 'debt':
-                tot_line += amount
                 move_line_val['debit'] = amount
+                tot_line += amount
             else:
-                tot_line -= amount
                 move_line_val['credit'] = amount
+                tot_line -= amount
+
+            if self._get_current_currency() != self._get_company_currency():
+                move_line_val['amount_currency'] = sign * line.amount_currency
 
             if self.tax_id and self.type in ('sale', 'purchase'):
                 move_line_val.update(
@@ -1794,16 +1773,16 @@ class AccountPaymentOrder(models.Model):
                         'account_tax_id': self.tax_id.id,
                     }
                 )
+
             new_aml = self.env['account.move.line'].create(move_line_val)
+
             if line.move_line_id:
                 # Save relation to original aml to make reconcilation.
                 rec_lst_ids.append(line.move_line_id + new_aml)
 
         return tot_line, rec_lst_ids
 
-    def writeoff_move_line_get(
-        self, line_total, move_id, name, company_currency, current_currency
-    ):
+    def writeoff_move_line_get(self, line_total, move_id, name):
         move_line = {}
 
         if not self.currency_id.is_zero(line_total):
@@ -1820,7 +1799,10 @@ class AccountPaymentOrder(models.Model):
                     )
                 else:
                     account_id = self.partner_id.property_account_payable_id.id
-            sign = self.type == 'payment' and -1 or 1
+            sign = self.type == 'payment' and 1 or -1
+            line_total_cur = self.currency_id.round(
+                line_total / self.payment_rate
+            )
             move_line = {
                 'name': write_off_name or name,
                 'account_id': account_id,
@@ -1829,8 +1811,9 @@ class AccountPaymentOrder(models.Model):
                 'date': self.date,
                 'credit': line_total > 0 and line_total or 0.0,
                 'debit': line_total < 0 and -line_total or 0.0,
-                'amount_currency': sign * line_total,
+                'amount_currency': sign * line_total_cur,
                 'currency_id': self.currency_id.id,
+                'currency_rate': self.payment_rate,
             }
         return move_line
 
@@ -2014,7 +1997,6 @@ class AccountPaymentOrderLine(models.Model):
         string='partner',
         related='payment_order_id.partner_id',
     )
-    untax_amount = fields.Float(string='untax amount')
     amount = fields.Float(string='amount', digits='account')
     reconcile = fields.Boolean(string='full reconcile')
     type = fields.Selection(
@@ -2103,33 +2085,36 @@ class AccountPaymentOrderLine(models.Model):
             ):
                 raise ValidationError(_('Inovice duplicated.'))
 
-    @api.onchange('amount')
-    def onchange_amount(self):
-        parent = self.payment_order_id
-        if self.original_currency_id.id != parent.company_currency.id:
-            amount_computed = self.amount / parent.payment_rate
-        else:
-            amount_computed = 0
-        self.amount_currency = amount_computed
+    # @api.onchange('amount')
+    # def onchange_amount(self):
+    #     parent = self.payment_order_id
+    #     if self.currency_id.id != parent.company_currency.id:
+    #         amount_computed = self.amount / parent.payment_rate
+    #     else:
+    #         amount_computed = 0
+    #     self.amount_currency = amount_computed
 
     @api.onchange('amount_currency')
     def onchange_amount_currency(self):
-        parent = self.payment_order_id
-        if self.original_currency_id.id != parent.company_currency.id:
-            amount_computed = self.amount_currency * parent.payment_rate
+        if self.currency_id.id != self.original_currency_id.id:
+            amount_computed = (
+                self.amount_currency * self.payment_order_id.payment_rate
+            )
         else:
-            amount_computed = 0
+            amount_computed = self.amount
         self.amount = amount_computed
 
     @api.depends('move_line_id')
     def _compute_balance(self):
         for line in self:
             move_line = line.move_line_id
-            line.amount_original = move_line.debit or move_line.credit or 0.0
             sign = line.type == 'debt' and -1 or 1
+
+            line.amount_original = move_line.debit or move_line.credit or 0.0
             line.amount_unreconciled = sign * move_line.amount_residual or 0.0
+
             # Usability Multicurrency fields
-            line.amount_original_currency = move_line.amount_currency
+            line.amount_original_currency = sign * move_line.amount_currency
             line.amount_unreconciled_currency = (
                 sign * move_line.amount_residual_currency
             )
@@ -2142,14 +2127,11 @@ class AccountPaymentOrderLine(models.Model):
                 line.amount_currency = 0
             else:
                 if (
-                    line.original_currency_id.id
+                    line.currency_id.id
                     != line.payment_order_id.company_currency.id
                 ):
                     line.amount_currency = line.amount_unreconciled_currency
-                    line.amount = (
-                        line.amount_unreconciled_currency
-                        * line.payment_order_id.payment_rate
-                    )
+                    line.amount = line.amount_unreconciled
                 else:
                     line.amount = line.amount_unreconciled
                     line.amount_currency = 0
@@ -2213,12 +2195,6 @@ class AccountPaymentModeLine(models.Model):
         string='Payment Date', help="This date is informative only."
     )
 
-    # @api.depends('payment_mode_id')
-    # def _compute_currency(self):
-    #     for i in self:
-    #         i.currency_id = i.payment_mode_id.currency_id or \
-    #             self._get_company_currency()
-
     def _compute_currency_id(self):
         return self.payment_order_id.currency_id
 
@@ -2257,11 +2233,7 @@ class AccountPaymentModeLine(models.Model):
 
     @api.model
     def _get_company_currency(self):
-        currency_obj = self.env['res.currency']
-        if self.env.user.company_id:
-            return self.env.user.company_id.currency_id
-        else:
-            return currency_obj.search([('rate', '=', 1.0)], limit=1)
+        return self.payment_order_id.journal_id.company_id.currency_id
 
 
 class AccountPaymentOrderRetentionLine(models.Model):

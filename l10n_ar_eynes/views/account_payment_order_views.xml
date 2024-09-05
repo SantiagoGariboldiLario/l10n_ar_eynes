@@ -255,7 +255,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        invisible="True"
+                                        column_invisible="True"
                                         force_save="True"
                                     />
                                     <field
@@ -274,13 +274,13 @@
                                         readonly="1"
                                         force_save="True"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                     />
                                     <field
                                         name="amount_unreconciled"
                                         readonly="1"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         sum="Total Unreconciled"
                                         force_save="True"
                                     />
@@ -289,13 +289,13 @@
                                         sum="Total Allocation"
                                         string="Allocation"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                     />
                                     <field
                                         name="amount_original_currency"
                                         string="Amount Original CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -303,7 +303,7 @@
                                         name="amount_unreconciled_currency"
                                         string="Amount Residual CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -312,7 +312,7 @@
                                         sum="Total Allocation CCY"
                                         string="Allocation CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -344,7 +344,7 @@
                                     <field name="type" column_invisible="1" />
                                     <field name="move_invoice_id" column_invisible="1" />
                                     <field name="original_currency_id" column_invisible="1" />
-                                    <field name="state" invisible="1" />
+                                    <field name="state" column_invisible="True" />
                                     <field
                                         name="invoice_id"
                                         force_save="true"
@@ -359,7 +359,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        invisible="True"
+                                        column_invisible="True"
                                         force_save="True"
                                     />
                                     <field
@@ -377,7 +377,7 @@
                                         readonly="1"
                                         force_save="True"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                     />
                                     <field
                                         name="amount_unreconciled"
@@ -385,21 +385,26 @@
                                         sum="Total Unreconciled"
                                         force_save="True"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                     />
-                                    <field name="reconcile" readonly="1" force_save="True" invisible="1" />
+                                    <field
+                                        name="reconcile"
+                                        readonly="1"
+                                        force_save="True"
+                                        column_invisible="True"
+                                    />
                                     <field
                                         name="amount"
                                         sum="Total Allocation"
                                         string="Allocation"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                     />
                                     <field
                                         name="amount_original_currency"
                                         string="Amount Original CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -407,7 +412,7 @@
                                         name="amount_unreconciled_currency"
                                         string="Amount Residual CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -416,7 +421,7 @@
                                         sum="Total Allocation CCY"
                                         string="Allocation CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -491,11 +496,7 @@
                             </field>
                         </page>
 
-                        <page
-                            string="Journal Items"
-                            name="journal_items"
-                            invisible="state != 'posted'"
-                        >
+                        <page string="Journal Items" name="journal_items" invisible="state != 'posted'">
                             <group col="4">
                                 <field name="move_id" />
                             </group>
@@ -763,7 +764,11 @@
                             />
                         </group>
                         <group>
-                            <field name="date" invisible="context.get('line_type', False)" readonly="state != 'draft'" />
+                            <field
+                                name="date"
+                                invisible="context.get('line_type', False)"
+                                readonly="state != 'draft'"
+                            />
                             <field
                                 name="reference"
                                 invisible="context.get('line_type', False)"
@@ -786,17 +791,17 @@
                         <label for="payment_rate" colspan="1" />
                         <div>
                             <field
-                                name="payment_rate"
-                                required="1"
-                                class="oe_inline"
-                                readonly="state != 'draft'"
-                            />
+                                    name="payment_rate"
+                                    required="1"
+                                    class="oe_inline"
+                                    readonly="state != 'draft'"
+                                />
                             <field
-                                name="payment_rate_currency_id"
-                                class="oe_inline"
-                                readonly="state != 'draft'"
-                                groups="base.group_multi_currency"
-                            />
+                                    name="payment_rate_currency_id"
+                                    class="oe_inline"
+                                    readonly="state != 'draft'"
+                                    groups="base.group_multi_currency"
+                                />
                         </div>
                     </group>
                         <group col="2">
@@ -921,7 +926,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        invisible="True"
+                                        column_invisible="True"
                                         force_save="True"
                                     />
                                     <field
@@ -940,13 +945,13 @@
                                         readonly="1"
                                         force_save="True"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                     />
                                     <field
                                         name="amount_unreconciled"
                                         readonly="1"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                         sum="Total Unreconciled"
                                         force_save="True"
                                     />
@@ -955,13 +960,13 @@
                                         sum="Total Allocation"
                                         string="Allocation"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                     />
                                     <field
                                         name="amount_original_currency"
                                         string="Amount Original CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -969,7 +974,7 @@
                                         name="amount_unreconciled_currency"
                                         string="Amount Residual CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -978,7 +983,7 @@
                                         sum="Total Allocation CCY"
                                         string="Allocation CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -1028,7 +1033,7 @@
                                         name="move_line_id"
                                         context="{'journal_id':parent.journal_id, 'partner_id':parent.partner_id}"
                                         domain="[('account_id.account_type','in',('asset_receivable','liability_payable')), ('reconciled','=', False), ('partner_id','=',parent.partner_id)]"
-                                        invisible="True"
+                                        column_invisible="True"
                                         force_save="True"
                                     />
                                     <field
@@ -1047,7 +1052,7 @@
                                         readonly="1"
                                         force_save="True"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                     />
                                     <field
                                         name="amount_unreconciled"
@@ -1055,21 +1060,26 @@
                                         sum="Total Unreconciled"
                                         force_save="True"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                     />
-                                    <field name="reconcile" readonly="1" force_save="True" column_invisible="1" />
+                                    <field
+                                        name="reconcile"
+                                        readonly="1"
+                                        force_save="True"
+                                        column_invisible="1"
+                                    />
                                     <field
                                         name="amount"
                                         sum="Total Allocation"
                                         string="Allocation"
                                         widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"
+                                        options="{'currency_field': 'original_currency_id'}"
                                     />
                                     <field
                                         name="amount_original_currency"
                                         string="Amount Original CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -1077,7 +1087,7 @@
                                         name="amount_unreconciled_currency"
                                         string="Amount Residual CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -1086,7 +1096,7 @@
                                         sum="Total Allocation CCY"
                                         string="Allocation CCY"
                                         widget="monetary"
-                                        options="{'currency_field': 'original_currency_id'}"
+                                        options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
@@ -1102,7 +1112,12 @@
 
                         <page string="Checks">
                             <label for="issued_check_line_ids" />
-                            <field name="issued_check_line_ids" nolabel="1" colspan="4" readonly="state != 'draft'">
+                            <field
+                                name="issued_check_line_ids"
+                                nolabel="1"
+                                colspan="4"
+                                readonly="state != 'draft'"
+                            >
                                 <tree>
                                     <field name="issued_check_id" />
                                     <field name="type" />
@@ -1222,10 +1237,7 @@
                                     <field name="state_id" column_invisible="1" />
                                     <field name="date" />
                                     <field name="retention_id_domain" column_invisible="1" />
-                                    <field
-                                        name="retention_id"
-                                        domain="retention_id_domain"
-                                    />
+                                    <field name="retention_id" domain="retention_id_domain" />
                                     <field name="taxapp_id" column_invisible="1" />
                                     <field name="date_applied" />
                                     <field name="concept_id" />
@@ -1321,11 +1333,7 @@
                                 </form>
                             </field>
                         </page>
-                        <page
-                            string="Journal Items"
-                            name="journal_items"
-                            invisible="state != 'posted'"
-                        >
+                        <page string="Journal Items" name="journal_items" invisible="state != 'posted'">
                             <group col="4">
                                 <field name="move_id" />
                             </group>

@@ -296,7 +296,9 @@ class AccountMove(models.Model):
         'amount_exempt',
     )
     def _compute_amount_all_cur(self):
-        for invoice in self:
+        for invoice in self.filtered(
+            lambda move: move.is_invoice(include_receipts=True)
+        ):
             res = {
                 'amount_taxed_cur': 0.0,  # Gravado
                 'amount_no_taxed_cur': 0.0,  # No gravado
