@@ -4,6 +4,7 @@
 ##############################################################################
 
 import logging
+
 from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
@@ -16,20 +17,16 @@ class PerceptionTaxLine(models.Model):
     _name = "perception.tax.line"
     _description = "Perception Tax Line"
 
-    # TODO: Maybe should add states to this object
-    # to manage properties depending its state
     name = fields.Char(
         string='Perception',
         required=True,
         size=64,
+        compute='_compute_name',
+        store=True,
     )
-    date = fields.Date(
-        index=True,
-    )
+    date = fields.Date(index=True, required=True)
     invoice_id = fields.Many2one(
-        'account.move',
-        string='Invoice',
-        ondelete='cascade',
+        'account.move', string='Invoice', ondelete='cascade'
     )
     base = fields.Float(
         digits='Account',
@@ -47,7 +44,9 @@ class PerceptionTaxLine(models.Model):
         digits='Account',
         compute='_compute_base_amount_second_cur',
     )
-    perception_id_domain = fields.Binary(compute='_compute_perception_id_domain')
+    perception_id_domain = fields.Binary(
+        compute='_compute_perception_id_domain'
+    )
     perception_id = fields.Many2one(
         'account.tax',
         string='Perception Tax',
@@ -60,7 +59,7 @@ class PerceptionTaxLine(models.Model):
         default=lambda self: self._default_company_id(),
         readonly=True,
         required=True,
-        store=True
+        store=True,
     )
     partner_id = fields.Many2one(
         'res.partner',
@@ -76,7 +75,7 @@ class PerceptionTaxLine(models.Model):
         'res.country.state',
         string="State/Province",
         related='perception_id.state_id',
-        store=True
+        store=True,
     )
     aml_id = fields.Many2one(
         'account.move.line',
@@ -92,6 +91,11 @@ class PerceptionTaxLine(models.Model):
 
     def _default_company_id(self):
         return self.env.company.id
+
+    @api.depends('perception_id')
+    def _compute_name(self):
+        for rec in self:
+            rec.name = '' if not rec.perception_id else rec.perception_id.name
 
     @api.depends('invoice_id')
     def _compute_perception_id_domain(self):
@@ -115,19 +119,6 @@ class PerceptionTaxLine(models.Model):
                 currency_rate = rec.invoice_id.currency_rate
                 rec.base_secondary_currency = rec.base * currency_rate
                 rec.amount_secondary_currency = rec.amount * currency_rate
-
-    @api.model_create_multi
-    def create(self, vals):
-        for line_vals in vals:
-            perception_id = line_vals.get('perception_id', False)
-            if not line_vals.get('name', False) and perception_id:
-                line_vals['name'] = self.env['account.tax'].browse(perception_id).name
-            invoice_id = line_vals.get('invoice_id', False)
-            if not line_vals.get('partner_id', False) and invoice_id:
-                invoice = self.env['account.move'].browse(invoice_id)
-                line_vals['partner_id'] = invoice.partner_id.id
-
-        return super(PerceptionTaxLine, self).create(vals)
 
     # @api.onchange('perception_id')
     # def _onchange_perception(self):
@@ -288,9 +279,13 @@ class PerceptionTaxApplication(models.Model):
 
     name = fields.Char('Description', size=128)
     reg_code = fields.Integer('Reg. Code')
-    concept_id_domain = fields.Binary(string='Concept filter ', compute='_compute_concept_domain')
+    concept_id_domain = fields.Binary(
+        string='Concept filter ', compute='_compute_concept_domain'
+    )
     concept_id = fields.Many2one('perception.concept')
-    activity_id_domain = fields.Binary(string='Activity filter ', compute='_compute_activity_domain')
+    activity_id_domain = fields.Binary(
+        string='Activity filter ', compute='_compute_activity_domain'
+    )
     activity_id = fields.Many2one('perception.activity')
     perception_tax_id = fields.Many2one(comodel_name='account.tax')
     # Minimo No Imponible
@@ -348,7 +343,9 @@ class PerceptionTaxApplication(models.Model):
     def _compute_concept_domain(self):
         for rec in self:
             if rec.perception_tax_id:
-                rec.concept_id_domain = [('type', '=', rec.perception_tax_id.retention_type)]
+                rec.concept_id_domain = [
+                    ('type', '=', rec.perception_tax_id.retention_type)
+                ]
             else:
                 rec.concept_id_domain = [()]
 
@@ -356,7 +353,9 @@ class PerceptionTaxApplication(models.Model):
     def _compute_activity_domain(self):
         for rec in self:
             if rec.perception_tax_id:
-                rec.activity_id_domain = [('type', '=', rec.perception_tax_id.retention_type)]
+                rec.activity_id_domain = [
+                    ('type', '=', rec.perception_tax_id.retention_type)
+                ]
             else:
                 rec.activity_id_domain = [()]
 
@@ -378,7 +377,13 @@ class PerceptionTaxApplication(models.Model):
     #     amount = round(base * (percent / 100.0), 2)
     #     return amount
 
-    def check_applicable(self, invoice, sit_iibb=False, from_padron=False, excluded_percent=0.0):
+    def check_applicable(
+        self, invoice, sit_iibb=False, from_padron=False, excluded_percent=0.0
+    ):
+        """
+        Este método es utilizado para determinar si una percepción debe ser aplicada al cliente
+        según su configuración.
+        """
         self.ensure_one()
 
         if not self.perception_tax_id.active:
@@ -412,9 +417,9 @@ class PerceptionTaxApplication(models.Model):
 
         partner_state = False
         retention_state = self.perception_tax_id.state_id.id
-        destination_shipping = invoice.address_shipping_id or self.env['res.partner'].browse(
-            invoice.partner_id.address_get(['delivery']).get('delivery')
-        )
+        destination_shipping = invoice.address_shipping_id or self.env[
+            'res.partner'
+        ].browse(invoice.partner_id.address_get(['delivery']).get('delivery'))
         source_shipping = invoice.company_id.partner_id
         if self.perception_tax_id.applicable_state == 'dest':
             partner_state = destination_shipping.state_id.id
@@ -433,6 +438,17 @@ class PerceptionTaxApplication(models.Model):
                 )
         # Hacemos el chequeo de los states
         return retention_state == partner_state
+
+    def check_concept(self, account_id):
+        """
+        Este método es útil cuando ya sabemos que la factura lleva percepciones pero necesitamos chequear si
+         un producto en particular está afectado o no.
+        """
+        if self.concept_id.account_ids.filtered(
+            lambda account: account == account_id
+        ):
+            return True
+        return False
 
     def get_perception_data(self, partner, invoice_date):
         perception = self.perception_tax_id
@@ -454,42 +470,39 @@ class PerceptionTaxApplication(models.Model):
         )
         if self.activity_id:
             partner_perception_lines.filtered(
-                lambda line: not line.activity_id or line.activity_id == self.activity_id
+                lambda line: not line.activity_id
+                or line.activity_id == self.activity_id
             )
-        partner_perception_period = (
-            partner_perception_lines.filtered(
-                lambda line: not line.period
-                or (
-                    line.period
-                    <= invoice_date
-                    <= (
-                        (line.period + relativedelta(months=1))
-                        - relativedelta(days=1)
-                    )
+        partner_perception_period = partner_perception_lines.filtered(
+            lambda line: not line.period
+            or (
+                line.period
+                <= invoice_date
+                <= (
+                    (line.period + relativedelta(months=1))
+                    - relativedelta(days=1)
                 )
             )
         )
         if not partner_perception_period and partner_perception_lines:
             partner_perception_periods = partner_perception_lines.filtered(
-                lambda line: not line.period
-                or (
-                    line.period
-                    <= invoice_date
-                )
+                lambda line: not line.period or (line.period <= invoice_date)
             )
             max_period = max(partner_perception_periods.mapped('period'))
             partner_perception_period = partner_perception_periods.filtered(
                 lambda line: line.period == max_period
             )
         if partner_perception_period:
-            data.update({
-                'excluded_percent': partner_perception_period.excluded_percent,
-                'percent': partner_perception_period.percent,
-                'ex_date_to': partner_perception_period.ex_date_to,
-                'ex_date_from': partner_perception_period.ex_date_from,
-                'sit_iibb': partner_perception_period.sit_iibb,
-                'from_padron': partner_perception_period.from_padron,
-            })
+            data.update(
+                {
+                    'excluded_percent': partner_perception_period.excluded_percent,
+                    'percent': partner_perception_period.percent,
+                    'ex_date_to': partner_perception_period.ex_date_to,
+                    'ex_date_from': partner_perception_period.ex_date_from,
+                    'sit_iibb': partner_perception_period.sit_iibb,
+                    'from_padron': partner_perception_period.from_padron,
+                }
+            )
 
         return data
 

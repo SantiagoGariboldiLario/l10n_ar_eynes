@@ -54,13 +54,13 @@ class AccountMoveLine(models.Model):
         )
         invoices = product_with_perception_lines.mapped('move_id')
         for inv in invoices:
-            if not inv.disable_perceptions:
-                sign = -1 if inv.is_inbound() else 1
-                inv_product_with_perception_lines = (
-                    product_with_perception_lines.filtered(
-                        lambda aml: aml.move_id == inv
-                    )
+            inv_product_with_perception_lines = (
+                product_with_perception_lines.filtered(
+                    lambda aml: aml.move_id == inv
                 )
+            )
+            if not inv.disable_perceptions and inv.perception_ids:
+                sign = -1 if inv.is_inbound() else 1
                 perceptions = (
                     inv_product_with_perception_lines.tax_ids.filtered(
                         lambda tax: tax.tax_group_id.group_type == 'perception'
@@ -105,57 +105,32 @@ class AccountMoveLine(models.Model):
                                     line_perception_base / rate
                                 )
 
-    @api.depends(
-        'product_id',
-        'product_uom_id',
-        'partner_id',
-        'move_id.invoice_date',
-        'move_id.disable_perceptions',
-        'quantity',
-    )
-    def _compute_tax_ids(self):
-        # pylint: disable=missing-return
-        super(AccountMoveLine, self)._compute_tax_ids()
-
     def _get_computed_taxes(self):
         tax_ids = super(AccountMoveLine, self)._get_computed_taxes()
         if self.move_id.is_sale_document(include_receipts=True):
-            perceptions_applications = perceptions = self.env[
-                'perception.tax.application'
-            ]
-            if self.account_id and not self.move_id.disable_perceptions:
-                perceptions_applications = (
-                    self.account_id.get_perceptions_applications()
-                )
-
-            if self.partner_id:
-                perceptions = self.env['account.tax']
-                for application in perceptions_applications:
-                    perception = application.perception_tax_id
-                    if (
-                        perception
-                        in self.partner_id.property_account_position_id.perception_ids
-                    ):
-                        perception_data = application.get_perception_data(
-                            self.partner_id, self.move_id.invoice_date
-                        )
-                        applicable = application.check_applicable(
-                            invoice=self.move_id,
-                            sit_iibb=perception_data['sit_iibb'],
-                            from_padron=perception_data['from_padron'],
-                            excluded_percent=perception_data[
-                                'excluded_percent'
-                            ],
-                        )
-                        if applicable:
-                            perceptions += perception
-                tax_ids += perceptions
-        if (
+            perceptions = self.env['account.tax']
+            for perception in self.move_id.perception_ids.mapped(
+                'perception_id'
+            ):
+                for perception_line in self.move_id.perception_ids.filtered(
+                    lambda line: line.perception_id == perception
+                ):
+                    application = perception_line.tax_app_id.check_concept(
+                        self.account_id
+                    )
+                    if application:
+                        perceptions += perception
+            tax_ids += perceptions
+        elif (
             self.move_id.is_purchase_document(include_receipts=True)
             and self.move_id.perception_ids
         ):
             tax_ids += self.move_id.perception_ids.mapped('perception_id')
         return tax_ids
+
+    def link_perception_to_move_lines(self):
+        self._compute_tax_ids()
+        self._compute_all_tax()
 
     def price_unit_to_PDF(self):
         price_unit = self.price_unit
