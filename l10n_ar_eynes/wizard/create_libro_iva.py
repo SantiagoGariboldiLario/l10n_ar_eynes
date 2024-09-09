@@ -162,6 +162,8 @@ class LibroIVAExporterWizard(models.TransientModel):
                 invoice_name = invoice.internal_number
             else:
                 invoice_name = invoice.supplier_move_reference
+            if not invoice_name:
+                invoice_name = "/"
             if invoice.is_purchase_document() or 'False' in pos:
                 if '-' in invoice_name:
                     pos = '%.5s' % str(invoice_name.split('-')[0]).rjust(5, '0')
