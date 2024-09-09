@@ -2,8 +2,7 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta as relatived
 
-from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo import api, fields, models
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DSDF
 
 
@@ -122,9 +121,13 @@ class RetentionTaxApplication(models.Model):
 
     name = fields.Char('Description', size=128)
     reg_code = fields.Integer('Reg. Code')
-    concept_id_domain = fields.Binary(string='Concept filter ', compute='_compute_concept_domain')
+    concept_id_domain = fields.Binary(
+        string='Concept filter ', compute='_compute_concept_domain'
+    )
     concept_id = fields.Many2one('retention.concept', 'Concept')
-    activity_id_domain = fields.Binary(string='Activity filter ', compute='_compute_activity_domain')
+    activity_id_domain = fields.Binary(
+        string='Activity filter ', compute='_compute_activity_domain'
+    )
     activity_id = fields.Many2one('retention.activity', 'Activity')
     retention_tax_id = fields.Many2one(
         comodel_name='account.tax',
@@ -170,7 +173,7 @@ class RetentionTaxApplication(models.Model):
         selection=[('percent', 'Percent'), ('scale', 'Scale')],
         string='Aliquot Type',
         required=True,
-        default='percent'
+        default='percent',
     )
     percent = fields.Float(
         'Percent',
@@ -206,7 +209,9 @@ class RetentionTaxApplication(models.Model):
     def _compute_concept_domain(self):
         for rec in self:
             if rec.retention_tax_id:
-                rec.concept_id_domain = [('type', '=', rec.retention_tax_id.retention_type)]
+                rec.concept_id_domain = [
+                    ('type', '=', rec.retention_tax_id.retention_type)
+                ]
             else:
                 rec.concept_id_domain = [()]
 
@@ -214,7 +219,9 @@ class RetentionTaxApplication(models.Model):
     def _compute_activity_domain(self):
         for rec in self:
             if rec.retention_tax_id:
-                rec.activity_id_domain = [('type', '=', rec.retention_tax_id.retention_type)]
+                rec.activity_id_domain = [
+                    ('type', '=', rec.retention_tax_id.retention_type)
+                ]
             else:
                 rec.activity_id_domain = [()]
 
@@ -453,16 +460,7 @@ class RetentionTaxApplication(models.Model):
             return 0.0, 0.0, 0.0
 
         # Chequeamos que la cantidad a retener no sea negativa
-        if amount < 0:
-            raise ValidationError(
-                _('Retention Error!\n')
-                + _(
-                    'There is an error in retention configuration because '
-                    + 'amount of %s is negative'
-                )
-                % self.retention_tax_id.name
-            )
-        elif amount == 0.0:
+        if amount <= 0:
             return 0.0, 0.0, 0.0
 
         # Aplicamos el porcentaje de eximision si es que lo hay

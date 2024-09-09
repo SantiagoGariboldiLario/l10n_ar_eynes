@@ -210,6 +210,7 @@ class AccountPaymentOrder(models.Model):
         digits='Account',
         default=default_amount,
         required=True,
+        compute='_compute_amount',
     )
     writeoff_acc_id = fields.Many2one(
         comodel_name='account.account',
@@ -385,30 +386,6 @@ class AccountPaymentOrder(models.Model):
     employee_id = fields.Many2one('hr.employee', string="Employee")
     employee_payment = fields.Boolean(string='Employee Payments')
 
-    def prepare_retention_values(self, voucher):
-        ret_vals = {
-            'voucher_number': voucher.number,
-            'partner_id': voucher.partner_id.id,
-        }
-        return ret_vals
-
-    @api.onchange('retention_ids')
-    def _onchange_retentions(self):
-        amount = self.payment_order_amount_hook()
-        self.amount = amount
-
-    @api.onchange(
-        'third_party_check_ids',
-        'third_party_check_receipt_ids',
-        'issued_check_line_ids',
-    )
-    def onchange_checks(self):
-        issued_checks = self.issued_check_line_ids.mapped('issued_check_id')
-        if len(issued_checks) != len(self.issued_check_line_ids):
-            raise ValidationError(_("You can't use the same check twice."))
-        amount = self.payment_order_amount_hook()
-        self.amount = amount
-
     def payment_order_amount_hook(self):
         amount = self.get_payment_lines_amount()
         amount += self.get_issued_checks_amount()
@@ -427,6 +404,9 @@ class AccountPaymentOrder(models.Model):
         amount += self.compute_advance_payment_retentions(amount)
         return amount
 
+    def get_payment_lines_amount(self):
+        return sum(self.payment_mode_line_ids.mapped('amount'))
+
     def get_issued_checks_amount(self):
         return sum(self.issued_check_line_ids.mapped('amount'))
 
@@ -438,6 +418,30 @@ class AccountPaymentOrder(models.Model):
 
     def get_retentions_amount(self):
         return sum(self.retention_ids.mapped('amount'))
+
+    def get_concept_lines_amount(self):
+        return sum(self.concept_line_ids.mapped('amount'))
+
+    @api.depends(
+        'retention_ids',
+        'third_party_check_ids',
+        'third_party_check_receipt_ids',
+        'issued_check_line_ids',
+        'payment_mode_line_ids',
+    )
+    def _compute_amount(self):
+        for rec in self:
+            rec.amount = rec.payment_order_amount_hook()
+
+    @api.onchange(
+        'third_party_check_ids',
+        'third_party_check_receipt_ids',
+        'issued_check_line_ids',
+    )
+    def onchange_checks(self):
+        issued_checks = self.issued_check_line_ids.mapped('issued_check_id')
+        if len(issued_checks) != len(self.issued_check_line_ids):
+            raise ValidationError(_("You can't use the same check twice."))
 
     def compute_advance_payment_retentions(self, amount):
         amount = amount - sum(self.retention_ids.mapped('amount'))
@@ -895,9 +899,6 @@ class AccountPaymentOrder(models.Model):
         amount -= self.get_concept_lines_amount()
         return amount
 
-    def get_concept_lines_amount(self):
-        return sum(self.concept_line_ids.mapped('amount'))
-
     @api.depends('currency_id')
     def _compute_is_multicurrency(self):
         for p in self:
@@ -922,14 +923,6 @@ class AccountPaymentOrder(models.Model):
                 or self.journal_id.loss_account_id
             )
         self.account_id = account_id
-
-    def get_payment_lines_amount(self):
-        return sum(self.payment_mode_line_ids.mapped('amount'))
-
-    @api.onchange('payment_mode_line_ids')
-    def onchange_payment_line(self):
-        amount = self.payment_order_amount_hook()
-        self.amount = amount
 
     @api.onchange('debt_line_ids')
     def onchange_debt_lines(self):
@@ -1389,6 +1382,13 @@ class AccountPaymentOrder(models.Model):
             'ref': ref,
         }
         return move
+
+    def prepare_retention_values(self, voucher):
+        ret_vals = {
+            'voucher_number': voucher.number,
+            'partner_id': voucher.partner_id.id,
+        }
+        return ret_vals
 
     def create_move_line_hook(self, move_id):
         move_lines = []
