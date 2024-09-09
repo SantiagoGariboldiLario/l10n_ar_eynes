@@ -27,7 +27,7 @@
                         <field name="date_to" />
                         <label for="datas" string="Generated File" />
                         <div class="oe_inline">
-                            <field name="datas" class="pr-3" />
+                            <field name="datas" filename="code" class="pr-3" />
                             <field name="attachment_id" />
                         </div>
                     </group>
