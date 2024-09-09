@@ -122,7 +122,7 @@ class StockPicking(models.Model):
         aux = 0
 
         if self.pick_type == "outgoing":
-            for move in self.move_lines:
+            for move in self.move_ids:
                 aux = move.product_qty * move.sale_line_id.price_unit
 
             qty += aux
@@ -134,7 +134,7 @@ class StockPicking(models.Model):
                         from_currency, to_currency, qty, round=False
                     )
         else:
-            for move in self.move_lines:
+            for move in self.move_ids:
                 aux = move.product_qty * move.price_unit
                 qty += aux
         return qty
@@ -509,7 +509,7 @@ class StockPicking(models.Model):
 
     def cot_product(self):
         ls_product = []
-        for line in self.move_lines:
+        for line in self.move_ids:
             product_qty = str(int(line.product_qty * 100))
             product_code = str(line.product_id.default_code)[:25]
             product_desc = line.name
