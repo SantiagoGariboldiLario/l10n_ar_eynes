@@ -46,7 +46,7 @@ class LibroIVAExporterWizard(models.TransientModel):
     def _get_perception_with_type_iva(self, invoice):
         amount = 0.0
         for perception_id in invoice.perception_ids:
-            if perception_id.perception_id.tax_id.retention_type == 'vat':
+            if perception_id.perception_id.retention_type == 'vat':
                 if perception_id.__contains__('tax_currency'):
                     amount += perception_id.tax_currency
                 else:
@@ -57,8 +57,8 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount = 0.0
         for perception_id in invoice.perception_ids:
             if (
-                perception_id.perception_id.tax_id.jurisdiccion == jurisdiction
-                and perception_id.perception_id.tax_id.retention_type != 'vat'
+                perception_id.perception_id.jurisdiccion == jurisdiction
+                and perception_id.perception_id.retention_type != 'vat'
             ):
                 amount += perception_id.amount
         return ('%016.2f' % amount).replace('.', '')
@@ -175,8 +175,9 @@ class LibroIVAExporterWizard(models.TransientModel):
             pos = False
             errors.append(
                 _(
-                    'Invoice %(name)s of %(type)s: Wrong %(field)s in Journal',
+                    'Invoice %(name)s (ID %(id)s) of %(type)s: Wrong %(field)s in Journal',
                     name=invoice.name,
+                    id=invoice.id,
                     type=(
                         _('suppliers')
                         if invoice.move_type.startswith('in_')
@@ -193,11 +194,13 @@ class LibroIVAExporterWizard(models.TransientModel):
             internal_number = invoice.internal_number
         else:
             internal_number = invoice.supplier_move_reference
+        if not internal_number:
+            internal_number = "/"
         if invoice.iva_digital_operation_code in ['X', 'Z']:
             import_clearance = internal_number.rjust(16, ' ')
             internal_number = '0'
         else:
-            if '-' in internal_number:
+            if internal_number and '-' in internal_number:
                 internal_number = internal_number.split('-')[1]
             try:
                 int(internal_number)
@@ -209,8 +212,9 @@ class LibroIVAExporterWizard(models.TransientModel):
                 )
                 errors.append(
                     _(
-                        'Invoice %(name)s of %(type)s: Wrong %(field)s',
+                        'Invoice %(name)s (ID %(id)s) of %(type)s: Wrong %(field)s',
                         name=invoice.name,
+                        id=invoice.id,
                         type=(
                             _('suppliers')
                             if invoice.move_type.startswith('in_')
@@ -237,8 +241,9 @@ class LibroIVAExporterWizard(models.TransientModel):
             partner_document_type = False
             errors.append(
                 _(
-                    'Invoice %(name)s of %(type)s: Wrong %(field)s in Partner',
+                    'Invoice %(name)s (ID %(id)s) of %(type)s: Wrong %(field)s in Partner',
                     name=invoice.name,
+                    id=invoice.id,
                     type=(
                         _('suppliers')
                         if invoice.move_type.startswith('in_')
