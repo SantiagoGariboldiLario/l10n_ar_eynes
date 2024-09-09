@@ -5,7 +5,7 @@ from odoo.tools import float_is_zero
 class PosPayment(models.Model):
     _inherit = "pos.payment"
 
-    def _create_payment_moves(self):
+    def _create_payment_moves(self, is_reverse=False):
         """
         Override to force move_type on payment_move creation to prevent error when
         user validate invoice from backend.
@@ -65,6 +65,7 @@ class PosPayment(models.Model):
                 amounts['amount'],
                 amounts['amount_converted'],
             )
+
             self.env['account.move.line'].with_context(
                 check_move_validity=False
             ).create([credit_line_vals, debit_line_vals])

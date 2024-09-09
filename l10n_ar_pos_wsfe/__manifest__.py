@@ -33,18 +33,10 @@
         'views/pos_config_views.xml',
     ],
     'assets': {
-        'point_of_sale.assets': [
-            'l10n_ar_pos_wsfe/static/src/js/models.js',
-            'l10n_ar_pos_wsfe/static/src/js/payment.js',
-            'l10n_ar_pos_wsfe/static/src/js/ticket.js',
-            'l10n_ar_pos_wsfe/static/src/js/client.js',
-            'l10n_ar_pos_wsfe/static/src/js/product.js',
-            'l10n_ar_pos_wsfe/static/src/js/order_widget.js',
-            'l10n_ar_pos_wsfe/static/src/scss/cash_move_button_popup.scss',
-            'l10n_ar_pos_wsfe/static/src/js/PaymentScreenStatus.js',
-        ],
-        'web.assets_qweb': [
-            'l10n_ar_pos_wsfe/static/src/xml/**/*',
+        'point_of_sale._assets_pos': [
+            'l10n_ar_pos_wsfe/static/src/js/models_mig17.js',
+            'l10n_ar_pos_wsfe/static/src/js/payment_mig17.js',
+            'l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml',
         ],
     },
     "external_dependencies": {},
