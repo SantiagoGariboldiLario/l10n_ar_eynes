@@ -1,7 +1,8 @@
 odoo.define("l10n_ar_pos_wsfe.PosOrder", function (require) {
     "use strict";
 
-    var models = require("point_of_sale.models");
+    import { Order } from "@point_of_sale/app/store/models";
+    import { patch } from "@web/core/utils/patch";
 
     models.load_fields("res.partner", ["property_account_position_id", "document_type_id"]);
 

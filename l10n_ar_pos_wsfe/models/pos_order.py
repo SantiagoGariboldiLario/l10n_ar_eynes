@@ -50,15 +50,15 @@ class PosOrder(models.Model):
 
     def _hook_recompute_account_move(self, new_move):
         ctx = dict(self.env.context)
-        ctx['check_move_validity'] = False
-        # new_move.with_context(**ctx)._onchange_invoice_date() # Existe en l10n_ar_eynes v15 pero se borró
-        # new_move.with_context(**ctx).compute_perceptions()  # Metodo comentado en l10n_ar_eynes
+        # ctx['check_move_validity'] = False
+        ctx['from_so'] = True
+        new_move.with_context(**ctx).add_perceptions()
         new_move._onchange_payment_term_date_invoice()
         new_move.select_default_voucher_type()
         return
 
     def _check_balanced(self, new_move):
-        new_move._check_balanced()
+        new_move._check_balanced(self)
         return True
 
     def _create_invoice(self, move_vals):
@@ -83,6 +83,7 @@ class PosOrder(models.Model):
             new_move = order._create_invoice(move_vals)
 
             order.write({'account_move': new_move.id, 'state': 'invoiced'})
+
             if order.is_wsfe:
                 res = (
                     new_move.sudo()
