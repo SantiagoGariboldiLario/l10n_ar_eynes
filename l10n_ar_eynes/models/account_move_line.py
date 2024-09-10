@@ -112,6 +112,8 @@ class AccountMoveLine(models.Model):
             for perception in self.move_id.perception_ids.mapped(
                 'perception_id'
             ):
+                if perception.apply_custom_code:
+                    perceptions += perception
                 for perception_line in self.move_id.perception_ids.filtered(
                     lambda line: line.perception_id == perception
                 ):

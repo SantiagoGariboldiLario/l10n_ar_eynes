@@ -58,8 +58,10 @@ class ResPartner(models.Model):
     )
     is_checked_special_partner_required_fields = fields.Boolean(
         string="Required Document Type, NIF, and Fiscal Position on partners",
-        default=lambda self: self.env["ir.config_parameter"].sudo().get_param("l10n_ar_eynes.special_partner_required_fields"),
-        store=False
+        default=lambda self: self.env["ir.config_parameter"]
+        .sudo()
+        .get_param("l10n_ar_eynes.special_partner_required_fields"),
+        store=False,
     )
     perception_ids = fields.One2many(
         'res.partner.perception',
@@ -394,6 +396,17 @@ class ResPartner(models.Model):
             return True
 
         return False
+
+    def get_python_application_perceptions(self):
+        perceptions = self.env['account.tax']
+        try:
+            self.ensure_one()
+        except Exception:
+            return perceptions
+        perceptions = self.property_account_position_id.perception_ids.filtered(
+            lambda perception: perception.apply_custom_code
+        )
+        return perceptions
 
     def _get_retentions_to_apply(self, operation_date):
         # Buscamos las retenciones a aplicar segun la posicion fiscal

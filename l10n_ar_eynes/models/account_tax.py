@@ -215,6 +215,14 @@ class AccountTax(models.Model):
         In the python code avoid using origin, since it may come empty
         """
         origin_vals = origin_vals or {}
+        if origin._name == 'account.move':
+            invoice_vals = self._parse_move_lines(origin)
+            origin_vals.update(
+                {
+                    **invoice_vals,
+                    'invoice_date': origin.invoice_date,
+                }
+            )
         return {
             'origin': origin,
             'origin_name': origin._name,
@@ -222,9 +230,9 @@ class AccountTax(models.Model):
             **origin_vals,
         }
 
-    def _get_taxapps_from_code(
+    def calculate_python_custom_tax(
         self,
-        perc_data,
+        # perc_data,
         partner,
         origin,
         origin_vals=None,
@@ -254,7 +262,7 @@ class AccountTax(models.Model):
         eval_context.update(
             {
                 **origin_eval_ctx,
-                'perc_data': perc_data,
+                # 'perc_data': perc_data,
                 'perception': self,
                 'retention': self,
                 'partner': partner,
@@ -341,9 +349,7 @@ class AccountTax(models.Model):
         ).filtered(lambda x: x.repartition_type == 'tax')
 
         if not tax_repartition_lines:
-            raise ValidationError(
-                _("No tax repartition lines where found")
-            )
+            raise ValidationError(_("No tax repartition lines where found"))
 
         if len(tax_repartition_lines) != 1:
             raise ValidationError(
@@ -601,19 +607,16 @@ class AccountTax(models.Model):
         return retentions
 
     def _parse_move_lines(self, move):
-        not_payable_moves = move.line_ids.filtered(
-            lambda ml: ml.account_id.account_type != 'liability_payable'
-        )
-        tax_mls = not_payable_moves.filtered(lambda ml: ml.tax_line_id)
-        taxed_mls = not_payable_moves.filtered(lambda ml: ml.tax_ids)
-        untaxed_mls = not_payable_moves.filtered(
+        tax_mls = move.invoice_line_ids.filtered(lambda ml: ml.tax_line_id)
+        taxed_mls = move.invoice_line_ids.filtered(lambda ml: ml.tax_ids)
+        untaxed_mls = move.invoice_line_ids.filtered(
             lambda ml: not (ml.tax_line_id + ml.tax_ids)
         )
 
-        amount_tax = sum(ml.credit or ml.debit for ml in tax_mls)
-        amount_untaxed = sum(ml.credit or ml.debit for ml in taxed_mls)
-        amount_no_taxed = sum(ml.credit or ml.debit for ml in untaxed_mls)
-        amount_total = sum(ml.credit or ml.debit for ml in not_payable_moves)
+        amount_tax = sum(ml.price_subtotal for ml in tax_mls)
+        amount_untaxed = sum(ml.price_subtotal for ml in taxed_mls)
+        amount_no_taxed = sum(ml.price_subtotal for ml in untaxed_mls)
+        amount_total = sum(ml.price_subtotal for ml in move.invoice_line_ids)
 
         tax_lines = {
             at: tax_mls.filtered(lambda ml: ml.tax_line_id == at)

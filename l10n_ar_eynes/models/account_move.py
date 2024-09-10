@@ -654,6 +654,8 @@ class AccountMove(models.Model):
     def _automatic_perception_calculation(self):
         if self.is_sale_document():
             if self.partner_id and not self.disable_perceptions:
+                # Se agrupan las líneas de la factura sobre las cuales se aplican las percepciones
+                # que corresponden (según concepto --> cuenta contable / posición fiscal --> partner)
                 perception_application_data = {}
                 for line in self.invoice_line_ids:
                     perceptions_applications = (
@@ -695,6 +697,8 @@ class AccountMove(models.Model):
                             )
 
                 perception_tax_line_vals = []
+                # Se calculan las percepciones obtenidas anteriormente y se generan los correspondientes
+                # dicts de datos para crear las líneas de percepción.
                 for application in perception_application_data.keys():
                     application_data = perception_application_data[application]
                     base, amount = application.apply_perception(
@@ -716,7 +720,40 @@ class AccountMove(models.Model):
                                 'concept_id': application.concept_id.id,
                             }
                         )
+                # Se buscan las percepciones configuradas por código python que aplican según la posición
+                # fiscal del partner. La aplicación o no y su cálculo se definen en dicho código.
+                for (
+                    perception
+                ) in self.partner_id.get_python_application_perceptions():
+                    perceptions_applications = (
+                        perception.calculate_python_custom_tax(
+                            self.partner_id, self
+                        )
+                    )
+                    for application in perceptions_applications:
+                        base = application['base']
+                        amount = application['amount']
+                        if base > 0 and amount > 0:
+                            perception_tax_line_vals.append(
+                                {
+                                    'name': perception.name,
+                                    'date': self.invoice_date,
+                                    'invoice_id': self.id,
+                                    'partner_id': self.partner_id.id,
+                                    'base': base,
+                                    'amount': amount,
+                                    'perception_id': perception.id,
+                                    'manual': False,
+                                    'reg_code': application.get(
+                                        'reg_code', False
+                                    ),
+                                    'concept_id': application.get(
+                                        'concept_id', False
+                                    ),
+                                }
+                            )
 
+                # Se generan las líneas de percepción y se asocian a la factura
                 new_perception_lines = self.env['perception.tax.line']
                 for perception_tax_line_vals in perception_tax_line_vals:
                     new_perception_lines += self.env['perception.tax.line'].new(
@@ -725,6 +762,8 @@ class AccountMove(models.Model):
                 self.perception_ids = new_perception_lines
             else:
                 self.perception_ids.unlink()
+            # Una vez creadas / eliminadas las líneas de percepción, se actualizan los montos de las líneas
+            # contables que corresponden a cada percepción con los montos correctos calculados.
             self.invoice_line_ids.link_perception_to_move_lines()
 
     @api.onchange('perception_ids')

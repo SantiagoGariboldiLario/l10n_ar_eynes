@@ -655,7 +655,7 @@ class AccountPaymentOrder(models.Model):
                 'debt_lines': debt_line_affected,
                 'payment_order': self,
             }
-            retentions = retention._get_taxapps_from_code(
+            retentions = retention.calculate_python_custom_tax(
                 retention_data,
                 self.partner_id,
                 self,
