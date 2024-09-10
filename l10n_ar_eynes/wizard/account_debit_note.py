@@ -16,11 +16,14 @@ class AccountDebitNote(models.TransientModel):
     )
 
     def _get_voucher_type(self, move):
-        return self.env['res.voucher.type'].search([
-            ('denomination', '=', move.denomination),
-            ('doc_type', '=', 'dn'),
-            ('afip_code', '>' if move.is_FCE_invoice else '<', 200)
-        ], limit=1)
+        return self.env['res.voucher.type'].search(
+            [
+                ('denomination', '=', move.denomination),
+                ('doc_type', '=', 'dn'),
+                ('afip_code', '>' if move.is_FCE_invoice else '<', 200),
+            ],
+            limit=1,
+        )
 
     def _prepare_default_values(self, move):
         res = super(AccountDebitNote, self)._prepare_default_values(move)
@@ -36,7 +39,6 @@ class AccountDebitNote(models.TransientModel):
                         {
                             'amount': p.amount,
                             'base': p.base,
-                            'base_amount': p.base_amount,
                             'concept_id': p.concept_id.id,
                             'manual': p.manual,
                             'name': p.name,
@@ -44,7 +46,6 @@ class AccountDebitNote(models.TransientModel):
                             'perception_id': p.perception_id.id,
                             'reg_code': p.reg_code,
                             'state_id': p.state_id.id,
-                            'tax_amount': p.tax_amount,
                             'tax_app_id': p.tax_app_id.id,
                             'vat': p.vat,
                         },
@@ -53,7 +54,7 @@ class AccountDebitNote(models.TransientModel):
         res.update(
             {
                 'is_debit_note': True,
-                # 'address_shipping_id': move.address_shipping_id.id,
+                'address_shipping_id': move.address_shipping_id.id,
                 'perception_ids': perceptions,
                 'associated_inv_ids': [move.id],
                 'currency_id': move.currency_id.id,
