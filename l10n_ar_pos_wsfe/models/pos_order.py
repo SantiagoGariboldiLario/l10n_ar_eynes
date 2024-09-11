@@ -113,69 +113,69 @@ class PosOrder(models.Model):
             'res_id': moves and moves.ids[0] or False,
         }
 
-    def _compute_all_vat_taxes(self, line_vals, order_vals):
-        order_currency = self.env['res.currency'].browse(
-            order_vals['currency_id']
-        )
-        product = self.env['product.product'].browse(line_vals['product_id'])
-        partner = self.env['res.partner'].browse(order_vals['partner_id'])
-        taxes = self.env['account.tax'].browse(line_vals['tax_ids'])
-        account = self._get_computed_account(product, partner, order_vals)
-        currency = order_currency.with_context(
-            date=order_vals['date'] or fields.Date.context_today(self)
-        )
-        company_currency = self.env.user.company_id.currency_id
+    # def _compute_all_vat_taxes(self, line_vals, order_vals):
+    #     order_currency = self.env['res.currency'].browse(
+    #         order_vals['currency_id']
+    #     )
+    #     product = self.env['product.product'].browse(line_vals['product_id'])
+    #     partner = self.env['res.partner'].browse(order_vals['partner_id'])
+    #     taxes = self.env['account.tax'].browse(line_vals['tax_ids'])
+    #     account = self._get_computed_account(product, partner, order_vals)
+    #     currency = order_currency.with_context(
+    #         date=order_vals['date'] or fields.Date.context_today(self)
+    #     )
+    #     company_currency = self.env.user.company_id.currency_id
 
-        price_unit = line_vals['price']
-        quantity = line_vals['qty']
-        discount = line_vals['discount']
-        price = price_unit * (1 - (discount or 0.0) / 100.0)
-        price_subtotal = line_vals['price_subtotal']
+    #     price_unit = line_vals['price']
+    #     quantity = line_vals['qty']
+    #     discount = line_vals['discount']
+    #     price = price_unit * (1 - (discount or 0.0) / 100.0)
+    #     price_subtotal = line_vals['price_subtotal']
 
-        line_taxes = {}
-        taxes = taxes.compute_all(
-            price,
-            order_currency,
-            quantity,
-            product,
-            partner,
-        )
+    #     line_taxes = {}
+    #     taxes = taxes.compute_all(
+    #         price,
+    #         order_currency,
+    #         quantity,
+    #         product,
+    #         partner,
+    #     )
 
-        amount_tax = 0.0
-        amount_base = 0.0
-        amount_exempt = 0.0
-        for tax in taxes['taxes']:
-            if not tax['tax_group_name'].lower() == 'vat':
-                continue
+    #     amount_tax = 0.0
+    #     amount_base = 0.0
+    #     amount_exempt = 0.0
+    #     for tax in taxes['taxes']:
+    #         if not tax['tax_group_name'].lower() == 'vat':
+    #             continue
 
-            val = {}
-            val['name'] = tax['name']
-            val['amount'] = tax['amount']
-            val['base'] = tax['base']
-            val['base_amount'] = currency.compute(
-                val['base'], company_currency, round=False
-            )
-            val['tax_amount'] = currency.compute(
-                val['amount'], company_currency, round=False
-            )
-            val['account_id'] = tax['account_id'] or account.id
-            amount_tax += tax['amount']
-            if tax['is_exempt']:
-                amount_exempt += val['base']
-            else:
-                amount_base += val['base']
+    #         val = {}
+    #         val['name'] = tax['name']
+    #         val['amount'] = tax['amount']
+    #         val['base'] = tax['base']
+    #         val['base_amount'] = currency.compute(
+    #             val['base'], company_currency, round=False
+    #         )
+    #         val['tax_amount'] = currency.compute(
+    #             val['amount'], company_currency, round=False
+    #         )
+    #         val['account_id'] = tax['account_id'] or account.id
+    #         amount_tax += tax['amount']
+    #         if tax['is_exempt']:
+    #             amount_exempt += val['base']
+    #         else:
+    #             amount_base += val['base']
 
-            line_taxes[tax['id']] = val
+    #         line_taxes[tax['id']] = val
 
-        return {
-            'price_unit': price,
-            'amount_untaxed': price_subtotal,
-            'amount_total': amount_tax + price_subtotal,
-            'amount_no_taxed': price_subtotal - amount_base - amount_exempt,
-            'amount_exempt': amount_exempt,
-            'amount_taxed': amount_base,
-            'vat_taxes': line_taxes,
-        }
+    #     return {
+    #         'price_unit': price,
+    #         'amount_untaxed': price_subtotal,
+    #         'amount_total': amount_tax + price_subtotal,
+    #         'amount_no_taxed': price_subtotal - amount_base - amount_exempt,
+    #         'amount_exempt': amount_exempt,
+    #         'amount_taxed': amount_base,
+    #         'vat_taxes': line_taxes,
+    #     }
 
     def _get_computed_account(self, product, partner, order_vals):
         fiscal_position = partner.property_account_position_id
@@ -205,62 +205,62 @@ class PosOrder(models.Model):
             invoice_journal = self.env['account.journal']
         return invoice_journal.default_account_id
 
-    def _compute_base_perception(
-        self, perception, perception_data, origin_vals=None
-    ):
-        if not origin_vals:
-            return {}
-        percent = perception_data['percent']
+    # def _compute_base_perception(
+    #     self, perception, perception_data, origin_vals=None
+    # ):
+    #     if not origin_vals:
+    #         return {}
+    #     percent = perception_data['percent']
 
-        concept_id = False
+    #     concept_id = False
 
-        partner = self.env['res.partner'].browse(origin_vals['partner_id'])
+    #     partner = self.env['res.partner'].browse(origin_vals['partner_id'])
 
-        # Por cada linea, nos fijamos la configuracion del producto
-        perceptions = {}
-        order_vals = origin_vals['order_vals']
-        for line in order_vals['order_lines']:
-            product = self.env['product.product'].browse(line['product_id'])
-            account = self._get_computed_account(product, partner, order_vals)
+    #     # Por cada linea, nos fijamos la configuracion del producto
+    #     perceptions = {}
+    #     order_vals = origin_vals['order_vals']
+    #     for line in order_vals['order_lines']:
+    #         product = self.env['product.product'].browse(line['product_id'])
+    #         account = self._get_computed_account(product, partner, order_vals)
 
-            if not account:
-                raise ValidationError(
-                    _(
-                        "The product %(product)s has not account configured.",
-                        product=product.display_name,
-                    )
-                )
+    #         if not account:
+    #             raise ValidationError(
+    #                 _(
+    #                     "The product %(product)s has not account configured.",
+    #                     product=product.display_name,
+    #                 )
+    #             )
 
-            taxapps = perception._get_taxapps(perception_data, account)
-            if taxapps is None:
-                continue
+    #         taxapps = perception._get_taxapps(perception_data, account)
+    #         if taxapps is None:
+    #             continue
 
-            concept_id = taxapps.concept_id.id
+    #         concept_id = taxapps.concept_id.id
 
-            # Obtenemos toda la info contable de la linea de factura
-            # todas las cantidades y los impuestos de IVA aplicados
-            res = self._compute_all_vat_taxes(line, order_vals)
+    #         # Obtenemos toda la info contable de la linea de factura
+    #         # todas las cantidades y los impuestos de IVA aplicados
+    #         res = self._compute_all_vat_taxes(line, order_vals)
 
-            # Hacemos el computo de la Percepcion por linea de factura
-            base = taxapps.compute_base(percent, res)
+    #         # Hacemos el computo de la Percepcion por linea de factura
+    #         base = taxapps.compute_base(percent, res)
 
-            if base == 0.0:
-                continue
+    #         if base == 0.0:
+    #             continue
 
-            # Luego vamos agrupando por Concepto (no por actividad)
-            if concept_id in perceptions:
-                perceptions[concept_id]['base'] += base
-                # perceptions[concept_id]['amount'] += amount
-                # perceptions[concept_id]['lines'].append(line.id)
-            else:
-                perceptions[concept_id] = {
-                    'base': base,
-                    # 'amount': amount,
-                    # 'lines': [line.id],
-                    'reg_code': taxapps.reg_code,
-                    'tax_app_id': taxapps,
-                }
-        return perceptions
+    #         # Luego vamos agrupando por Concepto (no por actividad)
+    #         if concept_id in perceptions:
+    #             perceptions[concept_id]['base'] += base
+    #             # perceptions[concept_id]['amount'] += amount
+    #             # perceptions[concept_id]['lines'].append(line.id)
+    #         else:
+    #             perceptions[concept_id] = {
+    #                 'base': base,
+    #                 # 'amount': amount,
+    #                 # 'lines': [line.id],
+    #                 'reg_code': taxapps.reg_code,
+    #                 'tax_app_id': taxapps,
+    #             }
+    #     return perceptions
 
     def _get_perceptions_ctx(self, order_vals):
         return {
@@ -272,19 +272,66 @@ class PosOrder(models.Model):
 
     @api.model
     def compute_perceptions(self, order_vals):
-        AccountJournal = self.env['account.journal']
-        partner_id = order_vals['partner_id']
+        partner_id = order_vals.get('partner_id', False)
+        if not partner_id:
+            return 0.0
+        partner = self.env['res.partner'].browse(partner_id)
         if order_vals.get('date'):
             order_vals['date'] = datetime.strptime(
                 order_vals['date'],
                 '%Y-%m-%d',
             ).date()
         date = order_vals['date']
-        if not partner_id:
-            return 0.0
-        partner = self.env['res.partner'].browse(partner_id)
-        perception_ctx = self._get_perceptions_ctx(order_vals)
-        perception_lst = AccountJournal.get_applicable_perceptions(
-            partner, self, origin_vals=perception_ctx, date=date
-        )
-        return sum(x['amount'] for x in perception_lst)
+
+        accounts = {}
+        for line in order_vals['order_lines']:
+            product = self.env['product.product'].browse(line['product_id'])
+            account = self._get_computed_account(product, partner, order_vals)
+            if not account:
+                raise ValidationError(
+                    _(
+                        "The product %(product)s has not account configured.",
+                        product=product.display_name,
+                    )
+                )
+            accounts.setdefault(account, [])
+            accounts[account].append(line)
+
+        perception_application_data = {}
+        for account in accounts.keys():
+            perceptions_applications = account.get_perceptions_applications()
+            for application in perceptions_applications:
+                account_perception_application_data = (
+                    application.get_perception_data(partner, date)
+                )
+                applicable = application.check_applicable(
+                    destination_shipping=partner,
+                    source_shipping=self.company_id.partner_id,
+                    sit_iibb=account_perception_application_data['sit_iibb'],
+                    from_padron=account_perception_application_data[
+                        'from_padron'
+                    ],
+                    excluded_percent=account_perception_application_data[
+                        'excluded_percent'
+                    ],
+                )
+                if applicable:
+                    perception_application_data.setdefault(
+                        application,
+                        {'lines': []},
+                    )
+                    perception_application_data[application].update(
+                        account_perception_application_data
+                    )
+                    perception_application_data[application]['lines'].extend(
+                        accounts[account]
+                    )
+
+        perceptions_amount = 0.0
+        # Se calculan las percepciones obtenidas anteriormente y se generan los correspondientes
+        # dicts de datos para crear las líneas de percepción.
+        for application in perception_application_data.keys():
+            application_data = perception_application_data[application]
+            _base, amount = application.apply_perception(application_data)
+            perceptions_amount += amount
+        return perceptions_amount

@@ -378,7 +378,12 @@ class PerceptionTaxApplication(models.Model):
     #     return amount
 
     def check_applicable(
-        self, invoice, sit_iibb=False, from_padron=False, excluded_percent=0.0
+        self,
+        destination_shipping,
+        source_shipping,
+        sit_iibb=False,
+        from_padron=False,
+        excluded_percent=0.0,
     ):
         """
         Este método es utilizado para determinar si una percepción debe ser aplicada al cliente
@@ -417,10 +422,9 @@ class PerceptionTaxApplication(models.Model):
 
         partner_state = False
         retention_state = self.perception_tax_id.state_id.id
-        destination_shipping = invoice.address_shipping_id or self.env[
-            'res.partner'
-        ].browse(invoice.partner_id.address_get(['delivery']).get('delivery'))
-        source_shipping = invoice.company_id.partner_id
+        destination_shipping = self.env['res.partner'].browse(
+            destination_shipping.address_get(['delivery']).get('delivery')
+        )
         if self.perception_tax_id.applicable_state == 'dest':
             partner_state = destination_shipping.state_id.id
             if not partner_state:
@@ -506,17 +510,31 @@ class PerceptionTaxApplication(models.Model):
 
         return data
 
+    def _get_base_from_account_move_lines(self, field, lines):
+        return sum(lines.mapped(field))
+
+    def _get_base_from_list(self, field, lines):
+        return sum(line[field] for line in lines)
+
     def compute_base(self, lines):
         self.ensure_one()
+
+        method_name = '_get_base_from_account_move_lines'
+        if isinstance(lines, list):
+            method_name = '_get_base_from_list'
+        method = getattr(self, method_name)
+
         base = 0.0
         if self.calculation_base in ('proportional_vat', 'amount_taxed'):
-            base = sum(lines.mapped('amount_taxed'))  # TODO
+            # TODO
+            base = method('amount_taxed', lines)
         elif self.calculation_base == 'amount_total':
-            base = sum(lines.mapped('price_total'))
+            base = method('price_total', lines)
         elif self.calculation_base == 'amount_no_taxed':
-            base = sum(lines.mapped('amount_no_taxed'))  # TODO
+            # TODO
+            base = method('amount_no_taxed', lines)
         elif self.calculation_base == 'amount_untaxed':
-            base = sum(lines.mapped('price_subtotal'))
+            base = method('price_subtotal', lines)
 
         if base < self.tax_allowance:
             return 0.0

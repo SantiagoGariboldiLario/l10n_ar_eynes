@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates id="template" xml:space="preserve">
 
-    <t t-name="TicketScreen" t-inherit="point_of_sale.TicketScreen" t-inherit-mode="extension" owl="1">
-        <xpath expr="//div[@class='header-row']/div[text()='Employee']" position="after">
+    <t t-name="TicketScreen" t-inherit="point_of_sale.TicketScreen" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('header-row')]/div[text()='Employee']" position="after">
             <div class="col">Origin</div>
         </xpath>
-        <xpath expr="//div[@class='order-row']/div[div[text()='Employee']]" position="after">
+        <xpath expr="//div[hasclass('order-row')]/div[div[text()='Employee']]" position="after">
             <div class="col">
                 <div t-if="env.isMobile">Origin</div>
                 <div><t t-esc="getDocOrigin(order)" /></div>
@@ -13,7 +13,7 @@
         </xpath>
     </t>
 
-    <t t-name="OrderDetails" t-inherit="point_of_sale.OrderDetails" t-inherit-mode="extension" owl="1">
+    <t t-name="OrderDetails" t-inherit="point_of_sale.OrderDetails" t-inherit-mode="extension">
         <xpath expr="//div[hasclass('summary')]/div/div/div" position="after">
             <div t-if="props.order.get_total_perception()" class="subentry">
                 Percepciones:

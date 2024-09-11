@@ -656,10 +656,11 @@ class AccountMove(models.Model):
             if self.partner_id and not self.disable_perceptions:
                 # Se agrupan las líneas de la factura sobre las cuales se aplican las percepciones
                 # que corresponden (según concepto --> cuenta contable / posición fiscal --> partner)
+                accounts = self.invoice_line_ids.mapped('account_id')
                 perception_application_data = {}
-                for line in self.invoice_line_ids:
+                for account in accounts:
                     perceptions_applications = (
-                        line.account_id.get_perceptions_applications()
+                        account.get_perceptions_applications()
                     )
                     for application in perceptions_applications:
                         line_perception_application_data = (
@@ -668,7 +669,10 @@ class AccountMove(models.Model):
                             )
                         )
                         applicable = application.check_applicable(
-                            invoice=self,
+                            destination_shipping=(
+                                self.address_shipping_id or self.partner_id
+                            ),
+                            source_shipping=self.company_id.partner_id,
                             sit_iibb=line_perception_application_data[
                                 'sit_iibb'
                             ],
@@ -680,6 +684,9 @@ class AccountMove(models.Model):
                             ],
                         )
                         if applicable:
+                            lines = self.invoice_line_ids.filtered(
+                                lambda line: line.account_id == account
+                            )
                             perception_application_data.setdefault(
                                 application,
                                 {'lines': self.env['account.move.line']},
@@ -692,7 +699,7 @@ class AccountMove(models.Model):
                                     'lines': perception_application_data[
                                         application
                                     ]['lines']
-                                    + line
+                                    + lines
                                 }
                             )
 
@@ -772,10 +779,8 @@ class AccountMove(models.Model):
             self.invoice_line_ids.link_perception_to_move_lines()
 
     def add_perceptions(self):
-        if self.env.context.get('from_so', False):
-            for move in self:
-                move._automatic_perception_calculation()
-                self.invoice_line_ids.link_perception_to_move_lines()
+        for move in self:
+            move._automatic_perception_calculation()
 
     def _get_fce_prefix(self):
         voucher_type = int(self.voucher_type_id.afip_code)

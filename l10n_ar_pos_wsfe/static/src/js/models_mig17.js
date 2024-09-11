@@ -1,7 +1,7 @@
 /** @odoo-module */
 
-import { Order } from "@point_of_sale/app/store/models";
-import { patch } from "@web/core/utils/patch";
+import {Order} from "@point_of_sale/app/store/models";
+import {patch} from "@web/core/utils/patch";
 import {useService} from "@web/core/utils/hooks";
 
 // Backup original export_as_JSON before patching
@@ -19,11 +19,9 @@ patch(Order.prototype, {
         this.orm = useService("orm");
         return this;
     },
-    _isRefundAndSaleOrder: function() {
-        if(this.orderlines.length && this.orderlines.refunded_orderline_id)
-            return true;
-        else
-            return false;
+    _isRefundAndSaleOrder: function () {
+        if (this.orderlines.length && this.orderlines.refunded_orderline_id) return true;
+        else return false;
     },
     set_invoice_number: function (seq_vals) {
         if (!seq_vals) {
@@ -62,7 +60,7 @@ patch(Order.prototype, {
         this.invoice_journal_id = journal_id;
     },
     export_as_JSON: function () {
-         // Call the original method to avoid recursion
+        // Call the original method to avoid recursion
         var json = originalExportAsJSON.apply(this, arguments);
 
         // Add custom properties to the JSON
@@ -95,6 +93,7 @@ patch(Order.prototype, {
             tax_ids: line.tax_ids || line.product.taxes_id || [],
             discount: line.discount,
             price_subtotal: line.get_price_without_tax(),
+            price_total: line.get_price_with_tax(),
         }));
     },
     _prepare_order_vals: function () {
@@ -118,8 +117,8 @@ patch(Order.prototype, {
     },
     set_perception: function (percepcion) {
         this.perception_amount = percepcion || 0.0;
-//        this.trigger("change-summary");
-//        this.trigger("change");
+        //        this.trigger("change-summary");
+        //        this.trigger("change");
     },
     get_total_perception: function () {
         return this.perception_amount || 0.0;
@@ -140,28 +139,29 @@ patch(Order.prototype, {
         const order_vals = this._prepare_order_vals();
         const self = this;
 
-        return this.pos.orm.call("pos.order","compute_perceptions",[order_vals])
+        return this.pos.orm
+            .call("pos.order", "compute_perceptions", [order_vals])
             .then(function (percepcion) {
                 self.set_perception(percepcion);
             });
     },
     // eslint-disable-next-line no-unused-vars
-//    add_product: async function (product, options) {
-//        const res = Order.prototype.add_product.apply(this, arguments);
-//        await this.compute_perceptions();
-//        return res;
-//    },
+    //    add_product: async function (product, options) {
+    //        const res = Order.prototype.add_product.apply(this, arguments);
+    //        await this.compute_perceptions();
+    //        return res;
+    //    },
 
-//    set_partner(partner) {
-//        this.assert_editable();
-//        this.partner = partner;
-//        this.updatePricelistAndFiscalPosition(partner);
-//        this.compute_perceptions();
-//    },
+    set_partner(partner) {
+        this.assert_editable();
+        this.partner = partner;
+        this.updatePricelistAndFiscalPosition(partner);
+        this.compute_perceptions();
+    },
 
-//    get_total_with_tax: function () {
-//        let res = Order.prototype.get_total_with_tax.apply(this, arguments);
-//        res += this.get_total_perception();
-//        return res;
-//    },
+    //    get_total_with_tax: function () {
+    //        let res = Order.prototype.get_total_with_tax.apply(this, arguments);
+    //        res += this.get_total_perception();
+    //        return res;
+    //    },
 });
