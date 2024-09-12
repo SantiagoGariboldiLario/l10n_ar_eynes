@@ -77,10 +77,10 @@
                         name="invoice_date_due"
                         force_save="1"
                         placeholder="Date"
-                        readonly="invoice_payment_term_id"
+                        readonly="invoice_payment_term_id or state != 'draft'"
                     />
                     <span class="o_form_label mx-3 oe_edit_only"> or </span>
-                    <field name="invoice_payment_term_id" placeholder="Terms" />
+                    <field name="invoice_payment_term_id" placeholder="Terms" readonly="state != 'draft'" />
                 </div>
             </xpath>
 
@@ -103,6 +103,7 @@
                 <field
                     name="disable_perceptions"
                     invisible="move_type not in ('out_invoice', 'out_refund')"
+                    readonly="state != 'draft'"
                 />
             </xpath>
 
@@ -112,6 +113,7 @@
                     placeholder="Currency Rate"
                     class="oe_inline"
                     invisible="not is_multi_currency"
+                    readonly="state != 'draft'"
                 />
                 <p invisible="not currency_preciated">
                     <i>Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
@@ -175,7 +177,7 @@
                     <field name="amount_perception_curr" invisible="amount_perception_curr == 0" />
                     <field name="amount_tax_cur" invisible="amount_tax_cur == 0" />
                     <field name="amount_total_cur" class="oe_subtotal_footer_separator" />
-                    <i>- Amounts in Secondary Currency</i>
+                    <i>- Amounts in Company Currency</i>
                 </group>
             </xpath>
 
@@ -185,7 +187,7 @@
                 position="attributes"
             >
                 <attribute name="readonly">
-                    move_type in ('out_invoice', 'out_refund')
+                    move_type in ('out_invoice', 'out_refund') or state != 'draft'
                 </attribute>
                 <attribute name="required">
                     move_type in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')
@@ -201,7 +203,7 @@
                     force_save="1"
                     required="move_type in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')"
                     invisible="move_type not in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')"
-                    readonly="move_type in ('out_invoice', 'out_refund')"
+                    readonly="move_type in ('out_invoice', 'out_refund') or state != 'draft'"
                 />
                 <field
                     name="cae"
@@ -227,6 +229,7 @@
                     required="move_type in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')"
                     domain="voucher_type_domain"
                     widget="selection"
+                    readonly="state != 'draft'"
                 />
             </xpath>
 
@@ -234,9 +237,17 @@
                 <div>
                     <separator string="Associated Invoices" />
                     <group>
-                        <field name="inform_period" />
-                        <field name="inform_period_date_from" invisible="not inform_period" />
-                        <field name="inform_period_date_to" invisible="not inform_period" />
+                        <field name="inform_period" readonly="state != 'draft'" />
+                        <field
+                            name="inform_period_date_from"
+                            invisible="not inform_period"
+                            readonly="state != 'draft'"
+                        />
+                        <field
+                            name="inform_period_date_to"
+                            invisible="not inform_period"
+                            readonly="state != 'draft'"
+                        />
                     </group>
                     <field
                         name="associated_inv_ids"
