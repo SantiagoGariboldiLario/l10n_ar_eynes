@@ -22,7 +22,8 @@ class AccountAccount(models.Model):
         string='Concepts',
     )
     recpam_type = fields.Selection(
-        [('reexpressed', 'Reexpressed'), ('no_reexpressed', 'No Reexpressed')], 'RECPAM'
+        [('reexpressed', 'Reexpressed'), ('no_reexpressed', 'No Reexpressed')],
+        'RECPAM',
     )
     retention_concept_ids = fields.Many2many(
         comodel_name='retention.concept',
@@ -32,8 +33,13 @@ class AccountAccount(models.Model):
         string='Concepts',
     )
 
-    def get_perceptions_applications(self):
+    def get_perceptions_applications(self, fiscal_position):
         self.ensure_one()
-        return self.env['perception.tax.application'].search([
-            ('concept_id', 'in', self.perception_concept_ids.ids)
-        ])
+        return (
+            self.env['perception.tax.application']
+            .search([('concept_id', 'in', self.perception_concept_ids.ids)])
+            .filtered(
+                lambda application: application.perception_tax_id
+                in fiscal_position.perception_ids
+            )
+        )

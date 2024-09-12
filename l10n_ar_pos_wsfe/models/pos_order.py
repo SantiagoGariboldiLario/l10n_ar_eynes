@@ -299,7 +299,9 @@ class PosOrder(models.Model):
 
         perception_application_data = {}
         for account in accounts.keys():
-            perceptions_applications = account.get_perceptions_applications()
+            perceptions_applications = account.get_perceptions_applications(
+                partner.property_account_position_id
+            )
             for application in perceptions_applications:
                 account_perception_application_data = (
                     application.get_perception_data(partner, date)

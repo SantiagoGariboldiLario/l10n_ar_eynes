@@ -660,7 +660,9 @@ class AccountMove(models.Model):
                 perception_application_data = {}
                 for account in accounts:
                     perceptions_applications = (
-                        account.get_perceptions_applications()
+                        account.get_perceptions_applications(
+                            self.partner_id.property_account_position_id
+                        )
                     )
                     for application in perceptions_applications:
                         line_perception_application_data = (
