@@ -601,8 +601,8 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
-msgid "<i>- Amounts in Secondary Currency</i>"
-msgstr "<i>- Importes en segunda divisa</i>"
+msgid "<i>- Amounts in Company Currency</i>"
+msgstr "<i>- Importes en moneda de la compañía</i>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_change_currency_wizard_view
