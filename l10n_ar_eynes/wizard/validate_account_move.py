@@ -21,52 +21,6 @@ class ValidateAccountMove(models.TransientModel):
             lambda inv: inv.fiscal_type == 'electronic'
         )
 
-        # if electronic_invoices and internal_moves:
-        #     raise UserError(
-        #         _(
-        #             "You can't validate Electronic and Internal invoices at the same time."
-        #         )
-        #     )
-        # if electronic_invoices:
-        #     invoices = electronic_invoices.sorted(key=lambda x: x.create_date)
-
-        #     # La condicion para que se pueda validar un lote de
-        #     # facturas electronicas es que deben ser del mismo Punto de Venta,
-        #     # el mismo Tipo de Comprobante y obviamente estar en estado 'Draft'
-        #     pos_ids = invoices.mapped('journal_id').ids
-        #     # Son todas del mismo Punto de Venta?
-        #     if len(set(pos_ids)) != 1:
-        #         raise UserError(
-        #             _(
-        #                 'WSFE Error!\n'
-        #                 'You are trying to validate several invoices but not all '
-        #                 'of them belongs to the same point of sale'
-        #             )
-        #         )
-
-        #     draft_state = map(lambda x: x.state == 'draft', invoices)
-        #     # Estan todas en estado 'Draft'?
-        #     if not all(draft_state):
-        #         raise UserError(
-        #             _(
-        #                 "WSFE Error!\n"
-        #                 "You are trying to validate several invoices but not "
-        #                 "all of them are in 'draft' state"
-        #             )
-        #         )
-
-        #     voucher_type = set(invoices.mapped('voucher_type_id'))
-        #     # Son todas el mismo Tipo de Comprobante?
-        #     if len(voucher_type) != 1:
-        #         raise UserError(
-        #             _(
-        #                 'WSFE Error!\n'
-        #                 "You are trying to validate several invoices but not all "
-        #                 "of them are the same type. For example, all Customer "
-        #                 "Invoices or all Customer Refund"
-        #             )
-        #         )
-
         (moves - electronic_invoices)._post(not self.force_post)
 
         afip_result = electronic_invoices._validate_electronic_invoices(

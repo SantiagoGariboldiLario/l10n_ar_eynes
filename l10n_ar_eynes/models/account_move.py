@@ -827,7 +827,19 @@ class AccountMove(models.Model):
             return 'NDE'
         return ''
 
+    def _required_supplier_move_reference(self):
+        """Supplier bills must have an supplier_move_reference set to be posted"""
+        for record in self:
+            if (
+                record.is_purchase_document()
+                and not record.supplier_move_reference
+            ):
+                raise ValidationError(
+                    _("You must complete supplier move reference.")
+                )
+
     def _post(self, soft=True):
+        self._required_supplier_move_reference()
         for move in self:
             move.validate_period()
             if move.is_sale_document() and move.id:
@@ -849,20 +861,7 @@ class AccountMove(models.Model):
 
         return posted_moves
 
-    def _required_supplier_move_reference(self):
-        """Supplier bills must have an supplier_move_reference set to be posted"""
-        for record in self:
-            if (
-                record.is_purchase_document()
-                and not record.supplier_move_reference
-            ):
-                raise ValidationError(
-                    _("You must complete supplier move reference.")
-                )
-
     def action_post(self):
-        self._required_supplier_move_reference()
-
         if (
             self.move_type in ('out_invoice', 'out_refund')
             and self.amount_total == 0
