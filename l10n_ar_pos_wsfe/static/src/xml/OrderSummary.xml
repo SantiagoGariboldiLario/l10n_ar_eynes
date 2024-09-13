@@ -2,21 +2,12 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="OrderWidget" t-inherit="point_of_sale.OrderWidget" t-inherit-mode="extension">
-        <xpath expr="//OrderSummary" position="attributes">
-            <attribute name="perception">state.perception</attribute>
-            <attribute name="show_perception">state.show_perception</attribute>
-        </xpath>
-    </t>
-
-    <t t-name="OrderSummary" t-inherit="point_of_sale.OrderSummary" t-inherit-mode="extension">
-        <xpath expr="//div[hasclass('total')]" position="inside">
-            <div t-if="props.perception and props.show_perception" class="subentry">
-                Perceptions:
-                <span class="value">
-                    <t t-esc="props.perception" />
-                </span>
+        <xpath expr="//div[hasclass('subentry')]" position="after">
+            <div class="fs-6 text-muted subentry">
+                Perceptions: <span class="value" t-esc="props.perception_amount" />
             </div>
         </xpath>
     </t>
-
 </templates>
+<!--Esta es la linea correcta que va en la linea 6, por ahora le saque la condicion para que se muestre el campo de percepciones y ver si me aparece o no la percepcion/-->
+<!--            <div t-if="props.perception and props.show_perception" class="fs-6 text-muted subentry">-->
