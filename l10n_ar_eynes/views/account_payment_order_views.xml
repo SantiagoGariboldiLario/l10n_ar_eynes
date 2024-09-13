@@ -101,7 +101,6 @@
                                 placeholder="e.g. Invoice SAJ/0042"
                                 readonly="state != 'draft'"
                             />
-                            <field name="disable_retentions" invisible="1" />
                             <field name="company_id" readonly="1" groups="base.group_multi_company" />
                             <field
                                 name="account_id"
@@ -527,7 +526,7 @@
                                 name="retention_ids"
                                 force_save="1"
                                 nolabel="1"
-                                readonly="not disable_retentions or state != 'draft'"
+                                readonly="state != 'draft'"
                             >
                                 <tree>
                                     <field name="currency_id" column_invisible="1" />
@@ -566,31 +565,17 @@
                                 </tree>
                                 <form>
                                     <h1>
-                                        <field
-                                            name="name"
-                                            class="oe_inline"
-                                            readonly="not parent.disable_retentions"
-                                        />
+                                        <field name="name" class="oe_inline" />
                                     </h1>
                                     <group>
                                         <group string="Information" name="info">
                                             <field name="state_id" invisible="1" />
                                             <field name="retention_id_domain" invisible="1" />
-                                            <field
-                                                name="retention_id"
-                                                domain="retention_id_domain"
-                                                readonly="not parent.disable_retentions"
-                                            />
-                                            <field
-                                                name="certificate_no"
-                                                readonly="not parent.disable_retentions"
-                                            />
-                                            <field name="state_id" readonly="not parent.disable_retentions" />
-                                            <field
-                                                name="date_applied"
-                                                readonly="not parent.disable_retentions"
-                                            />
-                                            <field name="date" readonly="not parent.disable_retentions" />
+                                            <field name="retention_id" domain="retention_id_domain" />
+                                            <field name="certificate_no" />
+                                            <field name="state_id" />
+                                            <field name="date_applied" />
+                                            <field name="date" />
                                             <label
                                                 for="date"
                                                 string="Keep it empty if the date is the same as the voucher."
@@ -598,9 +583,9 @@
                                             />
                                         </group>
                                         <group string="Amounts" name="amount">
-                                            <field name="base" readonly="not parent.disable_retentions" />
-                                        <field name="amount" readonly="not parent.disable_retentions" />
-                                        <field name="account_id" invisible="1" />
+                                            <field name="base" />
+                                            <field name="amount" />
+                                            <field name="account_id" invisible="1" />
                                         </group>
                                     </group>
                                 </form>
