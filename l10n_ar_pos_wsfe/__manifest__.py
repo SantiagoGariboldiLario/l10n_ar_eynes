@@ -36,7 +36,9 @@
         'point_of_sale._assets_pos': [
             'l10n_ar_pos_wsfe/static/src/js/models_mig17.js',
             'l10n_ar_pos_wsfe/static/src/js/payment_mig17.js',
-            # 'l10n_ar_pos_wsfe/static/src/xml/OrderSummary.xml',
+            'l10n_ar_pos_wsfe/static/src/js/order_widget_mig17.js',
+            'l10n_ar_pos_wsfe/static/src/js/PaymentScreenStatus_mig17.js',
+            'l10n_ar_pos_wsfe/static/src/xml/OrderSummary.xml',
             'l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml',
             'l10n_ar_pos_wsfe/static/src/xml/PaymentScreenStatus.xml',
             # 'l10n_ar_pos_wsfe/static/src/xml/TicketScreen.xml',

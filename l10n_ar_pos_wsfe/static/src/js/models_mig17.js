@@ -3,6 +3,7 @@
 import {Order} from "@point_of_sale/app/store/models";
 import {patch} from "@web/core/utils/patch";
 import {useService} from "@web/core/utils/hooks";
+import {EventBus} from "@odoo/owl";
 
 // Backup original export_as_JSON before patching
 const originalExportAsJSON = Order.prototype.export_as_JSON;
@@ -117,8 +118,9 @@ patch(Order.prototype, {
     },
     set_perception: function (percepcion) {
         this.perception_amount = percepcion || 0.0;
-        //        this.trigger("change-summary");
-        //        this.trigger("change");
+        console.log(this.perception_amount);
+        //        $('subentry').trigger('change-summary');
+        //        $('subentry').trigger('change');
     },
     get_total_perception: function () {
         return this.perception_amount || 0.0;
@@ -146,22 +148,19 @@ patch(Order.prototype, {
             });
     },
     // eslint-disable-next-line no-unused-vars
-    //    add_product: async function (product, options) {
-    //        const res = Order.prototype.add_product.apply(this, arguments);
-    //        await this.compute_perceptions();
-    //        return res;
-    //    },
-
-    set_partner(partner) {
-        this.assert_editable();
-        this.partner = partner;
-        this.updatePricelistAndFiscalPosition(partner);
+    add_product(product, options) {
+        super.add_product(...arguments);
         this.compute_perceptions();
     },
 
-    //    get_total_with_tax: function () {
-    //        let res = Order.prototype.get_total_with_tax.apply(this, arguments);
-    //        res += this.get_total_perception();
-    //        return res;
-    //    },
+    set_partner(partner) {
+        super.set_partner(...arguments);
+        this.compute_perceptions();
+    },
+
+    get_total_with_tax() {
+        let res = super.get_total_with_tax(...arguments);
+        res += this.get_total_perception();
+        return res;
+    },
 });
