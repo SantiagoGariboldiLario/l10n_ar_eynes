@@ -716,13 +716,18 @@ class AccountPaymentOrder(models.Model):
 
                 # Obtenemos el factor desde el total de la deuda contra
                 # lo que se pretende pagar
-                mla = move_line.credit or move_line.debit
+                mla = abs(
+                    move_line.amount_currency * self.payment_rate
+                    if self.is_multi_currency
+                    else move_line.balance
+                )
                 factor_to_pay = mla / po_line.amount
                 factor_unrec = mla / po_line.amount_unreconciled
 
                 logging_messages.append("Linea a aplicar %s" % (po_line.ref))
 
                 retentions = retention._compute_base_retention(
+                    self,
                     move_line,
                     factor_to_pay,
                     factor_unrec,
@@ -1163,7 +1168,6 @@ class AccountPaymentOrder(models.Model):
                 return
 
             po.retention_ids = [(5, 0, 0)]
-            po._onchange_retentions()
 
             if not po.disable_retentions:
                 if any(

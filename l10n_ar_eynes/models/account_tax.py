@@ -417,6 +417,7 @@ class AccountTax(models.Model):
     # pylint: disable-next=dangerous-default-value
     def _compute_base_retention(
         self,
+        payment,
         move_line,
         factor_to_pay,
         factor_unrec,
@@ -543,7 +544,11 @@ class AccountTax(models.Model):
             # ninguna informacion con respecto a Percepciones
 
             # Hacemos el computo de la Retencion por linea de factura
-            base = ml.credit or ml.debit
+            base = abs(
+                ml.amount_currency * payment.payment_rate
+                if payment.is_multi_currency
+                else ml.balance
+            )
             logging_messages.append(f"Base tomada: {base}")
             if line_type == 'income':
                 base *= -1
