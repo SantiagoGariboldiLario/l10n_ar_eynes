@@ -2656,9 +2656,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
             raise UserError(
                 _("You can't delete a retention of a Posted Payment Order")
             )
-        payment_orders = self.mapped('payment_order_id')
         res = super(AccountPaymentOrderRetentionLine, self).unlink()
-        payment_orders._onchange_retentions()
         return res
 
 
