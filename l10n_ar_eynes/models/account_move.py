@@ -12,6 +12,7 @@ import qrcode
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import file_open, formatLang
+from odoo.tools.sql import drop_index, index_exists
 
 _logger = logging.getLogger(__name__)
 
@@ -21,6 +22,29 @@ AFIP_FCE_CODE_START = 200
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
+
+    def _auto_init(self):
+        """
+        Se modifica la validación de base ya que no permite que se carguen dos facturas con la misma
+        numeración y esto para Proveedores es algo posible, por lo tanto debemos permitirlo. Creamos la
+        validación para poder crear facturas de proveedores que posean la misma numeración siempre y cuando
+        sean de proveedores distintos.
+        """
+        if not index_exists(self.env.cr, "account_move_unique_name_eynes"):
+            drop_index(self.env.cr, "account_move_unique_name", self._table)
+            self.env.cr.execute(
+                """
+                CREATE UNIQUE INDEX account_move_unique_name
+                                 ON account_move(name, journal_id)
+                              WHERE (state = 'posted' AND name != '/'
+                                AND move_type NOT IN ('in_invoice', 'in_refund', 'in_receipt'));
+                CREATE UNIQUE INDEX account_move_unique_name_eynes
+                                 ON account_move(name, partner_id, journal_id, move_type, is_debit_note)
+                              WHERE (state = 'posted' AND name != '/'
+                                AND move_type IN ('in_invoice', 'in_refund', 'in_receipt'));
+            """
+            )
+        return super()._auto_init()
 
     amount_exempt = fields.Monetary(
         string='Except',
@@ -229,6 +253,11 @@ class AccountMove(models.Model):
             'unique_move',
             'unique(partner_id, supplier_move_reference, is_debit_note)',
             _('This invoice was already entered.'),
+        ),
+        (
+            'unique_name_eynes',
+            '',
+            _('Another entry with the same name already exists.'),
         ),
     ]
 
