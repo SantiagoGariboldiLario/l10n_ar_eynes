@@ -5,8 +5,6 @@ import {patch} from "@web/core/utils/patch";
 import {useService} from "@web/core/utils/hooks";
 import {EventBus} from "@odoo/owl";
 
-// Backup original export_as_JSON before patching
-const originalExportAsJSON = Order.prototype.export_as_JSON;
 
 patch(Order.prototype, {
     initialize: function () {
@@ -60,11 +58,8 @@ patch(Order.prototype, {
     set_invoice_journal: function (journal_id) {
         this.invoice_journal_id = journal_id;
     },
-    export_as_JSON: function () {
-        // Call the original method to avoid recursion
-        var json = originalExportAsJSON.apply(this, arguments);
-
-        // Add custom properties to the JSON
+    export_as_JSON() {
+        var json = super.export_as_JSON(...arguments);
         json.inv_manual_mode = this.inv_manual_mode ? this.inv_manual_mode : false;
         json.inv_electronic_mode = this.inv_electronic_mode ? this.inv_electronic_mode : false;
         json.invoice_journal_id = this.invoice_journal_id || false;
@@ -118,9 +113,7 @@ patch(Order.prototype, {
     },
     set_perception: function (percepcion) {
         this.perception_amount = percepcion || 0.0;
-        console.log(this.perception_amount);
-        //        $('subentry').trigger('change-summary');
-        //        $('subentry').trigger('change');
+        console.log(this.perception_amount)
     },
     get_total_perception: function () {
         return this.perception_amount || 0.0;
@@ -129,11 +122,9 @@ patch(Order.prototype, {
         return this.pos.format_currency(this.get_total_perception());
     },
     compute_perceptions: async function () {
-        // To avoid restart perception on load values from json
         if (this._on_init_json) {
             return Promise.resolve();
         }
-        // To avoid send request
         if (!this.get_partner() || !this.get_orderlines().length) {
             this.set_perception(0);
             return Promise.resolve();

@@ -17,11 +17,18 @@ patch(PaymentScreenStatus.prototype, {
                 if (!(taxId in groupTaxes)) {
                     groupTaxes[taxId] = 0;
                 }
-                groupTaxes[taxId] += taxDetails[taxId];
+
+                let taxAmount = parseFloat(taxDetails[taxId].amount);
+                if (!isNaN(taxAmount)) {
+                    groupTaxes[taxId] += taxAmount;
+                } else {
+                    console.error(`Tax amount for tax ID ${taxId} is not a valid number`, taxDetails[taxId]);
+                }
             }
         });
 
         let taxIds = Object.keys(groupTaxes);
+
         for (let j = 0; j < taxIds.length; j++) {
             let taxAmount = groupTaxes[taxIds[j]];
             let taxName = this.env.services.pos.taxes_by_id[taxIds[j]].name;
@@ -34,8 +41,8 @@ patch(PaymentScreenStatus.prototype, {
     },
 
     get total_iva_and_retentions() {
-        let total_value = this.getTaxesTotals("iva") + this.getTaxesTotals("retenciones");
-        return this.env.utils.isValidFloat(total_value);
+        let total_value = this.getTaxesTotals("iva");
+        return this.env.utils.formatCurrency(total_value);
     },
 
     get total_perceptions() {
