@@ -2584,43 +2584,32 @@ class AccountPaymentOrderRetentionLine(models.Model):
         retention_vals = {}
         if not retention.date:
             retention_vals['date'] = voucher.date
-
-        current_currency = self.currency_id.id
-
-        tax_amount_in_company_currency = retention.amount
-        debit = credit = 0.0
-
         retention.write(retention_vals)
 
-        debit = credit = 0.0
+        balance = retention.amount
+        amount_currency = balance
+        if voucher.is_multi_currency:
+            amount_currency = retention.amount_currency
         if voucher.type in ('purchase', 'payment'):
-            credit = tax_amount_in_company_currency
-        elif voucher.type in ('sale', 'receipt'):
-            debit = tax_amount_in_company_currency
-        if debit < 0:
-            credit = -debit
-            debit = 0.0
-        if credit < 0:
-            debit = -credit
-            credit = 0.0
-        sign = debit - credit < 0 and -1 or 1
+            balance = -balance
+            amount_currency = -amount_currency
 
         if voucher.type == 'payment' and not voucher.disable_retentions:
             self.apply_retention_sequence()
 
         # Create the move line of the retetention
         move_line = {
+            'date': voucher.date,
+            'date_maturity': voucher.date_due,
             'name': retention.name or '/',
-            'debit': debit,
-            'credit': credit,
             'account_id': retention.account_id.id,
             'tax_line_id': retention.retention_id.id,
             'journal_id': voucher.journal_id.id,
             'partner_id': voucher.partner_id.id,
-            'currency_id': current_currency,
-            'amount_currency': sign * (debit or credit),
-            'date': voucher.date,
-            'date_maturity': voucher.date_due,
+            'credit': abs(balance) if balance < 0 else 0.0,
+            'debit': balance if balance > 0 else 0.0,
+            'amount_currency': amount_currency,
+            'currency_id': self.currency_id.id,
         }
 
         return move_line
