@@ -1192,18 +1192,6 @@ class AccountPaymentOrder(models.Model):
 
     def proforma_voucher(self):
         self.ensure_one()
-        for voucher in self:
-            if not voucher.number:
-                voucher.write(
-                    {
-                        'number': voucher.get_next_sequence(),
-                    }
-                )
-            voucher.retention_ids.write(
-                {
-                    'unlinkable': False,
-                }
-            )
         # Chequeamos si la writeoff_amount no es negativa
         if round(self.writeoff_amount, 2) < 0.0:
             raise ValidationError(
@@ -1224,7 +1212,17 @@ class AccountPaymentOrder(models.Model):
 
         self._clean_payment_lines()
         self.action_move_line_create()
-
+        if not self.number:
+            self.write(
+                {
+                    'number': self.get_next_sequence(),
+                }
+            )
+        self.retention_ids.write(
+            {
+                'unlinkable': False,
+            }
+        )
         return True
 
     def _get_income_amount(self):
