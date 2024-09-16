@@ -9641,6 +9641,10 @@ msgstr "Usuarios"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_delivery_carrier__vat
+msgid "VAT"
+msgstr "NIF"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__retention_type__vat
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__perception_activity__type__vat
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__perception_concept__type__vat
