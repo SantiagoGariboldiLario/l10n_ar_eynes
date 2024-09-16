@@ -22,7 +22,7 @@ class SaleOrder(models.Model):
         """
         invoice_vals = super()._prepare_invoice()
         invoice_vals.update(
-            {'address_shipping_id': self.partner_shipping_id.id}
+            {'partner_shipping_id': self.partner_shipping_id.id}
         )
         journals = self.env.user.get_journals_by_fiscal_position(
             self.fiscal_position_id

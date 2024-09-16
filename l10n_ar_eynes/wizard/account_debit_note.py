@@ -54,7 +54,7 @@ class AccountDebitNote(models.TransientModel):
         res.update(
             {
                 'is_debit_note': True,
-                'address_shipping_id': move.address_shipping_id.id,
+                'partner_shipping_id': move.partner_shipping_id.id,
                 'perception_ids': perceptions,
                 'associated_inv_ids': [move.id],
                 'currency_id': move.currency_id.id,

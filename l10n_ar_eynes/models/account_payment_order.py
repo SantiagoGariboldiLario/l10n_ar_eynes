@@ -597,7 +597,7 @@ class AccountPaymentOrder(models.Model):
         def _filter_po_line_applicable(po_line):
             invoice = po_line.move_invoice_id
             destination_shipping = (
-                invoice.address_shipping_id
+                invoice.partner_shipping_id
                 or ResPartner.browse(
                     invoice.partner_id.address_get(['delivery']).get('delivery')
                 )
