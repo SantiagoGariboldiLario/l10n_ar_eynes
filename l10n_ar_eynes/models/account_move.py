@@ -1088,7 +1088,7 @@ class AccountMove(models.Model):
                         'invoice_id': self.id,
                         'move_line_id': move_line.id,
                         'account_id': move_line.account_id.id,
-                        'original_currency_id': move_line.currency_id.id,
+                        'original_currency_id': move_line.company_id.currency_id.id,
                         'currency_id': move_line.currency_id.id,
                     },
                 )

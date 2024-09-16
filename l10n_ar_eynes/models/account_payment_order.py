@@ -2098,7 +2098,7 @@ class AccountPaymentOrderLine(models.Model):
 
     @api.onchange('amount_currency')
     def onchange_amount_currency(self):
-        if self.currency_id.id != self.original_currency_id.id:
+        if self.payment_order_id.is_multi_currency:
             amount_computed = (
                 self.amount_currency * self.payment_order_id.payment_rate
             )
