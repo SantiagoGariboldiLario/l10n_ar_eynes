@@ -35,7 +35,7 @@
         'hr',
         'mail',
         # 'month_year_widget',  # To pick only month and year in date fields
-        # 'multi_step_wizard',
+        'multi_step_wizard',
         # 'om_fiscal_year',
         'popup_messages',
         'purchase',
@@ -92,7 +92,7 @@
         'report/payment_order.xml',
         'wizard/account_tax_subjournal_view.xml',
         'views/res_config_settigs_views.xml',
-        # "wizard/res_partner_afip_padron_wizard_view.xml",
+        "wizard/res_partner_afip_padron_wizard_view.xml",
         'wizard/force_journal_change_view.xml',
         'views/res_partner_views.xml',
         'views/res_currency_view.xml',

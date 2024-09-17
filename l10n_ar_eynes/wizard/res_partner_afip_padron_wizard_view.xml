@@ -26,7 +26,7 @@
         <field name="arch" type="xml">
             <xpath expr="//footer" position="before">
 
-                <group invisible="[('state', 'not in', ('mass_configuration'))]">
+                <group invisible="state != 'mass_configuration'">
                     <label for="field_to_update_ids" string="Fields to Update" class="o_light_label" />
                     <field
                         name="field_to_update_ids"
@@ -37,7 +37,7 @@
                     <field name="case_convertion" />
                 </group>
 
-                <group invisible="[('state', '!=', 'single_update')]" col="1">
+                <group invisible="state != 'single_update'" col="1">
                     <h1>
                         <field name="partner_id" options="{'no_open': True}" />
                     </h1>
@@ -62,12 +62,12 @@
             <xpath expr="//footer/div/button[@name='open_next']" position="attributes">
                 <attribute name="string">Skip Partner</attribute>
                 <attribute name="class">btn btn-default oe_link</attribute>
-                <attribute name="attrs">{"invisible": [('state', '!=', 'single_update')]}</attribute>
+                <attribute name="invisible">state != 'single_update'</attribute>
             </xpath>
 
             <xpath expr="//footer/div/button[@name='open_next']" position="before">
                 <button
-                    invisible="[('state', '!=', 'single_update')]"
+                    invisible="state != 'single_update'"
                     class="btn-primary"
                     name="update_selected"
                     string="Update selected partner"
@@ -77,7 +77,7 @@
 
             <xpath expr="//footer/div/button[@name='open_next']" position="after">
                     <button
-                    invisible="[('state', '!=', 'mass_configuration')]"
+                    invisible="state != 'mass_configuration'"
                     class="oe_highlight"
                     name="open_next"
                     string="Update one by one"
@@ -85,7 +85,7 @@
                 />
 
                     <button
-                    invisible="[('state', '!=', 'mass_configuration')]"
+                    invisible="state != 'mass_configuration'"
                     class="btn btn-default oe_link"
                     confirm="Are you sure you want update all partners automatically?"
                     name="update_partners_automatically"
@@ -96,6 +96,5 @@
 
         </field>
     </record>
-
 
 </odoo>
