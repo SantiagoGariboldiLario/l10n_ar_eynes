@@ -23,6 +23,7 @@ class PerceptionTaxLine(models.Model):
         size=64,
         compute='_compute_name',
         store=True,
+        copy=True,
     )
     date = fields.Date(index=True, required=True)
     invoice_id = fields.Many2one(

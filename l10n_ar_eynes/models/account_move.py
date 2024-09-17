@@ -9,7 +9,7 @@ from io import BytesIO
 
 import qrcode
 
-from odoo import _, api, fields, models
+from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import file_open, formatLang
 from odoo.tools.sql import drop_index, index_exists
@@ -176,6 +176,7 @@ class AccountMove(models.Model):
         'perception.tax.line',
         'invoice_id',
         string='Perception',
+        copy=True,
     )
     # *******************************************************************************************************
     #                                             Multimoneda:
@@ -929,6 +930,17 @@ class AccountMove(models.Model):
         ):
             return True
         return False
+
+    def copy_data(self, default=None):
+        data_list = super().copy_data(default)
+        for move, data in zip(self, data_list):
+            if move.move_type in ('out_invoice', 'in_invoice'):
+                data['perception_ids'] = [
+                    (command, _id, line_vals)
+                    for command, _id, line_vals in data['perception_ids']
+                    if command == Command.CREATE
+                ]
+        return data_list
 
     def unlink(self):
         if self._check_electronic_invoice_informed_before():
