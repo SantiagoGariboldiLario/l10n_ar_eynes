@@ -90,9 +90,7 @@ class AccountTax(models.Model):
     )
     general_resolution = fields.Char('GR Number', required=False, size=64)
     notes = fields.Text('Notes')
-    tax_group_name = fields.Char(
-        string='Tax group name', related='tax_group_id.name'
-    )
+    group_type = fields.Selection(related='tax_group_id.group_type')
     is_exempt = fields.Boolean(
         string='Exempt',
         default=False,
@@ -335,7 +333,7 @@ class AccountTax(models.Model):
             if tax:
                 res_tax.update(
                     {
-                        'tax_group_name': tax.tax_group_name,
+                        'tax_group_name': tax.tax_group_id.name,
                         'is_exempt': tax.is_exempt,
                     }
                 )

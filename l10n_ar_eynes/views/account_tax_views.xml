@@ -6,15 +6,9 @@
         <field name="model">account.tax</field>
         <field name="inherit_id" ref="account.view_tax_form" />
         <field name="arch" type="xml">
-            <xpath expr="//notebook" position="before">
-                <field name="tax_group_name" invisible="1" />
-            </xpath>
-
             <notebook position="inside">
-                <page
-                    string="Retentions"
-                    invisible="tax_group_name not in ('Retentions', 'Retenciones')"
-                >
+                <field name="group_type" invisible="True" />
+                <page string="Retentions" invisible="group_type != 'retention'">
                     <group>
                         <group string="Jurisdiction Information">
                             <field name="jurisdiccion" select="1" />
@@ -29,19 +23,10 @@
                                 invisible="jurisdiccion != 'provincial'"
                                 required="jurisdiccion == 'provincial'"
                             />
-                            <field
-                                name="from_register_ARBA"
-                                invisible="jurisdiccion != 'provincial'"
-                            />
-                            <field
-                                name="from_register_AGIP"
-                                invisible="jurisdiccion != 'provincial'"
-                            />
+                            <field name="from_register_ARBA" invisible="jurisdiccion != 'provincial'" />
+                            <field name="from_register_AGIP" invisible="jurisdiccion != 'provincial'" />
                         </group>
-                        <group
-                            string="Usability Configuration"
-                            invisible="jurisdiccion != 'provincial'"
-                        >
+                        <group string="Usability Configuration" invisible="jurisdiccion != 'provincial'">
                             <field name="check_sit_iibb" />
                             <field name="always_apply_padron" />
                             <field name="is_bank_settlement" />
@@ -71,9 +56,9 @@
                             <tree>
                                 <field name="retention_tax_id" column_invisible="True" />
                                 <field name="reg_code" />
-                                <field name="concept_id_domain" column_invisible="True"  />
+                                <field name="concept_id_domain" column_invisible="True" />
                                 <field name="concept_id" domain="concept_id_domain" />
-                                <field name="activity_id_domain" column_invisible="True"  />
+                                <field name="activity_id_domain" column_invisible="True" />
                                 <field name="activity_id" domain="activity_id_domain" />
                                 <field name="tax_allowance" />
                                 <field name="exclude_tax_allowance" />
@@ -86,9 +71,9 @@
                             <form>
                                 <group>
                                     <field name="retention_tax_id" invisible="True" />
-                                    <field name="concept_id_domain" invisible="True"  />
+                                    <field name="concept_id_domain" invisible="True" />
                                     <field name="concept_id" domain="concept_id_domain" />
-                                    <field name="activity_id_domain" invisible="True"  />
+                                    <field name="activity_id_domain" invisible="True" />
                                     <field name="activity_id" domain="activity_id_domain" />
                                     <field name="tax_allowance" />
                                     <field name="exclude_tax_allowance" />
@@ -119,10 +104,7 @@
                     </group>
                 </page>
 
-                <page
-                    string="Perceptions"
-                    invisible="tax_group_name not in ('Perceptions', 'Percepciones')"
-                >
+                <page string="Perceptions" invisible="group_type != 'perception'">
                     <group>
                         <group string="Jurisdiction Information">
                             <field name="jurisdiccion" select="1" />
@@ -171,9 +153,9 @@
                             <tree>
                                 <field name="perception_tax_id" column_invisible="True" />
                                 <field name="reg_code" />
-                                <field name="concept_id_domain" column_invisible="True"  />
+                                <field name="concept_id_domain" column_invisible="True" />
                                 <field name="concept_id" domain="concept_id_domain" />
-                                <field name="activity_id_domain" column_invisible="True"  />
+                                <field name="activity_id_domain" column_invisible="True" />
                                 <field name="activity_id" domain="activity_id_domain" />
                                 <field name="tax_allowance" />
                                 <field name="exclude_tax_allowance" />
@@ -184,9 +166,9 @@
                             <form>
                                 <group>
                                     <field name="perception_tax_id" invisible="True" />
-                                    <field name="concept_id_domain" invisible="True"  />
+                                    <field name="concept_id_domain" invisible="True" />
                                     <field name="concept_id" domain="concept_id_domain" />
-                                    <field name="activity_id_domain" invisible="True"  />
+                                    <field name="activity_id_domain" invisible="True" />
                                     <field name="activity_id" domain="activity_id_domain" />
                                     <field name="tax_allowance" />
                                     <field name="exclude_tax_allowance" />

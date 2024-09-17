@@ -12,7 +12,7 @@ import qrcode
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import file_open, formatLang
-from odoo.tools.sql import drop_index, index_exists
+from odoo.tools.sql import column_exists, create_column, drop_index, index_exists
 
 _logger = logging.getLogger(__name__)
 
@@ -31,6 +31,10 @@ class AccountMove(models.Model):
         sean de proveedores distintos.
         """
         if not index_exists(self.env.cr, "account_move_unique_name_eynes"):
+            if not column_exists(self.env.cr, "account_move", "is_debit_note"):
+                create_column(
+                    self.env.cr, "account_move", "is_debit_note", "boolean"
+                )
             drop_index(self.env.cr, "account_move_unique_name", self._table)
             self.env.cr.execute(
                 """

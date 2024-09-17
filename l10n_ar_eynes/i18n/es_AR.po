@@ -7181,59 +7181,6 @@ msgid "Perception will be calculated over this amount."
 msgstr "La percepción se calcula en base a este importe."
 
 #. module: l10n_ar_eynes
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_ganancias_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_ganancias_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_arba_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_arba_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_caba_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_caba_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_catamarca_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_catamarca_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_chaco_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_chaco_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_chubut_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_chubut_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_cordoba_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_cordoba_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_corrientes_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_corrientes_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_entre_rios_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_entre_rios_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_formosa_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_formosa_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_jujuy_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_jujuy_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_la_pampa_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_la_pampa_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_la_rioja_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_la_rioja_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_mendoza_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_mendoza_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_misiones_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_misiones_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_neuquen_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_neuquen_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_rio_negro_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_rio_negro_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_salta_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_salta_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_san_juan_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_san_juan_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_san_luis_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_san_luis_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santa_cruz_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santa_cruz_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santafe_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santafe_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santiago_del_estero_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santiago_del_estero_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_tierra_del_fuego_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_tierra_del_fuego_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_tucuman_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_tucuman_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iva_perceptions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iva_perceptions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_sircreb_perceptions_s
 #: model:account.tax.group,name:l10n_ar_eynes.perceptions_tax_group
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_perception_curr
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_fiscal_position__perception_ids
@@ -8006,61 +7953,6 @@ msgid "Retention/Perception type"
 msgstr "Tipo de retención/percepción"
 
 #. module: l10n_ar_eynes
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_ganancias_m_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_ganancias_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_ganancias_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_arba_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_arba_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_caba_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_caba_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_catamarca_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_catamarca_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_chaco_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_chaco_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_chubut_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_cordoba_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_cordoba_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_corrientes_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_corrientes_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_entre_rios_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_entre_rios_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_formosa_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_formosa_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_jujuy_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_jujuy_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_la_pampa_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_la_pampa_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_la_rioja_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_la_rioja_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_mendoza_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_mendoza_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_misiones_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_misiones_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_neuquen_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_neuquen_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_rio_negro_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_rio_negro_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_salta_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_salta_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_san_juan_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_san_juan_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_san_luis_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_san_luis_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santa_cruz_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santa_cruz_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santafe_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santafe_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santiago_del_estero_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_santiago_del_estero_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_tierra_del_fuego_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_tierra_del_fuego_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_tucuman_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_tucuman_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iva_m21_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iva_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iva_retentions_s
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_suss_retentions_e
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_suss_retentions_s
 #: model:account.tax.group,name:l10n_ar_eynes.retentions_tax_group
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_fiscal_position__retention_ids
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__retention_ids
@@ -8717,11 +8609,6 @@ msgid "Tax Minimum"
 msgstr "Impuesto minimo"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__tax_group_name
-msgid "Tax group name"
-msgstr "Nombre del grupo impuestos"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_taxed
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__amount_taxed_cur
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__amount_taxed
@@ -8733,7 +8620,6 @@ msgid "Taxed"
 msgstr "Gravado"
 
 #. module: l10n_ar_eynes
-#: model:account.tax,tax_group_name:l10n_ar_eynes.tax_iibb_chubut_retentions_s
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__vat_tax_ids
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_taxes_reports
 #: model:ir.ui.menu,name:l10n_ar_eynes.taxes_submenu
@@ -9720,20 +9606,6 @@ msgid "Value"
 msgstr "Valor"
 
 #. module: l10n_ar_eynes
-#: model:account.tax,tax_group_name:l10n_ar_eynes.0_percent_tax_purchase
-#: model:account.tax,tax_group_name:l10n_ar_eynes.0_percent_tax_sale
-#: model:account.tax,tax_group_name:l10n_ar_eynes.10_50_percent_tax_purchase
-#: model:account.tax,tax_group_name:l10n_ar_eynes.10_50_percent_tax_sale
-#: model:account.tax,tax_group_name:l10n_ar_eynes.21_percent_tax_purchase
-#: model:account.tax,tax_group_name:l10n_ar_eynes.21_percent_tax_sale
-#: model:account.tax,tax_group_name:l10n_ar_eynes.27_percent_tax_purchase
-#: model:account.tax,tax_group_name:l10n_ar_eynes.27_percent_tax_sale
-#: model:account.tax,tax_group_name:l10n_ar_eynes.2_5_percent_tax_purchase
-#: model:account.tax,tax_group_name:l10n_ar_eynes.2_5_percent_tax_sale
-#: model:account.tax,tax_group_name:l10n_ar_eynes.5_percent_tax_purchase
-#: model:account.tax,tax_group_name:l10n_ar_eynes.5_percent_tax_sale
-#: model:account.tax,tax_group_name:l10n_ar_eynes.exempt_percent_tax_purchase
-#: model:account.tax,tax_group_name:l10n_ar_eynes.exempt_percent_tax_sale
 #: model:account.tax.group,name:l10n_ar_eynes.vat_tax_group
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax_group__group_type__vat
 msgid "Vat"
