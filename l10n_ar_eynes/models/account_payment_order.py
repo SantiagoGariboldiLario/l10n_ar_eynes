@@ -656,7 +656,7 @@ class AccountPaymentOrder(models.Model):
                 'payment_order': self,
             }
             retentions = retention.calculate_python_custom_tax(
-                retention_data,
+                # retention_data,
                 self.partner_id,
                 self,
                 origin_vals=payment_code_ctx,
