@@ -198,7 +198,6 @@ class ResPartnerAfipPadronWizard(models.TransientModel):
         self.state = 'single_update'
 
     def state_exit_single_update(self):
-        self.refresh()
         if self.partner_id:
             self.write({"partner_ids": [(3, self.partner_id.id, False)]})
         if self.partner_ids:
