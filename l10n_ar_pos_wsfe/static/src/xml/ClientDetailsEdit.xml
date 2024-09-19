@@ -2,46 +2,39 @@
 <templates id="template" xml:space="preserve">
 
     <t
-        t-name="ClientDetailsEdit"
-        t-inherit="point_of_sale.ClientDetailsEdit"
+        t-name="PartnerDetailsEdit"
+        t-inherit="point_of_sale.PartnerDetailsEdit"
         t-inherit-mode="extension"
         owl="1"
     >
-        <xpath expr="//div[hasclass('client-details-left')]" position="inside">
-            <div class="client-detail">
-                <span class="label">Fiscal Position *</span>
+        <xpath expr="//div[hasclass('partner-details-box')]" position="inside">
+            <div class="partner-detail col">
+                <label class="form-label label" for="state">Fiscal Position</label>
                 <select
                     class="detail client-address-states needsclick"
                     name="property_account_position_id"
-                    t-on-change="captureChange"
+                    t-model="changes.property_account_position_id"
                 >
                     <option value="">None</option>
-                    <t t-foreach="env.pos.all_fiscal_positions" t-as="acc_position" t-key="acc_position.id">
-                        <option
-                            t-att-value="acc_position.id"
-                            t-att-selected="props.partner.property_account_position_id ? ((acc_position.id === props.partner.property_account_position_id[0]) ? true : undefined) : undefined"
-                        >
-                                <t t-esc="acc_position.name" />
+                    <t t-foreach="this.pos.fiscal_positions" t-as="acc_position" t-key="acc_position.id">
+                        <option t-att-value="acc_position.id">
+                            <t t-esc="acc_position.name" />
                         </option>
                     </t>
                 </select>
             </div>
-        </xpath>
-        <xpath expr="//div[hasclass('client-details-right')]" position="inside">
-            <div class="client-detail">
-                <span class="label">Doc Type *</span>
+
+            <div class="partner-detail col">
+                <label class="form-label label" for="state">Doc Type</label>
                 <select
                     class="detail client-address-states needsclick"
                     name="document_type_id"
-                    t-on-change="captureChange"
+                    t-model="changes.document_type_id"
                 >
                     <option value="">None</option>
-                    <t t-foreach="env.pos.all_doc_types" t-as="doc_type" t-key="doc_type.id">
-                        <option
-                            t-att-value="doc_type.id"
-                            t-att-selected="props.partner.document_type_id ? ((doc_type.id === props.partner.document_type_id[0]) ? true : undefined) : undefined"
-                        >
-                                <t t-esc="doc_type.name" />
+                    <t t-foreach="this.pos.all_doc_types" t-as="doc_type" t-key="doc_type.id">
+                        <option t-att-value="doc_type.id">
+                            <t t-esc="doc_type.name" />
                         </option>
                     </t>
                 </select>
