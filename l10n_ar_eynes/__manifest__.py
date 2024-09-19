@@ -43,7 +43,7 @@
         'sale',
         'stock_delivery',
         'uom',
-        # 'web_notify',
+        'web_notify',
         # 'report_qweb_element_page_visibility',
     ],
     'data': [
