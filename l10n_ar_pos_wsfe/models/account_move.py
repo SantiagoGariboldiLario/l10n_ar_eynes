@@ -1,4 +1,3 @@
-import json
 import logging
 
 from odoo import _, models
@@ -103,9 +102,9 @@ class AccountMove(models.Model):
         }
 
     def select_default_voucher_type(self):
-        self._compute_voucher_type()
+        self._compute_voucher_type_domain()
         self.voucher_type_id = self.env['res.voucher.type'].search(
-            json.loads(self.voucher_type_domain)
+            self.voucher_type_domain
         )[0]
 
     def _validate_electronic_invoices(self, soft=False):

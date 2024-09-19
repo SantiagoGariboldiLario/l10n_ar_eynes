@@ -124,11 +124,10 @@ class AccountMove(models.Model):
     inform_period_date_to = fields.Date()
     is_debit_note = fields.Boolean('Debit Note', default=False)
     local = fields.Boolean(related='fiscal_position_id.local')
-    voucher_type_domain = fields.Char(compute="_compute_voucher_type")
+    voucher_type_domain = fields.Binary(compute="_compute_voucher_type_domain")
     voucher_type_id = fields.Many2one(
         comodel_name='res.voucher.type',
         string='Voucher type',
-        compute='_compute_voucher_type',
         store=True,
         readonly=False,
     )
@@ -611,10 +610,8 @@ class AccountMove(models.Model):
             pos_code.zfill(4) + '-' + move_code.zfill(8)
         )
 
-    @api.depends(
-        'denomination', 'move_type', 'is_debit_note', 'invoice_line_ids'
-    )
-    def _compute_voucher_type(self):
+    @api.depends('denomination', 'move_type', 'is_debit_note')
+    def _compute_voucher_type_domain(self):
         for inv in self:
             inv_type = 'b'
             if inv.move_type.endswith("refund"):
@@ -627,7 +624,7 @@ class AccountMove(models.Model):
                 ('denomination', '=', inv.denomination),
             ]
 
-            inv.voucher_type_domain = json.dumps(domain)
+            inv.voucher_type_domain = domain
 
     @api.onchange('voucher_type_id')
     def _set_is_FCE(self):
