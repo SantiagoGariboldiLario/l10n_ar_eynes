@@ -64,7 +64,7 @@ class SaleOrder(models.Model):
         )
         for invoice in invoice_ids:
             invoice._onchange_currency_id()
-            invoice.with_context(from_so=True).add_perceptions()
+            invoice.add_perceptions()
         return invoice_ids
 
     def action_confirm(self):

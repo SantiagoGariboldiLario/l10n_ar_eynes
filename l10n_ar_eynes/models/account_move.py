@@ -806,9 +806,35 @@ class AccountMove(models.Model):
         if self.is_purchase_document(include_receipts=True):
             self.invoice_line_ids.link_perception_to_move_lines()
 
+    def _update_perception_move_line_amount(self):
+        for perception in self.perception_ids.mapped('perception_id'):
+            perception_line = self.line_ids.filtered(
+                lambda line: line.tax_line_id == perception
+            )
+            amount = sum(
+                self.perception_ids.filtered(
+                    lambda line: line.perception_id == perception
+                ).mapped('amount')
+            )
+            amount_currency = amount
+            if self.is_multi_currency:
+                amount_currency = sum(
+                    self.perception_ids.filtered(
+                        lambda line: line.perception_id == perception
+                    ).mapped('amount_currency')
+                )
+            sign = -1 if perception_line.balance < 0 else 1
+            perception_line.write(
+                {
+                    'balance': sign * amount,
+                    'amount_currency': sign * amount_currency,
+                }
+            )
+
     def add_perceptions(self):
         for move in self:
             move._automatic_perception_calculation()
+            move._update_perception_move_line_amount()
 
     def _get_fce_prefix(self):
         voucher_type = int(self.voucher_type_id.afip_code)

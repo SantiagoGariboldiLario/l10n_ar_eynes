@@ -49,10 +49,7 @@ class PosOrder(models.Model):
         return res
 
     def _hook_recompute_account_move(self, new_move):
-        ctx = dict(self.env.context)
-        # ctx['check_move_validity'] = False
-        ctx['from_so'] = True
-        new_move.with_context(**ctx).add_perceptions()
+        new_move.add_perceptions()
         new_move._onchange_payment_term_date_invoice()
         new_move.select_default_voucher_type()
         return
