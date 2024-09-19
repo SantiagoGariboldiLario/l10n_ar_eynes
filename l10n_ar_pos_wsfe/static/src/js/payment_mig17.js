@@ -1,10 +1,18 @@
 /** @odoo-module */
 
-import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
-import { patch } from "@web/core/utils/patch";
-import { ConnectionLostError } from "@web/core/network/rpc_service";
-import { _t } from "@web/core/l10n/translation";
-import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
+import {PaymentScreen} from "@point_of_sale/app/screens/payment_screen/payment_screen";
+import {patch} from "@web/core/utils/patch";
+import {ConnectionLostError} from "@web/core/network/rpc_service";
+import {_t} from "@web/core/l10n/translation";
+import {ErrorPopup} from "@point_of_sale/app/errors/popups/error_popup";
+import {PosStore} from "@point_of_sale/app/store/pos_store";
+
+patch(PosStore.prototype, {
+    async _processData(loadedData) {
+        await super._processData(...arguments);
+        this.all_doc_types = loadedData["res.document.type"];
+    },
+});
 
 patch(PaymentScreen.prototype, {
     async toggleIsManualInvoice() {
@@ -42,10 +50,10 @@ patch(PaymentScreen.prototype, {
     checkCustomerSelected() {
         if (!this.currentOrder.get_partner()) {
             this.env.services.popup.add(ErrorPopup, {
-                   title: _t("Error"),
-                   body: _t("You must first select a client."),
+                title: _t("Error"),
+                body: _t("You must first select a client."),
             });
-          return false
+            return false;
         }
         return true;
     },
@@ -91,15 +99,21 @@ patch(PaymentScreen.prototype, {
         const fiscal_type = this.currentOrder.is_electronic_invoice() ? "electronic" : "internal";
         const move_type = this.currentOrder._isRefundAndSaleOrder() ? "out_refund" : "out_invoice";
         try {
-            const seq_vals = await this.orm.call('account.move', 'get_next_sequence_from_pos',
-                [false, customer.id, config.id, fiscal_type, move_type, amount_total]);
+            const seq_vals = await this.orm.call("account.move", "get_next_sequence_from_pos", [
+                false,
+                customer.id,
+                config.id,
+                fiscal_type,
+                move_type,
+                amount_total,
+            ]);
             this.setSequenceValues(seq_vals);
             this.render();
         } catch (error) {
             if (error instanceof ConnectionLostError) {
                 this.env.services.popup.add(ErrorPopup, {
-                   title: _t("Error"),
-                   body: _t("Unable to get next sequence."),
+                    title: _t("Error"),
+                    body: _t("Unable to get next sequence."),
                 });
             } else {
                 throw error;

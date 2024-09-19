@@ -3,8 +3,6 @@
 import {Order} from "@point_of_sale/app/store/models";
 import {PaymentScreen} from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import {patch} from "@web/core/utils/patch";
-import {useService} from "@web/core/utils/hooks";
-import {EventBus} from "@odoo/owl";
 
 patch(Order.prototype, {
     initialize: function () {
