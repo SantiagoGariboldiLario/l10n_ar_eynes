@@ -3,7 +3,7 @@
 
     <t t-name="OrderWidget" t-inherit="point_of_sale.OrderWidget" t-inherit-mode="extension">
         <xpath expr="//div[hasclass('subentry')]" position="after">
-            <div t-if="props.perception" class="fs-6 text-muted subentry">
+            <div t-if="props.perception_amount" class="fs-6 text-muted subentry">
                 Perceptions: <span class="value" t-esc="props.perception_amount" />
             </div>
         </xpath>
