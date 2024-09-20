@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
@@ -22,15 +21,18 @@
 #
 ##############################################################################
 
-from odoo import fields, models, _
+from odoo import _, fields, models
 
 
 class CancelPickingDone(models.TransientModel):
     _name = 'cancel.picking.done'
 
     reason = fields.Text(string='Reason of cancellation')
-    next_action = fields.Selection([('renumerate', 'Cancel & Create draft'),
-                                   ('cancel', 'Cancel only')], string='Next Action', required=True)
+    next_action = fields.Selection(
+        [('renumerate', 'Cancel & Create draft'), ('cancel', 'Cancel only')],
+        string='Next Action',
+        required=True,
+    )
 
     def create_returns(self):
 
@@ -38,23 +40,27 @@ class CancelPickingDone(models.TransientModel):
 
         # Obtenemos el picking
         new_picks = []
-        for pick in pick_obj.search([('id', '=', self._context.get('active_id', False))]):
+        for pick in pick_obj.search(
+            [('id', '=', self._context.get('active_id', False))]
+        ):
 
             # Renumerate...clone pick
             pick_vals = {}
             if self.next_action == 'renumerate':
                 new_pick = pick.copy()
-                note = _('%(note)s\nPick renumerated from %(name)s. %(reason)s') % {
+                note = _(
+                    '%(note)s\nPick renumerated from %(name)s. %(reason)s'
+                ) % {
                     'note': pick.note or '',
                     'name': pick.name,
-                    'reason': self.reason or ''
+                    'reason': self.reason or '',
                 }
                 new_pick.write({'note': note, 'origin': pick.name})
                 new_picks.append(new_pick.id)
                 pick_vals['renum_pick_id'] = new_pick.id
 
             # Cancelamos el picking actual y sus lineas
-            moves_to_cancel = [m for m in pick.move_lines]
+            moves_to_cancel = [m for m in pick.move_ids]
             pick_vals['state'] = 'cancel'
             pick.write(pick_vals)
             for move in moves_to_cancel:
