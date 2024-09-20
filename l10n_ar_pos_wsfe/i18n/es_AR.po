@@ -4,18 +4,16 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-19 21:36+0000\n"
-"PO-Revision-Date: 2023-12-19 18:39-0300\n"
+"PO-Revision-Date: 2024-09-20 13:37+0000\n"
+"Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.3\n"
-"Last-Translator: \n"
-"Language: es_AR\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
 
 #. module: l10n_ar_pos_wsfe
 #: model:ir.model.fields,help:l10n_ar_pos_wsfe.field_pos_config__invoice_journal_ids
@@ -28,40 +26,82 @@ msgid "Accounting journals used to create invoices."
 msgstr "Diarios contables utilizados para crear facturas."
 
 #. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml:0
+#, python-format
+msgid "Customer"
+msgstr "Cliente"
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-python
+#: code:addons/l10n_ar_pos_wsfe/models/pos_order.py:0
+#, python-format
+msgid "Customer Invoice"
+msgstr "Factura de Cliente"
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/ClientDetailsEdit.xml:0
+#, python-format
+msgid "Doc Type"
+msgstr "Tipo de documento"
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
+#, python-format
+msgid "Doc Type Required"
+msgstr "Tipo de documento Requerido"
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/account_move.py:0
 #, python-format
 msgid "Electronic"
 msgstr "Electrónica"
 
 #. module: l10n_ar_pos_wsfe
-#. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/Screens/PaymentScreen.xml:0
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml:0
 #, python-format
 msgid "Electronic Invoice"
 msgstr "Factura Electrónica"
 
 #. module: l10n_ar_pos_wsfe
-#. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
 #, python-format
 msgid "Error"
 msgstr "¡Error!"
 
 #. module: l10n_ar_pos_wsfe
-#. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/Screens/ClientDetailsEdit.xml:0
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/ClientDetailsEdit.xml:0
 #, python-format
-msgid "Fiscal Position *"
-msgstr "Posición Fiscal *"
+msgid "Fiscal Position"
+msgstr "Posición Fiscal"
 
 #. module: l10n_ar_pos_wsfe
-#. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/client.js:0
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
 #, python-format
 msgid "Fiscal Position Is Required"
 msgstr "La posición fiscal es requerida"
 
 #. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenStatus.xml:0
+#, python-format
+msgid "Impuestos:"
+msgstr ""
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/account_move.py:0
 #, python-format
 msgid "Internal"
@@ -79,6 +119,22 @@ msgid "Invoice Journals"
 msgstr "Diarios de Factura"
 
 #. module: l10n_ar_pos_wsfe
+#. odoo-python
+#: code:addons/l10n_ar_pos_wsfe/models/pos_payment.py:0
+#, python-format
+msgid ""
+"Invoice payment for %(order_name)s (%(move_name)s) using "
+"%(payment_meth_name)s"
+msgstr ""
+"Pago de factura de la orden %(order_name)s (%(move_name)s) con "
+"%(payment_meth_name)s"
+
+#. module: l10n_ar_pos_wsfe
+#: model:ir.model.fields,field_description:l10n_ar_pos_wsfe.field_pos_order__is_wsfe
+msgid "Is Electronic Invoice"
+msgstr "Es factura electrónica"
+
+#. module: l10n_ar_pos_wsfe
 #: model:ir.model,name:l10n_ar_pos_wsfe.model_account_journal
 msgid "Journal"
 msgstr "Diario"
@@ -86,16 +142,24 @@ msgstr "Diario"
 #. module: l10n_ar_pos_wsfe
 #: model:ir.model,name:l10n_ar_pos_wsfe.model_account_move
 msgid "Journal Entry"
-msgstr "Entrada de diario"
+msgstr "Asiento contable"
 
 #. module: l10n_ar_pos_wsfe
-#. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/payment/PaymentScreen.xml:0
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml:0
 #, python-format
 msgid "Manual Mode"
-msgstr "Factura Manual"
+msgstr "Factura manual"
 
 #. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
+#, python-format
+msgid "NFI Required"
+msgstr ""
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/account_move.py:0
 #, python-format
 msgid ""
@@ -104,48 +168,61 @@ msgid ""
 msgstr "No se encontró ningún diario de tipo %(fiscal_type)s para la posición fiscal %(fiscal_position)s configurada en pos"
 
 #. module: l10n_ar_pos_wsfe
-#: code:addons/l10n_ar_pos_wsfe/models/account_move.py:0
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/ClientDetailsEdit.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/ClientDetailsEdit.xml:0
 #, python-format
-msgid "No journal of %s type was found for account position %s configured in pos"
-msgstr "No se encontró ningún diario de tipo %s para la posición fiscal %s configurada en pos"
+msgid "None"
+msgstr ""
 
 #. module: l10n_ar_pos_wsfe
-#. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
-#, python-format
-msgid "Offline"
-msgstr "Offline"
-
-#. module: l10n_ar_pos_wsfe
-#. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/Screens/TicketScreen.xml:0
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/Screens/TicketScreen.xml:0
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/TicketScreen.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/TicketScreen.xml:0
 #, python-format
 msgid "Origin"
 msgstr "Origen"
 
 #. module: l10n_ar_pos_wsfe
-#. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/Screens/PaymentScreen.xml:0
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenStatus.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/TicketScreen.xml:0
 #, python-format
-msgid "Payment"
-msgstr "Pago"
+msgid "Percepciones:"
+msgstr ""
 
 #. module: l10n_ar_pos_wsfe
-#. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/Screens/OrderSummary.xml:0
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/OrderSummary.xml:0
 #, python-format
 msgid "Perceptions:"
 msgstr "Percepciones:"
 
 #. module: l10n_ar_pos_wsfe
+#. odoo-python
+#: code:addons/l10n_ar_pos_wsfe/models/pos_order.py:0
+#, python-format
+msgid "Please provide a partner for the sale."
+msgstr "Por favor seleccione un cliente para la venta."
+
+#. module: l10n_ar_pos_wsfe
 #: model:ir.model,name:l10n_ar_pos_wsfe.model_pos_config
 msgid "Point of Sale Configuration"
-msgstr ""
+msgstr "Configuración del punto de venta"
 
 #. module: l10n_ar_pos_wsfe
 #: model:ir.model,name:l10n_ar_pos_wsfe.model_pos_order
 msgid "Point of Sale Orders"
+msgstr ""
+
+#. module: l10n_ar_pos_wsfe
+#: model:ir.model,name:l10n_ar_pos_wsfe.model_pos_payment
+msgid "Point of Sale Payments"
+msgstr ""
+
+#. module: l10n_ar_pos_wsfe
+#: model:ir.model,name:l10n_ar_pos_wsfe.model_pos_session
+msgid "Point of Sale Session"
 msgstr ""
 
 #. module: l10n_ar_pos_wsfe
@@ -154,20 +231,29 @@ msgid "Pos Config"
 msgstr "Configuración"
 
 #. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/OrderSummary.xml:0
+#, python-format
+msgid "SN"
+msgstr ""
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/pos_order.py:0
 #, python-format
 msgid "The product %(product)s has not account configured."
 msgstr "El producto %(product)s no tiene una cuenta configurada."
 
 #. module: l10n_ar_pos_wsfe
+#. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/account_move.py:0
 #, python-format
 msgid "There is no sequence configured for journal %s"
 msgstr "No hay ninguna secuencia configurada para el diario %s"
 
 #. module: l10n_ar_pos_wsfe
-#. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
 #, python-format
 msgid "Unable to get next sequence."
 msgstr "No se puede obtener la siguiente secuencia."
@@ -184,8 +270,19 @@ msgid "WSFE Pos Config"
 msgstr "Configuración del Pos para WSFE"
 
 #. module: l10n_ar_pos_wsfe
-#. openerp-web
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
 #, python-format
 msgid "You must first select a client."
 msgstr "Debe seleccionar un cliente"
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/OrderSummary.xml:0
+#, python-format
+msgid ""
+"{{ line.has_valid_product_lot() ? 'Valid product lot' : 'Invalid product "
+"lot'}}"
+msgstr ""
+"{{ line.has_valid_product_lot() ? 'Lote de producto válido' : 'Lote de "
+"producto no válido'}}"
