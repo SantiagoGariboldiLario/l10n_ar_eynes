@@ -462,12 +462,12 @@
                                     <field name="source_partner_id" invisible="1" />
                                     <group>
                                         <group>
-                                            <field name="source_payment_order_id" column_invisible="1" />
+                                            <field name="source_payment_order_id" invisible="1" />
                                             <field
                                                 name="journal_id"
                                                 domain="[('type', '=', 'third_party_checks')]"
                                             />
-                                            <field name="internal_type" column_invisible="1" />
+                                            <field name="internal_type" invisible="1" />
                                             <field name="number" />
                                             <field name="type" />
                                             <field name="checkbook_format" />
