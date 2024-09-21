@@ -155,7 +155,7 @@ msgstr "Factura manual"
 #. odoo-javascript
 #: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
 #, python-format
-msgid "NFI Required"
+msgid "NIF Required"
 msgstr ""
 
 #. module: l10n_ar_pos_wsfe

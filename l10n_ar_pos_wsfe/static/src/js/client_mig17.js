@@ -32,7 +32,7 @@ patch(PartnerDetailsEdit.prototype, {
         if (!this.props.partner.vat && !this.changes.vat) {
             this.env.services.popup.add(ErrorPopup, {
                 title: _t("Error"),
-                body: _t("NFI Required"),
+                body: _t("NIF Required"),
             });
             return false;
         }
