@@ -6,8 +6,10 @@ import {ErrorPopup} from "@point_of_sale/app/errors/popups/error_popup";
 import {_t} from "@web/core/l10n/translation";
 
 patch(PartnerDetailsEdit.prototype, {
-    constructor() {
-        PartnerDetailsEdit.prototype.constructor.call(this, ...arguments);
+    setup() {
+        super.setup(...arguments);
+        this.intFields.push("property_account_position_id");
+        this.intFields.push("document_type_id");
         this.props.partner.state_id = [];
         const partner = this.props.partner;
         this.changes.property_account_position_id =
