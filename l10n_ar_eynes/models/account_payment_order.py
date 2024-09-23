@@ -1766,6 +1766,7 @@ class AccountPaymentOrder(models.Model):
                 move_line_val['credit'] = amount
                 tot_line -= amount
 
+            move_line_val['amount_currency'] = sign * amount
             if self._get_current_currency() != self._get_company_currency():
                 move_line_val['amount_currency'] = sign * line.amount_currency
 
