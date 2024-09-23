@@ -111,7 +111,6 @@ patch(Order.prototype, {
     },
     set_perception: function (percepcion) {
         this.perception_amount = percepcion || 0.0;
-        console.log(this.perception_amount);
     },
     get_total_perception: function () {
         return this.perception_amount || 0.0;
@@ -183,8 +182,6 @@ patch(PaymentScreen.prototype, {
             // 2. Invoice.
             if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
                 if (syncOrderResult[0]?.account_move) {
-                    console.log("LLEGA ACA E IMPRIME");
-                    console.log(this.get_invoice_report_action());
                     await this.report.doAction(this.get_invoice_report_action(), [
                         syncOrderResult[0].account_move,
                     ]);
