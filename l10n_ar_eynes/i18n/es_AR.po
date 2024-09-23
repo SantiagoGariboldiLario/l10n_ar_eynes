@@ -6706,7 +6706,7 @@ msgstr "Líneas del asiento"
 #: code:addons/l10n_ar_eynes/wizard/force_journal_change.py:0
 #, python-format
 msgid "Move must be on 'draft' to change the Journal: %(move_names)s\n"
-msgid "El/los asiento/s debe/n estar en 'Borrador' para modificar el Diario: %(move_names)s\n"
+msgstr "El/los asiento/s debe/n estar en 'Borrador' para modificar el Diario: %(move_names)s\n"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_move_line__move_name
@@ -8664,7 +8664,7 @@ msgstr "Rechazado"
 #: code:addons/l10n_ar_eynes/wizard/reject_check_wizard.py:0
 #, python-format
 msgid "Rejected Check %(check_number)s on %(acc_number)s"
-msgid "Rechazo de cheque %(check_number)s en %(acc_number)s"
+msgstr "Rechazo de cheque %(check_number)s en %(acc_number)s"
 
 #. module: l10n_ar_eynes
 #. odoo-python
