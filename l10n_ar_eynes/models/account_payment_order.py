@@ -1070,7 +1070,6 @@ class AccountPaymentOrder(models.Model):
 
     def recompute_payment_lines(self, onchange_attr):
         MoveLine = self.env['account.move.line']
-        Currency = self.env['res.currency']
 
         ttype = self.env.context.get('type', 'bank')
         total_credit = total_debit = 0.0
@@ -1138,9 +1137,7 @@ class AccountPaymentOrder(models.Model):
                 if line.amount_residual_currency == self.amount:
                     move_lines_found.append(line.id)
                     break
-                line_residual = Currency.with_context(
-                    currency_rate=self.payment_rate
-                ).compute(abs(line.amount_residual), self.currency_id)
+                line_residual = line.amount_residual
 
                 total_credit += line.credit and line_residual or 0.0
                 total_debit += line.debit and line_residual or 0.0
@@ -1538,7 +1535,7 @@ class AccountPaymentOrder(models.Model):
             move_lines.append(
                 self._create_move_line_payment(
                     move_id,
-                    pml.name,
+                    pml.payment_mode_id.name,
                     pml.payment_mode_id,
                     pml.amount,
                     pml.amount_currency,
@@ -1747,11 +1744,11 @@ class AccountPaymentOrder(models.Model):
 
             move_line_val = {
                 'journal_id': self.journal_id.id,
-                'name': line.name or '/',
+                'name': line.invoice_id.name or '/',
                 'account_id': line.account_id.id,
                 'move_id': move_id,
                 'partner_id': self.partner_id.id,
-                'currency_id': line.currency_id.id,
+                'currency_id': self.currency_id.id,
                 'credit': 0.0,
                 'debit': 0.0,
                 'date': self.date,
@@ -1802,7 +1799,7 @@ class AccountPaymentOrder(models.Model):
                     )
                 else:
                     account_id = self.partner_id.property_account_payable_id.id
-            sign = self.type == 'payment' and 1 or -1
+            sign = self.type == 'payment' and -1 or 1
             line_total_cur = self.currency_id.round(
                 line_total / self.payment_rate
             )
@@ -1812,8 +1809,7 @@ class AccountPaymentOrder(models.Model):
                 'move_id': move_id,
                 'partner_id': self.partner_id.id,
                 'date': self.date,
-                'credit': line_total > 0 and line_total or 0.0,
-                'debit': line_total < 0 and -line_total or 0.0,
+                'balance': sign * line_total,
                 'amount_currency': sign * line_total_cur,
                 'currency_id': self.currency_id.id,
                 'currency_rate': self.payment_rate,
