@@ -58,10 +58,6 @@ patch(PaymentScreen.prototype, {
         return true;
     },
 
-    get invoiceNumber() {
-        return this.currentOrder.invoiceNumber;
-    },
-
     mounted() {
         super.mounted();
         // By default set electronic invoice

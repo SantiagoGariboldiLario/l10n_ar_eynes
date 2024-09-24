@@ -3,6 +3,7 @@
 import {Order} from "@point_of_sale/app/store/models";
 import {PaymentScreen} from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import {patch} from "@web/core/utils/patch";
+import {useService} from "@web/core/utils/hooks";
 
 patch(Order.prototype, {
     initialize: function () {
@@ -32,6 +33,9 @@ patch(Order.prototype, {
         } else {
             this.invoiceNumber = `[ ${seq_vals.full_sequence} ]`;
         }
+    },
+    getInvoiceNumber: function () {
+        return this.invoiceNumber;
     },
     set_manual_invoice: function (manual_mode) {
         this.assert_editable();
