@@ -2212,20 +2212,21 @@ class AccountPaymentModeLine(models.Model):
         parent = self.payment_order_id
         self.currency_id = parent.currency_id or parent.company_currency
 
-    @api.onchange('amount')
-    def onchange_amount(self):
-        parent = self.payment_order_id
-        if self.currency_id != parent.company_currency:
-            amount_computed = self.amount / parent.payment_rate
-        else:
-            amount_computed = self.amount
-        self.amount_currency = amount_computed
+    # @api.onchange('amount')
+    # def onchange_amount(self):
+    #     parent = self.payment_order_id
+    #     if self.currency_id != parent.company_currency:
+    #         amount_computed = self.amount / parent.payment_rate
+    #     else:
+    #         amount_computed = self.amount
+    #     self.amount_currency = amount_computed
 
     @api.onchange('amount_currency')
     def onchange_amount_currency(self):
-        parent = self.payment_order_id
-        if self.currency_id != parent.company_currency:
-            amount_computed = self.amount_currency * parent.payment_rate
+        if self.payment_order_id.is_multi_currency:
+            amount_computed = (
+                self.amount_currency * self.payment_order_id.payment_rate
+            )
         else:
             amount_computed = self.amount
         self.amount = amount_computed
