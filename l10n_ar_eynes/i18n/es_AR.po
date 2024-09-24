@@ -1738,7 +1738,7 @@ msgstr "Importe en moneda extranjera"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__amount_secondary_currency
 msgid "Amount in secondary currency"
-msgstr "Importe Orignal en moneda extranjera"
+msgstr "Importe en moneda de la compañia"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_customer_payment_order_view_form
@@ -1994,7 +1994,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__base_secondary_currency
 msgid "Base in secondary currency"
-msgstr "Base en moneda secundaria"
+msgstr "Base en moneda de la compañia"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax_subjournal__based_on

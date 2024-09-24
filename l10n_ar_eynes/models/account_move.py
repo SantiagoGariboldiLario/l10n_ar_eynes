@@ -818,10 +818,10 @@ class AccountMove(models.Model):
             )
             amount_currency = amount
             if self.is_multi_currency:
-                amount_currency = sum(
+                amount = sum(
                     self.perception_ids.filtered(
                         lambda line: line.perception_id == perception
-                    ).mapped('amount_currency')
+                    ).mapped('amount_secondary_currency')
                 )
             sign = -1 if perception_line.balance < 0 else 1
             perception_line.write(
