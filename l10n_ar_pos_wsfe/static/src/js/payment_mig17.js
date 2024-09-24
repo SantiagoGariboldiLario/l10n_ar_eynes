@@ -120,4 +120,17 @@ patch(PaymentScreen.prototype, {
             }
         }
     },
+
+    async _isOrderValid(isForceValidate) {
+        let result = super._isOrderValid(isForceValidate);
+        const partner = this.currentOrder.get_partner();
+        if (partner && !partner.property_account_position_id) {
+            this.popup.add(ErrorPopup, {
+                title: _t("Missing fields on partner"),
+                body: _t("The selected customer needs a fiscal position."),
+            });
+            result = false;
+        }
+        return result;
+    },
 });
