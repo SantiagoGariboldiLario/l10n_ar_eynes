@@ -29,7 +29,7 @@
         'base',
         'contacts',
         'l10n_ar_eynes',
-        'month_year_widget',
+        # 'month_year_widget',
     ],
     'data': [
         'data/cron_data.xml',
