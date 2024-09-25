@@ -1,21 +1,32 @@
-# ##############################################################################
-# #   Copyright (c) 2023 Eynes/E-MIPS (www.eynes.com.ar)
-# #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-# ##############################################################################
+##############################################################################
+#   Copyright (c) 2023 Eynes/E-MIPS (www.eynes.com.ar)
+#   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+##############################################################################
 
 # import json
 
-# from odoo import _, http
-# from odoo.http import (
-#     content_disposition,
-#     request,
-#     route,
-#     serialize_exception as _serialize_exception,
-# )
+from odoo import http
+from odoo.http import (  # content_disposition,; serialize_exception as _serialize_exception,
+    request,
+    route,
+)
+
 # from odoo.tools import html_escape
 
 # from odoo.addons.web.controllers import main as report
 # from odoo.addons.web.controllers.main import serialize_exception
+
+
+class MyController(http.Controller):
+    @route('/l10n-version', auth='public')
+    def handler(self):
+        version = (
+            request.env['ir.module.module']
+            .sudo()
+            .search([('name', '=', 'l10n_ar_eynes')])
+            .installed_version
+        )
+        return version
 
 
 # class Binary(http.Controller):
