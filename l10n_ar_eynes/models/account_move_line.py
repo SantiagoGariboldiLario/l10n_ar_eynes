@@ -59,7 +59,7 @@ class AccountMoveLine(models.Model):
                     lambda aml: aml.move_id == inv
                 )
             )
-            if not inv.disable_perceptions and inv.perception_ids:
+            if inv.perception_ids:
                 sign = -1 if inv.is_inbound() else 1
                 perceptions = (
                     inv_product_with_perception_lines.tax_ids.filtered(
@@ -107,7 +107,10 @@ class AccountMoveLine(models.Model):
 
     def _get_computed_taxes(self):
         tax_ids = super(AccountMoveLine, self)._get_computed_taxes()
-        if self.move_id.is_sale_document(include_receipts=True):
+        if (
+            self.move_id.is_sale_document(include_receipts=True)
+            and not self.move_id.disable_perceptions
+        ):
             perceptions = self.env['account.tax']
             for perception in self.move_id.perception_ids.mapped(
                 'perception_id'
@@ -125,6 +128,10 @@ class AccountMoveLine(models.Model):
             tax_ids += perceptions
         elif (
             self.move_id.is_purchase_document(include_receipts=True)
+            or (
+                self.move_id.is_sale_document(include_receipts=True)
+                and self.move_id.disable_perceptions
+            )
             and self.move_id.perception_ids
         ):
             tax_ids += self.move_id.perception_ids.mapped('perception_id')

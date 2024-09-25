@@ -670,16 +670,23 @@ class AccountMove(models.Model):
                 )
             )
 
+    @api.onchange('disable_perceptions')
+    def _onchange_disable_perceptions(self):
+        if self.disable_perceptions:
+            self.perception_ids.unlink()
+            self.invoice_line_ids.link_perception_to_move_lines()
+        else:
+            self._automatic_perception_calculation()
+
     @api.onchange(
         'invoice_date',
         'currency_id',
         'currency_rate',
         'invoice_line_ids',
-        'disable_perceptions',
     )
     def _automatic_perception_calculation(self):
-        if self.is_sale_document():
-            if self.partner_id and not self.disable_perceptions:
+        if self.is_sale_document() and not self.disable_perceptions:
+            if self.partner_id:
                 # Se agrupan las líneas de la factura sobre las cuales se aplican las percepciones
                 # que corresponden (según concepto --> cuenta contable / posición fiscal --> partner)
                 accounts = self.invoice_line_ids.mapped('account_id')
@@ -803,8 +810,12 @@ class AccountMove(models.Model):
 
     @api.onchange('perception_ids')
     def _onchange_perception_ids(self):
-        if self.is_purchase_document(include_receipts=True):
+        if self.is_purchase_document(include_receipts=True) or (
+            self.is_sale_document(include_receipts=True)
+            and self.disable_perceptions
+        ):
             self.invoice_line_ids.link_perception_to_move_lines()
+            self._update_perception_move_line_amount()
 
     def _update_perception_move_line_amount(self):
         for perception in self.perception_ids.mapped('perception_id'):
