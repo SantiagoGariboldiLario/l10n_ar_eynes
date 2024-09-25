@@ -8689,7 +8689,7 @@ msgstr "Rechazo cheques propios"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check_config__rejected_issued_checks_journal_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__rejected_issued_checks_journal_id
 msgid "Rejected issued checks journal"
-msgstr "Diario de Rechazo de cheques emitidos"
+msgstr "Diario de Rechazo de cheques"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.report,name:l10n_ar_eynes.stock_picking_qweb_l10n
