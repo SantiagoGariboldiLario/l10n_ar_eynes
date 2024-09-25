@@ -115,6 +115,84 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
     reject_date = fields.Date('Reject date')
     reject_reason = fields.Text()
 
+    def _get_field_string(self, obj, name):
+        return (
+            self.env['ir.model.fields']
+            .search([('name', '=', name), ('model', '=', obj._name)])
+            .field_description
+        )
+
+    def _missing_config_fields_for_delivered_third_party_check(self, config):
+        missing_fields = []
+        if not config.receivable_rejected_account_id:
+            missing_fields.append(
+                self._get_field_string(config, 'receivable_rejected_account_id')
+                + ' (receivable_rejected_account_id)'
+            )
+        if not config.rejected_account_id:
+            missing_fields.append(
+                self._get_field_string(config, 'rejected_account_id')
+                + ' (rejected_account_id)'
+            )
+
+        return missing_fields
+
+    def _create_account_move_line(self, check, config, params):
+        AccountMoveLine = self.env['account.move.line']
+
+        move_id = self.env['account.move'].create(
+            {
+                'journal_id': params['move_journal_id'],
+                'state': 'draft',
+                'date': self.reject_date,
+                'ref': params['move_ref'],
+            }
+        )
+
+        AccountMoveLine.with_context(check_move_validity=False).create(
+            {
+                'name': _('Check Rejected'),
+                'account_id': params['move_line_debit_account_id'],
+                'move_id': move_id.id,
+                'journal_id': params['move_journal_id'],
+                'date': self.reject_date,
+                'debit': check.amount,
+                'credit': 0.0,
+                'ref': _(
+                    'Rejected Check %(check_number)s on %(acc_number)s',
+                    check_number=check.number,
+                    acc_number=check.deposit_bank_id.acc_number,
+                ),
+            }
+        )
+        AccountMoveLine.with_context(check_move_validity=False).create(
+            {
+                'name': _('Check Rejected'),
+                'account_id': params['move_line_credit_account_id'],
+                'move_id': move_id.id,
+                'journal_id': params['move_journal_id'],
+                'date': self.reject_date,
+                'debit': 0.0,
+                'credit': check.amount,
+                'ref': _('Rejected Check %s') % check.number,
+            }
+        )
+        move_id._post()
+
+        check.write(
+            {
+                'third_party_check_state': 'rejected',
+                'reject_move_id': move_id.id,
+                'reject_date': self.reject_date,
+            }
+        )
+        check.message_post(
+            body=_(
+                "Check Rejected. Reason: %(reason)s. ",
+                reason=self.reject_reason,
+            )
+        )
+
     def action_reject(self):
         """
         This method is called when the rejection is confirmed in the wizard.
@@ -123,8 +201,6 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
         check = self.env['account.check'].browse(self._context.get('active_id'))
 
         if check:
-            AccountMoveLine = self.env['account.move.line']
-
             config = self.env['account.check.config'].search(
                 [('company_id', '=', check.company_id.id)]
             )
@@ -135,62 +211,37 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
                     )
                 )
 
-            move_ref = _(
-                'Reject Check %(check_number)s', check_number=check.number
-            )
+            # Valores originales
+            params = {
+                'move_ref': _(
+                    'Reject Check %(check_number)s', check_number=check.number
+                ),
+                'move_journal_id': check.deposit_bank_id.journal_id.id,
+                'move_line_debit_account_id': config.rejected_account_id.id,
+                'move_line_credit_account_id': check.deposit_bank_id.account_id.id,
+            }
 
-            move_id = self.env['account.move'].create(
-                {
-                    'journal_id': check.deposit_bank_id.journal_id.id,
-                    'state': 'draft',
-                    'date': self.reject_date,
-                    'ref': move_ref,
-                }
-            )
-
-            AccountMoveLine.with_context(check_move_validity=False).create(
-                {
-                    'name': _('Check Rejected'),
-                    'account_id': config.rejected_account_id.id,
-                    'move_id': move_id.id,
-                    'journal_id': check.deposit_bank_id.journal_id.id,
-                    'date': self.reject_date,
-                    'debit': check.amount,
-                    'credit': 0.0,
-                    'ref': _(
-                        'Rejected Check %(check_number)s on %(acc_number)s',
-                        check_number=check.number,
-                        acc_number=check.deposit_bank_id.acc_number,
-                    ),
-                }
-            )
-            AccountMoveLine.with_context(check_move_validity=False).create(
-                {
-                    'name': _('Check Rejected'),
-                    'account_id': check.deposit_bank_id.account_id.id,
-                    'move_id': move_id.id,
-                    'journal_id': check.deposit_bank_id.journal_id.id,
-                    'date': self.reject_date,
-                    'debit': 0.0,
-                    'credit': check.amount,
-                    'ref': _('Rejected Check %s') % check.number,
-                }
-            )
-            move_id._post()
-
-            check.write(
-                {
-                    'third_party_check_state': 'rejected',
-                    'reject_move_id': move_id.id,
-                    'reject_date': self.reject_date,
-                }
-            )
-            check.message_post(
-                body=_(
-                    "Check Rejected. Reason: %(reason)s. ",
-                    reason=self.reject_reason,
-                )
-            )
+            if check.internal_type == 'third_party':
+                if check.third_party_check_state == 'delivered':
+                    missing_fields = self._missing_config_fields_for_delivered_third_party_check(
+                        config
+                    )
+                    if missing_fields:
+                        raise ValidationError(
+                            _(
+                                'Missing config params for check. Go to Configuration/Check configuration and'
+                                ' complete the following fields for company %(company)s: \n\n\t* %(fields)s',
+                                company=check.company_id.name,
+                                fields='\n\t* '.join(missing_fields),
+                            )
+                        )
+                    params = {
+                        'move_ref': _('Reject %(check)s', check=check.number),
+                        'move_journal_id': config.rejected_issued_checks_journal_id.id,
+                        'move_line_debit_account_id': config.receivable_rejected_account_id.id,
+                        'move_line_credit_account_id': config.rejected_account_id.id,
+                    }
+            self._create_account_move_line(check, config, params)
 
         return {'type': 'ir.actions.act_window_close'}
 
