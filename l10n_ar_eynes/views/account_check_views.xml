@@ -350,7 +350,7 @@
                         string="Change State"
                         type="action"
                         class="oe_highlight"
-                        invisible="third_party_check_state in ('draft', 'deposited', 'rejected', 'expired')"
+                        invisible="third_party_check_state in ('draft', 'deposited', 'accredited', 'rejected', 'expired')"
                     />
                     <button
                         string="Deposit Check"
