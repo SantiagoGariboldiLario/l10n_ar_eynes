@@ -101,6 +101,7 @@
                         string="Change State"
                         type="action"
                         class="oe_highlight"
+                        invisible="issued_check_state in ('debited', 'rejected', 'cancelled', 'expired')"
                     />
                     <button
                         name="%(reject_issued_check_action)d"
@@ -412,14 +413,8 @@
                             <field name="internal_type" readonly="1" />
                         </group>
                         <group>
-                            <field
-                                name="reception_date"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
-                            <field
-                                name="issue_date"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
+                            <field name="reception_date" readonly="third_party_check_state != 'in_wallet'" />
+                            <field name="issue_date" readonly="third_party_check_state != 'in_wallet'" />
                             <field
                                 name="endorsement_date"
                                 invisible="third_party_check_state not in ('in_wallet', 'delivered', 'rejected')"
@@ -440,23 +435,11 @@
                                 string="Issuing Bank"
                                 readonly="third_party_check_state != 'in_wallet'"
                             />
-                            <field
-                                name="bank_branch"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
+                            <field name="bank_branch" readonly="third_party_check_state != 'in_wallet'" />
                             <field name="zip" readonly="third_party_check_state != 'in_wallet'" />
-                            <field
-                                name="origin"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
-                            <field
-                                name="crossed"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
-                            <field
-                                name="not_order"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
+                            <field name="origin" readonly="third_party_check_state != 'in_wallet'" />
+                            <field name="crossed" readonly="third_party_check_state != 'in_wallet'" />
+                            <field name="not_order" readonly="third_party_check_state != 'in_wallet'" />
                             <field
                                 name="dest"
                                 invisible="third_party_check_state != 'delivered'"
@@ -464,18 +447,9 @@
                             />
                         </group>
                         <group>
-                            <field
-                                name="clearing"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
-                            <field
-                                name="signatory"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
-                            <field
-                                name="signatory_vat"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
+                            <field name="clearing" readonly="third_party_check_state != 'in_wallet'" />
+                            <field name="signatory" readonly="third_party_check_state != 'in_wallet'" />
+                            <field name="signatory_vat" readonly="third_party_check_state != 'in_wallet'" />
                             <field
                                 name="signatory_account"
                                 readonly="third_party_check_state != 'in_wallet'"
@@ -488,33 +462,15 @@
                         readonly="third_party_check_state != 'in_wallet'"
                     >
                         <group>
-                            <field
-                                name="deposit_date"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
-                            <field
-                                name="deposit_slip"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
-                            <field
-                                name="deposit_move_id"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
-                            <field
-                                name="deposit_bank_id"
-                                readonly="third_party_check_state != 'in_wallet'"
-                            />
+                            <field name="deposit_date" readonly="third_party_check_state != 'in_wallet'" />
+                            <field name="deposit_slip" readonly="third_party_check_state != 'in_wallet'" />
+                            <field name="deposit_move_id" readonly="third_party_check_state != 'in_wallet'" />
+                            <field name="deposit_bank_id" readonly="third_party_check_state != 'in_wallet'" />
                         </group>
                     </group>
-                     <group
-                        string="Check Accreditation"
-                        invisible="third_party_check_state != 'accredited'"
-                    >
+                     <group string="Check Accreditation" invisible="third_party_check_state != 'accredited'">
                         <group>
-                            <field
-                                name="accredit_date"
-                                readonly="third_party_check_state != 'deposited'"
-                            />
+                            <field name="accredit_date" readonly="third_party_check_state != 'deposited'" />
                             <field
                                 name="accredit_move_id"
                                 readonly="third_party_check_state != 'deposited'"

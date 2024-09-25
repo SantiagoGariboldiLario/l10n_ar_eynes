@@ -14,13 +14,29 @@ class ChangeCheckStateWizard(models.TransientModel):
         comodel_name='account.check',
         default=lambda self: self._get_default_check(),
     )
-    new_state = fields.Selection(
-        selection=[
+    new_state = fields.Selection(selection=lambda self: self._load_options())
+    reason = fields.Text()
+
+    def _load_options(self):
+        check_id = self.env.context.get("active_ids", False)
+        Check = self.env['account.check']
+
+        if check_id and len(check_id) == 1:
+            account_check = Check.browse(check_id)
+            if account_check.internal_type == 'issued':
+                if account_check.issued_check_state == 'draft':
+                    return [
+                        ('cancelled', 'Cancelled'),
+                    ]
+                if account_check.issued_check_state == 'waiting_debit':
+                    return [
+                        ('expired', 'Expired'),
+                    ]
+
+        return [
             ('cancelled', 'Cancelled'),
             ('expired', 'Expired'),
         ]
-    )
-    reason = fields.Text()
 
     @api.model
     def _get_default_check(self):
