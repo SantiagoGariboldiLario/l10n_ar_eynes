@@ -296,7 +296,7 @@ class ReportFilesGenerator(models.Model):
                         'resource': tax_line.partner_id,
                     }
                 )
-            if '-' not in nro_doc_percibido and len(nro_doc_percibido) == 11:
+            elif '-' not in nro_doc_percibido and len(nro_doc_percibido) == 11:
                 nro_doc_percibido = '{}-{}-{}'.format(
                     nro_doc_percibido[0:2],
                     nro_doc_percibido[2:10],
@@ -433,7 +433,7 @@ class ReportFilesGenerator(models.Model):
                         'resource': tax_line.partner_id,
                     }
                 )
-            if '-' not in nro_doc_percibido and len(nro_doc_percibido) == 11:
+            elif '-' not in nro_doc_percibido and len(nro_doc_percibido) == 11:
                 nro_doc_percibido = '{}-{}-{}'.format(
                     nro_doc_percibido[0:2],
                     nro_doc_percibido[2:10],
