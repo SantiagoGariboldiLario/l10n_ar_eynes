@@ -32,6 +32,11 @@ class ChangeCheckStateWizard(models.TransientModel):
                     return [
                         ('expired', 'Expired'),
                     ]
+            elif account_check.internal_type == 'third_party':
+                if account_check.third_party_check_state == 'in_wallet':
+                    return [
+                        ('expired', 'Expired'),
+                    ]
 
         return [
             ('cancelled', 'Cancelled'),

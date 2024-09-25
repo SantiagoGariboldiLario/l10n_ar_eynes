@@ -315,11 +315,6 @@
                     domain="[('third_party_check_state', '=', 'in_wallet')]"
                 />
                 <filter
-                    name="cancelled"
-                    string="Cancelled"
-                    domain="[('third_party_check_state', '=', 'cancelled')]"
-                />
-                <filter
                     name="deposited"
                     string="Deposited"
                     domain="[('third_party_check_state','=','deposited')]"
@@ -355,6 +350,7 @@
                         string="Change State"
                         type="action"
                         class="oe_highlight"
+                        invisible="third_party_check_state in ('draft', 'deposited', 'rejected', 'expired')"
                     />
                     <button
                         string="Deposit Check"
@@ -383,12 +379,12 @@
                         string="Reject Check"
                         type="action"
                         class="oe_highlight"
-                        invisible="third_party_check_state not in ('deposited', 'delivered')"
+                        invisible="third_party_check_state not in ('accredited', 'delivered')"
                     />
                     <field
                         name="third_party_check_state"
                         widget="statusbar"
-                        statusbar_visible="draft,in_wallet,deposited,accredited,delivered,cancelled,rejected,expired"
+                        statusbar_visible="draft,in_wallet,deposited,accredited,delivered,rejected,expired"
                         statusbar_colors='{"cancel":"red"}'
                     />
                 </header>
