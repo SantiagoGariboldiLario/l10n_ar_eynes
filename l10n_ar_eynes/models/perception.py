@@ -8,7 +8,8 @@ import logging
 from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools import float_is_zero
 
 _logger = logging.getLogger(__name__)
 
@@ -29,12 +30,8 @@ class PerceptionTaxLine(models.Model):
     invoice_id = fields.Many2one(
         'account.move', string='Invoice', ondelete='cascade'
     )
-    base = fields.Float(
-        digits='Account',
-    )
-    amount = fields.Float(
-        digits='Account',
-    )
+    base = fields.Float(digits='Account', required=True)
+    amount = fields.Float(digits='Account', required=True)
     base_secondary_currency = fields.Float(
         string='Base in secondary currency',
         digits='Account',
@@ -89,6 +86,23 @@ class PerceptionTaxLine(models.Model):
         'perception.tax.application', 'Tax Application'
     )
     concept_id = fields.Many2one('perception.concept', 'Concept')
+
+    @api.constrains('base')
+    def _check_base_not_zero(self):
+        for rec in self:
+            if float_is_zero(
+                rec.base, precision_rounding=rec.invoice_id.currency_id.rounding
+            ):
+                raise ValidationError(_("Perception Base can't be zero"))
+
+    @api.constrains('amount')
+    def _check_amount_not_zero(self):
+        for rec in self:
+            if float_is_zero(
+                rec.amount,
+                precision_rounding=rec.invoice_id.currency_id.rounding,
+            ):
+                raise ValidationError(_("Perception Amount can't be zero"))
 
     def _default_company_id(self):
         return self.env.company.id
