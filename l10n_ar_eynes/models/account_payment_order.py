@@ -2249,7 +2249,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         return self.create_retention_lines()
 
     name = fields.Char(string='Retention', size=64)
-    date = fields.Date(index=True, required=True)
+    date = fields.Date(index=True)
     payment_order_id = fields.Many2one(
         comodel_name='account.payment.order',
         string='Payment Order',
