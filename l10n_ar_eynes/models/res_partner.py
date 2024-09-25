@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -179,8 +180,16 @@ class ResPartner(models.Model):
         values = self.parse_afip_values(ws)
         return values
 
+    def _get_str_repeated_partners(self, partners):
+        msg = f"{str(partners[0]['vat'])}\n"
+        for partner in partners:
+            msg += f"(id={str(partner['id'])}) {str(partner['display_name'])}\n"
+        msg += '\n'
+        return msg
+
     @api.constrains('vat', 'document_type_id')
     def check_vat_duplicated(self):
+        partners_to_check = []
         for partner in self:
             if partner.env.context.get('from_website', False):
                 continue
@@ -189,19 +198,59 @@ class ResPartner(models.Model):
             document_type = partner.document_type_id
             to_check = document_type.check_duplicated
             if to_check:
-                search_param = [
-                    ('vat', '=', partner.vat),
-                    ('document_type_id', '=', document_type.id),
-                    ('parent_id', '=', False),
-                ]
-                res = self.search_count(search_param)
-                if res > 1:
-                    raise ValidationError(
-                        _(
-                            'There is another partner with same '
-                            'VAT Information'
-                        )
+                partners_to_check.append(partner)
+        if partners_to_check:
+            partners_to_check = self.env['res.partner'].browse(
+                [p.id for p in partners_to_check]
+            )
+            search_param = [
+                ('id', 'not in', [partner.id for partner in partners_to_check]),
+                ('vat', 'in', [partner.vat for partner in partners_to_check]),
+                ('document_type_id', '!=', False),
+                ('parent_id', '=', False),
+            ]
+
+            partners_with_same_vat = self.env['res.partner'].search_read(
+                search_param, ['id', 'vat', 'display_name', 'document_type_id']
+            )
+            partners_with_same_vat = [
+                p1
+                for p1 in partners_with_same_vat
+                if p1['document_type_id'][0]
+                == partners_to_check.filtered(
+                    lambda p2: p2['vat'] == p1['vat']
+                ).document_type_id.id
+            ]
+            partners_to_check = [
+                partner
+                for partner in partners_to_check
+                if partner.vat in [p['vat'] for p in partners_with_same_vat]
+            ]
+
+            repeated_partners_by_vat = defaultdict(list)
+            for p in partners_with_same_vat:
+                repeated_partners_by_vat[p['vat']].append(p)
+            for p in partners_to_check:
+                repeated_partners_by_vat[p.vat].append(
+                    {
+                        'id': p.id,
+                        'vat': p.vat,
+                        'display_name': p.display_name,
+                        'document_type_id': p.document_type_id,
+                    }
+                )
+
+            msg = ""
+            for vat in repeated_partners_by_vat:
+                if len(repeated_partners_by_vat[vat]) > 1:
+                    msg += self._get_str_repeated_partners(
+                        repeated_partners_by_vat[vat]
                     )
+
+            if msg:
+                raise ValidationError(
+                    _('Partners with same VAT information:\n%s') % msg
+                )
 
     @api.onchange('document_type_id')
     def onchange_document_type(self):

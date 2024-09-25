@@ -10280,13 +10280,6 @@ msgstr "No hay diarios de pagos/recibos para esta moneda."
 
 #. module: l10n_ar_eynes
 #. odoo-python
-#: code:addons/l10n_ar_eynes/models/res_partner.py:0
-#, python-format
-msgid "There is another partner with same VAT Information"
-msgstr "Hay otra empresa con el mismo CUIT"
-
-#. module: l10n_ar_eynes
-#. odoo-python
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
 msgid "There is no check configuration for this Company!"
