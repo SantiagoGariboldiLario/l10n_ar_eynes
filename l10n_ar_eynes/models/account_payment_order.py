@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
-from odoo.tools import float_compare
+from odoo.tools import float_compare, float_is_zero
 
 _logger = logging.getLogger(__name__)
 
@@ -2249,7 +2249,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         return self.create_retention_lines()
 
     name = fields.Char(string='Retention', size=64)
-    date = fields.Date(index=True)
+    date = fields.Date(index=True, required=True)
     payment_order_id = fields.Many2one(
         comodel_name='account.payment.order',
         string='Payment Order',
@@ -2266,8 +2266,8 @@ class AccountPaymentOrderRetentionLine(models.Model):
             ('type', 'not in', ['view', 'income', 'closed']),
         ],
     )
-    base = fields.Float(digits='Account')
-    amount = fields.Float(digits='Account')
+    base = fields.Float(digits='Account', required=True)
+    amount = fields.Float(digits='Account', required=True)
     base_currency = fields.Float(
         digits='Account',
         compute='_compute_base_currency',
@@ -2316,7 +2316,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
     )
     certificate_no = fields.Char(
         string='Certificate No.',
-        required=False,
+        required=True,
         size=32,
     )
     state_id = fields.Many2one(
@@ -2388,6 +2388,22 @@ class AccountPaymentOrderRetentionLine(models.Model):
         compute='_compute_actual_payment_retention',
         store=False,
     )
+
+    @api.constrains('base')
+    def _check_base_not_zero(self):
+        for rec in self:
+            if float_is_zero(
+                rec.base, precision_rounding=rec.currency_id.rounding
+            ):
+                raise ValidationError(_("Retention Base can't be zero"))
+
+    @api.constrains('amount')
+    def _check_amount_not_zero(self):
+        for rec in self:
+            if float_is_zero(
+                rec.amount, precision_rounding=rec.currency_id.rounding
+            ):
+                raise ValidationError(_("Retention Amount can't be zero"))
 
     @api.depends('payment_order_id')
     def _compute_retention_id_domain(self):
