@@ -8,6 +8,12 @@ _logger = logging.getLogger(__name__)
 class PosSession(models.Model):
     _inherit = 'pos.session'
 
+    def _is_capture_system_activated(self):
+        """Override because native method needs ir_config_parameter that doesn't exists and it must be
+        created by point_of_sale module
+        """
+        return True
+
     def _loader_params_account_fiscal_position(self):
         return {
             'search_params': {
