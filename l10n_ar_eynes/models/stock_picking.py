@@ -115,29 +115,30 @@ class StockPicking(models.Model):
         return res
 
     def _get_declared_value(self):
-        Currency = self.env["res.currency"]
-
         sale_order = self.sale_id
-        qty = 0
+        amount = 0
         aux = 0
 
         if self.pick_type == "outgoing":
             for move in self.move_ids:
                 aux = move.product_qty * move.sale_line_id.price_unit
 
-            qty += aux
-            if qty != 0:
+            amount += aux
+            if amount != 0:
                 if self.company_id.currency_id.id != sale_order.currency_id.id:
                     from_currency = sale_order.currency_id
                     to_currency = self.company_id.currency_id
-                    qty = Currency._compute(
-                        from_currency, to_currency, qty, round=False
+                    amount = from_currency._convert(
+                        from_amount=amount,
+                        to_currency=to_currency,
+                        company=self.company_id,
+                        date=fields.Date.today(),
                     )
         else:
             for move in self.move_ids:
                 aux = move.product_qty * move.price_unit
-                qty += aux
-        return qty
+                amount += aux
+        return amount
 
     def button_validate(self):
         for reg in self:
