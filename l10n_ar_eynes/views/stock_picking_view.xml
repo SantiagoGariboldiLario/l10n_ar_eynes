@@ -21,18 +21,11 @@
             </xpath>
             <xpath expr="//field[@name='scheduled_date']" position="after">
                 <field name="voucher" invisible="True" />
-                <field
-                    name="cot_date"
-                    invisible="not voucher or picking_type_code != 'outgoing'"
-                />
+                <field name="cot_date" invisible="not voucher or picking_type_code != 'outgoing'" />
                 <field name="pick_type" invisible="False" />
             </xpath>
             <xpath expr="//field[@name='location_dest_id']" position="after">
-                <field
-                    name="shipping_number"
-                    invisible="picking_type_code != 'incoming'"
-                    readonly="False"
-                />
+                <field name="shipping_number" invisible="picking_type_code != 'incoming'" readonly="False" />
             </xpath>
             <field name="partner_id" invisible="False" />
             <field name="origin" position="after">
@@ -49,15 +42,12 @@
                 />
             </xpath>
             <xpath expr="/form/sheet/notebook/page[@name='extra']" position="after">
-                <page
-                    string="COT"
-                    invisible="picking_type_code in ('production', 'incoming')"
-                >
+                <page string="COT" invisible="picking_type_code in ('production', 'incoming')">
                     <group col="2" colspan="2" string="COT Information">
                         <group>
-                            <field name="declared_value" readonly="voucher" />
-                            <field name="dimension" readonly="voucher" />
-                            <field name="cot" readonly="1" />
+                            <field name="declared_value" />
+                            <field name="dimension" />
+                            <field name="cot" />
                             <field
                                 name="voucher"
                                 groups="l10n_ar_eynes.group_check_cot"
