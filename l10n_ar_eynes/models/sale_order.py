@@ -7,7 +7,8 @@
 
 import logging
 
-from odoo import _, api, exceptions, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -24,17 +25,22 @@ class SaleOrder(models.Model):
         invoice_vals.update(
             {'partner_shipping_id': self.partner_shipping_id.id}
         )
+        if not self.partner_id.property_account_position_id:
+            raise UserError(
+                _('You must set a Fiscal Position for %s')
+                % self.partner_id.name
+            )
         journals = self.env.user.get_journals_by_fiscal_position(
-            self.fiscal_position_id
+            self.partner_id.property_account_position_id
         )
         if not journals:
-            raise exceptions.ValidationError(
+            raise ValidationError(
                 _(
                     "Could not match any user available journals with fiscal position "
                     "'%(fiscal_pos)s'\n"
                     "Please check if there are any journals with this parameters "
                     "in users > preferences > available journals",
-                    fiscal_pos=self.fiscal_position_id.name,
+                    fiscal_pos=self.partner_id.property_account_position_id.name,
                 )
             )
         invoice_vals['journal_id'] = journals[0].id

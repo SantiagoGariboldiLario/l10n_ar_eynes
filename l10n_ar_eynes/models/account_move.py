@@ -420,6 +420,11 @@ class AccountMove(models.Model):
             partner_fiscal_position = (
                 self.partner_id.property_account_position_id
             )
+            if not partner_fiscal_position:
+                raise UserError(
+                    _('You must set a Fiscal Position for %s')
+                    % self.partner_id.name
+                )
             journals = self.env.user.get_journals_by_fiscal_position(
                 partner_fiscal_position
             )
