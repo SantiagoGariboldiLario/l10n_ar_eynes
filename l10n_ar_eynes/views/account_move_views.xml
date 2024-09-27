@@ -311,18 +311,16 @@
                 </page>
 
                 <page string="FCRED" invisible="not is_FCE_invoice">
-                    <group string="Optionals">
-                        <field name="optional_ids" nolabel="1">
-                            <tree editable="bottom">
-                                <field name="code" />
-                                <field
-                                    name="optional_id"
-                                    options="{'no_create': True, 'no_create_edit':True, 'no_open':True}"
-                                />
-                                <field name="value" />
-                            </tree>
-                        </field>
-                    </group>
+                    <field name="optional_ids">
+                        <tree editable="bottom">
+                            <field name="code" />
+                            <field
+                                name="optional_id"
+                                options="{'no_create': True, 'no_create_edit':True, 'no_open':True}"
+                            />
+                            <field name="value" />
+                        </tree>
+                    </field>
                 </page>
 
                 <page
