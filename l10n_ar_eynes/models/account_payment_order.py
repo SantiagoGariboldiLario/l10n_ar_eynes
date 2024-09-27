@@ -1871,7 +1871,9 @@ class AccountPaymentOrder(models.Model):
 
     def render_report(self, report_name, report_id):
         retention_report_id = self.env.ref('l10n_ar_eynes.' + report_id)
-        generated_report = retention_report_id._render_qweb_pdf(self.id)
+        generated_report = retention_report_id._render_qweb_pdf(
+            report_ref='l10n_ar_eynes.' + report_id, res_ids=self.id
+        )
         data_record = base64.b64encode(generated_report[0])
         ir_values = {
             'name': _(report_name),
