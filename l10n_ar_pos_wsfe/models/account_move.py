@@ -116,7 +116,7 @@ class AccountMove(models.Model):
             order = self.env['pos.order'].search(
                 [('account_move', '=', inv.id)]
             )
-            if order and self.env.context.get('force_pos_payment', False):
+            if order:
                 order._apply_invoice_payments()
 
         return res

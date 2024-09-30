@@ -943,9 +943,7 @@ class AccountMove(models.Model):
 
         super(AccountMove, self - electronic_invoices).action_post()
 
-        return electronic_invoices.with_context(
-            force_pos_payment=True
-        )._validate_electronic_invoices()
+        return electronic_invoices._validate_electronic_invoices()
 
     def validate_period(self):
         date = self.date or self.invoice_date or fields.Date.context_today(self)
