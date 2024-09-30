@@ -1478,24 +1478,19 @@ class AccountPaymentOrder(models.Model):
         amount_currency,
         sign,
     ):
+        if not self.is_multi_currency:
+            amount_currency = amount
         debit = credit = 0.0
-        pl_account_id = journal_id.suspense_account_id.id
         if self.type in ('purchase', 'payment'):
             credit = amount
         elif self.type in ('sale', 'receipt'):
             debit = amount
-        if debit < 0:
-            credit = -debit
-            debit = 0.0
-        if credit < 0:
-            debit = -credit
-            credit = 0.0
         sign = debit - credit < 0 and -1 or 1
         move_line = {
             'name': name or '/',
             'debit': debit,
             'credit': credit,
-            'account_id': pl_account_id,
+            'account_id': journal_id.suspense_account_id.id,
             'move_id': move_id,
             'journal_id': self.journal_id.id,
             'partner_id': self.partner_id.id,
