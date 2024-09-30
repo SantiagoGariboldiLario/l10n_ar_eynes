@@ -441,18 +441,21 @@ class ResPartner(models.Model):
         except ValueError:
             return False
 
-        check_list = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2]
+        if self.document_type_id in [cuit, cuil]:
+            check_list = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2]
 
-        var1 = 0
-        for i in range(10):
-            var1 = var1 + int(vat[i]) * check_list[i]
-        var3 = 11 - var1 % 11
+            var1 = 0
+            for i in range(10):
+                var1 = var1 + int(vat[i]) * check_list[i]
+            var3 = 11 - var1 % 11
 
-        if var3 == 11:
-            var3 = 0
-        if var3 == 10:
-            var3 = 9
-        if var3 == int(vat[10]):
+            if var3 == 11:
+                var3 = 0
+            if var3 == 10:
+                var3 = 9
+            if var3 == int(vat[10]):
+                return True
+        else:
             return True
 
         return False
