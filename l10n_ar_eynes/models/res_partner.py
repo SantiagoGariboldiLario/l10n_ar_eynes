@@ -211,16 +211,21 @@ class ResPartner(models.Model):
             ]
 
             partners_with_same_vat = self.env['res.partner'].search_read(
-                search_param, ['id', 'vat', 'display_name', 'document_type_id']
+                search_param,
+                ['id', 'vat', 'display_name', 'document_type_id', 'child_ids'],
             )
-            partners_with_same_vat = [
-                p1
-                for p1 in partners_with_same_vat
-                if p1['document_type_id'][0]
-                == partners_to_check.filtered(
-                    lambda p2: p2['vat'] == p1['vat']
-                ).document_type_id.id
-            ]
+
+            # Comento la siguiente línea porque me parece que no nos interesa si los contactos comparten el
+            # TIPO de documento. De igual manera no deberían poner repetirse...
+            # partners_with_same_vat = [
+            #     p1
+            #     for p1 in partners_with_same_vat
+            #     if p1['document_type_id'][0]
+            #     == partners_to_check.filtered(
+            #         lambda p2: p2['vat'] == p1['vat']
+            #     ).document_type_id.id
+            # ]
+
             partners_to_check = [
                 partner
                 for partner in partners_to_check
@@ -231,14 +236,20 @@ class ResPartner(models.Model):
             for p in partners_with_same_vat:
                 repeated_partners_by_vat[p['vat']].append(p)
             for p in partners_to_check:
-                repeated_partners_by_vat[p.vat].append(
-                    {
-                        'id': p.id,
-                        'vat': p.vat,
-                        'display_name': p.display_name,
-                        'document_type_id': p.document_type_id,
-                    }
-                )
+                companies = repeated_partners_by_vat[p.vat]
+                is_child = False
+                for company in companies:
+                    if p.id in company['child_ids']:
+                        is_child = True
+                if not is_child:
+                    repeated_partners_by_vat[p.vat].append(
+                        {
+                            'id': p.id,
+                            'vat': p.vat,
+                            'display_name': p.display_name,
+                            'document_type_id': p.document_type_id,
+                        }
+                    )
 
             msg = ""
             for vat in repeated_partners_by_vat:
