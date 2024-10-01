@@ -2719,15 +2719,15 @@ msgstr "¡Error! El cheque debe estar asociado a un voucher."
 #. odoo-python
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
-msgid "Check Error! You cannot delete a check that is not in Draft"
-msgstr "¡Error! No se puede eliminar un cheque que no esté en borrador"
+msgid "Check Error! You cannot delete an Issued Check"
+msgstr "¡Error! No se puede eliminar un cheque propio."
 
 #. module: l10n_ar_eynes
 #. odoo-python
 #: code:addons/l10n_ar_eynes/models/account_check.py:0
 #, python-format
-msgid "Check Error! You cannot delete a third check that is not in Wallet"
-msgstr "¡Error! No puedes eliminar un cheque de terceros que no esté en cartera"
+msgid "Check Error! You cannot delete a third check that is not in Draft"
+msgstr "¡Error! No puedes eliminar un cheque de terceros que no esté en Borrador"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form

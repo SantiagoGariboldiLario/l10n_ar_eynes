@@ -1854,7 +1854,7 @@ class AccountPaymentOrder(models.Model):
 
             # A draft los cheques de tercero en cobros
             third_checks = voucher.third_party_check_receipt_ids
-            third_checks.write({'third_party_check_state': 'in_wallet'})
+            third_checks.write({'third_party_check_state': 'draft'})
         self.write({'state': 'draft'})
         return True
 

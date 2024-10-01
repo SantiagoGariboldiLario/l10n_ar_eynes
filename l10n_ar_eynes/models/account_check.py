@@ -189,21 +189,17 @@ class AccountCheck(models.Model):
         """
         for check in self:
             if check.internal_type == 'third_party':
-                if check.third_party_check_state != 'in_wallet':
+                if check.third_party_check_state != 'draft':
                     raise UserError(
                         _(
                             "Check Error! You cannot delete a third check that is "
-                            "not in Wallet"
+                            "not in Draft"
                         )
                     )
             elif check.internal_type == 'issued':
-                if check.issued_check_state != 'draft':
-                    raise UserError(
-                        _(
-                            "Check Error! You cannot delete a check that is not in "
-                            "Draft"
-                        )
-                    )
+                raise UserError(
+                    _("Check Error! You cannot delete an Issued Check")
+                )
         return super(AccountCheck, self).unlink()
 
     def cancel_check(self, reason):
