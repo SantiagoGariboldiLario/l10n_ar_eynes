@@ -58,15 +58,14 @@ patch(PaymentScreen.prototype, {
         return true;
     },
 
-    mounted() {
-        super.mounted();
+    onMounted() {
+        super.onMounted();
         // By default set electronic invoice
         if (!this.currentOrder.is_manual_invoice() && !this.currentOrder.is_electronic_invoice()) {
             this.toggleIsElectronicInvoice();
         } else {
             this.setNextInvoiceSequence();
         }
-        this.env.pos.on("change:selectedClient", () => this.setNextInvoiceSequence(), this);
     },
 
     willUnmount() {
@@ -115,6 +114,11 @@ patch(PaymentScreen.prototype, {
                 throw error;
             }
         }
+    },
+
+    async selectPartner(isEditMode = false, missingFields = []) {
+        await super.selectPartner(isEditMode, missingFields);
+        this.setNextInvoiceSequence();
     },
 
     async _isOrderValid(isForceValidate) {
