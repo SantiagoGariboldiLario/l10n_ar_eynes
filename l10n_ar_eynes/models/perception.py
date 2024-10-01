@@ -551,12 +551,15 @@ class PerceptionTaxApplication(models.Model):
         elif self.calculation_base == 'amount_untaxed':
             base = method('price_subtotal', lines)
 
+        # Necesitamos cambiarle el signo a la base para el caso de las NC desde POS
+        sign = -1 if base < 0 else 1
+        base = base * sign
         if base < self.tax_allowance:
             return 0.0
 
         if self.exclude_tax_allowance:
             base -= self.tax_allowance
-        return base
+        return base * sign
 
     def apply_perception(self, perception_data):
         percent = perception_data['percent']
