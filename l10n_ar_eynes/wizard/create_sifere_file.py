@@ -156,10 +156,9 @@ class ReportFilesGenerator(models.Model):
 
         retention_query = """
         SELECT r.id FROM account_payment_order_retention_line r
-        JOIN account_journal ret ON r.retention_id = ret.id
-        JOIN account_tax at ON ret.tax_id=at.id
+        JOIN account_tax ret ON r.retention_id = ret.id
         WHERE r.date BETWEEN %(date_from)s AND %(date_to)s
-        AND at.retention_type in ('gross_income') AND at.type_tax_use LIKE 'sale'
+        AND ret.retention_type in ('gross_income') AND ret.type_tax_use LIKE 'sale'
         AND r.company_id = %(company_id)s ORDER BY r.date
         """
 
@@ -182,14 +181,13 @@ class ReportFilesGenerator(models.Model):
 
         perception_query = """
         SELECT p.id FROM perception_tax_line p
-        JOIN account_journal per ON p.perception_id = per.id
-        JOIN account_tax at ON per.tax_id=at.id
+        JOIN account_tax per ON p.perception_id = per.id
         JOIN account_move i ON p.invoice_id=i.id
         WHERE p.date BETWEEN %(date_from)s AND %(date_to)s
         AND i.state = %(inv_state)s
-        AND at.retention_type in %(type)s AND at.type_tax_use LIKE 'purchase'
+        AND per.retention_type in %(type)s AND per.type_tax_use LIKE 'purchase'
         AND p.company_id = %(company_id)s
-        AND at.is_bank_settlement IS True
+        AND per.is_bank_settlement IS True
         ORDER BY p.date
         """
 
@@ -244,7 +242,7 @@ class ReportFilesGenerator(models.Model):
                     nro_doc_retenido[10],
                 )
             jurisdiction = SifereJurisdiction.search(
-                [('state', '=', tax_line.retention_id.tax_id.state_id.id)]
+                [('state', '=', tax_line.retention_id.state_id.id)]
             )
             if not jurisdiction.code:
                 jurisdiction_code = 0
@@ -252,7 +250,7 @@ class ReportFilesGenerator(models.Model):
                     errors.append(
                         {
                             'error': _('Jurisdiction cannot be found'),
-                            'resource': tax_line.retention_id.tax_id,
+                            'resource': tax_line.retention_id,
                         }
                     )
             else:
@@ -303,7 +301,7 @@ class ReportFilesGenerator(models.Model):
                     nro_doc_percibido[10],
                 )
             jurisdiction = SifereJurisdiction.search(
-                [('state', '=', tax_line.perception_id.tax_id.state_id.id)]
+                [('state', '=', tax_line.perception_id.state_id.id)]
             )
             if not jurisdiction.code:
                 jurisdiction_code = 0
@@ -311,7 +309,7 @@ class ReportFilesGenerator(models.Model):
                     errors.append(
                         {
                             'error': _('Jurisdiction cannot be found'),
-                            'resource': tax_line.perception_id.tax_id,
+                            'resource': tax_line.perception_id,
                         }
                     )
             else:
@@ -364,14 +362,13 @@ class ReportFilesGenerator(models.Model):
 
         perception_query = """
         SELECT p.id FROM perception_tax_line p
-        JOIN account_journal per ON p.perception_id = per.id
-        JOIN account_tax at ON per.tax_id=at.id
+        JOIN account_tax per ON p.perception_id = per.id
         JOIN account_move i ON p.invoice_id=i.id
         WHERE p.date BETWEEN %(date_from)s AND %(date_to)s
         AND i.state = %(inv_state)s
-        AND at.retention_type in %(type)s AND at.type_tax_use LIKE 'purchase'
+        AND per.retention_type in %(type)s AND per.type_tax_use LIKE 'purchase'
         AND p.company_id = %(company_id)s
-        AND at.is_bank_settlement IS NOT True
+        AND per.is_bank_settlement IS NOT True
         ORDER BY p.date
         """
 
@@ -440,15 +437,15 @@ class ReportFilesGenerator(models.Model):
                     nro_doc_percibido[10],
                 )
 
-            if not tax_line.perception_id.tax_id.state_id:
+            if not tax_line.perception_id.state_id:
                 raise UserError(
                     _(
                         "%(per_name)s doesn't have State configured",
-                        per_name=tax_line.perception_id.tax_id.name,
+                        per_name=tax_line.perception_id.name,
                     )
                 )
             jurisdiction = SifereJurisdiction.search(
-                [('state', '=', tax_line.perception_id.tax_id.state_id.id)]
+                [('state', '=', tax_line.perception_id.state_id.id)]
             )
             jurisdiction_code = 0
             if not jurisdiction.code:
@@ -456,7 +453,7 @@ class ReportFilesGenerator(models.Model):
                     errors.append(
                         {
                             'error': _('Jurisdiction cannot be found'),
-                            'resource': tax_line.perception_id.tax_id,
+                            'resource': tax_line.perception_id,
                         }
                     )
             else:
