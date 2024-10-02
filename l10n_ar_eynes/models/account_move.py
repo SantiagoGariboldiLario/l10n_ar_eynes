@@ -906,6 +906,19 @@ class AccountMove(models.Model):
                     _("You must complete supplier move reference.")
                 )
 
+    def _set_perception_date(self):
+        invoices = self.filtered(lambda move: move.is_invoice())
+        for inv in invoices:
+            for perc_line in inv.perception_ids:
+                """
+                Usamos la date de la invoice porque en el caso de facturas de proveedor que son ingresadas en el mes
+                siguiente, la invoice_date no nos serviría a la hora de cerrar los impuestos del  mes. Ej, si la
+                factura es del 29/3/24 (invoice_date) y se ingresa el 1/4/24 (date) porque el proveedor la entregó
+                tarde, esta percepción no saldría en el archivo de percepciones generado para Abril.
+                """
+                if not perc_line.date:
+                    perc_line.write({'date': inv.date})
+
     def _post(self, soft=True):
         self._required_supplier_move_reference()
         for move in self:
@@ -925,7 +938,7 @@ class AccountMove(models.Model):
                 inv.write({'internal_number': sequence})
 
         posted_moves = super(AccountMove, self)._post(soft=soft)
-        # posted_moves._set_perception_date()
+        posted_moves._set_perception_date()
 
         return posted_moves
 
