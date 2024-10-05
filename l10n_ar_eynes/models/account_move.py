@@ -907,15 +907,15 @@ class AccountMove(models.Model):
                 )
 
     def _set_perception_date(self):
+        """
+        Usamos la date de la invoice porque en el caso de facturas de proveedor que son ingresadas en el mes
+        siguiente, la invoice_date no nos serviría a la hora de cerrar los impuestos del  mes. Ej, si la
+        factura es del 29/3/24 (invoice_date) y se ingresa el 1/4/24 (date) porque el proveedor la entregó
+        tarde, esta percepción no saldría en el archivo de percepciones generado para Abril.
+        """
         invoices = self.filtered(lambda move: move.is_invoice())
         for inv in invoices:
             for perc_line in inv.perception_ids:
-                """
-                Usamos la date de la invoice porque en el caso de facturas de proveedor que son ingresadas en el mes
-                siguiente, la invoice_date no nos serviría a la hora de cerrar los impuestos del  mes. Ej, si la
-                factura es del 29/3/24 (invoice_date) y se ingresa el 1/4/24 (date) porque el proveedor la entregó
-                tarde, esta percepción no saldría en el archivo de percepciones generado para Abril.
-                """
                 if not perc_line.date:
                     perc_line.write({'date': inv.date})
 
@@ -1367,6 +1367,16 @@ class AccountMove(models.Model):
         if self.denomination == 'b':
             price_subtotal += self.amount_tax
         return price_subtotal
+
+    def _report_xls_query_extra(self):
+        """
+        Método útil para extender el alcance del reporte por jurisdicciones export.sales.by.jurisdiction.xls
+        """
+        select_extra = """ """
+        join_extra = """ """
+        where_extra = """ """
+        sort_selection = """ """
+        return (select_extra, join_extra, where_extra, sort_selection)
 
     # --------------------------------------------------------------------------------
     # METHODS FOR ELECTRONIC INVOICES:

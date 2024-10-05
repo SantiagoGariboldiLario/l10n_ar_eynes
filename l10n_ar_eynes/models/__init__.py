@@ -55,3 +55,4 @@ from . import purchase
 from . import ir_attachment
 from . import account_tax_group
 from . import ir_actions_report
+from . import default_jurisdiction_config
