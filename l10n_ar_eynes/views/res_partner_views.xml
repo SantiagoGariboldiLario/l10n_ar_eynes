@@ -26,11 +26,6 @@
                 <field name="express_id" domain="[('supplier_rank', '>', 0)]" />
             </group>
 
-            <xpath expr="//field[@name='country_id']" position="attributes">
-                <attribute name="readonly">type == 'contact' and parent_id</attribute>
-                <attribute name="required">dst_cuit</attribute>
-            </xpath>
-
             <xpath expr="//field[@name='vat']" position="before">
                 <field name="dst_cuit" invisible="1" />
                 <field name="is_checked_special_partner_required_fields" invisible="1" />
@@ -167,6 +162,7 @@
                     class="o_address_country"
                     options='{"no_open": True, "no_create": True}'
                     readonly="type == 'contact' and parent_id"
+                    required="dst_cuit"
                 />
 
                 <field
@@ -192,7 +188,7 @@
                     name="city_id"
                     placeholder="City"
                     class="o_address_city"
-                    domain="[('country_id', '=', country_id)]"
+                    domain="[('country_id', '=', country_id), ('state_id', '=', state_id)]"
                     invisible="not country_enforce_cities"
                     readonly="type == 'contact' and parent_id"
                     context="{'default_country_id': country_id, 'default_state_id': state_id, 'default_zipcode': zip}"
