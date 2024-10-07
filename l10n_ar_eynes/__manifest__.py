@@ -29,6 +29,7 @@
         'account',
         'account_debit_note',
         'base',
+        'base_address_extended',
         'contacts',
         'delivery',
         'date_range',
