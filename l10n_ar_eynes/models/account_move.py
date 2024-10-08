@@ -612,7 +612,7 @@ class AccountMove(models.Model):
             raise ValidationError(_('Some of the fields exceeds length'))
 
         self.supplier_move_reference = (
-            pos_code.zfill(4) + '-' + move_code.zfill(8)
+            pos_code.zfill(5) + '-' + move_code.zfill(8)
         )
 
     @api.depends('denomination', 'move_type', 'is_debit_note')
