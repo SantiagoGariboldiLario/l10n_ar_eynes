@@ -1794,7 +1794,6 @@ class AccountPaymentOrder(models.Model):
                     )
                 else:
                     account_id = self.partner_id.property_account_payable_id.id
-            sign = self.type == 'payment' and -1 or 1
             line_total_cur = self.currency_id.round(
                 line_total / self.payment_rate
             )
@@ -1804,8 +1803,8 @@ class AccountPaymentOrder(models.Model):
                 'move_id': move_id,
                 'partner_id': self.partner_id.id,
                 'date': self.date,
-                'balance': sign * line_total,
-                'amount_currency': sign * line_total_cur,
+                'balance': line_total * -1,
+                'amount_currency': line_total_cur * -1,
                 'currency_id': self.currency_id.id,
                 'currency_rate': self.payment_rate,
             }
