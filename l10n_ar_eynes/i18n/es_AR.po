@@ -11542,11 +11542,13 @@ msgstr "Asistente para acreditación de cheques"
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_journal__due_date
 #: model:ir.model.fields,help:l10n_ar_eynes.field_update_journal_period_wizard_line__journal_due_date
 msgid ""
-"after this expiration date, account moves are not allowed to use this "
-"journal till its extended"
+"Before this date, account moves changes are not allowed. For example: if you want to close "
+"this journal at 31/12/2023 set this field to 01/01/2024. In this way, you can make and modify "
+"entries from 01/01/2024."
 msgstr ""
-"después de esta fecha de vencimiento, los movimientos de cuenta no están permitidos para usar este "
-"diario hasta que se extienda"
+"Antes de esta fecha, no está permitido modificar asientos. Por ejemplo, si quiere cerrar este diario al"
+" 31/12/2024 establezcala en 01/01/2024. De esta forma, podrá realizar y modificar asientos del "
+"01/01/2024 en adelante."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__amount

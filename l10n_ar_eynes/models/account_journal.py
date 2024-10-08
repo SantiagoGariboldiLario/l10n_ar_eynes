@@ -99,8 +99,9 @@ class AccountJournal(models.Model):
     )
     due_date = fields.Date(
         string='Due Date',
-        help='after this expiration date, account moves are not allowed '
-        'to use this journal till its extended',
+        help="Before this date, account moves changes are not allowed. For example: if you want to close "
+        "this journal at 31/12/2023 set this field to 01/01/2024. In this way, you can make and modify "
+        "entries from 01/01/2024.",
     )
     type = fields.Selection(
         selection_add=[
@@ -240,7 +241,9 @@ class AccountJournal(models.Model):
             lambda j: j.type in ('payment', 'receipt')
         ):
             if journal.type in default_account_id_types:
-                journal.default_account_type = default_account_id_types.get(journal.type, '%')
+                journal.default_account_type = default_account_id_types.get(
+                    journal.type, '%'
+                )
             else:
                 journal.default_account_type = False
         return
