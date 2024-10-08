@@ -564,9 +564,6 @@
                                     <field name="account_id" column_invisible="1" />
                                 </tree>
                                 <form>
-                                    <h1>
-                                        <field name="name" class="oe_inline" />
-                                    </h1>
                                     <group>
                                         <group string="Information" name="info">
                                             <field name="state_id" invisible="1" />
@@ -1252,13 +1249,6 @@
                                     <field name="account_id" column_invisible="1" />
                                 </tree>
                                 <form>
-                                    <h1>
-                                        <field
-                                            name="name"
-                                            class="oe_inline"
-                                            readonly="not parent.disable_retentions"
-                                        />
-                                    </h1>
                                     <group>
                                         <group string="Information" name="info">
                                             <field name="state_id" invisible="1" />
