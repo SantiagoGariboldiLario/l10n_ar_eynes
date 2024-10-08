@@ -1091,9 +1091,9 @@ class AccountMove(models.Model):
     def create(self, vals):
         res = super().create(vals)
         for move in res:
-            if not move.invoice_date:
-                move.write({'invoice_date': datetime.date.today()})
             if move.is_invoice():
+                if not move.invoice_date:
+                    move.write({'invoice_date': datetime.date.today()})
                 if not move.denomination:
                     if move.is_sale_document():
                         denomination = move.journal_id.denomination
