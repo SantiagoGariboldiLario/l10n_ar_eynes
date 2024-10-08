@@ -1025,6 +1025,8 @@ class AccountMove(models.Model):
     def _check_closed_journal_moves(self):
         closed_journal_moves = self.filtered(
             lambda move: move.date < move.journal_id.due_date
+            if move.journal_id.due_date
+            else False
         )
 
         if closed_journal_moves:
