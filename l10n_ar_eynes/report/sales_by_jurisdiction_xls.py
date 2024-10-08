@@ -284,7 +284,7 @@ class SalesExportXlsx(models.AbstractModel):
             CASE
                 WHEN ai.is_debit_note IS True THEN 'ND '
                 WHEN ai.move_type = 'out_invoice' THEN 'FAC '
-                ELSE 'NC ' END || ai.denomination || ' ' ||
+                ELSE 'NC ' END || UPPER(ai.denomination) || ' ' ||
                 ai.internal_number AS invoice_internal_number,
             ai.company_id AS company_id,
             rc.name AS company_name,
