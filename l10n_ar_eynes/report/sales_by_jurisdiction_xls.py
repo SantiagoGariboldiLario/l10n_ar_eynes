@@ -298,7 +298,7 @@ class SalesExportXlsx(models.AbstractModel):
             rp.zip AS CP,
             aa.code AS Codigo_Cuenta,
             aa.name AS Nombre_Cuenta_Contable,
-            ail.balance AS Monto,
+            (-1 * ail.balance) AS Monto,
         CASE WHEN ai.is_debit_note IS True THEN 'Nota de Débito'
         WHEN ai.move_type = 'out_invoice' THEN 'Factura'
         ELSE 'Nota de Crédito' END AS TipoFactura
@@ -335,7 +335,7 @@ class SalesExportXlsx(models.AbstractModel):
             AND ai.company_id = %(company_id)s
             AND ai.state = 'posted'
             AND ai.move_type IN ('out_invoice', 'out_refund')
-            AND aa.account_type = 'asset_receivable'
+            AND ail.display_type = 'product'
         """
             + where_extra
             + """
