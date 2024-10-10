@@ -167,9 +167,8 @@ class AccountPaymentOrder(models.Model):
         comodel_name='account.journal',
         string='Journal',
         required=True,
-        domain=domain_journal,
-        default=default_journal,
     )
+    journal_id_domain = fields.Binary(compute='_compute_journal_id_domain')
     move_id = fields.Many2one(
         comodel_name='account.move',
         string='Account Entry',
@@ -432,6 +431,14 @@ class AccountPaymentOrder(models.Model):
     def _compute_amount(self):
         for rec in self:
             rec.amount = rec.payment_order_amount_hook()
+
+    @api.depends('type', 'company_id')
+    def _compute_journal_id_domain(self):
+        for rec in self:
+            domain = [('company_id', '=', rec.company_id.id)]
+            if rec.type:
+                domain.append(('type', '=', rec.type))
+            rec.journal_id_domain = domain
 
     @api.onchange(
         'third_party_check_ids',

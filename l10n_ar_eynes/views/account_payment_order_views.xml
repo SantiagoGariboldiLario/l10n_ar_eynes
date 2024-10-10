@@ -70,9 +70,10 @@
                                 context="{'search_default_customer': 1}"
                                 readonly="state != 'draft'"
                             />
+                            <field name="journal_id_domain" invisible="True" />
                             <field
                                 name="journal_id"
-                                domain="[('type','=','receipt'), ('company_id', '=', company_id)]"
+                                domain="journal_id_domain"
                                 string="Journal"
                                 options="{'no_quick_create': True, 'no_create': True, 'no_create_edit': True}"
                                 readonly="state != 'draft'"
@@ -727,9 +728,10 @@
                             />
                             <field name="currency_id" invisible="True" />
                             <field name="company_id" invisible="True" />
+                            <field name="journal_id_domain" invisible="True" />
                             <field
                                 name="journal_id"
-                                domain="[('type', '=', 'payment'), ('company_id', '=', company_id)]"
+                                domain="journal_id_domain"
                                 invisible="context.get('line_type', False)"
                                 options="{'no_quick_create': True, 'no_create': True, 'no_create_edit': True}"
                                 string="Journal"
