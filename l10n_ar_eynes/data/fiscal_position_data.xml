@@ -7,6 +7,7 @@
         <field name="afip_code">1</field>
         <field name="local">1</field>
         <field name="active">1</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_ri_oc" model="account.fiscal.position" forcecreate="0">
@@ -15,6 +16,7 @@
         <field name="afip_code">1</field>
         <field name="local">1</field>
         <field name="active">1</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_rni" model="account.fiscal.position" forcecreate="0">
@@ -23,6 +25,7 @@
         <field name="afip_code">2</field>
         <field name="local">1</field>
         <field name="active">0</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_nr" model="account.fiscal.position" forcecreate="0">
@@ -31,6 +34,7 @@
         <field name="afip_code">3</field>
         <field name="local">1</field>
         <field name="active">0</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_se" model="account.fiscal.position" forcecreate="0">
@@ -39,6 +43,7 @@
         <field name="afip_code">4</field>
         <field name="local">1</field>
         <field name="active">1</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_se_oc" model="account.fiscal.position" forcecreate="0">
@@ -47,6 +52,7 @@
         <field name="afip_code">4</field>
         <field name="local">1</field>
         <field name="active">1</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_cf" model="account.fiscal.position" forcecreate="0">
@@ -55,6 +61,7 @@
         <field name="afip_code">5</field>
         <field name="local">1</field>
         <field name="active">1</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_rem" model="account.fiscal.position" forcecreate="0">
@@ -63,6 +70,7 @@
         <field name="afip_code">6</field>
         <field name="local">1</field>
         <field name="active">1</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_snc" model="account.fiscal.position" forcecreate="0">
@@ -71,6 +79,7 @@
         <field name="afip_code">7</field>
         <field name="local">1</field>
         <field name="active">1</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_pe" model="account.fiscal.position" forcecreate="0">
@@ -79,6 +88,7 @@
         <field name="afip_code">8</field>
         <field name="local">0</field>
         <field name="active">1</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_ce" model="account.fiscal.position" forcecreate="0">
@@ -87,6 +97,7 @@
         <field name="afip_code">9</field>
         <field name="local">0</field>
         <field name="active">1</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_lib" model="account.fiscal.position" forcecreate="0">
@@ -95,6 +106,7 @@
         <field name="afip_code">10</field>
         <field name="local">1</field>
         <field name="active">0</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_ri_ap" model="account.fiscal.position" forcecreate="0">
@@ -103,6 +115,7 @@
         <field name="afip_code">11</field>
         <field name="local">1</field>
         <field name="active">0</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_pce" model="account.fiscal.position" forcecreate="0">
@@ -111,6 +124,7 @@
         <field name="afip_code">12</field>
         <field name="local">1</field>
         <field name="active">0</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_ms" model="account.fiscal.position" forcecreate="0">
@@ -119,6 +133,7 @@
         <field name="afip_code">13</field>
         <field name="local">1</field>
         <field name="active">0</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_pces" model="account.fiscal.position" forcecreate="0">
@@ -127,18 +142,22 @@
         <field name="afip_code">14</field>
         <field name="local">1</field>
         <field name="active">0</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_a" model="account.fiscal.position" forcecreate="0">
         <field name="name">Aduana</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_m" model="account.fiscal.position" forcecreate="0">
         <field name="name">M</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
     <record id="fiscal_position_l" model="account.fiscal.position" forcecreate="0">
         <field name="name">Leyenda</field>
+        <field name="country_id" ref="base.ar" />
     </record>
 
 
