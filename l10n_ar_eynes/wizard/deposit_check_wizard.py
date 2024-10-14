@@ -26,7 +26,7 @@ class DepositCheckwizard(models.TransientModel):
         comodel_name='res.company',
         string='Company',
         required=True,
-        default=lambda self: self.env.user.company_id.id,
+        default=lambda self: self.env.company.id,
     )
 
     def view_init(self, fields_list):

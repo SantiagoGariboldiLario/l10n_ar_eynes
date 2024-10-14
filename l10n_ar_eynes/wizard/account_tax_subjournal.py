@@ -65,7 +65,7 @@ class AccountTaxSubjournal(models.TransientModel):
     company_id = fields.Many2one(
         'res.company',
         string='Company',
-        default=lambda self: self.env.user.company_id.id,
+        default=lambda self: self.env.company.id,
     )
 
     def create_report(self):

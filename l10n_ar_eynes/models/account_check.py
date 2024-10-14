@@ -39,7 +39,7 @@ class AccountCheckConfig(models.Model):
         comodel_name='res.company',
         string='Company',
         required=True,
-        default=lambda self: self.env.user.company_id.id,
+        default=lambda self: self.env.company.id,
     )
     expired_issued_checks_account_id = fields.Many2one(
         comodel_name='account.account',

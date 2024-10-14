@@ -37,7 +37,7 @@ class WSAAConfig(models.Model):
         'res.company',
         'Company Name',
         required=True,
-        default=lambda self: self.env.user.company_id.id,
+        default=lambda self: self.env.company.id,
     )
     homologation = fields.Boolean(default=True)
     key = fields.Text('Private Key', readonly=True)
