@@ -31,9 +31,7 @@ class StockPicking(models.Model):
         "You cannot delete pickings if it is done, so it is cancelled "
         "and a new one is created, corrected and renumerated",
     )
-    name_original = fields.Char(
-        string='Original picking number',
-    )
+    name_original = fields.Char(string='Original picking number', copy=False)
     declared_value = fields.Float(
         string='Declared Value',
         readonly=True,
