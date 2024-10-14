@@ -221,10 +221,11 @@ class CreateSicoreFiles(models.TransientModel):
                 #   (Accounting->Configuration->Retentions->Tax Application {0}->Reg.Code)"""
                 #   .format(tax_line.tax_app_id.name)
                 # )
+            tax_journal = self.env['account.journal'].search(
+                [('tax_id', '=', tax_line.retention_id.id)]
+            )
             codigo_impuesto = (
-                int(tax_line.retention_id.afip_code)
-                if tax_line.retention_id.afip_code
-                else 0
+                int(tax_journal.afip_code) if tax_journal.afip_code else 0
             )
             if not codigo_impuesto:
                 raise UserError(
@@ -233,7 +234,7 @@ class CreateSicoreFiles(models.TransientModel):
                         Error: Add field 'afip code' to retention
                         (Accounting->Configuration->Retentions->{}->AFIP Code)
                         """
-                    ).format(tax_line.retention_id.name)
+                    ).format(tax_journal.name)
                 )
             line = {
                 'codigo_comprobante': '06',
@@ -328,8 +329,7 @@ class CreateSicoreFiles(models.TransientModel):
         retention_query = (
             "SELECT r.id "
             "FROM account_payment_order_retention_line r "
-            "JOIN account_journal ret ON r.retention_id = ret.id "
-            "JOIN account_tax at ON ret.tax_id=at.id "
+            "JOIN account_tax at ON r.retention_id=at.id "
             "JOIN account_payment_order av ON av.id=r.payment_order_id "
             "WHERE r.date BETWEEN %(date_from)s AND %(date_to)s "
             "AND at.retention_type in ('vat','profit') AND at.type_tax_use='purchase' "
