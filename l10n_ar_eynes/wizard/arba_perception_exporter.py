@@ -33,8 +33,7 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
             'SELECT ptl.id '
             'FROM perception_tax_line ptl '
             'JOIN account_move ai ON ptl.invoice_id = ai.id '
-            'JOIN account_journal pp ON ptl.perception_id = pp.id '
-            'JOIN account_tax at ON pp.tax_id = at.id '
+            'JOIN account_tax at ON ptl.perception_id = at.id '
             'WHERE ptl.date BETWEEN %(date_from)s AND %(date_to)s '
             'AND ai.state IN %(state)s '
             'AND at.inform_arba = True '
@@ -90,7 +89,7 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
             voucher_type = self._get_voucher_type(invoice)
             if not voucher_type:
                 err_list.append(
-                    'Voucher type for invoice {}'.format(invoice.number)
+                    'Voucher type for invoice {}'.format(invoice.name)
                 )
 
             if err_list:
@@ -132,15 +131,12 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
         'C': Nota de crédito
         'D': Nota de débito
         """
-        res = None
+        res = 'F'
 
-        if invoice_id.move_type == 'out_invoice':
-            if invoice_id.is_debit_note:
-                res = 'D'
-            else:
-                res = 'F'
-        elif invoice_id.move_type == 'out_refund':
+        if invoice_id.move_type == 'out_refund':
             res = 'C'
+        elif invoice_id.is_debit_note:
+            res = 'D'
 
         return res
 

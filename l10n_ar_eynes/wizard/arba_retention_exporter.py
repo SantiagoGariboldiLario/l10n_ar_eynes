@@ -34,8 +34,7 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         query = (
             'SELECT rtl.id '
             'FROM account_payment_order_retention_line rtl '
-            'JOIN account_journal rr ON rtl.retention_id = rr.id '
-            'JOIN account_tax at ON rr.tax_id = at.id '
+            'JOIN account_tax at ON rtl.retention_id = at.id '
             'JOIN account_payment_order apo ON apo.id = rtl.payment_order_id '
             'WHERE rtl.date BETWEEN %(date_from)s AND %(date_to)s '
             'AND at.retention_type IN %(type)s '
