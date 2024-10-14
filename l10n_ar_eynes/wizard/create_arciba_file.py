@@ -542,8 +542,7 @@ class CreateArcibaFiles(models.TransientModel):
             SELECT p.id
             FROM perception_tax_line p
             JOIN account_move i ON p.invoice_id = i.id
-            JOIN account_journal per ON p.perception_id = per.id
-            JOIN account_tax at ON per.tax_id=at.id
+            JOIN account_tax at ON p.perception_id = at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
             AND i.state = %(state)s
             AND at.inform_arciba=True
@@ -585,8 +584,7 @@ class CreateArcibaFiles(models.TransientModel):
             SELECT p.id
             FROM account_payment_order_retention_line p
             JOIN account_payment_order op ON p.payment_order_id = op.id
-            JOIN account_journal ret ON p.retention_id = ret.id
-            JOIN account_tax at ON ret.tax_id=at.id
+            JOIN account_tax at ON p.retention_id = at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
             AND op.state = %(state)s
             AND at.inform_arciba=True
@@ -844,8 +842,7 @@ class CreateArcibaNcFile(models.TransientModel):
             SELECT p.id
             FROM perception_tax_line p
             JOIN account_move i ON p.invoice_id = i.id
-            JOIN account_journal per ON p.perception_id = per.id
-            JOIN account_tax at ON per.tax_id=at.id
+            JOIN account_tax at ON p.perception_id = at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
             AND i.state = %(state)s
             AND at.inform_arciba=True
