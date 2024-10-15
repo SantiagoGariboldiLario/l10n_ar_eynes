@@ -1213,6 +1213,13 @@ class AccountPaymentOrder(models.Model):
                     "and no income lines"
                 )
             )
+        if self.payment_rate == 0.0:
+            raise ValidationError(
+                _(
+                    "Validate Error!\n"
+                    "You cannot validate a voucher with a payment rate of 0.0"
+                )
+            )
 
         self._clean_payment_lines()
         self.action_move_line_create()
