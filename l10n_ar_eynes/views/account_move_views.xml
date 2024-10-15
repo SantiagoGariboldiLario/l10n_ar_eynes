@@ -159,9 +159,9 @@
                     <!-- Se agrega el campo currency_preciated para linkearlo al label y lograr que este -->
                     <!-- div se situe en la columna derecha de la vista -->
                     <field id="preciated_alert" name="currency_preciated" invisible="1" />
-                    <span invisible="not currency_preciated">
-                        <i>Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
-                    </span>
+                    <i
+                        invisible="not currency_preciated"
+                    >Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>
                 </div>
             </div>
 
