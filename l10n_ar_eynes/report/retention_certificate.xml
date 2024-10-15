@@ -196,11 +196,11 @@
                         </tr>
                         <tr>
                             <td style="width:25%;text-align:center;padding:9px;">
-                                <t t-set="base" t-value="r.base_amount" />
+                                <t t-set="base" t-value="r.base" />
                                 <span t-esc="base" style="font-size:21px;" />
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
-                                <t t-set="applied_aliquot" t-value="r.applied_aliquot" />
+                                <t t-set="applied_aliquot" t-value="100 * r.amount / r.base" />
                                 <span t-esc="applied_aliquot" style="font-size:21px;" />
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
