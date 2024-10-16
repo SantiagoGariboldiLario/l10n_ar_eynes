@@ -245,6 +245,13 @@ msgid "The product %(product)s has not account configured."
 msgstr "El producto %(product)s no tiene una cuenta configurada."
 
 #. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#, python-format
+msgid "The selected customer needs a fiscal position."
+msgstr "El cliente seleccionado necesita posición fiscal"
+
+#. module: l10n_ar_pos_wsfe
 #. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/account_move.py:0
 #, python-format

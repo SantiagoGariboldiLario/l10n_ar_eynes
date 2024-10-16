@@ -1200,25 +1200,20 @@ class AccountPaymentOrder(models.Model):
         if round(self.writeoff_amount, 2) < 0.0:
             raise ValidationError(
                 _(
-                    'Error!\n Cannot validate a '
-                    'voucher with negative amount.\n Please check '
+                    'Cannot validate a voucher with negative amount. Please check '
                     'that Writeoff Amount is not negative.'
                 )
             )
         if self.amount == 0.0 and not self._get_income_amount():
             raise ValidationError(
                 _(
-                    "Validate Error!\n"
                     "You cannot validate a voucher with amount of 0.0 "
                     "and no income lines"
                 )
             )
         if self.payment_rate == 0.0:
             raise ValidationError(
-                _(
-                    "Validate Error!\n"
-                    "You cannot validate a voucher with a payment rate of 0.0"
-                )
+                _("You cannot validate a voucher with a payment rate of 0.0")
             )
 
         self._clean_payment_lines()

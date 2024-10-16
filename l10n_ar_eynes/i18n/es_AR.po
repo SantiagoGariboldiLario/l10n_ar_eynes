@@ -4887,6 +4887,17 @@ msgid "Export Invoice"
 msgstr "Exportar factura"
 
 #. module: l10n_ar_eynes
+#: model:ir.actions.report,name:l10n_ar_eynes.action_sales_by_jurisdiction_export_xlsx
+#: model:ir.model,name:l10n_ar_eynes.model_export_sales_by_jurisdiction_xls
+msgid "Export Sales By Jurisdiction"
+msgstr "Exportar Ventas por Jurisdicción"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_export_sales_by_jurisdiction
+msgid "Export Sales by Jurisdiction"
+msgstr "Exportar Ventas por Jurisdicción"
+
+#. module: l10n_ar_eynes
 #: model:ir.actions.report,name:l10n_ar_eynes.action_move_line_list_subj_xls
 msgid "Export Subjournal"
 msgstr "Exportar Subdiario"
@@ -8056,9 +8067,23 @@ msgid "Perception Activity"
 msgstr "Actividad de la percepción"
 
 #. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/perception.py:0
+#, python-format
+msgid "Perception Amount can't be zero"
+msgstr "El monto de la percepción no puede ser cero"
+
+#. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.perception_tax_line_menu_applied
 msgid "Perception Applied"
 msgstr "Percepción aplicada"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/perception.py:0
+#, python-format
+msgid "Perception Base can't be zero"
+msgstr "La Base de la percepción no puede ser cero"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_perception_concept_form
@@ -9437,6 +9462,24 @@ msgid "Sales Order"
 msgstr "Pedido de venta"
 
 #. module: l10n_ar_eynes
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_export_sales_by_jurisdiction
+msgid "Sales by Jurisdiction"
+msgstr "Ventas por Jurisdicción"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_report_default_jurisdiction_configuration
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_report_default_jurisdiction
+msgid "Sales by Jurisdiction Config"
+msgstr "Configuración de Ventas por Jurisdicción"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/report/sales_by_jurisdiction_xls.py:0
+#, python-format
+msgid "Sales by jurisdiction"
+msgstr "Ventas por Jurisdicción"
+
+#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.certificate_renewal_wizard
 msgid "Save Certificate"
 msgstr "Guardar certificado"
@@ -10289,7 +10332,21 @@ msgstr "No hay índices de inflación para este año fiscal"
 #, python-format
 msgid ""
 "There is no reference for account move. Imposible to go back to wallet."
-"No hay referencia al asiento contable. Imposible volver a la billetera."
+msgstr "No hay referencia al asiento contable. Imposible volver a la billetera."
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/perception.py:0
+#, python-format
+msgid "There is no State configured for the Supplier %s"
+msgstr "La Provincia no está configurada en el Cliente %s"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/perception.py:0
+#, python-format
+msgid "There is no State configured for this Company"
+msgstr "La Provincia no está configurada en esta Compañía"
 
 #. module: l10n_ar_eynes
 #. odoo-python
@@ -11499,6 +11556,14 @@ msgstr "Debe seleccionar la fecha de débito"
 #, python-format
 msgid "You must select the new state for this check."
 msgstr "Debe seleccionar un nuevo estado para este cheque"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#: code:addons/l10n_ar_eynes/models/sale_order.py:0
+#, python-format
+msgid "You must set a Fiscal Position for %s"
+msgstr "Debe seleccionar Posición Fiscal para %s"
 
 #. module: l10n_ar_eynes
 #. odoo-python

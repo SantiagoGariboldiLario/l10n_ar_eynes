@@ -444,16 +444,14 @@ class PerceptionTaxApplication(models.Model):
             partner_state = destination_shipping.state_id.id
             if not partner_state:
                 raise UserError(
-                    _(
-                        'There is no State/Province configured for '
-                        f'the Supplier while computing {self.name}'
-                    )
+                    _("There is no State configured for the Supplier %s")
+                    % destination_shipping.name
                 )
         elif self.perception_tax_id.applicable_state == 'source':
             partner_state = source_shipping.state_id.id
             if not partner_state:
                 raise UserError(
-                    _('There is no State/Province configured for this Company')
+                    _('There is no State configured for this Company')
                 )
         # Hacemos el chequeo de los states
         return retention_state == partner_state
