@@ -1418,20 +1418,30 @@ class AccountMove(models.Model):
         wsfex_conf = WSFEXConfig.with_context(**ctx).get_config()
         return wsfex_conf
 
-    def _check_fce_using_abc(self):
+    def _check_fce_using_abc(self, amount_total):
         if not self.partner_id:
             return False
         if not self.partner_id.vat:
             return False
-        ABC = self.env['afip.big.company'].sudo()
-        is_bc = ABC.search([('cuit', '=like', self.partner_id.vat)])
-        fcred_minimum_amount = self.company_id.fcred_minimum_amount
-        return {
-            'is_bc': is_bc,
-            'fcred_minimum_amount': fcred_minimum_amount,
-        }
+        if (
+            self.is_debit_note or self.move_type == 'out_refund'
+        ) and self.associated_inv_ids.filtered(lambda inv: inv.is_FCE_invoice):
+            _logger.info('The Invoice ID: %s must be of type FCRED' % self.id)
+            return True
+        else:
+            is_bc = (
+                self.env['afip.big.company']
+                .sudo()
+                .search([('cuit', '=like', self.partner_id.vat)])
+            )
+            if is_bc and amount_total >= self.company_id.fcred_minimum_amount:
+                _logger.info(
+                    'The Invoice ID: %s must be of type FCRED' % self.id
+                )
+                return True
+        return False
 
-    def _check_fce_using_ws(self):
+    def _check_fce_using_ws(self, amount_total):
         if not self.partner_id:
             return False
         if not self.partner_id.vat:
@@ -1451,16 +1461,15 @@ class AccountMove(models.Model):
         ctx['company_id'] = company.id
         ws = self.env['wsfecred.config'].with_context(**ctx).get_config()
         amount = ws.check_partner_obliged_to_FCE(self)
-        res = {
-            'is_bc': True if amount else False,
-            'fcred_minimum_amount': amount if amount else -1,
-        }
-        return res
+        if amount and amount_total >= amount:
+            return True
+        return False
 
     def _check_must_be_fce(self):
         """
         If the invoice matches some criteria, the invoice must be -FCE-
         """
+        res = False
         if (
             self.is_sale_document()
             and self.company_id.fcred_is_fce_emitter
@@ -1471,30 +1480,18 @@ class AccountMove(models.Model):
                 if self.is_multi_currency
                 else self.amount_total
             )
-            res = None
             try:
-                res = self._check_fce_using_ws()
+                res = self._check_fce_using_ws(amount_total)
             except Exception:
                 _logger.warning('WSFECRED Fail.. trying old method..')
-                res = self._check_fce_using_abc()
+                res = self._check_fce_using_abc(amount_total)
 
-            if not res:
-                return False
-
-            if res['is_bc'] and amount_total > res['fcred_minimum_amount']:
-                _logger.info(
-                    'The Invoice ID: %s must be of type FCRED' % self.id
-                )
-                return True
-        return False
+        return res
 
     def _ensure_fce_values(self):
         """
         If invoice must be of type FCE, ensure certain values are set.
         """
-        # Ensure Fiscal Type FCE
-        self.is_FCE_invoice = True
-
         if self.associated_inv_ids:
             associated_type = self.associated_inv_ids.mapped('is_FCE_invoice')
             if False in associated_type:
@@ -1505,61 +1502,68 @@ class AccountMove(models.Model):
                         """
                     )
                 )
+        # Ensure Fiscal Type FCE
+        self.is_FCE_invoice = True
+        voucher_type_domain = self.voucher_type_domain
+        voucher_type_domain.append(('afip_code', '>', AFIP_FCE_CODE_START))
+        self.voucher_type_id = self.env['res.voucher.type'].search(
+            voucher_type_domain, limit=1
+        )
 
-        conf = self._get_ws_conf()
-        set_optionals = True
-        if self.is_debit_note or self.move_type == 'out_refund':
-            set_optionals = False
-            if not self.optional_ids.filtered(lambda opt: opt.code == '22'):
-                raise UserError(
-                    _(
-                        """
-                        You must inform optional with code '22' for this type of voucher.
-                        Possible value: 'S' or 'N'
-                        """
-                    )
-                )
-        # Optionals
-        if not self.optional_ids and set_optionals:
-            WSOptionals = self.env['ws.optionals']
-            aio_todo = WSOptionals.search(
-                [
-                    ('code', 'in', ('2101', '27')),
-                    ('wsfe_config_id', '=', conf.id),
-                ]
-            )
-            # 2101: cbu del emisor, 27 sca|adc
+        if not self.optional_ids:
+            conf = self._get_ws_conf()
             aios = []
-            for aio in aio_todo:
-                if aio.code == '2101':
-                    value = self.company_id.fcred_cbu_emitter
-                    if not value:
-                        raise UserError(
-                            _(
-                                """
-                                You need yo configure a CBU for FCE. Go to Settings --> Companies,
-                                select %(name)s
-                                and complete "CBU (FCE)" field.
-                                """,
-                                name=self.company_id.name,
-                            )
-                        )
-                if aio.code == '27':
-                    value = self.partner_id.fcred_transfer
-                    if not value:
-                        raise UserError(
-                            _(
-                                """
-                                You need to configure the "SCA/ADC (FCE)?" field for this partner %(name)s.
-                                """,
-                                name=self.partner_id.name,
-                            )
-                        )
+            if self.is_debit_note or self.move_type == 'out_refund':
+                aio = self.env['ws.optionals'].search(
+                    [
+                        ('code', '=', '22'),
+                        ('wsfe_config_id', '=', conf.id),
+                    ]
+                )
                 dd = {
                     'optional_id': aio.id,
-                    'value': value,
+                    'value': 'N',
                 }
                 aios.append((0, 0, dd))
+            # Optionals
+            else:
+                aio_todo = self.env['ws.optionals'].search(
+                    [
+                        ('code', 'in', ('2101', '27')),
+                        ('wsfe_config_id', '=', conf.id),
+                    ]
+                )
+                # 2101: cbu del emisor, 27 sca|adc
+                for aio in aio_todo:
+                    if aio.code == '2101':
+                        value = self.company_id.fcred_cbu_emitter
+                        if not value:
+                            raise UserError(
+                                _(
+                                    """
+                                    You need yo configure a CBU for FCE. Go to Settings --> Companies,
+                                    select %(name)s
+                                    and complete "CBU (FCE)" field.
+                                    """,
+                                    name=self.company_id.name,
+                                )
+                            )
+                    if aio.code == '27':
+                        value = self.partner_id.fcred_transfer
+                        if not value:
+                            raise UserError(
+                                _(
+                                    """
+                                    You need to configure the "SCA/ADC (FCE)?" field for this partner %(name)s.
+                                    """,
+                                    name=self.partner_id.name,
+                                )
+                            )
+                    dd = {
+                        'optional_id': aio.id,
+                        'value': value,
+                    }
+                    aios.append((0, 0, dd))
             self.optional_ids = aios
         # Point Of Sale
         pos_ar_id = (
@@ -1581,6 +1585,15 @@ class AccountMove(models.Model):
                 )
             )
         self.journal_id = pos_ar_id
+
+    def _clean_fce_values(self):
+        self.is_FCE_invoice = False
+        voucher_type_domain = self.voucher_type_domain
+        voucher_type_domain.append(('afip_code', '<', AFIP_FCE_CODE_START))
+        self.voucher_type_id = self.env['res.voucher.type'].search(
+            voucher_type_domain, limit=1
+        )
+        self.optional_ids.unlink()
 
     def _create_ws_request(self):
         request = self.env['ws.request'].create(
@@ -1616,6 +1629,8 @@ class AccountMove(models.Model):
                 else:
                     if inv._check_must_be_fce():
                         inv._ensure_fce_values()
+                    elif inv.is_FCE_invoice:
+                        inv._clean_fce_values()
                     try:
                         ws.send_invoice_to_afip(inv, request_id)
                     except Exception:
