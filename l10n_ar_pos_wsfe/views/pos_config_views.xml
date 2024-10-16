@@ -5,37 +5,31 @@
         <field name="model">pos.config</field>
         <field name="inherit_id" ref="point_of_sale.pos_config_view_form" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="after">
-                <label
-                    string="Invoice Journals"
-                    for="invoice_manual_journal_ids"
-                    class="col-lg-3 o_light_label"
-                />
-                <field
-                    name="invoice_manual_journal_ids"
-                    widget="many2many_tags"
-                    context="{
-                        'default_company_id': company_id,
-                        'default_type': 'sale',
-                        'default_fiscal_type': 'internal',
-                        'no_journal_in_pos': True,
-                    }"
-                />
-                <label
-                    string="WSFE Invoice Journals"
-                    for="invoice_journal_ids"
-                    class="col-lg-3 o_light_label"
-                />
-                <field
-                    name="invoice_journal_ids"
-                    widget="many2many_tags"
-                    context="{
-                        'default_company_id': company_id,
-                        'default_type': 'sale',
-                        'default_fiscal_type': 'electronic',
-                        'no_journal_in_pos': True,
-                    }"
-                />
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
+                <group>
+                    <field
+                        string="Invoice Journals"
+                        name="invoice_manual_journal_ids"
+                        widget="many2many_tags"
+                        context="{
+                            'default_company_id': company_id,
+                            'default_type': 'sale',
+                            'default_fiscal_type': 'internal',
+                            'no_journal_in_pos': True,
+                        }"
+                    />
+                    <field
+                        string="WSFE Invoice Journals"
+                        name="invoice_journal_ids"
+                        widget="many2many_tags"
+                        context="{
+                            'default_company_id': company_id,
+                            'default_type': 'sale',
+                            'default_fiscal_type': 'electronic',
+                            'no_journal_in_pos': True,
+                        }"
+                    />
+                </group>
             </xpath>
 
         </field>
