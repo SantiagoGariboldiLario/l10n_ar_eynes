@@ -629,7 +629,16 @@ class AccountMove(models.Model):
                 ('denomination', '=', inv.denomination),
             ]
 
+            if inv.is_sale_document(include_receipts=True):
+                sign = '>' if inv.is_FCE_invoice else '<'
+                domain.append(('afip_code', sign, AFIP_FCE_CODE_START))
+
             inv.voucher_type_domain = domain
+
+            if inv.is_sale_document(include_receipts=True):
+                inv.voucher_type_id = self.env['res.voucher.type'].search(
+                    domain, limit=1
+                )
 
     @api.onchange('voucher_type_id')
     def _set_is_FCE(self):
@@ -1504,11 +1513,7 @@ class AccountMove(models.Model):
                 )
         # Ensure Fiscal Type FCE
         self.is_FCE_invoice = True
-        voucher_type_domain = self.voucher_type_domain
-        voucher_type_domain.append(('afip_code', '>', AFIP_FCE_CODE_START))
-        self.voucher_type_id = self.env['res.voucher.type'].search(
-            voucher_type_domain, limit=1
-        )
+        self._compute_voucher_type_domain()
 
         if not self.optional_ids:
             conf = self._get_ws_conf()
@@ -1588,11 +1593,7 @@ class AccountMove(models.Model):
 
     def _clean_fce_values(self):
         self.is_FCE_invoice = False
-        voucher_type_domain = self.voucher_type_domain
-        voucher_type_domain.append(('afip_code', '<', AFIP_FCE_CODE_START))
-        self.voucher_type_id = self.env['res.voucher.type'].search(
-            voucher_type_domain, limit=1
-        )
+        self._compute_voucher_type_domain()
         self.optional_ids.unlink()
 
     def _create_ws_request(self):
