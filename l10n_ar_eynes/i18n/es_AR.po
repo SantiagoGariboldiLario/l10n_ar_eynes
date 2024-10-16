@@ -9606,7 +9606,7 @@ msgstr "Secuencia para usar"
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_journal_view_form_inherit_l10n_ar_eynes
 msgid "Sequences"
-msgstr "Secuancias"
+msgstr "Secuencias"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_ta__name
