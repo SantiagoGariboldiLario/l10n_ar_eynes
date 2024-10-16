@@ -37,7 +37,7 @@
         'mail',
         # 'month_year_widget',  # To pick only month and year in date fields
         'multi_step_wizard',
-        # 'om_fiscal_year',
+        'om_fiscal_year',
         'popup_messages',
         'purchase',
         'report_xlsx',

@@ -7,12 +7,7 @@
         <field name="arch" type="xml">
             <form string="Fiscal Year Closing">
                 <header>
-                    <button
-                        name="action_draft"
-                        string="Continue"
-                        type="object"
-                        invisible="state != 'new'"
-                    />
+                    <button name="action_draft" string="Continue" type="object" invisible="state != 'new'" />
                     <button
                         name="%(action_fiscal_year_closing)d"
                         string="Perform Operations"
@@ -42,204 +37,188 @@
                     <field name="state" widget="statusbar" readonly="1" />
                 </header>
                 <sheet>
-                    <group colspan="4">
-                        <field
-                            name="company_id"
-                            select="1"
-                            required="1"
-                            readonly="state != 'new'"
-                        />
+                    <group>
+                        <field name="company_id" select="1" required="1" readonly="state != 'new'" />
                         <field name="name" select="2" readonly="state != 'new'" />
                     </group>
-                    <group string="Fiscal Years" colspan="4">
+                    <group string="Fiscal Years">
                         <field name="closing_id" readonly="state != 'new'" />
                         <field name="opening_id" readonly="state != 'new'" />
                     </group>
-                    <group invisible="state == 'new'" colspan="4">
-                        <notebook>
-                            <page string="General">
-                                <group string="Operations">
-                                    <group>
-                                        <separator string="Operation to Perform" />
-                                        <separator string="Move Created by the Operation" />
-                                        <field
-                                            name="create_loss_profit_move"
-                                            readonly="state in ('done', 'cancel')"
-                                        />
-                                        <field name="loss_profit_move_id" />
-                                        <field
-                                            name="create_closing_move"
-                                            readonly="state in ('done', 'cancel')"
-                                        />
-                                        <field name="closing_move_id" />
-                                        <field
-                                            name="create_opening_move"
-                                            readonly="state in ('done', 'cancel')"
-                                        />
-                                        <field name="opening_move_id" />
-                                        <field
-                                            name="create_recpam"
-                                            readonly="state in ('done', 'cancel')"
-                                        />
-                                        <field name="recpam_move_id" />
-                                    </group>
-                                    <group string="Checks">
-                                        <field
-                                            name="check_invalid_period_moves"
-                                            readonly="state in ('done', 'cancel')"
-                                        />
-                                        <field
-                                            name="check_draft_moves"
-                                            readonly="state in ('done', 'cancel')"
-                                        />
-                                        <field
-                                            name="check_unbalanced_moves"
-                                            readonly="state in ('done', 'cancel')"
-                                        />
-                                    </group>
+                    <notebook invisible="state == 'new'">
+                        <page string="General">
+                            <group string="Operations">
+                                <group string="Operation to Perform">
+                                    <field
+                                        name="create_loss_profit_move"
+                                        readonly="state in ('done', 'cancel')"
+                                    />
+                                    <field
+                                        name="create_closing_move"
+                                        readonly="state in ('done', 'cancel')"
+                                    />
+                                    <field
+                                        name="create_opening_move"
+                                        readonly="state in ('done', 'cancel')"
+                                    />
+                                    <field name="create_recpam" readonly="state in ('done', 'cancel')" />
                                 </group>
-                            </page>
-                            <page string="Configuration" invisible="state == 'new'">
-                                <notebook>
-                                    <page string="Loss and Profit">
+                                <group string="Move Created by the Operation">
+                                    <field name="loss_profit_move_id" />
+                                    <field name="closing_move_id" />
+                                    <field name="opening_move_id" />
+                                    <field name="recpam_move_id" />
+                                </group>
+                            </group>
+                            <group string="Checks">
+                                <field
+                                    name="check_invalid_period_moves"
+                                    readonly="state in ('done', 'cancel')"
+                                />
+                                <field name="check_draft_moves" readonly="state in ('done', 'cancel')" />
+                                <field name="check_unbalanced_moves" readonly="state in ('done', 'cancel')" />
+                            </group>
+                        </page>
+                        <page string="Configuration" invisible="state == 'new'">
+                            <notebook>
+                                <page string="Loss and Profit">
+                                    <group>
                                         <group>
-                                            <group>
-                                                <field
-                                                    name="loss_profit_description"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                                <field
-                                                    name="loss_profit_journal_id"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                            </group>
-                                            <group>
-                                                <field
-                                                    name="loss_profit_date_range_id"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                                <field
-                                                    name="loss_profit_date"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                            </group>
+                                            <field
+                                                name="loss_profit_description"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
+                                            <field
+                                                name="loss_profit_journal_id"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
                                         </group>
-                                        <field
-                                            name="loss_profit_account_mapping_ids"
-                                            nolabel="1"
-                                            readonly="state in ('done', 'cancel')"
-                                        >
-                                            <tree editable="top">
-                                                <field
-                                                    name="source_account_type"
-                                                    widget="account_type_selection"
-                                                />
-                                                <field name="destination_account_id" required="1" />
-                                            </tree>
-                                            <form string="Account mapping">
-                                                <field
-                                                    name="source_account_type"
-                                                    widget="account_type_selection"
-                                                />
-                                                <field name="destination_account_id" required="1" />
-                                                <field name="name" />
-                                            </form>
-                                        </field>
-                                    </page>
-                                    <page string="Closing">
                                         <group>
-                                            <group>
-                                                <field
-                                                    name="closing_description"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                                <field
-                                                    name="closing_journal_id"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                            </group>
-                                            <group>
-                                                <field
-                                                    name="closing_date_range_id"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                                <field
-                                                    name="closing_date"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                            </group>
+                                            <field
+                                                name="loss_profit_date_range_id"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
+                                            <field
+                                                name="loss_profit_date"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
                                         </group>
-                                        <field
-                                            name="closing_account_mapping_ids"
-                                            nolabel="1"
-                                            readonly="state in ('done', 'cancel')"
-                                        >
-                                            <tree editable="top">
-                                                <field
-                                                    name="source_account_type"
-                                                    widget="account_type_selection"
-                                                />
-                                                <field name="destination_account_id" />
-                                            </tree>
-                                            <form string="Account to close">
-                                                <field
-                                                    name="source_account_type"
-                                                    widget="account_type_selection"
-                                                />
-                                                <field name="name" />
-                                            </form>
-                                        </field>
-                                    </page>
-                                    <page string="Opening">
+                                    </group>
+                                    <field
+                                        name="loss_profit_account_mapping_ids"
+                                        nolabel="1"
+                                        readonly="state in ('done', 'cancel')"
+                                    >
+                                        <tree editable="top">
+                                            <field
+                                                name="source_account_type"
+                                                widget="account_type_selection"
+                                            />
+                                            <field name="destination_account_id" required="1" />
+                                        </tree>
+                                        <form string="Account mapping">
+                                            <field
+                                                name="source_account_type"
+                                                widget="account_type_selection"
+                                            />
+                                            <field name="destination_account_id" required="1" />
+                                            <field name="name" />
+                                        </form>
+                                    </field>
+                                </page>
+                                <page string="Closing">
+                                    <group>
                                         <group>
-                                            <group>
-                                                <field
-                                                    name="opening_description"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                                <field
-                                                    name="opening_journal_id"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                            </group>
-                                            <group>
-                                                <field
-                                                    name="opening_date_range_id"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                                <field
-                                                    name="opening_date"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                            </group>
+                                            <field
+                                                name="closing_description"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
+                                            <field
+                                                name="closing_journal_id"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
                                         </group>
-                                    </page>
-                                    <page string="RECPAM">
                                         <group>
-                                            <group>
-                                                <field
-                                                    name="recpam_description"
-                                                    readonly="state in ('done', 'cancel')"
-                                                />
-                                                <field
-                                                    name="recpam_account_id"
-                                                    readonly="state in ('done', 'cancel')"
-                                                    required="create_recpam"
-                                                />
-                                            </group>
-                                            <group>
-                                                <field
-                                                    name="recpam_journal_id"
-                                                    readonly="state in ('done', 'cancel')"
-                                                    required="create_recpam"
-                                                />
-                                            </group>
+                                            <field
+                                                name="closing_date_range_id"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
+                                            <field
+                                                name="closing_date"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
                                         </group>
-                                    </page>
-                                </notebook>
-                            </page>
-                        </notebook>
-                    </group>
+                                    </group>
+                                    <field
+                                        name="closing_account_mapping_ids"
+                                        nolabel="1"
+                                        readonly="state in ('done', 'cancel')"
+                                    >
+                                        <tree editable="top">
+                                            <field
+                                                name="source_account_type"
+                                                widget="account_type_selection"
+                                            />
+                                            <field name="destination_account_id" />
+                                        </tree>
+                                        <form string="Account to close">
+                                            <field
+                                                name="source_account_type"
+                                                widget="account_type_selection"
+                                            />
+                                            <field name="name" />
+                                        </form>
+                                    </field>
+                                </page>
+                                <page string="Opening">
+                                    <group>
+                                        <group>
+                                            <field
+                                                name="opening_description"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
+                                            <field
+                                                name="opening_journal_id"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
+                                        </group>
+                                        <group>
+                                            <field
+                                                name="opening_date_range_id"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
+                                            <field
+                                                name="opening_date"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
+                                        </group>
+                                    </group>
+                                </page>
+                                <page string="RECPAM">
+                                    <group>
+                                        <group>
+                                            <field
+                                                name="recpam_description"
+                                                readonly="state in ('done', 'cancel')"
+                                            />
+                                            <field
+                                                name="recpam_account_id"
+                                                readonly="state in ('done', 'cancel')"
+                                                required="create_recpam"
+                                            />
+                                        </group>
+                                        <group>
+                                            <field
+                                                name="recpam_journal_id"
+                                                readonly="state in ('done', 'cancel')"
+                                                required="create_recpam"
+                                            />
+                                        </group>
+                                    </group>
+                                </page>
+                            </notebook>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

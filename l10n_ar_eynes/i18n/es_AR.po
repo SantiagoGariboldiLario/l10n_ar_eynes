@@ -2920,10 +2920,14 @@ msgstr "Chequeras"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_supplier_payment_order_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.other_payment_view_form
 msgid "Checks"
 msgstr "Cheques"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
+msgid "Checks"
+msgstr "Validaciones"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.payment_order
