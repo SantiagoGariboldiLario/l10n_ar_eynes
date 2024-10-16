@@ -5,11 +5,7 @@
         <field name="model">account.journal</field>
         <field name="inherit_id" ref="account.view_account_journal_form" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='type']" position="after">
-                <field name="fiscal_type" invisible="type != 'sale'" />
-                <field name="fcred_is_fce_emitter" invisible="type != 'sale'" />
-                <field name="due_date" readonly="id" />
-            </xpath>
+            <!-- CAMBIO DE ATRIBUTOS A CAMPOS EXISTENTES -->
             <xpath expr="//page[@name='advanced_settings']" position="attributes">
                 <attribute name="invisible">
                     type in ('perceptions', 'retentions')
@@ -21,6 +17,11 @@
             >
                 <field name="format" readonly="1" />
             </xpath>
+            <xpath expr="//field[@name='default_account_id']" position="attributes">
+                <attribute name="invisible">
+                    type not in ('bank', 'cash', 'sale', 'purchase', 'general')
+                </attribute>
+            </xpath>
             <xpath expr="//field[@name='profit_account_id']" position="attributes">
                 <attribute name="invisible">
                     type not in ('cash', 'bank', 'third_party_checks')
@@ -31,9 +32,15 @@
                     type not in ('cash', 'bank', 'third_party_checks')
                 </attribute>
             </xpath>
-            <field name="code" position="after">
-                <field name="afip_code" invisible="type != 'retentions'" />
-            </field>
+
+            <!-- NUEVOS CAMPOS -->
+            <xpath expr="//field[@name='type']" position="after">
+                <field name="fiscal_type" invisible="type != 'sale'" />
+                <field name="fcred_is_fce_emitter" invisible="type != 'sale'" />
+                <field name="due_date" readonly="id" />
+            </xpath>
+
+            <!-- NUEVAS PESTAÑAS -->
             <notebook position="inside">
                 <page name="pos_info" string="POS information" invisible="type != 'sale'">
                     <group>
@@ -113,9 +120,9 @@
                         <field name="type_tax_use" select="1" />
                     </group>
                 </page>
-
                 <page name="retentions" string="Retentions" invisible="type != 'retentions'">
                     <group string="Tax Information">
+                        <field name="afip_code" />
                         <field name="tax_id" select="1" required="type == 'retentions'" />
                         <field name="type_tax_use" select="1" />
                     </group>
