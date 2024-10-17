@@ -427,6 +427,7 @@ class AccountPaymentOrder(models.Model):
         'third_party_check_receipt_ids',
         'issued_check_line_ids',
         'payment_mode_line_ids',
+        'payment_rate',
     )
     def _compute_amount(self):
         for rec in self:
@@ -1162,6 +1163,11 @@ class AccountPaymentOrder(models.Model):
             )
         else:
             setattr(self, onchange_attr, False)
+
+    @api.onchange('payment_rate')
+    def onchange_payment_rate(self):
+        for line in self.payment_mode_line_ids:
+            line.onchange_amount_currency()
 
     @api.onchange(
         'income_line_ids', 'debt_line_ids', 'disable_retentions', 'date'
@@ -2089,20 +2095,19 @@ class AccountPaymentOrderLine(models.Model):
             ):
                 raise ValidationError(_('Inovice duplicated.'))
 
-    # @api.onchange('amount')
-    # def onchange_amount(self):
-    #     parent = self.payment_order_id
-    #     if self.currency_id.id != parent.company_currency.id:
-    #         amount_computed = self.amount / parent.payment_rate
-    #     else:
-    #         amount_computed = 0
-    #     self.amount_currency = amount_computed
+    @api.onchange('amount')
+    def onchange_amount(self):
+        if self.payment_order_id.is_multi_currency:
+            amount_computed = self.amount / self.invoice_id.currency_rate
+        else:
+            amount_computed = self.amount
+        self.amount_currency = amount_computed
 
     @api.onchange('amount_currency')
     def onchange_amount_currency(self):
         if self.payment_order_id.is_multi_currency:
             amount_computed = (
-                self.amount_currency * self.payment_order_id.payment_rate
+                self.amount_currency * self.invoice_id.currency_rate
             )
         else:
             amount_computed = self.amount
@@ -2217,14 +2222,13 @@ class AccountPaymentModeLine(models.Model):
         parent = self.payment_order_id
         self.currency_id = parent.currency_id or parent.company_currency
 
-    # @api.onchange('amount')
-    # def onchange_amount(self):
-    #     parent = self.payment_order_id
-    #     if self.currency_id != parent.company_currency:
-    #         amount_computed = self.amount / parent.payment_rate
-    #     else:
-    #         amount_computed = self.amount
-    #     self.amount_currency = amount_computed
+    @api.onchange('amount')
+    def onchange_amount(self):
+        if self.payment_order_id.is_multi_currency:
+            amount_computed = self.amount / self.payment_order_id.payment_rate
+        else:
+            amount_computed = self.amount
+        self.amount_currency = amount_computed
 
     @api.onchange('amount_currency')
     def onchange_amount_currency(self):
