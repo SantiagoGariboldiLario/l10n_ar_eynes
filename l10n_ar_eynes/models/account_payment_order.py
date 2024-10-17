@@ -1198,7 +1198,18 @@ class AccountPaymentOrder(models.Model):
                     journal=self.journal_id.name,
                 )
             )
+        if not self.journal_id.sequence_id.active:
+            raise UserError(
+                _(
+                    'Configuration Error!\n'
+                    'Please activate the sequence of selected journal!'
+                )
+            )
         return self.journal_id.sequence_id._next()
+
+    def revert_sequence(self):
+        self.journal_id.sequence_number_next = self.number - 1
+        self.number = False
 
     def proforma_voucher(self):
         self.ensure_one()
@@ -1223,18 +1234,15 @@ class AccountPaymentOrder(models.Model):
             )
 
         self._clean_payment_lines()
-        self.action_move_line_create()
-        if not self.number:
-            self.write(
+        try:
+            self.action_move_line_create()
+            self.retention_ids.write(
                 {
-                    'number': self.get_next_sequence(),
+                    'unlinkable': False,
                 }
             )
-        self.retention_ids.write(
-            {
-                'unlinkable': False,
-            }
-        )
+        except Exception:
+            self.revert_sequence()
         return True
 
     def _get_income_amount(self):
@@ -1367,29 +1375,15 @@ class AccountPaymentOrder(models.Model):
         :return: mapping between fieldname and value of account move to create
         :rtype: dict
         '''
-
-        if self.number:
-            name = self.number
-        elif self.journal_id.sequence_id:
-            if not self.journal_id.sequence_id.active:
-                raise UserError(
-                    _(
-                        'Configuration Error!\n'
-                        'Please activate the sequence of selected journal!'
-                    )
-                )
-            name = self.journal_id.sequence_id.next_by_id()
-        else:
-            raise UserError(
-                _('Error!\n Please define a sequence on the journal.')
-            )
+        if not self.number:
+            self.number = self.get_next_sequence()
         if not self.reference:
-            ref = name.replace('/', '')
+            ref = self.number.replace('/', '')
         else:
             ref = self.reference
 
         move = {
-            'name': name,
+            'name': self.number,
             'journal_id': self.journal_id.id,
             'narration': self.narration,
             'date': self.date,
