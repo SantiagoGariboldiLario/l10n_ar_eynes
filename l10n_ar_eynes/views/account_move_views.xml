@@ -338,39 +338,80 @@
             </page>
 
             <!-- FOOTER -->
-            <xpath expr="//group[hasclass('oe_invoice_lines_tab')]/group[1]" position="replace">
-                <!-- If the invoice has same currency than the company -->
-                <group colspan="8" invisible="is_multi_currency">
-                    <span colspan="2">
-                        <field
-                            name="narration"
-                            placeholder="Terms and Conditions"
-                            class="oe_inline text-break"
-                            nolabel="1"
-                        />
-                    </span>
-                </group>
+            <xpath expr="//group[hasclass('oe_invoice_lines_tab')]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//group[hasclass('oe_invoice_lines_tab')]" position="after">
+                <group col="12" class="oe_invoice_lines_tab">
+                    <!-- If the invoice has same currency than the company -->
+                    <group colspan="8" invisible="is_multi_currency">
+                        <span colspan="2">
+                            <field
+                                name="narration"
+                                placeholder="Terms and Conditions"
+                                class="oe_inline text-break"
+                                nolabel="1"
+                            />
+                        </span>
+                    </group>
 
-                <!-- otherwise -->
-                <group colspan="4" invisible="not is_multi_currency">
-                    <span colspan="2">
-                        <field
-                            name="narration"
-                            placeholder="Terms and Conditions"
-                            class="oe_inline text-break"
-                            nolabel="1"
-                        />
-                    </span>
-                </group>
+                    <!-- otherwise -->
+                    <group colspan="4" invisible="not is_multi_currency">
+                        <span colspan="2">
+                            <field
+                                name="narration"
+                                placeholder="Terms and Conditions"
+                                class="oe_inline text-break"
+                                nolabel="1"
+                            />
+                        </span>
+                    </group>
+                    <!-- Totals (only invoices / receipts) -->
+                    <group colspan="4" class="oe_subtotal_footer" invisible="not is_multi_currency">
+                        <field name="amount_taxed_cur" invisible="amount_taxed_cur == 0" />
+                        <field name="amount_no_taxed_cur" invisible="amount_no_taxed_cur == 0" />
+                        <field name="amount_exempt_cur" invisible="amount_exempt_cur == 0" />
+                        <field name="amount_perception_curr" invisible="amount_perception_curr == 0" />
+                        <field name="amount_tax_cur" invisible="amount_tax_cur == 0" />
+                        <field name="amount_total_cur" class="oe_subtotal_footer_separator" />
+                        <label for="subtotal_label" />
+                        <div>
+                            <!-- Se agrega el campo is_multi_currency para linkearlo al label y lograr que este -->
+                            <!-- div se situe en la columna derecha de la vista -->
+                            <field id="subtotal_label" name="is_multi_currency" invisible="1" />
+                            <i>Amounts in Company Currency</i>
+                        </div>
+                    </group>
+                    <group colspan="4">
+                        <group
+                            class="oe_subtotal_footer"
+                            invisible="move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt') or payment_state == 'invoicing_legacy'"
+                        >
 
-                <group colspan="4" class="oe_subtotal_footer oe_right" invisible="not is_multi_currency">
-                    <field name="amount_taxed_cur" invisible="amount_taxed_cur == 0" />
-                    <field name="amount_no_taxed_cur" invisible="amount_no_taxed_cur == 0" />
-                    <field name="amount_exempt_cur" invisible="amount_exempt_cur == 0" />
-                    <field name="amount_perception_curr" invisible="amount_perception_curr == 0" />
-                    <field name="amount_tax_cur" invisible="amount_tax_cur == 0" />
-                    <field name="amount_total_cur" class="oe_subtotal_footer_separator" />
-                    <i>- Amounts in Company Currency</i>
+                            <field
+                                name="tax_totals"
+                                widget="account-tax-totals-field"
+                                nolabel="1"
+                                colspan="2"
+                                readonly="state != 'draft' or (move_type not in ('in_invoice', 'in_refund', 'in_receipt') and not quick_edit_mode)"
+                            />
+
+                            <field name="invoice_payments_widget" colspan="2" nolabel="1" widget="payment" />
+                            <field
+                                name="amount_residual"
+                                class="oe_subtotal_footer_separator"
+                                invisible="state == 'draft'"
+                            />
+                        </group>
+                        <field
+                            name="invoice_outstanding_credits_debits_widget"
+                            class="oe_invoice_outstanding_credits_debits"
+                            colspan="2"
+                            nolabel="1"
+                            widget="payment"
+                            invisible="state != 'posted'"
+                        />
+                    </group>
                 </group>
             </xpath>
         </field>
