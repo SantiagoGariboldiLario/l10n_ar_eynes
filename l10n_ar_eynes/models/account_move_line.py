@@ -105,8 +105,8 @@ class AccountMoveLine(models.Model):
                                     line_perception_base / rate
                                 )
 
-    def _get_computed_taxes(self):
-        tax_ids = super(AccountMoveLine, self)._get_computed_taxes()
+    def _get_computed_perceptions(self):
+        tax_ids = self.env['account.tax']
         if (
             self.move_id.is_sale_document(include_receipts=True)
             and not self.move_id.disable_perceptions
@@ -138,7 +138,16 @@ class AccountMoveLine(models.Model):
         return tax_ids
 
     def link_perception_to_move_lines(self):
-        self._compute_tax_ids()
+        for line in self:
+            if line.display_type in (
+                'line_section',
+                'line_note',
+                'payment_term',
+            ):
+                continue
+            # /!\ Don't remove existing taxes if there is no explicit taxes set on the account.
+            if line.product_id or line.account_id.tax_ids or not line.tax_ids:
+                line.tax_ids += line._get_computed_perceptions()
         self._compute_all_tax()
 
     def price_unit_to_PDF(self):
