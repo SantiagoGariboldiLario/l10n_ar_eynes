@@ -18,7 +18,7 @@
             </xpath>
             <page name="tax_mapping" position="after">
                 <page name="applied_perceptions" string="Applied Perceptions">
-                    <field name="perception_ids" widget="one2many_list" nolabel="1">
+                    <field name="perception_ids" nolabel="1">
                         <tree>
                             <field name="name" />
                             <field name="state_id" />

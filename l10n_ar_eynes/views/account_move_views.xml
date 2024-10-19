@@ -317,7 +317,7 @@
                         />
                     </group>
                     <group string="Shipping Permissions">
-                        <field name="shipping_perm_ids" nolabel="1" widget="one2many_list">
+                        <field name="shipping_perm_ids" nolabel="1">
                             <tree editable="bottom">
                                 <field name="name" />
                                 <field name="dst_country_id" />
