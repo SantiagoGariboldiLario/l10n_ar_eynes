@@ -1175,6 +1175,8 @@ class AccountPaymentOrder(models.Model):
             Si es una Órden de Pago:
                 Se actualiza el monto en moneda local (converte los u$s a $ con la nueva tasa)
         """
+        if not self.payment_rate:
+            raise ValidationError(_("Currency rate can't be zero"))
         if self.type in ('receipt', 'sale'):
             for line in self.payment_mode_line_ids:
                 line.onchange_amount()
