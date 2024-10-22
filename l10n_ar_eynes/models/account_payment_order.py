@@ -1227,7 +1227,7 @@ class AccountPaymentOrder(models.Model):
         return self.journal_id.sequence_id._next()
 
     def revert_sequence(self):
-        self.journal_id.sequence_number_next = self.number - 1
+        self.journal_id.sequence_number_next = int(self.number) - 1
         self.number = False
 
     def proforma_voucher(self):
