@@ -1224,10 +1224,10 @@ class AccountPaymentOrder(models.Model):
                     'Please activate the sequence of selected journal!'
                 )
             )
-        return self.journal_id.sequence_id._next()
+        return self.journal_id.sequence_id.next_by_id()
 
     def revert_sequence(self):
-        self.journal_id.sequence_number_next = int(self.number) - 1
+        self.journal_id.sequence_number_next -= 1
         self.number = False
 
     def proforma_voucher(self):
@@ -1260,8 +1260,25 @@ class AccountPaymentOrder(models.Model):
                     'unlinkable': False,
                 }
             )
-        except Exception:
+        except Exception as e:
             self.revert_sequence()
+            self.cancel_voucher()
+            self.action_cancel_draft()
+
+            context = dict(self._context or {})
+            context["message"] = str(e)
+            view = self.env.ref("popup_messages.message_wizard")
+            view_id = view and view.id or False
+            return {
+                'name': _('Error'),
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'res_model': 'message.wizard',
+                'views': [(view_id, 'form')],
+                'view_id': view_id,
+                'target': 'new',
+                'context': context,
+            }
         return True
 
     def _get_income_amount(self):
