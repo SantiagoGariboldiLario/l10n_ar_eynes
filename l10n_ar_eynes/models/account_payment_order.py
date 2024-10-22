@@ -1166,8 +1166,25 @@ class AccountPaymentOrder(models.Model):
 
     @api.onchange('payment_rate')
     def onchange_payment_rate(self):
-        for line in self.payment_mode_line_ids:
-            line.onchange_amount_currency()
+        """
+        Decidimos que para Clientes (recibos) la moneda predominante es la de
+        la compañía ($) y para Proveedores (órdenes de pago) la moneda predominante es la extranjera (u$s)
+        Por lo tanto al cambiar la tasa de cambio:
+            Si es un Recibo:
+                Se actualiza el monto en moneda extranjera (converte los pesos a u$s con la nueva tasa)
+            Si es una Órden de Pago:
+                Se actualiza el monto en moneda local (converte los u$s a $ con la nueva tasa)
+        """
+        if self.type in ('receipt', 'sale'):
+            for line in self.payment_mode_line_ids:
+                line.onchange_amount()
+            for line in self.income_line_ids + self.debt_line_ids:
+                line.onchange_amount()
+        else:
+            for line in self.payment_mode_line_ids:
+                line.onchange_amount_currency()
+            for line in self.income_line_ids + self.debt_line_ids:
+                line.onchange_amount_currency()
 
     @api.onchange(
         'income_line_ids', 'debt_line_ids', 'disable_retentions', 'date'
@@ -2092,7 +2109,7 @@ class AccountPaymentOrderLine(models.Model):
     @api.onchange('amount')
     def onchange_amount(self):
         if self.payment_order_id.is_multi_currency:
-            amount_computed = self.amount / self.invoice_id.currency_rate
+            amount_computed = self.amount / self.payment_order_id.payment_rate
         else:
             amount_computed = self.amount
         self.amount_currency = amount_computed
@@ -2101,7 +2118,7 @@ class AccountPaymentOrderLine(models.Model):
     def onchange_amount_currency(self):
         if self.payment_order_id.is_multi_currency:
             amount_computed = (
-                self.amount_currency * self.invoice_id.currency_rate
+                self.amount_currency * self.payment_order_id.payment_rate
             )
         else:
             amount_computed = self.amount
@@ -2129,12 +2146,11 @@ class AccountPaymentOrderLine(models.Model):
                 line.amount = 0
                 line.amount_currency = 0
             else:
-                if (
-                    line.currency_id.id
-                    != line.payment_order_id.company_currency.id
-                ):
-                    line.amount_currency = line.amount_unreconciled_currency
-                    line.amount = line.amount_unreconciled
+                if line.payment_order_id.is_multi_currency:
+                    if self.type in ('receipt', 'sale'):
+                        line.amount = line.amount_unreconciled
+                    else:
+                        line.amount_currency = line.amount_unreconciled_currency
                 else:
                     line.amount = line.amount_unreconciled
                     line.amount_currency = 0
