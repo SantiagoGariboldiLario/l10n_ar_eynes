@@ -122,6 +122,7 @@ class AccountJournal(models.Model):
             'retentions': lambda recs: recs.write({'type': 'general'}),
             'perceptions': lambda recs: recs.write({'type': 'general'}),
         },
+        default=False,
     )
     fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
     suspense_account_id = fields.Many2one(
