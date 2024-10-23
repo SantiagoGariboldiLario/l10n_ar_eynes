@@ -144,7 +144,7 @@
                         aria-label="Opened"
                         type="action"
                         class="btn-link oe_inline"
-                        invisible="state != 'draft' or not is_multi_currency"
+                        invisible="state != 'draft'"
                         groups="account.group_account_user"
                     >
                         <i

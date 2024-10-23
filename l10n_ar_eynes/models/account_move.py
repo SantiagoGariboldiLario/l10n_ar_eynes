@@ -543,7 +543,8 @@ class AccountMove(models.Model):
     @api.onchange('currency_id')
     def _inverse_currency_id(self):
         super(AccountMove, self)._inverse_currency_id()
-        self._onchange_currency_id()
+        if not self.env.context.get('force_rate', False):
+            self._onchange_currency_id()
         return
 
     @api.onchange('invoice_payment_term_id', 'invoice_date')
