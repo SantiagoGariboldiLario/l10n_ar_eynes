@@ -207,12 +207,12 @@
                                     />
                                 </tree>
                             </field>
-                            <div class="oe_button_box" name="button_box">
+                            <div class="o-form-buttonbox d-flex w-md-auto o_not_full">
                                 <button
                                     name="gather_income_lines"
                                     invisible="state != 'draft'"
                                     type="object"
-                                    class="oe_stat_button"
+                                    class="btn oe_stat_button btn-outline-secondary flex-grow-1 flex-lg-grow-0"
                                     icon="fa-refresh slow-spin"
                                 >
                                     Gather Lines
@@ -319,12 +319,12 @@
                                     <field string="Full" name="reconcile" class="reconcile_bullseye" />
                                 </tree>
                             </field>
-                            <div class="oe_button_box" name="button_box">
+                            <div class="o-form-buttonbox d-flex w-md-auto o_not_full">
                                 <button
                                     name="gather_debt_lines"
                                     invisible="state != 'draft'"
                                     type="object"
-                                    class="oe_stat_button"
+                                    class="btn oe_stat_button btn-outline-secondary flex-grow-1 flex-lg-grow-0"
                                     icon="fa-refresh slow-spin"
                                 >
                                     Gather Lines
@@ -862,12 +862,12 @@
                                 </tree>
                             </field>
                             <field name="invoice_ids" widget="many2many_tags" invisible="1" />
-                            <div class="oe_button_box" name="button_box">
+                            <div class="o-form-buttonbox d-flex w-md-auto o_not_full">
                                 <button
                                     name="gather_debt_lines"
                                     invisible="state != 'draft'"
                                     type="object"
-                                    class="oe_stat_button"
+                                    class="btn oe_stat_button btn-outline-secondary flex-grow-1 flex-lg-grow-0"
                                     icon="fa-refresh slow-spin"
                                 >
                                     Gather Lines
@@ -974,12 +974,12 @@
                                     <field string="Full" name="reconcile" class="reconcile_bullseye" />
                                 </tree>
                             </field>
-                            <div class="oe_button_box" name="button_box">
+                            <div class="o-form-buttonbox d-flex w-md-auto o_not_full">
                                 <button
                                     name="gather_income_lines"
                                     invisible="state != 'draft'"
                                     type="object"
-                                    class="oe_stat_button"
+                                    class="btn oe_stat_button btn-outline-secondary flex-grow-1 flex-lg-grow-0"
                                     icon="fa-refresh slow-spin"
                                 >
                                     Gather Lines
