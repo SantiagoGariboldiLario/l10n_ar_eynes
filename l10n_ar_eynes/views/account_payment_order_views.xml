@@ -571,7 +571,6 @@
                                             <field name="retention_id_domain" invisible="1" />
                                             <field name="retention_id" domain="retention_id_domain" />
                                             <field name="certificate_no" />
-                                            <field name="state_id" />
                                             <field name="date_applied" />
                                             <field name="date" />
                                             <label
@@ -1264,7 +1263,6 @@
                                                 name="certificate_no"
                                                 readonly="not parent.disable_retentions"
                                             />
-                                            <field name="state_id" readonly="not parent.disable_retentions" />
                                             <field
                                                 name="date_applied"
                                                 readonly="not parent.disable_retentions"
