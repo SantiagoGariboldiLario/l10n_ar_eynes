@@ -203,7 +203,6 @@
         <field name="amount">1</field>
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
-        <field name="jurisdiccion">provincial</field>
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -243,6 +242,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_b" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -254,6 +254,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_c" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -265,6 +266,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_k" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -276,6 +278,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_h" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -287,6 +290,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_u" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -298,6 +302,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_x" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -309,6 +314,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_w" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -320,6 +326,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_e" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -331,6 +338,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_p" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -342,6 +350,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_y" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -353,6 +362,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_l" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -364,6 +374,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_f" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -375,6 +386,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_m" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -386,6 +398,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_n" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -397,6 +410,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_q" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -408,6 +422,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_r" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -419,6 +434,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_a" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -430,6 +446,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_j" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -441,6 +458,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_d" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -452,6 +470,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_z" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -463,6 +482,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_s" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -474,6 +494,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_g" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -485,6 +506,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_v" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -496,6 +518,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_t" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -507,6 +530,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_b" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -518,6 +542,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_c" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -529,6 +554,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_k" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -540,6 +566,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_h" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -551,6 +578,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_u" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -562,6 +590,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_x" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -573,6 +602,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_w" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -584,6 +614,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_e" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -595,6 +626,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_p" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -606,6 +638,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_y" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -617,6 +650,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_l" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -628,6 +662,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_f" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -639,6 +674,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_m" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -650,6 +686,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_n" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -661,6 +698,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_q" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -672,6 +710,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_r" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -683,6 +722,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_a" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -694,6 +734,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_j" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -705,6 +746,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_d" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -716,6 +758,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_z" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -727,6 +770,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_s" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -738,6 +782,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_g" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -749,6 +794,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_v" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -760,6 +806,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_t" />
         <field name="tax_group_id" ref='l10n_ar_eynes.perceptions_tax_group' />
     </record>
 
@@ -770,6 +817,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_b" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -780,6 +828,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_c" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -790,6 +839,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_k" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -800,6 +850,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_h" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -807,6 +858,10 @@
         <field name="name">Retenciones IIBB CHUBUT Sufridas</field>
         <field name="type_tax_use">sale</field>
         <field name="country_id" ref="base.ar" />
+        <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_u" />
         <field name="amount_type">percent</field>
     </record>
 
@@ -817,6 +872,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_x" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -827,6 +883,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_w" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -837,6 +894,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_e" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -847,6 +905,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_p" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -857,6 +916,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_y" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -867,6 +927,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_l" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -875,6 +936,9 @@
         <field name="type_tax_use">sale</field>
         <field name="country_id" ref="base.ar" />
         <field name="amount_type">percent</field>
+        <field name="retention_type">gross_income</field>
+        <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_f" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -885,6 +949,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_m" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -895,6 +960,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_n" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -905,6 +971,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_q" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -915,6 +982,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_r" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -925,6 +993,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_a" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -935,6 +1004,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_j" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -945,6 +1015,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_d" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -955,6 +1026,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_z" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -965,6 +1037,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_s" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -975,6 +1048,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_g" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -985,6 +1059,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_v" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -995,6 +1070,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_t" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1005,6 +1081,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_b" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1015,6 +1092,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_c" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1025,6 +1103,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_k" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1035,6 +1114,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_h" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1045,6 +1125,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_u" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1055,6 +1136,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_x" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1065,6 +1147,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_w" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1075,6 +1158,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_e" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1085,6 +1169,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_p" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1095,6 +1180,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_y" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1105,6 +1191,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_l" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1115,6 +1202,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_f" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1125,6 +1213,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_m" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1135,6 +1224,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_n" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1145,6 +1235,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_q" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1155,6 +1246,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_r" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1165,6 +1257,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_a" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1175,6 +1268,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_j" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1185,6 +1279,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_d" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1195,6 +1290,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_z" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1205,6 +1301,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_s" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1215,6 +1312,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_g" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1225,6 +1323,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_v" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
@@ -1235,6 +1334,7 @@
         <field name="amount_type">percent</field>
         <field name="retention_type">gross_income</field>
         <field name="jurisdiccion">provincial</field>
+        <field name="state_id" ref="base.state_ar_t" />
         <field name="tax_group_id" ref='l10n_ar_eynes.retentions_tax_group' />
     </record>
 
