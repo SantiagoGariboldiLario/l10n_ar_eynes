@@ -2354,7 +2354,6 @@ class AccountPaymentOrderRetentionLine(models.Model):
     )
     certificate_no = fields.Char(
         string='Certificate No.',
-        required=True,
         size=32,
     )
     state_id = fields.Many2one(

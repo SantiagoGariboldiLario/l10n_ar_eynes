@@ -546,7 +546,7 @@
                                     <field name="excluded_percent" column_invisible="1" />
                                     <field name="exclusion_date_certificate" column_invisible="1" />
                                     <field name="partner_id" column_invisible="1" />
-                                    <field name="certificate_no" />
+                                    <field name="certificate_no" required="True" />
                                     <field name="base" />
                                     <field name="base_amount" />
                                     <field
@@ -570,7 +570,7 @@
                                             <field name="state_id" invisible="1" />
                                             <field name="retention_id_domain" invisible="1" />
                                             <field name="retention_id" domain="retention_id_domain" />
-                                            <field name="certificate_no" />
+                                            <field name="certificate_no" required="True" />
                                             <field name="date_applied" />
                                             <field name="date" />
                                             <label
