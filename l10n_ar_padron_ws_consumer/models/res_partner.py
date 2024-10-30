@@ -15,6 +15,7 @@ _logger = logging.getLogger(__name__)
 class ResPartnerPerception(models.Model):
     _inherit = "res.partner.perception"
 
+    period = fields.Date()
     coeficient = fields.Float(digits=(12, 4))
     coeficient_percent = fields.Float(digits=(12, 2))
     risk = fields.Selection(
@@ -42,6 +43,7 @@ class ResPartnerPerception(models.Model):
 class ResPartnerRetention(models.Model):
     _inherit = "res.partner.retention"
 
+    period = fields.Date()
     is_multilateral = fields.Boolean()
 
     _sql_constraints = [
@@ -61,9 +63,9 @@ class ResPartner(models.Model):
 
     last_padron_update = fields.Date()
 
-    @api.model_create_multi
+    @api.model
     def create(self, vals):
-        res = super(ResPartner, self).create(vals)
+        res = super().create(vals)
         self.with_context(active_ids=res.ids).do_update_from_padron()
         return res
 
@@ -230,6 +232,7 @@ class ResPartner(models.Model):
                             "sit_iibb": iibb_situation,
                             "risk": risk,
                             "excluded_percent": excluded_percent,
+                            "from_padron": True,
                         }
                     )
                 else:
@@ -276,6 +279,7 @@ class ResPartner(models.Model):
                         {
                             "percent": percent,
                             "sit_iibb": iibb_situation,
+                            "from_padron": True,
                         }
                     )
                 else:
@@ -295,6 +299,7 @@ class ResPartner(models.Model):
 
     def _update_partner_coeficients(self, partner, coeficients):
         for coeficient in coeficients:
+
             journal_id = self._get_journal_from_padron_name(
                 coeficient["P"], 'perceptions'
             )
@@ -314,28 +319,27 @@ class ResPartner(models.Model):
                 coeficient = coeficient.get("C")
                 if percent:
                     percent = str(percent).replace(",", ".")
+
                 if coeficient:
                     coeficient = str(coeficient).replace(",", ".")
+                    data = {
+                        "coeficient": coeficient,
+                        "coeficient_percent": percent,
+                        "from_padron": True,
+                    }
+                if coeficient == 'E':
+                    data["coeficient"] = 0
+                    data["coeficient_percent"] = 0
+                    data["excluded_percent"] = 1
 
                 if res_partner_perception:
-                    res_partner_perception.write(
-                        {
-                            "coeficient": coeficient,
-                            "coeficient_percent": percent,
-                        }
-                    )
+                    res_partner_perception.write(data)
                 else:
-                    res_partner_perception.create(
-                        {
-                            "perception_id": journal_id.id,
-                            "partner_id": partner.id,
-                            "coeficient": coeficient,
-                            "coeficient_percent": percent,
-                            "percent": 0,
-                            "period": period,
-                            "from_padron": True,
-                        }
-                    )
+                    data["perception_id"] = journal_id.id
+                    data["partner_id"] = partner.id
+                    data["percent"] = 0
+                    data["period"] = period
+                    res_partner_perception.create(data)
             _logger.debug(
                 f'Write Coeficient into {journal_id.name} for partner {partner.name}'
             )
