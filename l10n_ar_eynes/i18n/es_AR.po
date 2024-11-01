@@ -838,8 +838,17 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
-msgid "<i>- Amounts in Company Currency</i>"
-msgstr "<i>- Importes en moneda de la compañía</i>"
+msgid ""
+"<i title=\"Update Currency: Will convert the amount lines to the new currency set\" class=\"fa fa-fw fa-refresh\"/>\n"
+"                        <span>Update Rate</span>"
+msgstr ""
+"<i title=\"Actualizar Moneda: Convierte el monto de las líneas en la nueva moneda seleccionada\" class=\"fa fa-fw fa-refresh\"/>\n"
+"                        <span>Actualizar Tasa de cambio</span>"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_move_view_form_inherit_l10n_ar_eynes
+msgid "<i>Amounts in Company Currency</i>"
+msgstr "<i>Importes en moneda de la compañía</i>"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_change_currency_wizard_view
@@ -9193,6 +9202,20 @@ msgid "Retention Activity"
 msgstr "Actividad de retención"
 
 #. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid "Retention Amount can't be zero"
+msgstr "El Monto de la Retención no puede ser cero"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/account_payment_order.py:0
+#, python-format
+msgid "Retention Base can't be zero"
+msgstr "La Base de la Retención no puede ser cero"
+
+#. module: l10n_ar_eynes
 #: model:ir.actions.report,name:l10n_ar_eynes.action_print_retention_certificate_qweb
 msgid "Retention Certificate"
 msgstr "Certificado de retención"
@@ -10674,7 +10697,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_perception__ex_date_to
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_retention__ex_date_to
 msgid "To date"
-msgstr "Fecha asta"
+msgstr "Fecha hasta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_ta__token
