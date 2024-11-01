@@ -11,8 +11,8 @@
                 <group>
                     <label for="actual_currency_id" />
                     <div>
-                        <field name="actual_currency_rate" class="oe_inline" /> -
-                        <field name="actual_currency_id" class="oe_inline" />
+                        <field name="actual_currency_id" class="oe_inline" /> a
+                        <field name="actual_currency_rate" class="oe_inline" /> ARS
                         <field name="actual_currency_preciated" invisible="1" />
                         <p invisible="not actual_currency_preciated">
                             <i>Cuidado, la moneda es preciada!.</i>
@@ -25,10 +25,16 @@
                 </div>
 
                 <group>
+                    <field name="company_currency" invisible="1" />
                     <label for="new_currency_id" />
                     <div>
-                        <field name="new_currency_rate" class="oe_inline" /> -
-                        <field name="new_currency_id" class="oe_inline" />
+                        <field name="new_currency_id" class="oe_inline" /> a
+                        <field
+                            name="new_currency_rate"
+                            class="oe_inline"
+                            readonly="new_currency_id == company_currency"
+                            force_save="True"
+                        /> ARS
                         <field name="new_currency_preciated" invisible="1" />
                         <p invisible="not new_currency_preciated">
                             <i>Cuidado, la moneda es preciada! ponga el monto correspondiente.</i>

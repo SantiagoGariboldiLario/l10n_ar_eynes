@@ -20,6 +20,15 @@ class AccountChangeCurrency(models.TransientModel):
     _description = 'Change Currency'
 
     @api.model
+    def _get_company_currency_id(self):
+        invoice_id = self._context.get('active_id', False)
+        if not invoice_id:
+            return False
+
+        invoice = self.env['account.move'].browse(invoice_id)
+        return invoice.company_id.currency_id
+
+    @api.model
     def _get_actual_currency_id(self):
         invoice_id = self._context.get('active_id', False)
         if not invoice_id:
@@ -61,6 +70,9 @@ class AccountChangeCurrency(models.TransientModel):
         string="Actual Currency Rate",
         default=_get_actual_currency_rate,
         readonly=True,
+    )
+    company_currency = fields.Many2one(
+        'res.currency', default=_get_company_currency_id
     )
     new_currency_id = fields.Many2one('res.currency', string="New Currency")
     new_currency_preciated = fields.Boolean(
