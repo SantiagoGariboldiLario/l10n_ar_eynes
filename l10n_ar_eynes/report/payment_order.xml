@@ -63,468 +63,238 @@
                         <div class="page">
                             <!-- Imprimir pago a proveedor o pago de cliente -->
                             <t t-if="o.type == 'payment'">
-                                <t t-if="o.debt_line_ids">
-                                    <div id="invoices">
-                                        <h3>Facturas / Notas de Débito</h3>
-                                        <table class="table-bordered" width="100%">
-                                            <thead>
-                                                <tr
-                                                    style="background: black; color: white; text-align: left;"
-                                                >
-                                                    <th>
-                                                        <strong>Comprobante</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Fecha</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Venc.</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Total</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Saldo Inicial</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Saldo Final</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Abonado</strong>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                    <tr t-foreach="o.debt_line_ids" t-as="line">
-                                                        <td>
-                                                            <span t-field="line.invoice_id.name" />
-                                                        </td>
-                                                        <td>
-                                                            <span t-field="line.date_original" />
-                                                        </td>
-                                                        <td>
-                                                            <span t-field="line.date_due" />
-                                                        </td>
-                                                        <t t-if="o.currency_id.name.lower() == 'ars'">
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_unreconciled"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-esc="line.amount - line.amount_unreconciled"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_original"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                        </t>
-                                                        <t t-else="">
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_unreconciled_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-esc="line.amount_currency - line.amount_unreconciled_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_original_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                        </t>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="7" style="text-align: right;">
-                                                            <strong
-                                                        >Total Abonado en Facturas / Notas de Débito:
-                                                                    <span
-                                                                t-if="o.currency_id.name.lower() == 'ars'"
-                                                                t-esc="sum(line.amount for line in o.debt_line_ids)"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                                    <span
-                                                                t-else=""
-                                                                t-esc="sum(line.amount for line in o.debt_line_ids) / o.payment_rate"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </t>
-                                <t t-if="o.income_line_ids">
-                                    <div id="invoices">
-                                        <h3>Notas de Crédito</h3>
-                                        <table class="table-bordered" width="100%">
-                                            <thead>
-                                                <tr
-                                                    style="background: black; color: white; text-align: left;"
-                                                >
-                                                    <th>
-                                                        <strong>Comprobante</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Fecha</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Venc.</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Total</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Saldo Inicial</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Saldo Final</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Abonado</strong>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                    <tr t-foreach="o.income_line_ids" t-as="line">
-                                                        <td>
-                                                            <span t-field="line.invoice_id.name" />
-                                                        </td>
-                                                        <td>
-                                                            <span t-field="line.date_original" />
-                                                        </td>
-                                                        <td>
-                                                            <span t-field="line.date_due" />
-                                                        </td>
-                                                        <t t-if="o.currency_id.name.lower() == 'ars'">
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_unreconciled"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-esc="line.amount - line.amount_unreconciled"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_original"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                        </t>
-                                                        <t t-else="">
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_unreconciled_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-esc="line.amount_currency - line.amount_unreconciled_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_original_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                        </t>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="7" style="text-align: right;">
-                                                            <strong>Total Abonado en las Notas de Crédito:
-                                                                    <span
-                                                                t-if="o.currency_id.name.lower() == 'ars'"
-                                                                t-esc="sum(line.amount for line in o.income_line_ids)"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                                    <span
-                                                                t-else=""
-                                                                t-esc="sum(line.amount for line in o.income_line_ids) / o.payment_rate"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </t>
+                                <t t-set="show_first" t-value="o.debt_line_ids" />
+                                <t t-set="show_second" t-value="o.income_line_ids" />
                             </t>
                             <t t-else="">
-                                <t t-if="o.income_line_ids">
+                                <t t-set="show_first" t-value="o.income_line_ids" />
+                                <t t-set="show_second" t-value="o.debt_line_ids" />
+                            </t>
+                            <t t-if="show_first">
+                                <div id="invoices">
                                     <h3>Facturas / Notas de Débito</h3>
                                     <table class="table-bordered" width="100%">
-                                            <thead>
-                                                <tr
-                                                style="background: black; color: white; text-align: left;"
-                                            >
-                                                    <th>
-                                                        <strong>Comprobante</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Fecha</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Venc.</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Total</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Saldo Inicial</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Saldo Final</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Abonado</strong>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                    <tr t-foreach="o.income_line_ids" t-as="line">
-                                                        <td>
-                                                            <span t-field="line.invoice_id.name" />
-                                                        </td>
-                                                        <td>
-                                                            <span t-field="line.date_original" />
-                                                        </td>
-                                                        <td>
-                                                            <span t-field="line.date_due" />
-                                                        </td>
-                                                        <t t-if="o.currency_id.name.lower() == 'ars'">
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                            t-field="line.amount"
-                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                        />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                            t-field="line.amount_unreconciled"
-                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                        />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                            t-esc="line.amount - line.amount_unreconciled"
-                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                        />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
+                                        <thead>
+                                            <tr style="background: black; color: white; text-align: left;">
+                                                <th>
+                                                    <strong>Comprobante</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Fecha</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Venc.</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Total</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Saldo Inicial</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Saldo Final</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Abonado</strong>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="show_first" t-as="line">
+                                                <td>
+                                                    <span t-field="line.invoice_id.name" />
+                                                </td>
+                                                <td>
+                                                    <span t-field="line.date_original" />
+                                                </td>
+                                                <td>
+                                                    <span t-field="line.date_due" />
+                                                </td>
+                                                <t t-if="o.currency_id.name.lower() == 'ars'">
+                                                    <td style="text-align: right;">
+                                                        <span
                                                             t-field="line.amount_original"
                                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                         />
-                                                            </td>
-                                                        </t>
-                                                        <t t-else="">
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                            t-field="line.amount_currency"
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.amount_unreconciled"
                                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                         />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                            t-field="line.amount_unreconciled_currency"
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-esc="line.amount - line.amount_unreconciled"
                                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                         />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                            t-esc="line.amount_currency - line.amount_unreconciled_currency"
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.amount"
                                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                         />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
+                                                    </td>
+                                                </t>
+                                                <t t-else="">
+                                                    <td style="text-align: right;">
+                                                        <span
                                                             t-field="line.amount_original_currency"
                                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                         />
-                                                            </td>
-                                                        </t>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="7" style="text-align: right;">
-                                                            <strong
-                                                    >Total Abonado en Facturas / Notas de Débito:
-                                                                    <span
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.amount_unreconciled_currency"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-esc="line.amount_currency - line.amount_unreconciled_currency"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.amount_currency"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                </t>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="7" style="text-align: right;">
+                                                    <strong>Total Abonado en Facturas / Notas de Débito:
+                                                    <span
                                                             t-if="o.currency_id.name.lower() == 'ars'"
-                                                            t-esc="sum(line.amount for line in o.income_line_ids)"
+                                                            t-esc="sum(line.amount for line in show_first)"
                                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                         />
-                                                                    <span
+                                                    <span
                                                             t-else=""
-                                                            t-esc="sum(line.amount_currency for line in o.income_line_ids)"
+                                                            t-esc="sum(line.amount for line in show_first) / o.payment_rate"
                                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                         />
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                            </tbody>
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table>
-                                </t>
-                                <t t-if="o.debt_line_ids">
-                                    <div id="invoices">
-                                        <h3>Notas de Crédito</h3>
-                                        <table class="table-bordered" width="100%">
-                                            <thead>
-                                                <tr
-                                                    style="background: black; color: white; text-align: left;"
-                                                >
-                                                    <th>
-                                                        <strong>Comprobante</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Fecha</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Venc.</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Total</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Saldo Inicial</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Saldo Final</strong>
-                                                    </th>
-                                                    <th>
-                                                        <strong>Abonado</strong>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                    <tr t-foreach="o.debt_line_ids" t-as="line">
-                                                        <td>
-                                                            <span t-field="line.invoice_id.name" />
-                                                        </td>
-                                                        <td>
-                                                            <span t-field="line.date_original" />
-                                                        </td>
-                                                        <td>
-                                                            <span t-field="line.date_due" />
-                                                        </td>
-                                                        <t t-if="o.currency_id.name.lower() == 'ars'">
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_unreconciled"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-esc="line.amount - line.amount_unreconciled"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_original"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                        </t>
-                                                        <t t-else="">
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_unreconciled_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-esc="line.amount_currency - line.amount_unreconciled_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                            <td style="text-align: right;">
-                                                                <span
-                                                                t-field="line.amount_original_currency"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </td>
-                                                        </t>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="7" style="text-align: right;">
-                                                            <strong>Total Abonado en las Notas de Crédito:
-                                                                        <span
-                                                                t-if="o.currency_id.name.lower() == 'ars'"
-                                                                t-esc="sum(line.amount for line in o.debt_line_ids)"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                                        <span
-                                                                t-else=""
-                                                                t-esc="sum(line.amount for line in o.debt_line_ids) / o.payment_rate"
-                                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                            />
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </t>
+                                </div>
+                            </t>
+                            <t t-if="show_second">
+                                <div id="credit_notes">
+                                    <h3>Notas de Crédito</h3>
+                                    <table class="table-bordered" width="100%">
+                                        <thead>
+                                            <tr style="background: black; color: white; text-align: left;">
+                                                <th>
+                                                    <strong>Comprobante</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Fecha</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Venc.</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Total</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Saldo Inicial</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Saldo Final</strong>
+                                                </th>
+                                                <th>
+                                                    <strong>Abonado</strong>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="show_second" t-as="line">
+                                                <td>
+                                                    <span t-field="line.invoice_id.name" />
+                                                </td>
+                                                <td>
+                                                    <span t-field="line.date_original" />
+                                                </td>
+                                                <td>
+                                                    <span t-field="line.date_due" />
+                                                </td>
+                                                <t t-if="o.currency_id.name.lower() == 'ars'">
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.amount_original"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.amount_unreconciled"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-esc="line.amount - line.amount_unreconciled"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.amount"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                </t>
+                                                <t t-else="">
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.amount_original_currency"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.amount_unreconciled_currency"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-esc="line.amount_currency - line.amount_unreconciled_currency"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.amount_currency"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                </t>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="7" style="text-align: right;">
+                                                    <strong>Total Abonado en las Notas de Crédito:
+                                                            <span
+                                                            t-if="o.currency_id.name.lower() == 'ars'"
+                                                            t-esc="sum(line.amount for line in show_second)"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                            <span
+                                                            t-else=""
+                                                            t-esc="sum(line.amount for line in show_second) / o.payment_rate"
+                                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </t>
                             <!--Pagos-->
                             <div id="payments">
