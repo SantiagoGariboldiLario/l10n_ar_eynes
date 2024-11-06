@@ -46,7 +46,7 @@
                         <img t-else="" t-attf-src="data:image/png;base64,#{o.company_id.logo}" />
                         <br />
                         <p>
-                            Razón social: <span t-esc="o.journal_id.warehouse_id.partner_id.name" />
+                            Razón social: <span t-esc="o.journal_id.warehouse_id.company_id.name" />
                             <br />
                             Domicillio: <span t-esc="o.journal_id.warehouse_id.partner_id.street" />
                             <span t-esc="o.journal_id.warehouse_id.partner_id.city" /> (
