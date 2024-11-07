@@ -157,7 +157,7 @@
 
                 .right img {
                     height: 80px;
-                    width: 70%;
+                    object-fit: contain;
                 }
 
                 .center{
