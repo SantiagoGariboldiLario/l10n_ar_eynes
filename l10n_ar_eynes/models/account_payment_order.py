@@ -1531,8 +1531,13 @@ class AccountPaymentOrder(models.Model):
         elif self.type in ('sale', 'receipt'):
             debit = amount
         sign = debit - credit < 0 and -1 or 1
+
+        name = name + ' - ' if name else ''
+        if self.reference:
+            name += 'Ref: ' + self.reference + ' - '
+        name += self.number
         move_line = {
-            'name': name or '/',
+            'name': name,
             'debit': debit,
             'credit': credit,
             'account_id': journal_id.suspense_account_id.id,
@@ -1575,7 +1580,7 @@ class AccountPaymentOrder(models.Model):
             move_lines.append(
                 self._create_move_line_payment(
                     move_id,
-                    pml.payment_mode_id.name,
+                    pml.name or pml.payment_mode_id.name,
                     pml.payment_mode_id,
                     pml.amount,
                     pml.amount_currency,
