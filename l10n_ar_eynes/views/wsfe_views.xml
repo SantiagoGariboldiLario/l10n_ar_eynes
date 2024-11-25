@@ -26,7 +26,10 @@
                                 <field name="name" readonly="True" />
                                 <field name="to_date" readonly="True" />
                                 <field name="blocked" readonly="True" />
-                                <field name="journal_id" />
+                                <field
+                                    name="journal_id"
+                                    domain="[('type', '=', 'sale'), ('company_id', '=', parent.company_id)]"
+                                />
                                 <field name="priority" />
                                 <field name="from_afip" readonly="True" />
                             </tree>

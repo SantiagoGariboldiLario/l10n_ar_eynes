@@ -112,7 +112,6 @@ class WsPOSLine(models.Model):
     from_afip = fields.Boolean(related='pos_id.from_afip')
     journal_id = fields.Many2one(
         comodel_name='account.journal',
-        domain=[('type', '=', 'sale')],
         string='Odoo POS',
     )
     name = fields.Char(related='pos_id.name')
