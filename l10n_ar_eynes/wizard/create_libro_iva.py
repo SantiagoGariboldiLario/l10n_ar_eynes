@@ -88,9 +88,7 @@ class LibroIVAExporterWizard(models.TransientModel):
     def _get_fiscal_credit_currency(self, invoice):
         cfc = 0
         for tax_line in self._get_invoice_vat_tax_lines(invoice):
-            cfc += tax_line.price_unit
-        if invoice.__contains__('currency_rate'):
-            cfc = cfc * invoice.currency_rate
+            cfc += -1 * tax_line.amount_currency
         return cfc
 
     def _get_ganancias_retentions(self, invoice):
@@ -429,13 +427,21 @@ class LibroIVAExporterWizard(models.TransientModel):
                 ('%016.2f' % 0).replace('.', ''),
             ]
         else:
+            tax_base = tax_line.tax_base_amount
+            if invoice.is_multi_currency:
+                rate = invoice.currency_rate
+                if invoice.currency_id.preciated:
+                    rate = 1 / rate
+                tax_base = tax_base * rate
+
+            tax_amount = -1 * tax_line.amount_currency
             line = [
                 voucher_type,
                 pos,
                 internal_number_formatted,
-                ('%016.2f' % tax_line.tax_base_amount).replace('.', ''),
+                ('%016.2f' % tax_base).replace('.', ''),
                 ('%.4s' % str(tax_line.tax_line_id.afip_code).rjust(4, '0')),
-                ('%016.2f' % tax_line.price_unit).replace('.', ''),
+                ('%016.2f' % tax_amount).replace('.', ''),
             ]
         if False in line:
             errors = '\n'.join(errors)
@@ -452,52 +458,14 @@ class LibroIVAExporterWizard(models.TransientModel):
             invoice, errors
         )
 
-        try:
-            tax_base = tax_line.tax_base_amount
-            if invoice.__contains__('currency_rate'):
-                tax_base = tax_base * invoice.currency_rate
-        except Exception as e:
-            _logger.error(
-                'Error on field %s: %s'
-                % ('account_move_line.tax_base_amount', e)
-            )
-            errors.append(
-                _(
-                    'Invoice %(name)s of %(type)s: Wrong %(field)s in account move line',
-                    name=invoice.name,
-                    type=(
-                        _('suppliers')
-                        if invoice.move_type.startswith('in_')
-                        else _('customers')
-                    ),
-                    field=self.env['account.move.line']
-                    ._fields['tax_base_amount']
-                    .string,
-                )
-            )
+        tax_base = tax_line.tax_base_amount
+        if invoice.is_multi_currency:
+            rate = invoice.currency_rate
+            if invoice.currency_id.preciated:
+                rate = 1 / rate
+            tax_base = tax_base * rate
 
-        try:
-            tax_amount = tax_line.price_unit
-            if invoice.__contains__('currency_rate'):
-                tax_amount = tax_amount * invoice.currency_rate
-        except Exception as e:
-            _logger.error(
-                'Error on field %s: %s' % ('account_move_line.price_unit', e)
-            )
-            errors.append(
-                _(
-                    'Invoice %(name)s of %(type)s: Wrong %(field)s in account move line',
-                    name=invoice.name,
-                    type=(
-                        _('suppliers')
-                        if invoice.move_type.startswith('in_')
-                        else _('customers')
-                    ),
-                    field=self.env['account.move.line']
-                    ._fields['price_unit']
-                    .string,
-                )
-            )
+        tax_amount = -1 * tax_line.amount_currency
 
         line = [
             voucher_type,
@@ -520,11 +488,19 @@ class LibroIVAExporterWizard(models.TransientModel):
             invoice, errors
         )
 
+        tax_base = tax_line.tax_base_amount
+        if invoice.is_multi_currency:
+            rate = invoice.currency_rate
+            if invoice.currency_id.preciated:
+                rate = 1 / rate
+            tax_base = tax_base * rate
+        tax_amount = -1 * tax_line.amount_currency
+
         line = [
             import_clearance,
-            ('%016.2f' % tax_line.tax_base_amount).replace('.', ''),
+            ('%016.2f' % tax_base).replace('.', ''),
             ('%.4s' % str(tax_line.tax_line_id.afip_code).rjust(4, '0')),
-            ('%016.2f' % tax_line.price_unit).replace('.', ''),
+            ('%016.2f' % tax_amount).replace('.', ''),
         ]
         if False in line:
             errors = '\n'.join(errors)
