@@ -512,27 +512,30 @@ class AccountMove(models.Model):
 
     @api.onchange('invoice_date')
     def _onchange_currency_id(self):
-        date_invoice = self.date or self.invoice_date or fields.Date.today()
-        if not self.currency_id:
-            self.is_multi_currency = False
-            # self.currency_rate = 1.0
-        else:
-            company = self.env.company
-            company_currency = company.currency_id
-            currency = self.currency_id
-            if currency != company_currency:
-                curr_rate = currency.get_currency_rate(company, date_invoice)
-                self.is_multi_currency = True
-                if currency.preciated:
-                    self.currency_rate = curr_rate.inverse_company_rate
-                else:
-                    self.currency_rate = curr_rate.company_rate
-            else:
+        # Agregamos contexto para evitar la actualización de la tasa de cambio al validar la factura
+        if not self.env.context.get('from_action_post', False):
+            date_invoice = self.date or self.invoice_date or fields.Date.today()
+            if not self.currency_id:
                 self.is_multi_currency = False
-                self.currency_rate = 1.0
+                # self.currency_rate = 1.0
+            else:
+                company = self.env.company
+                company_currency = company.currency_id
+                currency = self.currency_id
+                if currency != company_currency:
+                    curr_rate = currency.get_currency_rate(
+                        company, date_invoice
+                    )
+                    self.is_multi_currency = True
+                    if currency.preciated:
+                        self.currency_rate = curr_rate.inverse_company_rate
+                    else:
+                        self.currency_rate = curr_rate.company_rate
+                else:
+                    self.is_multi_currency = False
+                    self.currency_rate = 1.0
 
-        self._onchange_payment_term_date_invoice()
-        return
+            self._onchange_payment_term_date_invoice()
 
     @api.onchange('date')
     def _onchange_date(self):
@@ -937,6 +940,8 @@ class AccountMove(models.Model):
                 move.validate_denomination()
 
         sale_invoices = self.filtered(lambda move: move.is_sale_document())
+        # Agregamos contexto para evitar la actualización de la tasa de cambio al validar la factura
+        sale_invoices = sale_invoices.with_context(from_action_post=True)
         electronic_invoices = sale_invoices.filtered(
             lambda move: move.fiscal_type == 'electronic'
         )
