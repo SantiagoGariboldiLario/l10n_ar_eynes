@@ -12,7 +12,7 @@ class ResPartner(models.Model):
 
     @api.model
     def _get_retentions_domain(self):
-        company = self.env.user.company_id
+        company = self.env.company
         return [
             '|',
             ('company_id', '=', False),
@@ -21,7 +21,7 @@ class ResPartner(models.Model):
 
     @api.model
     def _get_perceptions_domain(self):
-        company = self.env.user.company_id
+        company = self.env.company
         return [
             '|',
             ('company_id', '=', False),
@@ -161,7 +161,7 @@ class ResPartner(models.Model):
     def _get_ws_conf(self):
         WsPadronConfig = self.env['ws.padron.config']
         ctx = self.env.context.copy()
-        ctx['company_id'] = self.env.user.company_id.id
+        ctx['company_id'] = self.env.company.id
         ws_padron_conf = WsPadronConfig.with_context(**ctx).get_config()
         return ws_padron_conf
 

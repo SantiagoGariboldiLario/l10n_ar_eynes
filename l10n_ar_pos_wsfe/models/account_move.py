@@ -43,10 +43,10 @@ class AccountMove(models.Model):
         return journals[0]
 
     def is_out_invoice_fce(self, partner, amount_total):
-        if self.env.user.company_id.fcred_is_fce_emitter:
+        if self.env.company.fcred_is_fce_emitter:
             ABC = self.env['afip.big.company'].sudo()
             is_bc = ABC.search([('cuit', '=like', partner.vat)])
-            fcred_minimum_amount = self.env.user.company_id.fcred_minimum_amount
+            fcred_minimum_amount = self.env.company.fcred_minimum_amount
             if is_bc and amount_total > fcred_minimum_amount:
                 return True
         return False

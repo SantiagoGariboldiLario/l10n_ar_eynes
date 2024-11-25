@@ -110,7 +110,7 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
     @api.model
     def _get_arba_filename(self):
         activity_num = '7'  # 7 Alícuota general
-        company_vat = self.env.user.company_id.vat
+        company_vat = self.env.company.vat
         lot_name = 'PER'
 
         month = str(self.date_from.month).zfill(2)

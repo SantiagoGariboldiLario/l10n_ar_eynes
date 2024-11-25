@@ -140,7 +140,7 @@ class AccountPaymentOrder(models.Model):
             if journal.currency:
                 return journal.currency
         # No journal given in the context, use company currency as default
-        return self.env.user.company_id.currency_id
+        return self.env.company.currency_id
 
     number = fields.Char(string='Number', copy=False, default=False)
     name = fields.Char(string='Memo', default='')
@@ -610,7 +610,7 @@ class AccountPaymentOrder(models.Model):
                     invoice.partner_id.address_get(['delivery']).get('delivery')
                 )
             )
-            source_shipping = self.env.user.company_id.partner_id
+            source_shipping = self.env.company.partner_id
             applicable = retention.check_applicable(
                 sit_iibb=sit_iibb,
                 from_padron=from_padron,

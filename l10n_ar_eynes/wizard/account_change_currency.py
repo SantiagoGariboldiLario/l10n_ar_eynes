@@ -43,7 +43,7 @@ class AccountChangeCurrency(models.TransientModel):
         if not invoice_id:
             return False
 
-        company = self.env.user.company_id
+        company = self.env.company
         invoice = self.env['account.move'].browse(invoice_id)
         date = invoice.date or fields.Date.today()
         curr_rate = invoice.currency_id.get_currency_rate(company, date)
@@ -93,7 +93,7 @@ class AccountChangeCurrency(models.TransientModel):
             return
 
         date = self.invoice_id.date or fields.Date.today()
-        company = self.env.user.company_id
+        company = self.env.company
         curr_rate = self.new_currency_id.get_currency_rate(company, date)
         if self.new_currency_id == company.currency_id:
             self.new_currency_rate = 1.0

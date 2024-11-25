@@ -150,7 +150,7 @@ class PerceptionTaxLine(models.Model):
 
     # def compute_all(self, currency=None):
     #     if len(self) == 0:
-    #         company_id = self.env.user.company_id
+    #         company_id = self.env.company
     #     else:
     #         company_id = self[0].company_id
     #     if not currency:

@@ -121,7 +121,7 @@ class PosOrder(models.Model):
     #     currency = order_currency.with_context(
     #         date=order_vals['date'] or fields.Date.context_today(self)
     #     )
-    #     company_currency = self.env.user.company_id.currency_id
+    #     company_currency = self.env.company.currency_id
 
     #     price_unit = line_vals['price']
     #     quantity = line_vals['qty']

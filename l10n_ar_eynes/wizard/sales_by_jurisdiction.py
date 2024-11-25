@@ -47,7 +47,7 @@ class ExportSalesByJurisdictionXLS(models.TransientModel):
             'print_by': self.env.user.name,
             'date_start': self.date_from,
             'date_stop': self.date_to,
-            'company_name': self.env.user.company_id.name,
+            'company_name': self.env.company.name,
             'dynamic_report': True,
             'company_ids': company_ids.ids,
         }

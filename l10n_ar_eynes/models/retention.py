@@ -12,7 +12,7 @@ class RetentionConcept(models.Model):
 
     @api.model
     def _get_company(self):
-        return self.env.user.company_id
+        return self.env.company
 
     name = fields.Char('Description', size=256, required=True)
     code = fields.Char('Code', size=32)
@@ -52,7 +52,7 @@ class RetentionActivity(models.Model):
 
     @api.model
     def _get_company(self):
-        return self.env.user.company_id
+        return self.env.company
 
     name = fields.Char('Description', size=256, required=True)
     code = fields.Char('Code', size=32)
@@ -210,7 +210,9 @@ class RetentionTaxApplication(models.Model):
         for rec in self:
             if rec.retention_tax_id:
                 rec.concept_id_domain = [
-                    ('type', '=', rec.retention_tax_id.retention_type)
+                    ('type', '=', rec.retention_tax_id.retention_type)(
+                        'company_id', '=', rec.company_id.id
+                    )
                 ]
             else:
                 rec.concept_id_domain = [()]
@@ -220,7 +222,9 @@ class RetentionTaxApplication(models.Model):
         for rec in self:
             if rec.retention_tax_id:
                 rec.activity_id_domain = [
-                    ('type', '=', rec.retention_tax_id.retention_type)
+                    ('type', '=', rec.retention_tax_id.retention_type)(
+                        'company_id', '=', rec.company_id.id
+                    )
                 ]
             else:
                 rec.activity_id_domain = [()]

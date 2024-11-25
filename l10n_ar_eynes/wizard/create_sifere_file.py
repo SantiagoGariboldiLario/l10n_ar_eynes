@@ -151,7 +151,7 @@ class ReportFilesGenerator(models.Model):
         return self._do_sifere('create_retention_file')
 
     def create_retention_file(self):
-        company_id = self.env.user.company_id.id
+        company_id = self.env.company.id
         cr = self._cr
 
         retention_query = """
@@ -357,7 +357,7 @@ class ReportFilesGenerator(models.Model):
         return self._do_sifere('create_perception_file')
 
     def create_perception_file(self):
-        company_id = self.env.user.company_id.id
+        company_id = self.env.company.id
         cr = self._cr
 
         perception_query = """

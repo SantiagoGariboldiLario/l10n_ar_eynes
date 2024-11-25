@@ -517,7 +517,7 @@ class AccountMove(models.Model):
             self.is_multi_currency = False
             # self.currency_rate = 1.0
         else:
-            company = self.env.user.company_id
+            company = self.env.company
             company_currency = company.currency_id
             currency = self.currency_id
             if currency != company_currency:

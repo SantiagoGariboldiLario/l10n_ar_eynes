@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo noupdate="1">
+
+        <record model="ir.rule" id="retention_concept_comp_rule">
+            <field name="name">Retention Concept multi-company</field>
+            <field name="model_id" ref="model_retention_concept" />
+            <field name="global" eval="True" />
+            <field name="domain_force">[
+                '|',
+                ('company_id', '=', False),
+                ('company_id', 'in', company_ids)
+            ]</field>
+        </record>
+
+        <record model="ir.rule" id="retention_activity_comp_rule">
+            <field name="name">Retention Activity multi-company</field>
+            <field name="model_id" ref="model_retention_activity" />
+            <field name="global" eval="True" />
+            <field name="domain_force">[
+                '|',
+                ('company_id', '=', False),
+                ('company_id', 'in', company_ids)
+            ]</field>
+        </record>
+
+</odoo>

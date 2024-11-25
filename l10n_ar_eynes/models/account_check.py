@@ -227,7 +227,7 @@ class AccountCheck(models.Model):
                         )
                     )
             rej_check_account = AccountCheckConfig.search(
-                [('company_id', '=', self.env.user.company_id.id)]
+                [('company_id', '=', self.env.company.id)]
             ).rejected_account_id
             if not rej_check_account:
                 raise UserError(
@@ -236,14 +236,14 @@ class AccountCheck(models.Model):
                     )
                 )
             check_account = AccountCheckConfig.search(
-                [('company_id', '=', self.env.user.company_id.id)]
+                [('company_id', '=', self.env.company.id)]
             ).account_id
             if not check_account:
                 raise UserError(
                     _("Error! There is no Account configured for third checks.")
                 )
             def_check_journal = AccountCheckConfig.search(
-                [('company_id', '=', self.env.user.company_id.id)]
+                [('company_id', '=', self.env.company.id)]
             ).deferred_journal_id
             if not def_check_journal:
                 raise UserError(
@@ -323,7 +323,7 @@ class AccountCheck(models.Model):
             AccountCheckConfig = self.env['account.check.config']
             AccountMoveLine = self.env['account.move.line']
             rej_check_account = AccountCheckConfig.search(
-                [('company_id', '=', self.env.user.company_id.id)]
+                [('company_id', '=', self.env.company.id)]
             ).expired_issued_checks_account_id
             if not rej_check_account:
                 raise UserError(
@@ -332,7 +332,7 @@ class AccountCheck(models.Model):
                     )
                 )
             check_account = AccountCheckConfig.search(
-                [('company_id', '=', self.env.user.company_id.id)]
+                [('company_id', '=', self.env.company.id)]
             ).deferred_account_id
             if not check_account:
                 raise UserError(
@@ -341,7 +341,7 @@ class AccountCheck(models.Model):
                     )
                 )
             def_check_journal = AccountCheckConfig.search(
-                [('company_id', '=', self.env.user.company_id.id)]
+                [('company_id', '=', self.env.company.id)]
             ).rejected_issued_checks_journal_id
             if not def_check_journal:
                 raise UserError(
@@ -462,10 +462,10 @@ class AccountCheck(models.Model):
 
         for check in self:
             def_check_account = AccountCheckConfig.search(
-                [('company_id', '=', self.env.user.company_id.id)]
+                [('company_id', '=', self.env.company.id)]
             ).deferred_account_id
             def_check_journal = AccountCheckConfig.search(
-                [('company_id', '=', self.env.user.company_id.id)]
+                [('company_id', '=', self.env.company.id)]
             ).deferred_journal_id
             if not def_check_journal:
                 raise UserError(

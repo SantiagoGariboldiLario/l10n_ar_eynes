@@ -140,9 +140,7 @@ class FiscalYearClosing(models.Model):
     def _get_default_closing_id(self):
         AccountFiscalYear = self.env['account.fiscal.year']
 
-        company = (
-            self.env.user.company_id.id if self.env.user.company_id else False
-        )
+        company = self.env.company.id if self.env.company else False
         str_date = '%s-06-01' % (datetime.now().year - 1)
 
         fiscal_year = AccountFiscalYear.search(
@@ -157,14 +155,12 @@ class FiscalYearClosing(models.Model):
         return fiscal_year
 
     def _get_default_company_id(self):
-        return self.env.user.company_id
+        return self.env.company
 
     def _get_default_opening_id(self):
         AccountFiscalYear = self.env['account.fiscal.year']
 
-        company = (
-            self.env.user.company_id.id if self.env.user.company_id else False
-        )
+        company = self.env.company.id if self.env.company else False
         str_date = '%s-06-01' % datetime.now().year
 
         fiscal_year = AccountFiscalYear.search(

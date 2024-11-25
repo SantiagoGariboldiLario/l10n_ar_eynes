@@ -595,7 +595,7 @@ class AccountJournal(models.Model):
     #     destination_shipping = address_shipping or partner_model.browse(
     #         partner.address_get(['delivery']).get('delivery')
     #     )
-    #     source_shipping = self.env.user.company_id.partner_id
+    #     source_shipping = self.env.company.partner_id
     #     applicable = perception_id.check_applicable(
     #         sit_iibb=perception_data['sit_iibb'],
     #         from_padron=perception_data['from_padron'],

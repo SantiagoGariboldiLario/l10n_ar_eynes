@@ -22,7 +22,7 @@ class PurchaseOrder(models.Model):
         """
         invoice_vals = super(PurchaseOrder, self)._prepare_invoice()
         date_invoice = fields.Date.today()
-        company = self.env.user.company_id
+        company = self.env.company
         company_currency = company.currency_id
         currency = self.currency_id
         if currency != company_currency:

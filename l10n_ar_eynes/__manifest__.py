@@ -74,6 +74,7 @@
         'security/delivery_cot_security.xml',
         'security/account_security.xml',
         'security/perception_ir_rule.xml',
+        'security/retention_ir_rule.xml',
         "wizard/fiscal_year_closing_operation_wizard_views.xml",
         "wizard/wsaa_config_renewal.xml",
         "views/account_views.xml",
