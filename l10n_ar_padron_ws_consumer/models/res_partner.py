@@ -80,26 +80,21 @@ class ResPartner(models.Model):
         return padron_url
 
     def _filter_valid_vats(self, vat_list=None):
-        res = []
+        valid, invalid = list(), list()
         for vat in vat_list:
             try:
                 if self.check_vat_ar(vat):
-                    res.append(vat)
+                    valid.append(vat)
+                else:
+                    invalid.append(vat)
             except BaseException:
-                _logger.info('Ignoring vat')
-        return res
+                invalid.append(vat)
+        return valid, invalid
 
     def _get_padron_values(
-        self, partners, padron_url, padron_name, padron_type
+        self, vat_list, padron_url, padron_name, padron_type, from_cron
     ):
         headers = {"content-type": "application/json"}
-        vat_list = [partner.vat for partner in partners if partner.vat]
-        vat_list = self._filter_valid_vats(vat_list)
-        if not vat_list:
-            raise ValidationError(
-                _("Padron Error!\n") + _("No partner with valid VAT to check.")
-            )
-
         payload = {
             "vat": vat_list,
             "padron_name": padron_name,
@@ -112,9 +107,20 @@ class ResPartner(models.Model):
             headers=headers,
         ).json()
         if not response.get('result'):
-            raise ValidationError(
-                _("Padron Error!\n") + _("Please check if Padron WS is running")
-            )
+            if from_cron:
+                users_to_message = self._get_users_from_padron_group()
+                self.env['res.partner'].browse(2).message_post(
+                    subject=_("Problem while Updating IIBB registry"),
+                    body=_(
+                        "No valid values ​​have been obtained for updating the IIBB registry."
+                    ),
+                    partner_ids=users_to_message,
+                )
+            else:
+                raise ValidationError(
+                    _("Padron Error!\n")
+                    + _("Please check if Padron WS is running")
+                )
         return response["result"]
 
     def _get_journal_from_padron_name(self, padron_name, padron_type):
@@ -279,7 +285,6 @@ class ResPartner(models.Model):
                         {
                             "percent": percent,
                             "sit_iibb": iibb_situation,
-                            "from_padron": True,
                         }
                     )
                 else:
@@ -390,6 +395,12 @@ class ResPartner(models.Model):
                 f'Write iva into {journal_id.name} for partner {partner.name}'
             )
 
+    def _get_users_from_padron_group(self):
+        group_xml_id = (
+            'l10n_ar_padron_ws_consumer.group_receive_padron_notifications'
+        )
+        return self.env.ref(group_xml_id).users.mapped('partner_id').ids
+
     def _cleanup_old_padron_values(self):
         _logger.debug('Deleting OLD padron')
 
@@ -401,22 +412,37 @@ class ResPartner(models.Model):
         """
         self.env.cr.execute(query)
 
-    # def _valid_padron_ws_conf(self):
-    #     services = (
-    #         self.env['wsaa.config']
-    #         .search(
-    #             [
-    #                 ('homologation', '=', False),
-    #             ]
-    #         )
-    #         .mapped('service_ids.name')
-    #     )
-    #     return any(
-    #         service.name == 'ws_sr_constancia_inscripcion'
-    #         for service in services
-    #     )
+    def _validate_partners_vat(self, partners, from_cron):
+        message = ""
+        vat_list = [partner.vat for partner in partners]
+        valid, invalid = self._filter_valid_vats(vat_list)
+        if not valid and not from_cron:
+            raise ValidationError(
+                _("Padron Error!\n") + _("No partner with valid VAT to check.")
+            )
+        if not valid:
+            message = "\nNo existen partners con CUIT Válido para verificar"
 
-    def do_update_from_padron(self, padron_name=None, padron_type=None):
+        if invalid and from_cron:
+            message = (
+                _(
+                    'There are partners with the following CUIT %s that are invalid.\n'
+                    + 'Correct them so that there are no errors with the IIBB update'
+                )
+                % invalid
+            )
+        if message:
+            users_to_message = self._get_users_from_padron_group()
+            self.env['res.partner'].browse(2).message_post(
+                subject=_("Possible Problems while Updating IIBB Registers"),
+                body=message,
+                partner_ids=users_to_message,
+            )
+        return valid
+
+    def do_update_from_padron(
+        self, padron_name=None, padron_type=None, from_cron=None
+    ):
         if padron_name is None:
             padron_name = []
 
@@ -452,50 +478,56 @@ class ResPartner(models.Model):
         partners = res_partner_obj.search(domain)
         _logger.info('Getting Padron Information')
         if partners:
+            valid_vat = self._validate_partners_vat(partners, from_cron)
+
             updates = set()
             response = self._get_padron_values(
-                partners, padron_url, padron_name, padron_type
+                valid_vat, padron_url, padron_name, padron_type, from_cron
             )
             _logger.info('Padron Information Fetched')
             for vat, partner_values in response.items():
-                perceptions = [
-                    d
-                    for d in partner_values
-                    if d["T"] == "P" and d["P"] != "SALT"
-                ]
-                retentions = [d for d in partner_values if d["T"] == "R"]
-                coeficients = [
-                    d
-                    for d in partner_values
-                    if d["T"] == "C" or (d["T"] == "P" and d["P"] == "SALT")
-                ]
-                ivas = [d for d in partner_values if d["T"] == "I"]
-
-                partner_id = res_partner_obj.search(
-                    [
-                        ("vat", "=", vat),
-                        ('parent_id', '=', False),
-                    ],
-                    limit=1,
-                )
-                self._update_partner_perceptions(partner_id, perceptions)
-                self._update_partner_retentions(partner_id, retentions)
-                self._update_partner_coeficients(partner_id, coeficients)
-                self._update_partner_ivas(partner_id, ivas)
-                partner_id.write(
-                    {
-                        "last_padron_update": current_period,
-                    }
-                )
-                total_updates = perceptions + retentions + coeficients
-                new_values = {
-                    value
-                    for value in [
-                        value["P"] + " - " + value["M"]
-                        for value in total_updates
+                try:
+                    perceptions = [
+                        d
+                        for d in partner_values
+                        if d["T"] == "P" and d["P"] != "SALT"
                     ]
-                }
-                updates.update(new_values)
+                    retentions = [d for d in partner_values if d["T"] == "R"]
+                    coeficients = [
+                        d
+                        for d in partner_values
+                        if d["T"] == "C" or (d["T"] == "P" and d["P"] == "SALT")
+                    ]
+                    ivas = [d for d in partner_values if d["T"] == "I"]
+
+                    partner_id = res_partner_obj.search(
+                        [
+                            ("vat", "=", vat),
+                            ('parent_id', '=', False),
+                        ],
+                        limit=1,
+                    )
+                    self._update_partner_perceptions(partner_id, perceptions)
+                    self._update_partner_retentions(partner_id, retentions)
+                    self._update_partner_coeficients(partner_id, coeficients)
+                    self._update_partner_ivas(partner_id, ivas)
+                    partner_id.write(
+                        {
+                            "last_padron_update": current_period,
+                        }
+                    )
+                    total_updates = perceptions + retentions + coeficients
+                    new_values = {
+                        value
+                        for value in [
+                            value["P"] + " - " + value["M"]
+                            for value in total_updates
+                        ]
+                    }
+                    updates.update(new_values)
+                except Exception:
+                    _logger.info(_("No partners to check. All updated."))
+
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
@@ -508,5 +540,72 @@ class ResPartner(models.Model):
                     ),
                 },
             }
-        else:
-            _logger.info(_("No partners to check. All updated."))
+        # else:
+        #     domain_append = [
+        #         '|',
+        #         ('last_padron_update', '=', False),
+        #         ('last_padron_update', '<', current_period),
+        #     ]
+        # domain = domain + domain_append
+        # res_partner_obj = self.env["res.partner"]
+        # partners = res_partner_obj.search(domain)
+        # _logger.info('Getting Padron Information')
+        # if partners:
+        #     updates = set()
+        #     response = self._get_padron_values(
+        #         partners, padron_url, padron_name, padron_type
+        #     )
+        #     _logger.info('Padron Information Fetched')
+        #     for vat, partner_values in response.items():
+        #         perceptions = [
+        #             d
+        #             for d in partner_values
+        #             if d["T"] == "P" and d["P"] != "SALT"
+        #         ]
+        #         retentions = [d for d in partner_values if d["T"] == "R"]
+        #         coeficients = [
+        #             d
+        #             for d in partner_values
+        #             if d["T"] == "C" or (d["T"] == "P" and d["P"] == "SALT")
+        #         ]
+        #         ivas = [d for d in partner_values if d["T"] == "I"]
+
+        #         partner_id = res_partner_obj.search(
+        #             [
+        #                 ("vat", "=", vat),
+        #                 ('parent_id', '=', False),
+        #             ],
+        #             limit=1,
+        #         )
+        #         self._update_partner_perceptions(partner_id, perceptions)
+        #         self._update_partner_retentions(partner_id, retentions)
+        #         self._update_partner_coeficients(partner_id, coeficients)
+        #         self._update_partner_ivas(partner_id, ivas)
+        #         partner_id.write(
+        #             {
+        #                 "last_padron_update": current_period,
+        #             }
+        #         )
+        #         total_updates = perceptions + retentions + coeficients
+        #         new_values = {
+        #             value
+        #             for value in [
+        #                 value["P"] + " - " + value["M"]
+        #                 for value in total_updates
+        #             ]
+        #         }
+        #         updates.update(new_values)
+        #     return {
+        #         'type': 'ir.actions.client',
+        #         'tag': 'display_notification',
+        #         'params': {
+        #             'type': 'info',
+        #             'sticky': True,
+        #             'message': (
+        #                 "Se actualizaron los siguientes Padrones: "
+        #                 + " | ".join([value for value in updates])
+        #             ),
+        #         },
+        #     }
+        # else:
+        #     _logger.info(_("No partners to check. All updated."))
