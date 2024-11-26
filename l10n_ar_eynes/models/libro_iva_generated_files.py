@@ -13,6 +13,7 @@ class LibroivaGeneratedFiles(models.Model):
 
     attachment_id = fields.Many2one('ir.attachment')
     code = fields.Char()
+    company_id = fields.Many2one('res.company')
     datas = fields.Binary(related='attachment_id.datas')
     date_from = fields.Date(string='Date From')
     date_to = fields.Date(string='Date To')

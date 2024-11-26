@@ -8,6 +8,7 @@
 import binascii
 import codecs
 import itertools
+import json
 import logging
 
 # import re
@@ -27,8 +28,18 @@ class ArbaRetentionExporterWizard(models.TransientModel):
     _name = 'arba.retention.exporter.wizard'
     _desc = 'ARBA Retention Exporter Wizard'
 
+    company_id = fields.Many2one('res.company', 'Company', required=True)
+    company_id_domain = fields.Char(
+        default=lambda self: self._default_company_ids()
+    )
     date_from = fields.Date(string='Date From')
     date_to = fields.Date(string='Date To')
+
+    @api.model
+    def _default_company_ids(self):
+        return json.dumps(
+            [('id', 'in', self.env.context.get('allowed_company_ids', []))]
+        )
 
     def create_file(self):
         query = (
@@ -40,6 +51,7 @@ class ArbaRetentionExporterWizard(models.TransientModel):
             'AND at.retention_type IN %(type)s '
             'AND at.inform_arba = True '
             'AND apo.state = \'posted\' '
+            'AND apo.company_id = %(company_id)s '
             'ORDER BY rtl.date'
         )
         cr = self.env.cr
@@ -48,6 +60,7 @@ class ArbaRetentionExporterWizard(models.TransientModel):
             'date_from': self.date_from,
             'date_to': self.date_to,
             'type': ('gross_income',),
+            'company_id': self.company_id.id,
         }
         cr.execute(query, vals)
         res = cr.fetchall()
@@ -102,7 +115,7 @@ class ArbaRetentionExporterWizard(models.TransientModel):
     @api.model
     def _get_arba_filename(self):
         activity_num = '6'  # 6 ~Alicuota gral
-        company_vat = self.env.company.vat
+        company_vat = self.company_id.vat
         lot_name = 'RET'
 
         month = str(self.date_from.month).zfill(2)
@@ -226,3 +239,5 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         generated_file_rec.write({'attachment_id': attach_id.id})
 
         file.close()
+
+        return True

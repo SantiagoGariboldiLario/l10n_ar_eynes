@@ -21,6 +21,7 @@
 
 import binascii
 import codecs
+import json
 import logging
 import re
 import tempfile
@@ -40,9 +41,19 @@ class CreateArcibaFiles(models.TransientModel):
     _name = 'create.arciba.files'
     _description = 'Wizard Create e-arciba Files'
 
+    company_id = fields.Many2one('res.company', required=True)
+    company_id_domain = fields.Char(
+        default=lambda self: self._default_company_ids()
+    )
     period_start = fields.Date('Date start')
     period_end = fields.Date('Date end')
     notes = fields.Text('Notes')
+
+    @api.model
+    def _default_company_ids(self):
+        return json.dumps(
+            [('id', 'in', self.env.context.get('allowed_company_ids', []))]
+        )
 
     @api.model
     def _get_partner_document_type_code(self, partner):
@@ -116,12 +127,16 @@ class CreateArcibaFiles(models.TransientModel):
 
         f = codecs.open(head_filename, "r", "latin-1")
 
-        name = 'eARCIBA_%s.txt' % self.period_start
+        name = 'eARCIBA_%s_%s.txt' % (
+            self.period_start,
+            self.company_id.name.replace(' ', '-'),
+        )
         generated_file_rec = generated_files_model.create(
             {
                 'code': name,
                 'date_from': self.period_start,
                 'date_to': self.period_end,
+                'company_id': self.company_id.id,
             }
         )
 
@@ -135,24 +150,7 @@ class CreateArcibaFiles(models.TransientModel):
         doc = self.env['ir.attachment'].create(data_attach)
         generated_file_rec.write({'attachment_id': doc.id})
 
-        close_window = {'type': 'ir.actions.act_window_close'}
-        # download_file = {
-        #     'type': "ir.actions.act_url",
-        #     'url': '/web/binary/download_document?model=ir.attachment'
-        #     '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
-        #     'target': "self",
-        #     'no_destroy': False,
-        # }
-
-        # res = {
-        #     'type': 'ir.actions.act_url',
-        #     'actions': [
-        #         close_window,
-        #         download_file,
-        #     ],
-        # }
-        f.close()
-        return close_window
+        return True
 
     def _get_invoice_tax_lines(self, invoice):
         tax_line_ids = invoice.line_ids.filtered(lambda line: line.tax_line_id)
@@ -544,6 +542,7 @@ class CreateArcibaFiles(models.TransientModel):
             JOIN account_move i ON p.invoice_id = i.id
             JOIN account_tax at ON p.perception_id = at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
+            AND p.company_id = %(company_id)s
             AND i.state = %(state)s
             AND at.inform_arciba=True
             AND at.type_tax_use LIKE 'sale'  -- Only perceptions applied
@@ -554,6 +553,7 @@ class CreateArcibaFiles(models.TransientModel):
             'period_start': self.period_start,
             'period_end': self.period_end,
             'state': 'posted',
+            'company_id': self.company_id.id,
         }
         cr.execute(perception_query, query_vals)
         res = cr.fetchall()
@@ -586,6 +586,7 @@ class CreateArcibaFiles(models.TransientModel):
             JOIN account_payment_order op ON p.payment_order_id = op.id
             JOIN account_tax at ON p.retention_id = at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
+            AND p.company_id = %(company_id)s
             AND op.state = %(state)s
             AND at.inform_arciba=True
             AND at.type_tax_use LIKE 'purchase'  -- Only retentions applied
@@ -648,9 +649,19 @@ class CreateArcibaNcFile(models.TransientModel):
     _name = 'create.arciba.nc.file'
     _description = 'Wizard Create e-ARCIBA NC File'
 
+    company_id = fields.Many2one('res.company', required=True)
+    company_id_domain = fields.Char(
+        default=lambda self: self._default_company_ids()
+    )
     period_start = fields.Date('Date start')
     period_end = fields.Date('Date end')
     notes = fields.Text('Notes')
+
+    @api.model
+    def _default_company_ids(self):
+        return json.dumps(
+            [('id', 'in', self.env.context.get('allowed_company_ids', []))]
+        )
 
     @api.model
     def _get_inv_data(self, perc_ids):
@@ -790,12 +801,16 @@ class CreateArcibaNcFile(models.TransientModel):
         f.close()
         f = codecs.open(head_filename, 'r', "latin-1")
 
-        name = 'eARCIBA_NC_%s.txt' % self.period_start
+        name = 'eARCIBA_NC_%s_%s.txt' % (
+            self.period_start,
+            self.company_id.name.replace(' ', '-'),
+        )
         generated_file_rec = generated_files_model.create(
             {
                 'code': name,
                 'date_from': self.period_start,
                 'date_to': self.period_end,
+                'company_id': self.company_id.id,
             }
         )
 
@@ -809,23 +824,7 @@ class CreateArcibaNcFile(models.TransientModel):
         doc = self.env['ir.attachment'].create(data_attach)
         generated_file_rec.write({'attachment_id': doc.id})
 
-        close_window = {'type': 'ir.actions.act_window_close'}
-        # download_file = {
-        #     'type': "ir.actions.act_url",
-        #     'url': '/web/binary/download_document?model=ir.attachment'
-        #     '&id=%s&filename=%s&field=index_content' % (doc.id, doc.name),
-        #     'target': "self",
-        #     'no_destroy': False,
-        # }
-
-        # res = {
-        #     'type': 'ir.actions.act_url',
-        #     'actions': [
-        #         close_window,
-        #         download_file,
-        #     ],
-        # }
-        return close_window
+        return True
 
     def create_files(self):
         """
@@ -844,6 +843,7 @@ class CreateArcibaNcFile(models.TransientModel):
             JOIN account_move i ON p.invoice_id = i.id
             JOIN account_tax at ON p.perception_id = at.id
             WHERE p.date BETWEEN %(period_start)s AND %(period_end)s
+            AND p.company_id = %(company_id)s
             AND i.state = %(state)s
             AND at.inform_arciba=True
             AND at.type_tax_use LIKE 'sale'  -- Only perceptions applied
@@ -854,6 +854,7 @@ class CreateArcibaNcFile(models.TransientModel):
             'period_start': self.period_start,
             'period_end': self.period_end,
             'state': 'posted',
+            'company_id': self.company_id.id,
         }
 
         cr.execute(perception_query, query_vals)

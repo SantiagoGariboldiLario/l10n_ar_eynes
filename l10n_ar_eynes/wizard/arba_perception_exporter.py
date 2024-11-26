@@ -7,6 +7,7 @@
 
 import binascii
 import codecs
+import json
 import logging
 import re
 import tempfile
@@ -25,8 +26,18 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
     _name = 'arba.perception.exporter.wizard'
     _desc = 'ARBA Perception Exporter Wizard'
 
+    company_id = fields.Many2one('res.company', 'Company', required=True)
+    company_id_domain = fields.Char(
+        default=lambda self: self._default_company_ids()
+    )
     date_from = fields.Date(string='Date From')
     date_to = fields.Date(string='Date To')
+
+    @api.model
+    def _default_company_ids(self):
+        return json.dumps(
+            [('id', 'in', self.env.context.get('allowed_company_ids', []))]
+        )
 
     def create_file(self):
         query = (
@@ -38,6 +49,7 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
             'AND ai.state IN %(state)s '
             'AND at.inform_arba = True '
             'AND at.retention_type IN %(type)s '
+            'AND ai.company_id = %(company_id)s '
             'ORDER BY ptl.date '
         )
         cr = self.env.cr
@@ -47,6 +59,7 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
             'date_to': self.date_to,
             'state': ('posted', 'paid'),
             'type': ('gross_income',),
+            'company_id': self.company_id.id,
         }
 
         cr.execute(query, vals)
@@ -110,7 +123,7 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
     @api.model
     def _get_arba_filename(self):
         activity_num = '7'  # 7 Alícuota general
-        company_vat = self.env.company.vat
+        company_vat = self.company_id.vat
         lot_name = 'PER'
 
         month = str(self.date_from.month).zfill(2)
@@ -250,3 +263,5 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
         generated_file_rec.write({'attachment_id': attach_id.id})
 
         file.close()
+
+        return True

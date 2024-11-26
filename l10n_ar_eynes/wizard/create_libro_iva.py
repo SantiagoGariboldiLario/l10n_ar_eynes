@@ -1,10 +1,11 @@
 import binascii
 import codecs
+import json
 import logging
 import tempfile
 from calendar import monthrange
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -15,10 +16,19 @@ class LibroIVAExporterWizard(models.TransientModel):
 
     date_from = fields.Date(required=True)
     company_id = fields.Many2one('res.company', 'Company', required=True)
+    company_id_domain = fields.Char(
+        default=lambda self: self._default_company_ids()
+    )
     notes = fields.Text('Notes', readonly=True)
     state = fields.Selection(
         [('init', 'Start'), ('done', 'Done')], 'State', default='init'
     )
+
+    @api.model
+    def _default_company_ids(self):
+        return json.dumps(
+            [('id', 'in', self.env.context.get('allowed_company_ids', []))]
+        )
 
     def _get_date_to(self):
         end_of_month = monthrange(self.date_from.year, self.date_from.month)[1]
@@ -759,6 +769,7 @@ class LibroIVAExporterWizard(models.TransientModel):
                 'code': filename,
                 'date_from': self.date_from,
                 'date_to': self._get_date_to(),
+                'company_id': self.company_id.id,
             }
         )
 
@@ -801,7 +812,10 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
 
         suffix = ".libroivadigitalsalesaliquot"
-        filename = "LIBRO_IVA_DIGITAL_VENTAS_ALICUOTAS.txt"
+        filename = (
+            "LIBRO_IVA_VENTAS_ALICUOTAS_%s.txt"
+            % self.company_id.name.replace(' ', '-')
+        )
         if aliquots:
             self.create_attachment(suffix, filename, aliquots)
 
@@ -809,7 +823,10 @@ class LibroIVAExporterWizard(models.TransientModel):
             sale_errors.insert(0, _('\nSale File Errors\n================\n'))
 
         suffix = ".libroivadigitalsales"
-        filename = "LIBRO_IVA_DIGITAL_VENTAS_CBTE.txt"
+        filename = (
+            "LIBRO_IVA_VENTAS_CBTE_%s.txt"
+            % self.company_id.name.replace(' ', '-')
+        )
         if sales:
             self.create_attachment(suffix, filename, sales)
 
@@ -854,7 +871,10 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
 
         suffix = ".libroivadigitalimportaliquot"
-        filename = "LIBRO_IVA_DIGITAL_IMPORTACION_BIENES_ALICUOTA.txt"
+        filename = (
+            "LIBRO_IVA_IMPORTACION_BIENES_ALICUOTA_%s.txt"
+            % self.company_id.name.replace(' ', '-')
+        )
         if import_aliquots:
             self.create_attachment(suffix, filename, import_aliquots)
 
@@ -864,7 +884,10 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
 
         suffix = ".libroivadigitalpurchasesaliquot"
-        filename = "LIBRO_IVA_DIGITAL_COMPRAS_ALICUOTAS.txt"
+        filename = (
+            "LIBRO_IVA_COMPRAS_ALICUOTAS_%s.txt"
+            % self.company_id.name.replace(' ', '-')
+        )
         if purchase_aliquots:
             self.create_attachment(suffix, filename, purchase_aliquots)
 
@@ -874,7 +897,10 @@ class LibroIVAExporterWizard(models.TransientModel):
             )
 
         suffix = ".libroivadigitalpurchases"
-        filename = "LIBRO_IVA_DIGITAL_COMPRAS_CBTE.txt"
+        filename = (
+            "LIBRO_IVA_COMPRAS_CBTE_%s.txt"
+            % self.company_id.name.replace(' ', '-')
+        )
         if purchases:
             self.create_attachment(suffix, filename, purchases)
 

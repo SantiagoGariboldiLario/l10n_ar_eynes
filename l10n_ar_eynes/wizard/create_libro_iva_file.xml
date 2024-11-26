@@ -12,7 +12,8 @@
                 <separator colspan="4" />
                 <group>
                     <field name="date_from" widget="month_year_format" />
-                    <field name="company_id" />
+                    <field name="company_id_domain" invisible="True" />
+                    <field name="company_id" domain="company_id_domain" />
                 </group>
                 <separator string="Validation Errors" colspan="4" />
                 <field name="notes" readonly="1" nolabel="1" colspan="4" />

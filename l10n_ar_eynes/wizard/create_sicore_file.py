@@ -21,6 +21,7 @@
 
 import binascii
 import codecs
+import json
 import logging
 import re
 import tempfile
@@ -44,13 +45,23 @@ class CreateSicoreFiles(models.TransientModel):
     _name = 'create.sicore.files'
     _description = 'Wizard Create sicore Files'
 
+    company_id = fields.Many2one('res.company', required=True, default=False)
+    company_id_domain = fields.Char(
+        default=lambda self: self._default_company_ids()
+    )
+    notes = fields.Text('Notes')
     period_start = fields.Date('Date start')
     period_end = fields.Date('Date end')
-    notes = fields.Text('Notes')
-    rrhh_ret_profit_code = fields.Char('RRHH Rule Code', default='H348')
     presentation_date = fields.Date(
         'Date of presentation', default=fields.Date.today()
     )
+    rrhh_ret_profit_code = fields.Char('RRHH Rule Code', default='H348')
+
+    @api.model
+    def _default_company_ids(self):
+        return json.dumps(
+            [('id', 'in', self.env.context.get('allowed_company_ids', []))]
+        )
 
     @api.model
     def _parse_move_lines(self, move):
@@ -295,13 +306,18 @@ class CreateSicoreFiles(models.TransientModel):
         f = open(head_filename, 'rb')  # rb to export with CRLF line terminators
 
         name_base = "SICORE_RET" if is_local else "SICORE_RET_EXT"
-        name = ('%s_%s.txt') % (name_base, self.period_start)
+        name = ('%s_%s_%s.txt') % (
+            name_base,
+            self.period_start,
+            self.company_id.name.replace(' ', '-'),
+        )
         generated_file_rec = self.env['sicore.generated.files'].create(
             {
                 'code': name,
                 'period_start': self.period_start,
                 'period_end': self.period_end,
                 'presentation_date': self.presentation_date,
+                'company_id': self.company_id.id,
             }
         )
         data = f.read()
@@ -333,12 +349,17 @@ class CreateSicoreFiles(models.TransientModel):
             "JOIN account_payment_order av ON av.id=r.payment_order_id "
             "WHERE r.date BETWEEN %(date_from)s AND %(date_to)s "
             "AND at.retention_type in ('vat','profit') AND at.type_tax_use='purchase' "
-            "AND av.state ~ 'posted' ORDER BY r.date"
+            "AND av.state ~ 'posted' AND r.company_id = %(company_id)s "
+            "ORDER BY r.date"
         )
 
         cr.execute(
             retention_query,
-            {'date_from': self.period_start, 'date_to': self.period_end},
+            {
+                'date_from': self.period_start,
+                'date_to': self.period_end,
+                'company_id': self.company_id.id,
+            },
         )
         res = cr.fetchall()
         if not len(res):
@@ -512,13 +533,17 @@ class CreateSicoreFiles(models.TransientModel):
 
         f = open(head_filename, 'rb')
 
-        name = 'SICORE_RET_RRHH_%s.txt' % self.period_start
+        name = 'SICORE_RET_RRHH_%s_%s.txt' % (
+            self.period_start,
+            self.company_id.name.replace(' ', '-'),
+        )
         generated_file_rec = self.env['sicore.generated.files'].create(
             {
                 'code': name,
                 'period_start': self.period_start,
                 'period_end': self.period_end,
                 'presentation_date': self.presentation_date,
+                'company_id': self.company_id.id,
             }
         )
         data = f.read()
@@ -549,13 +574,17 @@ class CreateSicoreFiles(models.TransientModel):
 
         f = open(head_filename, 'rb')
 
-        name = 'SICORE_RET_RRHH_P_%s.txt' % self.period_start
+        name = 'SICORE_RET_RRHH_P_%s_%s.txt' % (
+            self.period_start,
+            self.company_id.name.replace(' ', '-'),
+        )
         generated_file_rec = self.env['sicore.generated.files'].create(
             {
                 'code': name,
                 'period_start': self.period_start,
                 'period_end': self.period_end,
                 'presentation_date': self.presentation_date,
+                'company_id': self.company_id.id,
             }
         )
         data = f.read()
@@ -586,7 +615,8 @@ class CreateSicoreFiles(models.TransientModel):
             JOIN hr_payslip AS pl ON (pl.id=psl.slip_id)
             WHERE psl.code IN %(code)s AND pl.date BETWEEN
             %(date_from)s AND %(date_to)s AND psl.total!=0
-            AND pl.state IN %(state)s GROUP BY pl.id, pl.employee_id, pl.date_to;
+            AND pl.state IN %(state)s AND psl.company_id = %(company_id)s
+            GROUP BY pl.id, pl.employee_id, pl.date_to
         """
         q_params = {
             'state': tuple(['done']),
@@ -594,6 +624,7 @@ class CreateSicoreFiles(models.TransientModel):
             'code': tuple([self.rrhh_ret_profit_code, 'H349']),
             'date_from': self.period_start,
             'date_to': self.period_end,
+            'company_id': self.company_id.id,
         }
         self._cr.execute(q, q_params)
         res = self._cr.fetchall()

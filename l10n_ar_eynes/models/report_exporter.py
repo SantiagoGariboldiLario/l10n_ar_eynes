@@ -21,6 +21,7 @@ class ReportExporter(models.Model):
 
     name = fields.Char(required=True)
     codename = fields.Char(required=True, readonly=True)
+    company_id = fields.Many2one('res.company')
     group_ids = fields.Many2many(
         'res.groups', string='Groups', default=_default_groups
     )

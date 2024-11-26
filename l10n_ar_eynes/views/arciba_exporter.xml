@@ -16,6 +16,7 @@
                             <field name="datas" class="pr-3" />
                             <field name="attachment_id" />
                         </div>
+                        <field name="company_id" />
                     </group>
                 </sheet>
             </form>
@@ -32,6 +33,7 @@
                 <field name="date_from" />
                 <field name="date_to" />
                 <field name="attachment_id" />
+                <field name="company_id" />
             </tree>
         </field>
     </record>

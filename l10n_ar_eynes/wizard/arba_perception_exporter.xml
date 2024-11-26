@@ -9,6 +9,8 @@
                 will be attached to the corresponding period
             </span>
             <group>
+                <field name="company_id_domain" invisible="True" />
+                <field name="company_id" domain="company_id_domain" />
                 <field name="date_from" />
                 <field name="date_to" />
             </group>

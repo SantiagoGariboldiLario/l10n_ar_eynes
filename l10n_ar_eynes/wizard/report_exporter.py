@@ -4,9 +4,10 @@
 ##############################################################################
 
 import binascii
+import json
 import logging
 
-from odoo import _, exceptions, fields, models
+from odoo import _, api, exceptions, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -20,11 +21,16 @@ class ReportFilesGenerator(models.Model):
     )
     date_start = fields.Date()
     date_stop = fields.Date()
-    company_id = fields.Many2one(
-        'res.company',
-        string='Company',
-        default=lambda self: self.env.company.id,
+    company_id = fields.Many2one('res.company', string='Company')
+    company_id_domain = fields.Char(
+        default=lambda self: self._default_company_ids()
     )
+
+    @api.model
+    def _default_company_ids(self):
+        return json.dumps(
+            [('id', 'in', self.env.context.get('allowed_company_ids', []))]
+        )
 
     def get_dates(self):
         return (self.date_start, self.date_stop)

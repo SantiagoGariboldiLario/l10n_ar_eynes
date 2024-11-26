@@ -15,6 +15,8 @@
                         <field name="period_end" />
                         <field name="rrhh_ret_profit_code" />
                         <field name="presentation_date" />
+                        <field name="company_id_domain" invisible="True" />
+                        <field name="company_id" domain="company_id_domain" />
                     </group>
                 </group>
                 <separator string="Validation Errors" colspan="4" />

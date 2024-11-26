@@ -3,6 +3,7 @@
 #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 ##############################################################################
 
+import json
 import logging
 import re
 from datetime import datetime
@@ -24,8 +25,18 @@ class CreateSifereFiles(models.TransientModel):
     _name = 'create.sifere.files'
     _desc = 'Create SIFERE Files'
 
+    company_id = fields.Many2one('res.company', 'Company', required=True)
+    company_id_domain = fields.Char(
+        default=lambda self: self._default_company_ids()
+    )
     period_start = fields.Date('Date start')
     period_end = fields.Date('Date end')
+
+    @api.model
+    def _default_company_ids(self):
+        return json.dumps(
+            [('id', 'in', self.env.context.get('allowed_company_ids', []))]
+        )
 
     @api.constrains('period_start', 'period_end')
     def _check_period(self):
@@ -66,6 +77,7 @@ class CreateSifereFiles(models.TransientModel):
                 'date_start': self.period_start,
                 'date_stop': self.period_end,
                 'exporter_id': exp.id,
+                'company_id': self.company_id.id,
             }
             rfe = FilesGenerator.create(vals)
             fname = '_do_%s' % exp.codename
@@ -132,7 +144,11 @@ class ReportFilesGenerator(models.Model):
         date_start = datetime.strptime(
             str(self.date_start), DEFAULT_SERVER_DATE_FORMAT
         )
-        return "%s-%s" % (date_start.month, date_start.year)
+        return "%s-%s_%s" % (
+            date_start.month,
+            date_start.year,
+            self.company_id.name.replace(' ', '-'),
+        )
 
     def _do_sifere(self, method):
         data = getattr(self, method)()
@@ -151,7 +167,6 @@ class ReportFilesGenerator(models.Model):
         return self._do_sifere('create_retention_file')
 
     def create_retention_file(self):
-        company_id = self.env.company.id
         cr = self._cr
 
         retention_query = """
@@ -167,7 +182,7 @@ class ReportFilesGenerator(models.Model):
             {
                 'date_from': self.date_start,
                 'date_to': self.date_stop,
-                'company_id': company_id,
+                'company_id': self.company_id.id,
             },
         )
         res = cr.fetchall()
@@ -196,7 +211,7 @@ class ReportFilesGenerator(models.Model):
             'date_to': self.date_stop,
             'type': ('gross_income',),
             'inv_state': 'posted',
-            'company_id': company_id,
+            'company_id': self.company_id.id,
         }
         cr.execute(perception_query, q_data_perception)
         perception_res = cr.fetchall()

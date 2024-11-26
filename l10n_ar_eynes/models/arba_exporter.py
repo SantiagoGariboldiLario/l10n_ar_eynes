@@ -12,6 +12,7 @@ class ArbaGeneratedFiles(models.Model):
     _name = 'arba.generated.files'
 
     code = fields.Char()
+    company_id = fields.Many2one('res.company')
     datas = fields.Binary(related='attachment_id.datas')
     date_from = fields.Date(string='Date From')
     date_to = fields.Date(string='Date To')

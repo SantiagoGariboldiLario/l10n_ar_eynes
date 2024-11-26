@@ -24,6 +24,7 @@ class SicoreGeneratedFiles(models.Model):
 
     attachment_id = fields.Many2one('ir.attachment')
     code = fields.Char()
+    company_id = fields.Many2one('res.company')
     datas = fields.Binary(related='attachment_id.datas')
     name = fields.Char(compute='_compute_name')
     period_start = fields.Date('Date start')
