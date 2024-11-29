@@ -98,7 +98,7 @@ class LibroIVAExporterWizard(models.TransientModel):
     def _get_fiscal_credit_currency(self, invoice):
         cfc = 0
         for tax_line in self._get_invoice_vat_tax_lines(invoice):
-            cfc += -1 * tax_line.amount_currency
+            cfc += abs(tax_line.amount_currency)
         return cfc
 
     def _get_ganancias_retentions(self, invoice):
@@ -444,7 +444,7 @@ class LibroIVAExporterWizard(models.TransientModel):
                     rate = 1 / rate
                 tax_base = tax_base * rate
 
-            tax_amount = -1 * tax_line.amount_currency
+            tax_amount = abs(tax_line.amount_currency)
             line = [
                 voucher_type,
                 pos,
@@ -475,7 +475,7 @@ class LibroIVAExporterWizard(models.TransientModel):
                 rate = 1 / rate
             tax_base = tax_base * rate
 
-        tax_amount = -1 * tax_line.amount_currency
+        tax_amount = abs(tax_line.amount_currency)
 
         line = [
             voucher_type,
@@ -504,7 +504,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             if invoice.currency_id.preciated:
                 rate = 1 / rate
             tax_base = tax_base * rate
-        tax_amount = -1 * tax_line.amount_currency
+        tax_amount = abs(tax_line.amount_currency)
 
         line = [
             import_clearance,
