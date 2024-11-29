@@ -47,7 +47,7 @@
 
             <xpath expr="//field[@name='vat']" position="attributes">
                 <attribute name="string">NIF</attribute>
-                <attribute name="required" eval="is_checked_special_partner_required_fields" />
+                <attribute name="required">is_checked_special_partner_required_fields</attribute>
             </xpath>
 
             <xpath expr="//field[@name='vat']" position="after">
@@ -59,7 +59,7 @@
             </xpath>
 
             <xpath expr="//field[@name='property_account_position_id']" position="attributes">
-                <attribute name="required" eval="is_checked_special_partner_required_fields" />
+                <attribute name="required">is_checked_special_partner_required_fields</attribute>
             </xpath>
 
             <page name="accounting" position="after">
