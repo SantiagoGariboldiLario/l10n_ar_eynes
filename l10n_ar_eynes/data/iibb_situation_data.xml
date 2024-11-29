@@ -14,12 +14,8 @@
         <field name="name">No Inscripto</field>
     </record>
 
-    <record
-        forcecreate="1"
-        id="iibb_situation_simplified_regime"
-        model="iibb.situation"
-    >
-        <field name="name">Régimen Simpligicado</field>
+    <record forcecreate="1" id="iibb_situation_simplified_regime" model="iibb.situation">
+        <field name="name">Régimen Simplificado</field>
     </record>
 
 </odoo>

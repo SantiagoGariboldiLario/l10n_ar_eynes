@@ -25,6 +25,9 @@
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
     'category': 'Accounting/Accounting',
+    'excludes': [
+        'l10n_ar'
+    ],  # Va a impedir que se instale l10n_ar_eynes con errores por haber instalado en paralelo ese módulo pero la solución está en evitar configurar el país en las compañías hasta después de la instalación de l10n_ar_eynes
     'depends': [
         'account',
         'account_debit_note',
@@ -32,10 +35,9 @@
         'base_address_extended',
         'contacts',
         'delivery',
-        'date_range',
         'hr',
         'mail',
-        # 'month_year_widget',  # To pick only month and year in date fields
+        'month_year_widget',  # To pick only month and year in date fields
         'multi_step_wizard',
         'om_fiscal_year',
         'popup_messages',
@@ -46,7 +48,7 @@
         'stock_delivery',
         'uom',
         'web_notify',
-        # 'report_qweb_element_page_visibility',
+        'report_qweb_element_page_visibility',
     ],
     'data': [
         "data/decimal_precision_data.xml",
@@ -123,11 +125,9 @@
         'views/treasury_menuitems.xml',
         'views/taxes_menuitems.xml',
         'wizard/update_journal_period_view.xml',
-        "wizard/wsaa_config_renewal.xml",
         'wizard/cancel_picking_done_view.xml',
         'views/stock_picking_view.xml',
         'views/stock_picking_type_view.xml',
-        'views/certificate_request_view.xml',
         "wizard/afip_sinchronize_voucher_view.xml",
         "wizard/wsfe_massive_sinchronize_view.xml",
         "wizard/create_sicore_file.xml",

@@ -210,9 +210,8 @@ class RetentionTaxApplication(models.Model):
         for rec in self:
             if rec.retention_tax_id:
                 rec.concept_id_domain = [
-                    ('type', '=', rec.retention_tax_id.retention_type)(
-                        'company_id', '=', rec.company_id.id
-                    )
+                    ('type', '=', rec.retention_tax_id.retention_type),
+                    ('company_id', '=', rec.company_id.id),
                 ]
             else:
                 rec.concept_id_domain = [()]
@@ -222,9 +221,8 @@ class RetentionTaxApplication(models.Model):
         for rec in self:
             if rec.retention_tax_id:
                 rec.activity_id_domain = [
-                    ('type', '=', rec.retention_tax_id.retention_type)(
-                        'company_id', '=', rec.company_id.id
-                    )
+                    ('type', '=', rec.retention_tax_id.retention_type),
+                    ('company_id', '=', rec.company_id.id),
                 ]
             else:
                 rec.activity_id_domain = [()]

@@ -112,10 +112,6 @@ class AccountMove(models.Model):
         store=True,
     )
     fiscal_type = fields.Selection(
-        selection=[
-            ('internal', 'Internal Invoice'),
-            ('electronic', 'Electronic Invoice'),
-        ],
         related='journal_id.fiscal_type',
         store=True,
     )
