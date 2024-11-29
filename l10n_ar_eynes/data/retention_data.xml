@@ -1,4 +1,389 @@
 <odoo noupdate="1">
+    <!-- Conceptos para Retencion de Ganancias -->
+    <record forcecreate="0" id="retention_concept_profit_99" model="retention.concept">
+        <field name="name">
+            Emisión de comprobantes con discriminación del Gravamen
+        </field>
+        <field name="type">profit</field>
+        <field name="code">99</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_21" model="retention.concept">
+        <field name="name">
+            Intereses originados en operaciones no comprendidas en el punto 1. (Codigo 19)
+        </field>
+        <field name="type">profit</field>
+        <field name="code">21</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_25" model="retention.concept">
+        <field name="name">
+            Comisiones u otras retribuciones derivadas de la actividad de comisionista, rematador, consignatario y demas auxiliares de comercio a que se refiere el inciso c) del articulo 49 de la Ley de Impuesto a las profit, texto ordenado en 1997 y sus modificaci
+        </field>
+        <field name="type">profit</field>
+        <field name="code">25</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_30" model="retention.concept">
+        <field name="name">
+            Alquileres o arrendamientos de bienes muebles
+        </field>
+        <field name="type">profit</field>
+        <field name="code">30</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_35" model="retention.concept">
+        <field name="name">
+            Regalias
+        </field>
+        <field name="type">profit</field>
+        <field name="code">35</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_53" model="retention.concept">
+        <field name="name">
+            Operaciones realizadas por intermedio de mercados de cereales a termino que se resuelvan en el curso del termino (arbitrajes) y de mercados de futuros y opciones.
+        </field>
+        <field name="type">profit</field>
+        <field name="code">53</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_78" model="retention.concept">
+        <field name="name">
+            Enajenacion de bienes muebles y bienes de cambio.
+        </field>
+        <field name="type">profit</field>
+        <field name="code">78</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_94" model="retention.concept">
+        <field name="name">
+            Locaciones de obra y/o servicios no ejecutados en relacion de dependencia no mencionados expresamente en otros incisos
+        </field>
+        <field name="type">profit</field>
+        <field name="code">94</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_95" model="retention.concept">
+        <field name="name">
+            Operaciones de transporte de carga nacional e internacional.
+        </field>
+        <field name="type">profit</field>
+        <field name="code">95</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_110" model="retention.concept">
+        <field name="name">
+            Explotacion de derechos de autor (Ley No 11.723).
+        </field>
+        <field name="type">profit</field>
+        <field name="code">110</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_116" model="retention.concept">
+        <field name="name">
+            Honorarios de director de sociedades anonimas, sindico, fiduciario, consejero de sociedades cooperativas, integrante de consejos de vigilancia y s/escala socios administradores de las sociedades de responsabilidad limitada, en comandita simple y en coman
+        </field>
+        <field name="type">profit</field>
+        <field name="code">116</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_119" model="retention.concept">
+        <field name="name">
+            Profesiones liberales, oficios
+        </field>
+        <field name="type">profit</field>
+        <field name="code">119</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_no_subject" model="retention.concept">
+        <field name="name">
+            No Sujeto
+        </field>
+        <field name="type">profit</field>
+        <field name="no_subject">True</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_3" model="retention.concept">
+        <field name="name">
+            Ret. Ga. Locaciones de Bs. y Serv RI
+        </field>
+        <field name="type">profit</field>
+        <field name="code">3</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_27" model="retention.concept">
+        <field name="name">
+            Alquileres de inmuebles
+        </field>
+        <field name="type">profit</field>
+        <field name="code">27</field>
+    </record>
+
+    <!-- Conceptos para Retencion de IVA -->
+    <record forcecreate="0" id="retention_concept_499" model="retention.concept">
+        <field name="name">
+            Factura “M” – IVA –Emisión de comprobantes con discriminación del Gravamen
+        </field>
+        <field name="type">vat</field>
+        <field name="code">499</field>
+    </record>
+
+    <!-- Conceptos para Retencion de II BB -->
+    <record forcecreate="0" id="retention_concept_no_subject" model="retention.concept">
+        <field name="name">No sujeto</field>
+        <field name="type">gross_income</field>
+        <field name="no_subject">True</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_caba" model="retention.concept">
+        <field name="name">Ciudad Autónoma de Buenos Aires</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_ba" model="retention.concept">
+        <field name="name">Buenos Aires</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_caba" model="retention.concept">
+        <field name="name">Ciudad Autónoma de Buenos Aires</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_catamarca" model="retention.concept">
+        <field name="name">Catamarca</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_chaco" model="retention.concept">
+        <field name="name">Chaco</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_chubut" model="retention.concept">
+        <field name="name">Chubut</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_cordoba" model="retention.concept">
+        <field name="name">Cordoba</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_corrientes" model="retention.concept">
+        <field name="name">Corrientes</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_entre_rios" model="retention.concept">
+        <field name="name">Entre Rios</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_formosa" model="retention.concept">
+        <field name="name">Formosa</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_jujuy" model="retention.concept">
+        <field name="name">Jujuy</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_la_pampa" model="retention.concept">
+        <field name="name">La Pampa</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_la_rioja" model="retention.concept">
+        <field name="name">La Rioja</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_mendoza" model="retention.concept">
+        <field name="name">Mendoza</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_misiones" model="retention.concept">
+        <field name="name">Misiones</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_neuquen" model="retention.concept">
+        <field name="name">Neuquen</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_rio_negro" model="retention.concept">
+        <field name="name">Rio Negro</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_salta" model="retention.concept">
+        <field name="name">Salta</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_san_juan" model="retention.concept">
+        <field name="name">San Juan</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_san_luis" model="retention.concept">
+        <field name="name">San Luis</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_santa_cruz" model="retention.concept">
+        <field name="name">Santa Cruz</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_santa_fe" model="retention.concept">
+        <field name="name">Santa Fe</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_santiago_del_estero" model="retention.concept">
+        <field name="name">Santiago del Estero</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_tierra_del_fuego" model="retention.concept">
+        <field name="name">Tierra del Fuego</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <record forcecreate="0" id="retention_concept_tucuman" model="retention.concept">
+        <field name="name">Tucuman</field>
+        <field name="type">gross_income</field>
+    </record>
+
+    <!-- ESCALAS -->
+    <record forcecreate="0" id="retention_scale_honorarios" model="retention.scale">
+        <field name="name">Honorarios</field>
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_profesionales" model="retention.scale">
+        <field name="name">Honorarios profesionales</field>
+    </record>
+
+    <!-- LINEAS ESCALAS -->
+    <record forcecreate="0" id="retention_scale_honorarios_8000" model="retention.scale.line">
+        <field name="name">0 a 8000</field>
+        <field name="limit">8000</field>
+        <field name="percent">5</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_16000" model="retention.scale.line">
+        <field name="name">8000 a 16000</field>
+        <field name="limit">16000</field>
+        <field name="percent">9</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_24000" model="retention.scale.line">
+        <field name="name">16000 a 24000</field>
+        <field name="limit">24000</field>
+        <field name="percent">12</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_32000" model="retention.scale.line">
+        <field name="name">24000 a 32000</field>
+        <field name="limit">32000</field>
+        <field name="percent">15</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_48000" model="retention.scale.line">
+        <field name="name">32000 a 48000</field>
+        <field name="limit">48000</field>
+        <field name="percent">19</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_64000" model="retention.scale.line">
+        <field name="name">48000 a 64000</field>
+        <field name="limit">64000</field>
+        <field name="percent">23</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_96000" model="retention.scale.line">
+        <field name="name">64000 a 96000</field>
+        <field name="limit">96000</field>
+        <field name="percent">27</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_inf" model="retention.scale.line">
+        <field name="name">96000 a inf</field>
+        <field name="limit">-1</field>
+        <field name="percent">31</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_profesionales_71000" model="retention.scale.line">
+        <field name="name">0 a 71000</field>
+        <field name="limit">71000</field>
+        <field name="percent">5</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios_profesionales" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_profesionales_142000" model="retention.scale.line">
+        <field name="name">71000 a 142000</field>
+        <field name="limit">142000</field>
+        <field name="percent">9</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios_profesionales" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_profesionales_213000" model="retention.scale.line">
+        <field name="name">142000 a 213000</field>
+        <field name="limit">213000</field>
+        <field name="percent">12</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios_profesionales" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_profesionales_284000" model="retention.scale.line">
+        <field name="name">213000 a 284000</field>
+        <field name="limit">284000</field>
+        <field name="percent">15</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios_profesionales" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_profesionales_426000" model="retention.scale.line">
+        <field name="name">284000 a 426000</field>
+        <field name="limit">426000</field>
+        <field name="percent">19</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios_profesionales" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_profesionales_568000" model="retention.scale.line">
+        <field name="name">426000 a 568000</field>
+        <field name="limit">568000</field>
+        <field name="percent">23</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios_profesionales" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_profesionales_852000" model="retention.scale.line">
+        <field name="name">568000 a 852000</field>
+        <field name="limit">852000</field>
+        <field name="percent">27</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios_profesionales" />
+    </record>
+
+    <record forcecreate="0" id="retention_scale_honorarios_profesionales_inf" model="retention.scale.line">
+        <field name="name">852000 a inf</field>
+        <field name="limit">-1</field>
+        <field name="percent">31</field>
+        <field name="scale_id" ref="l10n_ar_eynes.retention_scale_honorarios_profesionales" />
+    </record>
+
+    <!-- DIARIOS -->
     <record id="iva_retentions_s" model="account.journal" forcecreate="0">
         <field name="name">Retenciones IVA sufridas</field>
         <field name="type">retentions</field>
