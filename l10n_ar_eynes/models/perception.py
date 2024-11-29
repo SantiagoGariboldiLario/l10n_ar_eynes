@@ -135,37 +135,9 @@ class PerceptionTaxLine(models.Model):
                 rec.base_secondary_currency = rec.base * currency_rate
                 rec.amount_secondary_currency = rec.amount * currency_rate
 
-    # @api.onchange('perception_id')
-    # def _onchange_perception(self):
-    #     res = {}
-    #     if self.perception_id:
-    #         res['domain'] = {
-    #             'concept_id': [
-    #                 ('type', '=', self.perception_id.tax_id.retention_type)
-    #             ],
-    #         }
-    #     self.name = self.perception_id.name
-    #     self.state_id = self.perception_id.state_id.id
-    #     return res
-
-    # def compute_all(self, currency=None):
-    #     if len(self) == 0:
-    #         company_id = self.env.company
-    #     else:
-    #         company_id = self[0].company_id
-    #     if not currency:
-    #         currency = company_id.currency_id
-    #     taxes = []
-    #     taxes.append(
-    #         {
-    #             'id': self.perception_id.tax_id.id,
-    #             'name': self.name,
-    #             'amount': self.amount,
-    #             'base': self.base,
-    #         }
-    #     )
-
-    #     return taxes
+    def autocomplete_base_amount(self, amount_untaxed):
+        for rec in self:
+            rec.base = amount_untaxed
 
     @api.model
     def get_readeable_name(self):
@@ -177,28 +149,6 @@ class PerceptionTaxLine(models.Model):
         ptl_partner_name = self.partner_id.name or 'Undefined'
         name = u"RTL(#{})[{}-{}]".format(ptl_id, ptl_name, ptl_partner_name)
         return name
-
-    # def _compute(self, invoice, base, amount):
-    #     """
-    #     self: perception.tax.line
-    #     invoice: account.invoice
-    #     """
-    #     # Nos fijamos la currency de la invoice
-    #     currency = invoice.currency_id.with_context(
-    #         date=invoice.invoice_date or fields.Date.context_today(invoice)
-    #     )
-    #     company_currency = invoice.company_id.currency_id
-    #     if invoice.type in ('out_invoice', 'in_invoice'):
-    #         base_amount = currency.compute(base, company_currency, round=False)
-    #         tax_amount = currency.compute(amount, company_currency, round=False)
-    #     else:  # invoice is out_refund
-    #         base_amount = currency.compute(
-    #             base * -1, company_currency, round=False
-    #         )
-    #         tax_amount = currency.compute(
-    #             amount * -1, company_currency, round=False
-    #         )
-    #     return (tax_amount, base_amount)
 
 
 class PerceptionVatTax(models.Model):

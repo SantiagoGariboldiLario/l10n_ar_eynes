@@ -826,12 +826,25 @@ class AccountMove(models.Model):
             # contables que corresponden a cada percepción con los montos correctos calculados.
             self.invoice_line_ids.link_perception_to_move_lines()
 
-    @api.onchange('perception_ids')
+    def _get_perception_manual_base(self):
+        return sum(
+            self.invoice_line_ids.filtered(
+                lambda line: line.tax_ids
+                and (True not in line.tax_ids.mapped('is_exempt'))
+            ).mapped('price_subtotal')
+        )
+
+    @api.onchange('perception_ids', 'invoice_line_ids')
     def _onchange_perception_ids(self):
         if self.is_purchase_document(include_receipts=True) or (
             self.is_sale_document(include_receipts=True)
             and self.disable_perceptions
         ):
+            base = self._get_perception_manual_base()
+            if base > 0:
+                self.perception_ids.autocomplete_base_amount(base)
+            else:
+                self.perception_ids.unlink()
             self.invoice_line_ids.link_perception_to_move_lines()
             self._update_perception_move_line_amount()
 
