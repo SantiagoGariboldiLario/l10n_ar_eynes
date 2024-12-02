@@ -26,8 +26,9 @@
     'license': 'AGPL-3',
     'category': 'Accounting/Accounting',
     'excludes': [
-        'l10n_ar'
-    ],  # Va a impedir que se instale l10n_ar_eynes con errores por haber instalado en paralelo ese módulo pero la solución está en evitar configurar el país en las compañías hasta después de la instalación de l10n_ar_eynes
+        'l10n_ar',
+    ],  # Va a impedir que se instale l10n_ar_eynes con errores por haber instalado en paralelo ese módulo pero la
+    # solución está en evitar configurar el país en las compañías hasta después de la instalación de l10n_ar_eynes
     'depends': [
         'account',
         'account_debit_note',
@@ -37,7 +38,7 @@
         'delivery',
         'hr',
         'mail',
-        'month_year_widget',  # To pick only month and year in date fields
+        # 'month_year_widget',  # To pick only month and year in date fields
         'multi_step_wizard',
         'om_fiscal_year',
         'popup_messages',
