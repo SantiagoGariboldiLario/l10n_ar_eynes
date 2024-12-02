@@ -67,27 +67,31 @@ class AccountMoveLine(models.Model):
                     )
                 )
                 for perception in perceptions:
+                    perception = perception._origin
                     lines_with_perception = (
                         inv_product_with_perception_lines.filtered(
-                            lambda aml: perception in aml.tax_ids
+                            lambda aml: perception in aml.tax_ids._origin
                         )
                     )
-                    perception_total_base = sum(
-                        inv.perception_ids.filtered(
-                            lambda ptl: ptl.perception_id == perception
-                        ).mapped('base')
-                    )
-                    perception_total_amount = sum(
-                        inv.perception_ids.filtered(
-                            lambda ptl: ptl.perception_id == perception
-                        ).mapped('amount')
-                    )
-                    line_perception_base = inv.currency_id.round(
-                        perception_total_base / len(lines_with_perception)
-                    )
-                    line_perception_amount = inv.currency_id.round(
-                        perception_total_amount / len(lines_with_perception)
-                    )
+                    perception_total_base = line_perception_base = 0.0
+                    perception_total_amount = line_perception_amount = 0.0
+                    if lines_with_perception:
+                        perception_total_base = sum(
+                            inv.perception_ids.filtered(
+                                lambda ptl: ptl.perception_id == perception
+                            ).mapped('base')
+                        )
+                        perception_total_amount = sum(
+                            inv.perception_ids.filtered(
+                                lambda ptl: ptl.perception_id == perception
+                            ).mapped('amount')
+                        )
+                        line_perception_base = inv.currency_id.round(
+                            perception_total_base / len(lines_with_perception)
+                        )
+                        line_perception_amount = inv.currency_id.round(
+                            perception_total_amount / len(lines_with_perception)
+                        )
                     for aml in lines_with_perception:
                         rate = aml.currency_rate
                         for key in aml.compute_all_tax:
@@ -138,16 +142,30 @@ class AccountMoveLine(models.Model):
         return tax_ids
 
     def link_perception_to_move_lines(self):
+        to_clean = self.env['account.tax']
         for line in self:
-            if line.display_type in (
-                'line_section',
-                'line_note',
-                'payment_term',
+            if (
+                line.display_type == 'product'
+                and line.product_id
+                and line.tax_ids
+                and line.tax_ids.filtered(
+                    lambda tax: tax.tax_group_id.group_type == 'vat'
+                )
             ):
-                continue
-            # /!\ Don't remove existing taxes if there is no explicit taxes set on the account.
-            if line.product_id or line.account_id.tax_ids or not line.tax_ids:
-                line.tax_ids += line._get_computed_perceptions()
+                existing = line.tax_ids.filtered(
+                    lambda tag: tag.tax_group_id.group_type == 'perception'
+                )
+                to_check = line._get_computed_perceptions()
+                to_clean = self.env['account.tax']
+                to_add = self.env['account.tax']
+                for exists in existing:
+                    if exists._origin not in to_check:
+                        to_clean += exists
+                for new in to_check:
+                    if new not in existing._origin:
+                        to_add += new
+                line.tax_ids -= to_clean
+                line.tax_ids += to_add
         self._compute_all_tax()
 
     def price_unit_to_PDF(self):

@@ -842,7 +842,9 @@ class AccountMove(models.Model):
             else:
                 self.perception_ids.unlink()
             self.invoice_line_ids.link_perception_to_move_lines()
-            self._update_perception_move_line_amount()
+            self.with_context(
+                skip_invoice_line_sync=True
+            )._update_perception_move_line_amount()
 
     def _update_perception_move_line_amount(self):
         for perception in self.perception_ids.mapped('perception_id'):
