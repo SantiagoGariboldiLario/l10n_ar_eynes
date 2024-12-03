@@ -951,8 +951,6 @@ class AccountMove(models.Model):
                 move.validate_denomination()
 
         sale_invoices = self.filtered(lambda move: move.is_sale_document())
-        # Agregamos contexto para evitar la actualización de la tasa de cambio al validar la factura
-        sale_invoices = sale_invoices.with_context(from_action_post=True)
         electronic_invoices = sale_invoices.filtered(
             lambda move: move.fiscal_type == 'electronic'
         )
@@ -983,7 +981,8 @@ class AccountMove(models.Model):
 
         super(AccountMove, self - electronic_invoices).action_post()
 
-        return electronic_invoices._validate_electronic_invoices()
+        # Agregamos contexto para evitar la actualización de la tasa de cambio al validar la factura
+        return electronic_invoices.with_context(from_action_post=True)._validate_electronic_invoices()
 
     def validate_period(self):
         date = self.date or self.invoice_date or fields.Date.context_today(self)
