@@ -137,7 +137,10 @@ class PerceptionTaxLine(models.Model):
 
     def autocomplete_base_amount(self, amount_untaxed):
         for rec in self:
-            rec.base = amount_untaxed
+            if rec._origin.base == rec.base:
+                # Autocompletamos el importe de la base imponible en el caso de que el
+                # usuario no haya ingresado el importe a mano
+                rec.base = amount_untaxed
 
     @api.model
     def get_readeable_name(self):
