@@ -206,9 +206,10 @@ class SubjournalXlsx(models.AbstractModel):
                                 line['credit'] - line['debit']
                             ) * based_sign
                         elif tax['type'] == 'base':
-                            lines[dict_hash]['taxes'][i] = (
-                                line['tax_amount'] * sign
-                            )
+                            if line['tax_amount']:
+                                lines[dict_hash]['taxes'][i] = (
+                                    line['tax_amount'] * sign
+                                )
                     if lines[dict_hash]['taxes'][i] != 0:
                         c_taxes[i] += 1
 
@@ -486,8 +487,13 @@ class SubjournalXlsx(models.AbstractModel):
             sheet.write('C' + str(p), line['partner'], cell_format)
             sheet.write('D' + str(p), line['state'], cell_format)
             sheet.write('E' + str(p), line['vat'], cell_format)
-            sheet.write('F' + str(p), line["fiscal_position"][self.env.lang]
-                        if self.env.lang in line["fiscal_position"] else line["fiscal_position"]["en_US"], cell_format)
+            sheet.write(
+                'F' + str(p),
+                line["fiscal_position"][self.env.lang]
+                if self.env.lang in line["fiscal_position"]
+                else line["fiscal_position"]["en_US"],
+                cell_format,
+            )
             sheet.write('G' + str(p), line['invoice_type'], cell_format)
             sheet.write('H' + str(p), line['invoice_number'], cell_format)
             i = 8
