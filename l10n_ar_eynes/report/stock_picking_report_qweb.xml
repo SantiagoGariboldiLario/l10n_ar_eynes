@@ -172,7 +172,7 @@
                                 </td>
 
                                 <td>
-                                    <span t-esc="line.quantity_done" />
+                                    <span t-esc="line.quantity" />
                                 </td>
 
                                 <td>
