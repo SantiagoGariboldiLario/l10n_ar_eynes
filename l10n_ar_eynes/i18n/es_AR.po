@@ -10412,7 +10412,7 @@ msgstr "Deberia haber solo una linea de distribucion de facturas para '%s'"
 #: code:addons/l10n_ar_eynes/report/report_subjournal_xlsx.py:0
 #, python-format
 msgid "There were no moves for this period"
-msgstr "No hubieron apuntes contables en este período"
+msgstr "No hubo movimientos en este período"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,help:l10n_ar_eynes.field_account_fiscal_position__perception_ids
