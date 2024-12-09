@@ -101,15 +101,12 @@ class LibroIVAExporterWizard(models.TransientModel):
             cfc += abs(tax_line.amount_currency)
         return cfc
 
-    def _get_ganancias_retentions(self, invoice):
-        qty = len(
-            self._get_invoice_tax_lines(invoice).filtered(
-                lambda line: line.tax_line_id.tax_group_id.group_type
-                == self.env.ref('l10n_ar_eynes.retentions_tax_group').group_type
-                and line.tax_line_id.retention_type == 'profit'
-            )
-        )
-        return ('%016.2f' % qty).replace('.', '')
+    def _get_ganancias_perceptions(self, invoice):
+        amount = 0.0
+        for perception_id in invoice.perception_ids:
+            if perception_id.perception_id.retention_type == 'profit':
+                amount += perception_id.amount
+        return ('%016.2f' % amount).replace('.', '')
 
     def _get_invoice_date(self, invoice, errors):
         try:
@@ -671,7 +668,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         fiscal_credit = self._get_fiscal_credit_currency(invoice)
         fiscal_credit = ('%016.2f' % fiscal_credit).replace('.', '')
 
-        amount_ganancias = self._get_ganancias_retentions(invoice)
+        amount_ganancias = self._get_ganancias_perceptions(invoice)
 
         amount_iibb = self._get_perception_with_type(invoice, 'provincial')
         amount_municipal_perception = self._get_perception_with_type(
