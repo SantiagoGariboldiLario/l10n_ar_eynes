@@ -12,13 +12,13 @@ class PosConfig(models.Model):
         comodel_name='account.journal',
         inverse_name='wsfe_pos_config_id',
         string='Invoice Journals',
-        domain=[('type', '=', 'sale'), ('fiscal_type', '=', 'electronic')],
+        domain="[('type', '=', 'sale'), ('fiscal_type', '=', 'electronic')]",
         help="Accounting journals used to create electronic invoices.",
     )
     invoice_manual_journal_ids = fields.One2many(
         comodel_name='account.journal',
         inverse_name='pos_config_id',
         string='WSFE Invoice Journals',
-        domain=[('type', '=', 'sale'), ('fiscal_type', '=', 'internal')],
+        domain="[('type', '=', 'sale'), ('fiscal_type', '=', 'internal')]",
         help="Accounting journals used to create invoices.",
     )
