@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
     <data noupdate="0">
         <record id="paperformat_stock_picking_report_qweb" model="report.paperformat">
             <field name="name">Stock Picking Report Qweb L10n-Eynes</field>
@@ -8,12 +7,12 @@
             <field name="format">A4</field>
             <field name="page_width">0</field>
             <field name="orientation">Portrait</field>
-            <field name="margin_top">55</field>
+            <field name="margin_top">50</field>
             <field name="margin_bottom">20</field>
             <field name="margin_right">5</field>
             <field name="margin_left">5</field>
             <field name="header_line" eval="False" />
-            <field name="header_spacing">5</field>
+            <field name="header_spacing">45</field>
             <field name="dpi">90</field>
         </record>
     </data>
@@ -143,6 +142,8 @@
                 }
             </style>
         </div>
+        <div class="page">
+        </div>
         <div
             class="article"
             t-att-data-oe-model="o and o._name"
@@ -158,7 +159,7 @@
             <t t-foreach="docs" t-as="o">
                 <div t-call="l10n_ar_eynes.weblearns_layout_stock_picking">
                     <div class="page">
-                        <h4>Datos de entrega: </h4>
+                        <span>Datos de entrega: </span>
                         <table class="partner-table">
                             <tr>
                                 <td width="50%">
