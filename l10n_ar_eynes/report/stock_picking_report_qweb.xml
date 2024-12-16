@@ -143,8 +143,13 @@
                 }
             </style>
         </div>
-        <t t-raw="0" />
-        <div class="footer">
+        <div
+            class="article"
+            t-att-data-oe-model="o and o._name"
+            t-att-data-oe-id="o and o.id"
+            t-att-data-oe-lang="o and o.env.context.get('lang')"
+        >
+          <t t-out="0" />
         </div>
     </template>
 
@@ -152,84 +157,86 @@
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <div t-call="l10n_ar_eynes.weblearns_layout_stock_picking">
-                    <h4>Datos de entrega: </h4>
-                    <table class="partner-table">
-                        <tr>
-                            <td width="50%">
-                                <span>Cliente: </span><span t-esc="o.partner_id.name" />
-                                <br />
-                                <span>Direccion: </span><span t-esc="o.partner_id.city" /> <span
-                                    t-esc="o.partner_id.state_id.name"
-                                />
-                                <br />
-                                <span>Pais: </span><span t-esc="o.partner_id.country_id.name" />
-                            </td>
-                            <td width="50%">
-                                <span>Calle: </span><span t-esc="o.partner_id.street" /> <span
-                                    t-esc="o.partner_id.num"
-                                />
-                                <br />
-                                <span>Telefono: </span><span t-esc="o.partner_id.phone" />
-                                <br />
-                                <span>Mail: </span><span t-esc="o.partner_id.email" />
-                            </td>
-                        </tr>
-                    </table>
-                    <!--Products-->
-                    <table class="product-table">
-                        <thead>
+                    <div class="page">
+                        <h4>Datos de entrega: </h4>
+                        <table class="partner-table">
                             <tr>
-                                <th class="product-description-column" width="50%">
-                                    Producto
-                                </th>
-                                <!-- <th>
-                                    Uni.
-                                </th> -->
-                                <th>
-                                    Cant. cont.
-                                </th>
-                                <th>
-                                    UdM
-                                </th>
-                                <th>
-                                    Precio
-                                </th>
-                                <th>
-                                    Subtotal
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr t-foreach="o.move_ids_without_package" t-as="line">
-
-                                <td class="product-description-column">
-                                    [<span t-esc="line.product_id.default_code" />] <span
-                                        t-esc="line.product_id.name"
+                                <td width="50%">
+                                    <span>Cliente: </span><span t-esc="o.partner_id.name" />
+                                    <br />
+                                    <span>Direccion: </span><span t-esc="o.partner_id.city" /> <span
+                                        t-esc="o.partner_id.state_id.name"
                                     />
+                                    <br />
+                                    <span>Pais: </span><span t-esc="o.partner_id.country_id.name" />
                                 </td>
-
-                                <td>
-                                    <span t-esc="line.quantity" />
-                                </td>
-
-                                <td>
-                                    <span t-esc="line.product_uom.name" />
-                                </td>
-                                <td>
-                                    <span
-                                        t-esc="line.sale_line_id.price_unit"
-                                        t-options="{'widget': 'monetary', 'display_currency': line.sale_line_id.currency_id}"
+                                <td width="50%">
+                                    <span>Calle: </span><span t-esc="o.partner_id.street" /> <span
+                                        t-esc="o.partner_id.num"
                                     />
-                                </td>
-                                <td>
-                                    <span
-                                        t-esc="line.sale_line_id.price_subtotal"
-                                        t-options="{'widget': 'monetary', 'display_currency': line.sale_line_id.currency_id}"
-                                    />
+                                    <br />
+                                    <span>Telefono: </span><span t-esc="o.partner_id.phone" />
+                                    <br />
+                                    <span>Mail: </span><span t-esc="o.partner_id.email" />
                                 </td>
                             </tr>
-                        </tbody>
-                    </table>
+                        </table>
+                        <!--Products-->
+                        <table class="product-table">
+                            <thead>
+                                <tr>
+                                    <th class="product-description-column" width="50%">
+                                        Producto
+                                    </th>
+                                    <!-- <th>
+                                        Uni.
+                                    </th> -->
+                                    <th>
+                                        Cant. cont.
+                                    </th>
+                                    <th>
+                                        UdM
+                                    </th>
+                                    <th>
+                                        Precio
+                                    </th>
+                                    <th>
+                                        Subtotal
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.move_ids_without_package" t-as="line">
+
+                                    <td class="product-description-column">
+                                        [<span t-esc="line.product_id.default_code" />] <span
+                                            t-esc="line.product_id.name"
+                                        />
+                                    </td>
+
+                                    <td>
+                                        <span t-esc="line.quantity" />
+                                    </td>
+
+                                    <td>
+                                        <span t-esc="line.product_uom.name" />
+                                    </td>
+                                    <td>
+                                        <span
+                                            t-esc="line.sale_line_id.price_unit"
+                                            t-options="{'widget': 'monetary', 'display_currency': line.sale_line_id.currency_id}"
+                                        />
+                                    </td>
+                                    <td>
+                                        <span
+                                            t-esc="line.sale_line_id.price_subtotal"
+                                            t-options="{'widget': 'monetary', 'display_currency': line.sale_line_id.currency_id}"
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                     <style>
                     .partner-table,
                     .company-table,
