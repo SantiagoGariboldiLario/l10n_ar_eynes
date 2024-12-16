@@ -32,88 +32,126 @@
     <template id="weblearns_layout_stock_picking">
         <div class="header">
             <table class="header-table">
-                <tr>
-                    <td class="view-limits" style="width: 40%;">
-                        <div style="height: 10%;" />
-                        <img class="logo" t-attf-src="data:image/png;base64,#{o.company_id.logo}" />
-                        <div style="height: 10%;" />
-                    </td>
-                    <td class="view-limits" style="width: 60%;">
-                        <div style="height: 90%; width: 90%; margin-left: 20px;">
-                            <div class="view-limits" style="width: 100%; height: 70%;">
-                                REMITO: <span t-esc="o.name" /><br />
-                                Fecha de envio: <br />
-                                <span t-esc="o.date_done" />
+                <theader>
+                </theader>
+                <tbody>
+                    <tr>
+                        <td class="right">
+                            <img t-attf-src="data:image/png;base64,#{o.company_id.logo}" />
+                            <br />
+                            <p>
+                                Razón social: <span t-esc="o.company_id.name" />
+                                <br />
+                                Domicillio: <span t-esc="o.company_id.partner_id.street" />
+                                <span t-esc="o.company_id.partner_id.city" /> (
+                                <span t-esc="o.company_id.partner_id.zip" />) -
+                                <span t-esc="o.company_id.partner_id.state_id.name" /> -
+                                <span t-esc="o.company_id.partner_id.country_id.name" />
+                                <br />
+                                Tel.: <span t-esc="o.company_id.partner_id.phone" />
+                                <br />
+                                Condición frente al IVA: <span
+                                    t-esc="o.company_id.partner_id.property_account_position_id.name"
+                                />
+                            </p>
+                        </td>
+                        <td class="center">
+                            <div class="denomination-render">
+                                <h1>X</h1>
                             </div>
-                            <div class="view-limits" style="width: 100%; height: 30%;">
-                                <table style="width: 100%; height: 100%;">
-                                    <tr>
-                                        <td class="view-limits">
-                                            Orden:<br />
-                                            <span t-esc="o.origin" />
-                                        </td>
-                                        <td class="view-limits" style="width: 50%; height: 100%;">
-                                            Peso total:<br />
-                                            <span t-esc="o.weight" />
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
+                        </td>
+                        <td class="left">
+                            REMITO nº <span t-esc="o.name" />
+                            <br />
+                            <span>C.U.I.T: <span t-esc="o.company_id.vat" />
+                            </span>
+                            <br />
+                            <t t-if="o.company_id.partner_id.nro_insc_iibb">
+                                <span class="partner-info">Ing. Brutos: </span><span
+                                    t-esc="o.company_id.partner_id.nro_insc_iibb"
+                                />
+                                <br />
+                            </t>
+                            <span>Email: <span t-esc="o.company_id.partner_id.email" />
+                            </span>
+                            <br />
+                            <!-- <span>
+                                Inic. Activ.:
+                                <t t-if="o.journal_id.activity_start_date">
+                                    <span t-esc="o.journal_id.activity_start_date.strftime('%d/%m/%Y')" />
+                                </t>
+                            </span> -->
+                            Orden: <span t-esc="o.origin" />
+                            <br />
+                            Peso total:<span t-esc="o.weight" />
+                            <br />
+                            Fecha de envio: <span t-esc="o.date_done" />
+                        </td>
+                    </tr>
+                </tbody>
             </table>
             <style>
                 .header-table{
-                    height: 200px;
                     width: 100%;
-                }
-
-                .logo{
-                    height: 70%;
-                    width: 90%;
-                    margin-left: 10px;
-                    object-fit: cover;
-                }
-
-                .view-limits{
+                    border-collapse: collapse;
+                    margin: 25px 0;
+                    border-radius: 5px 5px 0 0;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+                    background-color: #f3f3f3;
                     border: transparent;
+                }
+
+                .right{
+                    font-weight: bold;
+                    width: 44%;
+                    padding-right: 10px;
+                }
+
+                .right p, .left span{
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 14px;
+                }
+
+                .right img {
+                    height: 80px;
+                    object-fit: contain;
+                }
+
+                .center{
+                    width: 20%;
+                    vertical-align: top;
+                    text-align: center;
+                }
+
+                .left {
+                    width: 44%;
+                    font-weight: bold;
+                    padding-left: 30px;
+                }
+
+                .denomination-render{
+                    display: block;
+                    margin: 0 auto;
+                    border: 2px solid #000;
+                    height: 90px;
+                    width: 90px;
+                    font-size: 40px;
+                }
+                .denomination-render h1{
+                    margin: 0;
                 }
             </style>
         </div>
         <t t-raw="0" />
         <div class="footer">
-
         </div>
     </template>
 
     <template id="stock_picking_report_qweb">
-        <t t-foreach="docs" t-as="o">
-            <t t-call="web.html_container">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
                 <div t-call="l10n_ar_eynes.weblearns_layout_stock_picking">
-                    <h4>Datos propios: </h4>
-                    <table class="company-table">
-                        <tr>
-                            <td width="50%">
-                                <span>Nombre: </span><span t-esc="o.company_id.name" />
-                                <br />
-                                <span>CUIT: </span><span t-esc="o.company_id.vat" />
-                                <br />
-                                <span>Direccion: </span><span t-esc="o.company_id.street" />
-                                <br />
-                                <span>Ciudad: </span><span t-esc="o.company_id.city" /> - <span
-                                    t-esc="o.company_id.state_id.name"
-                                />
-                            </td>
-                            <td width="50%">
-                                <span>IIBB <t t-esc="o.company_id.partner_id.nro_insc_iibb" /></span>
-                                <br />
-                                <!-- <span>Fecha de inicio de actividad: 11/11/1111</span>
-                                <br /> -->
-                                <span>IVA </span>
-                            </td>
-                        </tr>
-                    </table>
                     <h4>Datos de entrega: </h4>
                     <table class="partner-table">
                         <tr>
