@@ -26,7 +26,7 @@ class PerceptionTaxLine(models.Model):
         store=True,
         copy=True,
     )
-    date = fields.Date(index=True, required=True)
+    date = fields.Date(index=True)
     invoice_id = fields.Many2one(
         'account.move', string='Invoice', ondelete='cascade'
     )
