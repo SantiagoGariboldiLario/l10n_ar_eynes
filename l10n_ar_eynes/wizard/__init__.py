@@ -27,3 +27,4 @@ from . import account_check_change_state  # noqa
 from . import accredit_check_wizard
 from . import force_journal_change
 from . import sales_by_jurisdiction
+from . import libro_diario_wizard

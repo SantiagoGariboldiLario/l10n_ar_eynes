@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="libro_diario_exporter_view" model="ir.ui.view">
+        <field name="name">Libro diario</field>
+        <field name="model">journal.ledger.wizard</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="date_start" widget="month_year_format" />
+                    <field name="date_end" widget="month_year_format" />
+                    <field name="company_id_domain" invisible="True" />
+                    <field name="company_id" domain="company_id_domain" />
+                </group>
+                <footer>
+                    <button name="run" string="Generate" colspan="1" type="object" class="oe_highlight" />
+                    <button special="cancel" string="Cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_export_libro_diario" model="ir.actions.act_window">
+        <field name="name">Libro Diario</field>
+        <field name="res_model">journal.ledger.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        id="libro_diario_menu"
+        name="Libro Diario"
+        parent="account.account_reports_management_menu"
+        action="action_export_libro_diario"
+    />
+</odoo>

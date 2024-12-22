@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data noupdate="1">
+        <record id="paperformat_libro_diario" model="report.paperformat">
+            <field name="name">Libro Diario</field>
+            <field name="default" eval="False" />
+            <field name="format">A4</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">35</field>
+            <field name="margin_bottom">35</field>
+            <field name="margin_right">5</field>
+            <field name="margin_left">5</field>
+            <field name="header_line" eval="False" />
+            <field name="header_spacing">5</field>
+            <field name="dpi">90</field>
+        </record>
+    </data>
+
+    <record id="action_report_libro_diario" model="ir.actions.report">
+        <field name="name">Libro Diario</field>
+        <field name="model">journal.ledger.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ar_eynes.libro_diario_qweb</field>
+        <field name="report_file">l10n_ar_eynes.libro_diario_qweb</field>
+        <field name="paperformat_id" ref="l10n_ar_eynes.paperformat_libro_diario" />
+    </record>
+</odoo>

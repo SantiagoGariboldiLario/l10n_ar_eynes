@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="weblearns_layout_libro_diario">
+        <div class="header">
+            <table style="width: 100%; margin: 40px auto;">
+                <theader>
+                </theader>
+                <tbody>
+                    <tr>
+                        <td style="width: 30%; text-align: left; font-size: small;">
+                            <t t-if="company.logo">
+                                <img
+                                    style="width: 200px; height: 75px"
+                                    alt="logo"
+                                    t-att-src="image_data_uri(company.logo)"
+                                />
+                            </t>
+                        </td>
+                        <td style="width: 50%; text-align: left; font-size: small;">
+                            <strong> <t t-out="company.name" /> </strong>
+                            <br />
+                            <span> CUIT: <t t-out="company.vat" /> </span>
+                            <br />
+                            <span> <t t-out="company.street" /> </span>
+                            <br />
+                            <span> Web: <t t-out="company.website" /> </span>
+                            <br />
+                            <span> Tel.: <t t-out="company.phone" /> </span>
+                            <br />
+                            <span> e-mail: <t t-out="company.email" /> </span>
+                        </td>
+                        <td style="text-align: right; font-size: medium;">
+                            <h2>LIBRO DIARIO</h2>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div
+            class="article"
+            t-att-data-oe-model="o and o._name"
+            t-att-data-oe-id="o and o.id"
+            t-att-data-oe-lang="o and o.env.context.get('lang')"
+        >
+          <t t-out="0" />
+        </div>
+    </template>
+
+    <template id="libro_diario_qweb">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="l10n_ar_eynes.weblearns_layout_libro_diario">
+                    <div class="page">
+                        <!-- REPORT BODY -->
+                        <t t-foreach="move_headers" t-as="move_head">
+                            <t t-set="nro_asiento" t-value="move_head[1]" />
+                            <t t-set="date" t-value="move_head[2]" />
+                            <t t-if="move_head[0] == 'move_header'">
+                                <!-- Day header -->
+                                <div class="container-header">
+                                    <div>
+                                        Número <t t-out="nro_asiento" />
+                                    </div>
+                                    <div>
+                                        Fecha <t t-out="date" />
+                                    </div>
+                                    <div>
+                                        Período <t t-out="date[3:]" />
+                                    </div>
+                                </div>
+                            </t>
+                            <style>
+                                .container-header {
+                                    width: 100%;
+                                    display: -webkit-box;
+                                    -webkit-box-orient: horizontal;
+                                    -webkit-box-direction: normal;
+                                    -webkit-box-pack: space-between;
+                                    -webkit-justify-content: space-between;
+                                    background: #F2E6E6;
+                                    text-align: left;
+                                    padding: 10px;
+                                    margin-bottom: 3px;
+                                }
+                                .container-header div {
+                                    width: 30%;
+                                }
+
+                                .day-content {
+                                    width: 100%;
+                                    margin-bottom: 3px;
+                                }
+                                .day-content thead tr {
+                                    text-align: left;
+                                    padding: 10px;
+                                }
+                                .monetary-cell {
+                                    text-align: right;
+                                }
+                            </style>
+                            <table class="day-content">
+                                <thead>
+                                    <tr class="day-content-row">
+                                        <t t-foreach="o._get_table_headers()" t-as="head">
+                                            <t t-if="head not in ['', 'header']">
+                                                <th>
+                                                    <t t-out="head" />
+                                                </th>
+                                            </t>
+                                        </t>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="moves" t-as="line">
+                                        <t t-if="line[1] == nro_asiento">
+                                            <t t-if="line[0] == 'body'">
+                                                <tr class="day-content-row">
+                                                    <td>
+                                                        <t t-out="line[3]" />
+                                                    </td>
+                                                    <td>
+                                                        <t t-out="line[4]" />
+                                                    </td>
+                                                    <td class="monetary-cell">
+                                                        <t t-set="value5" t-value="'%.2f' % float(line[5])" />
+                                                        <t t-out="value5" />
+                                                    </td>
+                                                    <td class="monetary-cell">
+                                                        <t t-set="value6" t-value="'%.2f' % float(line[6])" />
+                                                        <t t-out="value6" />
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                            <t t-if="line[0] == 'footer'">
+                                                <tr>
+                                                    <td>
+                                                    </td>
+                                                    <td>
+                                                        <strong> Totales del asiento </strong>
+                                                    </td>
+                                                    <td class="monetary-cell">
+                                                        <t t-set="value7" t-value="'%.2f' % float(line[7])" />
+                                                        <strong> <t t-out="value7" /> </strong>
+                                                    </td>
+                                                    <td class="monetary-cell">
+                                                        <t t-set="value8" t-value="'%.2f' % float(line[8])" />
+                                                        <strong> <t t-out="value8" /> </strong>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

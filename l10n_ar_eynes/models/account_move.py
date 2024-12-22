@@ -69,6 +69,8 @@ class AccountMove(models.Model):
         string='Internal Number',
         copy=False,
     )
+    is_closing = fields.Boolean(default=False)
+    is_opening = fields.Boolean(default=False)
     supplier_move_reference = fields.Char(
         string='Supplier Invoice Reference',
         copy=False,
@@ -982,7 +984,9 @@ class AccountMove(models.Model):
         super(AccountMove, self - electronic_invoices).action_post()
 
         # Agregamos contexto para evitar la actualización de la tasa de cambio al validar la factura
-        return electronic_invoices.with_context(from_action_post=True)._validate_electronic_invoices()
+        return electronic_invoices.with_context(
+            from_action_post=True
+        )._validate_electronic_invoices()
 
     def validate_period(self):
         date = self.date or self.invoice_date or fields.Date.context_today(self)

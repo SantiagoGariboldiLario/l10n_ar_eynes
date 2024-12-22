@@ -367,7 +367,10 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         if move_lines:
             move_data = data.copy()
             move_data.update(
-                {'line_ids': [(0, 0, line) for line in move_lines]}
+                {
+                    'line_ids': [(0, 0, line) for line in move_lines],
+                    'is_closing': True,
+                }
             )
 
             move = AccountMove.with_context(**ctx).create(move_data)
@@ -444,6 +447,7 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
                     'journal_id': journal_id,
                     'line_ids': [(0, 0, line) for line in move_lines],
                     'ref': description,
+                    'is_opening': True,
                 }
             )
             if move:
