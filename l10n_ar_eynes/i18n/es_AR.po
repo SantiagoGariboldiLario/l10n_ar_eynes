@@ -3737,7 +3737,7 @@ msgstr "Fecha aplicada"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_journal_ledger_wizard__date_end
 msgid "Date End"
-msgstr ""
+msgstr "Fecha Hasta"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_generated_files__date_from
