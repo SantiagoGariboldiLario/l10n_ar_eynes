@@ -2442,6 +2442,7 @@ msgstr "No se puede romper la conciliación de un cheque no emitido!"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.fiscal_year_closing_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.force_journal_change_form_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.key_renewal_wizard
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_diario_exporter_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_iva_exporter_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.reject_issued_check_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.reject_third_party_check_wizard_view_form
@@ -3108,6 +3109,7 @@ msgstr "Compañías"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_force_journal_change_wizard__company_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_journal_ledger_wizard__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_activity__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_concept__company_id
@@ -3415,6 +3417,7 @@ msgstr "Generación de archivos SIFERE"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_gross_income__create_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_iibb_situation__create_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_inflation_index__create_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_journal_ledger_wizard__create_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__create_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libroiva_generated_files__create_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_activity__create_uid
@@ -3515,6 +3518,7 @@ msgstr "Creado por"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_gross_income__create_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_iibb_situation__create_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_inflation_index__create_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_journal_ledger_wizard__create_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__create_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libroiva_generated_files__create_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_activity__create_date
@@ -3731,6 +3735,11 @@ msgid "Date Applied"
 msgstr "Fecha aplicada"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_journal_ledger_wizard__date_end
+msgid "Date End"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_generated_files__date_from
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_perception_exporter_wizard__date_from
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_retention_exporter_wizard__date_from
@@ -3797,6 +3806,7 @@ msgid "Date of presentation"
 msgstr "Fecha de presentación"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_journal_ledger_wizard__date_start
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_arciba_files__period_start
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_arciba_nc_file__period_start
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_create_sicore_files__period_start
@@ -4201,6 +4211,7 @@ msgstr "Deshabilitar retenciones"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_gross_income__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_iibb_situation__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_inflation_index__display_name
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_journal_ledger_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libroiva_generated_files__display_name
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_activity__display_name
@@ -5315,6 +5326,7 @@ msgid "Generar"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_diario_exporter_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_iva_exporter_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_generator_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_files
@@ -6304,6 +6316,7 @@ msgstr "Última actualización desde AFIP"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_gross_income__write_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_iibb_situation__write_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_inflation_index__write_uid
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_journal_ledger_wizard__write_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__write_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libroiva_generated_files__write_uid
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_activity__write_uid
@@ -6404,6 +6417,7 @@ msgstr "Última actualización por"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_gross_income__write_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_iibb_situation__write_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_inflation_index__write_date
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_journal_ledger_wizard__write_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__write_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libroiva_generated_files__write_date
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_activity__write_date
