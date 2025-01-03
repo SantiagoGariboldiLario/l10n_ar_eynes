@@ -81,6 +81,7 @@
                                     text-align: left;
                                     padding: 10px;
                                     margin-bottom: 3px;
+                                    border: transparent;
                                 }
                                 .container-header div {
                                     width: 30%;
@@ -89,6 +90,7 @@
                                 .day-content {
                                     width: 100%;
                                     margin-bottom: 3px;
+                                    border: transparent;
                                 }
                                 .day-content thead tr {
                                     text-align: left;
