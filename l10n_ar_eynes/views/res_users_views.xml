@@ -7,11 +7,14 @@
         <field name="inherit_id" ref="base.view_users_form" />
         <field name="arch" type="xml">
             <xpath expr="//group[@name='preferences']" position="inside">
+                <field name="used_journals_domain" invisible="True" />
                 <field name="journal_rel_ids">
                     <tree editable="bottom">
                         <field name="priority" />
-                        <field name="journal_id" />
+                        <field name="used_journals_domain" column_invisible="True" />
+                        <field name="journal_id" domain="used_journals_domain" />
                         <field name="code" />
+                        <field name="company_id" />
                     </tree>
                 </field>
             </xpath>
