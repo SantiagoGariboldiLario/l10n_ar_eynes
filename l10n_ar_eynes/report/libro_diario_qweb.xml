@@ -2,7 +2,7 @@
 <odoo>
     <template id="weblearns_layout_libro_diario">
         <div class="header">
-            <table style="width: 100%; margin: 40px auto;">
+            <table style="width: 100%; margin: 40px auto; border: transparent;">
                 <theader>
                 </theader>
                 <tbody>
