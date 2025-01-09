@@ -10,8 +10,8 @@
             <t t-foreach="docs" t-as="o">
                 <t t-foreach="o.retention_ids" t-as="r">
                     <!-- *-* *-* TITLE I *-* *-* -->
-                    <div class="header">
-                        <table style="width:100%">
+                    <div class="header" style="page-break-before:always;">
+                        <table style="width: 100%; border: transparent;">
                             <tr>
                                 <td colspan="2" style="text-align:center;padding:9px;">
                                     <t
@@ -24,7 +24,7 @@
                         </table>
                     </div>
                     <div class="article">
-                        <table style="width:100%">
+                        <table style="width: 100%; border: transparent;">
                         <tr>
                             <td colspan="2" style="text-align:center;padding:9px;font-size:30px;">
                                 <strong>Nro. de Constancia: </strong>
@@ -179,7 +179,7 @@
                             </td>
                         </tr>
                     </table>
-                    <table style="width:100%">
+                    <table style="width: 100%; border: transparent;">
                         <tr>
                             <td style="width:25%;text-align:center;padding:9px;">
                                 <strong style="font-size:21px;">Monto Base Imponible</strong>
@@ -220,7 +220,7 @@
                         </tr>
                     </table>
 
-                    <table style="width:100%">
+                    <table style="width: 100%; border: transparent;">
                         <tr>
                             <td style="padding:9px;">
                                 <strong style="font-size:21px;">Total Retenido: </strong>
@@ -266,8 +266,8 @@
                         </tr>
                     </table>
                 </div>
-                <div class="footer">
-                    <table style="width:100%;margin-top:250px;">
+                <div class="footer" style="page-break-after:always;">
+                    <table style="width: 100%; border: transparent;">
                         <tr>
                             <td rowspan="2" style="width:70%;padding:9px;">
                             </td>
@@ -294,7 +294,7 @@
         <field name="page_width">210</field>
         <field name="orientation">Portrait</field>
         <field name="margin_top">12</field>
-        <field name="margin_bottom">8</field>
+        <field name="margin_bottom">16</field>
         <field name="margin_left">5</field>
         <field name="margin_right">5</field>
         <field name="header_line" eval="False" />
