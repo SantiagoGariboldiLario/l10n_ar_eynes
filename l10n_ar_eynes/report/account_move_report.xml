@@ -248,7 +248,6 @@
 
                 .column-afip-2 img {
                     height: 35px;
-                    width: 132px;
                 }
 
                 .column-afip-2 p {
@@ -596,87 +595,125 @@
                                 </tbofy>
                             </table>
                             <!--Observations/Total-->
-                            <table class="total-table fix-position" style="width: 40%">
-                                <thead>
-                                    <tr>
-                                        <td t-if="o.denomination != 'e'">
-                                            Subtotal
-                                        </td>
-                                        <td t-else="">
-                                            Tipo de cambio
-                                        </td>
-                                        <td t-if="o.denomination == 'b'">
-                                            Otros imp.
-                                        </td>
-                                        <td t-elif="o.denomination != 'e'">
-                                            Impuestos
-                                        </td>
-                                        <td t-else="">
-                                            Divisa
-                                        </td>
-                                        <td>
-                                            Total
-                                        </td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr t-if="o.denomination == 'b'">
-                                        <td>
-                                            <span
-                                                t-esc="o.amount_total - (percepciones_amount + retenciones_amount)"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                            />
-                                        </td>
-                                        <td>
-                                            <span
-                                                t-esc="percepciones_amount + retenciones_amount"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                            />
-                                        </td>
-                                        <td>
-                                            <span
-                                                t-esc="o.amount_total"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                            />
-                                        </td>
-                                    </tr>
-                                    <tr t-elif="o.denomination != 'e'">
-                                        <td>
-                                            <span
-                                                t-esc="o.price_subtotal_to_PDF()"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                            />
-                                        </td>
-                                        <td t-if="o.denomination != 'b'">
-                                            <span
-                                                t-esc="o.amount_tax"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                            />
-                                        </td>
-                                        <td>
-                                            <span
-                                                t-esc="o.amount_total"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                            />
-                                        </td>
-                                    </tr>
-                                    <tr t-else="">
-                                        <td>
-                                            $ <span t-esc="o.currency_rate" />
-                                        </td>
-                                        <td t-if="o.denomination != 'b'">
-                                            <span t-esc="o.currency_id.name" />
-                                        </td>
-                                        <td>
-                                            <span
-                                                t-esc="o.amount_total"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                            />
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <!--Masagge-->
+                            <div>
+                                <table class="total-table fix-position" style="width: 40%">
+                                    <thead>
+                                        <tr>
+                                            <td t-if="o.denomination != 'e'">
+                                                Subtotal
+                                            </td>
+                                            <td t-else="">
+                                                Tipo de cambio
+                                            </td>
+                                            <td t-if="o.denomination == 'b'">
+                                                Otros imp.
+                                            </td>
+                                            <td t-elif="o.denomination != 'e'">
+                                                Impuestos
+                                            </td>
+                                            <td t-else="">
+                                                Divisa
+                                            </td>
+                                            <td>
+                                                Total
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-if="o.denomination == 'b'">
+                                            <td>
+                                                <span
+                                                    t-esc="o.amount_total - (percepciones_amount + retenciones_amount)"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
+                                            </td>
+                                            <td>
+                                                <span
+                                                    t-esc="percepciones_amount + retenciones_amount"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
+                                            </td>
+                                            <td>
+                                                <span
+                                                    t-esc="o.amount_total"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
+                                            </td>
+                                        </tr>
+                                        <tr t-elif="o.denomination != 'e'">
+                                            <td>
+                                                <span
+                                                    t-esc="o.price_subtotal_to_PDF()"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
+                                            </td>
+                                            <td t-if="o.denomination != 'b'">
+                                                <span
+                                                    t-esc="o.amount_tax"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
+                                            </td>
+                                            <td>
+                                                <span
+                                                    t-esc="o.amount_total"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
+                                            </td>
+                                        </tr>
+                                        <tr t-else="">
+                                            <td>
+                                                $ <span t-esc="o.currency_rate" />
+                                            </td>
+                                            <td t-if="o.denomination != 'b'">
+                                                <span t-esc="o.currency_id.name" />
+                                            </td>
+                                            <td>
+                                                <span
+                                                    t-esc="o.amount_total"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <t t-if="o.denomination == 'b'">
+                                    <table class="total-table total-table-cf fix-position" style="width: 60%">
+                                        <thead>
+                                            <th>
+                                                <td>
+                                                    Régimen de Transparencia Fiscal al Consumidor Ley 27.743
+                                                </td>
+                                            </th>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td style="width: 50%">
+                                                    IVA Contenido:
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        t-esc="o.amount_tax"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="width: 50%">
+                                                    Otros Impuestos Nacionales Indirectos:
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        t-esc="percepciones_amount + retenciones_amount"
+                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                    />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </t>
+                            </div>
+
+                            <!--Mesagge-->
                             <div class="fix-position">
                                 <t
                                     t-if="o.move_type == 'out_invoice' and denomination_name == 'A' and o.partner_id.property_account_position_id.name == 'Responsable Monotributo'"
@@ -713,6 +750,10 @@
                         .taxes-table,
                         .total-table {
                             float: right;
+                        }
+
+                        .total-table-cf {
+                            float: left;
                         }
 
                         .fix-position {

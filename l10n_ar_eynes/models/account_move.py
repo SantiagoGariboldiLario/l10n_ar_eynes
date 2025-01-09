@@ -1389,7 +1389,7 @@ class AccountMove(models.Model):
         return 'l10n_ar_eynes.report_invoice_document'
 
     def get_afip_logo_path(self):
-        return "l10n_ar_eynes/static/img/logo_afip.png"
+        return "l10n_ar_eynes/static/img/ARCA_logo.png"
 
     def get_afip_logo(self):
         return b64encode(file_open(self.get_afip_logo_path(), 'rb').read())
