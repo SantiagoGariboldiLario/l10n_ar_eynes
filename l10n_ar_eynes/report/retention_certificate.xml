@@ -197,15 +197,23 @@
                         <tr>
                             <td style="width:25%;text-align:center;padding:9px;">
                                 <t t-set="base" t-value="r.base" />
-                                <span t-esc="base" style="font-size:21px;" />
+                                <span
+                                        t-esc="base"
+                                        style="font-size:21px;"
+                                        t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'
+                                    />
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
-                                <t t-set="applied_aliquot" t-value="100 * r.amount / r.base" />
+                                <t t-set="applied_aliquot" t-value="'%.2f' % (100 * r.amount / r.base)" />
                                 <span t-esc="applied_aliquot" style="font-size:21px;" />
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
                                 <t t-set="amount" t-value="r.amount" />
-                                <span t-esc="amount" style="font-size:21px;" />
+                                <span
+                                        t-esc="amount"
+                                        style="font-size:21px;"
+                                        t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'
+                                    />
                             </td>
                             <td style="text-align:center;padding:9px;">
                                 <t t-if="r.date">
