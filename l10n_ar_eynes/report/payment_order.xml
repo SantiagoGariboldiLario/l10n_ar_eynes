@@ -576,53 +576,43 @@
                                 </t>
                             </div>
                             <!--Footer-->
-                            <div style="width: 250px; height: 50px; margin: auto;" />
                             <div
-                                style="width: 800px; height: 242px; border: 2px solid black; margin: 40px auto; page-break-inside: avoid;"
+                                style="width: 800px; height: 242px; border: 2px solid black; margin: 40px auto; page-break-after: true;"
                             >
-                                    <tr>
-                                        <td
-                                        colspan="3"
-                                        style="border: 1.5px solid black; width: 800px; height: 134px;"
-                                    >
-                                            <div
-                                            style="color: black; background-color: white; text-align: right; margin-top: 5px;margin-right: 5px"
-                                        >
-                                                <t t-if="o.type == 'receipt' or o.type == 'sale'">
-                                                    <strong>Total cobrado:
-                                                        <t
-                                                        t-if="o.currency_id.name.lower() == 'ars'"
-                                                        t-esc="o.amount"
-                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                    />
-                                                        <t
-                                                        t-else=""
-                                                        t-esc="o.amount / o.payment_rate"
-                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                    />
-                                                    </strong>
-                                                </t>
-                                                <t t-else="">
-                                                    <strong>Total pagado: <t
-                                                        t-esc="sum(line.amount for line in o.debt_line_ids)"
-                                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-                                                    /></strong>
-                                                </t>
-                                            </div>
-                                            <div style="height: 75px;" />
-                                            <div
-                                            style="border-top: 1px solid black; width: 350px; margin: 40px auto"
-                                        />
-                                            <div style="text-align: center;">
-                                                Firma y Aclaracion
-                                            </div>
-                                            <div
-                                            style="text-align: center; font-size: 8pt; padding-left: 4px; padding-right: 4px; margin-top: 30px;"
-                                        >
-                                                COMPROBANTE NO VALIDO COMO FACTURA. ESTE DOCUMENTO CARECE DE VALIDEZ SI NO SE ENCUENTRA DEBIDAMENTE FIRMADO
-                                            </div>
-                                        </td>
-                                    </tr>
+                                <div
+                                    style="color: black; background-color: white; text-align: right; margin-right: 5px"
+                                >
+                                    <t t-if="o.type == 'receipt' or o.type == 'sale'">
+                                        <strong>Total cobrado:
+                                            <t
+                                                t-if="o.currency_id.name.lower() == 'ars'"
+                                                t-esc="o.amount"
+                                                t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"
+                                            />
+                                            <t
+                                                t-else=""
+                                                t-esc="o.amount / o.payment_rate"
+                                                t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"
+                                            />
+                                        </strong>
+                                    </t>
+                                    <t t-else="">
+                                        <strong>Total pagado: <t
+                                                t-esc="sum(line.amount for line in o.debt_line_ids)"
+                                                t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"
+                                            /></strong>
+                                    </t>
+                                </div>
+                                <div style="height: 75px;" />
+                                <div style="border-top: 1px solid black; width: 350px; margin: 40px auto" />
+                                <div style="text-align: center;">
+                                    Firma y Aclaracion
+                                </div>
+                                <div
+                                    style="text-align: center; font-size: 8pt; padding-left: 4px; padding-right: 4px; margin-top: 30px; margin-bottom: 15px;"
+                                >
+                                    COMPROBANTE NO VALIDO COMO FACTURA. ESTE DOCUMENTO CARECE DE VALIDEZ SI NO SE ENCUENTRA DEBIDAMENTE FIRMADO
+                                </div>
                             </div>
                         </div>
                         <style>
