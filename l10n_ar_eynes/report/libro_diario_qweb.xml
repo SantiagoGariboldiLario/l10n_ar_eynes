@@ -92,9 +92,8 @@
                                     margin-bottom: 3px;
                                     border: transparent;
                                 }
-                                .day-content thead tr {
+                                .normal-cell {
                                     text-align: left;
-                                    padding: 10px;
                                 }
                                 .monetary-cell {
                                     text-align: right;
@@ -105,9 +104,16 @@
                                     <tr class="day-content-row">
                                         <t t-foreach="o._get_table_headers()" t-as="head">
                                             <t t-if="head not in ['', 'header']">
-                                                <th>
-                                                    <t t-out="head" />
-                                                </th>
+                                                <t t-if="head in ['Debe', 'Haber']">
+                                                    <th class="monetary-cell">
+                                                        <t t-out="head" />
+                                                    </th>
+                                                </t>
+                                                <t t-else="">
+                                                    <th class="normal-cell">
+                                                        <t t-out="head" />
+                                                    </th>
+                                                </t>
                                             </t>
                                         </t>
                                     </tr>
@@ -117,10 +123,10 @@
                                         <t t-if="line[1] == nro_asiento">
                                             <t t-if="line[0] == 'body'">
                                                 <tr class="day-content-row">
-                                                    <td>
+                                                    <td class="normal-cell">
                                                         <t t-out="line[3]" />
                                                     </td>
-                                                    <td>
+                                                    <td class="normal-cell">
                                                         <t t-out="line[4]" />
                                                     </td>
                                                     <td class="monetary-cell">
