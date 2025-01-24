@@ -1381,12 +1381,33 @@ class AccountMove(models.Model):
         url = self._generate_qr_afip_url()
         return self._generate_qr(url)
 
+    def _get_mail_template(self):
+        """
+        @override --> Custom PDF inyection
+        :return: the correct mail template based on the current move type
+        """
+        report = (
+            'l10n_ar_eynes.email_template_edi_credit_note'
+            if all(move.move_type == 'out_refund' for move in self)
+            else 'l10n_ar_eynes.email_template_edi_invoice'
+        )
+        return report
+
     def _get_name_invoice_report(self):
         """This method need to be inherit by the localizations if they want to
         print a custom invoice report instead of
         the default one. For example please review the l10n_ar module"""
         self.ensure_one()
-        return 'l10n_ar_eynes.report_invoice_document'
+        return 'l10n_ar_eynes.account_move_report'
+
+    def action_invoice_print(self):
+        """
+        @override --> Custom PDF inyection
+        Print the invoice and mark it as sent, so that we can see more
+        easily the next step of the workflow
+        """
+        super(AccountMove, self).action_invoice_print()
+        return self.env.ref(self._get_name_invoice_report()).report_action(self)
 
     def get_afip_logo_path(self):
         return "l10n_ar_eynes/static/img/ARCA_logo.png"
