@@ -148,6 +148,7 @@
         'wizard/create_libro_iva_file.xml',
         'views/libro_iva_generated_files.xml',
         'report/stock_picking_report_qweb.xml',
+        'views/account_portal_templates.xml',
         "wizard/sales_by_jurisdiction_view.xml",
         "report/sales_by_jurisdiction_xls.xml",
         "views/default_jurisdiction_config_view.xml",

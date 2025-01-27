@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="portal_my_invoices_eynes" inherit_id="account.portal_my_invoices">
+        <xpath expr="//thead/tr/th[last()]" position="after">
+            <th>Voucher type</th>
+            <th>Company</th>
+        </xpath>
+        <xpath expr="//tbody/t/tr/td[last()]" position="after">
+            <td><span t-esc="invoice.voucher_type_id.name" /></td>
+            <td><span t-esc="invoice.company_id.name" /></td>
+        </xpath>
+    </template>
+</odoo>
