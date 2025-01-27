@@ -3124,6 +3124,7 @@ msgstr "Compañías"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_activity__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_concept__company_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_retention_tax_application__company_id
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.portal_my_invoices_eynes
 msgid "Company"
 msgstr "Compañia"
 
@@ -11159,6 +11160,7 @@ msgstr "Tipos de comprobante"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__voucher_type_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__voucher_type_id
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_voucher_type_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.portal_my_invoices_eynes
 msgid "Voucher type"
 msgstr "Tipo de comprobante"
 
