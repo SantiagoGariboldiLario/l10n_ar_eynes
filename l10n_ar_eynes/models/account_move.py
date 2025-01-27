@@ -199,6 +199,19 @@ class AccountMove(models.Model):
         help="""Fields with internal purpose only that depicts
                 if the invoice is a multi currency one or not""",
     )
+    secondary_currency_id = fields.Many2one(
+        'res.currency',
+        string='Secondary Currency',
+        readonly=True,
+        default=lambda x: x.env.company.currency_id,
+    )
+    secondary_currency_rate = fields.Float(
+        string='Secondary Currency Rate',
+        digits=(12, 6),
+        readonly=True,
+        default=lambda x: 1.00,
+        help="It is the old currency rate of the last change of currency",
+    )
     # MONTOS EN MONEDA (currency_id):
     amount_exempt_cur = fields.Monetary(
         compute='_compute_amount_all_cur',
@@ -335,16 +348,15 @@ class AccountMove(models.Model):
                 'amount_total_cur': 0.0,  # Total
             }
 
-            if invoice.company_currency_id != invoice.currency_id:
-                res['amount_taxed_cur'] = (
-                    invoice.amount_taxed * invoice.currency_rate
-                )
-                res['amount_no_taxed_cur'] = (
-                    invoice.amount_no_taxed * invoice.currency_rate
-                )
-                res['amount_exempt_cur'] = (
-                    invoice.amount_exempt * invoice.currency_rate
-                )
+            if invoice.is_multi_currency:
+                if invoice.company_currency_id != invoice.currency_id:
+                    rate = invoice.currency_rate
+                else:
+                    rate = 1 / invoice.secondary_currency_rate
+
+                res['amount_taxed_cur'] = invoice.amount_taxed * rate
+                res['amount_no_taxed_cur'] = invoice.amount_no_taxed * rate
+                res['amount_exempt_cur'] = invoice.amount_exempt * rate
 
                 res['amount_total_cur'] += res['amount_taxed_cur']
                 res['amount_total_cur'] += res['amount_no_taxed_cur']
@@ -363,13 +375,13 @@ class AccountMove(models.Model):
                                 * invoice.currency_rate
                             )
                             res['amount_tax_cur'] = (
-                                tax['tax_group_amount'] * invoice.currency_rate
+                                tax['tax_group_amount'] * rate
                             )
 
                             res['amount_total_cur'] += res['amount_tax_cur']
                         elif group.group_type == 'perception':
                             res['amount_perception_curr'] = (
-                                tax['tax_group_amount'] * invoice.currency_rate
+                                tax['tax_group_amount'] * rate
                             )
 
                             res['amount_total_cur'] += res[

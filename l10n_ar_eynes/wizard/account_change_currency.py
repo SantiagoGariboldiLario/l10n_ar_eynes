@@ -108,7 +108,6 @@ class AccountChangeCurrency(models.TransientModel):
         )
 
         company = invoice.company_id
-        company_currency = company.currency_id
         inv_currency = self.actual_currency_id
         new_currency = self.new_currency_id
 
@@ -151,7 +150,9 @@ class AccountChangeCurrency(models.TransientModel):
         inv_vals = {
             'currency_id': new_currency.id,
             'currency_rate': new_rate,
-            'is_multi_currency': new_currency != company_currency,
+            'is_multi_currency': True,
+            'secondary_currency_rate': self.actual_currency_rate,
+            'secondary_currency_id': self.actual_currency_id,
         }
         invoice.with_context(force_rate=True).write(inv_vals)
 

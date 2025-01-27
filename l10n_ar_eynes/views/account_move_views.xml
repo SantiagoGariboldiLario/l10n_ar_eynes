@@ -368,18 +368,53 @@
                     </group>
                     <!-- Totals (only invoices / receipts) -->
                     <group colspan="4" class="oe_subtotal_footer" invisible="not is_multi_currency">
-                        <field name="amount_taxed_cur" invisible="amount_taxed_cur == 0" />
-                        <field name="amount_no_taxed_cur" invisible="amount_no_taxed_cur == 0" />
-                        <field name="amount_exempt_cur" invisible="amount_exempt_cur == 0" />
-                        <field name="amount_perception_curr" invisible="amount_perception_curr == 0" />
-                        <field name="amount_tax_cur" invisible="amount_tax_cur == 0" />
-                        <field name="amount_total_cur" class="oe_subtotal_footer_separator" />
+                        <field
+                            name="amount_taxed_cur"
+                            invisible="amount_taxed_cur == 0"
+                            widget="monetary"
+                            options="{'currency_field': 'secondary_currency_id'}"
+                        />
+                        <field
+                            name="amount_no_taxed_cur"
+                            invisible="amount_no_taxed_cur == 0"
+                            widget="monetary"
+                            options="{'currency_field': 'secondary_currency_id'}"
+                        />
+                        <field
+                            name="amount_exempt_cur"
+                            invisible="amount_exempt_cur == 0"
+                            widget="monetary"
+                            options="{'currency_field': 'secondary_currency_id'}"
+                        />
+                        <field
+                            name="amount_perception_curr"
+                            invisible="amount_perception_curr == 0"
+                            widget="monetary"
+                            options="{'currency_field': 'secondary_currency_id'}"
+                        />
+                        <field
+                            name="amount_tax_cur"
+                            invisible="amount_tax_cur == 0"
+                            widget="monetary"
+                            options="{'currency_field': 'secondary_currency_id'}"
+                        />
+                        <field
+                            name="amount_total_cur"
+                            class="oe_subtotal_footer_separator"
+                            widget="monetary"
+                            options="{'currency_field': 'secondary_currency_id'}"
+                        />
                         <label for="subtotal_label" />
                         <div>
                             <!-- Se agrega el campo is_multi_currency para linkearlo al label y lograr que este -->
                             <!-- div se situe en la columna derecha de la vista -->
                             <field id="subtotal_label" name="is_multi_currency" invisible="1" />
-                            <i>Amounts in Company Currency</i>
+                            <span class="oe_inline">Amounts in </span><field
+                                name="secondary_currency_id"
+                                readonly="True"
+                                options="{'no_create': True, 'no_open': True}"
+                                class="oe_inline"
+                            />
                         </div>
                     </group>
                     <group colspan="4">
