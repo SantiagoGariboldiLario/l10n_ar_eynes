@@ -1410,7 +1410,9 @@ class AccountMove(models.Model):
         print a custom invoice report instead of
         the default one. For example please review the l10n_ar module"""
         self.ensure_one()
-        return 'l10n_ar_eynes.account_move_report'
+        if self.fiscal_type == 'electronic':
+            return 'l10n_ar_eynes.account_move_report'
+        return super()._get_name_invoice_report()
 
     def action_invoice_print(self):
         """
