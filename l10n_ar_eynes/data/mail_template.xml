@@ -125,10 +125,7 @@
     </p>
 </div>
         </field>
-        <field name="report_template" ref="l10n_ar_eynes.account_move_report" />
-        <field
-            name="report_name"
-        >Invoice_{{ (object.name or '').replace('/','_') }}{{ object.state == 'draft' and '_draft' or '' }}</field>
+        <field name="report_template_ids" eval="[(4, ref('l10n_ar_eynes.account_move_report'))]" />
         <field name="lang">{{ object.partner_id.lang }}</field>
         <field name="auto_delete" eval="True" />
     </record>
@@ -179,10 +176,7 @@
 </p>
 </div>
         </field>
-        <field name="report_template" ref="l10n_ar_eynes.account_move_report" />
-        <field
-            name="report_name"
-        >Credit_note_{{ (object.name or '').replace('/','_') }}{{ object.state == 'draft' and '_draft' or '' }}</field>
+        <field name="report_template_ids" eval="[(4, ref('l10n_ar_eynes.account_move_report'))]" />
         <field name="lang">{{ object.partner_id.lang }}</field>
         <field name="auto_delete" eval="True" />
     </record>
