@@ -90,6 +90,7 @@ class StockPicking(models.Model):
         string='Carrier Partner',
     )
     shipping_number = fields.Char(string='Shipping number')
+    means_of_transport = fields.Char(default='Truck')
 
     @api.onchange("carrier_id")
     def onchange_carrier(self):

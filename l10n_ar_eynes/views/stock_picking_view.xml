@@ -56,6 +56,7 @@
                         </group>
                         <group>
                             <field name="cot_date_transfer" readonly="state == 'done'" />
+                            <field name="means_of_transport" placeholder="Truck, plane, train, etc.." />
                             <field name="carrier_id" readonly="state == 'done'" />
                             <field name="truck_license_plate" readonly="state == 'done'" />
                             <field name="trailer_license_plate" readonly="state == 'done'" />

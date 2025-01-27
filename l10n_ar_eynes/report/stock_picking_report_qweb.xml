@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <data noupdate="0">
-        <record id="paperformat_stock_picking_report_qweb" model="report.paperformat">
-            <field name="name">Stock Picking Report Qweb L10n-Eynes</field>
+        <record id="paperformat_remito_report_qweb" model="report.paperformat">
+            <field name="name">Remito X</field>
             <field name="default" eval="False" />
             <field name="format">A4</field>
             <field name="page_width">0</field>
@@ -17,13 +17,13 @@
         </record>
     </data>
 
-    <record id="stock_picking_qweb_l10n" model="ir.actions.report">
-        <field name="name">Remito</field>
+    <record id="remito_x_qweb_l10n" model="ir.actions.report">
+        <field name="name">Remito X</field>
         <field name="model">stock.picking</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">l10n_ar_eynes.stock_picking_report_qweb</field>
-        <field name="report_file">l10n_ar_eynes.stock_picking_report_qweb</field>
-        <field name="paperformat_id" ref="l10n_ar_eynes.paperformat_stock_picking_report_qweb" />
+        <field name="report_name">l10n_ar_eynes.remito_x_report_qweb</field>
+        <field name="report_file">l10n_ar_eynes.remito_x_report_qweb</field>
+        <field name="paperformat_id" ref="l10n_ar_eynes.paperformat_remito_report_qweb" />
         <field name="print_report_name">(object.name)</field>
         <field name="binding_model_id" ref="model_stock_picking" />
     </record>
@@ -154,7 +154,7 @@
         </div>
     </template>
 
-    <template id="stock_picking_report_qweb">
+    <template id="remito_x_report_qweb">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <div t-call="l10n_ar_eynes.weblearns_layout_stock_picking">
@@ -182,6 +182,7 @@
                                 </td>
                             </tr>
                         </table>
+                        <span>Transporte: <t t-out="o.means_of_transport" /></span>
                         <!--Products-->
                         <table class="product-table">
                             <thead>
