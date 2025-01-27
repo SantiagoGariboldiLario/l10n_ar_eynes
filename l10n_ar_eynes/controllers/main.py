@@ -8,10 +8,11 @@ import json
 from werkzeug.exceptions import InternalServerError
 
 from odoo import http
+from odoo.exceptions import AccessError, MissingError
 from odoo.http import content_disposition, request, route, serialize_exception
 from odoo.tools.misc import html_escape
 
-# from odoo.addons.web.controllers import main as report
+from odoo.addons.account.controllers.portal import PortalAccount
 
 
 class MyController(http.Controller):
@@ -60,3 +61,40 @@ class DownloadController(http.Controller):
             error = {'code': 200, 'message': 'Odoo Server Error', 'data': se}
             res = request.make_response(html_escape(json.dumps(error)))
             raise InternalServerError(response=res) from e
+
+
+class PortalAccount(PortalAccount):
+    @http.route(
+        ['/my/invoices/<int:invoice_id>'],
+        type='http',
+        auth="public",
+        website=True,
+    )
+    def portal_my_invoice_detail(
+        self,
+        invoice_id,
+        access_token=None,
+        report_type=None,
+        download=False,
+        **kw
+    ):
+        try:
+            invoice_sudo = self._document_check_access(
+                'account.move', invoice_id, access_token
+            )
+        except (AccessError, MissingError):
+            return request.redirect('/my')
+
+        if report_type in ('html', 'pdf', 'text'):
+            report_name = invoice_sudo._get_name_invoice_report()
+            return self._show_report(
+                model=invoice_sudo,
+                report_type=report_type,
+                report_ref=report_name,
+                download=download,
+            )
+
+        values = self._invoice_get_page_view_values(
+            invoice_sudo, access_token, **kw
+        )
+        return request.render("account.portal_invoice_page", values)
