@@ -491,6 +491,7 @@ class RetentionTaxApplication(models.Model):
 
         # Chequeamos que la cantidad a retener no sea negativa
         if amount <= 0:
+            # 22/1/25 comento esta validación en 15.0 porque para el caso de la NC, el monto retenido PUEDE ser negativo
             return 0.0, 0.0, 0.0
 
         # Aplicamos el porcentaje de eximision si es que lo hay
