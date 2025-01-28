@@ -6175,6 +6175,11 @@ msgid "Journal"
 msgstr "Diario"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__journal_bank_id
+msgid "Journal Bank Account"
+msgstr "Cuenta Bancaria"
+
+#. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_move
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_line__move_invoice_id
 msgid "Journal Entry"

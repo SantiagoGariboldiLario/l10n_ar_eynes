@@ -82,6 +82,9 @@ class AccountCheck(models.Model):
         required=True,
         default=_get_default_journal,
     )
+    journal_bank_id = fields.Many2one(
+        related='journal_id.bank_account_id', string="Journal Bank Account"
+    )
     bank_id = fields.Many2one(comodel_name='res.bank', string='Bank')
     checkbook_format = fields.Selection(
         selection=[

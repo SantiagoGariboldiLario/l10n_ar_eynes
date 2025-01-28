@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
     <!-- CHECK CONFIGURATION FORM VIEW-->
     <record id="account_check_view_form_config" model="ir.ui.view">
         <field name="name">account.check.config.view.form</field>
@@ -222,9 +221,12 @@
                 <field name="bank_id" />
                 <field name="issue_date" />
                 <field name="payment_date" />
+                <field name="receiving_partner_id" />
+                <field name="payment_order_id" />
                 <field name="amount" />
                 <field name="type" />
                 <field name="checkbook_format" />
+                <field name="journal_bank_id" />
                 <field name="issued_check_state" string="State" />
                 <field name="company_id" />
             </tree>
@@ -528,6 +530,7 @@
                 <field name="payment_date" />
                 <field name="bank_id" />
                 <field name="deposit_journal_id" />
+                <field name="deposit_bank_id" />
                 <field name="deposit_slip" />
                 <field name="amount" />
                 <field name="third_party_check_state" string="State" />
