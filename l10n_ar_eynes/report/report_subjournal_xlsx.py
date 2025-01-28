@@ -146,8 +146,17 @@ class SubjournalXlsx(models.AbstractModel):
             raise UserError(_('There were no moves for this period'))
 
         c_taxes = [0] * len(cols)
+        exempt_vat_ids = (
+            self.env['account.tax']
+            .search(
+                [
+                    ('company_id', '=', self.env.company.id),
+                    ('is_exempt', '=', True),
+                ]
+            )
+            .ids
+        )
         lines = {}
-
         for line in query_vals:
             sign = 1
             based_sign = 1
@@ -172,11 +181,14 @@ class SubjournalXlsx(models.AbstractModel):
                     [("id", "=", line["invoice_id"])]
                 )
 
-                line["no_taxed"] = (
-                    account_move.amount_no_taxed_cur
-                    if account_move.amount_no_taxed_cur != 0
-                    else account_move.amount_no_taxed
-                ) * sign
+                if line['tax_ids'] in exempt_vat_ids:
+                    line["no_taxed"] = 0
+                else:
+                    line["no_taxed"] = (
+                        account_move.amount_no_taxed_cur
+                        if account_move.amount_no_taxed_cur != 0
+                        else account_move.amount_no_taxed
+                    ) * sign
                 # # #
 
                 if line['invoice_id'] == -1:
@@ -200,16 +212,21 @@ class SubjournalXlsx(models.AbstractModel):
                 if line['tax_line_id'] == tax['id'] or (
                     line['tax_ids'] == tax['id'] and tax.get('is_exempt')
                 ):
-                    if lines[dict_hash]['taxes'][i] == 0:
+                    if tax['type'] == 'tax' and tax['id'] in exempt_vat_ids:
+                        lines[dict_hash]['taxes'][i] += (
+                            line['credit'] - line['debit']
+                        ) * based_sign
+
+                    elif lines[dict_hash]['taxes'][i] == 0:
                         if tax['type'] == 'tax':
                             lines[dict_hash]['taxes'][i] = (
                                 line['credit'] - line['debit']
                             ) * based_sign
-                        elif tax['type'] == 'base':
-                            if line['tax_amount']:
-                                lines[dict_hash]['taxes'][i] = (
-                                    line['tax_amount'] * sign
-                                )
+
+                        elif tax['type'] == 'base' and line['tax_amount']:
+                            lines[dict_hash]['taxes'][i] = (
+                                line['tax_amount'] * sign
+                            )
                     if lines[dict_hash]['taxes'][i] != 0:
                         c_taxes[i] += 1
 
