@@ -1,9 +1,12 @@
+import logging
 from datetime import datetime
 
 from dateutil.relativedelta import relativedelta as relatived
 
 from odoo import api, fields, models
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DSDF
+
+_logger = logging.getLogger(__name__)
 
 
 class RetentionConcept(models.Model):
@@ -369,8 +372,6 @@ class RetentionTaxApplication(models.Model):
         return extra_untaxed_amount
 
     def get_period_base_amount(self, partner, concept, po_date=False):
-        retention_line_model = self.env['account.payment.order.retention.line']
-
         date_start, date_finish = self._get_month_date_span_from_date(po_date)
 
         # Buscamos las retenciones
@@ -383,7 +384,7 @@ class RetentionTaxApplication(models.Model):
             ('payment_order_id.state', 'in', ['posted']),
         ]
 
-        ret_lines = retention_line_model.search(
+        ret_lines = self.env['account.payment.order.retention.line'].search(
             domain, order="date desc, id desc"
         )
 
@@ -400,20 +401,24 @@ class RetentionTaxApplication(models.Model):
         if percent < 0:
             percent = self.percent
 
+        base = vals['base']
+        to_pay = vals['to_pay']
+        _logger.info("ARRANCA CON BASE: %s y TO PAY: %s" % (base, to_pay))
+
         # Aca tenemos que ver que si es un calculo de ganancias hay que
         # chequear el tema de varios pagos en un mes al mismo beneficiario
         period_base = 0.0
         period_amount = 0.0
         period_payment_amount = 0.0
-        base = vals['base']
-        to_pay = vals['to_pay']
         if self.calculation_base in [
             'payment_amount',
             'payment_amount_untaxed',
         ]:
             base = to_pay
+            _logger.info("CAMBIA BASE SEGÚN MONTO PAGADO: %s" % base)
 
         payment_order_base = base
+        _logger.info("BASE DE LA OP: %s", payment_order_base)
         if self.retention_tax_id.retention_type == 'profit':
             period_base, period_amount = self.get_period_base_amount(
                 partner, self.concept_id, po_date
@@ -421,11 +426,19 @@ class RetentionTaxApplication(models.Model):
             period_payment_amount = self.get_period_partner_payments(
                 partner, self.concept_id, po_date
             )
+            _logger.info(
+                "RETENCION GANANCIAS - BASE DEL PERIODO: %s, IMPUESTO DEL PERIODO: %s, PAGOS DEL PERIODO: %s"
+                % (period_base, period_amount, period_payment_amount)
+            )
             # Si tenemos pagos anteriores de este concepto,
             # los sumamos a la base y al ser de ganancias,
             # tenemos que usar la cantidad a pagar neto de Impuestos
             base = to_pay + period_payment_amount
             payment_order_base = to_pay
+            _logger.info(
+                "ACTUALIZA BASE: %s BASE DE LA OP: %s"
+                % (base, payment_order_base)
+            )
 
         # Puede darse el caso en que FAC-NC quede en 0.0 y
         # realizaba una division por cero
@@ -437,28 +450,43 @@ class RetentionTaxApplication(models.Model):
         base = abs(base)
 
         if base < self.tax_allowance:
+            _logger.info("Base menor a la desgravación")
             return 0.0, 0.0, 0.0
 
         if self.exclude_tax_allowance:
             base -= self.tax_allowance
+            _logger.info(
+                "DESCUENTA DESGRAVACIÓN %s DE LA BASE: %s"
+                % (self.tax_allowance, base)
+            )
 
         if self.calculation_base == 'proportional_vat':
             # TODO: Chequear que esta funcion funcione correctamente
             amount = self._compute_proportional_vat(percent, base)
+            _logger.info("MONTO CALCULADO COMO 'proportional_vat' %s" % amount)
         else:
             if self.aliq_type == 'percent':
                 amount = round(base * (percent / 100.0), 2)
+                _logger.info("MONTO CALCULADO COMO 'percent' %s" % amount)
             else:
                 amount = self._compute_amount_via_scale(base)
+                _logger.info("MONTO CALCULADO COMO 'scale' %s" % amount)
 
         # Si es de ganancias, le detraemos las retenciones de ganancias
         # ya practicadas para este concepto
         # en el mes calendario en pagos previos a este proveedor
         if self.retention_tax_id.retention_type == 'profit':
             amount -= period_amount
+            _logger.info(
+                "Descuenta monto del periodo %s al MONTO CALCULADO %s"
+                % (period_amount, amount)
+            )
 
         # Chequeamos contra el minimo a percibir
         if amount < self.tax_minimum and period_amount == 0.0:
+            _logger.info(
+                "Base impuesto menor al mínimo y sin montos anteriores del período. IMPUESTO: 0"
+            )
             return 0.0, 0.0, 0.0
 
         # Chequeamos que la cantidad a retener no sea negativa

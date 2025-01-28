@@ -427,9 +427,6 @@ class AccountTax(models.Model):
         tax_app_obj = self.env['retention.tax.application']
         retention = self
 
-        # Por cada linea, nos fijamos la configuracion del producto
-        retentions = {}
-
         move = move_line.move_id
         parsed_move = self._parse_move_lines(move)
 
@@ -438,9 +435,9 @@ class AccountTax(models.Model):
             "Parseando lineas del asiento: %s [%s]" % (move.name, move.ref)
         )
 
+        # Por cada linea, nos fijamos la configuracion del producto
         mls = parsed_move.get("concept_lines")
-
-        # for _tax_id, mls in parsed_move['concept_lines'].items():
+        retentions = {}
         for ml in mls:
             # Evitamos la linea de la deuda
             concepts = self._get_concepts_from_account(
