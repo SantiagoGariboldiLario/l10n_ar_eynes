@@ -555,12 +555,13 @@
                                         options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                     />
-                                    <field name="amount" string="Amount" />
+                                    <field name="amount" string="Amount" sum="Amount" />
                                     <field
                                         name="amount_currency"
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
+                                        sum="Amount currency"
                                     />
                                     <field name="account_id" column_invisible="1" />
                                 </tree>
@@ -1240,12 +1241,13 @@
                                         options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
                                     />
-                                    <field name="amount" />
+                                    <field name="amount" sum="Amount" />
                                     <field
                                         name="amount_currency"
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
                                         column_invisible="not parent.is_multi_currency"
+                                        sum="Amount currency"
                                     />
                                     <field name="account_id" column_invisible="1" />
                                 </tree>
