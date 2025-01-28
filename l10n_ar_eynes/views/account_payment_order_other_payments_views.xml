@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
     <record id="other_payment_view_form" model="ir.ui.view">
         <field name="name">account.payment.order.other.payment.form</field>
         <field name="model">account.payment.order</field>
@@ -222,47 +221,82 @@
                         </group>
                     </page>
                     <page string="Checks">
+                        <label for="issued_check_line_ids" invisible="type == 'receipt'" />
                         <field
-                                name="issued_check_ids"
-                                string="Issued Checks"
+                                name="issued_check_line_ids"
                                 nolabel="True"
                                 colspan="4"
                                 readonly="state != 'draft'"
+                                invisible="type == 'receipt'"
                             >
                             <tree>
-                                <field name="number" />
+                                <field name="issued_check_id" />
                                 <field name="type" />
                                 <field name="issue_date" />
                                 <field name="payment_date" />
                                 <field name="bank_id" />
                                 <field name="amount" sum="Total Amount" />
+                                <field
+                                        name="amount_currency"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
+                                        sum="Total Amount"
+                                    />
                             </tree>
                             <form string="Issued Checks">
                                 <group>
                                     <group>
-                                        <field name="number" invisible="True" />
-                                        <field name="checkbook_id" required="True" />
-                                        <field name="type" readonly="True" />
+                                        <field name="journal_id" required="True" />
+                                        <field
+                                                name="checkbook_id"
+                                                domain="[('journal_id', '=', journal_id), ('payment_method_id.code', '=', 'checks')]"
+                                            />
+                                        <field
+                                                name="issued_check_id"
+                                                options="{
+                                                'no_create_edit': True,
+                                                'no_create':True,
+                                                'no_open':True,
+                                            }"
+                                                domain="[
+                                                ('internal_type', '=', 'issued'),
+                                                ('issued_check_state', '=', 'draft'),
+                                                ('checkbook_id', '=', checkbook_id),
+                                                ('payment_order_id', '=', False)
+                                            ]"
+                                                context="{
+                                                'default_internal_type': 'issued',
+                                                'default_checkbook_id': checkbook_id,
+                                                'default_journal_id': journal_id,
+                                                'default_amount': amount,
+                                                'default_issue_date': issue_date,
+                                                'default_crossed': crossed,
+                                                'default_signatory': signatory,
+                                                'default_checkbook_format': checkbook_format,
+                                                'default_clearing': clearing,
+                                                'default_origin': origin,
+                                                'default_not_order': not_order,
+                                            }"
+                                            />
+                                        <field name="type" />
+                                        <field name="checkbook_format" />
                                         <field name="amount" />
-                                        <field name="bank_id" invisible="True" />
-                                        <field name="company_id" invisible="0" />
                                     </group>
                                     <group>
-                                        <field name="issue_date" />
+                                        <field name="issue_date" required="type == 'deferred'" />
                                         <field
                                                 name="payment_date"
                                                 invisible="type == 'common'"
-                                                required="type == 'postdated'"
+                                                required="type == 'deferred'"
                                             />
                                         <field name="clearing" />
                                         <field name="signatory" />
                                         <field name="origin" />
-                                        <field name="issued_check_state" invisible="True" />
                                         <field name="crossed" />
                                         <field name="not_order" />
                                     </group>
                                 </group>
-                                <field name="receiving_partner_id" invisible="True" />
                             </form>
                         </field>
                         <label for="third_party_check_ids" />
@@ -387,5 +421,4 @@
         parent="account.menu_finance_receivables"
         sequence="5"
     />
-
 </odoo>
