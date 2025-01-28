@@ -422,7 +422,6 @@ class AccountTax(models.Model):
         prev_ret_ids,
         line_type,
         sit_iibb,
-        logging_messages,
         activity=None,
     ):
         tax_app_obj = self.env['retention.tax.application']
@@ -435,7 +434,7 @@ class AccountTax(models.Model):
         parsed_move = self._parse_move_lines(move)
 
         # Obtenemos el concepto desde la cuenta contable
-        logging_messages.append(
+        _logger.info(
             "Parseando lineas del asiento: %s [%s]" % (move.name, move.ref)
         )
 
@@ -448,13 +447,13 @@ class AccountTax(models.Model):
                 ml.account_id, retention=retention
             )
 
-            logging_messages.append(f"Linea: {ml.name} [{ml.account_id.name}]")
+            _logger.info(f"Linea: {ml.name} [{ml.account_id.name}]")
 
             # Si el concepto no esta sujeto a retencion, continuamos
             no_subject = False
             for concept in concepts:
                 if concept and concept.no_subject:
-                    logging_messages.append(
+                    _logger.info(
                         f"Concepto no sujeto a Retencion: {concept.name}"
                     )
                     no_subject = True
@@ -525,7 +524,7 @@ class AccountTax(models.Model):
             # asi que tenemos que tener en cuenta
             # facturas con pagos parciales
             taxapp = taxapps
-            logging_messages.append(
+            _logger.info(
                 "Tax Application: [id: %s ; reg_code: %s] %s"
                 % (taxapp.id, taxapp.reg_code, taxapp.concept_id.name)
             )
@@ -547,7 +546,7 @@ class AccountTax(models.Model):
                 if payment.is_multi_currency
                 else ml.balance
             )
-            logging_messages.append(f"Base tomada: {base}")
+            _logger.info(f"Base tomada: {base}")
             if line_type == 'income':
                 base *= -1
 
@@ -582,7 +581,7 @@ class AccountTax(models.Model):
             retentions[key]['base_to_pay'] += base_to_pay
             retentions[key]['base_unrec'] += base_unrec
             retentions[key]['lines'] += ml
-            logging_messages.append(
+            _logger.info(
                 (
                     "Agregando a la key %s ==> Base: %f Base "
                     + "To Pay: %f Base Unrec: %f"
@@ -590,7 +589,7 @@ class AccountTax(models.Model):
                 % (key, base, base_to_pay, base_unrec)
             )
 
-            logging_messages.append(
+            _logger.info(
                 (
                     "Subtotales %s ==> Base: %f Base To Pay: "
                     + "%f Base Unrec: %f"
@@ -603,10 +602,6 @@ class AccountTax(models.Model):
                 )
             )
 
-        # Mensajes de logging
-        _logger.info("\n\nLogging messages: ")
-        for msg in logging_messages:
-            _logger.info(msg)
         return retentions
 
     def _parse_move_lines(self, move):

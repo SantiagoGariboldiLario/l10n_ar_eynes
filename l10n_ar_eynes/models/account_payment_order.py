@@ -631,13 +631,8 @@ class AccountPaymentOrder(models.Model):
         sit_iibb = retention_data.get('sit_iibb')
         from_padron = retention_data.get('from_padron')
 
-        res = []
-
-        logging_messages = []
-        all_concepts = {}
-
-        logging_messages.append("\n\nAplicando %s ==>" % (self.name))
-        logging_messages.append(
+        _logger.info("\n\nAplicando %s ==>" % (self.name))
+        _logger.info(
             f"Actividad: {activity} "
             f"Porcentaje en partner: {percent}. "
             f"Porcentaje de Exclusion: {excluded_percent}"
@@ -657,6 +652,7 @@ class AccountPaymentOrder(models.Model):
                 lambda po_line: _filter_po_line_applicable(po_line)
             )
 
+        all_concepts = {}
         if retention.apply_custom_code:
             payment_code_ctx = {
                 'income_lines': income_line_affected,
@@ -732,7 +728,7 @@ class AccountPaymentOrder(models.Model):
                 factor_to_pay = mla / po_line.amount
                 factor_unrec = mla / po_line.amount_unreconciled
 
-                logging_messages.append("Linea a aplicar %s" % (po_line.ref))
+                _logger.info("Linea a aplicar %s" % (po_line.ref))
 
                 retentions = retention._compute_base_retention(
                     self,
@@ -743,7 +739,6 @@ class AccountPaymentOrder(models.Model):
                     po_line.type,
                     sit_iibb,
                     activity=activity,
-                    logging_messages=logging_messages,
                 )
 
                 for (concept, _invoice), vals in retentions.items():
@@ -769,6 +764,7 @@ class AccountPaymentOrder(models.Model):
 
         # Ahora que tenemos las bases agrupadas por concepto
         # aplicamos el calculo de la retencion
+        res = []
         for (_ret, concept), vals in all_concepts.items():
             taxapp = vals['taxapp']
             if taxapp:
