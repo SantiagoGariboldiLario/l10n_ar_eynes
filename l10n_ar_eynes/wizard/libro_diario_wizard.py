@@ -138,7 +138,9 @@ class JournalLedgerWizard(models.TransientModel):
                     nro_asiento,
                     date,
                     line[1],
-                    line[2]['es_AR'],
+                    line[2].get(
+                        'es_AR', line[2].get('en_US', '')
+                    ),  # Primero intenta 'es_AR', luego 'en_US', si no hay ninguno, usa ''
                     line[3],
                     line[4],
                     0.0,
