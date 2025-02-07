@@ -1999,6 +1999,12 @@ class AccountPaymentOrder(models.Model):
             }
         )
 
+        # Fix para enviar mail cuando se ingresa al pago desde la factura
+        if ctx.get('active_model') == 'account.move':
+            ctx.pop('active_id', '')
+            ctx.pop('active_ids', '')
+            ctx.pop('active_model', '')
+
         return {
             'type': 'ir.actions.act_window',
             'name': _('Send payment order by email'),
