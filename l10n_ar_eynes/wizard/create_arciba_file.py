@@ -250,17 +250,17 @@ class CreateArcibaFiles(models.TransientModel):
                 pos_fiscal_retenido = (
                     partner.property_account_position_id.afip_code
                 )
-                if (
-                    pos_fiscal_retenido
-                    == self.env.ref(
-                        'l10n_ar_eynes.fiscal_position_rem'
-                    ).afip_code
-                ):
+                if pos_fiscal_retenido in [
+                    self.env.ref('l10n_ar_eynes.fiscal_position_rem').afip_code,
+                    self.env.ref('l10n_ar_eynes.fiscal_position_ms').afip_code,
+                ]:
                     pos_fiscal_retenido = 4
                 elif pos_fiscal_retenido in [
                     self.env.ref('l10n_ar_eynes.fiscal_position_se').afip_code,
                 ]:
                     pos_fiscal_retenido = 3
+                else:
+                    pos_fiscal_retenido = 1
 
                 razon_social_retenido = (
                     (partner.name).replace('ñ', 'n').replace('Ñ', 'N')
