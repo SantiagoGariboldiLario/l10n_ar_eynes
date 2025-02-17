@@ -398,7 +398,7 @@ class RetentionTaxApplication(models.Model):
         # Si la alicuota que esta en la ficha del partner es negativa,
         # se toma la de la regla que se aplica.
         # Si es 0.0, se toma ese valor, 0.0.
-        if percent < 0:
+        if percent == -1:
             percent = self.percent
 
         base = vals['base']
