@@ -495,7 +495,9 @@ class ResPartner(models.Model):
 
         # Ahora buscamos a ver si tiene alguna excepcion
         partner_retentions = {}
-        for p_ret in self.retention_ids:
+        for p_ret in self.retention_ids.filtered(
+            lambda line: line.period < operation_date
+        ):
             excluded_percent = p_ret.excluded_percent
             # ~ ddate = dt.strftime(operation_date, DSDF)
             # ddate = dt.strftime(operation_date, "%Y-%m-%d %H:%M:%S")
