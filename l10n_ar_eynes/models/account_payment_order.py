@@ -2479,7 +2479,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         retention_move_lines = self.env['retention.move.line']
         if retention_line:
             retention_move_lines = retention_move_lines.search(
-                [('payment_order_line_id', '=', retention_line.id)]
+                [('payment_order_line_id', 'in', retention_line.ids)]
             )
             for rml in retention_move_lines:
                 move_line_ids.append(

@@ -398,7 +398,7 @@ class RetentionTaxApplication(models.Model):
         # Si la alicuota que esta en la ficha del partner es negativa,
         # se toma la de la regla que se aplica.
         # Si es 0.0, se toma ese valor, 0.0.
-        if percent < 0:
+        if percent == -1:
             percent = self.percent
 
         base = vals['base']
@@ -490,12 +490,27 @@ class RetentionTaxApplication(models.Model):
             return 0.0, 0.0, 0.0
 
         # Chequeamos que la cantidad a retener no sea negativa
-        if amount <= 0:
-            # 22/1/25 comento esta validación en 15.0 porque para el caso de la NC, el monto retenido PUEDE ser negativo
+        # if amount < 0:
+        #     raise ValidationError(
+        #         _('Retention Error!\n')
+        #         + _(
+        #             'There is an error in retention configuration because '
+        #             + 'amount of %s is negative'
+        #         )
+        #         % self.retention_tax_id.name
+        #     )
+        # 22/1/25 comento esta validación porque para el caso de la NC, el monto retenido PUEDE ser negativo
+        if amount == 0.0:
+            _logger.info("IMPUESTO: 0")
             return 0.0, 0.0, 0.0
 
         # Aplicamos el porcentaje de eximision si es que lo hay
+        _logger.info(
+            "IMPUESTO: %s, se aplica exclusión del %s.. "
+            % (amount, excluded_percent)
+        )
         amount *= 1 - excluded_percent
+        _logger.info("IMPUESTO: %s" % amount)
 
         return (
             base * sign_base,

@@ -460,7 +460,7 @@ class AccountCheck(models.Model):
         for check in self:
             if check.issued_check_state != "waiting_debit":
                 raise ValidationError(
-                    _("Check %s can't be debited!") % self.number
+                    _("Check %s can't be debited!") % check.number
                 )
 
         for check in self:
