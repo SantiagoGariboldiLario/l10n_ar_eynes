@@ -130,6 +130,20 @@
             <div name="journal_div" position="after">
                 <field name="currency_preciated" invisible="1" />
                 <field name="is_multi_currency" invisible="1" />
+                <field name="show_same_currency_cancel" invisible="True" />
+                <field name="show_get_arca_currency_btn" invisible="True" />
+                <label for="same_currency_cancel" invisible="not show_same_currency_cancel" />
+                <div class="d-flex">
+                    <field name="same_currency_cancel" invisible="not show_same_currency_cancel" />
+                    <button
+                        name="get_arca_currency_rate"
+                        type="object"
+                        string="Get ARCA Currency"
+                        class="btn-primary"
+                        invisible="not show_get_arca_currency_btn"
+                        groups="account.group_account_user"
+                    />
+                </div>
                 <label for="currency_rate" invisible="not is_multi_currency" />
                 <div class="d-flex">
                     <field
