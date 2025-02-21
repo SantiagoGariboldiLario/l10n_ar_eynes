@@ -102,20 +102,10 @@
                             <table class="day-content">
                                 <thead>
                                     <tr class="day-content-row">
-                                        <t t-foreach="o._get_table_headers()" t-as="head">
-                                            <t t-if="head not in ['', 'header']">
-                                                <t t-if="head in ['Debe', 'Haber']">
-                                                    <th class="monetary-cell">
-                                                        <t t-out="head" />
-                                                    </th>
-                                                </t>
-                                                <t t-else="">
-                                                    <th class="normal-cell">
-                                                        <t t-out="head" />
-                                                    </th>
-                                                </t>
-                                            </t>
-                                        </t>
+                                        <th class="normal-cell" width="15%"> Cod.cuenta </th>
+                                        <th class="normal-cell"> Cuenta </th>
+                                        <th class="monetary-cell" width="20%"> Debe </th>
+                                        <th class="monetary-cell" width="20%"> Haber </th>
                                     </tr>
                                 </thead>
                                 <tbody>

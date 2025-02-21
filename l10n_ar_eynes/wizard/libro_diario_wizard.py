@@ -63,19 +63,6 @@ class JournalLedgerWizard(models.TransientModel):
     def _get_move_headers(self, nro_asiento, fecha):
         return ['move_header', nro_asiento, fecha, '', '', 0.0, 0.0, 0.0, 0.0]
 
-    def _get_table_headers(self):
-        return [
-            'header',
-            '',
-            '',
-            'Cod.cuenta',
-            'Cuenta',
-            'Debe',
-            'Haber',
-            '',
-            '',
-        ]
-
     def run(self):
         """
         Crea una matriz con los datos necesarios para crear la tabla de asientos
