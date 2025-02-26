@@ -1416,6 +1416,33 @@ class AccountMove(models.Model):
             return 'l10n_ar_eynes.account_move_report'
         return super()._get_name_invoice_report()
 
+    def get_invoice_pdf_report_attachment(self):
+        if self.fiscal_type == 'electronic':
+            if len(self) < 2 and self.invoice_pdf_report_id:
+                # if the Send & Print succeeded
+                return (
+                    self.invoice_pdf_report_id.raw,
+                    self.invoice_pdf_report_id.name,
+                )
+            elif len(self) < 2 and self.message_main_attachment_id:
+                # if the Send & Print failed with fallback=True -> proforma PDF
+                return (
+                    self.message_main_attachment_id.raw,
+                    self.message_main_attachment_id.name,
+                )
+            # all other cases
+            pdf_content = self.env['ir.actions.report']._render(
+                'l10n_ar_eynes.account_move_report', self.ids
+            )[0]
+            pdf_name = (
+                self._get_invoice_report_filename()
+                if len(self) == 1
+                else "Invoices.pdf"
+            )
+            return pdf_content, pdf_name
+        else:
+            super().get_invoice_pdf_report_attachment()
+
     def action_invoice_print(self):
         """
         @override --> Custom PDF inyection
