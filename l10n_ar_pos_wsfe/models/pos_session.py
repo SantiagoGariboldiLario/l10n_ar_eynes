@@ -15,9 +15,12 @@ class PosSession(models.Model):
         return True
 
     def _loader_params_account_fiscal_position(self):
+        domain = [('active', '=', True)]
+        if self.config_id.tax_regime_selection:
+            domain = [('id', 'in', self.config_id.fiscal_position_ids.ids)]
         return {
             'search_params': {
-                'domain': [('active', '=', True)],
+                'domain': domain,
                 'fields': ['id', 'name', 'tax_ids'],
             }
         }
