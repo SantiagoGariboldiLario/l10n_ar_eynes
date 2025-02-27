@@ -423,6 +423,8 @@ class WsfeConfig(models.Model):
             fecha_venc_pago=data['FchVtoPago'],
             moneda_id=data['MonId'],
             moneda_ctz=data['MonCotiz'],
+            cancela_misma_mon_ext=data['CanMisMonExt'],
+            cond_iva_receptor=data['CondicionIVAReceptorId'],
             fecha_serv_desde=data['FchServDesde'],
             fecha_serv_hasta=data['FchServHasta'],
             cbt_desde=number,
