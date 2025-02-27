@@ -218,7 +218,7 @@ class ResPartner(models.Model):
                     "res.partner.perception"
                 ].search(
                     [
-                        ("perception_id", "=", journal_id.id),
+                        ("perception_id", "=", journal_id.tax_id.id),
                         ("partner_id", "=", partner.id),
                         ("period", "=", period),
                         ("from_padron", "=", True),
@@ -244,7 +244,7 @@ class ResPartner(models.Model):
                 else:
                     res_partner_perception.create(
                         {
-                            "perception_id": journal_id.id,
+                            "perception_id": journal_id.tax_id.id,
                             "partner_id": partner.id,
                             "percent": percent,
                             "risk": risk,
@@ -271,7 +271,7 @@ class ResPartner(models.Model):
                     "res.partner.retention"
                 ].search(
                     [
-                        ("retention_id", "=", journal_id.id),
+                        ("retention_id", "=", journal_id.tax_id.id),
                         ("partner_id", "=", partner.id),
                         ("period", "=", period),
                         ("from_padron", "=", True),
@@ -290,7 +290,7 @@ class ResPartner(models.Model):
                 else:
                     res_partner_retention.create(
                         {
-                            "retention_id": journal_id.id,
+                            "retention_id": journal_id.tax_id.id,
                             "partner_id": partner.id,
                             "percent": percent,
                             "sit_iibb": iibb_situation,
@@ -314,7 +314,7 @@ class ResPartner(models.Model):
                     "res.partner.perception"
                 ].search(
                     [
-                        ("perception_id", "=", journal_id.id),
+                        ("perception_id", "=", journal_id.tax_id.id),
                         ("partner_id", "=", partner.id),
                         ("period", "=", period),
                         ("from_padron", "=", True),
@@ -340,7 +340,7 @@ class ResPartner(models.Model):
                 if res_partner_perception:
                     res_partner_perception.write(data)
                 else:
-                    data["perception_id"] = journal_id.id
+                    data["perception_id"] = journal_id.tax_id.id
                     data["partner_id"] = partner.id
                     data["percent"] = 0
                     data["period"] = period
@@ -360,7 +360,7 @@ class ResPartner(models.Model):
                     "res.partner.perception"
                 ].search(
                     [
-                        ("perception_id", "=", journal_id.id),
+                        ("perception_id", "=", journal_id.tax_id.id),
                         ("partner_id", "=", partner.id),
                         ("period", "=", period),
                         ("from_padron", "=", True),
@@ -381,7 +381,7 @@ class ResPartner(models.Model):
                 else:
                     res_partner_perception.create(
                         {
-                            "perception_id": journal_id.id,
+                            "perception_id": journal_id.tax_id.id,
                             "partner_id": partner.id,
                             "percent": 0,
                             "ex_date_from": ex_date_from,
