@@ -39,6 +39,17 @@
                     <i class="fa fa-file-text-o" />
                     Electronic Invoice
                 </button>
+                <button
+                    t-if="pos.config.ship_later"
+                    class="button btn btn-light py-3 text-start rounded-0 border-bottom"
+                    t-att-class="{ 'highlight text-bg-primary': currentOrder.getShippingDate() }"
+                    t-on-click="toggleShippingDatePicker"
+                >
+                    <i class="fa fa-clock-o me-2" />Ship Later
+                    <span t-if="currentOrder.getShippingDate()">
+                        (<t t-esc="currentOrder.getShippingDate()" />)
+                    </span>
+                </button>
             </div>
         </xpath>
     </t>
