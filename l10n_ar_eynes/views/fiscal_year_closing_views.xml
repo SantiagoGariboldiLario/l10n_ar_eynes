@@ -37,18 +37,20 @@
                     <field name="state" widget="statusbar" readonly="1" />
                 </header>
                 <sheet>
-                    <group>
-                        <field name="company_id" select="1" required="1" readonly="state != 'new'" />
-                        <field name="name" select="2" readonly="state != 'new'" />
+                    <group invisible="state != 'new'">
+                        <field name="company_id_domain" invisible="True" />
+                        <field name="company_id" select="1" required="1" domain="company_id_domain" />
+                        <field name="name" select="2" />
                     </group>
-                    <group string="Fiscal Years">
-                        <field name="closing_id" readonly="state != 'new'" />
-                        <field name="opening_id" readonly="state != 'new'" />
+                    <group string="Fiscal Years" invisible="state != 'new'">
+                        <field name="closing_id" domain="[('company_id', '=', company_id)]" />
+                        <field name="opening_id" domain="[('company_id', '=', company_id)]" />
                     </group>
                     <notebook invisible="state == 'new'">
                         <page string="General">
-                            <group string="Operations">
-                                <group string="Operation to Perform">
+                            <group>
+                                <group>
+                                    <separator string="Operation to Perform" />
                                     <field
                                         name="create_loss_profit_move"
                                         readonly="state in ('done', 'cancel')"
@@ -62,21 +64,19 @@
                                         readonly="state in ('done', 'cancel')"
                                     />
                                     <field name="create_recpam" readonly="state in ('done', 'cancel')" />
-                                </group>
-                                <group string="Move Created by the Operation">
+                                    <separator string="Move Created by the Operation" />
                                     <field name="loss_profit_move_id" />
                                     <field name="closing_move_id" />
                                     <field name="opening_move_id" />
                                     <field name="recpam_move_id" />
                                 </group>
-                            </group>
-                            <group string="Checks">
-                                <field
-                                    name="check_invalid_period_moves"
-                                    readonly="state in ('done', 'cancel')"
-                                />
-                                <field name="check_draft_moves" readonly="state in ('done', 'cancel')" />
-                                <field name="check_unbalanced_moves" readonly="state in ('done', 'cancel')" />
+                                <group string="Checks">
+                                    <field name="check_draft_moves" readonly="state in ('done', 'cancel')" />
+                                    <field
+                                        name="check_unbalanced_moves"
+                                        readonly="state in ('done', 'cancel')"
+                                    />
+                                </group>
                             </group>
                         </page>
                         <page string="Configuration" invisible="state == 'new'">
@@ -91,19 +91,17 @@
                                             <field
                                                 name="loss_profit_journal_id"
                                                 readonly="state in ('done', 'cancel')"
+                                                required="create_loss_profit_move"
                                             />
                                         </group>
                                         <group>
-                                            <field
-                                                name="loss_profit_date_range_id"
-                                                readonly="state in ('done', 'cancel')"
-                                            />
                                             <field
                                                 name="loss_profit_date"
                                                 readonly="state in ('done', 'cancel')"
                                             />
                                         </group>
                                     </group>
+                                    <separator string="Account Mapping" />
                                     <field
                                         name="loss_profit_account_mapping_ids"
                                         nolabel="1"
@@ -112,18 +110,14 @@
                                         <tree editable="top">
                                             <field
                                                 name="source_account_type"
-                                                widget="account_type_selection"
+                                                widget="account_hierarchy_selection"
                                             />
-                                            <field name="destination_account_id" required="1" />
-                                        </tree>
-                                        <form string="Account mapping">
                                             <field
-                                                name="source_account_type"
-                                                widget="account_type_selection"
+                                                name="destination_account_id"
+                                                required="True"
+                                                domain="[('company_id', '=', parent.company_id)]"
                                             />
-                                            <field name="destination_account_id" required="1" />
-                                            <field name="name" />
-                                        </form>
+                                        </tree>
                                     </field>
                                 </page>
                                 <page string="Closing">
@@ -136,19 +130,17 @@
                                             <field
                                                 name="closing_journal_id"
                                                 readonly="state in ('done', 'cancel')"
+                                                required="create_closing_move"
                                             />
                                         </group>
                                         <group>
-                                            <field
-                                                name="closing_date_range_id"
-                                                readonly="state in ('done', 'cancel')"
-                                            />
                                             <field
                                                 name="closing_date"
                                                 readonly="state in ('done', 'cancel')"
                                             />
                                         </group>
                                     </group>
+                                    <separator string="Account Mapping" />
                                     <field
                                         name="closing_account_mapping_ids"
                                         nolabel="1"
@@ -157,17 +149,13 @@
                                         <tree editable="top">
                                             <field
                                                 name="source_account_type"
-                                                widget="account_type_selection"
+                                                widget="account_hierarchy_selection"
                                             />
-                                            <field name="destination_account_id" />
-                                        </tree>
-                                        <form string="Account to close">
                                             <field
-                                                name="source_account_type"
-                                                widget="account_type_selection"
+                                                name="destination_account_id"
+                                                domain="[('company_id', '=', parent.company_id)]"
                                             />
-                                            <field name="name" />
-                                        </form>
+                                        </tree>
                                     </field>
                                 </page>
                                 <page string="Opening">
@@ -180,13 +168,10 @@
                                             <field
                                                 name="opening_journal_id"
                                                 readonly="state in ('done', 'cancel')"
+                                                required="create_opening_move"
                                             />
                                         </group>
                                         <group>
-                                            <field
-                                                name="opening_date_range_id"
-                                                readonly="state in ('done', 'cancel')"
-                                            />
                                             <field
                                                 name="opening_date"
                                                 readonly="state in ('done', 'cancel')"
@@ -213,6 +198,7 @@
                                                 readonly="state in ('done', 'cancel')"
                                                 required="create_recpam"
                                             />
+                                            <field name="rounding" readonly="state in ('done', 'cancel')" />
                                         </group>
                                     </group>
                                 </page>
