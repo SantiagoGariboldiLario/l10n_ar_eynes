@@ -8,7 +8,7 @@ class GrossIncome(models.Model):
     province_id = fields.Many2one(
         "res.country.state",
         string="Provincias",
-        domain="[('country_id', '=', 'Argentina'),('code', 'in', ['W', 'P', 'N', 'Q', 'S']),]",
+        domain="[('country_id', '=', 'Argentina')]",
     )
     type_taxpayer = fields.Selection(
         [
