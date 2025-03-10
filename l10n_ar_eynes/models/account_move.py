@@ -273,7 +273,7 @@ class AccountMove(models.Model):
     _sql_constraints = [
         (
             'unique_move',
-            'unique(partner_id, supplier_move_reference, is_debit_note)',
+            'unique(partner_id, supplier_move_reference, is_debit_note, move_type)',
             _('This invoice was already entered.'),
         ),
         (
