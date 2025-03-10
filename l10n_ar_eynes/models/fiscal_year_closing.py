@@ -4,11 +4,10 @@
 #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 #
 ##############################################################################
-
+import json
 import logging
-from datetime import datetime
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -19,16 +18,12 @@ class FiscalYearClosing(models.Model):
     _description = 'Fiscal Year Closing'
 
     check_draft_moves = fields.Boolean('Check Draft Moves')
-    check_invalid_period_moves = fields.Boolean(
-        'Check Invalid Period or Date Moves'
-    )
     check_unbalanced_moves = fields.Boolean('Check Unbalanced Moves')
     closing_id = fields.Many2one(
         'account.fiscal.year',
         'Closing Fiscal Year',
         required=True,
         ondelete='cascade',
-        default=lambda self: self._get_default_closing_id(),
     )
     closing_account_mapping_ids = fields.One2many(
         'account.mapping.fiscal.year.closing',
@@ -48,14 +43,14 @@ class FiscalYearClosing(models.Model):
         ondelete='set null',
         readonly=True,
     )
-    closing_date_range_id = fields.Many2one('date.range', 'Period')
     company_id = fields.Many2one(
         'res.company',
         'Company',
         ondelete='cascade',
-        readonly=True,
         required=True,
-        default=lambda self: self._get_default_company_id(),
+    )
+    company_id_domain = fields.Char(
+        default=lambda self: self._default_company_ids()
     )
     create_closing_move = fields.Boolean('Create Closing Fiscal Year')
     create_loss_profit_move = fields.Boolean('Create Loss & Profit Move')
@@ -74,17 +69,12 @@ class FiscalYearClosing(models.Model):
     loss_profit_move_id = fields.Many2one(
         'account.move', 'Loss & Profit Move', ondelete='set null', readonly=True
     )
-    loss_profit_date_range_id = fields.Many2one(
-        'date.range',
-        'Net Loss & Profit Period',
-    )
     name = fields.Char('Description', size=60, required=True)
     opening_id = fields.Many2one(
         'account.fiscal.year',
         'Opening Fiscal Year',
         required=True,
         ondelete='cascade',
-        default=lambda self: self._get_default_opening_id(),
     )
     opening_date = fields.Date('Opening Fiscal Year Date')
     opening_description = fields.Char(
@@ -99,10 +89,6 @@ class FiscalYearClosing(models.Model):
         ondelete='set null',
         readonly=True,
     )
-    opening_date_range_id = fields.Many2one(
-        'date.range',
-        'Opening Fiscal Year Period',
-    )
     recpam_account_id = fields.Many2one(
         'account.account', 'RECPAM Account', ondelete='set null'
     )
@@ -110,6 +96,9 @@ class FiscalYearClosing(models.Model):
     recpam_journal_id = fields.Many2one('account.journal', 'RECPAM Journal')
     recpam_move_id = fields.Many2one(
         'account.move', 'RECPAM Move', ondelete='set null', readonly=True
+    )
+    rounding = fields.Integer(
+        default=2, help="This is used to round RECPAM coefficient."
     )
     state = fields.Selection(
         [
@@ -137,96 +126,11 @@ class FiscalYearClosing(models.Model):
         ),
     ]
 
-    def _get_default_closing_id(self):
-        AccountFiscalYear = self.env['account.fiscal.year']
-
-        company = self.env.company.id if self.env.company else False
-        str_date = '%s-06-01' % (datetime.now().year - 1)
-
-        fiscal_year = AccountFiscalYear.search(
-            [
-                ('company_id', 'in', [company, False]),
-                ('date_from', '<=', str_date),
-                ('date_to', '>=', str_date),
-            ],
-            limit=1,
+    @api.model
+    def _default_company_ids(self):
+        return json.dumps(
+            [('id', 'in', self.env.context.get('allowed_company_ids', []))]
         )
-
-        return fiscal_year
-
-    def _get_default_company_id(self):
-        return self.env.company
-
-    def _get_default_opening_id(self):
-        AccountFiscalYear = self.env['account.fiscal.year']
-
-        company = self.env.company.id if self.env.company else False
-        str_date = '%s-06-01' % datetime.now().year
-
-        fiscal_year = AccountFiscalYear.search(
-            [
-                ('company_id', 'in', [company, False]),
-                ('date_from', '<=', str_date),
-                ('date_to', '>=', str_date),
-            ],
-            limit=1,
-        )
-
-        return fiscal_year
-
-    def _get_closing_period(self, fiscal_year):
-        DateRange = self.env['date.range']
-
-        period = DateRange.search(
-            [('date_start', '=', fiscal_year.closing_id.date_to)], limit=1
-        )
-        if period:
-            return period.id
-
-        return False
-
-    def _get_journal_id(self, fiscal_year):
-        AccountJournal = self.env['account.journal']
-
-        assert fiscal_year.company_id, 'You should select a company'
-
-        company = fiscal_year.company_id.id if fiscal_year.company_id else False
-
-        journal = AccountJournal.search(
-            [
-                ('company_id', 'in', [company, False]),
-                '|',
-                ('code', '=', 'GRAL'),
-                ('name', 'ilike', 'General'),
-            ],
-            limit=1,
-        )
-        if journal:
-            return journal.id
-
-        return False
-
-    def _get_loss_profit_period(self, fiscal_year):
-        DateRange = self.env['date.range']
-
-        period = DateRange.search(
-            [('date_start', '=', fiscal_year.closing_id.date_to)], limit=1
-        )
-        if period:
-            return period.id
-
-        return False
-
-    def _get_opening_period(self, fiscal_year):
-        DateRange = self.env['date.range']
-
-        period = DateRange.search(
-            [('date_end', '=', fiscal_year.closing_id.date_from)], limit=1
-        )
-        if period:
-            return period.id
-
-        return False
 
     def action_draft(self):
         if self.closing_account_mapping_ids:
@@ -234,24 +138,20 @@ class FiscalYearClosing(models.Model):
         else:
             data = {
                 'check_draft_moves': True,
-                'check_invalid_period_moves': True,
                 'check_unbalanced_moves': True,
                 'closing_date': self.closing_id.date_to,
                 'closing_description': _('Fiscal Year Closing'),
-                'closing_journal_id': self._get_journal_id(self),
-                'closing_date_range_id': self._get_closing_period(self),
+                'closing_journal_id': self.closing_journal_id.id,
                 'create_closing_move': True,
                 'create_loss_profit_move': True,
                 'create_opening_move': True,
                 'create_recpam': True,
                 'loss_profit_date': self.closing_id.date_to,
                 'loss_profit_description': _('Loss & Profit'),
-                'loss_profit_journal_id': self._get_journal_id(self),
-                'loss_profit_date_range_id': self._get_loss_profit_period(self),
+                'loss_profit_journal_id': self.loss_profit_journal_id.id,
                 'opening_date': self.opening_id.date_from,
                 'opening_description': _('Fiscal Year Opening'),
-                'opening_journal_id': self._get_journal_id(self),
-                'opening_date_range_id': self._get_opening_period(self),
+                'opening_journal_id': self.opening_journal_id.id,
                 'state': 'draft',
             }
             self.write(data)
@@ -290,7 +190,6 @@ class FiscalYearClosing(models.Model):
         FiscalYearClosing.with_context(**ctx).write(
             {
                 'check_draft_moves': False,
-                'check_invalid_period_moves': False,
                 'check_unbalanced_moves': False,
                 'create_closing_move': False,
                 'create_loss_profit_move': False,
