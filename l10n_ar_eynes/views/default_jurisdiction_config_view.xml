@@ -31,7 +31,7 @@
     </record>
 
     <record id="action_report_default_jurisdiction_configuration" model="ir.actions.act_window">
-        <field name="name">Sales by Jurisdiction Config</field>
+        <field name="name">Sales/Purchases by Jurisdiction Config</field>
         <field name="res_model">report.default.jurisdiction.configuration</field>
         <field name="view_mode">tree,form</field>
     </record>

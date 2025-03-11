@@ -126,13 +126,20 @@ class SalesExportXlsx(models.AbstractModel):
         worksheets = []
         company_ids = self.env['res.company'].browse(data['company_ids'])
         for company_id in company_ids:
+            report_type = data['report_type']
+            title = (
+                _("Sales by jurisdiction")
+                if report_type == 'sale'
+                else _("Purchases by jurisdiction")
+            )
             ws_params = {
                 'company_id': company_id.id,
                 'ws_name': company_id.name,
                 'generate_ws_method': '_sales_report',
-                'title': company_id.name + " " + _("Sales by jurisdiction"),
+                'title': company_id.name + " " + title,
                 'wanted_list': wanted_list,
                 'col_specs': sales_template,
+                'report_type': report_type,
             }
             worksheets.append(ws_params)
 
@@ -201,7 +208,9 @@ class SalesExportXlsx(models.AbstractModel):
         return (_from, row_pos, jurisdiction_total)
 
     def _sales_report(self, workbook, ws, ws_params, data, lines):
-        lines = self.get_data(data, ws_params['company_id'])
+        lines = self.get_data(
+            data, ws_params['company_id'], ws_params['report_type']
+        )
         ws.set_portrait()
         ws.fit_to_pages(1, 0)
         ws.set_header(XLS_HEADERS["xls_headers"]["standard"])
@@ -268,7 +277,7 @@ class SalesExportXlsx(models.AbstractModel):
             round(grand_total, 2),
         )
 
-    def get_data(self, data, company):
+    def get_data(self, data, company, report_type):
         select_extra, join_extra, where_extra, sort_selection = self.env[
             'account.move'
         ]._report_xls_query_extra()
@@ -277,6 +286,11 @@ class SalesExportXlsx(models.AbstractModel):
         # field value translations.
         # If performance is no issue, you can adapt the _report_xls_template in
         # an inherited module to add field value translations.
+        invoice_number_field = (
+            'ai.internal_number'
+            if report_type == 'sale'
+            else 'ai.supplier_move_reference'
+        )
         query = (
             """
         SELECT
@@ -284,24 +298,31 @@ class SalesExportXlsx(models.AbstractModel):
             CASE
                 WHEN ai.is_debit_note IS True THEN 'ND '
                 WHEN ai.move_type = 'out_invoice' THEN 'FAC '
+                WHEN ai.move_type = 'in_invoice' THEN 'FAC '
                 ELSE 'NC ' END || UPPER(ai.denomination) || ' ' ||
-                ai.internal_number AS invoice_internal_number,
+                """
+            + invoice_number_field
+            + """ AS invoice_internal_number,
             ai.company_id AS company_id,
             rc.name AS company_name,
             ai.invoice_date AS Fecha,
             ai.denomination AS Denom,
             pa.name AS Pto_Vta,
-            ai.internal_number AS Num_Factura,
+            """
+            + invoice_number_field
+            + """ AS Num_Factura,
             ai.date AS Fecha_Asiento,
             rp.name AS Nombre_Cliente,
             COALESCE(rcs2.name, rcs.name, rcs_def.name) AS Jurisdiccion,
             rp.zip AS CP,
             aa.code AS Codigo_Cuenta,
             aa.name AS Nombre_Cuenta_Contable,
-            (-1 * ail.balance) AS Monto,
-        CASE WHEN ai.is_debit_note IS True THEN 'Nota de Débito'
-        WHEN ai.move_type = 'out_invoice' THEN 'Factura'
-        ELSE 'Nota de Crédito' END AS TipoFactura
+            (%(sign)s * ail.balance) AS Monto,
+        CASE
+            WHEN ai.is_debit_note IS True THEN 'Nota de Débito'
+            WHEN ai.move_type = 'out_invoice' THEN 'Factura'
+            WHEN ai.move_type = 'in_invoice' THEN 'Factura'
+            ELSE 'Nota de Crédito' END AS TipoFactura
         """
             + select_extra
             + """
@@ -334,7 +355,7 @@ class SalesExportXlsx(models.AbstractModel):
         WHERE ai.invoice_date BETWEEN %(date_start)s AND %(date_stop)s
             AND ai.company_id = %(company_id)s
             AND ai.state = 'posted'
-            AND ai.move_type IN ('out_invoice', 'out_refund')
+            AND ai.move_type IN %(move_type)s
             AND ail.display_type = 'product'
         """
             + where_extra
@@ -342,13 +363,18 @@ class SalesExportXlsx(models.AbstractModel):
         ORDER BY """
             + sort_selection
             + """
-        rcs.name, ai.invoice_date, ai.internal_number
+        rcs.name, ai.invoice_date,
         """
+            + invoice_number_field
         )
         query_vals = {
             'date_start': data['date_start'],
             'date_stop': data['date_stop'],
             'company_id': company,
+            'move_type': ('out_invoice', 'out_refund')
+            if report_type == 'sale'
+            else ('in_invoice', 'in_refund'),
+            'sign': -1 if report_type == 'sale' else 1,
         }
         self._cr.execute(query, query_vals)
         lines = self._cr.dictfetchall()

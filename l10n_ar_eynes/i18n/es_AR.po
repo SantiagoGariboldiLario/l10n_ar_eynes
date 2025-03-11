@@ -4914,13 +4914,13 @@ msgstr "Exportar factura"
 #. module: l10n_ar_eynes
 #: model:ir.actions.report,name:l10n_ar_eynes.action_sales_by_jurisdiction_export_xlsx
 #: model:ir.model,name:l10n_ar_eynes.model_export_sales_by_jurisdiction_xls
-msgid "Export Sales By Jurisdiction"
-msgstr "Exportar Ventas por Jurisdicción"
+msgid "Export Sales/Purchases by Jurisdiction"
+msgstr "Exportar Compras/Ventas por Jurisdicción"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_export_sales_by_jurisdiction
-msgid "Export Sales by Jurisdiction"
-msgstr "Exportar Ventas por Jurisdicción"
+msgid "Export Sales/Purchases by Jurisdiction"
+msgstr "Exportar Compras/Ventas por Jurisdicción"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.report,name:l10n_ar_eynes.action_move_line_list_subj_xls
@@ -9510,14 +9510,21 @@ msgstr "Pedido de venta"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_export_sales_by_jurisdiction
-msgid "Sales by Jurisdiction"
-msgstr "Ventas por Jurisdicción"
+msgid "Sales/Purchases by Jurisdiction"
+msgstr "Compras/Ventas por Jurisdicción"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.action_report_default_jurisdiction_configuration
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_report_default_jurisdiction
-msgid "Sales by Jurisdiction Config"
-msgstr "Configuración de Ventas por Jurisdicción"
+msgid "Sales/Purchases by Jurisdiction Config"
+msgstr "Configuración de Compras/Ventas por Jurisdicción"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/report/sales_by_jurisdiction_xls.py:0
+#, python-format
+msgid "Purchases by jurisdiction"
+msgstr "Compras por Jurisdicción"
 
 #. module: l10n_ar_eynes
 #. odoo-python
