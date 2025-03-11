@@ -30,11 +30,16 @@ _logger = logging.getLogger(__name__)
 
 class ExportSalesByJurisdictionXLS(models.TransientModel):
     _name = 'export.sales.by.jurisdiction.xls'
-    _description = 'Export Sales By Jurisdiction'
+    _description = 'Export Sales/Purchases By Jurisdiction'
 
+    company_ids = fields.Many2many('res.company', string='Company')
     date_from = fields.Date(string='Period From', required=True)
     date_to = fields.Date(string='Period To', required=True)
-    company_ids = fields.Many2many('res.company', string='Company')
+    report_type = fields.Selection(
+        [('sale', 'Sale'), ('purchase', 'Purchase')],
+        default='sale',
+        required=True,
+    )
 
     def create_report(self):
         report_file_name = 'subjournal_by_jurisdiction'
@@ -50,6 +55,7 @@ class ExportSalesByJurisdictionXLS(models.TransientModel):
             'company_name': self.env.company.name,
             'dynamic_report': True,
             'company_ids': company_ids.ids,
+            'report_type': self.report_type,
         }
         return {
             'context': dict(self.env.context, report_file=report_file_name),
@@ -57,6 +63,4 @@ class ExportSalesByJurisdictionXLS(models.TransientModel):
             'type': 'ir.actions.report',
             'report_name': 'l10n_ar_eynes.sales_by_jurisdiction_export_xlsx',
             'report_type': 'xlsx',
-            'report_file': '',
-            'name': 'Export Subjournal',
         }

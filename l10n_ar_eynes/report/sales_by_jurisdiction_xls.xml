@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <record id="action_sales_by_jurisdiction_export_xlsx" model="ir.actions.report">
-        <field name="name">Export Sales By Jurisdiction</field>
+        <field name="name">Export Sales/Purchases By Jurisdiction</field>
         <field name="model">account.move.line</field>
         <field name="type">ir.actions.report</field>
         <field name="report_name">l10n_ar_eynes.sales_by_jurisdiction_export_xlsx</field>

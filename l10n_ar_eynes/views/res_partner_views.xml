@@ -80,7 +80,7 @@
                             <field name="sit_iibb" />
                         </tree>
                     </field>
-                    <separator string="IIBB" />
+                    <separator string="Situación IIBB para percepciones por código Python" />
                     <field name="gross_income_ids" nolabel="1">
                         <tree editable="bottom">
                             <field name="province_id" />

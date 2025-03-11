@@ -6,14 +6,13 @@
         <field name="res_model">res.partner.afip.padron.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="binding_model_id" ref="base.model_res_partner" />
-        <field name="binding_view_types">form</field>
     </record>
 
     <record id="fetch_partner_information_from_afip" model="ir.actions.server">
         <field name="name">Fetch Partners Information from AFIP</field>
         <field name="model_id" ref="model_res_partner_afip_padron_wizard" />
         <field name="binding_model_id" ref="base.model_res_partner" />
+        <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">action = model.action_open_wizard()</field>
     </record>
