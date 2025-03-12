@@ -426,17 +426,19 @@ class AccountTax(models.Model):
     ):
         tax_app_obj = self.env['retention.tax.application']
         retention = self
-
         move = move_line.move_id
-        parsed_move = self._parse_move_lines(move)
-
         # Obtenemos el concepto desde la cuenta contable
         _logger.info(
             "Parseando lineas del asiento: %s [%s]" % (move.name, move.ref)
         )
+        parsed_move = self._parse_move_lines(move)
 
         # Por cada linea, nos fijamos la configuracion del producto
         mls = parsed_move.get("concept_lines")
+        if not mls:
+            _logger.warning(
+                "No hay importe neto gravado al cual aplicar Retenciones. VERIFICAR FACTURA."
+            )
         retentions = {}
         for ml in mls:
             # Evitamos la linea de la deuda

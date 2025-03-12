@@ -631,7 +631,7 @@ class AccountPaymentOrder(models.Model):
         sit_iibb = retention_data.get('sit_iibb')
         from_padron = retention_data.get('from_padron')
 
-        _logger.info("\n\nAplicando %s ==>" % (self.name))
+        _logger.info("Aplicando %s ==>" % (retention.name))
         _logger.info(
             f"Actividad: {activity} "
             f"Porcentaje en partner: {percent}. "
@@ -728,7 +728,7 @@ class AccountPaymentOrder(models.Model):
                 factor_to_pay = mla / po_line.amount
                 factor_unrec = mla / po_line.amount_unreconciled
 
-                _logger.info("Linea a aplicar %s" % (po_line.ref))
+                _logger.info("Linea a aplicar %s" % (po_line.name))
 
                 retentions = retention._compute_base_retention(
                     self,
