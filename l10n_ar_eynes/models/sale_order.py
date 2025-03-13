@@ -7,7 +7,7 @@
 
 import logging
 
-from odoo import _, api, fields, models
+from odoo import _, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
@@ -60,18 +60,6 @@ class SaleOrder(models.Model):
 
         invoice_vals['currency_rate'] = currency_rate
         return invoice_vals
-
-    @api.model
-    def _create_invoices(self, grouped=False, final=False, date=None):
-        invoice_ids = super(SaleOrder, self)._create_invoices(
-            grouped,
-            final,
-            date=date,
-        )
-        for invoice in invoice_ids:
-            invoice._onchange_currency_id()
-            invoice.add_perceptions()
-        return invoice_ids
 
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
