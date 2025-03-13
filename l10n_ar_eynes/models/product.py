@@ -29,6 +29,7 @@ class UoM(models.Model):
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
+    area_id = fields.Many2one('product.area')
     cot_nomenclature_id = fields.Many2one(
         "cot.nomenclature",
         string="COT Nomenclature",
