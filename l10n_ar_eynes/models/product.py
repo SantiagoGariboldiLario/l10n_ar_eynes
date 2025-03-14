@@ -34,6 +34,14 @@ class ProductTemplate(models.Model):
         "cot.nomenclature",
         string="COT Nomenclature",
     )
+    fiscal_credit = fields.Selection(
+        [
+            ('direct_taxed', 'Direct Taxed'),
+            ('direct_exempt', 'Direct Exempt'),
+            ('apport', 'Apport'),
+        ]
+    )
+    manufacturer_id = fields.Many2one('res.partner')
 
     @api.onchange("cot_nomenclature_id")
     def onchange_cot_nomenclature_id(self):
