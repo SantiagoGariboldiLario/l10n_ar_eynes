@@ -1812,6 +1812,11 @@ msgid "Apply Custom Code"
 msgstr "Aplicar código personalizado"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__product_template__fiscal_credit__apport
+msgid "Apport"
+msgstr "Prorrateable"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__ws_request_detail__result__a
 msgid "Approved"
 msgstr "Aprobado"
@@ -4175,6 +4180,16 @@ msgid "Dimension"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__product_template__fiscal_credit__direct_exempt
+msgid "Direct Exempt"
+msgstr "Directo Exento"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__product_template__fiscal_credit__direct_taxed
+msgid "Direct Taxed"
+msgstr "Directo Gravado"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__disable_perceptions
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__disable_perceptions
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__disable_perceptions
@@ -5137,6 +5152,12 @@ msgstr ""
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax_subjournal__base_position__first
 msgid "First"
 msgstr "Primero"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_product_product__fiscal_credit
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_product_template__fiscal_credit
+msgid "Fiscal Credit"
+msgstr "Crédito Fiscal"
 
 #. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_fiscal_position
@@ -6676,6 +6697,12 @@ msgstr "Información principal"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_perception_tax_line__manual
 msgid "Manual"
 msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_product_product__manufacturer_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_product_template__manufacturer_id
+msgid "Manufacturer"
+msgstr "Fabricante"
 
 #. module: l10n_ar_eynes
 #: model:ir.ui.menu,name:l10n_ar_eynes.wsfe_massive_sinchronize
@@ -10109,6 +10136,8 @@ msgstr "Gravado"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsfe_config__vat_tax_ids
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_taxes_reports
 #: model:ir.ui.menu,name:l10n_ar_eynes.taxes_submenu
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.cot_product_product_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.cot_product_template_view_form
 msgid "Taxes"
 msgstr "Impuestos"
 

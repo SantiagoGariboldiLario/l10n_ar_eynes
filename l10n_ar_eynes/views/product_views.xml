@@ -10,6 +10,19 @@
                 <field name="cot_nomenclature_id" />
                 <field name="area_id" />
             </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Taxes">
+                    <group>
+                        <group>
+                            <field name="area_id" />
+                            <field name="fiscal_credit" />
+                        </group>
+                        <group>
+                            <field name="manufacturer_id" />
+                        </group>
+                    </group>
+                </page>
+            </xpath>
         </field>
     </record>
 
@@ -20,7 +33,19 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='uom_po_id']" position="after">
                 <field name="cot_nomenclature_id" />
-                <field name="area_id" />
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Taxes">
+                    <group>
+                        <group>
+                            <field name="area_id" />
+                            <field name="fiscal_credit" />
+                        </group>
+                        <group>
+                            <field name="manufacturer_id" />
+                        </group>
+                    </group>
+                </page>
             </xpath>
         </field>
     </record>
