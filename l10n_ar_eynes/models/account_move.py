@@ -71,6 +71,12 @@ class AccountMove(models.Model):
     )
     is_closing = fields.Boolean(default=False)
     is_opening = fields.Boolean(default=False)
+    show_fiscal_credit = fields.Boolean(
+        default=lambda self: self.env["ir.config_parameter"]
+        .sudo()
+        .get_param("l10n_ar_eynes.apportionable_vat"),
+        store=False,
+    )
     supplier_move_reference = fields.Char(
         string='Supplier Invoice Reference',
         copy=False,

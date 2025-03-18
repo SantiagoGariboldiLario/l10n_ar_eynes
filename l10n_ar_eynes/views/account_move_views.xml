@@ -178,6 +178,11 @@
                 </attribute>
             </xpath>
 
+            <!-- MODIFICACION EN LAS LÍNEAS DE FACTURA POR IVA PRORRATEABLE -->
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='product_id']" position="after">
+                <field name="fiscal_credit" column_invisible="not parent.show_fiscal_credit" />
+            </xpath>
+
             <!-- NUEVOS CAMPOS EN PESTAÑA "OTRA INFORMACION" -->
             <xpath
                 expr="//group[@name='accounting_info_group']/field[@name='fiscal_position_id']"
@@ -207,6 +212,7 @@
                     invisible="move_type not in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')"
                 />
                 <field name="iva_digital_operation_code" />
+                <field name="show_fiscal_credit" invisible="True" />
                 <field name="local" invisible="1" />
             </xpath>
 
