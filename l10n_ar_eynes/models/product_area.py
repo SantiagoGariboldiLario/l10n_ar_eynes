@@ -12,13 +12,13 @@ class ProductArea(models.Model):
     _name = "product.area"
 
     active = fields.Boolean(default=True)
-    name = fields.Integer('Code', required=True)
-    description = fields.Char(required=True)
+    code = fields.Integer(required=True)
+    name = fields.Char('Description', required=True)
 
     _sql_constraints = [
         (
-            'unique_area_name',
-            'unique(name)',
+            'unique_area_code',
+            'unique(code)',
             _('This code is used.'),
         )
     ]

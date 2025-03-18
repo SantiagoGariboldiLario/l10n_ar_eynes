@@ -5,8 +5,8 @@
         <field name="model">product.area</field>
         <field name="arch" type="xml">
             <tree>
+                <field name="code" />
                 <field name="name" />
-                <field name="description" />
                 <field name="active" widget="boolean_toggle" />
             </tree>
         </field>
@@ -19,8 +19,8 @@
             <form>
                 <sheet>
                     <group>
+                        <field name="code" />
                         <field name="name" />
-                        <field name="description" />
                     </group>
                     <group>
                         <field name="active" widget="boolean_toggle" />
