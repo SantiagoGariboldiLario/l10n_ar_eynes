@@ -42,6 +42,12 @@ class ProductTemplate(models.Model):
         ]
     )
     manufacturer_id = fields.Many2one('res.partner')
+    show_fiscal_credit = fields.Boolean(
+        default=lambda self: self.env["ir.config_parameter"]
+        .sudo()
+        .get_param("l10n_ar_eynes.apportionable_vat"),
+        store=False,
+    )
 
     @api.onchange("cot_nomenclature_id")
     def onchange_cot_nomenclature_id(self):

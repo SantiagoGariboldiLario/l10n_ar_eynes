@@ -15,7 +15,8 @@
                     <group>
                         <group>
                             <field name="area_id" />
-                            <field name="fiscal_credit" />
+                            <field name="show_fiscal_credit" invisible="True" />
+                            <field name="fiscal_credit" invisible="not show_fiscal_credit" />
                         </group>
                         <group>
                             <field name="manufacturer_id" />
@@ -39,7 +40,8 @@
                     <group>
                         <group>
                             <field name="area_id" />
-                            <field name="fiscal_credit" />
+                            <field name="show_fiscal_credit" invisible="True" />
+                            <field name="fiscal_credit" invisible="not show_fiscal_credit" />
                         </group>
                         <group>
                             <field name="manufacturer_id" />
