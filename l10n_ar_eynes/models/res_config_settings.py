@@ -1,9 +1,15 @@
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    apportionable_vat = fields.Boolean(
+        related='company_id.apportionable_vat',
+        config_parameter='l10n_ar_eynes.apportionable_vat',
+        readonly=False,
+        default=False,
+    )
     case_convertion = fields.Selection(
         [
             ('title', 'Titlecase'),
@@ -42,12 +48,3 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='l10n_ar_eynes.special_partner_required_fields',
         readonly=False,
     )
-
-    def set_values(self):
-        res = super().set_values()
-        return res
-
-    @api.model
-    def get_values(self):
-        res = super().get_values()
-        return res

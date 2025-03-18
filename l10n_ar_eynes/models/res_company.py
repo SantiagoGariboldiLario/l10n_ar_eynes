@@ -11,51 +11,48 @@ _logger = logging.getLogger(__name__)
 class ResCompany(models.Model):
     _inherit = "res.company"
 
-    rejected_issued_checks_journal_id = fields.Many2one(
-        comodel_name='account.journal',
-        string='Rejected issued checks journal',
+    apartment = fields.Char(
+        string="Apartment",
+        related="partner_id.apartment",
+        store=True,
     )
-    fcred_cbu_emitter = fields.Char(string='CBU (FCE)')
-    fcred_minimum_amount = fields.Float(
-        string='Monto Minimo (FCE)',
-        default=195698,
-    )
-    fcred_transfer = fields.Char(string='SCA/ADC (FCE)?', default='SCA')
-    fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
-    fcred_pos_ar_id = fields.Many2one(
-        'account.journal',
-        string='FCE Pos',
-        domain="[('fcred_is_fce_emitter', '=', True)]",
-    )
+    apportionable_vat = fields.Boolean()
+    cot_pass = fields.Char(string="COT Password")
+    cot_url = fields.Char(string="COT URL")
+    cot_user = fields.Char(string="COT User (NIF)")
     door = fields.Char(
         string="Door",
         related="partner_id.door",
         size=3,
         store=True,
     )
+    fcred_cbu_emitter = fields.Char(string='CBU (FCE)')
+    fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
+    fcred_minimum_amount = fields.Float(
+        string='Monto Minimo (FCE)',
+        default=195698,
+    )
+    fcred_pos_ar_id = fields.Many2one(
+        'account.journal',
+        string='FCE Pos',
+        domain="[('fcred_is_fce_emitter', '=', True)]",
+    )
+    fcred_transfer = fields.Char(string='SCA/ADC (FCE)?', default='SCA')
     floor = fields.Char(
         string="Floor",
         related="partner_id.floor",
         size=3,
         store=True,
     )
+    group_check_cot = fields.Boolean(
+        string="Enable Web Service",
+        implied_group="l10n_ar_eynes.group_check_cot",
+    )
     num = fields.Char(
         string="Number",
         related="partner_id.floor",
         size=5,
         store=True,
-    )
-    apartment = fields.Char(
-        string="Apartment",
-        related="partner_id.apartment",
-        store=True,
-    )
-    cot_user = fields.Char(string="COT User (NIF)")
-    cot_pass = fields.Char(string="COT Password")
-    cot_url = fields.Char(string="COT URL")
-    group_check_cot = fields.Boolean(
-        string="Enable Web Service",
-        implied_group="l10n_ar_eynes.group_check_cot",
     )
 
 

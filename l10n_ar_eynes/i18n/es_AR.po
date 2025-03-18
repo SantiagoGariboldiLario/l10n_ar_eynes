@@ -1813,6 +1813,7 @@ msgstr "Aplicar código personalizado"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__product_template__fiscal_credit__apport
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_move_line__fiscal_credit__apport
 msgid "Apport"
 msgstr "Prorrateable"
 
@@ -4181,11 +4182,13 @@ msgstr ""
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__product_template__fiscal_credit__direct_exempt
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_move_line__fiscal_credit__direct_exempt
 msgid "Direct Exempt"
 msgstr "Directo Exento"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__product_template__fiscal_credit__direct_taxed
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_move_line__fiscal_credit__direct_taxed
 msgid "Direct Taxed"
 msgstr "Directo Gravado"
 
@@ -5156,6 +5159,7 @@ msgstr "Primero"
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_product_product__fiscal_credit
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_product_template__fiscal_credit
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move_line__fiscal_credit
 msgid "Fiscal Credit"
 msgstr "Crédito Fiscal"
 

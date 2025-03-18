@@ -7,6 +7,13 @@
         <field name="inherit_id" ref="account.res_config_settings_view_form" />
         <field name="arch" type="xml">
             <xpath expr="//block[@name='default_taxes_setting_container']" position="inside">
+                <setting
+                    id="apportionable_vat"
+                    string="Apportionable VAT"
+                    help="Enable custom fields to manage Apportionable VAT declaration"
+                >
+                    <field name="apportionable_vat" />
+                </setting>
                 <h2>ARBA Account Data</h2>
                 <group>
                     <group>

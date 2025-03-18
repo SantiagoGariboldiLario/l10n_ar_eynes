@@ -8,11 +8,33 @@ _logger = logging.getLogger(__name__)
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
+    fiscal_credit = fields.Selection(
+        [
+            ('direct_taxed', 'Direct Taxed'),
+            ('direct_exempt', 'Direct Exempt'),
+            ('apport', 'Apport'),
+        ],
+        compute='_compute_fiscal_credit',
+        readonly=False,
+        store=True,
+    )
     issued_check_id = fields.Many2one(
         comodel_name='account.check',
         string='Issued Check',
         domain=[('internal_type', '=', 'issued')],
     )
+
+    @api.depends('product_id')
+    def _compute_fiscal_credit(self):
+        for rec in self:
+            fiscal_credit = rec.fiscal_credit
+            if (
+                rec.move_id.show_fiscal_credit
+                and rec.product_id
+                and not fiscal_credit
+            ):
+                fiscal_credit = rec.product_id.fiscal_credit
+            rec.fiscal_credit = fiscal_credit
 
     @api.depends(
         'currency_id', 'company_id', 'move_id.date', 'move_id.currency_rate'
