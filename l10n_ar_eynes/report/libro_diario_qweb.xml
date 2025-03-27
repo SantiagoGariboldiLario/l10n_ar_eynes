@@ -120,13 +120,20 @@
                                                         <t t-out="line[4]" />
                                                     </td>
                                                     <td class="monetary-cell">
-                                                        <t t-set="value5" t-value="'%.2f' % float(line[5])" />
+                                                        <t
+                                                            t-set="value5"
+                                                            t-value="'{:,.2f}'.format(float(line[5])).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                                        />
                                                         <t t-out="value5" />
                                                     </td>
                                                     <td class="monetary-cell">
-                                                        <t t-set="value6" t-value="'%.2f' % float(line[6])" />
+                                                        <t
+                                                            t-set="value6"
+                                                            t-value="'{:,.2f}'.format(float(line[6])).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                                        />
                                                         <t t-out="value6" />
                                                     </td>
+
                                                 </tr>
                                             </t>
                                             <t t-if="line[0] == 'footer'">
@@ -137,11 +144,17 @@
                                                         <strong> Totales del asiento </strong>
                                                     </td>
                                                     <td class="monetary-cell">
-                                                        <t t-set="value7" t-value="'%.2f' % float(line[7])" />
+                                                        <t
+                                                            t-set="value7"
+                                                            t-value="'{:,.2f}'.format(float(line[7])).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                                        />
                                                         <strong> <t t-out="value7" /> </strong>
                                                     </td>
                                                     <td class="monetary-cell">
-                                                        <t t-set="value8" t-value="'%.2f' % float(line[8])" />
+                                                        <t
+                                                            t-set="value8"
+                                                            t-value="'{:,.2f}'.format(float(line[8])).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                                        />
                                                         <strong> <t t-out="value8" /> </strong>
                                                     </td>
                                                 </tr>
