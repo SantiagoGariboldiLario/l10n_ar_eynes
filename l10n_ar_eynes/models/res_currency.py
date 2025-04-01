@@ -53,7 +53,7 @@ class ResCurrency(models.Model):
         return rate_id
 
     # pylint: disable=redefined-builtin
-    def _convert(self, from_amount, to_currency, company, date, round=True):
+    def _convert(self, from_amount, to_currency, company=None, date=None, round=True):
         if (
             self._context.get('currency_rate')
             and self._context.get('currency_rate') != 0
