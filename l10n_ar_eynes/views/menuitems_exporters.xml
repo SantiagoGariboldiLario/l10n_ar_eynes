@@ -9,31 +9,36 @@
     />
 
     <!-- Level 2 -->
-    <menuitem parent="menu_taxes_reports" id="menu_sicore" name="SICORE" sequence="1" />
+    <menuitem parent="menu_taxes_reports" id="menu_iva" name="IVA" sequence="1" />
 
-    <menuitem parent="menu_taxes_reports" id="menu_parent_exporters_sifere" name="SIFERE" sequence="2" />
+    <menuitem parent="menu_taxes_reports" id="menu_libro_iva" name="Libro IVA Digital" sequence="2" />
 
-    <menuitem parent="menu_taxes_reports" id="menu_arba" name="ARBA" sequence="3" />
+    <menuitem parent="menu_taxes_reports" id="menu_parent_exporters_sifere" name="SIFERE" sequence="3" />
 
-    <menuitem parent="menu_taxes_reports" id="menu_arciba" name="e-ARCIBA" sequence="4" />
+    <menuitem parent="menu_taxes_reports" id="menu_arba" name="ARBA" sequence="4" />
 
-    <menuitem parent="menu_taxes_reports" id="menu_libro_iva" name="Libro IVA Digital" sequence="5" />
+    <menuitem parent="menu_taxes_reports" id="menu_arciba" name="e-ARCIBA" sequence="5" />
 
-    <menuitem parent="menu_taxes_reports" id="menu_iibb" name="Ingresos Brutos" sequence="6" />
+    <menuitem parent="menu_taxes_reports" id="menu_sicore" name="SICORE" sequence="6" />
+
+    <menuitem parent="menu_taxes_reports" id="menu_iibb" name="Ingresos Brutos" sequence="7" />
 
     <!-- Level 3 -->
     <menuitem
-        parent="menu_sicore"
-        id="menu_sicore_report"
-        name="Sicore files generation"
-        action="action_generate_sicore_files"
+        parent="menu_iva"
+        id="account_tax_subjournal_menu"
+        name="Taxes Subjournal"
+        action="account_tax_subjournal_action"
     />
 
+    <menuitem parent="menu_iva" id="purchase_vat_exporter_menu" action="action_export_purchase_vat" />
+
+    <menuitem parent="menu_libro_iva" id="libroiva_exporter_menu" action="action_export_libro_iva" />
+
     <menuitem
-        parent="menu_sicore"
-        id="menu_action_sicore_generated_files"
-        name="Sicore generated files"
-        action="action_sicore_generated_files"
+        parent="menu_libro_iva"
+        id="menu_libroiva_generated_files"
+        action="action_libro_IVA_generated_files"
     />
 
     <menuitem
@@ -50,13 +55,6 @@
         action="report_files_sifere"
     />
 
-    <menuitem
-        parent="menu_arba"
-        id="menu_action_arba_generated_files"
-        name="ARBA generated files"
-        action="action_arba_generated_files"
-    />
-
     <menuitem parent="menu_arba" id="menu_arba_retention_report" action="action_create_arba_retention_file" />
 
     <menuitem
@@ -66,10 +64,10 @@
     />
 
     <menuitem
-        parent="menu_arciba"
-        id="menu_action_arciba_generated_files"
-        name="ArciBA generated files"
-        action="action_arciba_generated_files"
+        parent="menu_arba"
+        id="menu_action_arba_generated_files"
+        name="ARBA generated files"
+        action="action_arba_generated_files"
     />
 
     <menuitem parent="menu_arciba" id="menu_arciba_report" action="action_generate_arciba_files" />
@@ -77,12 +75,25 @@
     <menuitem parent="menu_arciba" id="menu_arciba_nc_report" action="action_generate_arciba_nc_files" />
 
     <menuitem
-        parent="menu_libro_iva"
-        id="menu_libroiva_generated_files"
-        action="action_libro_IVA_generated_files"
+        parent="menu_arciba"
+        id="menu_action_arciba_generated_files"
+        name="ArciBA generated files"
+        action="action_arciba_generated_files"
     />
 
-    <menuitem parent="menu_libro_iva" id="libroiva_exporter_menu" action="action_export_libro_iva" />
+    <menuitem
+        parent="menu_sicore"
+        id="menu_sicore_report"
+        name="Sicore files generation"
+        action="action_generate_sicore_files"
+    />
+
+    <menuitem
+        parent="menu_sicore"
+        id="menu_action_sicore_generated_files"
+        name="Sicore generated files"
+        action="action_sicore_generated_files"
+    />
 
     <menuitem
         parent="menu_iibb"
