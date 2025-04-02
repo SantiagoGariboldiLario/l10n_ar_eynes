@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="purchase_vat_exporter_view" model="ir.ui.view">
+        <field name="name">Purchase VAT</field>
+        <field name="model">purchase.vat.wizard</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="date_start" widget="month_year_format" />
+                    <field name="date_end" widget="month_year_format" />
+                    <field name="company_id_domain" invisible="True" />
+                    <field name="company_id" domain="company_id_domain" />
+                </group>
+                <footer>
+                    <button name="run" string="Generate" colspan="1" type="object" class="oe_highlight" />
+                    <button special="cancel" string="Cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_export_purchase_vat" model="ir.actions.act_window">
+        <field name="name">Purchase VAT</field>
+        <field name="res_model">purchase.vat.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

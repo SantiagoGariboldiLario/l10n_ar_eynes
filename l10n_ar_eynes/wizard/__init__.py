@@ -28,3 +28,4 @@ from . import accredit_check_wizard
 from . import force_journal_change
 from . import sales_by_jurisdiction
 from . import libro_diario_wizard
+from . import purchase_vat_wizard
