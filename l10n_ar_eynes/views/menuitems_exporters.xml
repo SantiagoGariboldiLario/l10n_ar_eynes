@@ -33,6 +33,8 @@
 
     <menuitem parent="menu_iva" id="purchase_vat_exporter_menu" action="action_export_purchase_vat" />
 
+    <menuitem parent="menu_iva" id="sale_vat_exporter_menu" action="action_export_sale_vat" />
+
     <menuitem parent="menu_libro_iva" id="libroiva_exporter_menu" action="action_export_libro_iva" />
 
     <menuitem
