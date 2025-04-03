@@ -94,6 +94,9 @@ class PurchaseVATWizard(models.TransientModel):
             'exempt': 0.0,
             'untaxed': 0.0,
             'ni_nr_ex_mon': 0.0,
+            'exempt_refund': 0.0,
+            'untaxed_refund': 0.0,
+            'ni_nr_ex_mon_refund': 0.0,
         }
 
         vat_type = None
@@ -134,20 +137,23 @@ class PurchaseVATWizard(models.TransientModel):
             if not next_is_same_aml:
                 total = line[5] * line[7]
                 if not vat_type:
-                    by_fiscal_credit['untaxed'] += total
+                    vat_type = 'untaxed'
+
+                if vat_type in ['exempt', 'ni_nr_ex_mon', 'untaxed']:
+                    if line[8] == 'out_refund':
+                        vat_type = vat_type + '_refund'
+                        total = total * -1
+                    by_fiscal_credit[vat_type] += total
                 else:
-                    if vat_type in ['exempt', 'ni_nr_ex_mon']:
-                        by_fiscal_credit[vat_type] += total
-                    else:
-                        net = line[4] * line[7]
-                        vat = total - net
-                        fiscal_credit = line[3]
-                        if line[8] == 'in_refund':
-                            fiscal_credit = fiscal_credit + '_refund'
-                            net = net * -1
-                            vat = vat * -1
-                        by_fiscal_credit[fiscal_credit][vat_type][0] += net
-                        by_fiscal_credit[fiscal_credit][vat_type][1] += vat
+                    fiscal_credit = line[3]
+                    net = line[4] * line[7]
+                    vat = total - net
+                    if line[8] == 'out_refund':
+                        fiscal_credit = fiscal_credit + '_refund'
+                        net = net * -1
+                        vat = vat * -1
+                    by_fiscal_credit[fiscal_credit][vat_type][0] += net
+                    by_fiscal_credit[fiscal_credit][vat_type][1] += vat
                 vat_type = None
 
         for fiscal_type in (
@@ -237,10 +243,19 @@ class PurchaseVATWizard(models.TransientModel):
                 'exempt': tax_credit_refunds['exempt'],
                 'untaxed': tax_credit_refunds['untaxed'],
                 'ni_nr_ex_mon': tax_credit_refunds['ni_nr_ex_mon'],
+                'exempt_refund': tax_credit_refunds['exempt_refund'],
+                'untaxed_refund': tax_credit_refunds['untaxed_refund'],
+                'ni_nr_ex_mon_refund': tax_credit_refunds[
+                    'ni_nr_ex_mon_refund'
+                ],
                 'retention_perception': retention_perception,
+                # HARCODE: HAY QUE VER DE DONDE SALEN LOS SIGUIENTES MONTOS
                 'cero': 0.0,
                 'fees': 0.0,
                 'internal_taxes': 0.0,
+                'cero_refund': 0.0,
+                'fees_refund': 0.0,
+                'internal_taxes_refund': 0.0,
             },
         )
 

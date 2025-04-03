@@ -1217,11 +1217,114 @@
                                     </td>
                                 </tr>
 
+                                <!-- NI, NR, Exento, Monot., NCat -->
+                                <tr class="no-border-row">
+                                    <td>NI, NR, Exento, Monot., NCat</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="ni_nr_ex_mon_refundformatted"
+                                            t-value="'{:,.2f}'.format(ni_nr_ex_mon_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="ni_nr_ex_mon_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="ni_nr_ex_mon_refundformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>Exento</td>
+                                    <td>
+                                        <t
+                                            t-set="exempt_refundformatted"
+                                            t-value="'{:,.2f}'.format(exempt_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="exempt_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="exempt_refundformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>No alcanzado</td>
+                                    <td>
+                                        <t
+                                            t-set="untaxed_refundformatted"
+                                            t-value="'{:,.2f}'.format(untaxed_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="untaxed_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="untaxed_refundformatted" /></td>
+                                </tr>
+
+                                <!-- 0, Tasas, Imp. Internos -->
+                                <tr class="no-border-row">
+                                    <td>0     0</td>
+                                    <td>
+                                        <t
+                                            t-set="cero_refundformatted"
+                                            t-value="'{:,.2f}'.format(cero_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="cero_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="cero_refundformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>III     Tasas</td>
+                                    <td>
+                                        <t
+                                            t-set="fees_refundformatted"
+                                            t-value="'{:,.2f}'.format(fees_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="fees_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="fees_refundformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>IIV     Imp. Int. Agua</td>
+                                    <td>
+                                        <t
+                                            t-set="internal_taxes_refundformatted"
+                                            t-value="'{:,.2f}'.format(internal_taxes_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="internal_taxes_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="internal_taxes_refundformatted" /></td>
+                                </tr>
+
                                 <!-- TOTALES -->
                                 <tr class="total-row">
                                     <td>TOTAL DF</td>
                                     <td>
-                                        <t t-set="total_exempt_refund" t-value="0.0" />
+                                        <t
+                                            t-set="total_exempt_refund"
+                                            t-value="float(exempt_refund + untaxed_refund + cero_refund + fees_refund + internal_taxes_refund)"
+                                        />
                                         <t
                                             t-set="total_exempt_refundformatted"
                                             t-value="'{:,.2f}'.format(total_exempt_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
@@ -1230,12 +1333,7 @@
                                     </td>
                                     <td />
                                     <td>
-                                        <t t-set="total_ni_nr_ex_mon_refund" t-value="0.0" />
-                                        <t
-                                            t-set="total_ni_nr_ex_mon_refundformatted"
-                                            t-value="'{:,.2f}'.format(total_ni_nr_ex_mon_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
-                                        />
-                                        <t t-out="total_ni_nr_ex_mon_refundformatted" />
+                                        <t t-out="ni_nr_ex_mon_refundformatted" />
                                     </td>
                                     <td>
                                         <t
@@ -1265,7 +1363,7 @@
                                     <td>
                                         <t
                                             t-set="total_refund"
-                                            t-value="float(direct_taxed_refundtotal + apport_refundtotal + direct_exempt_refundtotal)"
+                                            t-value="float(direct_taxed_refundtotal + apport_refundtotal + direct_exempt_refundtotal + total_exempt_refund + ni_nr_ex_mon_refund)"
                                         />
                                         <t
                                             t-set="total_refundformatted"
@@ -1296,7 +1394,7 @@
                                     <td>
                                         <t
                                             t-set="total_ni_nr_ex_mon_global"
-                                            t-value="ni_nr_ex_mon + total_ni_nr_ex_mon_refund"
+                                            t-value="ni_nr_ex_mon + ni_nr_ex_mon_refund"
                                         />
                                         <t
                                             t-set="total_ni_nr_ex_mon_globalformatted"

@@ -16,6 +16,7 @@ l10n_ar_eynes.access_deposit_check_wizard,access_deposit_check_wizard,l10n_ar_ey
 
 l10n_ar_eynes.access_cancel_picking_done,access_cancel_picking_done,l10n_ar_eynes.model_cancel_picking_done,base.group_user,1,1,1,1
 l10n_ar_eynes.access_purchase_vat_wizard,access_purchase_vat_wizard,l10n_ar_eynes.model_purchase_vat_wizard,base.group_user,1,1,1,1
+l10n_ar_eynes.access_sale_vat_wizard,access_sale_vat_wizard,l10n_ar_eynes.model_sale_vat_wizard,base.group_user,1,1,1,1
 l10n_ar_eynes.access_retention_concept,access_retention_concept,l10n_ar_eynes.model_retention_concept,base.group_user,1,1,1,1
 l10n_ar_eynes.access_retention_activity,access_retention_activity,l10n_ar_eynes.model_retention_activity,base.group_user,1,1,1,1
 l10n_ar_eynes.access_retention_vat_tax,access_retention_vat_tax,l10n_ar_eynes.model_retention_vat_tax,base.group_user,1,1,1,1
