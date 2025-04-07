@@ -104,7 +104,7 @@ class PurchaseVATWizard(models.TransientModel):
             next_line = (
                 purchase_data[i + 1] if i + 1 < len(purchase_data) else None
             )
-            next_is_same_aml = next_line[1] == line[1] if next_line else False
+            next_is_same_aml = next_line[2] == line[2] if next_line else False
 
             if line[0] == self.env.ref('l10n_ar_eynes.fiscal_position_ri').id:
                 if (
