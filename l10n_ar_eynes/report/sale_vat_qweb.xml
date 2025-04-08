@@ -172,7 +172,7 @@
                                         <t t-out="direct_taxed2totalformatted" />
                                     </td>
                                 </tr>
-                                <tr class="subtotal-row">
+                                <tr class="no-border-row subtotal-row">
                                     <td />
                                     <td>Subtotal</td>
                                     <td />
@@ -324,7 +324,7 @@
                                         <t t-out="apport2totalformatted" />
                                     </td>
                                 </tr>
-                                <tr class="subtotal-row">
+                                <tr class="no-border-row subtotal-row">
                                     <td />
                                     <td>Subtotal</td>
                                     <td />
@@ -476,7 +476,7 @@
                                         <t t-out="direct_exempt2totalformatted" />
                                     </td>
                                 </tr>
-                                <tr class="subtotal-row">
+                                <tr class="no-border-row subtotal-row">
                                     <td />
                                     <td>Subtotal</td>
                                     <td />
@@ -620,7 +620,7 @@
                                 </tr>
 
                                 <!-- TOTALES -->
-                                <tr class="total-row">
+                                <tr class="no-border-row total-row">
                                     <td>TOTAL DF</td>
                                     <td>
                                         <t
@@ -701,7 +701,7 @@
                                     </tr>
                                 </t>
                                 <!-- TOTALES -->
-                                <tr class="total-row">
+                                <tr class="no-border-row total-row">
                                     <td>TOTAL RE</td>
                                     <td />
                                     <td>
@@ -852,7 +852,7 @@
                                         <t t-out="direct_taxed_refund2totalformatted" />
                                     </td>
                                 </tr>
-                                <tr class="subtotal-row">
+                                <tr class="no-border-row subtotal-row">
                                     <td />
                                     <td>Subtotal</td>
                                     <td />
@@ -1004,7 +1004,7 @@
                                         <t t-out="apport_refund2totalformatted" />
                                     </td>
                                 </tr>
-                                <tr class="subtotal-row">
+                                <tr class="no-border-row subtotal-row">
                                     <td />
                                     <td>Subtotal</td>
                                     <td />
@@ -1174,7 +1174,7 @@
                                         <t t-out="direct_exempt_refund2totalformatted" />
                                     </td>
                                 </tr>
-                                <tr class="subtotal-row">
+                                <tr class="no-border-row subtotal-row">
                                     <td />
                                     <td>Subtotal</td>
                                     <td />
@@ -1318,7 +1318,7 @@
                                 </tr>
 
                                 <!-- TOTALES -->
-                                <tr class="total-row">
+                                <tr class="no-border-row total-row">
                                     <td>TOTAL CF</td>
                                     <td>
                                         <t
@@ -1375,7 +1375,7 @@
 
                                 <!-- ************************************************************************ -->
                                 <!--                                TOTAL GLOBAL                              -->
-                                <tr class="total-row global-row">
+                                <tr class="no-border-row total-row global-row">
                                     <td><strong>Totales al <t t-out="date_end" /></strong></td>
                                     <td>
                                         <t
