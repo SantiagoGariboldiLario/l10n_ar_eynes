@@ -12,7 +12,12 @@ import qrcode
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import file_open, formatLang
-from odoo.tools.sql import column_exists, create_column, drop_index, index_exists
+from odoo.tools.sql import (
+    column_exists,
+    create_column,
+    drop_index,
+    index_exists,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -65,6 +70,7 @@ class AccountMove(models.Model):
         compute='_compute_amount_custom',
         store=True,
     )
+    created_from_rej_check = fields.Boolean(default=False)
     internal_number = fields.Char(
         string='Internal Number',
         copy=False,
