@@ -55,7 +55,7 @@ lint-pylint:
 deploy-job: # This job runs in the deploy stage.
   stage: deploy # It only runs when jobs in the test stage complete successfully.
   rules:
-    - if: $CI_COMMIT_BRANCH == "15.0-stage"
+    - if: $CI_COMMIT_BRANCH == "17.0"
   trigger:
-    project: localization/l10n-v15-testing
+    project: localization/l10n-v17-testing
     strategy: depend
