@@ -20,6 +20,7 @@
                         <field name="expired_issued_checks_account_id" />
                         <field name="rejected_issued_checks_journal_id" />
                         <field name="deferred_journal_id" />
+                        <field name="rejected_check_product_id" />
                     </group>
                 </sheet>
             </form>
@@ -389,6 +390,13 @@
                         statusbar_visible="draft,in_wallet,deposited,accredited,delivered,rejected,expired"
                         statusbar_colors='{"cancel":"red"}'
                     />
+                     <button
+                        name="create_debit_note_from_rejected_check"
+                        type='object'
+                        string='Create Debit Note'
+                        class="oe_highlight"
+                        invisible="third_party_check_state not in ('rejected') or debit_note_id"
+                    />
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -409,6 +417,8 @@
                             />
                             <field name="checkbook_format" readonly="1" />
                             <field name="internal_type" readonly="1" />
+                            <field name="debit_note_id" readonly="1" invisible="not debit_note_id" />
+
                         </group>
                         <group>
                             <field name="reception_date" readonly="third_party_check_state != 'in_wallet'" />

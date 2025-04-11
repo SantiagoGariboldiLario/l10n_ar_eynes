@@ -51,6 +51,12 @@ class AccountCheckConfig(models.Model):
         domain="[('company_id', '=', company_id)]",
         string='Rejected issued checks journal',
     )
+    rejected_check_product_id = fields.Many2one(
+        comodel_name='product.product',
+        readonly=False,
+        string='Rejected check Product ID',
+        help='Product to be use on Debit Note when a Third Party check is rejected',
+    )
 
     def name_get(self):
         ret = []
@@ -681,6 +687,7 @@ class AccountCheck(models.Model):
         comodel_name='account.move', string='Accredit Move', readonly=True
     )
     accredit_date = fields.Date(string='Accredit Date', readonly=True)
+    debit_note_id = fields.Many2one('account.move', ondelete='set null')
 
     @api.depends('deposit_move_id')
     def _compute_deposit_journal_id(self):
@@ -845,6 +852,76 @@ class AccountCheck(models.Model):
         }
 
         return move_line
+
+    def _get_voucher_type(self, denomination):
+        return self.env['res.voucher.type'].search(
+            [
+                ('denomination', '=', denomination),
+                ('doc_type', '=', 'dn'),
+                ('afip_code', '<', 200),
+            ],
+            limit=1,
+        )
+
+    def create_debit_note_from_rejected_check(self):
+        AccountCheckConfig = self.env['account.check.config']
+
+        for check in self:
+            name_ref = 'Debit note for Third Party Check ' + check.number
+            check_config = AccountCheckConfig.search(
+                [('company_id', '=', check.company_id.id)]
+            )
+            journals = self.env.user.get_journals_by_fiscal_position(
+                check.source_partner_id.property_account_position_id
+            )
+
+            if not journals:
+                raise ValidationError(
+                    _("Partner don't have a properly journal configured.")
+                )
+            if not check_config.rejected_check_product_id:
+                raise ValidationError(
+                    _(
+                        "You need to configure a product for rejected check first."
+                    )
+                )
+
+            denomination = journals[0].denomination
+
+            move_vals = {
+                'ref': name_ref,
+                'partner_id': check.source_partner_id.id,
+                'journal_id': journals[0].id,
+                'move_type': 'out_invoice',
+                'is_debit_note': True,
+                'denomination': denomination,
+                'created_from_rej_check': True,
+                'fiscal_position_id': check.source_partner_id.property_account_position_id.id,
+                'invoice_line_ids': [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": check_config.rejected_check_product_id.id,
+                            "quantity": 1.0,
+                            "name": name_ref,
+                            "price_unit": check.amount,
+                        },
+                    ),
+                ],
+            }
+            # 'voucher_type_id': check._get_voucher_type(denomination),
+            move = self.env['account.move'].create(move_vals)
+            check.debit_note_id = move.id
+
+            return {
+                'name': _('Debit Note'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'account.move',
+                'view_mode': 'form',
+                'res_id': move.id,
+                'target': 'current',
+            }
 
     _sql_constraints = [
         (

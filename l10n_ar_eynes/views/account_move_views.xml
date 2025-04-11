@@ -218,6 +218,7 @@
                 <field name="iva_digital_operation_code" />
                 <field name="show_fiscal_credit" invisible="True" />
                 <field name="local" invisible="1" />
+                <field name="created_from_rej_check" invisible="1" />
             </xpath>
 
             <page name="other_info" position="inside">
@@ -319,11 +320,11 @@
                         <field
                             name="export_type_id"
                             widget="selection"
-                            required="not local and move_type in ('out_invoice', 'out_refund')"
+                            required="not created_from_rej_check or not local and move_type in ('out_invoice', 'out_refund')"
                         />
                         <field
                             name="dst_country_id"
-                            required="not local and move_type in ('out_invoice', 'out_refund')"
+                            required="not created_from_rej_check or not local and move_type in ('out_invoice', 'out_refund')"
                         />
                     </group>
                     <group string="Shipping Permissions">
