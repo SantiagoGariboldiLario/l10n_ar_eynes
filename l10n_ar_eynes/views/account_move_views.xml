@@ -334,11 +334,11 @@
                         <field
                             name="export_type_id"
                             widget="selection"
-                            required="not created_from_rej_check or not local and move_type in ('out_invoice', 'out_refund')"
+                            required="not created_from_rej_check and not local and move_type in ('out_invoice', 'out_refund')"
                         />
                         <field
                             name="dst_country_id"
-                            required="not created_from_rej_check or not local and move_type in ('out_invoice', 'out_refund')"
+                            required="not created_from_rej_check and not local and move_type in ('out_invoice', 'out_refund')"
                         />
                     </group>
                     <group string="Shipping Permissions">
