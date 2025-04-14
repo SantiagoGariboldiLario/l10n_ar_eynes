@@ -105,6 +105,21 @@ class WSFEParser(WSParser):
             or '99'
         )
         doc_num = (invoice.partner_id.vat or '0') if doc_type != '99' else '0'
+        fiscal_position = invoice.partner_id.property_account_position_id
+        if not fiscal_position:
+            raise UserError(
+                _("You must configure a fiscal position for %s")
+                % invoice.partner_id.name
+            )
+        try:
+            fiscal_position = int(fiscal_position.afip_code)
+        except ValueError:
+            raise UserError(
+                _(
+                    "You must select a valid AFIP Code for fiscal position for %s"
+                )
+                % invoice.partner_id.property_account_position_id.name
+            ) from None
         date_due = self._get_date_due(invoice, concept, invoice_date)
         currency_code = invoice.get_currency_code()
         invoice_rate = invoice.currency_rate
@@ -129,6 +144,8 @@ class WSFEParser(WSParser):
                 'FchVtoPago': date_due,
                 'MonId': currency_code,
                 'MonCotiz': invoice_rate,
+                'CanMisMonExt': 'S' if invoice.same_currency_cancel else 'N',
+                'CondicionIVAReceptorId': fiscal_position,
                 'FchServDesde': date_from,
                 'FchServHasta': date_to,
             }

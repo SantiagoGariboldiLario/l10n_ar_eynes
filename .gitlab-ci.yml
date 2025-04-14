@@ -52,6 +52,7 @@ lint-pylint:
     paths:
       - $FOLDER_NAME/
 
+# child project deploy
 deploy-job: # This job runs in the deploy stage.
   stage: deploy # It only runs when jobs in the test stage complete successfully.
   rules:

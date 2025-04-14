@@ -12,7 +12,12 @@ import qrcode
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import file_open, formatLang
-from odoo.tools.sql import column_exists, create_column, drop_index, index_exists
+from odoo.tools.sql import (
+    column_exists,
+    create_column,
+    drop_index,
+    index_exists,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -65,6 +70,7 @@ class AccountMove(models.Model):
         compute='_compute_amount_custom',
         store=True,
     )
+    created_from_rej_check = fields.Boolean(default=False)
     internal_number = fields.Char(
         string='Internal Number',
         copy=False,
@@ -150,10 +156,17 @@ class AccountMove(models.Model):
     dst_country_id = fields.Many2one('wsfex.dst.country.codes', 'Dest Country')
     dst_cuit_id = fields.Many2one('dst.cuit.codes', 'Country CUIT')
     export_type_id = fields.Many2one('wsfex.export.type.codes', 'Export Type')
+    same_currency_cancel = fields.Boolean(default=False)
     shipping_perm_ids = fields.One2many(
         'wsfex.shipping.permission',
         'invoice_id',
         'Shipping Permissions',
+    )
+    show_same_currency_cancel = fields.Boolean(
+        compute='_compute_show_same_currency_cancel'
+    )
+    show_get_arca_currency_btn = fields.Boolean(
+        compute='_compute_show_get_arca_currency_btn'
     )
     # REPORTE LIBRO IVA DIGITAL:
     iva_digital_operation_code = fields.Selection(
@@ -395,6 +408,36 @@ class AccountMove(models.Model):
                             ]
 
             invoice.update(res)
+
+    @api.depends('move_type', 'currency_id', 'company_currency_id')
+    def _compute_show_same_currency_cancel(self):
+        for move in self:
+            show = False
+            if (
+                move.move_type in ('out_invoice', 'out_refund')
+                and move.currency_id != move.company_currency_id
+            ):
+                show = True
+            move.show_same_currency_cancel = show
+
+    @api.depends(
+        'move_type',
+        'currency_id',
+        'company_currency_id',
+        'state',
+        'same_currency_cancel',
+    )
+    def _compute_show_get_arca_currency_btn(self):
+        for move in self:
+            show = False
+            if (
+                move.move_type in ('out_invoice', 'out_refund')
+                and move.state == 'draft'
+                and move.currency_id != move.company_currency_id
+                and move.same_currency_cancel
+            ):
+                show = True
+            move.show_get_arca_currency_btn = show
 
     def get_highest_pos_sequence(
         self, journal, move_type, is_debit_note=False, is_fce=False
@@ -1835,3 +1878,37 @@ class AccountMove(models.Model):
             if inv.state == 'draft':
                 inv._post(soft=False)
             return
+
+    def get_arca_currency_rate(self):
+        """Button to get legal currency rate to electronic invoice informed to ARCA"""
+        if self:
+            request_id = self._create_ws_request()
+            ws = self._get_ws_conf()
+
+            result, error_msg = ws.get_currency_rate(self, request_id)
+
+            if result:
+                self.currency_rate = result
+                return True
+            else:
+                context = dict(self._context or {})
+                context["message"] = _(
+                    "Error trying to get currency rate of %(currency)s on %(date)s.\n"
+                    "Error received -> %(error_msg)s",
+                    currency=self.currency_id.name,
+                    date=self.invoice_date,
+                    error_msg=error_msg,
+                )
+                view = self.env.ref("popup_messages.message_wizard")
+                view_id = view and view.id or False
+
+                return {
+                    'name': _('WSFE Error'),
+                    'type': 'ir.actions.act_window',
+                    'view_mode': 'form',
+                    'res_model': 'message.wizard',
+                    'views': [(view_id, 'form')],
+                    'view_id': view_id,
+                    'target': 'new',
+                    'context': context,
+                }

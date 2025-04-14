@@ -130,6 +130,20 @@
             <div name="journal_div" position="after">
                 <field name="currency_preciated" invisible="1" />
                 <field name="is_multi_currency" invisible="1" />
+                <field name="show_same_currency_cancel" invisible="True" />
+                <field name="show_get_arca_currency_btn" invisible="True" />
+                <label for="same_currency_cancel" invisible="not show_same_currency_cancel" />
+                <div class="d-flex">
+                    <field name="same_currency_cancel" invisible="not show_same_currency_cancel" />
+                    <button
+                        name="get_arca_currency_rate"
+                        type="object"
+                        string="Get ARCA Currency"
+                        class="btn-primary"
+                        invisible="not show_get_arca_currency_btn"
+                        groups="account.group_account_user"
+                    />
+                </div>
                 <label for="currency_rate" invisible="not is_multi_currency" />
                 <div class="d-flex">
                     <field
@@ -218,6 +232,7 @@
                 <field name="iva_digital_operation_code" />
                 <field name="show_fiscal_credit" invisible="True" />
                 <field name="local" invisible="1" />
+                <field name="created_from_rej_check" invisible="1" />
             </xpath>
 
             <page name="other_info" position="inside">
@@ -319,11 +334,11 @@
                         <field
                             name="export_type_id"
                             widget="selection"
-                            required="not local and move_type in ('out_invoice', 'out_refund')"
+                            required="not created_from_rej_check or not local and move_type in ('out_invoice', 'out_refund')"
                         />
                         <field
                             name="dst_country_id"
-                            required="not local and move_type in ('out_invoice', 'out_refund')"
+                            required="not created_from_rej_check or not local and move_type in ('out_invoice', 'out_refund')"
                         />
                     </group>
                     <group string="Shipping Permissions">
