@@ -5,6 +5,7 @@
 
 import logging
 
+from dateutil.relativedelta import relativedelta
 from pyafipws.wsfexv1 import WSFEXv1
 from pysimplesoap.client import SoapFault
 
@@ -459,6 +460,102 @@ class WsfexConfig(models.Model):
         _logger.info('Voucher info: %s' % res)
         return res
 
+    def get_currency_rate(self, invoice, request_id):
+        """
+        Devuelve la cotización de la moneda de la factura. Si la fecha es anterior o igual
+        al día actual, se tomará la cotización del día anterior a dicha fecha.
+        Si la fecha de la factura es posterior a la fecha actual, se tomará la cotización
+        del día anterior a hoy.
+        """
+        self.ensure_one()
+        if not self.cuit:
+            raise UserError(_("Please configure the company VAT!"))
+
+        mon_id = invoice.get_currency_code()
+
+        today = fields.Date.today()
+        invoice_date = invoice.invoice_date
+        invoice_date = (
+            invoice_date if invoice_date and invoice_date <= today else today
+        )
+        invoice_date = invoice_date - relativedelta(days=1)
+        date = invoice_date and invoice_date.strftime('%Y-%m-%d') or False
+
+        ws = None
+        req_vals = {
+            'invoice_id': invoice.id,
+        }
+        error_msg = xml_request = ""
+        cotizacion = False
+        try:
+            ws = self.ws_auth()
+            logging.info(
+                "Send request to get currency rate of %s on %s"
+                % (invoice.currency_id.name, date)
+            )
+            result = ws.GetParamCtz(mon_id, date)
+            logging.info("Result: %s" % result)
+            cotizacion = result and float(result)
+        except SoapFault as soap_fault:
+            error_msg = "%s: %s" % (
+                soap_fault.faultcode,
+                soap_fault.faultstring,
+            )
+            _logger.exception("SOAP Error.")
+            _logger.exception(error_msg)
+        except Exception as e:
+            if ws and ws.Excepcion:
+                error_msg = ws.Excepcion
+                _logger.exception("WSFE Error.")
+                _logger.exception(error_msg)
+            else:
+                error_msg = str(e)
+                _logger.exception("Internal Error.")
+                _logger.exception(error_msg)
+        finally:
+            req_vals.update(
+                {
+                    'xml_request': xml_request,
+                    'request_id': request_id,
+                }
+            )
+
+        try:
+            error_msg += '\n'.join(err for err in ws.Errores)
+        except Exception as e:
+            _logger.info(str(e))
+
+        obs_msg = ''
+        try:
+            obs_msg = '\n'.join(obs for obs in ws.Observaciones)
+        except Exception as e:
+            _logger.info(str(e))
+
+        events_msg = ''
+        try:
+            events_msg = '\n'.join(evn for evn in ws.Eventos)
+        except Exception as e:
+            _logger.info(str(e))
+
+        if not cotizacion:
+            error_msg += 'Cotización inválida. Respuesta ARCA: %s' % result
+
+        if not error_msg and not events_msg:
+            obs_msg += 'Se obtuvo la tasa de cambio desde ARCA al %s' % date
+
+        req_vals.update(
+            {
+                'errors': error_msg,
+                'events': events_msg,
+                'observations': obs_msg,
+            }
+        )
+        self.env['ws.request.detail'].create(req_vals)
+        _logger.info("Request details saved.")
+        self.env.cr.commit()  # pylint: disable=invalid-commit
+
+        return cotizacion, error_msg + events_msg + obs_msg
+
     def _get_next_id(self, ws):
         _logger.info("Checking last ID informed to AFIP")
         last_id = ws.GetLastID()
@@ -540,6 +637,7 @@ class WsfexConfig(models.Model):
             id_impositivo=data['partner_cuit'],
             moneda_id=data['MonId'],
             moneda_ctz=data['MonCotiz'],
+            cancela_misma_mon_ext=data['CanMisMonExt'],
             # obs_comerciales="",
             # obs_generales="",
             # forma_pago="",

@@ -101,6 +101,7 @@ class WSFEXParser(WSParser):
                 'FchVtoPago': date_due,
                 'MonId': currency_code,
                 'MonCotiz': invoice_rate,
+                'CanMisMonExt': 'S' if invoice.same_currency_cancel else 'N',
                 'expo_type': export_type,
                 'exist_perm': has_shipping_perm,
                 'pais_dst': pais_dst,

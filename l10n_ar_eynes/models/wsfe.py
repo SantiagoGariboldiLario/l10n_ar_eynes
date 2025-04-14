@@ -307,12 +307,14 @@ class WsfeConfig(models.Model):
         except Exception as e:
             _logger.info(str(e))
 
+        if not error_msg and not events_msg:
+            obs_msg += 'Se obtuvo la tasa de cambio desde ARCA al %s' % date
+
         req_vals.update(
             {
                 'errors': error_msg,
                 'events': events_msg,
-                'observations': obs_msg
-                or ('Se obtuvo la tasa de cambio desde ARCA al %s' % date),
+                'observations': obs_msg,
             }
         )
         self.env['ws.request.detail'].create(req_vals)
