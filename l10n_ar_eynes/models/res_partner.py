@@ -343,7 +343,11 @@ class ResPartner(models.Model):
         vals = self._parse_vat_string(vals)
         gross_income_ids = vals.get('gross_income_ids', [])
         for rec in gross_income_ids:
-            if rec[-1] and not rec[-1].get('type_taxpayer'):
+            if (
+                rec[-1]
+                and not isinstance(rec[-1], int)
+                and not rec[-1].get('type_taxpayer')
+            ):
                 raise ValidationError(
                     _(
                         "You must complete 'Type of taxpayer' field on Gross income configuration."
