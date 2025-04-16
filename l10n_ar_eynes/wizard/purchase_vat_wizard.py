@@ -140,7 +140,7 @@ class PurchaseVATWizard(models.TransientModel):
                     vat_type = 'untaxed'
 
                 if vat_type in ['exempt', 'ni_nr_ex_mon', 'untaxed']:
-                    if line[8] == 'out_refund':
+                    if line[8] == 'in_refund':
                         vat_type = vat_type + '_refund'
                         total = total * -1
                     by_fiscal_credit[vat_type] += total
@@ -148,7 +148,7 @@ class PurchaseVATWizard(models.TransientModel):
                     fiscal_credit = line[3]
                     net = line[4] * line[7]
                     vat = total - net
-                    if line[8] == 'out_refund':
+                    if line[8] == 'in_refund':
                         fiscal_credit = fiscal_credit + '_refund'
                         net = net * -1
                         vat = vat * -1
