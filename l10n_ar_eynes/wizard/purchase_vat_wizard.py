@@ -178,7 +178,7 @@ class PurchaseVATWizard(models.TransientModel):
         SELECT ret.name, -1 * sum(r.amount) FROM account_payment_order_retention_line r
         JOIN account_tax ret ON r.retention_id = ret.id
         WHERE r.date BETWEEN %(date_start)s AND %(date_end)s
-        AND ret.type_tax_use LIKE 'sale'
+        AND ret.type_tax_use LIKE 'purchase'
         AND r.company_id = %(company)s
         GROUP BY ret.id
         """
