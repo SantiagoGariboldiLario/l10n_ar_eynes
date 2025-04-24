@@ -574,10 +574,11 @@ class AccountMove(models.Model):
         # Agregamos contexto para evitar la actualización de la tasa de cambio al validar la factura
         if not self.env.context.get('from_action_post', False):
             date_invoice = self.date or self.invoice_date or fields.Date.today()
-            if not self.currency_id:
-                self.is_multi_currency = False
-                # self.currency_rate = 1.0
-            else:
+            vals = {
+                'is_multi_currency': False,
+                'currency_rate': 1.0,
+            }
+            if self.currency_id:
                 company = self.env.company
                 company_currency = company.currency_id
                 currency = self.currency_id
@@ -585,14 +586,13 @@ class AccountMove(models.Model):
                     curr_rate = currency.get_currency_rate(
                         company, date_invoice
                     )
-                    self.is_multi_currency = True
+
+                    vals['is_multi_currency'] = True
                     if currency.preciated:
-                        self.currency_rate = curr_rate.inverse_company_rate
+                        vals['currency_rate'] = curr_rate.inverse_company_rate
                     else:
-                        self.currency_rate = curr_rate.company_rate
-                else:
-                    self.is_multi_currency = False
-                    self.currency_rate = 1.0
+                        vals['currency_rate'] = curr_rate.company_rate
+            self.write(vals)
 
             self._onchange_payment_term_date_invoice()
 
@@ -605,8 +605,12 @@ class AccountMove(models.Model):
 
     @api.onchange('currency_id')
     def _inverse_currency_id(self):
+        currency_has_change = self._origin.currency_id != self.currency_id
         super(AccountMove, self)._inverse_currency_id()
-        if not self.env.context.get('force_rate', False):
+        if (
+            not self.env.context.get('force_rate', False)
+            and currency_has_change
+        ):
             for move in self:
                 move._onchange_currency_id()
         return
