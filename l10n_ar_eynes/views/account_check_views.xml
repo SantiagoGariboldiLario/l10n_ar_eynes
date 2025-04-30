@@ -374,7 +374,7 @@
                         type='object'
                         string='Back to Wallet'
                         class="btn-secondary"
-                        invisible="third_party_check_state in ('draft', 'in_wallet')"
+                        invisible="third_party_check_state in ('draft', 'in_wallet', 'rejected')"
                         confirm="You are going to delete an account move. Are you sure?"
                     />
                     <button
