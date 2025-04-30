@@ -437,6 +437,7 @@ class PerceptionTaxApplication(models.Model):
             'ex_date_from': False,
             'sit_iibb': False,
             'from_padron': False,
+            'coeficient': False,
         }
 
         # Aplicamos la modificación de alícuotas, exclusiones, etc según los datos del padrón:
@@ -477,6 +478,7 @@ class PerceptionTaxApplication(models.Model):
                     'ex_date_from': partner_perception_period.ex_date_from,
                     'sit_iibb': partner_perception_period.sit_iibb,
                     'from_padron': partner_perception_period.from_padron,
+                    'coeficient': partner_perception_period.coeficient,
                 }
             )
 
