@@ -2766,11 +2766,6 @@ msgid "Check IIBB Situation"
 msgstr "Chequeo de situación de IIBB"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__check_invalid_period_moves
-msgid "Check Invalid Period or Date Moves"
-msgstr "Chequear período inválido o asientos en borrador"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__number
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
