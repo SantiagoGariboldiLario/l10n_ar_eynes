@@ -610,6 +610,9 @@ class AccountPaymentOrder(models.Model):
                     invoice.partner_id.address_get(['delivery']).get('delivery')
                 )
             )
+            destination_shipping = (
+                destination_shipping or po_line.move_line_id.partner_id
+            )
             source_shipping = self.env.company.partner_id
             applicable = retention.check_applicable(
                 sit_iibb=sit_iibb,
