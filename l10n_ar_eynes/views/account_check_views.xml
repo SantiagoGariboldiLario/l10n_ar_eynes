@@ -346,7 +346,7 @@
         <field name="name">account.third.party.check.view.form</field>
         <field name="model">account.check</field>
         <field name="arch" type="xml">
-            <form string="Checks" create="false">
+            <form string="Checks" create="false" delete="false">
                 <header>
                     <button
                         name="%(change_check_state_action)d"
@@ -529,7 +529,7 @@
         <field name="name">account.third.party.check.view.tree</field>
         <field name="model">account.check</field>
         <field name="arch" type="xml">
-            <tree create="false">
+            <tree create="false" delete="false">
                 <field name="number" />
                 <field name="checkbook_format" />
                 <field name="type" />
@@ -556,7 +556,12 @@
         <field name="type">calendar</field>
         <field eval="2" name="priority" />
         <field name="arch" type="xml">
-            <calendar color="bank_id" date_start="issue_date" string="Third Checks by Issue Date">
+            <calendar
+                color="bank_id"
+                date_start="issue_date"
+                string="Third Checks by Issue Date"
+                delete="false"
+            >
                 <field name="number" />
                 <field name="amount" />
             </calendar>
@@ -569,7 +574,12 @@
         <field name="type">calendar</field>
         <field eval="10" name="priority" />
         <field name="arch" type="xml">
-            <calendar color="bank_id" date_start="payment_date" string="Third Checks by Payment Date">
+            <calendar
+                color="bank_id"
+                date_start="payment_date"
+                string="Third Checks by Payment Date"
+                delete="false"
+            >
                 <field name="number" />
                 <field name="amount" />
             </calendar>
@@ -582,7 +592,12 @@
         <field name="type">calendar</field>
         <field eval="10" name="priority" />
         <field name="arch" type="xml">
-            <calendar color="bank_id" date_start="endorsement_date" string="Third Checks by Endorsement Date">
+            <calendar
+                color="bank_id"
+                date_start="endorsement_date"
+                string="Third Checks by Endorsement Date"
+                delete="false"
+            >
                 <field name="number" />
                 <field name="amount" />
             </calendar>
