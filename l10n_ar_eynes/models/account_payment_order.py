@@ -1940,18 +1940,35 @@ class AccountPaymentOrder(models.Model):
                 _('You can send by email only posted Payment Orders.')
             )
 
-        template = self.env.ref(
-            'l10n_ar_eynes.mail_template_data_payment_order'
-        )
-        template_supplier = self.env.ref(
-            'l10n_ar_eynes.mail_template_data_payment_order_suppliers'
-        )
+        ctx = self.env.context.copy()
+        if self.type == 'payment':
+            payment_order_name = 'Órden de Pago'
+            template_supplier = self.env.ref(
+                'l10n_ar_eynes.mail_template_data_payment_order_suppliers'
+            )
+            ctx.update(
+                {
+                    'default_use_template': bool(template_supplier.id),
+                    'default_template_id': template_supplier.id,
+                }
+            )
+        else:
+            payment_order_name = 'Recibo'
+            template = self.env.ref(
+                'l10n_ar_eynes.mail_template_data_payment_order'
+            )
+            ctx.update(
+                {
+                    'default_use_template': bool(template.id),
+                    'default_template_id': template.id,
+                }
+            )
 
         payment_order_pdf = IrAttachment.search(
             [
                 ('res_model', '=', 'account.payment.order'),
                 ('res_id', '=', self.id),
-                ('name', '=', 'Payment order'),
+                ('name', '=', payment_order_name),
             ],
             order='create_date desc',
             limit=1,
@@ -1960,7 +1977,7 @@ class AccountPaymentOrder(models.Model):
             [
                 ('res_model', '=', 'account.payment.order'),
                 ('res_id', '=', self.id),
-                ('name', '=', 'Retention certificate'),
+                ('name', '=', 'Certificado de retención'),
             ],
             order='create_date desc',
             limit=1,
@@ -1968,7 +1985,7 @@ class AccountPaymentOrder(models.Model):
 
         if not payment_order_pdf:
             payment_order_pdf = self.render_report(
-                'Payment order', 'action_print_payment_order_qweb'
+                payment_order_name, 'action_print_payment_order_qweb'
             )
 
         attachments = [payment_order_pdf.id]
@@ -1979,23 +1996,14 @@ class AccountPaymentOrder(models.Model):
             and len(self.retention_ids) > 0
         ):
             retention_certificate_pdf = self.render_report(
-                'Retention certificate',
+                'Certificado de retención',
                 'action_print_retention_certificate_qweb',
             )
         if retention_certificate_pdf:
             attachments.append(retention_certificate_pdf.id)
 
-        ctx = self.env.context.copy()
-        if self.type == 'payment':
-            default_use_template = bool(template_supplier.id)
-            default_template_id = template_supplier.id
-        else:
-            default_use_template = bool(template.id)
-            default_template_id = template.id
         ctx.update(
             {
-                'default_use_template': default_use_template,
-                'default_template_id': default_template_id,
                 'default_composition_mode': 'comment',
                 'custom_layout': 'mail.mail_notification_light',
                 'default_attachment_ids': attachments,
