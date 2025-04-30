@@ -923,6 +923,21 @@ class AccountCheck(models.Model):
                 'target': 'current',
             }
 
+    def get_formview_id(self, access_uid=None):
+        res = super(AccountCheck, self).get_formview_id(access_uid=access_uid)
+        if (
+            self._context.get('internal_type', '') == 'third_party'
+            or self.internal_type == 'third_party'
+        ):
+            res = self.env.ref(
+                'l10n_ar_eynes.account_third_party_check_view_form'
+            ).id
+        else:
+            res = self.env.ref(
+                'l10n_ar_eynes.account_issued_check_view_form'
+            ).id
+        return res
+
     _sql_constraints = [
         (
             "unique_record",
