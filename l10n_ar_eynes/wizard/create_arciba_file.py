@@ -63,8 +63,10 @@ class CreateArcibaFiles(models.TransientModel):
         if not code_document_type:
             raise ValidationError(
                 _(
-                    'Arciba Code not found for document_type_name: %(doc_type)s. You must use CUIT/CUIL',
+                    'Arciba Code not found for document_type_name: %(doc_type)s  on %(partner_name)s.'
+                    ' You must use CUIT/CUIL',
                     doc_type=document_type_name,
+                    partner_name=partner.name,
                 )
             )
         return code_document_type
