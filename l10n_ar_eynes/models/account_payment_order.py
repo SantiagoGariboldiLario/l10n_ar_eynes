@@ -1423,6 +1423,7 @@ class AccountPaymentOrder(models.Model):
             'narration': self.narration,
             'date': self.date,
             'ref': ref,
+            'move_type': 'entry',
         }
         return move
 
