@@ -454,7 +454,7 @@ class AccountPaymentOrder(models.Model):
     def compute_advance_payment_retentions(self, amount):
         amount = amount - sum(self.retention_ids.mapped('amount'))
         new_ret_amount = 0.0
-        if not amount:
+        if not amount and not self.disable_retentions:
             self.retention_ids = False
             return amount
         tax_app_obj = self.env['retention.tax.application']
@@ -1608,12 +1608,12 @@ class AccountPaymentOrder(models.Model):
                 amount_debit, 3
             ) != round(total_debit, 3):
                 _logger.info(
-                    f'amount credit:{round(amount_credit, 3)} | '
-                    f'total credit:{round(total_credit, 3)}'
+                    f'amount credit: {round(amount_credit, 3)} | '
+                    f'total credit: {round(total_credit, 3)}'
                 )
                 _logger.info(
-                    f'amount debit:{round(amount_debit, 3)} | '
-                    f'total debit:{round(total_debit, 3)}'
+                    f'amount debit: {round(amount_debit, 3)} | '
+                    f'total debit: {round(total_debit, 3)}'
                 )
                 raise UserError(
                     _(
