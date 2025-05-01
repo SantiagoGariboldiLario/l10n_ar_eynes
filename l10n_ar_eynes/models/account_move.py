@@ -826,6 +826,7 @@ class AccountMove(models.Model):
                 # dicts de datos para crear las líneas de percepción.
                 for application in perception_application_data.keys():
                     application_data = perception_application_data[application]
+                    application_data['currency_rate'] = self.currency_rate
                     base, amount = application.apply_perception(
                         application_data
                     )
@@ -1396,7 +1397,7 @@ class AccountMove(models.Model):
         return {
             'invoice_date': self.invoice_date,
             'amount_untaxed': self.amount_untaxed,
-            # 'invoice': self,
+            'currency_rate': self.currency_rate,
         }
 
     def _generate_qr_afip_url(self):

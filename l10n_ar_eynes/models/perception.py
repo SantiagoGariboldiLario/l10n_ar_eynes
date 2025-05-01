@@ -490,7 +490,7 @@ class PerceptionTaxApplication(models.Model):
     def _get_base_from_list(self, field, lines):
         return sum(line[field] for line in lines)
 
-    def compute_base(self, lines):
+    def compute_base(self, lines, currency_rate):
         self.ensure_one()
 
         method_name = '_get_base_from_account_move_lines'
@@ -513,18 +513,25 @@ class PerceptionTaxApplication(models.Model):
         # Necesitamos cambiarle el signo a la base para el caso de las NC desde POS
         sign = -1 if base < 0 else 1
         base = base * sign
-        if base < self.tax_allowance:
+        tax_allowance = (
+            self.tax_allowance / currency_rate
+            if self.tax_allowance > 0
+            else 0.0
+        )
+
+        if base < tax_allowance:
             return 0.0
 
         if self.exclude_tax_allowance:
-            base -= self.tax_allowance
+            base -= tax_allowance
         return base * sign
 
     def apply_perception(self, perception_data):
         percent = perception_data['percent']
         excluded_percent = perception_data['excluded_percent']
+        currency_rate = perception_data['currency_rate']
 
-        base = self.compute_base(perception_data['lines'])
+        base = self.compute_base(perception_data['lines'], currency_rate)
         if base == 0.0:
             return 0.0, 0.0
         sign = -1 if base < 0 else 1
@@ -542,7 +549,10 @@ class PerceptionTaxApplication(models.Model):
         amount = round(amount + 10 ** (-len(str(amount)) - 1), 2)
 
         # Chequeamos contra el minimo a percibir
-        if amount < self.tax_minimum:
+        tax_minimum = (
+            self.tax_minimum / currency_rate if self.tax_minimum > 0 else 0.0
+        )
+        if amount < tax_minimum:
             return 0.0, 0.0
 
         # Si la cantidad de la percepcion es 0.0, tambien lo sera
