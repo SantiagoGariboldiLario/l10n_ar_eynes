@@ -194,10 +194,11 @@
 
             <!-- MODIFICACION EN LAS LÍNEAS DE FACTURA POR IVA PRORRATEABLE -->
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='product_id']" position="after">
+                <field name="required_fiscal_credit" column_invisible="True" />
                 <field
                     name="fiscal_credit"
                     column_invisible="not parent.show_fiscal_credit"
-                    required="parent.show_fiscal_credit"
+                    required="required_fiscal_credit"
                 />
             </xpath>
 
