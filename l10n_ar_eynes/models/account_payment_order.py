@@ -2417,7 +2417,9 @@ class AccountPaymentOrderRetentionLine(models.Model):
     concept_id = fields.Many2one(
         comodel_name='retention.concept',
         string='Concept',
-        related='taxapp_id.concept_id',
+        compute='_compute_concept_id',
+        readonly=False,
+        store=True,
     )
     concept_amount = fields.Float(
         string='Amount',
@@ -2460,6 +2462,14 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 rec.amount, precision_rounding=rec.currency_id.rounding
             ):
                 raise ValidationError(_("Retention Amount can't be zero"))
+
+    @api.depends('taxapp_id')
+    def _compute_concept_id(self):
+        for rec in self:
+            concept_id = rec.concept_id
+            if rec.taxapp_id:
+                concept_id = rec.taxapp_id.concept_id
+            rec.concept_id = concept_id
 
     @api.depends('payment_order_id')
     def _compute_retention_id_domain(self):

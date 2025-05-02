@@ -572,6 +572,8 @@
                                             <field name="retention_id_domain" invisible="1" />
                                             <field name="retention_id" domain="retention_id_domain" />
                                             <field name="certificate_no" required="True" />
+                                            <field name="reg_code" />
+                                            <field name="concept_id" />
                                             <field name="date_applied" />
                                             <field name="date" />
                                             <label
@@ -1265,6 +1267,8 @@
                                                 name="certificate_no"
                                                 readonly="not parent.disable_retentions"
                                             />
+                                            <field name="reg_code" />
+                                            <field name="concept_id" />
                                             <field
                                                 name="date_applied"
                                                 readonly="not parent.disable_retentions"
