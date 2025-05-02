@@ -6892,6 +6892,12 @@ msgid "NOTA DE DÉBITO ELECTRÓNICA MiPyMEs (FCE)"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/res_partner.py:0
+#, python-format
+msgid "NOTE: Remember that legal entities do not exist in the registry."
+msgstr "NOTA: Recuerde que las Personas Jurídicas no existen en el padrón"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__jurisdiccion__nacional
 msgid "Nacional"
 msgstr ""
