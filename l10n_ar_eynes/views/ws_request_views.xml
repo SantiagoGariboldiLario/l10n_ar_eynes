@@ -5,7 +5,7 @@
         <field name="model">ws.request</field>
         <field name="type">form</field>
         <field name="arch" type="xml">
-            <form string="WS Request" create="false" edit="false" delete="false">
+            <form string="WS Request" create="false" edit="false">
                 <sheet>
                     <h1>WS Request</h1>
                     <group col="4" colspan="6">

@@ -352,13 +352,23 @@
                 </page>
 
                 <page string="WS Requests" invisible="move_type not in ('out_invoice', 'out_refund')">
-                    <field name="ws_request_ids" readonly="1">
-                        <tree>
-                            <field name="request_id" />
-                            <field name="result" />
-                            <field name="errors" />
-                        </tree>
-                    </field>
+                    <sheet>
+                        <field name="ws_request_ids" readonly="1">
+                            <tree>
+                                <field name="request_id" />
+                                <field name="result" />
+                                <field name="errors" />
+                                <field name="observations" />
+                                <field name="events" />
+                            </tree>
+                        </field>
+                        <button
+                            name="delete_all_requests"
+                            type="object"
+                            string="Delete all requests"
+                            class="oe_highlight"
+                        />
+                    </sheet>
                 </page>
             </page>
 

@@ -1915,3 +1915,8 @@ class AccountMove(models.Model):
                     'target': 'new',
                     'context': context,
                 }
+
+    def delete_all_requests(self):
+        for move in self:
+            for request in move.ws_request_ids:
+                request.unlink()
