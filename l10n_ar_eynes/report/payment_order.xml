@@ -97,6 +97,11 @@
                                                 <th>
                                                     <strong>Abonado</strong>
                                                 </th>
+                                                <t t-if="o.currency_id.name.lower() != 'ars'">
+                                                    <th>
+                                                        <strong>Cotizacion</strong>
+                                                    </th>
+                                                </t>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -161,6 +166,12 @@
                                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                         />
                                                     </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.invoice_id.currency_rate"
+                                                            t-options='{"widget": "monetary", "display_currency": o.company_currency}'
+                                                        />
+                                                    </td>
                                                 </t>
                                             </tr>
                                             <tr>
@@ -210,6 +221,11 @@
                                                 <th>
                                                     <strong>Abonado</strong>
                                                 </th>
+                                                <t t-if="o.currency_id.name.lower() != 'ars'">
+                                                    <th>
+                                                        <strong>Cotizacion</strong>
+                                                    </th>
+                                                </t>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -272,6 +288,12 @@
                                                         <span
                                                             t-field="line.amount_currency"
                                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                        />
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <span
+                                                            t-field="line.invoice_id.currency_rate"
+                                                            t-options='{"widget": "monetary", "display_currency": o.company_currency}'
                                                         />
                                                     </td>
                                                 </t>
@@ -611,7 +633,15 @@
                                             />
                                         </strong>
                                     </t>
-
+                                    <t t-if="o.currency_id.name.lower() != 'ars'">
+                                        <strong>Cotización:
+                                            <t
+                                                t-esc="o.payment_rate"
+                                                t-options='{"widget": "monetary", "display_currency": o.company_currency}'
+                                            />
+                                        </strong>
+                                        <br />
+                                    </t>
                                 </div>
                                 <div style="height: 75px;" />
                                 <div style="border-top: 1px solid black; width: 350px; margin: 40px auto" />
