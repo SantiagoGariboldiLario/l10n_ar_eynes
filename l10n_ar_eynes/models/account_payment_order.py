@@ -1874,15 +1874,11 @@ class AccountPaymentOrder(models.Model):
         )
 
         for voucher in self:
-            # Cancelamos los cheques de tercero en recibos
-            third_receipt_checks = voucher.third_party_check_receipt_ids
-            third_receipt_checks.cancel_check(
-                reason=_("Payment Order Cancelled")
-            )
+            # Volvemos a borrador los cheques de tercero en recibos
+            voucher.third_party_check_receipt_ids.return_to_draft()
 
-            # Volvemos a cartera los cheques de tercero en pagos
-            third_checks = voucher.third_party_check_ids
-            third_checks.return_wallet()
+            # Volvemos a cartera los cheques de tercero en órdenes de pago
+            voucher.third_party_check_ids.return_wallet()
 
             # Cancelamos los cheques emitidos
             issued_checks = voucher.issued_check_ids
@@ -1901,9 +1897,6 @@ class AccountPaymentOrder(models.Model):
             issued_checks = voucher.issued_check_ids
             issued_checks.write({'issued_check_state': 'draft'})
 
-            # A draft los cheques de tercero en cobros
-            third_checks = voucher.third_party_check_receipt_ids
-            third_checks.write({'third_party_check_state': 'draft'})
         self.write({'state': 'draft'})
         return True
 

@@ -741,6 +741,7 @@ class AccountCheck(models.Model):
         return True
 
     def check_to_wallet(self):
+        # Se llama desde el botón de la vista de cheque
         if self.deposit_move_id:
             self.deposit_move_id.button_cancel()
             self.deposit_move_id.with_context(force_delete=True).unlink()
@@ -754,7 +755,7 @@ class AccountCheck(models.Model):
             )
 
     def return_wallet(self):
-        # Todos los cheques tienen que estar en delivered
+        # Se llama desde la cancelación de la Orden de Pago. Todos los cheques tienen que estar en 'Entregado'
         for check in self.filtered(
             lambda rec: rec.internal_type == 'third_party'
         ):
@@ -771,6 +772,29 @@ class AccountCheck(models.Model):
                 'endorsement_date': False,
                 'destiny_partner_id': False,
                 'dest': '',
+            }
+        )
+        return True
+
+    def return_to_draft(self):
+        # Se llama desde la cancelación de un Recibo. Todos los cheques tienen que estar en 'En cartera'
+        # Es la reversión al método to_wallet
+        for check in self.filtered(
+            lambda rec: rec.internal_type == 'third_party'
+        ):
+            if check.third_party_check_state != 'in_wallet':
+                raise UserError(
+                    _(
+                        "Third Check Error! You cannot return to "
+                        "draft a check if it is not in In Wallet state"
+                    )
+                )
+        self.write(
+            {
+                'third_party_check_state': 'draft',
+                'source_partner_id': False,
+                'origin': False,
+                'payment_date': False,
             }
         )
         return True
