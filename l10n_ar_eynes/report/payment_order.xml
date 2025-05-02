@@ -599,9 +599,19 @@
                                     <t t-else="">
                                         <strong>Total pagado: <t
                                                 t-esc="sum(line.amount for line in o.debt_line_ids)"
-                                                t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"
+                                                t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.company_currency}"
                                             /></strong>
                                     </t>
+                                    <br />
+                                    <t t-if="o.writeoff_amount">
+                                        <strong>Diferencia:
+                                            <t
+                                                t-esc="o.writeoff_amount"
+                                                t-options='{"widget": "monetary", "display_currency": o.company_currency}'
+                                            />
+                                        </strong>
+                                    </t>
+
                                 </div>
                                 <div style="height: 75px;" />
                                 <div style="border-top: 1px solid black; width: 350px; margin: 40px auto" />
