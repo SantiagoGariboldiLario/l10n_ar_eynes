@@ -1,209 +1,194 @@
-<odoo>
-    <data noupdate="1">
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <record id="l10n_ar_eynes.iibb_arba_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_b' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_arba_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_b' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_caba_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_c' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_caba_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_c' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_catamarca_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_k' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_catamarca_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_k' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_chaco_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_h' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_chaco_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_h' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_chubut_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_u' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_chubut_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_u' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_cordoba_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_x' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_cordoba_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_x' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_corrientes_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_w' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_corrientes_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_w' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_entre_rios_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_e' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_entre_rios_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_e' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_formosa_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_p' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_formosa_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_p' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_jujuy_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_y' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_jujuy_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_y' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_la_pampa_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_l' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_la_pampa_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_l' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_la_rioja_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_f' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_la_rioja_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_f' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_mendoza_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_m' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_mendoza_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_m' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_misiones_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_n' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_misiones_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_n' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_neuquen_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_q' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_neuquen_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_q' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_rio_negro_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_r' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_rio_negro_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_r' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_salta_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_a' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_salta_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_a' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_san_juan_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_j' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_san_juan_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_j' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_san_luis_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_d' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_san_luis_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_d' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_santa_cruz_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_z' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_santa_cruz_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_z' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_santafe_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_s' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_santafe_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_s' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_santiago_del_estero_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_g' />
+    </record>
 
-        <record
-            id="l10n_ar_eynes.iibb_santiago_del_estero_retentions_s"
-            model="account.journal"
-        >
-            <field name="padron_state_id" ref='base.state_ar_g' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_tierra_del_fuego_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_v' />
+    </record>
 
-        <record
-            id="l10n_ar_eynes.iibb_tierra_del_fuego_retentions_s"
-            model="account.journal"
-        >
-            <field name="padron_state_id" ref='base.state_ar_v' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_tucuman_retentions_s" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_t' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_tucuman_retentions_s" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_t' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_arba_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_b' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_arba_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_b' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_caba_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_c' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_caba_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_c' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_catamarca_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_k' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_catamarca_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_k' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_chaco_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_h' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_chaco_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_h' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_chubut_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_u' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_chubut_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_u' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_cordoba_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_x' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_cordoba_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_x' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_corrientes_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_w' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_corrientes_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_w' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_entre_rios_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_e' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_entre_rios_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_e' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_formosa_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_p' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_formosa_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_p' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_jujuy_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_y' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_jujuy_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_y' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_la_pampa_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_l' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_la_pampa_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_l' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_la_rioja_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_f' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_la_rioja_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_f' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_mendoza_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_m' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_mendoza_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_m' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_misiones_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_n' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_misiones_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_n' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_neuquen_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_q' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_neuquen_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_q' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_rio_negro_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_r' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_rio_negro_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_r' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_salta_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_a' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_salta_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_a' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_san_juan_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_j' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_san_juan_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_j' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_san_luis_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_d' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_san_luis_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_d' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_santa_cruz_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_z' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_santa_cruz_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_z' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_santafe_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_s' />
+    </record>
 
-        <record id="l10n_ar_eynes.iibb_santafe_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_s' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_santiago_del_estero_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_g' />
+    </record>
 
-        <record
-            id="l10n_ar_eynes.iibb_santiago_del_estero_retentions_e"
-            model="account.journal"
-        >
-            <field name="padron_state_id" ref='base.state_ar_g' />
-        </record>
+    <record id="l10n_ar_eynes.iibb_tierra_del_fuego_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_v' />
+    </record>
 
-        <record
-            id="l10n_ar_eynes.iibb_tierra_del_fuego_retentions_e"
-            model="account.journal"
-        >
-            <field name="padron_state_id" ref='base.state_ar_v' />
-        </record>
-
-        <record id="l10n_ar_eynes.iibb_tucuman_retentions_e" model="account.journal">
-            <field name="padron_state_id" ref='base.state_ar_t' />
-        </record>
-
-    </data>
+    <record id="l10n_ar_eynes.iibb_tucuman_retentions_e" model="account.journal">
+        <field name="padron_state_id" ref='base.state_ar_t' />
+    </record>
 </odoo>
