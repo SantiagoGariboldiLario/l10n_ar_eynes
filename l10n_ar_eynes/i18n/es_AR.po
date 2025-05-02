@@ -2766,11 +2766,6 @@ msgid "Check IIBB Situation"
 msgstr "Chequeo de situación de IIBB"
 
 #. module: l10n_ar_eynes
-#: model:ir.model.fields,field_description:l10n_ar_eynes.field_fiscal_year_closing__check_invalid_period_moves
-msgid "Check Invalid Period or Date Moves"
-msgstr "Chequear período inválido o asientos en borrador"
-
-#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__number
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_form
@@ -6895,6 +6890,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.weblearns_layout
 msgid "NOTA DE DÉBITO ELECTRÓNICA MiPyMEs (FCE)"
 msgstr ""
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/models/res_partner.py:0
+#, python-format
+msgid "NOTE: Remember that legal entities do not exist in the registry."
+msgstr "NOTA: Recuerde que las Personas Jurídicas no existen en el padrón"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax__jurisdiccion__nacional

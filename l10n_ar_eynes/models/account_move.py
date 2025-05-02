@@ -826,6 +826,7 @@ class AccountMove(models.Model):
                 # dicts de datos para crear las líneas de percepción.
                 for application in perception_application_data.keys():
                     application_data = perception_application_data[application]
+                    application_data['currency_rate'] = self.currency_rate
                     base, amount = application.apply_perception(
                         application_data
                     )
@@ -1213,10 +1214,7 @@ class AccountMove(models.Model):
         view_id = self.env.ref(
             'l10n_ar_eynes.account_supplier_payment_order_view_form'
         )
-        context = {
-            'active_model': 'account.move',
-            'default_disable_retentions': True,
-        }
+        context = self.env.context.copy()
         if self.is_sale_document():
             view_id = self.env.ref(
                 'l10n_ar_eynes.account_customer_payment_order_view_form'
@@ -1300,6 +1298,7 @@ class AccountMove(models.Model):
             po_vals['payment_rate'] = self.currency_rate
 
         if self.is_sale_document():
+            po_vals['disable_retentions'] = True
             if self.move_type == 'out_refund':
                 po_vals['debt_line_ids'] = po_move_lines
             else:
@@ -1398,7 +1397,7 @@ class AccountMove(models.Model):
         return {
             'invoice_date': self.invoice_date,
             'amount_untaxed': self.amount_untaxed,
-            # 'invoice': self,
+            'currency_rate': self.currency_rate,
         }
 
     def _generate_qr_afip_url(self):
@@ -1916,3 +1915,8 @@ class AccountMove(models.Model):
                     'target': 'new',
                     'context': context,
                 }
+
+    def delete_all_requests(self):
+        for move in self:
+            for request in move.ws_request_ids:
+                request.unlink()

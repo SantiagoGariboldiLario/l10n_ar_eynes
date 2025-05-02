@@ -3,7 +3,8 @@
 #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 ##############################################################################
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 from odoo.tools import pytz
 
 
@@ -38,6 +39,10 @@ class WsRequest(models.Model):
             val.update({'date_request': user_tz_date.replace(tzinfo=None)})
         return super(WsRequest, self).create(vals)
 
+    def unlink(self):
+        self.detail_ids.unlink()
+        return super(WsRequest, self).unlink()
+
 
 class WsRequestDetail(models.Model):
     _name = "ws.request.detail"
@@ -61,7 +66,7 @@ class WsRequestDetail(models.Model):
     currency = fields.Char(readonly=True)
     currency_rate = fields.Char(readonly=True)
     xml_request = fields.Text('XML', readonly=True)
-
+    is_currency_request = fields.Boolean(default=False)
     cae = fields.Char('CAE', readonly=True, size=64)
     cae_due_date = fields.Date('CAE Due Date', readonly=True)
     result = fields.Selection(
@@ -77,3 +82,29 @@ class WsRequestDetail(models.Model):
     observations = fields.Text('Observations', readonly=True)
     events = fields.Char('Events', readonly=True)
     errors = fields.Text('Errors', readonly=True)
+
+    def unlink(self):
+        if (
+            self.env.user.has_group(
+                'l10n_ar_eynes.group_arca_request_administrator'
+            )
+            or self.is_currency_request
+        ):
+            for rec in self:
+                if rec.result == 'A':
+                    raise ValidationError(
+                        _('You cannot delete a request with approved status.')
+                    )
+                if self.env['ws.request.detail'].search(
+                    [
+                        ('request_id', '=', rec.request_id.id),
+                    ]
+                ) == rec and not self.env.context.get('delete_parent', False):
+                    return rec.request_id.with_context(
+                        delete_parent=True
+                    ).unlink()
+                return super(WsRequestDetail, rec).unlink()
+        else:
+            raise ValidationError(
+                _('You do not have permission to delete this record.')
+            )

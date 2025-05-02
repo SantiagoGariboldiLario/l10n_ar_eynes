@@ -23,6 +23,20 @@ class AccountMoveLine(models.Model):
         string='Issued Check',
         domain=[('internal_type', '=', 'issued')],
     )
+    required_fiscal_credit = fields.Boolean(
+        default=False, store=False, compute='_compute_required_fiscal_credit'
+    )
+
+    @api.depends('move_id.show_fiscal_credit', 'tax_ids')
+    def _compute_required_fiscal_credit(self):
+        for move_line in self:
+            required = False
+            if move_line.move_id.show_fiscal_credit:
+                if move_line.tax_ids.filtered(
+                    lambda tax: tax.tax_group_id.group_type == 'vat'
+                ):
+                    required = True
+            move_line.required_fiscal_credit = required
 
     @api.depends('product_id')
     def _compute_fiscal_credit(self):

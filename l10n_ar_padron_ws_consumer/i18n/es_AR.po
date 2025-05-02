@@ -81,7 +81,7 @@ msgstr "Todo actualizado."
 #: code:addons/l10n_ar_padron_ws_consumer/models/res_partner.py:0
 #, python-format
 msgid "No valid values ​​have been obtained for updating the IIBB registry."
-msgstr "No se obtuvieron valores correctos al actualziar el registro de IIBB"
+msgstr "No se obtuvieron valores correctos al actualizar el registro de IIBB"
 
 #. module: l10n_ar_padron_ws_consumer
 #. odoo-python

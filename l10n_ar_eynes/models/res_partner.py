@@ -176,7 +176,14 @@ class ResPartner(models.Model):
             # ws.Conectar() Se realiza en ws_auth
             ws.Consultar(cuit)
         except Exception as e:
-            raise UserError(f'ERROR: {ws.ErrMsg}') from e
+            if ws.ErrMsg:
+                raise UserError(f'ERROR: {ws.ErrMsg}') from e
+            else:
+                raise UserError(
+                    _(
+                        'NOTE: Remember that legal entities do not exist in the registry.'
+                    )
+                ) from e
         values = self.parse_afip_values(ws)
         return values
 

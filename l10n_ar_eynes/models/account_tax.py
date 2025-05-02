@@ -702,6 +702,33 @@ class AccountTax(models.Model):
         # Hacemos el chequeo de los states
         return retention_state == partner_state
 
+    def _get_associated_percentage(self, invoice, perc_id):
+        if not perc_id:
+            return 0
+
+        # Get base from query to prevent unwanted field recompute
+        percentage = 0
+        associated = (
+            invoice.associated_inv_ids[0]
+            if invoice.associated_inv_ids
+            else False
+        )
+        if associated:
+            query = """
+                    SELECT amount, base
+                    FROM perception_tax_line
+                    WHERE invoice_id = %s
+                    AND perception_id = %s
+                    """
+            self.env.cr.execute(query, (associated._origin.id, perc_id))
+            res = self.env.cr.dictfetchone()
+            if res:
+                base = res.get("base", 0)
+                amount = res.get("amount", 0)
+                if base > 0:
+                    percentage = amount / base
+        return percentage
+
     # def _message_create(self, values_list):
     # model = values_list.get('model', None)
     # if model and model == 'account.tax':

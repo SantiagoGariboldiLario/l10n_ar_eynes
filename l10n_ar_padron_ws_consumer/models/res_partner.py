@@ -11,6 +11,10 @@ from ..utils.helpers import get_current_period
 
 _logger = logging.getLogger(__name__)
 
+HEADERS = {
+    "content-type": "application/json",
+}
+
 
 class ResPartnerPerception(models.Model):
     _inherit = "res.partner.perception"
@@ -439,13 +443,45 @@ class ResPartner(models.Model):
         return valid
 
     def do_update_from_padron(
-        self, padron_name=None, padron_type=None, from_cron=None
+        self,
+        padron_name=None,
+        padron_type=None,
+        from_cron=None,
+        check_server_state=False,
     ):
         if padron_name is None:
             padron_name = []
 
         if padron_type is None:
             padron_type = []
+
+        padron_url = self._get_padron_url()
+        payload = {
+            "status": True,
+        }
+
+        check_padron_server_state = (
+            self.env['ir.config_parameter']
+            .sudo()
+            .get_param('l10n_ar_padron_ws_consumer.check_padron_server_state')
+        )
+
+        if check_server_state or check_padron_server_state:
+            try:
+                _logger.info('Checking Padron URL State')
+                response = requests.head(
+                    padron_url,
+                    headers=HEADERS,
+                    data=json.dumps(payload),
+                )
+                if response.status_code != 200:
+                    raise ValidationError(
+                        _("Padron Error!\n") + _("Error in response CODE.")
+                    )
+            except requests.RequestException as err:
+                raise ValidationError(
+                    _("Padron Error!\n") + _("Padron server is not reachable.")
+                ) from err
 
         self._cleanup_old_padron_values()
 
@@ -538,72 +574,3 @@ class ResPartner(models.Model):
                     ),
                 },
             }
-        # else:
-        #     domain_append = [
-        #         '|',
-        #         ('last_padron_update', '=', False),
-        #         ('last_padron_update', '<', current_period),
-        #     ]
-        # domain = domain + domain_append
-        # res_partner_obj = self.env["res.partner"]
-        # partners = res_partner_obj.search(domain)
-        # _logger.info('Getting Padron Information')
-        # if partners:
-        #     updates = set()
-        #     response = self._get_padron_values(
-        #         partners, padron_url, padron_name, padron_type
-        #     )
-        #     _logger.info('Padron Information Fetched')
-        #     for vat, partner_values in response.items():
-        #         perceptions = [
-        #             d
-        #             for d in partner_values
-        #             if d["T"] == "P" and d["P"] != "SALT"
-        #         ]
-        #         retentions = [d for d in partner_values if d["T"] == "R"]
-        #         coeficients = [
-        #             d
-        #             for d in partner_values
-        #             if d["T"] == "C" or (d["T"] == "P" and d["P"] == "SALT")
-        #         ]
-        #         ivas = [d for d in partner_values if d["T"] == "I"]
-
-        #         partner_id = res_partner_obj.search(
-        #             [
-        #                 ("vat", "=", vat),
-        #                 ('parent_id', '=', False),
-        #             ],
-        #             limit=1,
-        #         )
-        #         self._update_partner_perceptions(partner_id, perceptions)
-        #         self._update_partner_retentions(partner_id, retentions)
-        #         self._update_partner_coeficients(partner_id, coeficients)
-        #         self._update_partner_ivas(partner_id, ivas)
-        #         partner_id.write(
-        #             {
-        #                 "last_padron_update": current_period,
-        #             }
-        #         )
-        #         total_updates = perceptions + retentions + coeficients
-        #         new_values = {
-        #             value
-        #             for value in [
-        #                 value["P"] + " - " + value["M"]
-        #                 for value in total_updates
-        #             ]
-        #         }
-        #         updates.update(new_values)
-        #     return {
-        #         'type': 'ir.actions.client',
-        #         'tag': 'display_notification',
-        #         'params': {
-        #             'type': 'info',
-        #             'sticky': True,
-        #             'message': (
-        #                 "Se actualizaron los siguientes Padrones: "
-        #                 + " | ".join([value for value in updates])
-        #             ),
-        #         },
-        #     }
-        # else:
-        #     _logger.info(_("No partners to check. All updated."))

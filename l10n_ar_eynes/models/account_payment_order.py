@@ -454,7 +454,7 @@ class AccountPaymentOrder(models.Model):
     def compute_advance_payment_retentions(self, amount):
         amount = amount - sum(self.retention_ids.mapped('amount'))
         new_ret_amount = 0.0
-        if not amount:
+        if not amount and not self.disable_retentions:
             self.retention_ids = False
             return amount
         tax_app_obj = self.env['retention.tax.application']
@@ -609,6 +609,9 @@ class AccountPaymentOrder(models.Model):
                 or ResPartner.browse(
                     invoice.partner_id.address_get(['delivery']).get('delivery')
                 )
+            )
+            destination_shipping = (
+                destination_shipping or po_line.move_line_id.partner_id
             )
             source_shipping = self.env.company.partner_id
             applicable = retention.check_applicable(
@@ -1420,6 +1423,7 @@ class AccountPaymentOrder(models.Model):
             'narration': self.narration,
             'date': self.date,
             'ref': ref,
+            'move_type': 'entry',
         }
         return move
 
@@ -1608,12 +1612,12 @@ class AccountPaymentOrder(models.Model):
                 amount_debit, 3
             ) != round(total_debit, 3):
                 _logger.info(
-                    f'amount credit:{round(amount_credit, 3)} | '
-                    f'total credit:{round(total_credit, 3)}'
+                    f'amount credit: {round(amount_credit, 3)} | '
+                    f'total credit: {round(total_credit, 3)}'
                 )
                 _logger.info(
-                    f'amount debit:{round(amount_debit, 3)} | '
-                    f'total debit:{round(total_debit, 3)}'
+                    f'amount debit: {round(amount_debit, 3)} | '
+                    f'total debit: {round(total_debit, 3)}'
                 )
                 raise UserError(
                     _(
@@ -1870,15 +1874,11 @@ class AccountPaymentOrder(models.Model):
         )
 
         for voucher in self:
-            # Cancelamos los cheques de tercero en recibos
-            third_receipt_checks = voucher.third_party_check_receipt_ids
-            third_receipt_checks.cancel_check(
-                reason=_("Payment Order Cancelled")
-            )
+            # Volvemos a borrador los cheques de tercero en recibos
+            voucher.third_party_check_receipt_ids.return_to_draft()
 
-            # Volvemos a cartera los cheques de tercero en pagos
-            third_checks = voucher.third_party_check_ids
-            third_checks.return_wallet()
+            # Volvemos a cartera los cheques de tercero en órdenes de pago
+            voucher.third_party_check_ids.return_wallet()
 
             # Cancelamos los cheques emitidos
             issued_checks = voucher.issued_check_ids
@@ -1897,9 +1897,6 @@ class AccountPaymentOrder(models.Model):
             issued_checks = voucher.issued_check_ids
             issued_checks.write({'issued_check_state': 'draft'})
 
-            # A draft los cheques de tercero en cobros
-            third_checks = voucher.third_party_check_receipt_ids
-            third_checks.write({'third_party_check_state': 'draft'})
         self.write({'state': 'draft'})
         return True
 
@@ -1937,18 +1934,35 @@ class AccountPaymentOrder(models.Model):
                 _('You can send by email only posted Payment Orders.')
             )
 
-        template = self.env.ref(
-            'l10n_ar_eynes.mail_template_data_payment_order'
-        )
-        template_supplier = self.env.ref(
-            'l10n_ar_eynes.mail_template_data_payment_order_suppliers'
-        )
+        ctx = self.env.context.copy()
+        if self.type == 'payment':
+            payment_order_name = 'Órden de Pago'
+            template_supplier = self.env.ref(
+                'l10n_ar_eynes.mail_template_data_payment_order_suppliers'
+            )
+            ctx.update(
+                {
+                    'default_use_template': bool(template_supplier.id),
+                    'default_template_id': template_supplier.id,
+                }
+            )
+        else:
+            payment_order_name = 'Recibo'
+            template = self.env.ref(
+                'l10n_ar_eynes.mail_template_data_payment_order'
+            )
+            ctx.update(
+                {
+                    'default_use_template': bool(template.id),
+                    'default_template_id': template.id,
+                }
+            )
 
         payment_order_pdf = IrAttachment.search(
             [
                 ('res_model', '=', 'account.payment.order'),
                 ('res_id', '=', self.id),
-                ('name', '=', 'Payment order'),
+                ('name', '=', payment_order_name),
             ],
             order='create_date desc',
             limit=1,
@@ -1957,7 +1971,7 @@ class AccountPaymentOrder(models.Model):
             [
                 ('res_model', '=', 'account.payment.order'),
                 ('res_id', '=', self.id),
-                ('name', '=', 'Retention certificate'),
+                ('name', '=', 'Certificado de retención'),
             ],
             order='create_date desc',
             limit=1,
@@ -1965,7 +1979,7 @@ class AccountPaymentOrder(models.Model):
 
         if not payment_order_pdf:
             payment_order_pdf = self.render_report(
-                'Payment order', 'action_print_payment_order_qweb'
+                payment_order_name, 'action_print_payment_order_qweb'
             )
 
         attachments = [payment_order_pdf.id]
@@ -1976,23 +1990,14 @@ class AccountPaymentOrder(models.Model):
             and len(self.retention_ids) > 0
         ):
             retention_certificate_pdf = self.render_report(
-                'Retention certificate',
+                'Certificado de retención',
                 'action_print_retention_certificate_qweb',
             )
         if retention_certificate_pdf:
             attachments.append(retention_certificate_pdf.id)
 
-        ctx = self.env.context.copy()
-        if self.type == 'payment':
-            default_use_template = bool(template_supplier.id)
-            default_template_id = template_supplier.id
-        else:
-            default_use_template = bool(template.id)
-            default_template_id = template.id
         ctx.update(
             {
-                'default_use_template': default_use_template,
-                'default_template_id': default_template_id,
                 'default_composition_mode': 'comment',
                 'custom_layout': 'mail.mail_notification_light',
                 'default_attachment_ids': attachments,
@@ -2405,7 +2410,9 @@ class AccountPaymentOrderRetentionLine(models.Model):
     concept_id = fields.Many2one(
         comodel_name='retention.concept',
         string='Concept',
-        related='taxapp_id.concept_id',
+        compute='_compute_concept_id',
+        readonly=False,
+        store=True,
     )
     concept_amount = fields.Float(
         string='Amount',
@@ -2448,6 +2455,14 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 rec.amount, precision_rounding=rec.currency_id.rounding
             ):
                 raise ValidationError(_("Retention Amount can't be zero"))
+
+    @api.depends('taxapp_id')
+    def _compute_concept_id(self):
+        for rec in self:
+            concept_id = rec.concept_id
+            if rec.taxapp_id:
+                concept_id = rec.taxapp_id.concept_id
+            rec.concept_id = concept_id
 
     @api.depends('payment_order_id')
     def _compute_retention_id_domain(self):

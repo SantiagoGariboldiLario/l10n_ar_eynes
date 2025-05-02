@@ -38,6 +38,7 @@
         'data/ir_config_parameter.xml',
         'views/account_journal_view.xml',
         'views/res_partner_view.xml',
+        'views/res_config_settings_view.xml',
     ],
     "external_dependencies": {},
     # "pre_init_hook": "pre_init_hook",

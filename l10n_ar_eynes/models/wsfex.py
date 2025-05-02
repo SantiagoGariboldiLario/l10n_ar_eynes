@@ -484,6 +484,7 @@ class WsfexConfig(models.Model):
         ws = None
         req_vals = {
             'invoice_id': invoice.id,
+            'is_currency_request': True,
         }
         error_msg = xml_request = ""
         cotizacion = False
