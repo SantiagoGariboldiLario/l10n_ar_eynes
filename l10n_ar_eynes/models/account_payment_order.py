@@ -530,7 +530,7 @@ class AccountPaymentOrder(models.Model):
             'name': advance_ret.retention_id.name,
             'concept_id': advance_ret.concept_id.id,
             'date': self.date,
-            'account_id': advance_ret.retention_id.tax_id.get_retention_account().id,
+            'account_id': advance_ret.retention_id.get_retention_account().id,
             'base': base,
             'amount': amount,
             'manual': False,
@@ -538,7 +538,7 @@ class AccountPaymentOrder(models.Model):
             'certificate_no': '',
             'taxapp_id': taxapp.id,
             'reg_code': taxapp.reg_code,
-            'state_id': advance_ret.retention_id.tax_id.state_id.id,
+            'state_id': advance_ret.retention_id.state_id.id,
             'excluded_percent': ret_vals.get('excluded_percent'),
             'exclusion_date_certificate': ret_vals.get(
                 'exclusion_date_certificate'
