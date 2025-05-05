@@ -111,15 +111,14 @@
                             <field name="company_id" invisible="1" />
                         </tree>
                     </field>
-                    <group string="Advance Payment Retentions" invisible="supplier_rank == 0">
-                        <field name="advance_retention_ids" nolabel="1">
-                            <tree editable="bottom">
-                                <field name="retention_id" />
-                                <field name="concept_id" />
-                                <field name="company_id" invisible="1" />
-                            </tree>
-                        </field>
-                    </group>
+                    <separator string="Advance Payment Retentions" />
+                    <field name="advance_retention_ids" nolabel="1" invisible="supplier_rank == 0">
+                        <tree editable="bottom">
+                            <field name="retention_id" />
+                            <field name="concept_id" />
+                            <field name="company_id" invisible="1" />
+                        </tree>
+                    </field>
                 </page>
             </page>
 
