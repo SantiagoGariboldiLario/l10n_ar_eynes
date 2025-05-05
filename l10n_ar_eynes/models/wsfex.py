@@ -5,7 +5,6 @@
 
 import logging
 
-from dateutil.relativedelta import relativedelta
 from pyafipws.wsfexv1 import WSFEXv1
 from pysimplesoap.client import SoapFault
 
@@ -471,6 +470,7 @@ class WsfexConfig(models.Model):
         if not self.cuit:
             raise UserError(_("Please configure the company VAT!"))
 
+        helper = WSFEXParser()
         mon_id = invoice.get_currency_code()
 
         today = fields.Date.today()
@@ -478,8 +478,8 @@ class WsfexConfig(models.Model):
         invoice_date = (
             invoice_date if invoice_date and invoice_date <= today else today
         )
-        invoice_date = invoice_date - relativedelta(days=1)
-        date = invoice_date and invoice_date.strftime('%Y-%m-%d') or False
+        invoice_date = helper._get_last_working_day(invoice_date)
+        date = invoice_date.strftime('%Y-%m-%d')
 
         ws = None
         req_vals = {

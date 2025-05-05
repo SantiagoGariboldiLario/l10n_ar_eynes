@@ -5,7 +5,6 @@
 
 import logging
 
-from dateutil.relativedelta import relativedelta
 from pyafipws.wsfev1 import WSFEv1
 from pysimplesoap.client import SoapFault
 
@@ -244,7 +243,7 @@ class WsfeConfig(models.Model):
         invoice_date = (
             invoice_date if invoice_date and invoice_date <= today else today
         )
-        invoice_date = invoice_date - relativedelta(days=1)
+        invoice_date = helper._get_last_working_day(invoice_date)
         date = (
             invoice_date
             and helper._convert_date_to_AFIP_format(invoice_date)
