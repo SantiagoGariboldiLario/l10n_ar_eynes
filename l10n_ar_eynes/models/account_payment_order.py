@@ -41,31 +41,6 @@ class AccountPaymentOrder(models.Model):
             result.append((payment.id, name))
         return result
 
-    def fields_view_get(
-        self, view_id=None, view_type='form', toolbar=False, submenu=False
-    ):
-        result = super(AccountPaymentOrder, self).fields_view_get(
-            view_id=view_id,
-            view_type=view_type,
-            toolbar=toolbar,
-            submenu=submenu,
-        )
-
-        if self.env.context.get("default_type") == "receipt":
-            if 'toolbar' in result:
-                print_actions = result.get('toolbar').get("print")
-                certificate_names = [
-                    "Retention Certificate",
-                    "Certificado de Retenciones",
-                ]
-                result.get('toolbar')['print'] = [
-                    action
-                    for action in print_actions
-                    if action.get("name") not in certificate_names
-                ]
-
-        return result
-
     def default_narration(self):
         return self.env.context.get('narration', False)
 
@@ -80,12 +55,6 @@ class AccountPaymentOrder(models.Model):
 
     def default_type(self):
         return self.env.context.get('type', False)
-
-    def default_company(self):
-        company = self.env['res.company']._company_default_get(
-            'account.payment.order'
-        )
-        return company
 
     def default_payment_rate_currency(self):
         """
@@ -226,7 +195,7 @@ class AccountPaymentOrder(models.Model):
     company_id = fields.Many2one(
         comodel_name='res.company',
         string='Company',
-        default=default_company,
+        default=lambda self: self.env.company.id,
         required=True,
         readonly=True,
     )
