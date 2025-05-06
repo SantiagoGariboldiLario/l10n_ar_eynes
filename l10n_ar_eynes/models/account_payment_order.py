@@ -2063,7 +2063,14 @@ class AccountPaymentOrderLine(models.Model):
                 'Voucher is multicurrency: Ignoring _check_amount_over_original'
             )
             return None
-        if not (0 <= self.amount <= self.amount_unreconciled):
+
+        prec = self.env['decimal.precision'].precision_get('Account')
+        if not (
+            0 <= self.amount
+            and float_is_zero(
+                self.amount_unreconciled - self.amount, precision_digits=prec
+            )
+        ):
             raise ValidationError(
                 _(
                     "Error!\nThe amount assigned to an invoice must not excede "
