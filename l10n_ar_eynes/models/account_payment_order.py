@@ -5,7 +5,7 @@ from pprint import pformat as pf
 from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
-from odoo.exceptions import RedirectWarning, UserError, ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_compare, float_is_zero
 
 _logger = logging.getLogger(__name__)
@@ -41,31 +41,6 @@ class AccountPaymentOrder(models.Model):
             result.append((payment.id, name))
         return result
 
-    def fields_view_get(
-        self, view_id=None, view_type='form', toolbar=False, submenu=False
-    ):
-        result = super(AccountPaymentOrder, self).fields_view_get(
-            view_id=view_id,
-            view_type=view_type,
-            toolbar=toolbar,
-            submenu=submenu,
-        )
-
-        if self.env.context.get("default_type") == "receipt":
-            if 'toolbar' in result:
-                print_actions = result.get('toolbar').get("print")
-                certificate_names = [
-                    "Retention Certificate",
-                    "Certificado de Retenciones",
-                ]
-                result.get('toolbar')['print'] = [
-                    action
-                    for action in print_actions
-                    if action.get("name") not in certificate_names
-                ]
-
-        return result
-
     def default_narration(self):
         return self.env.context.get('narration', False)
 
@@ -75,57 +50,11 @@ class AccountPaymentOrder(models.Model):
     def default_reference(self):
         return self.env.context.get('reference', False)
 
-    def default_journal(self):
-        res = False
-        ttype = self.env.context.get('type', 'bank')
-        company = self.default_company()
-
-        # Pago inmediato, al contado, desde el boton de la factura
-        immediate = self.env.context.get('immediate_payment', False)
-
-        if not immediate and ttype in ('payment', 'receipt'):
-            rec = self.env['account.journal'].search(
-                [('type', '=', ttype), ('company_id', '=', company.id)],
-                limit=1,
-                order='priority',
-            )
-            if not rec:
-                action = self.env.ref('account.action_account_journal_form')
-                msg = 'Cannot find a Payment/Receipt journal. \
-                \nPlease create at least one.'
-                raise RedirectWarning(
-                    msg, action.id, _('Go to the journal configuration')
-                )
-            res = rec[0] or False
-        return res and res.id
-
-    def domain_journal(self):
-        domain = [('id', '=', -1)]
-        journals = []
-        filtered_journals = self.env['account.journal'].search(
-            [
-                ('type', '=', self.env.context.get('type', 'bank')),
-                ('company_id', '=', self.default_company().id),
-            ]
-        )
-        for journal in filtered_journals:
-            journals.append(journal.id)
-        if journals:
-            domain = [('id', 'in', journals)]
-            return domain
-        return domain
-
     def default_amount(self):
         self.env.context.get('amount', 0.0)
 
     def default_type(self):
         return self.env.context.get('type', False)
-
-    def default_company(self):
-        company = self.env['res.company']._company_default_get(
-            'account.payment.order'
-        )
-        return company
 
     def default_payment_rate_currency(self):
         """
@@ -167,6 +96,7 @@ class AccountPaymentOrder(models.Model):
         comodel_name='account.journal',
         string='Journal',
         required=True,
+        compute='_compute_journal',
     )
     journal_id_domain = fields.Binary(compute='_compute_journal_id_domain')
     move_id = fields.Many2one(
@@ -265,7 +195,7 @@ class AccountPaymentOrder(models.Model):
     company_id = fields.Many2one(
         comodel_name='res.company',
         string='Company',
-        default=default_company,
+        default=lambda self: self.env.company.id,
         required=True,
         readonly=True,
     )
@@ -439,7 +369,17 @@ class AccountPaymentOrder(models.Model):
             domain = [('company_id', '=', rec.company_id.id)]
             if rec.type:
                 domain.append(('type', '=', rec.type))
+            if rec.currency_id and rec.currency_id != self.env.ref('base.ARS'):
+                domain.append(('currency_id', '=', rec.currency_id.id))
             rec.journal_id_domain = domain
+
+    @api.depends('journal_id_domain')
+    def _compute_journal(self):
+        for rec in self:
+            if rec.journal_id_domain:
+                rec.journal_id = self.env['account.journal'].search(
+                    rec.journal_id_domain, limit=1
+                )
 
     @api.onchange(
         'third_party_check_ids',
