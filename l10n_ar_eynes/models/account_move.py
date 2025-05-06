@@ -1313,7 +1313,9 @@ class AccountMove(models.Model):
 
     def _get_payment_order_journal(self, journal_type):
         domain = [('type', '=', journal_type)]
-        if self.is_multi_currency:
+        if self.is_multi_currency and self.currency_id != self.env.ref(
+            'base.ARS'
+        ):
             domain.append(
                 ('currency_id', '=', self.currency_id.id),
             )
