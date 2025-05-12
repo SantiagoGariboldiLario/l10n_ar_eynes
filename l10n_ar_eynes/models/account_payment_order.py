@@ -97,6 +97,7 @@ class AccountPaymentOrder(models.Model):
         string='Journal',
         required=True,
         compute='_compute_journal',
+        store=True,
     )
     journal_id_domain = fields.Binary(compute='_compute_journal_id_domain')
     move_id = fields.Many2one(
@@ -826,9 +827,13 @@ class AccountPaymentOrder(models.Model):
     @api.depends('journal_id', 'company_id')
     def _compute_default_journal_currency(self):
         for payment in self:
-            payment.currency_id = (
-                payment.journal_id.currency_id or payment.company_id.currency_id
+            journal_currency = (
+                payment.journal_id and payment.journal_id.currency_id
             )
+            company_currency = (
+                payment.company_id and payment.company_id.currency_id
+            )
+            payment.currency_id = journal_currency or company_currency
 
     @api.depends(
         'debt_line_ids', 'income_line_ids', 'amount', 'concept_line_ids'
