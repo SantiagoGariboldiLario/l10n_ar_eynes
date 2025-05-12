@@ -47,14 +47,14 @@
                         <table style="width: 100%; margin: 10px auto;">
                             <thead class="no-border-row">
                                 <tr>
-                                    <th />
-                                    <th>No Grav/Ex/No Alcanz.</th>
-                                    <th>Reg. Especiales</th>
-                                    <th>NIns,NRes,Ex,Mon,Ncat</th>
-                                    <th>Neto Gravado</th>
-                                    <th>IVA</th>
-                                    <th>IVA computable</th>
-                                    <th>TOTAL</th>
+                                    <th style="width: 12.5%;" />
+                                    <th style="width: 12.5%;">No Grav/Ex/No Alcanz.</th>
+                                    <th style="width: 12.5%;">Reg. Especiales</th>
+                                    <th style="width: 12.5%;">NIns,NRes,Ex,Mon,Ncat</th>
+                                    <th style="width: 12.5%;">Neto Gravado</th>
+                                    <th style="width: 12.5%;">IVA</th>
+                                    <th style="width: 12.5%;">IVA computable</th>
+                                    <th style="width: 12.5%;">TOTAL</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -685,7 +685,7 @@
                                     <t t-set="regime_total" t-value="regime_total + regime_line[1]" />
                                     <tr class="no-border-row">
                                         <td><t t-out="regime_line[0]" /></td>
-                                        <td />
+                                        <td><t t-out="regime_line[2]" /></td>
                                         <td>
                                             <t
                                                 t-set="amountformatted"

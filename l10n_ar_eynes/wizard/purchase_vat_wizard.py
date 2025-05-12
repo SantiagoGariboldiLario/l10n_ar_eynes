@@ -175,12 +175,13 @@ class PurchaseVATWizard(models.TransientModel):
 
     def _get_retention_data(self):
         retention_query = """
-        SELECT ret.name, -1 * sum(r.amount) FROM account_payment_order_retention_line r
+        SELECT ret.name, -1 * sum(r.amount), conc.code FROM account_payment_order_retention_line r
         JOIN account_tax ret ON r.retention_id = ret.id
+        JOIN retention_concept conc ON r.concept_id = conc.id
         WHERE r.date BETWEEN %(date_start)s AND %(date_end)s
         AND ret.type_tax_use LIKE 'purchase'
         AND r.company_id = %(company)s
-        GROUP BY ret.id
+        GROUP BY ret.id, conc.code
         """
         vals = {
             'date_start': self.date_start,
@@ -212,11 +213,24 @@ class PurchaseVATWizard(models.TransientModel):
         return perception_res
 
     def _parse_retention_perception(self):
-        taxes_data = self._get_retention_data() + self._get_perception_data()
         taxes_data_parsed = []
+        taxes_data = self._get_retention_data()
         for line in taxes_data:
             taxes_data_parsed.append(
-                (line[0].get('es_AR', line[0].get('en_US', 'No name')), line[1])
+                (
+                    line[0].get('es_AR', line[0].get('en_US', 'No name')),
+                    line[1],
+                    line[2],
+                )
+            )
+        taxes_data = self._get_perception_data()
+        for line in taxes_data:
+            taxes_data_parsed.append(
+                (
+                    line[0].get('es_AR', line[0].get('en_US', 'No name')),
+                    line[1],
+                    '',
+                )
             )
         return taxes_data_parsed
 
