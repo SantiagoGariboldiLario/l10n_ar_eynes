@@ -2075,6 +2075,7 @@ class AccountPaymentOrderLine(models.Model):
             and float_is_zero(
                 self.amount_unreconciled - self.amount, precision_digits=prec
             )
+            or self.amount < self.amount_unreconciled
         ):
             raise ValidationError(
                 _(
