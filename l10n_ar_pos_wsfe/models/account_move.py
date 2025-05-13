@@ -113,8 +113,10 @@ class AccountMove(models.Model):
         # Para facturas que provienen desde el POS, tenemos que vincular los pagos:
         posted = self.filtered(lambda inv: inv.state == 'posted')
         for inv in posted:
-            order = self.env['pos.order'].search(
-                [('account_move', '=', inv.id)]
+            order = (
+                self.env['pos.order']
+                .sudo()
+                .search([('account_move', '=', inv.id)])
             )
             if order:
                 order._apply_invoice_payments()
