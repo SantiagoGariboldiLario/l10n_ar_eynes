@@ -41,43 +41,61 @@ class AccountPaymentOrder(models.Model):
             result.append((payment.id, name))
         return result
 
-    def default_narration(self):
-        return self.env.context.get('narration', False)
+    def default_get(self, fields):
+        result = super(AccountPaymentOrder, self).default_get(fields)
+        # COMPAÑIA
+        default_company = self.env.company
+        if 'company_id' in fields:
+            result['company_id'] = default_company.id
 
-    def default_partner(self):
-        return self.env.context.get('partner_id', False)
+        # REFERENCIA DE PAGO
+        if 'reference' in fields:
+            default_reference = self.env.context.get('reference', False)
+            result['reference'] = default_reference
 
-    def default_reference(self):
-        return self.env.context.get('reference', False)
+        # TIPO
+        default_type = self.env.context.get('default_type', False)
+        if 'type' in fields:
+            result['type'] = default_type
 
-    def default_amount(self):
-        self.env.context.get('amount', 0.0)
+        # NOTAS
+        if 'narration' in fields:
+            default_narration = self.env.context.get('narration', False)
+            result['narration'] = default_narration
 
-    def default_type(self):
-        return self.env.context.get('type', False)
+        # EMPRESA
+        default_partner = self.env.context.get('partner_id', False)
+        if 'partner_id' in fields:
+            result['partner_id'] = default_partner
 
-    def default_payment_rate_currency(self):
-        """
-        Return the default value for field payment_rate_currency_id:
-          the currency of the journal
-        if there is one, otherwise the currency of the user's company
-        """
-        journal_obj = self.env['account.journal']
-        journal_id = self.env.context.get('journal_id', False)
-        if journal_id:
-            journal = journal_obj.browse(journal_id)
-            if journal.currency:
-                return journal.currency
-        # No journal given in the context, use company currency as default
-        return self.env.company.currency_id
+        # MONTO DE PAGO
+        if 'amount' in fields:
+            default_amount = self.env.context.get('amount', 0.0)
+            result['amount'] = default_amount
+
+        # DIARIO
+        domain = [('company_id', '=', default_company.id)]
+        if default_type:
+            domain.append(('type', '=', default_type))
+        default_journal = self.env['account.journal'].search(domain, limit=1)
+        if 'journal_id' in fields:
+            result['journal_id'] = default_journal.id
+
+        if 'payment_rate_currency_id' in fields:
+            # No journal given in the context, use company currency as default
+            currency = default_company.currency_id
+            if default_journal and default_journal.currency_id:
+                currency = default_journal.currency_id
+            result['payment_rate_currency_id'] = currency.id
+
+        return result
 
     number = fields.Char(string='Number', copy=False, default=False)
     name = fields.Char(string='Memo', default='')
-    narration = fields.Text(string='Notes', default=default_narration)
+    narration = fields.Text(string='Notes')
     partner_id = fields.Many2one(
         comodel_name='res.partner',
         string='Partner',
-        default=default_partner,
     )
     account_id = fields.Many2one(
         comodel_name='account.account',
@@ -91,17 +109,14 @@ class AccountPaymentOrder(models.Model):
         default='pay_now',
         string='Payment',
     )
-    reference = fields.Char(string='Ref #', default=default_reference)
+    reference = fields.Char(string='Ref #')
     journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Journal',
         required=True,
-        compute='_compute_journal_id_domain',
-        store=True,
     )
     journal_id_domain = fields.Binary(
         compute='_compute_journal_id_domain',
-        store=True,
     )
     move_id = fields.Many2one(
         comodel_name='account.move',
@@ -141,7 +156,6 @@ class AccountPaymentOrder(models.Model):
     amount = fields.Float(
         string='Tax Amount',
         digits='Account',
-        default=default_amount,
         required=True,
         compute='_compute_amount',
     )
@@ -173,7 +187,6 @@ class AccountPaymentOrder(models.Model):
             ('payment', 'Payment'),
             ('receipt', 'Receipt'),
         ],
-        default=default_type,
     )
     tax_id = fields.Many2one(
         comodel_name='account.tax',
@@ -199,7 +212,6 @@ class AccountPaymentOrder(models.Model):
     company_id = fields.Many2one(
         comodel_name='res.company',
         string='Company',
-        default=lambda self: self.env.company.id,
         required=True,
         readonly=True,
     )
@@ -234,7 +246,6 @@ class AccountPaymentOrder(models.Model):
     payment_rate_currency_id = fields.Many2one(
         comodel_name='res.currency',
         string='Payment Rate Currency',
-        default=default_payment_rate_currency,
         required=True,
     )
     payment_rate = fields.Float(
@@ -376,9 +387,6 @@ class AccountPaymentOrder(models.Model):
             if rec.currency_id and rec.currency_id != self.env.ref('base.ARS'):
                 domain.append(('currency_id', '=', rec.currency_id.id))
             rec.journal_id_domain = domain
-
-            journal = self.env['account.journal'].search(domain, limit=1)
-            rec.journal_id = journal
 
     @api.onchange(
         'third_party_check_ids',
