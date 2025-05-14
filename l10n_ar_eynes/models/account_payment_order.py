@@ -96,10 +96,13 @@ class AccountPaymentOrder(models.Model):
         comodel_name='account.journal',
         string='Journal',
         required=True,
-        compute='_compute_journal',
+        compute='_compute_journal_id_domain',
         store=True,
     )
-    journal_id_domain = fields.Binary(compute='_compute_journal_id_domain')
+    journal_id_domain = fields.Binary(
+        compute='_compute_journal_id_domain',
+        store=True,
+    )
     move_id = fields.Many2one(
         comodel_name='account.move',
         string='Account Entry',
@@ -374,13 +377,8 @@ class AccountPaymentOrder(models.Model):
                 domain.append(('currency_id', '=', rec.currency_id.id))
             rec.journal_id_domain = domain
 
-    @api.depends('journal_id_domain')
-    def _compute_journal(self):
-        for rec in self:
-            if rec.journal_id_domain:
-                rec.journal_id = self.env['account.journal'].search(
-                    rec.journal_id_domain, limit=1
-                )
+            journal = self.env['account.journal'].search(domain, limit=1)
+            rec.journal_id = journal
 
     @api.onchange(
         'third_party_check_ids',
