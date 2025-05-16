@@ -35,23 +35,33 @@ class AccountMove(models.Model):
         validación para poder crear facturas de proveedores que posean la misma numeración siempre y cuando
         sean de proveedores distintos.
         """
-        if not index_exists(self.env.cr, "account_move_unique_name_eynes"):
-            if not column_exists(self.env.cr, "account_move", "is_debit_note"):
-                create_column(
-                    self.env.cr, "account_move", "is_debit_note", "boolean"
-                )
+        if not column_exists(self.env.cr, "account_move", "is_debit_note"):
+            create_column(
+                self.env.cr, "account_move", "is_debit_note", "boolean"
+            )
+        if not (
+            index_exists(self.env.cr, "account_move_unique_name_customers")
+            or index_exists(self.env.cr, "account_move_unique_name_suppliers")
+        ):
             drop_index(self.env.cr, "account_move_unique_name", self._table)
             self.env.cr.execute(
                 """
                 CREATE UNIQUE INDEX account_move_unique_name
-                                 ON account_move(name, journal_id)
-                              WHERE (state = 'posted' AND name != '/'
-                                AND move_type NOT IN ('in_invoice', 'in_refund', 'in_receipt'));
-                CREATE UNIQUE INDEX account_move_unique_name_eynes
-                                 ON account_move(name, partner_id, journal_id, move_type, is_debit_note)
-                              WHERE (state = 'posted' AND name != '/'
-                                AND move_type IN ('in_invoice', 'in_refund', 'in_receipt'));
-            """
+                    ON account_move(name, journal_id)
+                    WHERE (state = 'posted' AND name != '/' AND move_type = 'entry');
+                CREATE UNIQUE INDEX account_move_unique_name_customers
+                    ON account_move(name, journal_id, move_type, is_debit_note)
+                    WHERE (
+                        state = 'posted' AND name != '/'
+                        AND move_type IN ('out_invoice', 'out_refund', 'out_receipt')
+                    );
+                CREATE UNIQUE INDEX account_move_unique_name_suppliers
+                    ON account_move(name, partner_id, journal_id, move_type, is_debit_note)
+                    WHERE (
+                        state = 'posted' AND name != '/'
+                        AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')
+                    );
+                """
             )
         return super()._auto_init()
 
@@ -289,7 +299,12 @@ class AccountMove(models.Model):
             _('This invoice was already entered.'),
         ),
         (
-            'unique_name_eynes',
+            'unique_name_customers',
+            '',
+            _('Another entry with the same name already exists.'),
+        ),
+        (
+            'unique_name_suppliers',
             '',
             _('Another entry with the same name already exists.'),
         ),
