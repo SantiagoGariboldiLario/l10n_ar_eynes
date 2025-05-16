@@ -1760,10 +1760,18 @@ msgstr "Cuenta Analítica"
 #. module: l10n_ar_eynes
 #. odoo-python
 #: code:addons/l10n_ar_eynes/models/account_move.py:0
-#: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_move_unique_name_eynes
+#: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_move_unique_name_suppliers
 #, python-format
 msgid "Another entry with the same name already exists."
 msgstr "Ya existe una factura con esta numeración para este proveedor."
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+#: model:ir.model.constraint,message:l10n_ar_eynes.constraint_account_move_unique_name_customers
+#, python-format
+msgid "Another entry with the same name already exists."
+msgstr "Ya existe una factura con esta numeración."
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__apartment
