@@ -1048,7 +1048,9 @@ class AccountMove(models.Model):
             self.invoice_line_ids.link_internal_taxes_to_move_lines(
                 self.internal_taxes_ids.mapped('tax_id')
             )
-            self._update_internal_taxes_move_line_amount()
+            self.with_context(
+                skip_invoice_line_sync=True
+            )._update_internal_taxes_move_line_amount()
 
     def _update_internal_taxes_move_line_amount(self):
         for internal_tax in self.internal_taxes_ids.mapped('tax_id'):
