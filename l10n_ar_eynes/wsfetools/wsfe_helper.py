@@ -190,8 +190,13 @@ class WSFEParser(WSParser):
         return vals
 
     def parse_taxes_not_vat(self, invoice):
-        PCODES = {'nacional': '1', 'provincial': '2', 'municipal': '3'}
-        perc_array = []
+        PCODES = {
+            'nacional': '1',
+            'provincial': '2',
+            'municipal': '3',
+            'interno': '4',
+        }
+        tributes_array = []
 
         tribute_total = 0
         for perception in invoice.perception_ids:
@@ -204,10 +209,21 @@ class WSFEParser(WSParser):
                 'Desc': perception.name,
             }
             tribute_total += perc['Importe']
-            perc_array.append(perc)
+            tributes_array.append(perc)
+
+        for internal in invoice.internal_taxes_ids:
+            perc = {
+                'Id': PCODES['interno'],
+                'BaseImp': internal.base,
+                'Importe': internal.amount,
+                'Alic': 0.0,
+                'Desc': internal.name,
+            }
+            tribute_total += perc['Importe']
+            tributes_array.append(perc)
 
         vals = {
-            'perc_array': perc_array,
+            'tributes_array': tributes_array,
             'tribute_total': tribute_total,
         }
         self._afip_round(vals)

@@ -33,6 +33,13 @@
                         </tree>
                     </field>
                 </page>
+                <page name="applied_internal_taxes" string="Applied Internal Taxes">
+                    <field name="internal_taxes_ids" nolabel="1">
+                        <tree>
+                            <field name="name" />
+                        </tree>
+                    </field>
+                </page>
             </page>
         </field>
     </record>

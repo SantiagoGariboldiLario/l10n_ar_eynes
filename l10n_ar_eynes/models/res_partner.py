@@ -553,6 +553,9 @@ class ResPartner(models.Model):
         retentions.update(partner_retentions)
         return retentions
 
+    def get_applicable_internals(self):
+        return self.property_account_position_id.internal_taxes_ids
+
 
 class ResPartnerRetention(models.Model):
     _name = "res.partner.retention"
