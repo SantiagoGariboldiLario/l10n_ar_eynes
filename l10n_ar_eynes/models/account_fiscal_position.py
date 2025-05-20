@@ -20,6 +20,20 @@ class AccountFiscalPosition(models.Model):
         default='not_defined',
     )
     afip_code = fields.Integer(string="AFIP Code")
+    internal_taxes_ids = fields.Many2many(
+        comodel_name='account.tax',
+        relation='fiscal_position_internal_rel',
+        column1='position_id',
+        column2='internal_tax_id',
+        string='Internal Taxes',
+        domain=lambda self: [
+            ('tax_group_id.group_type', '=', 'internals'),
+            ('company_id', '=', self.env.company.id),
+            ('type_tax_use', '=', 'sale'),
+        ],
+        help="These are the internal taxes that will be applied to Customers "
+        + "belonging to this Fiscal Position.",
+    )
     retention_ids = fields.Many2many(
         comodel_name='account.tax',
         relation='fiscal_position_retention_rel',
@@ -46,7 +60,7 @@ class AccountFiscalPosition(models.Model):
             ('company_id', '=', self.env.company.id),
             ('type_tax_use', '=', 'sale'),
         ],
-        help="These are the perceptions that will be applied to Suppliers "
+        help="These are the perceptions that will be applied to Customers "
         "belonging to this Fiscal Position. Exceptions to this have to be "
         "loaded at partner form.",
     )

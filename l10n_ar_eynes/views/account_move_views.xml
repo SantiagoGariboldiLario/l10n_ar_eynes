@@ -314,6 +314,28 @@
                     </field>
                 </page>
 
+                <page
+                    string="Internal taxes"
+                    invisible="move_type not in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')"
+                >
+                    <field
+                        name="internal_taxes_ids"
+                        nolabel="1"
+                        colspan="4"
+                        context="{'default_company_id': company_id}"
+                        readonly="state != 'draft'"
+                    >
+                        <tree editable="bottom">
+                            <field name="name" column_invisible="True" force_save="True" />
+                            <field name="company_id" column_invisible="True" force_save="True" />
+                            <field name="tax_id_domain" column_invisible="True" />
+                            <field name="tax_id" string="Internal tax" domain="tax_id_domain" />
+                            <field name="base" />
+                            <field name="amount" />
+                        </tree>
+                    </field>
+                </page>
+
                 <page string="FCRED" invisible="not is_FCE_invoice">
                     <field name="optional_ids">
                         <tree editable="bottom">
