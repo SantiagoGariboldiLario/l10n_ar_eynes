@@ -31,6 +31,7 @@
     ],
     'data': [
         'views/pos_config_views.xml',
+        'security/ir.model.access.csv',
     ],
     'assets': {
         'point_of_sale._assets_pos': [
