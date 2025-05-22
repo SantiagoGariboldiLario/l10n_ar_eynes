@@ -58,3 +58,4 @@ from . import ir_actions_report
 from . import default_jurisdiction_config
 from . import res_city
 from . import product_area
+from . import ir_ui_menu
