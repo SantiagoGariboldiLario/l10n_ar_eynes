@@ -450,7 +450,7 @@ class WsfeConfig(models.Model):
                 importe=vat_data['vat_dict'][vat_id]['Importe'],
             )
         _logger.info("Adding tributes info")
-        for other_tax in tribute_data['perc_array']:
+        for other_tax in tribute_data['tributes_array']:
             ws.AgregarTributo(
                 tributo_id=other_tax['Id'],
                 desc=other_tax['Desc'],

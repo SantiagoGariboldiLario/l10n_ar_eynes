@@ -291,6 +291,15 @@ class AccountMove(models.Model):
         currency_field="company_currency_id",
         string='Total',
     )
+    # *******************************************************************************************************
+    #                                        Impuestos Internos:
+    # *******************************************************************************************************
+    internal_taxes_ids = fields.One2many(
+        'internal.tax.line',
+        'invoice_id',
+        string='Internal',
+        copy=True,
+    )
 
     _sql_constraints = [
         (
@@ -521,6 +530,7 @@ class AccountMove(models.Model):
             self.journal_id = journals[0]
             self._inverse_journal_id()
             self.suitable_journal_ids = journals
+            self.invoice_line_ids.force_compute_tax_ids()
 
     @api.depends_context('lang')
     @api.depends(
@@ -768,6 +778,8 @@ class AccountMove(models.Model):
                 )
             )
 
+    # --------------------------------------------------------------------------------
+    # *********      MÉTODOS PARA PERCEPCIONES: *********
     @api.onchange('disable_perceptions')
     def _onchange_disable_perceptions(self):
         if self.disable_perceptions:
@@ -961,6 +973,113 @@ class AccountMove(models.Model):
             move._automatic_perception_calculation()
             move._update_perception_move_line_amount()
 
+    def _set_perception_date(self):
+        """
+        Usamos la date de la invoice porque en el caso de facturas de proveedor que son ingresadas en el mes
+        siguiente, la invoice_date no nos serviría a la hora de cerrar los impuestos del  mes. Ej, si la
+        factura es del 29/3/24 (invoice_date) y se ingresa el 1/4/24 (date) porque el proveedor la entregó
+        tarde, esta percepción no saldría en el archivo de percepciones generado para Abril.
+        """
+        invoices = self.filtered(lambda move: move.is_invoice())
+        for inv in invoices:
+            for perc_line in inv.perception_ids:
+                if not perc_line.date:
+                    perc_line.write({'date': inv.date})
+
+    def _get_perceptions_ctx(self):
+        """
+        Return values to compute perception in python code field
+        """
+        # TODO: Define values
+        return {
+            'invoice_date': self.invoice_date,
+            'amount_untaxed': self.amount_untaxed,
+            'currency_rate': self.currency_rate,
+        }
+
+    # --------------------------------------------------------------------------------
+    # *********      FIN MÉTODOS PARA PERCEPCIONES *********
+
+    # --------------------------------------------------------------------------------
+    # *********      MÉTODOS PARA IMPUESTOS INTERNOS: *********
+    @api.onchange('invoice_line_ids')
+    def _automatic_internal_taxes_calculation(self):
+        if self.is_sale_document():
+            amount = 0.0
+            base = 0.0
+            for subtotal in self.tax_totals['groups_by_subtotal']:
+                for tax in self.tax_totals['groups_by_subtotal'][subtotal]:
+                    group = self.env['account.tax.group'].browse(
+                        tax['tax_group_id']
+                    )
+                    if group.group_type == 'internals':
+                        amount = tax['tax_group_amount']
+                        base = tax['tax_group_base_amount']
+            if amount > 0:
+                # Se generan las líneas de impuestos internos y se asocian a la factura
+                internal_taxes = self.env['account.tax'].search(
+                    [
+                        ('company_id', '=', self.company_id.id),
+                        ('type_tax_use', '=', 'sale'),
+                        (
+                            'tax_group_id',
+                            '=',
+                            self.env.ref('l10n_ar_eynes.internal_tax_group').id,
+                        ),
+                    ],
+                    limit=1,
+                )
+                self.internal_taxes_ids = self.env['internal.tax.line'].new(
+                    {
+                        'invoice_id': self.id,
+                        'base': base,
+                        'amount': amount,
+                        'tax_id': internal_taxes.id,
+                        'manual': False,
+                    }
+                )
+            else:
+                self.internal_taxes_ids = False
+        self._link_internal_taxes()
+
+    @api.onchange('internal_taxes_ids')
+    def _link_internal_taxes(self):
+        if self.is_purchase_document():
+            self.invoice_line_ids.link_internal_taxes_to_move_lines(
+                self.internal_taxes_ids.mapped('tax_id')
+            )
+            self.with_context(
+                skip_invoice_line_sync=True
+            )._update_internal_taxes_move_line_amount()
+
+    def _update_internal_taxes_move_line_amount(self):
+        for internal_tax in self.internal_taxes_ids.mapped('tax_id'):
+            internal_tax_line = self.line_ids.filtered(
+                lambda line: line.tax_line_id == internal_tax
+            )
+            amount = sum(
+                self.internal_taxes_ids.filtered(
+                    lambda line: line.tax_id == internal_tax
+                ).mapped('amount')
+            )
+            amount_currency = amount
+            # if self.is_multi_currency:
+            #     amount = sum(
+            #         self.internal_taxes_ids.filtered(
+            #             lambda line: line.tax_id == internal_tax
+            #         ).mapped('amount_secondary_currency')
+            #     )
+            sign = -1 if internal_tax_line.balance < 0 else 1
+            internal_tax_line.write(
+                {
+                    'balance': sign * amount,
+                    'amount_currency': sign * amount_currency,
+                }
+            )
+
+    # --------------------------------------------------------------------------------
+    # *********      FIN MÉTODOS PARA IMPUESTOS INTERNOS *********
+
     def _get_fce_prefix(self):
         voucher_type = int(self.voucher_type_id.afip_code)
         if voucher_type in [
@@ -1014,19 +1133,6 @@ class AccountMove(models.Model):
                 raise ValidationError(
                     _("You must complete supplier move reference.")
                 )
-
-    def _set_perception_date(self):
-        """
-        Usamos la date de la invoice porque en el caso de facturas de proveedor que son ingresadas en el mes
-        siguiente, la invoice_date no nos serviría a la hora de cerrar los impuestos del  mes. Ej, si la
-        factura es del 29/3/24 (invoice_date) y se ingresa el 1/4/24 (date) porque el proveedor la entregó
-        tarde, esta percepción no saldría en el archivo de percepciones generado para Abril.
-        """
-        invoices = self.filtered(lambda move: move.is_invoice())
-        for inv in invoices:
-            for perc_line in inv.perception_ids:
-                if not perc_line.date:
-                    perc_line.write({'date': inv.date})
 
     def _post(self, soft=True):
         self._required_supplier_move_reference()
@@ -1089,15 +1195,6 @@ class AccountMove(models.Model):
                 )
             )
 
-    def _check_electronic_invoice_informed_before(self):
-        if self.env['ws.request.detail'].search(
-            [
-                ('invoice_id', 'in', self.ids),
-            ]
-        ):
-            return True
-        return False
-
     def copy_data(self, default=None):
         data_list = super().copy_data(default)
         for move, data in zip(self, data_list):
@@ -1118,22 +1215,6 @@ class AccountMove(models.Model):
                 )
             )
         return super(AccountMove, self).unlink()
-
-    def _check_electronic_invoice_approved_before(self):
-        if self.filtered(
-            lambda move: move.is_sale_document(include_receipts=True)
-            and move.fiscal_type == 'electronic'
-            and (move.cae or move.cae_due_date)
-        ):
-            return True
-        if self.env['ws.request.detail'].search(
-            [
-                ('invoice_id', 'in', self.ids),
-                ('result', '=', 'A'),
-            ]
-        ):
-            return True
-        return False
 
     def _check_closed_journal_moves(self):
         closed_journal_moves = self.filtered(
@@ -1406,17 +1487,6 @@ class AccountMove(models.Model):
 
         return vals
 
-    def _get_perceptions_ctx(self):
-        """
-        Return values to compute perception in python code field
-        """
-        # TODO: Define values
-        return {
-            'invoice_date': self.invoice_date,
-            'amount_untaxed': self.amount_untaxed,
-            'currency_rate': self.currency_rate,
-        }
-
     def _generate_qr_afip_url(self):
         voucher_type = self.get_voucher_type()
         pos = self.get_pos()
@@ -1544,7 +1614,7 @@ class AccountMove(models.Model):
         return (select_extra, join_extra, where_extra, sort_selection)
 
     # --------------------------------------------------------------------------------
-    # METHODS FOR ELECTRONIC INVOICES:
+    # *********      MÉTODOS PARA FACTURA ELECTRÓNICA (ARCA): *********
     def _get_ws_conf(self):
         WSFEConfig = self.env['wsfe.config']
         WSFEXConfig = self.env['wsfex.config']
@@ -1757,6 +1827,31 @@ class AccountMove(models.Model):
             }
         )
         return request.id
+
+    def _check_electronic_invoice_informed_before(self):
+        if self.env['ws.request.detail'].search(
+            [
+                ('invoice_id', 'in', self.ids),
+            ]
+        ):
+            return True
+        return False
+
+    def _check_electronic_invoice_approved_before(self):
+        if self.filtered(
+            lambda move: move.is_sale_document(include_receipts=True)
+            and move.fiscal_type == 'electronic'
+            and (move.cae or move.cae_due_date)
+        ):
+            return True
+        if self.env['ws.request.detail'].search(
+            [
+                ('invoice_id', 'in', self.ids),
+                ('result', '=', 'A'),
+            ]
+        ):
+            return True
+        return False
 
     def _validate_electronic_invoices(self, soft=False):
         if self:
