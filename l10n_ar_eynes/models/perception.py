@@ -529,7 +529,7 @@ class PerceptionTaxApplication(models.Model):
     def apply_perception(self, perception_data):
         percent = perception_data['percent']
         excluded_percent = perception_data['excluded_percent']
-        currency_rate = perception_data['currency_rate']
+        currency_rate = perception_data.get('currency_rate', 1.0)
 
         base = self.compute_base(perception_data['lines'], currency_rate)
         if base == 0.0:

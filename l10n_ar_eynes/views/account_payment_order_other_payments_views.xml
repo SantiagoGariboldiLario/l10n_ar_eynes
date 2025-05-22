@@ -221,6 +221,64 @@
                         </group>
                     </page>
                     <page string="Checks">
+                        <!-- ******************************* COBROS ********************************* -->
+                        <field
+                                name="third_party_check_receipt_ids"
+                                string="Third Checks"
+                                nolabel="1"
+                                colspan="4"
+                                context="{'default_internal_type': 'third_party'}"
+                                readonly="state != 'draft'"
+                                invisible="type == 'payment'"
+                            >
+                            <tree>
+                                <field name="number" />
+                                <field name="reception_date" />
+                                <field name="issue_date" />
+                                <field name="payment_date" />
+                                <field name="bank_id" />
+                                <field name="type" />
+                                <field name="amount" sum="Total" />
+                                <field name="third_party_check_state" />
+                            </tree>
+                            <form string="Third Checks">
+                                <field name="source_partner_id" invisible="1" />
+                                <group>
+                                    <group>
+                                        <field name="source_payment_order_id" invisible="1" />
+                                        <field
+                                                name="journal_id"
+                                                domain="[('type', '=', 'third_party_checks')]"
+                                            />
+                                        <field name="internal_type" invisible="1" />
+                                        <field name="number" />
+                                        <field name="type" />
+                                        <field name="checkbook_format" />
+                                        <field name="amount" required="1" />
+                                        <field name="bank_id" required="1" />
+                                        <field name="crossed" />
+                                        <field name="not_order" />
+                                    </group>
+                                    <group>
+                                        <field name="reception_date" required="1" />
+                                        <field name="issue_date" required="1" />
+                                        <field
+                                                name="payment_date"
+                                                invisible="type == 'common'"
+                                                required="type == 'deferred'"
+                                            />
+                                        <field name="clearing" />
+                                        <field name="signatory" />
+                                        <field name="signatory_vat" />
+                                        <field name="signatory_account" />
+                                    </group>
+                                </group>
+                                <field name="third_party_check_state" invisible="1" />
+                            </form>
+                        </field>
+                        <!-- ******************************* FIN COBROS ********************************* -->
+
+                        <!-- ********************************* PAGOS ********************************* -->
                         <label for="issued_check_line_ids" invisible="type == 'receipt'" />
                         <field
                                 name="issued_check_line_ids"
@@ -299,16 +357,23 @@
                                 </group>
                             </form>
                         </field>
-                        <label for="third_party_check_ids" />
+                        <label for="third_party_check_ids" invisible="type == 'receipt'" />
                         <field
                                 name="third_party_check_ids"
-                                string="Third Checks"
-                                readonly="state != 'draft'"
-                                nolabel="True"
+                                string="Third Party Checks"
+                                nolabel="1"
+                                invisible="type == 'receipt'"
                                 colspan="4"
-                                domain="[('internal_type', '=', 'third_party'), ('third_party_check_state', '=', 'wallet')]"
+                                readonly="state != 'draft'"
+                                domain="[
+                                ('internal_type', '=', 'third_party'),
+                                ('third_party_check_state', '=', 'in_wallet'),
+                                ('company_id', '=', company_id)
+                            ]"
+                                context="{'tree_view_ref': 'l10n_ar_eynes.account_third_party_check_view_tree'}"
                             >
-                            <tree>
+                            <tree create="false">
+                                <field name="currency_id" column_invisible="1" />
                                 <field name="number" />
                                 <field name="source_partner_id" />
                                 <field name="issue_date" />
@@ -316,9 +381,17 @@
                                 <field name="bank_id" />
                                 <field name="origin" />
                                 <field name="amount" sum="Total" />
-                                <field name="third_party_check_state" invisible="True" />
+                                <field
+                                        name="amount_currency"
+                                        widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"
+                                        column_invisible="not parent.is_multi_currency"
+                                        sum="Total Amount"
+                                    />
+                                <field name="third_party_check_state" column_invisible="1" />
                             </tree>
                         </field>
+                        <!-- ********************************* FIN PAGOS ********************************* -->
                     </page>
                     <page string="Journal Items" name="journal_items" invisible="state != 'posted'">
                         <group col="4">

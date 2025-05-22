@@ -5947,7 +5947,7 @@ msgstr ""
 #. module: l10n_ar_eynes
 #: model:account.tax.group,name:l10n_ar_eynes.internal_tax_group
 msgid "Internal"
-msgstr "Interna"
+msgstr "Internos"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_journal__fiscal_type__internal
