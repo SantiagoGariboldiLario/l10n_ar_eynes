@@ -3,5 +3,9 @@
     <!-- Currencies -->
     <record id="base.USD" model="res.currency">
         <field name="symbol">U$S</field>
+        <field name="afip_code">DOL</field>
+    </record>
+    <record id="base.ARS" model="res.currency">
+        <field name="afip_code">PES</field>
     </record>
 </odoo>
