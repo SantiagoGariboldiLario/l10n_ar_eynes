@@ -15,6 +15,12 @@ class PosOrder(models.Model):
         string='Invoice Journal',
         copy=False,
     )
+    invoice_state = fields.Selection(
+        string="Invoice State", related='account_move.state'
+    )
+    invoice_name = fields.Char(
+        string="Invoice Number", related='account_move.name'
+    )
     is_wsfe = fields.Boolean(
         string='Is Electronic Invoice',
         copy=False,

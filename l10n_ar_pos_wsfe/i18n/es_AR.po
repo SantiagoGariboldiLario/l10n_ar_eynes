@@ -55,6 +55,11 @@ msgid "Doc Type Required"
 msgstr "Tipo de documento Requerido"
 
 #. module: l10n_ar_pos_wsfe
+#: model_terms:ir.ui.view,arch_db:l10n_ar_pos_wsfe.view_pos_order_filter
+msgid "Draft Invoices"
+msgstr "Facturas en Borrador"
+
+#. module: l10n_ar_pos_wsfe
 #. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/account_move.py:0
 #, python-format
@@ -119,6 +124,16 @@ msgid "Invoice Journals"
 msgstr "Diarios de Factura"
 
 #. module: l10n_ar_pos_wsfe
+#: model:ir.model.fields,field_description:l10n_ar_pos_wsfe.field_pos_order__invoice_name
+msgid "Invoice Number"
+msgstr "Número de Factura"
+
+#. module: l10n_ar_pos_wsfe
+#: model:ir.model.fields,field_description:l10n_ar_pos_wsfe.field_pos_order__invoice_state
+msgid "Invoice State"
+msgstr "Estado de Factura"
+
+#. module: l10n_ar_pos_wsfe
 #. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/pos_payment.py:0
 #, python-format
@@ -150,6 +165,13 @@ msgstr "Asiento contable"
 #, python-format
 msgid "Manual Mode"
 msgstr "Factura manual"
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#, python-format
+msgid "Missing fields on partner"
+msgstr "Campos faltantes en el Contacto"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
@@ -238,6 +260,13 @@ msgid "SN"
 msgstr ""
 
 #. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml:0
+#, python-format
+msgid "Ship Later"
+msgstr "Enviar después"
+
+#. module: l10n_ar_pos_wsfe
 #. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/pos_order.py:0
 #, python-format
@@ -282,14 +311,3 @@ msgstr "Configuración del Pos para WSFE"
 #, python-format
 msgid "You must first select a client."
 msgstr "Debe seleccionar un cliente"
-
-#. module: l10n_ar_pos_wsfe
-#. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/OrderSummary.xml:0
-#, python-format
-msgid ""
-"{{ line.has_valid_product_lot() ? 'Valid product lot' : 'Invalid product "
-"lot'}}"
-msgstr ""
-"{{ line.has_valid_product_lot() ? 'Lote de producto válido' : 'Lote de "
-"producto no válido'}}"
