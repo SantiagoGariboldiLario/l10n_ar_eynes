@@ -1613,6 +1613,13 @@ class AccountMove(models.Model):
         sort_selection = """ """
         return (select_extra, join_extra, where_extra, sort_selection)
 
+    def get_sale_orders_name(self):
+        self.ensure_one()
+        names = ''
+        for line in self.line_ids.sale_line_ids:
+            names += line.order_id.name + ' / '
+        return names
+
     # --------------------------------------------------------------------------------
     # *********      MÉTODOS PARA FACTURA ELECTRÓNICA (ARCA): *********
     def _get_ws_conf(self):
