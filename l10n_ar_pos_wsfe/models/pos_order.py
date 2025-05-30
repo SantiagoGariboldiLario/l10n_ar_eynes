@@ -20,6 +20,19 @@ class PosOrder(models.Model):
         copy=False,
     )
 
+    @api.model
+    def create_from_ui(self, orders, draft=False):
+        res = super(PosOrder, self).create_from_ui(orders, draft)
+        for order in res:
+            state = self.env['account.move'].search_read(
+                domain=[('id', '=', order.get('account_move'))],
+                fields=['state'],
+                load=False,
+            )
+            if state:
+                order.update({'invoice_state': state[0].get('state')})
+        return res
+
     def _export_for_ui(self, order):
         res = super(PosOrder, self)._export_for_ui(order)
         refunded_moves = order.refunded_order_ids.mapped('account_move')
