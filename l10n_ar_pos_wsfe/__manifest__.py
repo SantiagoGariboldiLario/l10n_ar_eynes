@@ -31,6 +31,7 @@
     ],
     'data': [
         'views/pos_config_views.xml',
+        'views/res_company_views.xml',
         'security/ir.model.access.csv',
     ],
     'assets': {

@@ -22,3 +22,8 @@ class PosConfig(models.Model):
         domain="[('type', '=', 'sale'), ('fiscal_type', '=', 'internal')]",
         help="Accounting journals used to create invoices.",
     )
+    fcons_max_amount = fields.Float(
+        string='Monto Máximo Consumidor Final',
+        default=417288,
+        help="Maximun amount that voucher can be emitted to Final Consumer without identification.",
+    )
