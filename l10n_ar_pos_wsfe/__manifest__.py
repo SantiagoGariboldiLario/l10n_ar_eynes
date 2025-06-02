@@ -20,7 +20,7 @@
 
 {
     'name': 'Pos AR WSFE',
-    'version': '17.0.1.0.0',
+    'version': '17.0.1.1.0',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -31,6 +31,8 @@
     ],
     'data': [
         'views/pos_config_views.xml',
+        'views/pos_order_views.xml',
+        'views/res_company_views.xml',
         'security/ir.model.access.csv',
     ],
     'assets': {

@@ -5,6 +5,8 @@ import {PaymentScreen} from "@point_of_sale/app/screens/payment_screen/payment_s
 import {patch} from "@web/core/utils/patch";
 import {useService} from "@web/core/utils/hooks";
 import {ConnectionLostError} from "@web/core/network/rpc_service";
+import {ErrorPopup} from "@point_of_sale/app/errors/popups/error_popup";
+import {_t} from "@web/core/l10n/translation";
 
 patch(Order.prototype, {
     initialize: function () {
@@ -16,6 +18,7 @@ patch(Order.prototype, {
         this.invoice_journal_id = false;
         this.perception_amount = 0.0;
         this.orm = useService("orm");
+        this.partner_final_consumer = false;
         return this;
     },
     _isRefundAndSaleOrder: function () {
@@ -67,7 +70,7 @@ patch(Order.prototype, {
         json.inv_electronic_mode = this.inv_electronic_mode ? this.inv_electronic_mode : false;
         json.invoice_journal_id = this.invoice_journal_id || false;
         json.doc_origin = this.doc_origin || "";
-
+        json.partner_final_consumer = this.partner_final_consumer;
         return json;
     },
     // eslint-disable-next-line no-unused-vars
@@ -80,6 +83,7 @@ patch(Order.prototype, {
         this.to_invoice = true;
         this.invoice_journal_id = false;
         this.doc_origin = json.doc_origin || "";
+        this.partner_final_consumer = json.partner_final_consumer || false;
         this.compute_perceptions();
     },
 
@@ -140,15 +144,44 @@ patch(Order.prototype, {
                 self.set_perception(percepcion);
             });
     },
+    _over_final_consumer_max_amount: function () {
+        if (this.is_electronic_invoice() && this.partner_final_consumer) {
+            const total = this.get_total_with_tax();
+            const self = this;
+            this.pos.orm
+                .call("res.company", "get_fc_max_amount", [this.pos.company.id])
+                .then(function (max_fc) {
+                    if (total > max_fc) {
+                        self.pos.env.services.popup.add(ErrorPopup, {
+                            title: _t("Error"),
+                            body: _t("You must inform Final Consumer data to ARCA, create new Customer"),
+                        });
+                        self.set_partner(false);
+                    }
+                });
+        }
+    },
     // eslint-disable-next-line no-unused-vars
-    add_product(product, options) {
+    async add_product(product, options) {
         super.add_product(...arguments);
         this.compute_perceptions();
+        this._over_final_consumer_max_amount();
     },
 
     set_partner(partner) {
         super.set_partner(...arguments);
         this.compute_perceptions();
+        if (partner) {
+            const self = this;
+            this.pos.orm
+                .call("res.partner", "check_final_consumer_without_vat", [partner.id])
+                .then(function (result) {
+                    self.partner_final_consumer = result;
+                    self._over_final_consumer_max_amount();
+                });
+        } else {
+            this.partner_final_consumer = false;
+        }
     },
 
     get_total_with_tax() {
