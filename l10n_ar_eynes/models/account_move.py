@@ -1615,10 +1615,7 @@ class AccountMove(models.Model):
 
     def get_sale_orders_name(self):
         self.ensure_one()
-        names = ''
-        for line in self.line_ids.sale_line_ids:
-            names += line.order_id.name + ' / '
-        return names
+        return self.invoice_origin
 
     # --------------------------------------------------------------------------------
     # *********      MÉTODOS PARA FACTURA ELECTRÓNICA (ARCA): *********

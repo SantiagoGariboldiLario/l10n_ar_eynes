@@ -122,3 +122,9 @@ class AccountMove(models.Model):
                 order._apply_invoice_payments()
 
         return res
+
+    def get_sale_orders_name(self):
+        names = super(AccountMove, self).get_sale_orders_name()
+        if self.pos_order_ids:
+            names = ','.join(self.pos_order_ids.mapped('pos_reference'))
+        return names

@@ -418,7 +418,7 @@
                                         <t t-if="o.invoice_origin">
                                             <br />
                                             <span class="partner-info">Orden de venta: </span><span
-                                                t-esc="o.invoice_origin"
+                                                t-esc="o.get_sale_orders_name()"
                                             />
                                         </t>
                                     </td>
