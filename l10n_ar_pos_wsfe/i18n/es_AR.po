@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-19 21:36+0000\n"
-"PO-Revision-Date: 2024-09-20 13:37+0000\n"
+"PO-Revision-Date: 2025-05-23 18:59+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -24,6 +24,16 @@ msgstr "Diarios contables utilizados para crear facturas electrónicas."
 #: model:ir.model.fields,help:l10n_ar_pos_wsfe.field_pos_config__invoice_manual_journal_ids
 msgid "Accounting journals used to create invoices."
 msgstr "Diarios contables utilizados para crear facturas."
+
+#. module: l10n_ar_pos_wsfe
+#: model:ir.model,name:l10n_ar_pos_wsfe.model_res_company
+msgid "Companies"
+msgstr ""
+
+#. module: l10n_ar_pos_wsfe
+#: model:ir.model,name:l10n_ar_pos_wsfe.model_res_partner
+msgid "Contact"
+msgstr ""
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
@@ -55,6 +65,11 @@ msgid "Doc Type Required"
 msgstr "Tipo de documento Requerido"
 
 #. module: l10n_ar_pos_wsfe
+#: model_terms:ir.ui.view,arch_db:l10n_ar_pos_wsfe.view_pos_order_filter
+msgid "Draft Invoices"
+msgstr "Facturas en Borrador"
+
+#. module: l10n_ar_pos_wsfe
 #. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/account_move.py:0
 #, python-format
@@ -73,6 +88,7 @@ msgstr "Factura Electrónica"
 #: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
 #: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
 #: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/models_mig17.js:0
 #: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
 #: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
 #, python-format
@@ -119,6 +135,16 @@ msgid "Invoice Journals"
 msgstr "Diarios de Factura"
 
 #. module: l10n_ar_pos_wsfe
+#: model:ir.model.fields,field_description:l10n_ar_pos_wsfe.field_pos_order__invoice_name
+msgid "Invoice Number"
+msgstr "Número de Factura"
+
+#. module: l10n_ar_pos_wsfe
+#: model:ir.model.fields,field_description:l10n_ar_pos_wsfe.field_pos_order__invoice_state
+msgid "Invoice State"
+msgstr "Estado de Factura"
+
+#. module: l10n_ar_pos_wsfe
 #. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/pos_payment.py:0
 #, python-format
@@ -150,6 +176,44 @@ msgstr "Asiento contable"
 #, python-format
 msgid "Manual Mode"
 msgstr "Factura manual"
+
+#. module: l10n_ar_pos_wsfe
+#: model:ir.model.fields,help:l10n_ar_pos_wsfe.field_res_company__fcons_max_amount
+msgid ""
+"Maximun amount that invoice can be emitted to Final Consumer without "
+"identification. When you are making an invoice on PdV and it exceeds this "
+"amount, you will receive and alert before send it to ARCA."
+msgstr "Monto máximo en que la factura puede ser emitida a un Consumidor Final sin"
+"identificarlo. Cuando esté efectuando una factura en el PdV y se exceda este monto, "
+"recibirá una alerta antes de ser enviada a ARCA."
+
+#. module: l10n_ar_pos_wsfe
+#: model:ir.model.fields,help:l10n_ar_pos_wsfe.field_pos_config__fcons_max_amount
+msgid ""
+"Maximun amount that voucher can be emitted to Final Consumer without "
+"identification."
+msgstr "Monto máximo en que una factura puede ser emitida a un Consumidor Final "
+"sin identificación."
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#, python-format
+msgid "Missing fields on partner"
+msgstr "Campos faltantes en el Contacto"
+
+#. module: l10n_ar_pos_wsfe
+#: model:ir.model.fields,field_description:l10n_ar_pos_wsfe.field_pos_config__fcons_max_amount
+#: model:ir.model.fields,field_description:l10n_ar_pos_wsfe.field_res_company__fcons_max_amount
+msgid "Monto Máximo Consumidor Final"
+msgstr ""
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#, python-format
+msgid "Missing fields on partner"
+msgstr "Campos faltantes en el Contacto"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
@@ -238,6 +302,13 @@ msgid "SN"
 msgstr ""
 
 #. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml:0
+#, python-format
+msgid "Ship Later"
+msgstr "Enviar después"
+
+#. module: l10n_ar_pos_wsfe
 #. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/pos_order.py:0
 #, python-format
@@ -293,3 +364,10 @@ msgstr ""
 #, python-format
 msgid "You must first select a client."
 msgstr "Debe seleccionar un cliente"
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/models_mig17.js:0
+#, python-format
+msgid "You must inform Final Consumer data to ARCA, create new Customer"
+msgstr "Debe informar los datos del Consumidor Final a ARCA, cree un nuevo Cliente."
