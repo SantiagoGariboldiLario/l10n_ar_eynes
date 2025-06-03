@@ -8,6 +8,10 @@ _logger = logging.getLogger(__name__)
 class PosConfig(models.Model):
     _inherit = 'pos.config'
 
+    default_invoice_mode = fields.Selection(
+        [('manual', 'Manual'), ('electronic', 'Electronic')],
+        default='electronic',
+    )
     invoice_journal_ids = fields.One2many(
         comodel_name='account.journal',
         inverse_name='wsfe_pos_config_id',

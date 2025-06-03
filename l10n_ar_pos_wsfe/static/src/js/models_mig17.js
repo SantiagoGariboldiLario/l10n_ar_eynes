@@ -12,8 +12,7 @@ patch(Order.prototype, {
     initialize: function () {
         Order.prototype.initialize.apply(this, arguments);
         this.invoiceNumber = "";
-        this.inv_manual_mode = false;
-        this.inv_electronic_mode = true;
+        this.inv_electronic_mode = this.pos.config.default_invoice_mode == "electronic";
         this.to_invoice = true;
         this.invoice_journal_id = false;
         this.perception_amount = 0.0;
@@ -45,11 +44,11 @@ patch(Order.prototype, {
         this.assert_editable();
         this.set_to_invoice(manual_mode);
         if (this.is_to_invoice() === manual_mode) {
-            this.inv_manual_mode = manual_mode;
+            this.inv_electronic_mode = !manual_mode;
         }
     },
     is_manual_invoice: function () {
-        return this.inv_manual_mode;
+        return !this.inv_electronic_mode;
     },
     set_electronic_invoice: function (electronic_mode) {
         this.assert_editable();
@@ -66,7 +65,6 @@ patch(Order.prototype, {
     },
     export_as_JSON() {
         var json = super.export_as_JSON(...arguments);
-        json.inv_manual_mode = this.inv_manual_mode ? this.inv_manual_mode : false;
         json.inv_electronic_mode = this.inv_electronic_mode ? this.inv_electronic_mode : false;
         json.invoice_journal_id = this.invoice_journal_id || false;
         json.doc_origin = this.doc_origin || "";
@@ -78,8 +76,7 @@ patch(Order.prototype, {
         this._on_init_json = true;
         super.init_from_JSON(...arguments);
         this._on_init_json = false;
-        this.inv_manual_mode = false;
-        this.inv_electronic_mode = true;
+        this.inv_electronic_mode = json.inv_electronic_mode;
         this.to_invoice = true;
         this.invoice_journal_id = false;
         this.doc_origin = json.doc_origin || "";
