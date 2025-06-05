@@ -61,7 +61,10 @@ class PosOrder(models.Model):
         fiscal_position = self.partner_id.property_account_position_id
         if fiscal_position:
             res['fiscal_position_id'] = fiscal_position.id
-        if self.refunded_order_ids.account_move:
+        if (
+            self.refunded_order_ids.account_move
+            and res.get('move_type', '') == 'out_refund'
+        ):
             res['associated_inv_ids'] = [
                 (6, 0, self.refunded_order_ids.mapped('account_move').ids)
             ]
