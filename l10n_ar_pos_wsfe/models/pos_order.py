@@ -95,7 +95,6 @@ class PosOrder(models.Model):
                 )
                 if res is True:
                     moves += new_move
-                    order._apply_invoice_payments()
             else:
                 new_move.sudo().with_company(order.company_id)._post()
                 moves += new_move
