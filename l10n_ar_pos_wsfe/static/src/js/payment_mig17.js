@@ -20,9 +20,9 @@ patch(PaymentScreen.prototype, {
             return;
         }
 
-        if (!this.currentOrder.is_electronic_invoice()) {
-            this.currentOrder.set_manual_invoice(!this.currentOrder.is_manual_invoice());
-            if (this.currentOrder.is_manual_invoice()) {
+        if (this.currentOrder.is_manual_invoice()) {
+            this.currentOrder.set_electronic_invoice();
+            if (this.currentOrder.is_electronic_invoice()) {
                 this.setNextInvoiceSequence();
             } else {
                 this.currentOrder.set_invoice_number();
@@ -36,9 +36,9 @@ patch(PaymentScreen.prototype, {
             return;
         }
 
-        if (!this.currentOrder.is_manual_invoice()) {
-            this.currentOrder.set_electronic_invoice(!this.currentOrder.is_electronic_invoice());
-            if (this.currentOrder.is_electronic_invoice()) {
+        if (this.currentOrder.is_electronic_invoice()) {
+            this.currentOrder.set_manual_invoice();
+            if (this.currentOrder.is_manual_invoice()) {
                 this.setNextInvoiceSequence();
             } else {
                 this.currentOrder.set_invoice_number();
@@ -60,10 +60,11 @@ patch(PaymentScreen.prototype, {
 
     onMounted() {
         super.onMounted();
-        // By default set electronic invoice
-        if (!this.currentOrder.is_manual_invoice() && !this.currentOrder.is_electronic_invoice()) {
-            this.toggleIsElectronicInvoice();
+        // By default set invoice type
+        if (this.currentOrder.pos.config.default_invoice_mode == "electronic") {
+            this.toggleIsManualInvoice();
         } else {
+            this.toggleIsElectronicInvoice();
             this.setNextInvoiceSequence();
         }
     },
