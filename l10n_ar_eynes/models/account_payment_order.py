@@ -330,6 +330,27 @@ class AccountPaymentOrder(models.Model):
     employee_id = fields.Many2one('hr.employee', string="Employee")
     employee_payment = fields.Boolean(string='Employee Payments')
 
+    @api.model
+    def get_views(self, views, options=None):
+        res = super().get_views(views, options)
+        if options.get('action_id') in [
+            self.env.ref(
+                'l10n_ar_eynes.account_customer_payment_order_action'
+            ).id,
+            self.env.ref('l10n_ar_eynes.other_receipts_action').id,
+        ]:
+            if toolbar := res['views']['form'].get('toolbar'):
+                print_actions = toolbar.get("print")
+                certificate_id = self.env.ref(
+                    'l10n_ar_eynes.action_print_retention_certificate_qweb'
+                ).id
+                toolbar['print'] = [
+                    action
+                    for action in print_actions
+                    if action.get("id") != certificate_id
+                ]
+        return res
+
     def payment_order_amount_hook(self):
         amount = self.get_payment_lines_amount()
         amount += self.get_issued_checks_amount()
