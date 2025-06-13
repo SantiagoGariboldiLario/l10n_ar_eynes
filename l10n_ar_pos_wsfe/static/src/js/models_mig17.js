@@ -218,7 +218,7 @@ patch(PaymentScreen.prototype, {
                 return;
             }
             // 2. Invoice.
-            if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
+            if (this.shouldDownloadInvoice()) {
                 if (syncOrderResult[0]?.account_move) {
                     await this.report.doAction(this.get_invoice_report_action(), [
                         syncOrderResult[0].account_move,
