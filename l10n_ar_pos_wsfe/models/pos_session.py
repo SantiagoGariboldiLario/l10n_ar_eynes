@@ -1,12 +1,24 @@
-import logging
-
-from odoo import models
-
-_logger = logging.getLogger(__name__)
+from odoo import _, models
+from odoo.exceptions import UserError
 
 
 class PosSession(models.Model):
     _inherit = 'pos.session'
+
+    def _check_invoices_are_posted(self):
+        unposted_invoices = (
+            self._get_closed_orders()
+            .sudo()
+            .with_company(self.company_id)
+            .account_move.filtered(lambda x: x.state != 'posted')
+        )
+        if unposted_invoices:
+            raise UserError(
+                _(
+                    'You cannot close the POS when invoices are not posted.\n'
+                    'Go to Orders --> Orders, and use the Draft Invoices filter to fix it.'
+                )
+            )
 
     def _is_capture_system_activated(self):
         """Override because native method needs ir_config_parameter that doesn't exists and it must be
