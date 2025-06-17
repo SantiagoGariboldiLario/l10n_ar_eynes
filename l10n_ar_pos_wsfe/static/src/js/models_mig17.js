@@ -203,18 +203,24 @@ patch(PaymentScreen.prototype, {
 
         this.env.services.ui.block();
         let syncOrderResult;
+        let invoice_state_draft = false;
         try {
             // 1. Save order to server.
             syncOrderResult = await this.pos.push_single_order(this.currentOrder);
             if (!syncOrderResult) {
                 return;
             }
+
             // 2. Invoice.
             if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
                 if (syncOrderResult[0]?.account_move) {
-                    await this.report.doAction(this.get_invoice_report_action(), [
-                        syncOrderResult[0].account_move,
-                    ]);
+                    if (syncOrderResult[0]?.invoice_state == "draft") {
+                        invoice_state_draft = true;
+                    } else {
+                        await this.report.doAction(this.get_invoice_report_action(), [
+                            syncOrderResult[0].account_move,
+                        ]);
+                    }
                 } else {
                     throw {
                         code: 401,
@@ -241,5 +247,12 @@ patch(PaymentScreen.prototype, {
         }
 
         await this.afterOrderValidation(!!syncOrderResult && syncOrderResult.length > 0);
+
+        if (invoice_state_draft) {
+            this.env.services.popup.add(ErrorPopup, {
+                title: _t("Error with ARCA"),
+                body: _t("Check from backend and solve this situation"),
+            });
+        }
     },
 });
