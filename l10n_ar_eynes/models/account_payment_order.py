@@ -2582,7 +2582,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 % self.retention_id.name
             )
         if not self.certificate_no:
-            number = self.retention_id.sequence_id._next()
+            number = retention_journal.sequence_id._next()
             self.write({'certificate_no': number})
 
     @api.model
