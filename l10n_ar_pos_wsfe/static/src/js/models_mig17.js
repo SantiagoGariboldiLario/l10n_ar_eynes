@@ -12,8 +12,7 @@ patch(Order.prototype, {
     initialize: function () {
         Order.prototype.initialize.apply(this, arguments);
         this.invoiceNumber = "";
-        this.inv_manual_mode = false;
-        this.inv_electronic_mode = true;
+        this.inv_electronic_mode = false;
         this.to_invoice = true;
         this.invoice_journal_id = false;
         this.perception_amount = 0.0;
@@ -41,22 +40,16 @@ patch(Order.prototype, {
     getInvoiceNumber: function () {
         return this.invoiceNumber;
     },
-    set_manual_invoice: function (manual_mode) {
+    set_manual_invoice: function () {
         this.assert_editable();
-        this.set_to_invoice(manual_mode);
-        if (this.is_to_invoice() === manual_mode) {
-            this.inv_manual_mode = manual_mode;
-        }
+        this.inv_electronic_mode = false;
     },
     is_manual_invoice: function () {
-        return this.inv_manual_mode;
+        return !this.inv_electronic_mode;
     },
-    set_electronic_invoice: function (electronic_mode) {
+    set_electronic_invoice: function () {
         this.assert_editable();
-        this.set_to_invoice(electronic_mode);
-        if (this.is_to_invoice() === electronic_mode) {
-            this.inv_electronic_mode = electronic_mode;
-        }
+        this.inv_electronic_mode = true;
     },
     is_electronic_invoice: function () {
         return this.inv_electronic_mode;
@@ -66,9 +59,9 @@ patch(Order.prototype, {
     },
     export_as_JSON() {
         var json = super.export_as_JSON(...arguments);
-        json.inv_manual_mode = this.inv_manual_mode ? this.inv_manual_mode : false;
         json.inv_electronic_mode = this.inv_electronic_mode ? this.inv_electronic_mode : false;
         json.invoice_journal_id = this.invoice_journal_id || false;
+        json.to_invoice = true;
         json.doc_origin = this.doc_origin || "";
         json.partner_final_consumer = this.partner_final_consumer;
         return json;
@@ -78,8 +71,7 @@ patch(Order.prototype, {
         this._on_init_json = true;
         super.init_from_JSON(...arguments);
         this._on_init_json = false;
-        this.inv_manual_mode = false;
-        this.inv_electronic_mode = true;
+        this.inv_electronic_mode = json.inv_electronic_mode;
         this.to_invoice = true;
         this.invoice_journal_id = false;
         this.doc_origin = json.doc_origin || "";
