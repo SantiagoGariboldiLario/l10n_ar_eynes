@@ -20,7 +20,7 @@
 
 {
     'name': 'Pos AR WSFE',
-    'version': '17.0.1.1.0',
+    'version': '17.0.1.2.0',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
