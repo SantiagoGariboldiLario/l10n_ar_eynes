@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '17.0.2.4.0',
+    'version': '17.0.2.3.1',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -167,6 +167,7 @@
         'views/menuitems.xml',
         'views/menuitems_AFIP.xml',
         'views/menuitems_exporters.xml',
+        'security/exporters_ir_rule.xml',
         'security/ir.model.access.csv',
     ],
     "demo": [
