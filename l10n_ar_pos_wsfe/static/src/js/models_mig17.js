@@ -212,7 +212,7 @@ patch(PaymentScreen.prototype, {
             }
 
             // 2. Invoice.
-            if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
+            if (this.shouldDownloadInvoice()) {
                 if (syncOrderResult[0]?.account_move) {
                     if (syncOrderResult[0]?.invoice_state == "draft") {
                         invoice_state_draft = true;
