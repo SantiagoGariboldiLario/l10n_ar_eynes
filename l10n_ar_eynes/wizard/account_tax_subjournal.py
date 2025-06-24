@@ -67,6 +67,11 @@ class AccountTaxSubjournal(models.TransientModel):
         string='Company',
         default=lambda self: self.env.company.id,
     )
+    perception_retention_grouped = fields.Boolean(
+        string="Perception / Retention Grouped",
+        help="Group by retention / perception "
+        + "grouped in a single column retention / perception.",
+    )
 
     def create_report(self):
         self.validate_date_from()

@@ -374,9 +374,26 @@
                                             <span t-esc="o.partner_id.property_account_position_id.name" />
                                         </t>
                                         <br />
-                                        <span class="partner-info">Condicion Venta: </span><span
-                                            t-esc="o.invoice_payment_term_id.name"
-                                        />
+                                        <t t-if="denomination_name == 'E'">
+                                            <span class="partner-info">CUIT Pais: </span><span
+                                                t-if="o.partner_id.dst_cuit_id.code"
+                                                t-esc="int(o.partner_id.dst_cuit_id.code)"
+                                            />
+                                            <br />
+                                            <span class="partner-info">ID Impositivo: </span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="partner-info">CUIT: </span><span
+                                                t-esc="o.partner_id.vat"
+                                            />
+                                            <t t-if="o.partner_id.nro_insc_iibb">
+                                                <br />
+                                                <span class="partner-info">Ing. Brutos: </span><span
+                                                    t-esc="o.partner_id.nro_insc_iibb"
+                                                />
+                                            </t>
+                                        </t>
+                                        <br />
                                         <t t-if="o.associated_inv_ids">
                                             <br />
                                             <span class="partner-info">Comprobantes asociados: </span>
@@ -386,34 +403,24 @@
                                         </t>
                                     </td>
                                     <td width="40%">
-                                            <span class="partner-info">Tel.: </span><span
+                                        <span class="partner-info">Tel.: </span><span
                                             t-esc="o.partner_id.phone"
                                         />
+                                        <br />
+                                        <span class="partner-info">Condicion Venta: </span><span
+                                            t-esc="o.invoice_payment_term_id.name"
+                                        />
+                                        <br />
+                                        <span class="partner-info">F. Venc: </span>
+                                        <t t-if="o.invoice_date_due">
+                                            <span t-esc="o.invoice_date_due.strftime('%d/%m/%Y')" />
+                                        </t>
+                                        <t t-if="o.invoice_origin">
                                             <br />
-                                            <t t-if="denomination_name == 'E'">
-                                                <span class="partner-info">CUIT Pais: </span><span
-                                                t-if="o.partner_id.dst_cuit_id.code"
-                                                t-esc="int(o.partner_id.dst_cuit_id.code)"
+                                            <span class="partner-info">Orden de venta: </span><span
+                                                t-esc="o.get_sale_orders_name()"
                                             />
-                                                <br />
-                                                <span class="partner-info">ID Impositivo: </span>
-                                            </t>
-                                            <t t-else="">
-                                                <span class="partner-info">CUIT: </span><span
-                                                t-esc="o.partner_id.vat"
-                                            />
-                                                <t t-if="o.partner_id.nro_insc_iibb">
-                                                    <br />
-                                                    <span class="partner-info">Ing. Brutos: </span><span
-                                                    t-esc="o.partner_id.nro_insc_iibb"
-                                                />
-                                                </t>
-                                            </t>
-                                            <br />
-                                            <span class="partner-info">F. Venc: </span>
-                                            <t t-if="o.invoice_date_due">
-                                                <span t-esc="o.invoice_date_due.strftime('%d/%m/%Y')" />
-                                            </t>
+                                        </t>
                                     </td>
                                 </tr>
                             </table>

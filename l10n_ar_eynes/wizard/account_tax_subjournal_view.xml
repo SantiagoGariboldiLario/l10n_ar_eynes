@@ -28,11 +28,8 @@
                             </group>
                             <group>
                                 <field name="grouped" />
-                                <field
-                                    name="grouped_max_amount"
-                                    invisible="[('grouped', '=', False)]"
-                                    required="[('grouped', '!=', False)]"
-                                />
+                                <field name="grouped_max_amount" invisible="not grouped" required="grouped" />
+                                <field name="perception_retention_grouped" />
                             </group>
                         </page>
                     </notebook>
