@@ -26,6 +26,19 @@ class PosOrder(models.Model):
         copy=False,
     )
 
+    @api.model
+    def create_from_ui(self, orders, draft=False):
+        res = super(PosOrder, self).create_from_ui(orders, draft)
+        for order in res:
+            state = self.env['account.move'].search_read(
+                domain=[('id', '=', order.get('account_move'))],
+                fields=['state'],
+                load=False,
+            )
+            if state:
+                order.update({'invoice_state': state[0].get('state')})
+        return res
+
     def _export_for_ui(self, order):
         res = super(PosOrder, self)._export_for_ui(order)
         refunded_moves = order.refunded_order_ids.mapped('account_move')
@@ -48,7 +61,10 @@ class PosOrder(models.Model):
         fiscal_position = self.partner_id.property_account_position_id
         if fiscal_position:
             res['fiscal_position_id'] = fiscal_position.id
-        if self.refunded_order_ids.account_move:
+        if (
+            self.refunded_order_ids.account_move
+            and res.get('move_type', '') == 'out_refund'
+        ):
             res['associated_inv_ids'] = [
                 (6, 0, self.refunded_order_ids.mapped('account_move').ids)
             ]
@@ -95,7 +111,6 @@ class PosOrder(models.Model):
                 )
                 if res is True:
                     moves += new_move
-                    order._apply_invoice_payments()
             else:
                 new_move.sudo().with_company(order.company_id)._post()
                 moves += new_move

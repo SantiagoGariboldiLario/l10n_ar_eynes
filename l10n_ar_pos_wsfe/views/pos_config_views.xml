@@ -29,6 +29,7 @@
                             'no_journal_in_pos': True,
                         }"
                     />
+                    <field name="default_invoice_mode" />
                 </group>
             </xpath>
 

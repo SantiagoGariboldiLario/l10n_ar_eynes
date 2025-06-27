@@ -348,6 +348,17 @@ msgid "WSFE Pos Config"
 msgstr "Configuración del Pos para WSFE"
 
 #. module: l10n_ar_pos_wsfe
+#. odoo-python
+#: code:addons/l10n_ar_pos_wsfe/models/pos_session.py:0
+#, python-format
+msgid ""
+"You cannot close the POS when invoices are not posted.\n"
+"Go to Orders --> Orders, and use the Draft Invoices filter to fix it."
+msgstr ""
+"No puede cerrar el PdV cuando hay facturas que no han sido validadas.\n"
+"Vaya al menú Órdenes --> Órdenes y use el filtro de Facturas en Borrador para solucionarlo."
+
+#. module: l10n_ar_pos_wsfe
 #. odoo-javascript
 #: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
 #, python-format

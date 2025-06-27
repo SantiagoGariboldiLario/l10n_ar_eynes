@@ -26,14 +26,6 @@ def int2xlscol(number, state=None):
     return state
 
 
-def get_line_with_total(line):
-    """
-    Calculates the total of an invoice based on all the taxes and the base value
-    """
-    line['total'] = sum(line['taxes']) + line['no_taxed']
-    return line
-
-
 class SubjournalXlsx(models.AbstractModel):
     _name = 'report.report_xlsx.move_line_list_subj'
     _inherit = 'report.report_xlsx.abstract'
@@ -57,237 +49,284 @@ class SubjournalXlsx(models.AbstractModel):
         else:
             return ['in_invoice', 'in_refund', 'in_debit']
 
-    def get_invoice_type(self, inv_type, denom, is_debit):
-        if inv_type in ('out_invoice', 'in_invoice'):
-            if is_debit:
-                fiscal_type = "ND"
-            else:
-                fiscal_type = "F"
-        else:
-            fiscal_type = "NC"
-        return '%s %s' % (fiscal_type, denom)
+    def _get_exempt_taxes(self, cols):
+        exempt_vat_ids = set()
+        for tax in cols:
+            if tax.get('is_exempt', False):
+                if tax.get('id', False):
+                    exempt_vat_ids.add(tax.get('id', False))
+                for tid in tax.get('ids', []):
+                    exempt_vat_ids.add(tid)
+        return exempt_vat_ids
 
-    def get_move_domain(self, types, obj):
-        date = 'date' if obj.based_on == 'purchase' else 'invoice_date'
-        return [
-            ('state', '=', 'posted'),
-            ('move_type', 'in', types),
-            (date, '>=', obj.date_from),
-            (date, '<=', obj.date_to),
-        ]
+    def get_invoice_type(self, inv_type, denom, is_debit):
+        fiscal_type = "F"
+        if inv_type in ('out_refund', 'in_refund'):
+            fiscal_type = "NC"
+        elif is_debit:
+            fiscal_type = "ND"
+        return '%s %s' % (fiscal_type, denom.upper())
 
     def get_columns(self, types, obj):
-        AccountMove = self.env['account.move']
-        AccountTax = self.env['account.tax']
-        invoices = AccountMove.search(self.get_move_domain(types, obj))
-        tax_ids = set(
-            invoices.mapped('line_ids.tax_ids').ids
-            + invoices.mapped('line_ids.tax_line_id').ids
-        )
-        taxes = AccountTax.browse(tax_ids)
-
+        taxes = self._get_taxes_vals(types, obj)
         all_taxes = []
         i = 0
         base_first = obj.base_position == 'first'
 
-        for tax in taxes.sorted(lambda t: getattr(t, obj.sort_by)):
-            if (
-                not (
-                    tax.tax_group_id
-                    and tax.tax_group_id.group_type == 'perception'
-                )
-                and base_first
-            ):
-                base_vals = {
-                    'id': tax.id,
-                    'is_exempt': tax.is_exempt,
-                    'name': 'Base ' + tax.name,
-                    'type': 'base',
+        already_vat = False
+        already_gross = False
+        already_income = False
+
+        for tax in taxes:
+            tax_id = tax.get('tax_id', False)
+            if tax_id:
+                retention_type = tax.get('retention_type', '')
+                if obj.perception_retention_grouped and retention_type in [
+                    'gross_income',
+                    'vat',
+                    'profit',
+                ]:
+                    if retention_type == 'gross_income' and not already_gross:
+                        already_gross = True
+                        gross_vals = {
+                            'id': False,
+                            'ids': [
+                                t.get('tax_id', False)
+                                for t in taxes
+                                if t.get('retention_type', '') == 'gross_income'
+                            ],
+                            'names': [
+                                t.get('name', '')
+                                for t in taxes
+                                if t.get('retention_type', '') == 'gross_income'
+                            ],
+                            'is_exempt': tax.get('is_exempt', False),
+                            'name': 'Retenciones / Percepciones IIBB',
+                            'type': 'gross_income',
+                            'column': 7 + i,
+                        }
+                        i += 1
+                        all_taxes.append(gross_vals)
+                    elif retention_type == 'vat' and not already_vat:
+                        already_vat = True
+                        vat_vals = {
+                            'id': False,
+                            'ids': [
+                                t.get('tax_id', False)
+                                for t in taxes
+                                if t.get('retention_type', '') == 'vat'
+                            ],
+                            'names': [
+                                t.get('name', '')
+                                for t in taxes
+                                if t.get('retention_type', '') == 'vat'
+                            ],
+                            'is_exempt': tax.get('is_exempt', False),
+                            'name': 'Retenciones / Percepciones IVA',
+                            'type': 'vat',
+                            'column': 7 + i,
+                        }
+                        i += 1
+                        all_taxes.append(vat_vals)
+                    elif retention_type == 'profit' and not already_income:
+                        already_income = True
+                        income_vals = {
+                            'id': False,
+                            'ids': [
+                                t.get('tax_id', False)
+                                for t in taxes
+                                if t.get('retention_type', '') == 'profit'
+                            ],
+                            'names': [
+                                t.get('name', '')
+                                for t in taxes
+                                if t.get('retention_type', '') == 'profit'
+                            ],
+                            'is_exempt': tax.get('is_exempt', False),
+                            'name': 'Retenciones / Percepciones Ganancias',
+                            'type': 'profit',
+                            'column': 7 + i,
+                        }
+                        i += 1
+                        all_taxes.append(income_vals)
+                    continue
+
+                name = tax.get('name', '')
+                name = name.get('es_AR', name.get('en_US', '')) if name else ''
+                if (tax.get('group_type', '') == 'vat') and base_first:
+                    base_vals = {
+                        'id': tax_id,
+                        'is_exempt': tax.get('is_exempt', False),
+                        'name': 'Base ' + name,
+                        'type': 'base',
+                        'column': 7 + i,
+                    }
+                    all_taxes.append(base_vals)
+                    i += 1
+
+                tax_vals = {
+                    'id': tax_id,
+                    'is_exempt': tax.get('is_exempt', False),
+                    'name': name,
+                    'type': 'tax',
                     'column': 7 + i,
                 }
-                all_taxes.append(base_vals)
+                all_taxes.append(tax_vals)
                 i += 1
 
-            tax_vals = {
-                'id': tax.id,
-                'is_exempt': tax.is_exempt,
-                'name': tax.name,
-                'type': 'tax',
-                'column': 7 + i,
-            }
-            all_taxes.append(tax_vals)
-            i += 1
-
-            if (
-                not (
-                    tax.tax_group_id
-                    and tax.tax_group_id.group_type == 'perception'
-                )
-                and not base_first
-            ):
-                base_vals = {
-                    'id': tax.id,
-                    'is_exempt': tax.is_exempt,
-                    'name': 'Base ' + tax.name,
-                    'type': 'base',
-                    'column': 7 + i,
-                }
-                all_taxes.append(base_vals)
-                i += 1
-
+                if (tax.get('group_type', '') == 'vat') and not base_first:
+                    base_vals = {
+                        'id': tax_id,
+                        'is_exempt': tax.get('is_exempt', False),
+                        'name': 'Base ' + name,
+                        'type': 'base',
+                        'column': 7 + i,
+                    }
+                    all_taxes.append(base_vals)
+                    i += 1
         return all_taxes
 
     def get_lines(self, types, obj, cols):
-        AccountMove = self.env["account.move"]
-
-        query_vals = self.get_query_vals(types, obj)
-        # TODO: FIX RAISE USERERROR
+        query_vals = self._get_line_vals(types, obj)
         if not len(query_vals):
             raise UserError(_('There were no moves for this period'))
 
         c_taxes = [0] * len(cols)
-        exempt_vat_ids = (
-            self.env['account.tax']
-            .search(
-                [
-                    ('company_id', '=', self.env.company.id),
-                    ('is_exempt', '=', True),
-                ]
-            )
-            .ids
-        )
+        final_consumer_id = self.env.ref('l10n_ar_eynes.fiscal_position_cf').id
+        self._get_exempt_taxes(cols)
+
         lines = {}
+        last_line_id = -1
+        retention_perception_summary = {}
         for line in query_vals:
-            sign = 1
+            is_final_consumer = line['fpid'] == final_consumer_id
             based_sign = 1
 
-            if line['invoice_type'] in ('out_refund', 'in_refund'):
-                sign = -1
             if obj.based_on == 'purchase':
                 based_sign = -1
 
-            dict_hash = (
-                line['date'],
+            invoice_type = self.get_invoice_type(
                 line['invoice_type'],
-                line['pos'],
-                line['invoice_id'],
+                line['denomination'],
+                line['is_debit_note'],
             )
+            key = line['invoice_id']
+            line_id = line['line_id']
+            amount = (line['credit'] - line['debit']) * based_sign
 
-            if dict_hash not in lines:
-                lines[dict_hash] = line
-
-                # TODO: Optimizar bypasseando ORM o buscando todo en una llamada
-                account_move = AccountMove.search(
-                    [("id", "=", line["invoice_id"])]
+            if (
+                obj.grouped
+                and is_final_consumer
+                and line['invoice_total'] < obj.grouped_max_amount
+            ):
+                key = 'cf' + line['date'].strftime('%d/%m/%Y') + invoice_type
+                lines.setdefault(
+                    key,
+                    {
+                        'invoice_number': '',
+                        'date': line['date'],
+                        'invoice_type': invoice_type,
+                        'partner_name': 'Agrupado CF monto menor a %s'
+                        % round(obj.grouped_max_amount, 2),
+                        'partner_vat': '',
+                        'province': '',
+                        'partner_fiscal_pos': line['fiscal_position'],
+                        'total': 0.0,
+                        'taxes': [0] * len(cols),
+                        'no_taxed': 0.0,
+                    },
+                )
+            else:
+                lines.setdefault(
+                    key,
+                    {
+                        'invoice_number': line['invoice_number'],
+                        'date': line['date'],
+                        'invoice_type': invoice_type,
+                        'partner_name': line['partner'],
+                        'partner_vat': line['vat'],
+                        'province': line['state'],
+                        'partner_fiscal_pos': line['fiscal_position'],
+                        'total': 0.0,
+                        'taxes': [0] * len(cols),
+                        'no_taxed': 0.0,
+                    },
                 )
 
-                if line['tax_ids'] in exempt_vat_ids:
-                    line["no_taxed"] = 0
-                else:
-                    line["no_taxed"] = (
-                        account_move.amount_no_taxed_cur
-                        if account_move.amount_no_taxed_cur != 0
-                        else account_move.amount_no_taxed
-                    ) * sign
-                # # #
-
-                if line['invoice_id'] == -1:
-                    line['partner'] = 'Agrupado %s monto menor a %s' % (
-                        line['fiscal_position'],
-                        obj.grouped_max_amount,
-                    )
-                    line['invoice_number'] = (
-                        line['inv_from'] + ' -> ' + line['inv_to']
-                    )
-
-                line['taxes'] = [0] * len(cols)
-                line['total'] = (line['credit'] - line['debit']) * based_sign
-                line['invoice_type'] = self.get_invoice_type(
-                    line['invoice_type'],
-                    line['denomination'],
-                    line['is_debit_note'],
-                )
+            if last_line_id != line_id:
+                last_line_id = line_id
+                lines[key]['total'] += amount
 
             for i, tax in enumerate(cols):
-                if line['tax_line_id'] == tax['id'] or (
-                    line['tax_ids'] == tax['id'] and tax.get('is_exempt')
-                ):
-                    if tax['type'] == 'tax' and tax['id'] in exempt_vat_ids:
-                        lines[dict_hash]['taxes'][i] += (
-                            line['credit'] - line['debit']
-                        ) * based_sign
-
-                    elif lines[dict_hash]['taxes'][i] == 0:
-                        if tax['type'] == 'tax':
-                            lines[dict_hash]['taxes'][i] = (
-                                line['credit'] - line['debit']
-                            ) * based_sign
-
-                        elif tax['type'] == 'base' and line['tax_amount']:
-                            lines[dict_hash]['taxes'][i] = (
-                                line['tax_amount'] * sign
+                if obj.perception_retention_grouped:
+                    tax_ids = tax.get('ids', False)
+                    if tax_ids:
+                        if line['tax_line_id'] in tax_ids:
+                            tax_index = tax_ids.index(line['tax_line_id'])
+                            # LINEA DE IMPUESTO
+                            lines[key]['taxes'][i] += amount
+                            retention_perception_summary.setdefault(
+                                line['tax_line_id'],
+                                [tax.get('names', [])[tax_index], 0.0],
                             )
-                    if lines[dict_hash]['taxes'][i] != 0:
+                            retention_perception_summary[line['tax_line_id']][
+                                1
+                            ] += amount
+                        if lines[key]['taxes'][i] != 0:
+                            c_taxes[i] += 1
+
+                if (
+                    # LINEA DE IMPUESTO
+                    line['tax_line_id'] == tax['id']
+                    and tax['type'] == 'tax'
+                ) or (
+                    # LINEA DE PRODUCTO (BASE DE IMPUESTO)
+                    line['tax_ids'] == tax['id']
+                    and tax['type'] == 'base'
+                ):
+                    lines[key]['taxes'][i] += amount
+                    if lines[key]['taxes'][i] != 0:
                         c_taxes[i] += 1
 
-        res = [get_line_with_total(v) for k, v in lines.items()]
-        res.sort(
-            key=lambda k: k['date'].strftime('%d/%m/%Y')
-            + k['invoice_type']
-            + k['invoice_number'][:4]
-            + ('0' if k['partner'].startswith('Agrupado') else '1')
-            + k['invoice_number']
-        )
+            if not (line['tax_line_id'] or line['tax_ids']):
+                # SI NO ES LINEA DE IMPUESTO O ES LINEA SIN IMPUESTOS CORRESPONDE A NO GRAVADO
+                lines[key]['no_taxed'] += amount
 
-        return res, c_taxes
+        return lines, c_taxes, retention_perception_summary
 
-    def get_query_vals(self, types, obj):
-        """
-        This function executes a big query to return every invoice in a time range and its data.
-        It may seem weird that the returned columns 'tax_line_id' and 'tax_ids' are very similar:
-        They are neccesary because the only way (with the current DB architecture) to know if an \
-        invoice has untaxed values is to check if both of theese columns are null.
-        """
-
+    def _get_line_vals(self, types, obj):
         q = """
-        WITH all_lines AS (
-            SELECT  l.move_id AS move_id,
-                    lc.name AS company_id,
-                    i.invoice_date AS date,
-                    i.id AS invoice_id,
-                    i.name AS invoice_number,
-                    i.move_type AS invoice_type,
-                    i.cae AS cae,
-                    i.cae_due_date AS cae_due_date,
-                    i.is_debit_note AS is_debit_note,
-                    i.denomination AS denomination,
-                    CASE WHEN pos.name IS NOT NULL
-                    THEN pos.name::text
-                    ELSE split_part(i.name, '-', 1) END AS pos,
-                    l.id AS line_id,
-                    l.tax_line_id AS tax_line_id,
-                    l.credit AS credit,
-                    l.debit AS debit,
-                    l.tax_base_amount AS tax_amount,
-                    p.id AS partner_id,
-                    afp.name AS fiscal_position,
-                    afp.id AS fpid,
-                    rp.name AS partner,
-                    rp.vat AS vat,
-                    rpt.name AS partner_title,
-                    rcs.name AS state,
-                    amlatr.account_tax_id AS tax_ids
+            SELECT
+                i.invoice_date AS date,
+                i.id AS invoice_id,
+                i.name AS invoice_number,
+                i.move_type AS invoice_type,
+                i.cae AS cae,
+                i.cae_due_date AS cae_due_date,
+                i.is_debit_note AS is_debit_note,
+                i.denomination AS denomination,
+                i.currency_id AS currency,
+                i.amount_total AS invoice_total,
+                l.id AS line_id,
+                l.tax_line_id AS tax_line_id,
+                l.credit AS credit,
+                l.debit AS debit,
+                p.id AS partner_id,
+                afp.name AS fiscal_position,
+                afp.id AS fpid,
+                rp.name AS partner,
+                rp.vat AS vat,
+                rcs.name AS state,
+                amlatr.account_tax_id AS tax_ids
             FROM account_move_line l
             JOIN account_move i ON i.id = l.move_id
             JOIN res_partner rp ON rp.id = i.partner_id
             LEFT JOIN res_country_state rcs ON rcs.id = rp.state_id
-            LEFT JOIN res_partner_title rpt ON rpt.id = rp.title
-            LEFT JOIN account_journal pos ON pos.id = i.journal_id
             JOIN res_partner p ON p.id = i.partner_id
             JOIN account_account a ON a.id = l.account_id
             JOIN account_fiscal_position afp ON afp.id = i.fiscal_position_id
             LEFT JOIN account_move_line_account_tax_rel amlatr
-            ON account_move_line_id=l.id
+            ON account_move_line_id = l.id
             INNER JOIN res_company lc
             ON i.company_id = lc.id
             WHERE i.move_type IN %(inv_type)s
@@ -300,82 +339,7 @@ class SubjournalXlsx(models.AbstractModel):
                 AND a.account_type NOT LIKE '%%payable'
                 AND a.account_type NOT LIKE '%%receivable'
                 AND l.company_id = %(company_id)s
-        ),
-        grouped_invoice AS (
-            SELECT invoice_id, ABS(SUM(debit - credit)) AS invoice_total
-            FROM all_lines
-            GROUP BY invoice_id
-        )
-
-        SELECT NULL AS move_id,
-            al.date AS date,
-            al.company_id AS company_id,
-            -1 AS invoice_id,
-            al.invoice_type AS invoice_type,
-            NULL AS cae,
-            NULL AS cae_due_date,
-            NULL AS is_debit_note,
-            'B' AS denomination,
-            al.pos AS pos,
-            MIN(al.invoice_number) AS inv_from,
-            MAX(al.invoice_number) AS inv_to,
-            NULL AS invoice_number,
-            NULL AS line_id,
-            al.tax_line_id AS tax_line_id,
-            SUM(al.credit) AS credit,
-            SUM(al.debit) AS debit,
-            SUM(al.tax_amount) AS tax_amount,
-            NULL AS partner_id,
-            al.fiscal_position AS fiscal_position,
-            al.fpid AS fpid,
-            NULL AS partner,
-            NULL AS vat,
-            NULL AS partner_title,
-            NULL AS state,
-            NULL AS tax_ids
-        FROM all_lines al
-        JOIN grouped_invoice gi ON gi.invoice_id = al.invoice_id
-        WHERE al.fpid = %(fiscal_id)s
-            AND gi.invoice_total < %(grouped_max)s
-            AND %(grouped)s
-        GROUP BY al.date, al.tax_line_id, al.fpid,
-            al.invoice_type, al.pos, al.fiscal_position, al.company_id
-
-        UNION
-
-        SELECT al.move_id AS move_id,
-            al.date AS date,
-            al.company_id AS company,
-            al.invoice_id AS invoice_id,
-            al.invoice_type AS invoice_type,
-            al.cae AS cae,
-            al.cae_due_date AS cae_due_date,
-            al.is_debit_note AS is_debit_note,
-            al.denomination AS denomination,
-            al.pos AS pos,
-            al.invoice_number AS inv_from,
-            al.invoice_number AS inv_to,
-            al.invoice_number AS invoice_number,
-            al.line_id AS line_id,
-            al.tax_line_id AS tax_line_id,
-            al.credit AS credit,
-            al.debit AS debit,
-            al.tax_amount AS tax_amount,
-            al.partner_id AS partner_id,
-            al.fiscal_position AS fiscal_position,
-            al.fpid AS fpid,
-            al.partner AS partner,
-            al.vat AS vat,
-            al.partner_title AS partner_title,
-            al.state AS state,
-            al.tax_ids AS tax_ids
-        FROM all_lines al
-        JOIN grouped_invoice gi ON gi.invoice_id = al.invoice_id
-        WHERE al.fpid = %(fiscal_id)s
-            OR gi.invoice_total >= %(grouped_max)s
-            OR NOT %(grouped)s
-
-        ORDER BY date, pos, invoice_id, invoice_type
+        ORDER BY date, invoice_type, is_debit_note, invoice_number, line_id
         """
         q_vals = {
             'inv_type': tuple(types),
@@ -385,6 +349,47 @@ class SubjournalXlsx(models.AbstractModel):
             'grouped': obj.grouped,
             'grouped_max': obj.grouped_max_amount,
             'fiscal_id': self.env.ref('l10n_ar_eynes.fiscal_position_cf').id,
+        }
+
+        self._cr.execute(q, q_vals)
+
+        # Obtenemos el resultado de la consulta
+        return self._cr.dictfetchall()
+
+    def _get_taxes_vals(self, types, obj):
+        """ """
+
+        q = """
+            SELECT
+                amlatr.account_tax_id AS tax_id,
+                atg.group_type,
+                at.retention_type,
+                at.is_exempt,
+                at.name
+            FROM account_move_line l
+            JOIN account_move i ON i.id = l.move_id
+            LEFT JOIN account_move_line_account_tax_rel amlatr
+            ON account_move_line_id = l.id
+            LEFT JOIN account_tax at ON amlatr.account_tax_id = at.id
+            LEFT JOIN account_tax_group atg ON atg.id = at.tax_group_id
+            JOIN account_account a ON a.id = l.account_id
+            WHERE i.move_type IN %(inv_type)s
+                AND i.state = 'posted'
+                AND
+        """
+        q += 'i.date' if obj.based_on == 'purchase' else 'i.invoice_date'
+        q += """
+                BETWEEN %(date_from)s AND %(date_to)s
+                AND a.account_type NOT LIKE '%%payable'
+                AND a.account_type NOT LIKE '%%receivable'
+                AND l.company_id = %(company_id)s
+            GROUP BY tax_id, atg.group_type, at.retention_type, at.is_exempt, at.name
+        """
+        q_vals = {
+            'inv_type': tuple(types),
+            'company_id': obj.company_id.id,
+            'date_from': obj.date_from,
+            'date_to': obj.date_to,
         }
 
         self._cr.execute(q, q_vals)
@@ -461,7 +466,10 @@ class SubjournalXlsx(models.AbstractModel):
         wanted_list = self._report_xls_fields()
         title = self.get_title(wizard_obj)
         cols = self.get_columns(types, wizard_obj)
-        lines, c_taxes = self.get_lines(types, wizard_obj, cols)
+        lines, c_taxes, retention_perception_summary = self.get_lines(
+            types, wizard_obj, cols
+        )
+
         for i, col in enumerate(cols):
             if c_taxes[i] > 0:
                 wanted_list.insert(-2, col['name'])
@@ -491,7 +499,8 @@ class SubjournalXlsx(models.AbstractModel):
         self.set_column(sheet, i)
 
         # Insert values
-        for p, line in enumerate(lines, start=starting_row + 1):
+        for p, invoice_id in enumerate(lines, start=starting_row + 1):
+            line = lines[invoice_id]
             cell_format = gray_format
             if p % 2:
                 cell_format = date_format
@@ -500,15 +509,15 @@ class SubjournalXlsx(models.AbstractModel):
                 line['date'].strftime('%d/%m/%Y'),
                 cell_format,
             )
-            sheet.write('B' + str(p), line['company_id'], cell_format)
-            sheet.write('C' + str(p), line['partner'], cell_format)
-            sheet.write('D' + str(p), line['state'], cell_format)
-            sheet.write('E' + str(p), line['vat'], cell_format)
+            sheet.write('B' + str(p), wizard_obj.company_id.name, cell_format)
+            sheet.write('C' + str(p), line['partner_name'], cell_format)
+            sheet.write('D' + str(p), line['province'], cell_format)
+            sheet.write('E' + str(p), line['partner_vat'], cell_format)
             sheet.write(
                 'F' + str(p),
-                line["fiscal_position"][self.env.lang]
-                if self.env.lang in line["fiscal_position"]
-                else line["fiscal_position"]["en_US"],
+                line['partner_fiscal_pos'][self.env.lang]
+                if self.env.lang in line['partner_fiscal_pos']
+                else line['partner_fiscal_pos']['en_US'],
                 cell_format,
             )
             sheet.write('G' + str(p), line['invoice_type'], cell_format)
@@ -610,6 +619,19 @@ class SubjournalXlsx(models.AbstractModel):
             total_formula % indexes,
             footer_format,
         )
+
+        keyval_row = last_row_num + 6
+        for _key, val in retention_perception_summary.items():
+            key_col = int2xlscol(8 + len(cols) - i - 1)
+            val_col = int2xlscol(8 + len(cols) - i)
+            keyval_row = keyval_row + 1
+            sheet.write(
+                key_col + str(keyval_row),
+                val[0][self.env.lang]
+                if self.env.lang in val[0]
+                else val[0]['en_US'],
+            )
+            sheet.write(val_col + str(keyval_row), val[1])
 
         # formula labels
         sheet.write('A' + fac_row_char, 'Subtotal FC/ND', footer_format)
