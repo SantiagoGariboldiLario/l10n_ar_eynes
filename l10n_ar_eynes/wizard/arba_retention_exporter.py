@@ -224,6 +224,7 @@ class ArbaRetentionExporterWizard(models.TransientModel):
                 'code': name,
                 'date_from': self.date_from,
                 'date_to': self.date_to,
+                'company_id': self.company_id.id,
             }
         )
 
