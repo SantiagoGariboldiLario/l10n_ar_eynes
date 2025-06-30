@@ -1,6 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* l10n_ar_eynes
+# 	* account
 #
 msgid ""
 msgstr ""
@@ -14,6 +15,29 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: account
+#. odoo-python
+#: model:ir.actions.act_window,name:account.action_move_in_invoice_type
+#: model:ir.ui.menu,name:account.menu_action_move_in_invoice_type
+#, python-format
+msgid "Bills"
+msgstr "Facturas de proveedores"
+
+#. module: account
+#. odoo-python
+#: model:ir.actions.act_window,name:account.action_move_out_invoice_type
+#: model:ir.ui.menu,name:account.menu_action_move_out_invoice_type
+#, python-format
+msgid "Invoices"
+msgstr "Facturas de clientes"
+
+#. module: account
+#: model:ir.actions.act_window,name:account.action_move_in_refund_type
+#: model:ir.ui.menu,name:account.menu_action_move_in_refund_type
+msgid "Refunds"
+msgstr "Notas de crédito"
+
 
 #. module: l10n_ar_eynes
 #. odoo-python
