@@ -166,6 +166,7 @@
         'views/menuitems.xml',
         'views/menuitems_AFIP.xml',
         'views/menuitems_exporters.xml',
+        'security/exporters_ir_rule.xml',
         'security/ir.model.access.csv',
     ],
     "demo": [
