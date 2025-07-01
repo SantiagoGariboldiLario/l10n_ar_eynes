@@ -298,7 +298,7 @@
                                         name="amount_currency"
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
-                                        attrs="{'column_invisible': [('parent.is_multi_currency', '=', False)]}"
+                                        column_invisible="not parent.is_multi_currency"
                                         sum="Total Amount"
                                     />
                             </tree>
