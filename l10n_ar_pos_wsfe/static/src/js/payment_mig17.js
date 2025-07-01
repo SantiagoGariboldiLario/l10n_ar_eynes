@@ -16,9 +16,7 @@ patch(PosStore.prototype, {
 
 patch(PaymentScreen.prototype, {
     async toggleIsManualInvoice() {
-        if (!this.checkCustomerSelected()) {
-            return;
-        }
+        this.checkCustomerSelected();
 
         if (this.currentOrder.is_manual_invoice()) {
             this.currentOrder.set_electronic_invoice();
@@ -32,9 +30,7 @@ patch(PaymentScreen.prototype, {
     },
 
     async toggleIsElectronicInvoice() {
-        if (!this.checkCustomerSelected()) {
-            return;
-        }
+        this.checkCustomerSelected();
 
         if (this.currentOrder.is_electronic_invoice()) {
             this.currentOrder.set_manual_invoice();
@@ -53,9 +49,7 @@ patch(PaymentScreen.prototype, {
                 title: _t("Error"),
                 body: _t("You must first select a client."),
             });
-            return false;
         }
-        return true;
     },
 
     onMounted() {
