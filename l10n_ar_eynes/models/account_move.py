@@ -543,6 +543,7 @@ class AccountMove(models.Model):
         'partner_id',
         'currency_id',
         'perception_ids',
+        'internal_taxes_ids',
     )
     def _compute_tax_totals(self):
         """Computed field used for custom widget's rendering.
@@ -552,7 +553,7 @@ class AccountMove(models.Model):
         super(AccountMove, self)._compute_tax_totals()
         for move in self:
             if move.is_invoice(include_receipts=True):
-                if move.perception_ids:
+                if move.perception_ids or move.internal_taxes_ids:
                     totals = move.tax_totals
                     groups_by_subtotal = defaultdict(list)
                     for subtotal in totals['groups_by_subtotal']:
@@ -560,12 +561,22 @@ class AccountMove(models.Model):
                             group = self.env['account.tax.group'].browse(
                                 tax['tax_group_id']
                             )
-                            if group.group_type == 'perception':
+                            if group.group_type in ('perception', 'internals'):
                                 old_amount = tax['tax_group_amount']
-                                base = sum(move.perception_ids.mapped('base'))
-                                amount = sum(
-                                    move.perception_ids.mapped('amount')
-                                )
+                                if group.group_type == 'perception':
+                                    base = sum(
+                                        move.perception_ids.mapped('base')
+                                    )
+                                    amount = sum(
+                                        move.perception_ids.mapped('amount')
+                                    )
+                                else:
+                                    base = sum(
+                                        move.internal_taxes_ids.mapped('base')
+                                    )
+                                    amount = sum(
+                                        move.internal_taxes_ids.mapped('amount')
+                                    )
                                 tax['tax_group_base_amount'] = base
                                 tax['tax_group_amount'] = amount
                                 tax['formatted_tax_group_amount'] = formatLang(
