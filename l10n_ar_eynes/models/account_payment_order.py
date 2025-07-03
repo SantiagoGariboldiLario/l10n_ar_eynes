@@ -1226,12 +1226,12 @@ class AccountPaymentOrder(models.Model):
         self._clean_payment_lines()
         try:
             self.action_move_line_create()
-            self.retention_ids.write(
-                {
-                    'unlinkable': False,
-                    'base': self.amount,
-                    'base_amount': self.amount,
-                }
+            retention_vals = {
+                'unlinkable': False,
+                'base': self.amount,
+            }
+            self.retention_ids.write_defaults(
+                retention_vals, self.disable_retentions
             )
         except Exception as e:
             self.revert_sequence()
@@ -2624,6 +2624,25 @@ class AccountPaymentOrderRetentionLine(models.Model):
             )
         res = super(AccountPaymentOrderRetentionLine, self).unlink()
         return res
+
+    def write_defaults(self, retention_vals, disable_retentions):
+        for rec in self:
+            write_vals = {'unlinkable': retention_vals['unlinkable']}
+            prec = self.env['decimal.precision'].precision_get('Account')
+            if float_is_zero(rec.base, precision_digits=prec):
+                write_vals.update({'base': retention_vals['base']})
+            if float_is_zero(rec.base_amount, precision_digits=prec):
+                write_vals.update({'base_amount': retention_vals['base']})
+            if write_vals.get('base', False) and float_is_zero(
+                write_vals['base'] - rec.amount, precision_digits=prec
+            ):
+                raise UserError(
+                    _(
+                        'You must enter a valid base amount for this retention: %s'
+                    )
+                    % rec.retention_id.name
+                )
+            rec.write(write_vals)
 
 
 class RetentionMoveLine(models.Model):
