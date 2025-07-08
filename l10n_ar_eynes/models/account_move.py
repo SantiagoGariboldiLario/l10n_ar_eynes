@@ -553,7 +553,9 @@ class AccountMove(models.Model):
         super(AccountMove, self)._compute_tax_totals()
         for move in self:
             if move.is_invoice(include_receipts=True):
-                if move.perception_ids or move.internal_taxes_ids:
+                if move.perception_ids or (
+                    move.is_purchase_document() and move.internal_taxes_ids
+                ):
                     totals = move.tax_totals
                     groups_by_subtotal = defaultdict(list)
                     for subtotal in totals['groups_by_subtotal']:
@@ -561,22 +563,46 @@ class AccountMove(models.Model):
                             group = self.env['account.tax.group'].browse(
                                 tax['tax_group_id']
                             )
-                            if group.group_type in ('perception', 'internals'):
+                            if group.group_type == 'perception':
                                 old_amount = tax['tax_group_amount']
-                                if group.group_type == 'perception':
-                                    base = sum(
-                                        move.perception_ids.mapped('base')
-                                    )
-                                    amount = sum(
-                                        move.perception_ids.mapped('amount')
-                                    )
-                                else:
-                                    base = sum(
-                                        move.internal_taxes_ids.mapped('base')
-                                    )
-                                    amount = sum(
-                                        move.internal_taxes_ids.mapped('amount')
-                                    )
+                                base = sum(move.perception_ids.mapped('base'))
+                                amount = sum(
+                                    move.perception_ids.mapped('amount')
+                                )
+                                tax['tax_group_base_amount'] = base
+                                tax['tax_group_amount'] = amount
+                                tax['formatted_tax_group_amount'] = formatLang(
+                                    self.env,
+                                    base,
+                                    currency_obj=move.currency_id,
+                                )
+                                tax[
+                                    'formatted_tax_group_base_amount'
+                                ] = formatLang(
+                                    self.env,
+                                    amount,
+                                    currency_obj=move.currency_id,
+                                )
+                                groups_by_subtotal[subtotal].append(tax)
+                                totals['amount_total'] = (
+                                    totals['amount_total'] - old_amount + amount
+                                )
+                                totals['formatted_amount_total'] = formatLang(
+                                    self.env,
+                                    totals['amount_total'],
+                                    currency_obj=move.currency_id,
+                                )
+                            elif (
+                                group.group_type == 'internals'
+                                and move.is_purchase_document()
+                            ):
+                                old_amount = tax['tax_group_amount']
+                                base = sum(
+                                    move.internal_taxes_ids.mapped('base')
+                                )
+                                amount = sum(
+                                    move.internal_taxes_ids.mapped('amount')
+                                )
                                 tax['tax_group_base_amount'] = base
                                 tax['tax_group_amount'] = amount
                                 tax['formatted_tax_group_amount'] = formatLang(
