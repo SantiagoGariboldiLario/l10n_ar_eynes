@@ -129,14 +129,14 @@ class AccountCheck(models.Model):
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         compute='_compute_currency',
-        readonly=True,
         store=True,
+        required=True,
     )
     currency_rate = fields.Float(
         digits=(12, 6),
         compute='_compute_currency_rate',
-        readonly=True,
         store=True,
+        required=True,
     )
     amount_currency = fields.Float(
         digits='Account',
@@ -190,6 +190,22 @@ class AccountCheck(models.Model):
                 rec.amount_currency = rec.amount / rec.currency_rate
             except ZeroDivisionError:
                 rec.amount_currency = 0
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """
+        Override create method to ensure that checks have a currency set --> Prevent Error
+        when checks are imported.
+        """
+        for val in vals_list:
+            if not val.get('currency_id', False):
+                raise ValidationError(
+                    _('You must set a currency for the check')
+                )
+            # if not val.get('company_id', False):
+            # No lo solicitaron pero para mi tiene que agregarse esta validación
+            #     raise ValidationError(_('You must set a Company for the check'))
+        return super(AccountCheck, self).create(vals_list)
 
     def unlink(self):
         """

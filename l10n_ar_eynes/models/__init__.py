@@ -60,3 +60,4 @@ from . import res_city
 from . import product_area
 from . import internal_taxes
 from . import ir_ui_menu
+from . import base_import
