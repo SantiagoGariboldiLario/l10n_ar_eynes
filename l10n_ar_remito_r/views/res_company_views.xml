@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="res_company_remito_autoimpresor" model="ir.ui.view">
+        <field name="name">res.company.remito.autoimpresor</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='currency_id']" position="after">
+                <field name="autoprinter_num" />
+                <field name="autoprinter_code" />
+                <field name="autoprinter_due_date" />
+                <field name="dnrp_num" />
+            </xpath>
+        </field>
+    </record>
+</odoo>

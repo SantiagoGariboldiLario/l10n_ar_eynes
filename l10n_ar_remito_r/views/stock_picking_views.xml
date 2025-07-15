@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="stock_picking_view_form_add_bulk" model="ir.ui.view">
+        <field name="name">stock.picking.view.form.add.bulk</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="l10n_ar_eynes.stock_picking_view_form_inherit_l10n_ar_eynes" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='voucher']" position="after">
+                <field name="bulk" />
+            </xpath>
+        </field>
+    </record>
+</odoo>
