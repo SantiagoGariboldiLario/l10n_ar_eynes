@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data noupdate="0">
+        <record id="paperformat_remito_r_qweb" model="report.paperformat">
+            <field name="name">Remito R Qweb</field>
+            <field name="default" eval="False" />
+            <field name="format">A4</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">60</field>
+            <field name="margin_bottom">20</field>
+            <field name="margin_right">5</field>
+            <field name="margin_left">5</field>
+            <field name="header_line" eval="False" />
+            <field name="header_spacing">55</field>
+            <field name="dpi">90</field>
+        </record>
+    </data>
+
+    <record id="stock_picking_qweb_remito_r" model="ir.actions.report">
+        <field name="name">Remito R QWEB</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ar_remito_r.remito_r_qweb</field>
+        <field name="report_file">l10n_ar_remito_r.remito_r_qweb</field>
+        <field name="paperformat_id" ref="l10n_ar_remito_r.paperformat_remito_r_qweb" />
+        <field name="print_report_name">(object.name)</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking" />
+    </record>
+
+    <template id="weblearns_layout_remito_r">
+        <div class="header">
+            <table class="header-table">
+                <theader>
+                </theader>
+                <tbody>
+                    <tr>
+                        <td class="right">
+                            <img t-attf-src="data:image/png;base64,#{o.company_id.logo}" />
+                            <br />
+                            <p>
+                                Razón social: <span t-esc="o.company_id.name" />
+                                <br />
+                                Domicillio: <span t-esc="o.company_id.partner_id.street" />
+                                <span t-esc="o.company_id.partner_id.city" /> (
+                                <span t-esc="o.company_id.partner_id.zip" />) -
+                                <span t-esc="o.company_id.partner_id.state_id.name" /> -
+                                <span t-esc="o.company_id.partner_id.country_id.name" />
+                                <br />
+                                Tel.: <span t-esc="o.company_id.partner_id.phone" />
+                                <br />
+                                Condición frente al IVA: <span
+                                    t-esc="o.company_id.partner_id.property_account_position_id.name"
+                                />
+                                <span>C.U.I.T: <t t-out="o.company_id.vat" /></span>
+                                <br />
+                                <t t-if="o.company_id.partner_id.nro_insc_iibb">
+                                    <span class="partner-info">Ing. Brutos: <t
+                                            t-out="o.company_id.partner_id.nro_insc_iibb"
+                                        /></span>
+                                    <br />
+                                </t>
+                                <span>Email: <span t-esc="o.company_id.partner_id.email" /></span>
+                            </p>
+                        </td>
+                        <td class="center">
+                            <div class="denomination-render">
+                                <h1>R</h1>
+                            </div>
+                        </td>
+                        <td class="left">
+                            <span t-esc="n" />
+                            <br /><br />
+                            Documento no válido como factura
+                            <br />
+                            REMITO nº <span t-esc="o.name" />
+                            <br />
+                            Orden: <span t-esc="o.origin" />
+                            <br />
+                            Peso total:<span t-esc="o.weight" />
+                            <br />
+                            Fecha de envio: <span t-esc="o.date_done" />
+                            <br />
+                            DNRP No: <span style="font-weight: normal;" t-esc="o.company_id.dnrp_num" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <style>
+                .header-table{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 25px 0;
+                    border-radius: 5px 5px 0 0;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+                    background-color: #f3f3f3;
+                    border: transparent;
+                }
+
+                .right{
+                    font-weight: bold;
+                    width: 44%;
+                    padding-right: 10px;
+                }
+
+                .right p, .left span{
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 14px;
+                }
+
+                .right img {
+                    height: 80px;
+                    object-fit: contain;
+                }
+
+                .center{
+                    width: 20%;
+                    vertical-align: top;
+                    text-align: center;
+                }
+
+                .left {
+                    width: 44%;
+                    font-weight: bold;
+                    padding-left: 30px;
+                }
+
+                .denomination-render{
+                    display: block;
+                    margin: 0 auto;
+                    border: 2px solid #000;
+                    height: 90px;
+                    width: 90px;
+                    font-size: 40px;
+                }
+                .denomination-render h1{
+                    margin: 0;
+                }
+            </style>
+        </div>
+        <div class="page">
+        </div>
+        <div
+            class="article"
+            t-att-data-oe-model="o and o._name"
+            t-att-data-oe-id="o and o.id"
+            t-att-data-oe-lang="o and o.env.context.get('lang')"
+        >
+          <t t-out="0" />
+        </div>
+    </template>
+
+    <template id="remito_r_qweb">
+        <t t-set="list_of_copy" t-value="['ORIGINAL','DUPLICADO','TRIPLICADO']" />
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-foreach="list_of_copy" t-as="n">
+                    <div t-call="l10n_ar_remito_r.weblearns_layout_remito_r">
+                        <div class="page">
+                            <span>Datos de entrega: </span>
+                            <table class="partner-table">
+                                <tr>
+                                    <td width="50%">
+                                        <span>Cliente: </span><span t-esc="o.partner_id.name" />
+                                        <br />
+                                        <span>Direccion: </span><span t-esc="o.partner_id.city" /> <span
+                                            t-esc="o.partner_id.state_id.name"
+                                        />
+                                        <br />
+                                        <span>Pais: </span><span t-esc="o.partner_id.country_id.name" />
+                                    </td>
+                                    <td width="50%">
+                                        <span>Calle: </span><span t-esc="o.partner_id.street" /> <span
+                                            t-esc="o.partner_id.num"
+                                        />
+                                        <br />
+                                        <span>Telefono: </span><span t-esc="o.partner_id.phone" />
+                                        <br />
+                                        <span>Mail: </span><span t-esc="o.partner_id.email" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="50%">
+                                        <span>Transporte: <t t-out="o.means_of_transport" /></span> <br />
+                                        <span>Bultos: <t t-out="o.bulk" /></span>
+                                    </td>
+                                    <td width="50%">
+                                        <span>Kilos: <t t-out="o.shipping_weight" /> Kg</span> <br />
+                                        <span>Valor declarado: <t t-out="o.declared_value" /></span>
+                                    </td>
+                                </tr>
+                            </table>
+                            <!--Products-->
+                            <table class="product-table">
+                                <thead>
+                                    <tr>
+                                        <th class="product-description-column" width="50%">
+                                            Producto
+                                        </th>
+                                        <th>
+                                            Cant. cont.
+                                        </th>
+                                        <th>
+                                            UdM
+                                        </th>
+                                        <th>
+                                            Precio
+                                        </th>
+                                        <th>
+                                            Subtotal
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.move_ids_without_package" t-as="line">
+
+                                        <td class="product-description-column">
+                                            [<span t-esc="line.product_id.default_code" />] <span
+                                                t-esc="line.product_id.name"
+                                            />
+                                        </td>
+
+                                        <td>
+                                            <span t-esc="line.quantity" />
+                                        </td>
+
+                                        <td>
+                                            <span t-esc="line.product_uom.name" />
+                                        </td>
+                                        <td>
+                                            <span
+                                                t-esc="line.sale_line_id.price_unit"
+                                                t-options="{'widget': 'monetary', 'display_currency': line.sale_line_id.currency_id}"
+                                            />
+                                        </td>
+                                        <td>
+                                            <span
+                                                t-esc="line.sale_line_id.price_subtotal"
+                                                t-options="{'widget': 'monetary', 'display_currency': line.sale_line_id.currency_id}"
+                                            />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="footer">
+                            <div>
+                                <p>
+                                    Empresa autorizada como autoimpresor Nro. <span
+                                        t-esc="o.company_id.autoprinter_num"
+                                    />
+                                    <br />
+                                    Código de autorización de impresión Nro. <span
+                                        t-esc="o.company_id.autoprinter_code"
+                                    />
+                                    <br />
+                                    Vencimientos
+                                    <span
+                                        t-if="o.company_id.autoprinter_due_date"
+                                        t-esc="o.company_id.autoprinter_due_date.strftime('%d/%m/%Y')"
+                                    />
+                                    <span t-else="o.company_id.autoprinter_due_date" />
+                                </p>
+                            </div>
+                        </div>
+                        <style>
+                        .partner-table,
+                        .company-table,
+                        .product-table{
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 1.2em;
+                            margin: 25px 0;
+                            border-radius: 5px 5px 5px 5px;
+                            overflow: hidden;
+                            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+                            margin-bottom: 10px;
+                            margin-top: 20px;
+                        }
+
+                        .partner-table th,
+                        .partner-table td,
+                        .company-table th,
+                        .company-table td {
+                            padding: 10px 10px;
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 14px;
+                            font-weight: bold;
+                        }
+
+                        .partner-table,
+                        .company-table,
+                        .product-table tbody tr:nth-of-type(even){
+                            background-color: #f3f3f3;
+                        }
+
+                        .product-table {
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 13px;
+                        }
+
+                        .product-table thead tr{
+                            background-color: rgb(202, 215, 226);
+                            color: black;
+                            font-weight: bold;
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 13px;
+                        }
+
+                        .product-table th,
+                        .product-table td {
+                            padding: 5px 5px;
+                            font-family: Arial, Helvetica, sans-serif;
+                            font-size: 13px;
+                            text-align: right;
+                        }
+
+                        .product-table tbody tr {
+                            border-bottom: 1px solid rgb(202, 215, 226);
+                        }
+
+                        .product-table tbody tr:last-of-type {
+                            border-bottom: 2px solid rgb(202, 215, 226);
+                        }
+
+                        .product-description-column {
+                            text-align: left !important;
+                        }
+                        </style>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
