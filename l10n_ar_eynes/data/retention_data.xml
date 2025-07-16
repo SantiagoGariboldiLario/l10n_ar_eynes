@@ -1,130 +1,113 @@
 <odoo noupdate="1">
     <!-- Conceptos para Retencion de Ganancias -->
     <record forcecreate="0" id="retention_concept_profit_99" model="retention.concept">
-        <field name="name">
-            Emisión de comprobantes con discriminación del Gravamen
-        </field>
+        <field name="name">Emisión de comprobantes con discriminación del Gravamen</field>
         <field name="type">profit</field>
         <field name="code">99</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_21" model="retention.concept">
-        <field name="name">
-            Intereses originados en operaciones no comprendidas en el punto 1. (Codigo 19)
-        </field>
+        <field
+            name="name"
+        >Intereses originados en operaciones no comprendidas en el punto 1. (Codigo 19)</field>
         <field name="type">profit</field>
         <field name="code">21</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_25" model="retention.concept">
-        <field name="name">
-            Comisiones u otras retribuciones derivadas de la actividad de comisionista, rematador, consignatario y demas auxiliares de comercio a que se refiere el inciso c) del articulo 49 de la Ley de Impuesto a las profit, texto ordenado en 1997 y sus modificaci
+        <field
+            name="name"
+        >Comisiones u otras retribuciones derivadas de la actividad de comisionista, rematador, consignatario y demas auxiliares de comercio a que se refiere el inciso c) del articulo 49 de la Ley de Impuesto a las profit, texto ordenado en 1997 y sus modificaci
         </field>
         <field name="type">profit</field>
         <field name="code">25</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_30" model="retention.concept">
-        <field name="name">
-            Alquileres o arrendamientos de bienes muebles
+        <field name="name">Alquileres o arrendamientos de bienes muebles
         </field>
         <field name="type">profit</field>
         <field name="code">30</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_35" model="retention.concept">
-        <field name="name">
-            Regalias
-        </field>
+        <field name="name">Regalias</field>
         <field name="type">profit</field>
         <field name="code">35</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_53" model="retention.concept">
-        <field name="name">
-            Operaciones realizadas por intermedio de mercados de cereales a termino que se resuelvan en el curso del termino (arbitrajes) y de mercados de futuros y opciones.
+        <field
+            name="name"
+        >Operaciones realizadas por intermedio de mercados de cereales a termino que se resuelvan en el curso del termino (arbitrajes) y de mercados de futuros y opciones.
         </field>
         <field name="type">profit</field>
         <field name="code">53</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_78" model="retention.concept">
-        <field name="name">
-            Enajenacion de bienes muebles y bienes de cambio.
-        </field>
+        <field name="name">Enajenacion de bienes muebles y bienes de cambio.</field>
         <field name="type">profit</field>
         <field name="code">78</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_94" model="retention.concept">
-        <field name="name">
-            Locaciones de obra y/o servicios no ejecutados en relacion de dependencia no mencionados expresamente en otros incisos
+        <field
+            name="name"
+        >Locaciones de obra y/o servicios no ejecutados en relacion de dependencia no mencionados expresamente en otros incisos
         </field>
         <field name="type">profit</field>
         <field name="code">94</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_95" model="retention.concept">
-        <field name="name">
-            Operaciones de transporte de carga nacional e internacional.
-        </field>
+        <field name="name">Operaciones de transporte de carga nacional e internacional.</field>
         <field name="type">profit</field>
         <field name="code">95</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_110" model="retention.concept">
-        <field name="name">
-            Explotacion de derechos de autor (Ley No 11.723).
-        </field>
+        <field name="name">Explotacion de derechos de autor (Ley No 11.723).</field>
         <field name="type">profit</field>
         <field name="code">110</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_116" model="retention.concept">
-        <field name="name">
-            Honorarios de director de sociedades anonimas, sindico, fiduciario, consejero de sociedades cooperativas, integrante de consejos de vigilancia y s/escala socios administradores de las sociedades de responsabilidad limitada, en comandita simple y en coman
+        <field
+            name="name"
+        >Honorarios de director de sociedades anonimas, sindico, fiduciario, consejero de sociedades cooperativas, integrante de consejos de vigilancia y s/escala socios administradores de las sociedades de responsabilidad limitada, en comandita simple y en coman
         </field>
         <field name="type">profit</field>
         <field name="code">116</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_119" model="retention.concept">
-        <field name="name">
-            Profesiones liberales, oficios
-        </field>
+        <field name="name">Profesiones liberales, oficios</field>
         <field name="type">profit</field>
         <field name="code">119</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_no_subject" model="retention.concept">
-        <field name="name">
-            No Sujeto
-        </field>
+        <field name="name">No Sujeto</field>
         <field name="type">profit</field>
         <field name="no_subject">True</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_3" model="retention.concept">
-        <field name="name">
-            Ret. Ga. Locaciones de Bs. y Serv RI
-        </field>
+        <field name="name">Ret. Ga. Locaciones de Bs. y Serv RI</field>
         <field name="type">profit</field>
         <field name="code">3</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_27" model="retention.concept">
-        <field name="name">
-            Alquileres de inmuebles
-        </field>
+        <field name="name">Alquileres de inmuebles</field>
         <field name="type">profit</field>
         <field name="code">27</field>
     </record>
 
     <!-- Conceptos para Retencion de IVA -->
     <record forcecreate="0" id="retention_concept_499" model="retention.concept">
-        <field name="name">
-            Factura “M” – IVA –Emisión de comprobantes con discriminación del Gravamen
-        </field>
+        <field name="name">Factura “M” – IVA –Emisión de comprobantes con discriminación del Gravamen</field>
         <field name="type">vat</field>
         <field name="code">499</field>
     </record>
