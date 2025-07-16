@@ -106,6 +106,7 @@ patch(PaymentScreen.prototype, {
                     body: _t("Unable to get next sequence."),
                 });
             } else {
+                this.setSequenceValues();
                 throw error;
             }
         }

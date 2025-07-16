@@ -181,6 +181,19 @@ patch(Order.prototype, {
         res += this.get_total_perception();
         return res;
     },
+
+    /**
+     * Returns false if the current order is empty and has no payments.
+     * @returns {boolean}
+     */
+    _isValidEmptyOrder() {
+        let res = super._isValidEmptyOrder();
+        if (!this.invoice_journal_id) {
+            return false;
+        } else {
+            return res;
+        }
+    },
 });
 
 patch(PaymentScreen.prototype, {
