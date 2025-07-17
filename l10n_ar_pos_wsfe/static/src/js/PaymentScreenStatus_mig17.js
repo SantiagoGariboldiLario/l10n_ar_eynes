@@ -46,6 +46,6 @@ patch(PaymentScreenStatus.prototype, {
     },
 
     get total_perceptions() {
-        return this.env.utils.formatCurrency(this.props.order.perception_amount);
+        return this.env.utils.formatCurrency(this.props.order.get_total_perception());
     },
 });
