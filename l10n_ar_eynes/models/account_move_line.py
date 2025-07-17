@@ -83,6 +83,46 @@ class AccountMoveLine(models.Model):
     def _compute_all_tax(self):
         # pylint: disable=missing-return
         super(AccountMoveLine, self)._compute_all_tax()
+
+        def _distribute_rounded_values(total_base, total_amount, lines):
+            # Distribute rounded values and remainder to last line
+            num_lines = len(lines)
+            rounded_bases = []
+            rounded_amounts = []
+            for i, _aml in enumerate(lines):
+                if i < num_lines - 1:
+                    rounded_base = inv.currency_id.round(total_base / num_lines)
+                    rounded_amount = inv.currency_id.round(
+                        total_amount / num_lines
+                    )
+                    rounded_bases.append(rounded_base)
+                    rounded_amounts.append(rounded_amount)
+                else:
+                    # Last line gets the remainder
+                    rounded_base = total_base - sum(rounded_bases)
+                    rounded_amount = total_amount - sum(rounded_amounts)
+                    rounded_bases.append(rounded_base)
+                    rounded_amounts.append(rounded_amount)
+            return rounded_amounts, rounded_bases
+
+        def _assign_distributed_values(
+            lines, tax_name, sign, rounded_amounts, rounded_bases
+        ):
+            # Assign distributed values to lines
+            for idx, aml in enumerate(lines):
+                rate = aml.currency_rate
+                for key in aml.compute_all_tax:
+                    if aml.compute_all_tax[key].get('name', '') == tax_name:
+                        aml.compute_all_tax[key]['balance'] = (
+                            sign * rounded_amounts[idx] / rate
+                        )
+                        aml.compute_all_tax[key]['amount_currency'] = (
+                            sign * rounded_amounts[idx]
+                        )
+                        aml.compute_all_tax[key]['tax_base_amount'] = (
+                            rounded_bases[idx] / rate
+                        )
+
         product_with_perception_lines = self.filtered(
             lambda aml: aml.display_type == 'product'
             and aml.move_id.is_invoice(True)
@@ -109,8 +149,6 @@ class AccountMoveLine(models.Model):
                             lambda aml: perception in aml.tax_ids._origin
                         )
                     )
-                    perception_total_base = line_perception_base = 0.0
-                    perception_total_amount = line_perception_amount = 0.0
                     if lines_with_perception:
                         perception_total_base = sum(
                             inv.perception_ids.filtered(
@@ -122,28 +160,21 @@ class AccountMoveLine(models.Model):
                                 lambda ptl: ptl.perception_id == perception
                             ).mapped('amount')
                         )
-                        line_perception_base = inv.currency_id.round(
-                            perception_total_base / len(lines_with_perception)
+                        (
+                            rounded_amounts,
+                            rounded_bases,
+                        ) = _distribute_rounded_values(
+                            perception_total_base,
+                            perception_total_amount,
+                            lines_with_perception,
                         )
-                        line_perception_amount = inv.currency_id.round(
-                            perception_total_amount / len(lines_with_perception)
+                        _assign_distributed_values(
+                            lines_with_perception,
+                            perception.name,
+                            sign,
+                            rounded_amounts,
+                            rounded_bases,
                         )
-                    for aml in lines_with_perception:
-                        rate = aml.currency_rate
-                        for key in aml.compute_all_tax:
-                            if (
-                                aml.compute_all_tax[key].get('name', '')
-                                == perception.name
-                            ):
-                                aml.compute_all_tax[key]['balance'] = (
-                                    sign * line_perception_amount / rate
-                                )
-                                aml.compute_all_tax[key]['amount_currency'] = (
-                                    sign * line_perception_amount
-                                )
-                                aml.compute_all_tax[key]['tax_base_amount'] = (
-                                    line_perception_base / rate
-                                )
 
         product_lines = self.filtered(
             lambda aml: aml.display_type == 'product'
@@ -170,8 +201,6 @@ class AccountMoveLine(models.Model):
                             lambda aml: internal_tax in aml.tax_ids._origin
                         )
                     )
-                    internal_tax_total_base = line_internal_tax_base = 0.0
-                    internal_tax_total_amount = line_internal_tax_amount = 0.0
                     if lines_with_internals:
                         internal_tax_total_base = sum(
                             inv.internal_taxes_ids.filtered(
@@ -183,29 +212,21 @@ class AccountMoveLine(models.Model):
                                 lambda ptl: ptl.tax_id == internal_tax
                             ).mapped('amount')
                         )
-                        line_internal_tax_base = inv.currency_id.round(
-                            internal_tax_total_base / len(lines_with_internals)
+                        (
+                            rounded_amounts,
+                            rounded_bases,
+                        ) = _distribute_rounded_values(
+                            internal_tax_total_base,
+                            internal_tax_total_amount,
+                            lines_with_internals,
                         )
-                        line_internal_tax_amount = inv.currency_id.round(
-                            internal_tax_total_amount
-                            / len(lines_with_internals)
+                        _assign_distributed_values(
+                            lines_with_internals,
+                            internal_tax.name,
+                            sign,
+                            rounded_amounts,
+                            rounded_bases,
                         )
-                    for aml in lines_with_internals:
-                        rate = aml.currency_rate
-                        for key in aml.compute_all_tax:
-                            if (
-                                aml.compute_all_tax[key].get('name', '')
-                                == internal_tax.name
-                            ):
-                                aml.compute_all_tax[key]['balance'] = (
-                                    sign * line_internal_tax_amount / rate
-                                )
-                                aml.compute_all_tax[key]['amount_currency'] = (
-                                    sign * line_internal_tax_amount
-                                )
-                                aml.compute_all_tax[key]['tax_base_amount'] = (
-                                    line_internal_tax_base / rate
-                                )
 
     def _get_computed_perceptions(self):
         tax_ids = self.env['account.tax']
