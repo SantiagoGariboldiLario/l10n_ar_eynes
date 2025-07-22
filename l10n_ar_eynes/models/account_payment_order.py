@@ -1196,10 +1196,10 @@ class AccountPaymentOrder(models.Model):
                 )
             )
 
-        next = self.journal_id.sequence_id.number_next
+        number_next = self.journal_id.sequence_id.number_next
         if consume:
-            next = self.journal_id.sequence_id.next_by_id()
-        return next
+            number_next = self.journal_id.sequence_id.next_by_id()
+        return number_next
 
     def proforma_voucher(self):
         self.ensure_one()
