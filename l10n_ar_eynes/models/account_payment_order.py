@@ -1402,6 +1402,7 @@ class AccountPaymentOrder(models.Model):
         move = {
             'name': self.number,
             'journal_id': self.journal_id.id,
+            'partner_id': self.partner_id.id,
             'narration': self.narration,
             'date': self.date,
             'ref': ref,
