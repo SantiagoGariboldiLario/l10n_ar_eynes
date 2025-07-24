@@ -1498,6 +1498,8 @@ class AccountPaymentOrder(models.Model):
     ):
         if not self.is_multi_currency:
             amount_currency = abs(amount)
+        else:
+            amount_currency = abs(amount_currency)
         debit = credit = 0.0
         if self.type in ('purchase', 'payment'):
             if amount < 0:
