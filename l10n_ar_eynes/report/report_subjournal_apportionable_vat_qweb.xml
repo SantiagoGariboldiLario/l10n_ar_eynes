@@ -1,0 +1,1596 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="weblearns_layout_apportionable_vat">
+        <div class="header">
+            <table style="width: 100%; margin: 40px auto; border: transparent;">
+                <thead>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="width: 50%; text-align: center; font-size: medium;">
+                            <strong> <t t-out="title" /> </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; font-size: small;">
+                            <strong> <t t-out="o.company_id.name" /> </strong>
+                            <br />
+                            <span>Domicilio: <t t-out="o.company_id.street" /> </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div
+            class="article"
+            t-att-data-oe-model="o and o._name"
+            t-att-data-oe-id="o and o.id"
+            t-att-data-oe-lang="o and o.env.context.get('lang')"
+        >
+          <t t-out="0" />
+        </div>
+    </template>
+
+    <template id="subjournal_apportionable_vat_qweb">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="date_start" t-value="o.date_from.strftime('%d/%m/%Y')" />
+                <t t-set="date_end" t-value="o.date_to.strftime('%d/%m/%Y')" />
+                <t t-call="l10n_ar_eynes.weblearns_layout_apportionable_vat">
+                    <div class="page">
+                        <!-- ************************************************************************ -->
+                        <!--                      DEFAULT REPORT SUBJOURNAL BODY                      -->
+                        <!-- ************************************************************************ -->
+                        <table style="width: 100%; margin: 10px auto;">
+                            <thead class="no-border-row">
+                                <tr>
+                                    <th style="width: 5.5%;">Fecha</th>
+                                    <th style="width: 10%;">Razon Social</th>
+                                    <th style="width: 6%;">Provincia</th>
+                                    <th style="width: 6%;">CUIT</th>
+                                    <th style="width: 8%;">Cond. IVA</th>
+                                    <th style="width: 2.5%;">Tipo</th>
+                                    <th style="width: 7%;">Numero</th>
+                                    <t t-foreach="invoice_list_header" t-as="header">
+                                        <th>
+                                            <t t-out="header" />
+                                        </th>
+                                    </t>
+                                    <th>No Gravado</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="invoice_lines" t-as="line">
+                                    <tr class="no-border-row">
+                                        <t t-foreach="range(len(line))" t-as="index">
+                                            <t t-if="index > 6">
+                                                <td style="text-align: right;">
+                                                    <t t-set="amount_line" t-value="float(line[index])" />
+                                                    <t
+                                                        t-set="amount_line_formatted"
+                                                        t-value="'{:,.2f}'.format(amount_line).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                                    />
+                                                    <t t-out="amount_line_formatted" />
+                                                </td>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-if="index == 1">
+                                                    <td
+                                                        style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"
+                                                    >
+                                                        <t t-out="line[index]" />
+                                                    </td>
+                                                </t>
+                                                <t t-else="">
+                                                    <td>
+                                                        <t t-out="line[index]" />
+                                                    </td>
+                                                </t>
+                                            </t>
+                                        </t>
+                                    </tr>
+                                </t>
+                                <!-- TOTALES -->
+                                <tr class="no-border-row total-row">
+                                    <td colspan="7">TOTALES</td>
+                                    <t t-foreach="totals" t-as="total">
+                                        <td style="text-align: right;">
+                                            <t t-set="total" t-value="float(total)" />
+                                            <t
+                                                t-set="total_formatted"
+                                                t-value="'{:,.2f}'.format(total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                            />
+                                            <t t-out="total_formatted" />
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr class="no-border-row total-row">
+                                    <td colspan="7">TOTALES FC/ND</td>
+                                    <t t-foreach="totals_fc_nd" t-as="total_fc_nd">
+                                        <td style="text-align: right;">
+                                            <t t-set="total_fc_nd" t-value="float(total_fc_nd)" />
+                                            <t
+                                                t-set="total_fc_nd_formatted"
+                                                t-value="'{:,.2f}'.format(total_fc_nd).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                            />
+                                            <t t-out="total_fc_nd_formatted" />
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr class="no-border-row total-row">
+                                    <td colspan="7">TOTALES NC</td>
+                                    <t t-foreach="totals_nc" t-as="total_nc">
+                                        <td style="text-align: right;">
+                                            <t t-set="total_nc" t-value="float(total_nc)" />
+                                            <t
+                                                t-set="total_nc_formatted"
+                                                t-value="'{:,.2f}'.format(total_nc).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                            />
+                                            <t t-out="total_nc_formatted" />
+                                        </td>
+                                    </t>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <t t-if="retention_perception_summary">
+                            <table style="width: 100%; margin: 10px auto;">
+                                <thead class="no-border-row">
+                                    <tr>
+                                        <th style="width: 45%;" />
+                                        <th style="width: 20%;">Percepción / Retención</th>
+                                        <th style="width: 10%; text-align: right;">Monto</th>
+                                        <th style="width: 25%;" />
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="retention_perception_summary" t-as="line">
+                                        <tr class="no-border-row">
+                                            <td />
+                                            <td
+                                                style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"
+                                            >
+                                                <t t-out="line[0]" />
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-set="amount_line" t-value="float(line[1])" />
+                                                <t
+                                                    t-set="amount_line_formatted"
+                                                    t-value="'{:,.2f}'.format(amount_line).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                                />
+                                                <t t-out="amount_line_formatted" />
+                                            </td>
+                                            <td />
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                        <!-- ************************************************************************ -->
+                        <!--              REPORT SUBJOURNAL WITH APPORTIONABLE VAT BODY               -->
+                        <!-- ************************************************************************ -->
+                        <table style="width: 100%; margin: 10px auto;">
+                            <thead class="no-border-row">
+                                <tr>
+                                    <th style="width: 12.5%;" />
+                                    <th style="width: 12.5%;">No Grav/Ex/No Alcanz.</th>
+                                    <th style="width: 12.5%;">Reg. Especiales</th>
+                                    <th style="width: 12.5%;">NIns,NRes,Ex,Mon,Ncat</th>
+                                    <th style="width: 12.5%;">Neto Gravado</th>
+                                    <th style="width: 12.5%;">IVA</th>
+                                    <th style="width: 12.5%;">IVA computable</th>
+                                    <th style="width: 12.5%;">TOTAL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- ************************************************************************ -->
+                                <!--                  TOTAL DE OPERACIONES DEL PRIMER BLOQUE                  -->
+                                <tr class="no-border-row separator-row">
+                                    <td colspan="8"> <t t-out="first_block_apportionable_vat_title" /> </td>
+                                </tr>
+                                <!-- DIRECTO GRAVADO -->
+                                <tr class="no-border-row">
+                                    <td>DIRECTO GRAVADO</td>
+                                    <td>Tasa IVA 10.50%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="direct_taxed00" t-value="float(direct_taxed[0][0])" />
+                                        <t
+                                            t-set="direct_taxed00formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed00).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed00formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="direct_taxed01" t-value="float(direct_taxed[0][1])" />
+                                        <t
+                                            t-set="direct_taxed01formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed01).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed01formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="direct_taxed01formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed0total"
+                                            t-value="float(direct_taxed[0][0] + direct_taxed[0][1])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed0totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed0total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed0totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 21.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="direct_taxed10" t-value="float(direct_taxed[1][0])" />
+                                        <t
+                                            t-set="direct_taxed10formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed10).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed10formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="direct_taxed11" t-value="float(direct_taxed[1][1])" />
+                                        <t
+                                            t-set="direct_taxed11formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed11).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed11formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="direct_taxed11formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed1total"
+                                            t-value="float(direct_taxed[1][0] + direct_taxed[1][1])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed1totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed1total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed1totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 27.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="direct_taxed20" t-value="float(direct_taxed[2][0])" />
+                                        <t
+                                            t-set="direct_taxed20formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed20).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed20formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="direct_taxed21" t-value="float(direct_taxed[2][1])" />
+                                        <t
+                                            t-set="direct_taxed21formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed21).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed21formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="direct_taxed21formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed2total"
+                                            t-value="float(direct_taxed[2][0] + direct_taxed[2][1])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed2totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed2total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed2totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row subtotal-row">
+                                    <td />
+                                    <td>Subtotal</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="direct_taxednet"
+                                            t-value="float(direct_taxed00 + direct_taxed10 + direct_taxed20)"
+                                        />
+                                        <t
+                                            t-set="direct_taxednetformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxednet).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxednetformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxedvat"
+                                            t-value="float(direct_taxed01 + direct_taxed11 + direct_taxed21)"
+                                        />
+                                        <t
+                                            t-set="direct_taxedvatformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxedvat).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxedvatformatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="direct_taxedvatformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxedtotal"
+                                            t-value="float(direct_taxed0total + direct_taxed1total + direct_taxed2total)"
+                                        />
+                                        <t
+                                            t-set="direct_taxedtotalformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxedtotal).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxedtotalformatted" />
+                                    </td>
+                                </tr>
+
+                                <!-- PRORRATEABLE -->
+                                <tr class="no-border-row">
+                                    <td>PRORRATEABLE</td>
+                                    <td>Tasa IVA 10.50%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="apport00" t-value="float(apport[0][0])" />
+                                        <t
+                                            t-set="apport00formatted"
+                                            t-value="'{:,.2f}'.format(apport00).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport00formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="apport01" t-value="float(apport[0][1])" />
+                                        <t
+                                            t-set="apport01formatted"
+                                            t-value="'{:,.2f}'.format(apport01).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport01formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="apport0total"
+                                            t-value="float(apport[0][0] + apport[0][1])"
+                                        />
+                                        <t
+                                            t-set="apport0totalformatted"
+                                            t-value="'{:,.2f}'.format(apport0total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport0totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 21.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="apport10" t-value="float(apport[1][0])" />
+                                        <t
+                                            t-set="apport10formatted"
+                                            t-value="'{:,.2f}'.format(apport10).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport10formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="apport11" t-value="float(apport[1][1])" />
+                                        <t
+                                            t-set="apport11formatted"
+                                            t-value="'{:,.2f}'.format(apport11).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport11formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="apport1total"
+                                            t-value="float(apport[1][0] + apport[1][1])"
+                                        />
+                                        <t
+                                            t-set="apport1totalformatted"
+                                            t-value="'{:,.2f}'.format(apport1total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport1totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 27.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="apport20" t-value="float(apport[2][0])" />
+                                        <t
+                                            t-set="apport20formatted"
+                                            t-value="'{:,.2f}'.format(apport20).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport20formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="apport21" t-value="float(apport[2][1])" />
+                                        <t
+                                            t-set="apport21formatted"
+                                            t-value="'{:,.2f}'.format(apport21).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport21formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="apport2total"
+                                            t-value="float(apport[2][0] + apport[2][1])"
+                                        />
+                                        <t
+                                            t-set="apport2totalformatted"
+                                            t-value="'{:,.2f}'.format(apport2total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport2totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row subtotal-row">
+                                    <td />
+                                    <td>Subtotal</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="apportnet"
+                                            t-value="float(apport00 + apport10 + apport20)"
+                                        />
+                                        <t
+                                            t-set="apportnetformatted"
+                                            t-value="'{:,.2f}'.format(apportnet).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apportnetformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="apportvat"
+                                            t-value="float(apport01 + apport11 + apport21)"
+                                        />
+                                        <t
+                                            t-set="apportvatformatted"
+                                            t-value="'{:,.2f}'.format(apportvat).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apportvatformatted" />
+                                    </td>
+                                    <td>
+                                        Sujeto a prorrateo
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="apporttotal"
+                                            t-value="float(apport0total + apport1total + apport2total)"
+                                        />
+                                        <t
+                                            t-set="apporttotalformatted"
+                                            t-value="'{:,.2f}'.format(apporttotal).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apporttotalformatted" />
+                                    </td>
+                                </tr>
+
+                                <!-- DIRECTO EXENTO -->
+                                <tr class="no-border-row">
+                                    <td>DIRECTO EXENTO</td>
+                                    <td>Tasa IVA 10.50%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="direct_exempt00" t-value="float(direct_exempt[0][0])" />
+                                        <t
+                                            t-set="direct_exempt00formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt00).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt00formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="direct_exempt01" t-value="float(direct_exempt[0][1])" />
+                                        <t
+                                            t-set="direct_exempt01formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt01).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt01formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt0total"
+                                            t-value="float(direct_exempt[0][0] + direct_exempt[0][1])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt0totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt0total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt0totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 21.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="direct_exempt10" t-value="float(direct_exempt[1][0])" />
+                                        <t
+                                            t-set="direct_exempt10formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt10).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt10formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="direct_exempt11" t-value="float(direct_exempt[1][1])" />
+                                        <t
+                                            t-set="direct_exempt11formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt11).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt11formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt1total"
+                                            t-value="float(direct_exempt[1][0] + direct_exempt[1][1])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt1totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt1total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt1totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 27.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="direct_exempt20" t-value="float(direct_exempt[2][0])" />
+                                        <t
+                                            t-set="direct_exempt20formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt20).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt20formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="direct_exempt21" t-value="float(direct_exempt[2][1])" />
+                                        <t
+                                            t-set="direct_exempt21formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt21).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt21formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt2total"
+                                            t-value="float(direct_exempt[2][0] + direct_exempt[2][1])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt2totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt2total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt2totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row subtotal-row">
+                                    <td />
+                                    <td>Subtotal</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="direct_exemptnet"
+                                            t-value="float(direct_exempt00 + direct_exempt10 + direct_exempt20)"
+                                        />
+                                        <t
+                                            t-set="direct_exemptnetformatted"
+                                            t-value="'{:,.2f}'.format(direct_exemptnet).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exemptnetformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exemptvat"
+                                            t-value="float(direct_exempt01 + direct_exempt11 + direct_exempt21)"
+                                        />
+                                        <t
+                                            t-set="direct_exemptvatformatted"
+                                            t-value="'{:,.2f}'.format(direct_exemptvat).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exemptvatformatted" />
+                                    </td>
+                                    <td>
+                                        No computable
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempttotal"
+                                            t-value="float(direct_exempt0total + direct_exempt1total + direct_exempt2total)"
+                                        />
+                                        <t
+                                            t-set="direct_exempttotalformatted"
+                                            t-value="'{:,.2f}'.format(direct_exempttotal).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempttotalformatted" />
+                                    </td>
+                                </tr>
+
+                                <!-- NI, NR, Exento, Monot., NCat -->
+                                <tr class="no-border-row">
+                                    <td>NI, NR, Exento, Monot., NCat</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="ni_nr_ex_monformatted"
+                                            t-value="'{:,.2f}'.format(ni_nr_ex_mon).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="ni_nr_ex_monformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="ni_nr_ex_monformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>Exento</td>
+                                    <td>
+                                        <t
+                                            t-set="exemptformatted"
+                                            t-value="'{:,.2f}'.format(exempt).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="exemptformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="exemptformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>No alcanzado</td>
+                                    <td>
+                                        <t
+                                            t-set="untaxedformatted"
+                                            t-value="'{:,.2f}'.format(untaxed).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="untaxedformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="untaxedformatted" /></td>
+                                </tr>
+
+                                <!-- 0, Tasas, Imp. Internos -->
+                                <tr class="no-border-row">
+                                    <td>0     0</td>
+                                    <td>
+                                        <t
+                                            t-set="ceroformatted"
+                                            t-value="'{:,.2f}'.format(cero).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="ceroformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="ceroformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>III     Tasas</td>
+                                    <td>
+                                        <t
+                                            t-set="feesformatted"
+                                            t-value="'{:,.2f}'.format(fees).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="feesformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="feesformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>IIV     Imp. Int. Agua</td>
+                                    <td>
+                                        <t
+                                            t-set="internal_taxesformatted"
+                                            t-value="'{:,.2f}'.format(internal_taxes).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="internal_taxesformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="internal_taxesformatted" /></td>
+                                </tr>
+
+                                <!-- TOTALES -->
+                                <tr class="no-border-row total-row">
+                                    <td>TOTAL CF</td>
+                                    <td>
+                                        <t
+                                            t-set="total_exempt"
+                                            t-value="float(exempt + untaxed + cero + fees + internal_taxes)"
+                                        />
+                                        <t
+                                            t-set="total_exemptformatted"
+                                            t-value="'{:,.2f}'.format(total_exempt).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_exemptformatted" />
+                                    </td>
+                                    <td />
+                                    <td>
+                                        <t t-out="ni_nr_ex_monformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="total_net"
+                                            t-value="float(direct_taxednet + apportnet + direct_exemptnet)"
+                                        />
+                                        <t
+                                            t-set="total_netformatted"
+                                            t-value="'{:,.2f}'.format(total_net).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_netformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="total_vat"
+                                            t-value="float(direct_taxedvat + apportvat + direct_exemptvat)"
+                                        />
+                                        <t
+                                            t-set="total_vatformatted"
+                                            t-value="'{:,.2f}'.format(total_vat).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_vatformatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="direct_taxedvatformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="total"
+                                            t-value="float(direct_taxedtotal + apporttotal + direct_exempttotal + ni_nr_ex_mon + exempt + untaxed + cero + fees + internal_taxes)"
+                                        />
+                                        <t
+                                            t-set="totalformatted"
+                                            t-value="'{:,.2f}'.format(total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="totalformatted" />
+                                    </td>
+                                </tr>
+
+                                <!-- ************************************************************************ -->
+                                <!--                           REGIMENES ESPECIALES                           -->
+                                <tr class="no-border-row separator-row">
+                                    <td colspan="8">REGIMENES ESPECIALES</td>
+                                </tr>
+                                <t t-set="regime_total" t-value="0.0" />
+                                <t t-foreach="retention_perception" t-as="regime_line">
+                                    <t t-set="regime_total" t-value="regime_total + regime_line[1]" />
+                                    <tr class="no-border-row">
+                                        <td><t t-out="regime_line[0]" /></td>
+                                        <td><t t-out="regime_line[2]" /></td>
+                                        <td>
+                                            <t
+                                                t-set="amountformatted"
+                                                t-value="'{:,.2f}'.format(regime_line[1]).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                            />
+                                            <t t-out="amountformatted" />
+                                        </td>
+                                        <td />
+                                        <td />
+                                        <td />
+                                        <td />
+                                        <td><t t-out="amountformatted" /></td>
+                                    </tr>
+                                </t>
+                                <!-- TOTALES -->
+                                <tr class="no-border-row total-row">
+                                    <td>TOTAL RE</td>
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="regime_totalformatted"
+                                            t-value="'{:,.2f}'.format(regime_total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="regime_totalformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-out="regime_totalformatted" />
+                                    </td>
+                                </tr>
+
+                                <!-- ************************************************************************ -->
+                                <!--                  TOTAL DE OPERACIONES DEL SEGUNDO BLOQUE                 -->
+                                <tr class="no-border-row separator-row">
+                                    <td colspan="8"> <t t-out="second_block_apportionable_vat_title" /> </td>
+                                </tr>
+                                <!-- DIRECTO GRAVADO -->
+                                <tr class="no-border-row">
+                                    <td>DIRECTO GRAVADO</td>
+                                    <td>Tasa IVA 10.50%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refund00"
+                                            t-value="float(direct_taxed_refund[0][0])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refund00formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refund00).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refund00formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refund01"
+                                            t-value="float(direct_taxed_refund[0][1])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refund01formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refund01).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refund01formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="direct_taxed_refund01formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refund0total"
+                                            t-value="float(direct_taxed_refund[0][0] + direct_taxed_refund[0][1])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refund0totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refund0total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refund0totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 21.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refund10"
+                                            t-value="float(direct_taxed_refund[1][0])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refund10formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refund10).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refund10formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refund11"
+                                            t-value="float(direct_taxed_refund[1][1])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refund11formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refund11).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refund11formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="direct_taxed_refund11formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refund1total"
+                                            t-value="float(direct_taxed_refund[1][0] + direct_taxed_refund[1][1])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refund1totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refund1total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refund1totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 27.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refund20"
+                                            t-value="float(direct_taxed_refund[2][0])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refund20formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refund20).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refund20formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refund21"
+                                            t-value="float(direct_taxed_refund[2][1])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refund21formatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refund21).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refund21formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="direct_taxed_refund21formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refund2total"
+                                            t-value="float(direct_taxed_refund[2][0] + direct_taxed_refund[2][1])"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refund2totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refund2total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refund2totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row subtotal-row">
+                                    <td />
+                                    <td>Subtotal</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refundnet"
+                                            t-value="float(direct_taxed_refund00 + direct_taxed_refund10 + direct_taxed_refund20)"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refundnetformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refundnet).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refundnetformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refundvat"
+                                            t-value="float(direct_taxed_refund01 + direct_taxed_refund11 + direct_taxed_refund21)"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refundvatformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refundvat).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refundvatformatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="direct_taxed_refundvatformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_taxed_refundtotal"
+                                            t-value="float(direct_taxed_refund0total + direct_taxed_refund1total + direct_taxed_refund2total)"
+                                        />
+                                        <t
+                                            t-set="direct_taxed_refundtotalformatted"
+                                            t-value="'{:,.2f}'.format(direct_taxed_refundtotal).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_taxed_refundtotalformatted" />
+                                    </td>
+                                </tr>
+
+                                <!-- PRORRATEABLE -->
+                                <tr class="no-border-row">
+                                    <td>PRORRATEABLE</td>
+                                    <td>Tasa IVA 10.50%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="apport_refund00" t-value="float(apport_refund[0][0])" />
+                                        <t
+                                            t-set="apport_refund00formatted"
+                                            t-value="'{:,.2f}'.format(apport_refund00).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refund00formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="apport_refund01" t-value="float(apport_refund[0][1])" />
+                                        <t
+                                            t-set="apport_refund01formatted"
+                                            t-value="'{:,.2f}'.format(apport_refund01).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refund01formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="apport_refund0total"
+                                            t-value="float(apport_refund[0][0] + apport_refund[0][1])"
+                                        />
+                                        <t
+                                            t-set="apport_refund0totalformatted"
+                                            t-value="'{:,.2f}'.format(apport_refund0total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refund0totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 21.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="apport_refund10" t-value="float(apport_refund[1][0])" />
+                                        <t
+                                            t-set="apport_refund10formatted"
+                                            t-value="'{:,.2f}'.format(apport_refund10).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refund10formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="apport_refund11" t-value="float(apport_refund[1][1])" />
+                                        <t
+                                            t-set="apport_refund11formatted"
+                                            t-value="'{:,.2f}'.format(apport_refund11).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refund11formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="apport_refund1total"
+                                            t-value="float(apport_refund[1][0] + apport_refund[1][1])"
+                                        />
+                                        <t
+                                            t-set="apport_refund1totalformatted"
+                                            t-value="'{:,.2f}'.format(apport_refund1total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refund1totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 27.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t t-set="apport_refund20" t-value="float(apport_refund[2][0])" />
+                                        <t
+                                            t-set="apport_refund20formatted"
+                                            t-value="'{:,.2f}'.format(apport_refund20).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refund20formatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="apport_refund21" t-value="float(apport_refund[2][1])" />
+                                        <t
+                                            t-set="apport_refund21formatted"
+                                            t-value="'{:,.2f}'.format(apport_refund21).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refund21formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="apport_refund2total"
+                                            t-value="float(apport_refund[2][0] + apport_refund[2][1])"
+                                        />
+                                        <t
+                                            t-set="apport_refund2totalformatted"
+                                            t-value="'{:,.2f}'.format(apport_refund2total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refund2totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row subtotal-row">
+                                    <td />
+                                    <td>Subtotal</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="apport_refundnet"
+                                            t-value="float(apport_refund00 + apport_refund10 + apport_refund20)"
+                                        />
+                                        <t
+                                            t-set="apport_refundnetformatted"
+                                            t-value="'{:,.2f}'.format(apport_refundnet).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refundnetformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="apport_refundvat"
+                                            t-value="float(apport_refund01 + apport_refund11 + apport_refund21)"
+                                        />
+                                        <t
+                                            t-set="apport_refundvatformatted"
+                                            t-value="'{:,.2f}'.format(apport_refundvat).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refundvatformatted" />
+                                    </td>
+                                    <td>
+                                        Sujeto a prorrateo
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="apport_refundtotal"
+                                            t-value="float(apport_refund0total + apport_refund1total + apport_refund2total)"
+                                        />
+                                        <t
+                                            t-set="apport_refundtotalformatted"
+                                            t-value="'{:,.2f}'.format(apport_refundtotal).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="apport_refundtotalformatted" />
+                                    </td>
+                                </tr>
+
+                                <!-- DIRECTO EXENTO -->
+                                <tr class="no-border-row">
+                                    <td>DIRECTO EXENTO</td>
+                                    <td>Tasa IVA 10.50%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refund00"
+                                            t-value="float(direct_exempt_refund[0][0])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refund00formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refund00).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refund00formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refund01"
+                                            t-value="float(direct_exempt_refund[0][1])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refund01formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refund01).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refund01formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refund0total"
+                                            t-value="float(direct_exempt_refund[0][0] + direct_exempt_refund[0][1])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refund0totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refund0total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refund0totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 21.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refund10"
+                                            t-value="float(direct_exempt_refund[1][0])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refund10formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refund10).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refund10formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refund11"
+                                            t-value="float(direct_exempt_refund[1][1])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refund11formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refund11).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refund11formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refund1total"
+                                            t-value="float(direct_exempt_refund[1][0] + direct_exempt_refund[1][1])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refund1totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refund1total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refund1totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td />
+                                    <td>Tasa IVA 27.00%</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refund20"
+                                            t-value="float(direct_exempt_refund[2][0])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refund20formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refund20).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refund20formatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refund21"
+                                            t-value="float(direct_exempt_refund[2][1])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refund21formatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refund21).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refund21formatted" />
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refund2total"
+                                            t-value="float(direct_exempt_refund[2][0] + direct_exempt_refund[2][1])"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refund2totalformatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refund2total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refund2totalformatted" />
+                                    </td>
+                                </tr>
+                                <tr class="no-border-row subtotal-row">
+                                    <td />
+                                    <td>Subtotal</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refundnet"
+                                            t-value="float(direct_exempt_refund00 + direct_exempt_refund10 + direct_exempt_refund20)"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refundnetformatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refundnet).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refundnetformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refundvat"
+                                            t-value="float(direct_exempt_refund01 + direct_exempt_refund11 + direct_exempt_refund21)"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refundvatformatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refundvat).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refundvatformatted" />
+                                    </td>
+                                    <td>
+                                        No computable
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="direct_exempt_refundtotal"
+                                            t-value="float(direct_exempt_refund0total + direct_exempt_refund1total + direct_exempt_refund2total)"
+                                        />
+                                        <t
+                                            t-set="direct_exempt_refundtotalformatted"
+                                            t-value="'{:,.2f}'.format(direct_exempt_refundtotal).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="direct_exempt_refundtotalformatted" />
+                                    </td>
+                                </tr>
+
+                                <!-- NI, NR, Exento, Monot., NCat -->
+                                <tr class="no-border-row">
+                                    <td>NI, NR, Exento, Monot., NCat</td>
+                                    <td />
+                                    <td />
+                                    <td>
+                                        <t
+                                            t-set="ni_nr_ex_mon_refundformatted"
+                                            t-value="'{:,.2f}'.format(ni_nr_ex_mon_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="ni_nr_ex_mon_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="ni_nr_ex_mon_refundformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>Exento</td>
+                                    <td>
+                                        <t
+                                            t-set="exempt_refundformatted"
+                                            t-value="'{:,.2f}'.format(exempt_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="exempt_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="exempt_refundformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>No alcanzado</td>
+                                    <td>
+                                        <t
+                                            t-set="untaxed_refundformatted"
+                                            t-value="'{:,.2f}'.format(untaxed_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="untaxed_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="untaxed_refundformatted" /></td>
+                                </tr>
+
+                                <!-- 0, Tasas, Imp. Internos -->
+                                <tr class="no-border-row">
+                                    <td>0     0</td>
+                                    <td>
+                                        <t
+                                            t-set="cero_refundformatted"
+                                            t-value="'{:,.2f}'.format(cero_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="cero_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="cero_refundformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>III     Tasas</td>
+                                    <td>
+                                        <t
+                                            t-set="fees_refundformatted"
+                                            t-value="'{:,.2f}'.format(fees_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="fees_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="fees_refundformatted" /></td>
+                                </tr>
+                                <tr class="no-border-row">
+                                    <td>IIV     Imp. Int. Agua</td>
+                                    <td>
+                                        <t
+                                            t-set="internal_taxes_refundformatted"
+                                            t-value="'{:,.2f}'.format(internal_taxes_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="internal_taxes_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td />
+                                    <td><t t-out="internal_taxes_refundformatted" /></td>
+                                </tr>
+
+                                <!-- TOTALES -->
+                                <tr class="no-border-row total-row">
+                                    <td>TOTAL DF</td>
+                                    <td>
+                                        <t
+                                            t-set="total_exempt_refund"
+                                            t-value="float(exempt_refund + untaxed_refund + cero_refund + fees_refund + internal_taxes_refund)"
+                                        />
+                                        <t
+                                            t-set="total_exempt_refundformatted"
+                                            t-value="'{:,.2f}'.format(total_exempt_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_exempt_refundformatted" />
+                                    </td>
+                                    <td />
+                                    <td>
+                                        <t t-out="ni_nr_ex_mon_refundformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="total_net_refund"
+                                            t-value="float(direct_taxed_refundnet + apport_refundnet + direct_exempt_refundnet)"
+                                        />
+                                        <t
+                                            t-set="total_net_refundformatted"
+                                            t-value="'{:,.2f}'.format(total_net_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_net_refundformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="total_vat_refund"
+                                            t-value="float(direct_taxed_refundvat + apport_refundvat + direct_exempt_refundvat)"
+                                        />
+                                        <t
+                                            t-set="total_vat_refundformatted"
+                                            t-value="'{:,.2f}'.format(total_vat_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_vat_refundformatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="direct_taxed_refundvatformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="total_refund"
+                                            t-value="float(direct_taxed_refundtotal + apport_refundtotal + direct_exempt_refundtotal + total_exempt_refund + ni_nr_ex_mon_refund)"
+                                        />
+                                        <t
+                                            t-set="total_refundformatted"
+                                            t-value="'{:,.2f}'.format(total_refund).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_refundformatted" />
+                                    </td>
+                                </tr>
+
+                                <!-- ************************************************************************ -->
+                                <!--                                TOTAL GLOBAL                              -->
+                                <tr class="no-border-row total-row global-row">
+                                    <td><strong>Totales al <t t-out="date_end" /></strong></td>
+                                    <td>
+                                        <t
+                                            t-set="total_exempt_global"
+                                            t-value="total_exempt + total_exempt_refund"
+                                        />
+                                        <t
+                                            t-set="total_exempt_globalformatted"
+                                            t-value="'{:,.2f}'.format(total_exempt_global).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_exempt_globalformatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="regime_totalformatted" />
+                                    </td>
+                                    <td>
+                                        <t
+                                            t-set="total_ni_nr_ex_mon_global"
+                                            t-value="ni_nr_ex_mon + ni_nr_ex_mon_refund"
+                                        />
+                                        <t
+                                            t-set="total_ni_nr_ex_mon_globalformatted"
+                                            t-value="'{:,.2f}'.format(total_ni_nr_ex_mon_global).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_ni_nr_ex_mon_globalformatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="total_net_global" t-value="total_net + total_net_refund" />
+                                        <t
+                                            t-set="total_net_globalformatted"
+                                            t-value="'{:,.2f}'.format(total_net_global).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_net_globalformatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="total_vat_global" t-value="total_vat + total_vat_refund" />
+                                        <t
+                                            t-set="total_vat_globalformatted"
+                                            t-value="'{:,.2f}'.format(total_vat_global).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_vat_globalformatted" />
+                                    </td>
+                                    <td>
+                                        <t t-out="total_vat_globalformatted" />
+                                    </td>
+                                    <td>
+                                        <t t-set="total_global" t-value="float(total + total_refund)" />
+                                        <t
+                                            t-set="total_globalformatted"
+                                            t-value="'{:,.2f}'.format(total_global).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_globalformatted" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <style>
+                        .no-border-row {
+                            border: transparent;
+                            font-size: 11px;
+                        }
+                        .separator-row {
+                            font-size: 13px;
+                            font-weight: bold;
+                            margin-top: 20px;
+                        }
+                        .subtotal-row td {
+                            border-top-width: 1px !important;
+                            border-top-color: black !important;
+                            border-top-style: solid !important;
+                            font-weight: bold;
+                            font-size: 11px;
+                        }
+                        .total-row td {
+                            border-top-width: 1px !important;
+                            border-top-color: black !important;
+                            border-top-style: solid !important;
+                            border-bottom-width: 1px !important;
+                            border-bottom-color: black !important;
+                            border-bottom-style: solid !important;
+                            font-weight: bold;
+                            font-size: 11px;
+                        }
+                        .global-row {
+                            font-size: 13px;
+                        }
+                    </style>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

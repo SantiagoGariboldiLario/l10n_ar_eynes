@@ -49,15 +49,15 @@ class SubjournalXlsx(models.AbstractModel):
         else:
             return ['in_invoice', 'in_refund', 'in_debit']
 
-    def _get_exempt_taxes(self, cols):
-        exempt_vat_ids = set()
-        for tax in cols:
-            if tax.get('is_exempt', False):
-                if tax.get('id', False):
-                    exempt_vat_ids.add(tax.get('id', False))
-                for tid in tax.get('ids', []):
-                    exempt_vat_ids.add(tid)
-        return exempt_vat_ids
+    # def _get_exempt_taxes(self, cols):
+    #     exempt_vat_ids = set()
+    #     for tax in cols:
+    #         if tax.get('is_exempt', False):
+    #             if tax.get('id', False):
+    #                 exempt_vat_ids.add(tax.get('id', False))
+    #             for tid in tax.get('ids', []):
+    #                 exempt_vat_ids.add(tid)
+    #     return exempt_vat_ids
 
     def get_invoice_type(self, inv_type, denom, is_debit):
         fiscal_type = "F"
@@ -193,7 +193,7 @@ class SubjournalXlsx(models.AbstractModel):
 
         c_taxes = [0] * len(cols)
         final_consumer_id = self.env.ref('l10n_ar_eynes.fiscal_position_cf').id
-        self._get_exempt_taxes(cols)
+        # self._get_exempt_taxes(cols)
 
         lines = {}
         last_line_id = -1
