@@ -629,7 +629,7 @@ class AccountTax(models.Model):
             'amount_tax': amount_tax,
             'amount_no_taxed': amount_no_taxed,
             'amount_total': amount_total,
-            'concept_lines': taxed_mls,
+            'concept_lines': taxed_mls + untaxed_mls,
             'tax_lines': tax_lines,
         }
         return result
