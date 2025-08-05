@@ -323,28 +323,6 @@ class WsfeConfig(models.Model):
 
         return cotizacion, error_msg + events_msg + obs_msg
 
-    def _check_vat_taxes_configured(self, invoice_vat_lines):
-        self.ensure_one()
-        afip_taxes = self.vat_tax_ids.mapped('tax_id')
-
-        not_found_tax = invoice_vat_lines.filtered(
-            lambda x: x.tax_line_id not in afip_taxes
-        )
-        if not_found_tax:
-            raise UserError(
-                _("Taxes `%s` are not configured in WSFE!")
-                % (", ").join(not_found_tax.mapped('tax_line_id.name'))
-            )
-
-    def _get_vat_array(self, invoice):
-        invoice_vat_lines = invoice.line_ids.filtered(
-            lambda x: x.tax_line_id
-            and x.tax_group_id
-            and x.tax_group_id.group_type == 'vat'
-        )
-        self._check_vat_taxes_configured(invoice_vat_lines)
-        return invoice_vat_lines
-
     def _get_next_number(self, ws, tipo_cbte, pto_vta):
         _logger.info(
             "Checking last voucher informed to AFIP - Type: %s, POS: %s"
@@ -405,8 +383,7 @@ class WsfeConfig(models.Model):
         helper = WSFEParser()
         data = helper.parse_invoice(invoice)
         punto_vta = self._match_invoice_pos(invoice)
-        vat_lines = self._get_vat_array(invoice)
-        vat_data = helper.parse_vat_lines(invoice, vat_lines, self.vat_tax_ids)
+        vat_data = helper.parse_vat_lines(invoice, self.vat_tax_ids)
         tribute_data = helper.parse_taxes_not_vat(invoice)
         associated_data = helper.parse_associated_voucher(invoice)
         associated_period_data = helper.parse_associated_period(invoice)
