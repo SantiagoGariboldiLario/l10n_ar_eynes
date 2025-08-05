@@ -329,6 +329,7 @@ class AccountPaymentOrder(models.Model):
     other_payment = fields.Boolean(string='Other Payments')
     employee_id = fields.Many2one('hr.employee', string="Employee")
     employee_payment = fields.Boolean(string='Employee Payments')
+    posted_before = fields.Boolean(default=False)
 
     @api.model
     def get_views(self, views, options=None):
@@ -1229,13 +1230,13 @@ class AccountPaymentOrder(models.Model):
         except Exception as e:
             self.cancel_voucher()
             self.action_cancel_draft()
-            self.write(
-                {
-                    'move_id': False,
-                    'state': 'draft',
-                    'number': False,
-                }
-            )
+            vals = {
+                'move_id': False,
+                'state': 'draft',
+            }
+            if not self.posted_before:
+                vals['number'] = False
+            self.write(vals)
             self.flush_recordset()
 
             context = dict(self._context or {})
@@ -1259,13 +1260,14 @@ class AccountPaymentOrder(models.Model):
         self.retention_ids.write_defaults(
             retention_vals, self.disable_retentions
         )
-        self.write(
-            {
-                'move_id': move_id,
-                'state': 'posted',
-                'number': self.get_next_sequence(consume=True),
-            }
-        )
+        vals = {
+            'move_id': move_id,
+            'state': 'posted',
+            'posted_before': True,
+        }
+        if not self.posted_before:
+            vals['number'] = self.get_next_sequence(consume=True)
+        self.write(vals)
         return True
 
     def _get_income_amount(self):
