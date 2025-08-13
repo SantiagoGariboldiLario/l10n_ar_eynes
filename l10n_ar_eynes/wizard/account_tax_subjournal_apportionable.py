@@ -26,8 +26,8 @@ def _clean_tax_name(name):
         ' sufrido': '',
         ' Sufrida': '',
         ' sufrida': '',
-        'Ventas ': '',
-        'Compras ': '',
+        'IVA Ventas ': '',
+        'IVA Compras ': '',
         'Ganancias ': 'Gcias.',
         'Impuesto ': 'Imp.',
         'Interno ': 'Int.',
@@ -145,8 +145,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
     def _get_columns(self):
         taxes = self._get_taxes_vals()
         all_taxes = []
-        i = 0
-        base_first = self.base_position == 'first'
+        vat_taxes = []
 
         already_vat = False
         already_gross = False
@@ -155,113 +154,95 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
         for tax in taxes:
             tax_id = tax.get('tax_id', False)
             if tax_id:
-                retention_type = tax.get('retention_type', '')
-                if self.perception_retention_grouped and retention_type in [
-                    'gross_income',
-                    'vat',
-                    'profit',
-                ]:
-                    if retention_type == 'gross_income' and not already_gross:
-                        already_gross = True
-                        gross_vals = {
-                            'id': False,
-                            'ids': [
-                                t.get('tax_id', False)
-                                for t in taxes
-                                if t.get('retention_type', '') == 'gross_income'
-                            ],
-                            'names': [
-                                t.get('name', '')
-                                for t in taxes
-                                if t.get('retention_type', '') == 'gross_income'
-                            ],
-                            'is_exempt': tax.get('is_exempt', False),
-                            'name': 'Retenciones / Percepciones IIBB',
-                            'type': 'gross_income',
-                            'column': 7 + i,
-                        }
-                        i += 1
-                        all_taxes.append(gross_vals)
-                    elif retention_type == 'vat' and not already_vat:
-                        already_vat = True
-                        vat_vals = {
-                            'id': False,
-                            'ids': [
-                                t.get('tax_id', False)
-                                for t in taxes
-                                if t.get('retention_type', '') == 'vat'
-                            ],
-                            'names': [
-                                t.get('name', '')
-                                for t in taxes
-                                if t.get('retention_type', '') == 'vat'
-                            ],
-                            'is_exempt': tax.get('is_exempt', False),
-                            'name': 'Retenciones / Percepciones IVA',
-                            'type': 'vat',
-                            'column': 7 + i,
-                        }
-                        i += 1
-                        all_taxes.append(vat_vals)
-                    elif retention_type == 'profit' and not already_income:
-                        already_income = True
-                        income_vals = {
-                            'id': False,
-                            'ids': [
-                                t.get('tax_id', False)
-                                for t in taxes
-                                if t.get('retention_type', '') == 'profit'
-                            ],
-                            'names': [
-                                t.get('name', '')
-                                for t in taxes
-                                if t.get('retention_type', '') == 'profit'
-                            ],
-                            'is_exempt': tax.get('is_exempt', False),
-                            'name': 'Retenciones / Percepciones Ganancias',
-                            'type': 'profit',
-                            'column': 7 + i,
-                        }
-                        i += 1
-                        all_taxes.append(income_vals)
-                    continue
-
                 name = tax.get('name', '')
                 name = name.get('es_AR', name.get('en_US', '')) if name else ''
-                if (tax.get('group_type', '') == 'vat') and base_first:
-                    base_vals = {
-                        'id': tax_id,
-                        'is_exempt': tax.get('is_exempt', False),
-                        'name': 'Base ' + name,
-                        'type': 'base',
-                        'column': 7 + i,
-                    }
-                    all_taxes.append(base_vals)
-                    i += 1
-
                 tax_vals = {
                     'id': tax_id,
                     'is_exempt': tax.get('is_exempt', False),
                     'name': name,
                     'type': 'tax',
-                    'column': 7 + i,
                 }
-                all_taxes.append(tax_vals)
-                i += 1
+                if tax.get('group_type', '') == 'vat':
+                    vat_taxes.append(tax_vals)
+                else:
+                    retention_type = tax.get('retention_type', '')
+                    if (
+                        self.perception_retention_grouped
+                        and retention_type
+                        in [
+                            'gross_income',
+                            'vat',
+                            'profit',
+                        ]
+                    ):
+                        if (
+                            retention_type == 'gross_income'
+                            and not already_gross
+                        ):
+                            already_gross = True
+                            gross_vals = {
+                                'id': False,
+                                'ids': [
+                                    t.get('tax_id', False)
+                                    for t in taxes
+                                    if t.get('retention_type', '')
+                                    == 'gross_income'
+                                ],
+                                'names': [
+                                    t.get('name', '')
+                                    for t in taxes
+                                    if t.get('retention_type', '')
+                                    == 'gross_income'
+                                ],
+                                'is_exempt': tax.get('is_exempt', False),
+                                'name': 'Retenciones / Percepciones IIBB',
+                                'type': 'gross_income',
+                            }
+                            all_taxes.append(gross_vals)
+                        elif retention_type == 'vat' and not already_vat:
+                            already_vat = True
+                            vat_vals = {
+                                'id': False,
+                                'ids': [
+                                    t.get('tax_id', False)
+                                    for t in taxes
+                                    if t.get('retention_type', '') == 'vat'
+                                ],
+                                'names': [
+                                    t.get('name', '')
+                                    for t in taxes
+                                    if t.get('retention_type', '') == 'vat'
+                                ],
+                                'is_exempt': tax.get('is_exempt', False),
+                                'name': 'Retenciones / Percepciones IVA',
+                                'type': 'vat',
+                            }
+                            all_taxes.append(vat_vals)
+                        elif retention_type == 'profit' and not already_income:
+                            already_income = True
+                            income_vals = {
+                                'id': False,
+                                'ids': [
+                                    t.get('tax_id', False)
+                                    for t in taxes
+                                    if t.get('retention_type', '') == 'profit'
+                                ],
+                                'names': [
+                                    t.get('name', '')
+                                    for t in taxes
+                                    if t.get('retention_type', '') == 'profit'
+                                ],
+                                'is_exempt': tax.get('is_exempt', False),
+                                'name': 'Retenciones / Percepciones Ganancias',
+                                'type': 'profit',
+                            }
+                            all_taxes.append(income_vals)
+                        continue
 
-                if (tax.get('group_type', '') == 'vat') and not base_first:
-                    base_vals = {
-                        'id': tax_id,
-                        'is_exempt': tax.get('is_exempt', False),
-                        'name': 'Base ' + name,
-                        'type': 'base',
-                        'column': 7 + i,
-                    }
-                    all_taxes.append(base_vals)
-                    i += 1
-        return all_taxes
+                    all_taxes.append(tax_vals)
+        return all_taxes, vat_taxes
 
-    def _group_lines_data(self, cols):
+    def _group_lines_data(self, cols, vat_cols):  # noqa: C901
         query_vals = self._get_line_vals()
         if not len(query_vals):
             raise UserError(_('There were no moves for this period'))
@@ -303,10 +284,9 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                         'partner_name': 'Agrupado CF monto menor a %s'
                         % round(self.grouped_max_amount, 2),
                         'partner_vat': '',
-                        'province': '',
-                        'partner_fiscal_pos': line['fiscal_position'],
                         'total': 0.0,
                         'taxes': [0] * len(cols),
+                        'vat_taxes': {},
                         'no_taxed': 0.0,
                     },
                 )
@@ -319,10 +299,9 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                         'invoice_type': invoice_type,
                         'partner_name': line['partner'],
                         'partner_vat': line['vat'],
-                        'province': line['state'],
-                        'partner_fiscal_pos': line['fiscal_position'],
                         'total': 0.0,
                         'taxes': [0] * len(cols),
+                        'vat_taxes': {},
                         'no_taxed': 0.0,
                     },
                 )
@@ -362,33 +341,64 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     if lines[key]['taxes'][i] != 0:
                         c_taxes[i] += 1
 
+            for _i, tax in enumerate(vat_cols):
+                tax_id = tax.get('id', -1)
+                if (
+                    # LINEA DE PRODUCTO (BASE DE IMPUESTO)
+                    line['tax_ids']
+                    == tax_id
+                ):
+                    lines[key]['vat_taxes'].setdefault(
+                        tax_id,
+                        {
+                            'amount': 0.0,
+                            'name': _clean_tax_name(tax.get('name', '')),
+                        },
+                    )
+                    lines[key]['vat_taxes'][tax_id].setdefault(
+                        line['fiscal_credit'], 0.0
+                    )
+                    lines[key]['vat_taxes'][tax_id][
+                        line['fiscal_credit']
+                    ] += amount
+                if (
+                    # LINEA DE IMPUESTO
+                    line['tax_line_id']
+                    == tax_id
+                ):
+                    lines[key]['vat_taxes'][tax_id]['amount'] += amount
+
             if not (line['tax_line_id'] or line['tax_ids']):
                 # SI NO ES LINEA DE IMPUESTO O ES LINEA SIN IMPUESTOS CORRESPONDE A NO GRAVADO
                 lines[key]['no_taxed'] += amount
 
         return lines, c_taxes, retention_perception_summary
 
-    def _get_lines(self, cols):
+    def _get_lines(self, cols, vat_cols):
         lines, c_taxes, retention_perception_summary = self._group_lines_data(
-            cols
+            cols, vat_cols
         )
-
+        fiscal_credit_name = {
+            'direct_taxed': 'Directo Gravado',
+            'direct_exempt': 'Directo Exento',
+            'apport': 'Prorrateable',
+        }
         new_lines = []
-        totals = [0] * (len(cols) + 2)  # +2 for no_taxed and total
-        totals_fc_nd = [0] * (len(cols) + 2)  # +2 for no_taxed and total
-        totals_nc = [0] * (len(cols) + 2)  # +2 for no_taxed and total
+        totals = [0] * (
+            len(cols) + 4
+        )  # +4 for base_vat, vat, no_taxed and total
+        totals_fc_nd = [0] * (
+            len(cols) + 4
+        )  # +4 for base_vat, vat, no_taxed and total
+        totals_nc = [0] * (
+            len(cols) + 4
+        )  # +4 for base_vat, vat, no_taxed and total
         for line in lines.values():
-            new_lines.append(
+            new_line = (
                 [
                     line['date'],
-                    line['partner_name'],
-                    line.get('state', '').replace(
-                        'Ciudad Autónoma de Buenos Aires', 'CABA'
-                    ),
+                    line['partner_name'][:20],
                     line['partner_vat'],
-                    line['partner_fiscal_pos']
-                    .get('es_AR', line['partner_fiscal_pos'].get('en_US', ''))
-                    .replace('Responsable', 'Resp.'),
                     line['invoice_type'],
                     line['invoice_number'],
                 ]
@@ -398,7 +408,36 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     line['total'],
                 ]
             )
+
+            first_vat = True
+            for vat_values in line['vat_taxes'].values():
+                vat_split = list(vat_values.keys())
+                vat_split.remove('amount')
+                vat_split.remove('name')
+                for fiscal_credit in vat_split:
+                    if not first_vat:
+                        new_line = [''] * 5
+                        new_line = new_line + (
+                            [0] * (len(cols) + 2)
+                        )  # +2 for no_taxed and total
+                    new_line.insert(5, vat_values[fiscal_credit])
+                    new_line.insert(6, vat_values['name'])
+                    new_line.insert(7, vat_values['amount'])
+                    new_line.insert(8, fiscal_credit_name[fiscal_credit])
+                    new_lines.append(new_line)
+                    first_vat = False
+
+                    totals[0] += vat_values[fiscal_credit]
+                    totals[1] += vat_values['amount']
+                    if line['invoice_type'].startswith('NC'):
+                        totals_nc[0] += vat_values[fiscal_credit]
+                        totals_nc[1] += vat_values['amount']
+                    else:
+                        totals_fc_nd[0] += vat_values[fiscal_credit]
+                        totals_fc_nd[1] += vat_values['amount']
+
             for i, amount in enumerate(line['taxes']):
+                i = i + 2
                 totals[i] += amount
                 if line['invoice_type'].startswith('NC'):
                     totals_nc[i] += amount
@@ -413,6 +452,13 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             else:
                 totals_fc_nd[-2] += line['no_taxed']
                 totals_fc_nd[-1] += line['total']
+
+        totals.insert(1, '')
+        totals.insert(3, '')
+        totals_nc.insert(1, '')
+        totals_nc.insert(3, '')
+        totals_fc_nd.insert(1, '')
+        totals_fc_nd.insert(3, '')
 
         new_retention_perception_summary = []
         for line in retention_perception_summary.values():
@@ -449,18 +495,16 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                 l.tax_line_id AS tax_line_id,
                 l.credit AS credit,
                 l.debit AS debit,
-                p.id AS partner_id,
+                l.fiscal_credit AS fiscal_credit,
+                rp.id AS partner_id,
                 afp.name AS fiscal_position,
                 afp.id AS fpid,
                 rp.name AS partner,
                 rp.vat AS vat,
-                rcs.name AS state,
                 amlatr.account_tax_id AS tax_ids
             FROM account_move_line l
             JOIN account_move i ON i.id = l.move_id
             JOIN res_partner rp ON rp.id = i.partner_id
-            LEFT JOIN res_country_state rcs ON rcs.id = rp.state_id
-            JOIN res_partner p ON p.id = i.partner_id
             JOIN account_account a ON a.id = l.account_id
             JOIN account_fiscal_position afp ON afp.id = i.fiscal_position_id
             LEFT JOIN account_move_line_account_tax_rel amlatr
@@ -484,9 +528,6 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             'company_id': self.company_id.id,
             'date_from': self.date_from,
             'date_to': self.date_to,
-            'grouped': self.grouped,
-            'grouped_max': self.grouped_max_amount,
-            'fiscal_id': self.env.ref('l10n_ar_eynes.fiscal_position_cf').id,
         }
 
         self._cr.execute(q, q_vals)
@@ -753,7 +794,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
     def run(self):
         self._do_validations()
 
-        cols = self._get_columns()
+        cols, vat_cols = self._get_columns()
         (
             invoice_lines,
             totals,
@@ -761,9 +802,9 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             totals_nc,
             c_taxes,
             retention_perception_summary,
-        ) = self._get_lines(cols)
+        ) = self._get_lines(cols, vat_cols)
 
-        invoice_list_header = []
+        invoice_list_header = ['Base', '%', 'IVA', 'Asig.CF']
         for i, col in enumerate(cols):
             if c_taxes[i] > 0:
                 invoice_list_header.append(_clean_tax_name(col['name']))
