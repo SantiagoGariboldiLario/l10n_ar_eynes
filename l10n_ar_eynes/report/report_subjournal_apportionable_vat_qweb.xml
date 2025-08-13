@@ -45,10 +45,8 @@
                             <thead class="no-border-row">
                                 <tr>
                                     <th style="width: 5.5%;">Fecha</th>
-                                    <th style="width: 10%;">Razon Social</th>
-                                    <th style="width: 6%;">Provincia</th>
+                                    <th style="width: 6%">Razon Social</th>
                                     <th style="width: 6%;">CUIT</th>
-                                    <th style="width: 8%;">Cond. IVA</th>
                                     <th style="width: 2.5%;">Tipo</th>
                                     <th style="width: 7%;">Numero</th>
                                     <t t-foreach="invoice_list_header" t-as="header">
@@ -64,7 +62,7 @@
                                 <t t-foreach="invoice_lines" t-as="line">
                                     <tr class="no-border-row">
                                         <t t-foreach="range(len(line))" t-as="index">
-                                            <t t-if="index > 6">
+                                            <t t-if="(index == 5 or index > 6) and index != 8">
                                                 <td style="text-align: right;">
                                                     <t t-set="amount_line" t-value="float(line[index])" />
                                                     <t
@@ -76,9 +74,7 @@
                                             </t>
                                             <t t-else="">
                                                 <t t-if="index == 1">
-                                                    <td
-                                                        style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"
-                                                    >
+                                                    <td style="overflow: hidden; white-space: nowrap;">
                                                         <t t-out="line[index]" />
                                                     </td>
                                                 </t>
@@ -93,42 +89,57 @@
                                 </t>
                                 <!-- TOTALES -->
                                 <tr class="no-border-row total-row">
-                                    <td colspan="7">TOTALES</td>
+                                    <td colspan="5">TOTALES</td>
                                     <t t-foreach="totals" t-as="total">
-                                        <td style="text-align: right;">
-                                            <t t-set="total" t-value="float(total)" />
-                                            <t
-                                                t-set="total_formatted"
-                                                t-value="'{:,.2f}'.format(total).replace(',', 'X').replace('.', ',').replace('X', '.')"
-                                            />
-                                            <t t-out="total_formatted" />
-                                        </td>
+                                        <t t-if="total == ''">
+                                            <td><t t-out="''" /></td>
+                                        </t>
+                                        <t t-else="">
+                                            <td style="text-align: right;">
+                                                <t t-set="total" t-value="float(total)" />
+                                                <t
+                                                    t-set="total_formatted"
+                                                    t-value="'{:,.2f}'.format(total).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                                />
+                                                <t t-out="total_formatted" />
+                                            </td>
+                                        </t>
                                     </t>
                                 </tr>
                                 <tr class="no-border-row total-row">
-                                    <td colspan="7">TOTALES FC/ND</td>
+                                    <td colspan="5">TOTALES FC/ND</td>
                                     <t t-foreach="totals_fc_nd" t-as="total_fc_nd">
-                                        <td style="text-align: right;">
-                                            <t t-set="total_fc_nd" t-value="float(total_fc_nd)" />
-                                            <t
-                                                t-set="total_fc_nd_formatted"
-                                                t-value="'{:,.2f}'.format(total_fc_nd).replace(',', 'X').replace('.', ',').replace('X', '.')"
-                                            />
-                                            <t t-out="total_fc_nd_formatted" />
-                                        </td>
+                                        <t t-if="total_fc_nd == ''">
+                                            <td><t t-out="''" /></td>
+                                        </t>
+                                        <t t-else="">
+                                            <td style="text-align: right;">
+                                                <t t-set="total_fc_nd" t-value="float(total_fc_nd)" />
+                                                <t
+                                                    t-set="total_fc_nd_formatted"
+                                                    t-value="'{:,.2f}'.format(total_fc_nd).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                                />
+                                                <t t-out="total_fc_nd_formatted" />
+                                            </td>
+                                        </t>
                                     </t>
                                 </tr>
                                 <tr class="no-border-row total-row">
-                                    <td colspan="7">TOTALES NC</td>
+                                    <td colspan="5">TOTALES NC</td>
                                     <t t-foreach="totals_nc" t-as="total_nc">
-                                        <td style="text-align: right;">
-                                            <t t-set="total_nc" t-value="float(total_nc)" />
-                                            <t
-                                                t-set="total_nc_formatted"
-                                                t-value="'{:,.2f}'.format(total_nc).replace(',', 'X').replace('.', ',').replace('X', '.')"
-                                            />
-                                            <t t-out="total_nc_formatted" />
-                                        </td>
+                                        <t t-if="total_nc == ''">
+                                            <td><t t-out="''" /></td>
+                                        </t>
+                                        <t t-else="">
+                                            <td style="text-align: right;">
+                                                <t t-set="total_nc" t-value="float(total_nc)" />
+                                                <t
+                                                    t-set="total_nc_formatted"
+                                                    t-value="'{:,.2f}'.format(total_nc).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                                />
+                                                <t t-out="total_nc_formatted" />
+                                            </td>
+                                        </t>
                                     </t>
                                 </tr>
                             </tbody>
