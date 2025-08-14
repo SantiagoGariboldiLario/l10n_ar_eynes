@@ -366,6 +366,13 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     line['tax_line_id']
                     == tax_id
                 ):
+                    lines[key]['vat_taxes'].setdefault(
+                        tax_id,
+                        {
+                            'amount': 0.0,
+                            'name': _clean_tax_name(tax.get('name', '')),
+                        },
+                    )
                     lines[key]['vat_taxes'][tax_id]['amount'] += amount
 
             if not (line['tax_line_id'] or line['tax_ids']):
