@@ -166,17 +166,10 @@ class AccountMove(models.Model):
     dst_country_id = fields.Many2one('wsfex.dst.country.codes', 'Dest Country')
     dst_cuit_id = fields.Many2one('dst.cuit.codes', 'Country CUIT')
     export_type_id = fields.Many2one('wsfex.export.type.codes', 'Export Type')
-    same_currency_cancel = fields.Boolean(default=False)
     shipping_perm_ids = fields.One2many(
         'wsfex.shipping.permission',
         'invoice_id',
         'Shipping Permissions',
-    )
-    show_same_currency_cancel = fields.Boolean(
-        compute='_compute_show_same_currency_cancel'
-    )
-    show_get_arca_currency_btn = fields.Boolean(
-        compute='_compute_show_get_arca_currency_btn'
     )
     # REPORTE LIBRO IVA DIGITAL:
     iva_digital_operation_code = fields.Selection(
@@ -227,6 +220,13 @@ class AccountMove(models.Model):
         default=False,
         help="""Fields with internal purpose only that depicts
                 if the invoice is a multi currency one or not""",
+    )
+    same_currency_cancel = fields.Boolean(default=False)
+    show_get_arca_currency_btn = fields.Boolean(
+        compute='_compute_show_get_arca_currency_btn'
+    )
+    show_same_currency_cancel = fields.Boolean(
+        compute='_compute_show_same_currency_cancel'
     )
     secondary_currency_id = fields.Many2one(
         'res.currency',
@@ -1054,15 +1054,14 @@ class AccountMove(models.Model):
                         base = tax['tax_group_base_amount']
             if amount > 0:
                 # Se generan las líneas de impuestos internos y se asocian a la factura
+                internal_tax_group = self.env['account.tax.group'].search(
+                    [('group_type', '=', 'internals')]
+                )
                 internal_taxes = self.env['account.tax'].search(
                     [
                         ('company_id', '=', self.company_id.id),
                         ('type_tax_use', '=', 'sale'),
-                        (
-                            'tax_group_id',
-                            '=',
-                            self.env.ref('l10n_ar_eynes.internal_tax_group').id,
-                        ),
+                        ('tax_group_id', '=', internal_tax_group.id),
                     ],
                     limit=1,
                 )

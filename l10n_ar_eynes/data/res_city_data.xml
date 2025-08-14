@@ -42798,13 +42798,6 @@
     <field name="state_id" ref="base.state_ar_s" />
     <field name="country_id" ref="base.ar" />
   </record>
-  <record id="city_198_3061" model="res.city">
-    <field name="name">Antonio Pini</field>
-    <field name="zipcode">3061</field>
-    <field name="afip_code">198</field>
-    <field name="state_id" ref="base.state_ar_g" />
-    <field name="country_id" ref="base.ar" />
-  </record>
   <record id="city_2627_3061" model="res.city">
     <field name="name">Cabeza De Chancho</field>
     <field name="zipcode">3061</field>
@@ -163699,13 +163692,6 @@
     <field name="state_id" ref="base.state_ar_u" />
     <field name="country_id" ref="base.ar" />
   </record>
-  <record id="city_16158_8532" model="res.city">
-    <field name="name">Sierra Grande</field>
-    <field name="zipcode">8532</field>
-    <field name="afip_code">16158</field>
-    <field name="state_id" ref="base.state_ar_u" />
-    <field name="country_id" ref="base.ar" />
-  </record>
   <record id="city_1064_8532" model="res.city">
     <field name="name">Arroyo Salado</field>
     <field name="zipcode">8532</field>
@@ -164341,20 +164327,6 @@
     <field name="zipcode">9011</field>
     <field name="afip_code">6091</field>
     <field name="state_id" ref="base.state_ar_z" />
-    <field name="country_id" ref="base.ar" />
-  </record>
-  <record id="city_3166_9013" model="res.city">
-    <field name="name">Ca&#241;adon Seco</field>
-    <field name="zipcode">9013</field>
-    <field name="afip_code">3166</field>
-    <field name="state_id" ref="base.state_ar_u" />
-    <field name="country_id" ref="base.ar" />
-  </record>
-  <record id="city_6607_9013" model="res.city">
-    <field name="name">El Triana</field>
-    <field name="zipcode">9013</field>
-    <field name="afip_code">6607</field>
-    <field name="state_id" ref="base.state_ar_u" />
     <field name="country_id" ref="base.ar" />
   </record>
   <record id="city_3166_9013" model="res.city">

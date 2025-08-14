@@ -99,13 +99,6 @@
 
     <menuitem
         parent="menu_iibb"
-        id="menu_report_default_jurisdiction"
-        name="Sales/Purchases by Jurisdiction Config"
-        action="action_report_default_jurisdiction_configuration"
-    />
-
-    <menuitem
-        parent="menu_iibb"
         id="menu_export_sales_by_jurisdiction"
         name="Sales/Purchases by Jurisdiction"
         action="action_export_sales_by_jurisdiction"
