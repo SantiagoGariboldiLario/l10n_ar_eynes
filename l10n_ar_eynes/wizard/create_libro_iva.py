@@ -41,15 +41,13 @@ class LibroIVAExporterWizard(models.TransientModel):
 
     def _get_invoice_not_vat_tax_lines(self, invoice):
         tax_line_ids = self._get_invoice_tax_lines(invoice).filtered(
-            lambda line: line.tax_line_id.tax_group_id.group_type
-            != self.env.ref('l10n_ar_eynes.vat_tax_group').group_type
+            lambda line: line.tax_line_id.tax_group_id.group_type != 'vat'
         )
         return tax_line_ids
 
     def _get_invoice_vat_tax_lines(self, invoice):
         tax_line_ids = self._get_invoice_tax_lines(invoice).filtered(
-            lambda line: line.tax_line_id.tax_group_id.group_type
-            == self.env.ref('l10n_ar_eynes.vat_tax_group').group_type
+            lambda line: line.tax_line_id.tax_group_id.group_type == 'vat'
         )
         return tax_line_ids
 
@@ -408,8 +406,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             any(
                 line.tax_line_id
                 and line.tax_line_id.is_exempt
-                and line.tax_line_id.tax_group_id.group_type
-                == self.env.ref('l10n_ar_eynes.vat_tax_group').group_type
+                and line.tax_line_id.tax_group_id.group_type == 'vat'
                 for line in invoice.line_ids
             )
             or len(self._get_invoice_tax_lines(invoice)) == 0
@@ -550,12 +547,8 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount_municipal_perception = self._get_perception_with_type(
             invoice, 'municipal'
         )
-        amount_internal_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.internal_tax_group').group_type
-        )
-        amount_other_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.other_tax_group').group_type
-        )
+        amount_internal_taxes = self._get_taxes_with_type(invoice, 'internals')
+        amount_other_taxes = self._get_taxes_with_type(invoice, 'others')
         try:
             if (
                 invoice.denomination in ['E'] and voucher_type in ['020', '021']
@@ -674,13 +667,9 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount_municipal_perception = self._get_perception_with_type(
             invoice, 'municipal'
         )
-        amount_internal_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.internal_tax_group').group_type
-        )
+        amount_internal_taxes = self._get_taxes_with_type(invoice, 'internals')
 
-        amount_other_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.other_tax_group').group_type
-        )
+        amount_other_taxes = self._get_taxes_with_type(invoice, 'others')
 
         # TODO: add fields and logic for this fields:
         emitter_cuit = '%.15s' % '0'.ljust(11, '0')

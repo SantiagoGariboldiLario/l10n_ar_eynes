@@ -78,7 +78,9 @@ class AccountCheck(models.Model):
 
     def _get_default_journal(self):
         if self._context.get('default_internal_type') == 'third_party':
-            return self.env.ref('l10n_ar_eynes.third_party_checks_journal')
+            return self.env['account.journal'].search(
+                [('type', '=', 'third_party_checks')]
+            )
         return False
 
     number = fields.Char(string='Check Number', required=True, size=8)
