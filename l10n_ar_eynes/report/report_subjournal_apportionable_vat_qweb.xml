@@ -7,12 +7,12 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="width: 50%; text-align: center; font-size: medium;">
+                        <td style="width: 50%; text-align: center; font-size: 12px;">
                             <strong> <t t-out="title" /> </strong>
                         </td>
                     </tr>
                     <tr>
-                        <td style="text-align: left; font-size: small;">
+                        <td style="text-align: left; font-size: 10px;">
                             <strong> <t t-out="o.company_id.name" /> </strong>
                             <br />
                             <span>Domicilio: <t t-out="o.company_id.street" /> </span>
@@ -1572,10 +1572,10 @@
                     <style>
                         .no-border-row {
                             border: transparent;
-                            font-size: 11px;
+                            font-size: 10px;
                         }
                         .separator-row {
-                            font-size: 13px;
+                            font-size: 12px;
                             font-weight: bold;
                             margin-top: 20px;
                         }
@@ -1584,7 +1584,7 @@
                             border-top-color: black !important;
                             border-top-style: solid !important;
                             font-weight: bold;
-                            font-size: 11px;
+                            font-size: 10px;
                         }
                         .total-row td {
                             border-top-width: 1px !important;
@@ -1594,10 +1594,10 @@
                             border-bottom-color: black !important;
                             border-bottom-style: solid !important;
                             font-weight: bold;
-                            font-size: 11px;
+                            font-size: 10px;
                         }
                         .global-row {
-                            font-size: 13px;
+                            font-size: 12px;
                         }
                     </style>
                 </t>
