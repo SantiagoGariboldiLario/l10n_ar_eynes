@@ -97,7 +97,6 @@ class DepositCheckwizard(models.TransientModel):
         error_checks = third_party.filtered(
             lambda check: not check.payment_date
             or (check.issue_date and check.issue_date > deposit_date)
-            or (check.payment_date > deposit_date)
         )
         if error_checks:
             raise UserError(

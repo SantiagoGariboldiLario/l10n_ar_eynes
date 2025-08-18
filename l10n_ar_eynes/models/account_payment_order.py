@@ -1394,6 +1394,7 @@ class AccountPaymentOrder(models.Model):
         move = {
             'name': self.number,
             'journal_id': self.journal_id.id,
+            'partner_id': self.partner_id.id,
             'narration': self.narration,
             'date': self.date,
             'ref': ref,
@@ -1495,15 +1496,22 @@ class AccountPaymentOrder(models.Model):
         journal_id,
         amount,
         amount_currency,
-        sign,
     ):
         if not self.is_multi_currency:
-            amount_currency = amount
+            amount_currency = abs(amount)
+        else:
+            amount_currency = abs(amount_currency)
         debit = credit = 0.0
         if self.type in ('purchase', 'payment'):
-            credit = amount
+            if amount < 0:
+                debit = -amount
+            else:
+                credit = amount
         elif self.type in ('sale', 'receipt'):
-            debit = amount
+            if amount < 0:
+                credit = -amount
+            else:
+                debit = amount
         sign = debit - credit < 0 and -1 or 1
 
         name = name + ' - ' if name else ''
@@ -1537,13 +1545,6 @@ class AccountPaymentOrder(models.Model):
             total_credit = self.amount
         elif self.type in ('sale', 'receipt'):
             total_debit = self.amount
-        if total_debit < 0:
-            total_credit = -total_debit
-            total_debit = 0.0
-        if total_credit < 0:
-            total_debit = -total_credit
-            total_credit = 0.0
-        sign = total_debit - total_credit < 0 and -1 or 1
 
         # Creamos una move_line por payment_line
         move_lines = []
@@ -1558,7 +1559,6 @@ class AccountPaymentOrder(models.Model):
                     pml.payment_mode_id,
                     pml.amount,
                     pml.amount_currency,
-                    sign,
                 )
             )
 

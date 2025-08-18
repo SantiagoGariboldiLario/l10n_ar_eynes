@@ -91,6 +91,14 @@ class WSFEParser(WSParser):
                 )
         return date_to
 
+    def _check_vat_taxes_configured(self, afip_tax_ids, invoice_taxes):
+        not_found_tax = invoice_taxes.filtered(lambda x: x not in afip_tax_ids)
+        if not_found_tax:
+            raise UserError(
+                _("Taxes `%s` are not configured in WSFE!")
+                % (", ").join(not_found_tax.mapped('name'))
+            )
+
     def parse_invoice(self, invoice):
         tipo_cbte = invoice.get_voucher_type()
         invoice_date = (
@@ -152,26 +160,43 @@ class WSFEParser(WSParser):
         )
         return subtotals
 
-    def parse_vat_lines(self, invoice, vat_lines, afip_taxes):
+    def parse_vat_lines(self, invoice, afip_taxes):
+        invoice_taxes = invoice.invoice_line_ids.tax_ids.filtered(
+            lambda tax: tax.tax_group_id.group_type == 'vat'
+        )
+        self._check_vat_taxes_configured(
+            afip_taxes.mapped('tax_id'), invoice_taxes
+        )
+
         vat_dict = {}
-        for tax_line in vat_lines:
-            afip_tax = afip_taxes.filtered(
-                lambda x: x.tax_id == tax_line.tax_line_id
-            )
+        for tax in invoice_taxes:
+            afip_tax = afip_taxes.filtered(lambda x: x.tax_id == tax)
             if len(afip_tax) > 1:
                 raise UserError(
                     _(
                         """
                         This vat: %(vat_name)s has more than one configuration.
                         """,
-                        vat_name=tax_line,
+                        vat_name=tax.name,
                     )
                 )
+
             code = int(afip_tax.code)
-            amount = (
-                tax_line.credit or tax_line.debit
-            ) * tax_line.currency_rate
-            base = (tax_line.tax_base_amount) * tax_line.currency_rate
+
+            if code == 3:
+                lines = invoice.invoice_line_ids.filtered(
+                    lambda line: tax in line.tax_ids
+                )
+                amount = 0.0
+                base = sum(lines.mapped('price_subtotal'))
+            else:
+                tax_line = invoice.line_ids.filtered(
+                    lambda line: tax == line.tax_line_id
+                )
+                amount = (
+                    tax_line.credit or tax_line.debit
+                ) * tax_line.currency_rate
+                base = (tax_line.tax_base_amount) * tax_line.currency_rate
             if code not in vat_dict:
                 vat_dict[code] = {
                     'Importe': amount,
