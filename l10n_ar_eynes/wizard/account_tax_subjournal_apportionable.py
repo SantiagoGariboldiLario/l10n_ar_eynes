@@ -351,7 +351,6 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     lines[key]['vat_taxes'].setdefault(
                         tax_id,
                         {
-                            'amount': 0.0,
                             'name': _clean_tax_name(tax.get('name', '')),
                         },
                     )
@@ -361,19 +360,6 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     lines[key]['vat_taxes'][tax_id][
                         line['fiscal_credit']
                     ] += amount
-                if (
-                    # LINEA DE IMPUESTO
-                    line['tax_line_id']
-                    == tax_id
-                ):
-                    lines[key]['vat_taxes'].setdefault(
-                        tax_id,
-                        {
-                            'amount': 0.0,
-                            'name': _clean_tax_name(tax.get('name', '')),
-                        },
-                    )
-                    lines[key]['vat_taxes'][tax_id]['amount'] += amount
 
             if not (line['tax_line_id'] or line['tax_ids']):
                 # SI NO ES LINEA DE IMPUESTO O ES LINEA SIN IMPUESTOS CORRESPONDE A NO GRAVADO
@@ -419,7 +405,6 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             first_vat = True
             for vat_values in line['vat_taxes'].values():
                 vat_split = list(vat_values.keys())
-                vat_split.remove('amount')
                 vat_split.remove('name')
                 for fiscal_credit in vat_split:
                     if not first_vat:
@@ -427,21 +412,37 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                         new_line = new_line + (
                             [0] * (len(cols) + 2)
                         )  # +2 for no_taxed and total
-                    new_line.insert(5, vat_values[fiscal_credit])
-                    new_line.insert(6, vat_values['name'])
-                    new_line.insert(7, vat_values['amount'])
+                    base_vat_amount = vat_values[fiscal_credit]
+                    vat_aliquot = vat_values['name']
+                    vat_amount = round(
+                        base_vat_amount
+                        * (float(vat_aliquot.replace('%', '')) / 100),
+                        2,
+                    )
+
+                    new_line.insert(5, base_vat_amount)
+                    new_line.insert(6, vat_aliquot)
+                    new_line.insert(7, vat_amount)
                     new_line.insert(8, fiscal_credit_name[fiscal_credit])
                     new_lines.append(new_line)
                     first_vat = False
 
-                    totals[0] += vat_values[fiscal_credit]
-                    totals[1] += vat_values['amount']
+                    totals[0] += base_vat_amount
+                    totals[1] += vat_amount
                     if line['invoice_type'].startswith('NC'):
-                        totals_nc[0] += vat_values[fiscal_credit]
-                        totals_nc[1] += vat_values['amount']
+                        totals_nc[0] += base_vat_amount
+                        totals_nc[1] += vat_amount
                     else:
-                        totals_fc_nd[0] += vat_values[fiscal_credit]
-                        totals_fc_nd[1] += vat_values['amount']
+                        totals_fc_nd[0] += base_vat_amount
+                        totals_fc_nd[1] += vat_amount
+
+            if first_vat:
+                # If this value is True, it is a except invoice (maybe C type)
+                new_line.insert(5, 0.0)
+                new_line.insert(6, '')
+                new_line.insert(7, 0.0)
+                new_line.insert(8, '')
+                new_lines.append(new_line)
 
             for i, amount in enumerate(line['taxes']):
                 i = i + 2
@@ -492,8 +493,6 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                 i.id AS invoice_id,
                 i.name AS invoice_number,
                 i.move_type AS invoice_type,
-                i.cae AS cae,
-                i.cae_due_date AS cae_due_date,
                 i.is_debit_note AS is_debit_note,
                 i.denomination AS denomination,
                 i.currency_id AS currency,
