@@ -63,13 +63,14 @@ class LibroIVAExporterWizard(models.TransientModel):
                     amount += perception_id.amount
         return ('%016.2f' % amount).replace('.', '')
 
-    def _get_perception_with_type(self, invoice, jurisdiction):
+    def _get_perception_with_type(self, invoice, jurisdiction_or_type):
         amount = 0.0
         for perception_id in invoice.perception_ids:
             if (
-                perception_id.perception_id.jurisdiccion == jurisdiction
-                and perception_id.perception_id.retention_type != 'vat'
-            ):
+                perception_id.perception_id.jurisdiccion == jurisdiction_or_type
+                or perception_id.perception_id.retention_type
+                == jurisdiction_or_type
+            ) and perception_id.perception_id.retention_type != 'vat':
                 amount += perception_id.amount
         return ('%016.2f' % amount).replace('.', '')
 
@@ -680,7 +681,7 @@ class LibroIVAExporterWizard(models.TransientModel):
 
         amount_other_taxes = self._get_taxes_with_type(
             invoice, self.env.ref('l10n_ar_eynes.other_tax_group').group_type
-        )
+        ) + self._get_perception_with_type(invoice, 'other')
 
         # TODO: add fields and logic for this fields:
         emitter_cuit = '%.15s' % '0'.ljust(11, '0')
