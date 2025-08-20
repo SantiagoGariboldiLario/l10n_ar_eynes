@@ -194,17 +194,17 @@ class AccountCheck(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """
-        Override create method to ensure that checks have a currency set --> Prevent Error
+        Override create method to ensure that checks have a currency and a company set --> Prevent Error
         when checks are imported.
         """
         for val in vals_list:
+            if not val.get('currency_rate', False):
+                val['currency_rate'] = 1.0
             if not val.get('currency_id', False):
-                raise ValidationError(
-                    _('You must set a currency for the check')
-                )
-            # if not val.get('company_id', False):
-            # No lo solicitaron pero para mi tiene que agregarse esta validación
-            #     raise ValidationError(_('You must set a Company for the check'))
+                val['currency_id'] = self.env.company.currency_id.id
+            if not val.get('company_id', False):
+                # No lo solicitaron pero para mi tiene que agregarse esta validación
+                val['company_id'] = self.env.company.id
         return super(AccountCheck, self).create(vals_list)
 
     def unlink(self):
