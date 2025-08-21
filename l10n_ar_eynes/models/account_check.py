@@ -78,7 +78,9 @@ class AccountCheck(models.Model):
 
     def _get_default_journal(self):
         if self._context.get('default_internal_type') == 'third_party':
-            return self.env.ref('l10n_ar_eynes.third_party_checks_journal')
+            return self.env['account.journal'].search(
+                [('type', '=', 'third_party_checks')]
+            )
         return False
 
     number = fields.Char(string='Check Number', required=True, size=8)
@@ -194,17 +196,17 @@ class AccountCheck(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """
-        Override create method to ensure that checks have a currency set --> Prevent Error
+        Override create method to ensure that checks have a currency and a company set --> Prevent Error
         when checks are imported.
         """
         for val in vals_list:
+            if not val.get('currency_rate', False):
+                val['currency_rate'] = 1.0
             if not val.get('currency_id', False):
-                raise ValidationError(
-                    _('You must set a currency for the check')
-                )
-            # if not val.get('company_id', False):
-            # No lo solicitaron pero para mi tiene que agregarse esta validación
-            #     raise ValidationError(_('You must set a Company for the check'))
+                val['currency_id'] = self.env.company.currency_id.id
+            if not val.get('company_id', False):
+                # No lo solicitaron pero para mi tiene que agregarse esta validación
+                val['company_id'] = self.env.company.id
         return super(AccountCheck, self).create(vals_list)
 
     def unlink(self):

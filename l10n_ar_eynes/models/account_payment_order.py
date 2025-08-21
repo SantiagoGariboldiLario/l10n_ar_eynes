@@ -329,6 +329,7 @@ class AccountPaymentOrder(models.Model):
     other_payment = fields.Boolean(string='Other Payments')
     employee_id = fields.Many2one('hr.employee', string="Employee")
     employee_payment = fields.Boolean(string='Employee Payments')
+    posted_before = fields.Boolean(default=False)
 
     @api.model
     def get_views(self, views, options=None):
@@ -1180,7 +1181,7 @@ class AccountPaymentOrder(models.Model):
                     if po.amount:
                         po.compute_advance_payment_retentions(po.amount)
 
-    def get_next_sequence(self):
+    def get_next_sequence(self, consume=False):
         if not self.journal_id.sequence_id:
             raise ValidationError(
                 _(
@@ -1195,11 +1196,11 @@ class AccountPaymentOrder(models.Model):
                     'Please activate the sequence of selected journal!'
                 )
             )
-        return self.journal_id.sequence_id.next_by_id()
 
-    def revert_sequence(self):
-        self.journal_id.sequence_number_next -= 1
-        self.number = False
+        number_next = self.journal_id.sequence_id.number_next
+        if consume:
+            number_next = self.journal_id.sequence_id.next_by_id()
+        return number_next
 
     def proforma_voucher(self):
         self.ensure_one()
@@ -1225,18 +1226,18 @@ class AccountPaymentOrder(models.Model):
 
         self._clean_payment_lines()
         try:
-            self.action_move_line_create()
-            retention_vals = {
-                'unlinkable': False,
-                'base': self.amount,
-            }
-            self.retention_ids.write_defaults(
-                retention_vals, self.disable_retentions
-            )
+            move_id = self.action_move_line_create()
         except Exception as e:
-            self.revert_sequence()
             self.cancel_voucher()
             self.action_cancel_draft()
+            vals = {
+                'move_id': False,
+                'state': 'draft',
+            }
+            if not self.posted_before:
+                vals['number'] = False
+            self.write(vals)
+            self.flush_recordset()
 
             context = dict(self._context or {})
             context["message"] = str(e)
@@ -1252,6 +1253,21 @@ class AccountPaymentOrder(models.Model):
                 'target': 'new',
                 'context': context,
             }
+        retention_vals = {
+            'unlinkable': False,
+            'base': self.amount,
+        }
+        self.retention_ids.write_defaults(
+            retention_vals, self.disable_retentions
+        )
+        vals = {
+            'move_id': move_id,
+            'state': 'posted',
+            'posted_before': True,
+        }
+        if not self.posted_before:
+            vals['number'] = self.get_next_sequence(consume=True)
+        self.write(vals)
         return True
 
     def _get_income_amount(self):
@@ -1351,13 +1367,6 @@ class AccountPaymentOrder(models.Model):
         self.env['account.move.line'].with_context(**ctx).create(rec_list_ids)
         # We post the voucher.
         move_recordset.action_post()
-        self.write(
-            {
-                'move_id': move_id,
-                'state': 'posted',
-                'number': name,
-            }
-        )
         # We automatically reconcile the account move lines.
         for move_lines in amls_to_reconcile:
             if len(move_lines) >= 2:
@@ -1367,7 +1376,8 @@ class AccountPaymentOrder(models.Model):
         for line in self.line_ids:
             if not line.amount:
                 line.unlink()
-        return True
+
+        return move_id
 
     def _get_company_currency(self):
         return self.journal_id.company_id.currency_id

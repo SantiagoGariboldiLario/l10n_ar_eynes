@@ -17,6 +17,7 @@ class AccountMoveLine(models.Model):
         compute='_compute_fiscal_credit',
         readonly=False,
         store=True,
+        copy=True,
     )
     issued_check_id = fields.Many2one(
         comodel_name='account.check',
@@ -354,8 +355,7 @@ class AccountMoveLine(models.Model):
         return price_subtotal
 
     def get_iva_tax(self):
-        iva = self.env.ref('l10n_ar_eynes.vat_tax_group')
         for tax in self.tax_ids:
-            if iva.id == tax.tax_group_id.id:
+            if tax.tax_group_id.group_type == 'vat':
                 return tax
         return False

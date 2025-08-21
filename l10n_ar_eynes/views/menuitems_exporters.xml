@@ -31,6 +31,13 @@
         action="account_tax_subjournal_action"
     />
 
+    <menuitem
+        parent="menu_iva"
+        id="account_tax_subjournal_apportionable_vat_menu"
+        name="Taxes with Apportionable VAT Subjournal"
+        action="account_tax_subjournal_apportionable_vat_action"
+    />
+
     <menuitem parent="menu_iva" id="purchase_vat_exporter_menu" action="action_export_purchase_vat" />
 
     <menuitem parent="menu_iva" id="sale_vat_exporter_menu" action="action_export_sale_vat" />
@@ -95,13 +102,6 @@
         id="menu_action_sicore_generated_files"
         name="Sicore generated files"
         action="action_sicore_generated_files"
-    />
-
-    <menuitem
-        parent="menu_iibb"
-        id="menu_report_default_jurisdiction"
-        name="Sales/Purchases by Jurisdiction Config"
-        action="action_report_default_jurisdiction_configuration"
     />
 
     <menuitem
