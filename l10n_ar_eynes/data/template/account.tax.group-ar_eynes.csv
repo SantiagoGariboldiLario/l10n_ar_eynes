@@ -1,0 +1,6 @@
+"id","name","country_id","group_type"
+"retentions_tax_group","Retentions","base.ar","retention"
+"perceptions_tax_group","Perceptions","base.ar","perception"
+"vat_tax_group","Vat","base.ar","vat"
+"internal_tax_group","Internal","base.ar","internals"
+"other_tax_group","Other","base.ar","others"

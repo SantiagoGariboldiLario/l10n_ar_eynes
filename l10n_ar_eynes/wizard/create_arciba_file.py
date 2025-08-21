@@ -160,8 +160,7 @@ class CreateArcibaFiles(models.TransientModel):
 
     def _get_invoice_vat_tax_lines(self, invoice):
         tax_line_ids = self._get_invoice_tax_lines(invoice).filtered(
-            lambda line: line.tax_line_id.tax_group_id.group_type
-            == self.env.ref('l10n_ar_eynes.vat_tax_group').group_type
+            lambda line: line.tax_line_id.tax_group_id.group_type == 'vat'
         )
         return tax_line_ids
 
