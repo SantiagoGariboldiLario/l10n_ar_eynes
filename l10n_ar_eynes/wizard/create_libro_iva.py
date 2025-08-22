@@ -61,13 +61,14 @@ class LibroIVAExporterWizard(models.TransientModel):
                     amount += perception_id.amount
         return ('%016.2f' % amount).replace('.', '')
 
-    def _get_perception_with_type(self, invoice, jurisdiction):
+    def _get_perception_with_type(self, invoice, jurisdiction_or_type):
         amount = 0.0
         for perception_id in invoice.perception_ids:
             if (
-                perception_id.perception_id.jurisdiccion == jurisdiction
-                and perception_id.perception_id.retention_type != 'vat'
-            ):
+                perception_id.perception_id.jurisdiccion == jurisdiction_or_type
+                or perception_id.perception_id.retention_type
+                == jurisdiction_or_type
+            ) and perception_id.perception_id.retention_type != 'vat':
                 amount += perception_id.amount
         return ('%016.2f' % amount).replace('.', '')
 
