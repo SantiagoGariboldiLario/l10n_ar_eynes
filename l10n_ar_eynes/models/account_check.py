@@ -130,13 +130,11 @@ class AccountCheck(models.Model):
         comodel_name='res.currency',
         compute='_compute_currency',
         store=True,
-        required=True,
     )
     currency_rate = fields.Float(
         digits=(12, 6),
         compute='_compute_currency_rate',
         store=True,
-        required=True,
     )
     amount_currency = fields.Float(
         digits='Account',
@@ -168,10 +166,15 @@ class AccountCheck(models.Model):
     )
     def _compute_currency(self):
         for rec in self:
-            if rec.internal_type == 'issued':
-                rec.currency_id = rec.payment_order_id.currency_id
-            else:
-                rec.currency_id = rec.source_payment_order_id.currency_id
+            currency_id = rec.currency_id
+            if rec.internal_type == 'issued' and rec.payment_order_id:
+                currency_id = rec.payment_order_id.currency_id
+            elif (
+                rec.internal_type == 'third_party'
+                and rec.source_payment_order_id
+            ):
+                currency_id = rec.source_payment_order_id.currency_id
+            rec.currency_id = currency_id
 
     @api.depends(
         'payment_order_id.payment_rate', 'source_payment_order_id.payment_rate'
@@ -198,10 +201,11 @@ class AccountCheck(models.Model):
         when checks are imported.
         """
         for val in vals_list:
-            if not val.get('currency_rate', False):
-                val['currency_rate'] = 1.0
-            if not val.get('currency_id', False):
-                val['currency_id'] = self.env.company.currency_id.id
+            if self.env.context.get('import_file', False):
+                if not val.get('currency_rate', False):
+                    val['currency_rate'] = 1.0
+                if not val.get('currency_id', False):
+                    val['currency_id'] = self.env.company.currency_id.id
             if not val.get('company_id', False):
                 # No lo solicitaron pero para mi tiene que agregarse esta validación
                 val['company_id'] = self.env.company.id

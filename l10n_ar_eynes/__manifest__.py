@@ -34,6 +34,7 @@
         'account_debit_note',
         'base',
         'base_address_extended',
+        'base_import',
         'contacts',
         'delivery',
         'hr',
