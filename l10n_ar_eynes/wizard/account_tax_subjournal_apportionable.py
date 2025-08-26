@@ -716,16 +716,23 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
 
     def _get_perception_data(self):
         perception_query = """
-        SELECT per.name, sum(p.amount) FROM perception_tax_line p
+        SELECT
+            per.name,
+            sum(CASE
+                WHEN i.move_type IN %(neg_vouchers)s THEN -p.amount
+                ELSE p.amount
+            END)
+        FROM perception_tax_line p
         JOIN account_tax per ON p.perception_id = per.id
-        JOIN account_move i ON p.invoice_id=i.id
+        JOIN account_move i ON p.invoice_id = i.id
         WHERE p.date BETWEEN %(date_start)s AND %(date_end)s
         AND i.state = 'posted'
-        AND per.type_tax_use LIKE %(based_on)s
+        AND per.type_tax_use = %(based_on)s
         AND p.company_id = %(company)s
         GROUP BY per.id
         """
         vals = {
+            'neg_vouchers': tuple(('in_refund',)),
             'based_on': self.based_on,
             'date_start': self.date_from,
             'date_end': self.date_to,
