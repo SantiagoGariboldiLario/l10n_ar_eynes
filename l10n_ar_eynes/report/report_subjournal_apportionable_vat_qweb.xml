@@ -50,12 +50,10 @@
                                     <th style="width: 2.5%;">Tipo</th>
                                     <th style="width: 7%;">Numero</th>
                                     <t t-foreach="invoice_list_header" t-as="header">
-                                        <th>
+                                        <th style="text-align: right;">
                                             <t t-out="header" />
                                         </th>
                                     </t>
-                                    <th>No Gravado</th>
-                                    <th>Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -79,9 +77,16 @@
                                                     </td>
                                                 </t>
                                                 <t t-else="">
-                                                    <td>
-                                                        <t t-out="line[index]" />
-                                                    </td>
+                                                    <t t-if="index == 6">
+                                                        <td style="text-align: right; width: 3%;">
+                                                            <t t-out="line[index]" />
+                                                        </td>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <td>
+                                                            <t t-out="line[index]" />
+                                                        </td>
+                                                    </t>
                                                 </t>
                                             </t>
                                         </t>
