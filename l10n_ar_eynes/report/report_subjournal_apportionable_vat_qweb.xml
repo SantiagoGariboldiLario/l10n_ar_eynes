@@ -50,9 +50,17 @@
                                     <th style="width: 2.5%;">Tipo</th>
                                     <th style="width: 7%;">Numero</th>
                                     <t t-foreach="invoice_list_header" t-as="header">
-                                        <th style="text-align: right;">
-                                            <t t-out="header" />
-                                        </th>
+                                        <t t-if="header == 'Asig.CF'">
+                                            <th style="text-align: center;">
+                                                <t t-out="header" />
+                                            </th>
+                                        </t>
+                                        <t t-else="">
+                                            <th style="text-align: right;">
+                                                <t t-out="header" />
+                                            </th>
+                                        </t>
+
                                     </t>
                                 </tr>
                             </thead>
@@ -83,9 +91,16 @@
                                                         </td>
                                                     </t>
                                                     <t t-else="">
-                                                        <td>
-                                                            <t t-out="line[index]" />
-                                                        </td>
+                                                        <t t-if="index == 8">
+                                                            <td style="text-align: center;">
+                                                                <t t-out="line[index]" />
+                                                            </td>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <td>
+                                                                <t t-out="line[index]" />
+                                                            </td>
+                                                        </t>
                                                     </t>
                                                 </t>
                                             </t>
