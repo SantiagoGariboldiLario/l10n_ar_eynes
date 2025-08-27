@@ -61,8 +61,9 @@ class CreateCheckbookWizard(models.TransientModel):
         start_numer = int(self.start_num)
         end_number = int(self.end_num)
 
+        vals = []
         for i in range(start_numer, end_number + 1):
-            self.env['account.check'].create(
+            vals.append(
                 {
                     'number': str(i).zfill(8),
                     'journal_id': self.journal_id.id,
@@ -76,6 +77,7 @@ class CreateCheckbookWizard(models.TransientModel):
                     'type': self.type,
                 }
             )
+        self.env['account.check'].create(vals)
 
         return {'type': 'ir.actions.client', 'tag': 'reload'}
 
