@@ -41,34 +41,23 @@ class LibroIVAExporterWizard(models.TransientModel):
 
     def _get_invoice_not_vat_tax_lines(self, invoice):
         tax_line_ids = self._get_invoice_tax_lines(invoice).filtered(
-            lambda line: line.tax_line_id.tax_group_id.group_type
-            != self.env.ref('l10n_ar_eynes.vat_tax_group').group_type
+            lambda line: line.tax_line_id.tax_group_id.group_type != 'vat'
         )
         return tax_line_ids
 
     def _get_invoice_vat_tax_lines(self, invoice):
         tax_line_ids = self._get_invoice_tax_lines(invoice).filtered(
-            lambda line: line.tax_line_id.tax_group_id.group_type
-            == self.env.ref('l10n_ar_eynes.vat_tax_group').group_type
+            lambda line: line.tax_line_id.tax_group_id.group_type == 'vat'
         )
         return tax_line_ids
 
-    def _get_perception_with_type_iva(self, invoice):
-        amount = 0.0
-        for perception_id in invoice.perception_ids:
-            if perception_id.perception_id.retention_type == 'vat':
-                if perception_id.__contains__('tax_currency'):
-                    amount += perception_id.tax_currency
-                else:
-                    amount += perception_id.amount
-        return ('%016.2f' % amount).replace('.', '')
-
-    def _get_perception_with_type(self, invoice, jurisdiction):
+    def _get_perception_with_type(self, invoice, jurisdiction_or_type):
         amount = 0.0
         for perception_id in invoice.perception_ids:
             if (
-                perception_id.perception_id.jurisdiccion == jurisdiction
-                and perception_id.perception_id.retention_type != 'vat'
+                perception_id.perception_id.jurisdiccion == jurisdiction_or_type
+                or perception_id.perception_id.retention_type
+                == jurisdiction_or_type
             ):
                 amount += perception_id.amount
         return ('%016.2f' % amount).replace('.', '')
@@ -78,6 +67,16 @@ class LibroIVAExporterWizard(models.TransientModel):
         for tax_id in self._get_invoice_tax_lines(invoice):
             if tax_id.tax_line_id.tax_group_id.group_type == fee_type:
                 amount += tax_id.price_total
+        return ('%016.2f' % amount).replace('.', '')
+
+    def _get_taxes_with_type_others(self, invoice):
+        amount = 0.0
+        for tax_id in self._get_invoice_tax_lines(invoice):
+            if tax_id.tax_line_id.tax_group_id.group_type == 'others':
+                amount += tax_id.price_total
+        for perception_id in invoice.perception_ids:
+            if perception_id.perception_id.retention_type == 'other':
+                amount += perception_id.amount
         return ('%016.2f' % amount).replace('.', '')
 
     def _get_operation_code(self, invoice):
@@ -100,13 +99,6 @@ class LibroIVAExporterWizard(models.TransientModel):
         for tax_line in self._get_invoice_vat_tax_lines(invoice):
             cfc += abs(tax_line.amount_currency)
         return cfc
-
-    def _get_ganancias_perceptions(self, invoice):
-        amount = 0.0
-        for perception_id in invoice.perception_ids:
-            if perception_id.perception_id.retention_type == 'profit':
-                amount += perception_id.amount
-        return ('%016.2f' % amount).replace('.', '')
 
     def _get_invoice_date(self, invoice, errors):
         try:
@@ -408,8 +400,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             any(
                 line.tax_line_id
                 and line.tax_line_id.is_exempt
-                and line.tax_line_id.tax_group_id.group_type
-                == self.env.ref('l10n_ar_eynes.vat_tax_group').group_type
+                and line.tax_line_id.tax_group_id.group_type == 'vat'
                 for line in invoice.line_ids
             )
             or len(self._get_invoice_tax_lines(invoice)) == 0
@@ -550,12 +541,8 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount_municipal_perception = self._get_perception_with_type(
             invoice, 'municipal'
         )
-        amount_internal_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.internal_tax_group').group_type
-        )
-        amount_other_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.other_tax_group').group_type
-        )
+        amount_internal_taxes = self._get_taxes_with_type(invoice, 'internals')
+        amount_other_taxes = self._get_taxes_with_type_others(invoice)
         try:
             if (
                 invoice.denomination in ['E'] and voucher_type in ['020', '021']
@@ -662,25 +649,16 @@ class LibroIVAExporterWizard(models.TransientModel):
         has_iva_exempt = self._check_invoice_is_exempt(invoice)
         if has_iva_exempt:
             operation_code = 'E'
-
-        amount_iva = self._get_perception_with_type_iva(invoice)
-
+        amount_iva = self._get_perception_with_type(invoice, 'vat')
         fiscal_credit = self._get_fiscal_credit_currency(invoice)
         fiscal_credit = ('%016.2f' % fiscal_credit).replace('.', '')
-
-        amount_ganancias = self._get_ganancias_perceptions(invoice)
-
+        amount_ganancias = self._get_perception_with_type(invoice, 'profit')
         amount_iibb = self._get_perception_with_type(invoice, 'provincial')
         amount_municipal_perception = self._get_perception_with_type(
             invoice, 'municipal'
         )
-        amount_internal_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.internal_tax_group').group_type
-        )
-
-        amount_other_taxes = self._get_taxes_with_type(
-            invoice, self.env.ref('l10n_ar_eynes.other_tax_group').group_type
-        )
+        amount_other_taxes = self._get_taxes_with_type_others(invoice)
+        amount_internal_taxes = self._get_taxes_with_type(invoice, 'internals')
 
         # TODO: add fields and logic for this fields:
         emitter_cuit = '%.15s' % '0'.ljust(11, '0')
