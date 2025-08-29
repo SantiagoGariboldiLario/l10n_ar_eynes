@@ -147,6 +147,8 @@
 
     <record id="fiscal_position_a" model="account.fiscal.position" forcecreate="1">
         <field name="name">Aduana</field>
+        <field name="supplier_denomination">ana</field>
+        <field name="local">0</field>
         <field name="country_id" ref="base.ar" />
     </record>
 
