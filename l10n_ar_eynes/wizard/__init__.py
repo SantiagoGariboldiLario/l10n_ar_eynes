@@ -30,3 +30,4 @@ from . import sales_by_jurisdiction
 from . import libro_diario_wizard
 from . import purchase_vat_wizard
 from . import sale_vat_wizard
+from . import account_tax_subjournal_apportionable  # noqa

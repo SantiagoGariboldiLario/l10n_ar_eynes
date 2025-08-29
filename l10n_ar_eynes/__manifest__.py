@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina',
-    'version': '17.0.3.0.2',
+    'version': '17.0.4.0.0',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -156,6 +156,9 @@
         'wizard/purchase_vat_wizard_view.xml',
         'report/purchase_vat_qweb.xml',
         'report/purchase_vat_report.xml',
+        'wizard/account_tax_subjournal_apportionable.xml',
+        'report/report_subjournal_apportionable_vat_qweb.xml',
+        'report/report_subjournal_apportionable_vat.xml',
         'wizard/sale_vat_wizard_view.xml',
         'report/sale_vat_qweb.xml',
         'report/sale_vat_report.xml',

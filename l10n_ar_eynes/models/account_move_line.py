@@ -17,6 +17,7 @@ class AccountMoveLine(models.Model):
         compute='_compute_fiscal_credit',
         readonly=False,
         store=True,
+        copy=True,
     )
     issued_check_id = fields.Many2one(
         comodel_name='account.check',
