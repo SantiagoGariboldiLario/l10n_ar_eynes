@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="account_tax_subjournal_apportionable_wizard_view_form" model="ir.ui.view">
+        <field name="name">account.tax.subjournal.apportionable.wizard.view.form</field>
+        <field name="model">account.tax.subjournal.apportionable.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Taxes Subjournal with apportionable VAT">
+                <sheet>
+                    <separator string="Taxes Subjournal with apportionable VAT" colspan="4" />
+                    <group>
+                        <group>
+                            <field name="date_from" />
+                        </group>
+                        <group>
+                            <field name="date_to" readonly="True" force_save="True" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Configuration" name="configuration">
+                            <group string="Based on">
+                                <field name="company_id_domain" invisible="True" />
+                                <field name="company_id" domain="company_id_domain" />
+                                <field name="based_on" />
+                            </group>
+                            <group string="Sorting">
+                                <field name="sort_by" />
+                                <field name="base_position" />
+                            </group>
+                            <group>
+                                <field name="grouped" />
+                                <field name="grouped_max_amount" invisible="not grouped" required="grouped" />
+                                <field name="perception_retention_grouped" />
+                            </group>
+                        </page>
+                    </notebook>
+                    <footer>
+                        <button name="run" string="Print Report" type="object" />
+                        <button special="cancel" string="Cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="account_tax_subjournal_apportionable_vat_action" model="ir.actions.act_window">
+        <field name="name">Account Tax Subjournal apportionable wizard</field>
+        <field name="res_model">account.tax.subjournal.apportionable.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="account_tax_subjournal_apportionable_wizard_view_form" />
+    </record>
+</odoo>
