@@ -26,7 +26,15 @@ def _switch_partners_language(env):
     partners.write({'lang': 'es_AR'})
 
 
+def _load_l10n_ar_eynes_translations(env):
+    l10n_ar_eynes = env['ir.module.module'].search(
+        [('name', '=', 'l10n_ar_eynes')]
+    )
+    l10n_ar_eynes._update_translations('es_AR', overwrite=True)
+
+
 def post_init_hook(env):
     _install_language(env)
     _switch_users_language(env)
     _switch_partners_language(env)
+    _load_l10n_ar_eynes_translations(env)

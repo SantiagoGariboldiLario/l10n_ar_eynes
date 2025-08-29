@@ -166,17 +166,10 @@ class AccountMove(models.Model):
     dst_country_id = fields.Many2one('wsfex.dst.country.codes', 'Dest Country')
     dst_cuit_id = fields.Many2one('dst.cuit.codes', 'Country CUIT')
     export_type_id = fields.Many2one('wsfex.export.type.codes', 'Export Type')
-    same_currency_cancel = fields.Boolean(default=False)
     shipping_perm_ids = fields.One2many(
         'wsfex.shipping.permission',
         'invoice_id',
         'Shipping Permissions',
-    )
-    show_same_currency_cancel = fields.Boolean(
-        compute='_compute_show_same_currency_cancel'
-    )
-    show_get_arca_currency_btn = fields.Boolean(
-        compute='_compute_show_get_arca_currency_btn'
     )
     # REPORTE LIBRO IVA DIGITAL:
     iva_digital_operation_code = fields.Selection(
@@ -227,6 +220,13 @@ class AccountMove(models.Model):
         default=False,
         help="""Fields with internal purpose only that depicts
                 if the invoice is a multi currency one or not""",
+    )
+    same_currency_cancel = fields.Boolean(default=False)
+    show_get_arca_currency_btn = fields.Boolean(
+        compute='_compute_show_get_arca_currency_btn'
+    )
+    show_same_currency_cancel = fields.Boolean(
+        compute='_compute_show_same_currency_cancel'
     )
     secondary_currency_id = fields.Many2one(
         'res.currency',
@@ -1054,15 +1054,14 @@ class AccountMove(models.Model):
                         base = tax['tax_group_base_amount']
             if amount > 0:
                 # Se generan las líneas de impuestos internos y se asocian a la factura
+                internal_tax_group = self.env['account.tax.group'].search(
+                    [('group_type', '=', 'internals')]
+                )
                 internal_taxes = self.env['account.tax'].search(
                     [
                         ('company_id', '=', self.company_id.id),
                         ('type_tax_use', '=', 'sale'),
-                        (
-                            'tax_group_id',
-                            '=',
-                            self.env.ref('l10n_ar_eynes.internal_tax_group').id,
-                        ),
+                        ('tax_group_id', '=', internal_tax_group.id),
                     ],
                     limit=1,
                 )
@@ -1655,6 +1654,86 @@ class AccountMove(models.Model):
         return self.invoice_origin
 
     # --------------------------------------------------------------------------------
+    # *********      MÉTODOS PARA OBTENER MONTOS SEGÚN TIPO DE IVA: *********
+    def _get_amounts_by_vat_aliquot(self, aliquot, currency='company'):
+        """
+        Returns a dictionary with the amounts of the invoice grouped by tax type.
+        :param aliquot: string or float representing the aliquot type, can be 'no_taxed', 'exempt', 0.0,
+            '0.0', 10.5, 21.0, 27.0, 5.0, '2.5', etc.
+        :param currency: 'company' for company currency (ARS), 'invoice' for invoice currency
+        :return: dict with amounts for 'base' and 'tax'
+        """
+        self.ensure_one()
+
+        amounts = {'base': 0.0, 'tax': 0.0}
+
+        # Map aliquot values to their float equivalents
+        aliquot_map = {
+            'exempt': 'exempt',
+            'no_taxed': 'no_taxed',
+            '0.0': 0.0,
+            0.0: 0.0,
+            '10.5': 10.5,
+            10.5: 10.5,
+            '21.0': 21.0,
+            '21': 21.0,
+            21: 21.0,
+            '27.0': 27.0,
+            '27': 27.0,
+            27: 27.0,
+            '5.0': 5.0,
+            '5': 5.0,
+            5: 5.0,
+            '2.5': 2.5,
+            2.5: 2.5,
+        }
+        val = aliquot_map.get(aliquot, aliquot)
+
+        if val == 'exempt':
+            amounts['base'] = (
+                self.amount_exempt_cur
+                if currency == 'invoice'
+                else self.amount_exempt
+            )
+        elif val == 'no_taxed':
+            amounts['base'] = (
+                self.amount_no_taxed_cur
+                if currency == 'invoice'
+                else self.amount_no_taxed
+            )
+        elif val == 0.0:
+            for line in self.invoice_line_ids:
+                for tax in line.tax_ids:
+                    if tax.amount == 0.0:
+                        amounts['base'] += (
+                            line.price_subtotal
+                            if currency == 'invoice'
+                            else line.balance
+                        )
+        elif isinstance(val, float):
+            # For aliquots with a numeric value (VAT rates)
+            tax_line = self.line_ids.filtered(
+                lambda line: line.tax_line_id and line.tax_line_id.amount == val
+            )
+            if currency == 'company':
+                amounts['tax'] += sum(abs(line.balance) for line in tax_line)
+                amounts['base'] += sum(
+                    line.tax_base_amount for line in tax_line
+                )
+            else:
+                amounts['tax'] += sum(
+                    abs(line.amount_currency) for line in tax_line
+                )
+            for line in self.invoice_line_ids:
+                for tax in line.tax_ids:
+                    if tax.amount == val:
+                        amounts['base'] += line.price_subtotal
+        return amounts
+
+    # --------------------------------------------------------------------------------
+    # *********     FIN MÉTODOS PARA OBTENER MONTOS SEGÚN TIPO DE IVA *********
+
+    # --------------------------------------------------------------------------------
     # *********      MÉTODOS PARA FACTURA ELECTRÓNICA (ARCA): *********
     def _get_ws_conf(self):
         WSFEConfig = self.env['wsfe.config']
@@ -2073,3 +2152,6 @@ class AccountMove(models.Model):
         for move in self:
             for request in move.ws_request_ids:
                 request.unlink()
+
+    # --------------------------------------------------------------------------------
+    # *********     FIN MÉTODOS PARA FACTURA ELECTRÓNICA (ARCA) *********
