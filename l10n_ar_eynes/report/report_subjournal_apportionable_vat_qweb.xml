@@ -7,12 +7,12 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="width: 50%; text-align: center; font-size: medium;">
+                        <td style="width: 50%; text-align: center; font-size: 12px;">
                             <strong> <t t-out="title" /> </strong>
                         </td>
                     </tr>
                     <tr>
-                        <td style="text-align: left; font-size: small;">
+                        <td style="text-align: left; font-size: 10px;">
                             <strong> <t t-out="o.company_id.name" /> </strong>
                             <br />
                             <span>Domicilio: <t t-out="o.company_id.street" /> </span>
@@ -50,12 +50,18 @@
                                     <th style="width: 2.5%;">Tipo</th>
                                     <th style="width: 7%;">Numero</th>
                                     <t t-foreach="invoice_list_header" t-as="header">
-                                        <th>
-                                            <t t-out="header" />
-                                        </th>
+                                        <t t-if="header == 'Asig.CF'">
+                                            <th style="text-align: center;">
+                                                <t t-out="header" />
+                                            </th>
+                                        </t>
+                                        <t t-else="">
+                                            <th style="text-align: right;">
+                                                <t t-out="header" />
+                                            </th>
+                                        </t>
+
                                     </t>
-                                    <th>No Gravado</th>
-                                    <th>Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -79,9 +85,23 @@
                                                     </td>
                                                 </t>
                                                 <t t-else="">
-                                                    <td>
-                                                        <t t-out="line[index]" />
-                                                    </td>
+                                                    <t t-if="index == 6">
+                                                        <td style="text-align: right; width: 3%;">
+                                                            <t t-out="line[index]" />
+                                                        </td>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <t t-if="index == 8">
+                                                            <td style="text-align: center;">
+                                                                <t t-out="line[index]" />
+                                                            </td>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <td>
+                                                                <t t-out="line[index]" />
+                                                            </td>
+                                                        </t>
+                                                    </t>
                                                 </t>
                                             </t>
                                         </t>
@@ -1572,10 +1592,10 @@
                     <style>
                         .no-border-row {
                             border: transparent;
-                            font-size: 11px;
+                            font-size: 10px;
                         }
                         .separator-row {
-                            font-size: 13px;
+                            font-size: 12px;
                             font-weight: bold;
                             margin-top: 20px;
                         }
@@ -1584,7 +1604,7 @@
                             border-top-color: black !important;
                             border-top-style: solid !important;
                             font-weight: bold;
-                            font-size: 11px;
+                            font-size: 10px;
                         }
                         .total-row td {
                             border-top-width: 1px !important;
@@ -1594,10 +1614,10 @@
                             border-bottom-color: black !important;
                             border-bottom-style: solid !important;
                             font-weight: bold;
-                            font-size: 11px;
+                            font-size: 10px;
                         }
                         .global-row {
-                            font-size: 13px;
+                            font-size: 12px;
                         }
                     </style>
                 </t>

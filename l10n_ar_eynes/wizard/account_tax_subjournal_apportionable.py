@@ -26,11 +26,18 @@ def _clean_tax_name(name):
         ' sufrido': '',
         ' Sufrida': '',
         ' sufrida': '',
+        ' Sufr.': '',
+        ' sufr.': '',
+        ' Sufr': '',
+        ' sufr': '',
         'IVA Ventas ': '',
         'IVA Compras ': '',
         'Ganancias ': 'Gcias.',
         'Impuesto ': 'Imp.',
         'Interno ': 'Int.',
+        '10.50': '10.5',
+        '21.00': '21.0',
+        '27.00': '27.0',
     }
     for old, new in changes_map.items():
         name = name.replace(old, new)
@@ -134,13 +141,34 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             else ('in_invoice', 'in_refund')
         )
 
-    def _get_invoice_type(self, inv_type, denom, is_debit):
-        fiscal_type = "F"
-        if inv_type.endswith('_refund'):
-            fiscal_type = "NC"
-        elif is_debit:
-            fiscal_type = "ND"
-        return '%s %s' % (fiscal_type, denom.upper())
+    def _get_invoice_type(self, voucher_type, denom):
+        voucher_mapping = {
+            '001': 'F ',
+            '002': 'ND ',
+            '003': 'NC ',
+            '006': 'F ',
+            '007': 'ND ',
+            '008': 'NC ',
+            '011': 'F ',
+            '012': 'ND ',
+            '013': 'NC ',
+            '017': 'LSP ',
+            '018': 'LSP ',
+            '019': 'F ',
+            '051': 'F ',
+            '052': 'ND ',
+            '053': 'NC ',
+            '066': 'DES ',
+            '099': 'F ',
+            '090': 'NC ',
+            '201': 'FCE ',
+            '202': 'NDE ',
+            '203': 'NCE ',
+            '206': 'FCE ',
+            '207': 'NDE ',
+            '208': 'NCE ',
+        }
+        return '%s %s' % (voucher_mapping[voucher_type], denom.upper())
 
     def _get_columns(self):
         taxes = self._get_taxes_vals()
@@ -156,6 +184,8 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             if tax_id:
                 name = tax.get('name', '')
                 name = name.get('es_AR', name.get('en_US', '')) if name else ''
+                if tax.get('group_type', '') == 'internals':
+                    name = 'Imp.Interno'
                 tax_vals = {
                     'id': tax_id,
                     'is_exempt': tax.get('is_exempt', False),
@@ -249,6 +279,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
 
         c_taxes = [0] * len(cols)
         final_consumer_id = self.env.ref('l10n_ar_eynes.fiscal_position_cf').id
+        ri_id = self.env.ref('l10n_ar_eynes.fiscal_position_ri').id
 
         lines = {}
         last_line_id = -1
@@ -261,9 +292,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                 based_sign = -1
 
             invoice_type = self._get_invoice_type(
-                line['invoice_type'],
-                line['denomination'],
-                line['is_debit_note'],
+                line['voucher_type'], line['denomination']
             )
             key = line['invoice_id']
             line_id = line['line_id']
@@ -284,6 +313,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                         'partner_name': 'Agrupado CF monto menor a %s'
                         % round(self.grouped_max_amount, 2),
                         'partner_vat': '',
+                        'partner_ri': False,
                         'total': 0.0,
                         'taxes': [0] * len(cols),
                         'vat_taxes': {},
@@ -299,6 +329,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                         'invoice_type': invoice_type,
                         'partner_name': line['partner'],
                         'partner_vat': line['vat'],
+                        'partner_ri': line['fpid'] == ri_id,
                         'total': 0.0,
                         'taxes': [0] * len(cols),
                         'vat_taxes': {},
@@ -351,7 +382,6 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     lines[key]['vat_taxes'].setdefault(
                         tax_id,
                         {
-                            'amount': 0.0,
                             'name': _clean_tax_name(tax.get('name', '')),
                         },
                     )
@@ -361,19 +391,6 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     lines[key]['vat_taxes'][tax_id][
                         line['fiscal_credit']
                     ] += amount
-                if (
-                    # LINEA DE IMPUESTO
-                    line['tax_line_id']
-                    == tax_id
-                ):
-                    lines[key]['vat_taxes'].setdefault(
-                        tax_id,
-                        {
-                            'amount': 0.0,
-                            'name': _clean_tax_name(tax.get('name', '')),
-                        },
-                    )
-                    lines[key]['vat_taxes'][tax_id]['amount'] += amount
 
             if not (line['tax_line_id'] or line['tax_ids']):
                 # SI NO ES LINEA DE IMPUESTO O ES LINEA SIN IMPUESTOS CORRESPONDE A NO GRAVADO
@@ -389,6 +406,49 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             'direct_taxed': 'Directo Gravado',
             'direct_exempt': 'Directo Exento',
             'apport': 'Prorrateable',
+        }
+
+        by_fiscal_credit = {
+            # TIENEN RELACIONADO IVA PERO TIENEN FISCAL_CREDIT = direct_taxed, apport, direct_exempt
+            'direct_taxed': {
+                '10.5%': [0.0, 0.0],
+                '21.0%': [0.0, 0.0],
+                '27.0%': [0.0, 0.0],
+            },
+            'apport': {
+                '10.5%': [0.0, 0.0],
+                '21.0%': [0.0, 0.0],
+                '27.0%': [0.0, 0.0],
+            },
+            'direct_exempt': {
+                '10.5%': [0.0, 0.0],
+                '21.0%': [0.0, 0.0],
+                '27.0%': [0.0, 0.0],
+            },
+            'direct_taxed_refund': {
+                '10.5%': [0.0, 0.0],
+                '21.0%': [0.0, 0.0],
+                '27.0%': [0.0, 0.0],
+            },
+            'apport_refund': {
+                '10.5%': [0.0, 0.0],
+                '21.0%': [0.0, 0.0],
+                '27.0%': [0.0, 0.0],
+            },
+            'direct_exempt_refund': {
+                '10.5%': [0.0, 0.0],
+                '21.0%': [0.0, 0.0],
+                '27.0%': [0.0, 0.0],
+            },
+            # TIENEN RELACIONADO IVA EXENTO
+            'Exento': 0.0,
+            'Exento_refund': 0.0,
+            # NO TIENEN RELACIONADO IVA
+            'untaxed': 0.0,
+            'untaxed_refund': 0.0,
+            # NO TIENEN RELACIONADO IVA Y ADEMAS NO SON RESPONSABLES INSCRIPTOS
+            'ni_nr_ex_mon': 0.0,
+            'ni_nr_ex_mon_refund': 0.0,
         }
         new_lines = []
         totals = [0] * (
@@ -408,10 +468,10 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     line['partner_vat'],
                     line['invoice_type'],
                     line['invoice_number'],
+                    line['no_taxed'],
                 ]
                 + line['taxes']
                 + [
-                    line['no_taxed'],
                     line['total'],
                 ]
             )
@@ -419,7 +479,6 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             first_vat = True
             for vat_values in line['vat_taxes'].values():
                 vat_split = list(vat_values.keys())
-                vat_split.remove('amount')
                 vat_split.remove('name')
                 for fiscal_credit in vat_split:
                     if not first_vat:
@@ -427,38 +486,77 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                         new_line = new_line + (
                             [0] * (len(cols) + 2)
                         )  # +2 for no_taxed and total
-                    new_line.insert(5, vat_values[fiscal_credit])
-                    new_line.insert(6, vat_values['name'])
-                    new_line.insert(7, vat_values['amount'])
+                    base_vat_amount = vat_values[fiscal_credit]
+                    vat_aliquot = vat_values['name']
+                    try:
+                        vat_amount = round(
+                            base_vat_amount
+                            * (float(vat_aliquot.replace('%', '')) / 100),
+                            2,
+                        )
+                    except ValueError:
+                        vat_amount = 0.0
+
+                    new_line.insert(5, base_vat_amount)
+                    new_line.insert(6, vat_aliquot)
+                    new_line.insert(7, vat_amount)
                     new_line.insert(8, fiscal_credit_name[fiscal_credit])
                     new_lines.append(new_line)
                     first_vat = False
 
-                    totals[0] += vat_values[fiscal_credit]
-                    totals[1] += vat_values['amount']
+                    totals[0] += base_vat_amount
+                    totals[1] += vat_amount
                     if line['invoice_type'].startswith('NC'):
-                        totals_nc[0] += vat_values[fiscal_credit]
-                        totals_nc[1] += vat_values['amount']
+                        totals_nc[0] += base_vat_amount
+                        totals_nc[1] += vat_amount
+                        fiscal_credit = fiscal_credit + '_refund'
                     else:
-                        totals_fc_nd[0] += vat_values[fiscal_credit]
-                        totals_fc_nd[1] += vat_values['amount']
+                        totals_fc_nd[0] += base_vat_amount
+                        totals_fc_nd[1] += vat_amount
+
+                    if vat_aliquot in ('Exento', 'Exento_refund'):
+                        by_fiscal_credit[vat_aliquot] += base_vat_amount
+                    else:
+                        by_fiscal_credit[fiscal_credit][vat_aliquot][
+                            0
+                        ] += base_vat_amount
+                        by_fiscal_credit[fiscal_credit][vat_aliquot][
+                            1
+                        ] += vat_amount
+
+            by_fiscal_credit_untaxed_key = 'untaxed'
+            if first_vat:
+                # If this value is True, it is a no taxed invoice (maybe C type)
+                new_line.insert(5, 0.0)
+                new_line.insert(6, '')
+                new_line.insert(7, 0.0)
+                new_line.insert(8, '')
+                new_lines.append(new_line)
+                by_fiscal_credit_untaxed_key = 'ni_nr_ex_mon'
 
             for i, amount in enumerate(line['taxes']):
-                i = i + 2
+                i = (
+                    i + 3
+                )  # +3 for base_vat_amount, vat_amount and no_taxed_amount
                 totals[i] += amount
                 if line['invoice_type'].startswith('NC'):
                     totals_nc[i] += amount
                 else:
                     totals_fc_nd[i] += amount
 
-            totals[-2] += line['no_taxed']
+            totals[2] += line['no_taxed']
             totals[-1] += line['total']
             if line['invoice_type'].startswith('NC'):
-                totals_nc[-2] += line['no_taxed']
+                totals_nc[2] += line['no_taxed']
                 totals_nc[-1] += line['total']
+                by_fiscal_credit_untaxed_key = (
+                    by_fiscal_credit_untaxed_key + '_refund'
+                )
             else:
-                totals_fc_nd[-2] += line['no_taxed']
+                totals_fc_nd[2] += line['no_taxed']
                 totals_fc_nd[-1] += line['total']
+
+            by_fiscal_credit[by_fiscal_credit_untaxed_key] += line['no_taxed']
 
         totals.insert(1, '')
         totals.insert(3, '')
@@ -476,6 +574,21 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                 ]
             )
 
+        for fiscal_type in (
+            'direct_taxed',
+            'apport',
+            'direct_exempt',
+            'direct_taxed_refund',
+            'apport_refund',
+            'direct_exempt_refund',
+        ):
+            aliquots = (
+                by_fiscal_credit[fiscal_type]['10.5%'],
+                by_fiscal_credit[fiscal_type]['21.0%'],
+                by_fiscal_credit[fiscal_type]['27.0%'],
+            )
+            by_fiscal_credit[fiscal_type] = aliquots
+
         return (
             new_lines,
             totals,
@@ -483,6 +596,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             totals_nc,
             c_taxes,
             new_retention_perception_summary,
+            by_fiscal_credit,
         )
 
     def _get_line_vals(self):
@@ -492,12 +606,10 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                 i.id AS invoice_id,
                 i.name AS invoice_number,
                 i.move_type AS invoice_type,
-                i.cae AS cae,
-                i.cae_due_date AS cae_due_date,
-                i.is_debit_note AS is_debit_note,
                 i.denomination AS denomination,
                 i.currency_id AS currency,
                 i.amount_total AS invoice_total,
+                vt.afip_code as voucher_type,
                 l.id AS line_id,
                 l.tax_line_id AS tax_line_id,
                 l.credit AS credit,
@@ -511,6 +623,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                 amlatr.account_tax_id AS tax_ids
             FROM account_move_line l
             JOIN account_move i ON i.id = l.move_id
+            JOIN res_voucher_type vt ON vt.id = i.voucher_type_id
             JOIN res_partner rp ON rp.id = i.partner_id
             JOIN account_account a ON a.id = l.account_id
             JOIN account_fiscal_position afp ON afp.id = i.fiscal_position_id
@@ -528,7 +641,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                 AND a.account_type NOT LIKE '%%payable'
                 AND a.account_type NOT LIKE '%%receivable'
                 AND l.company_id = %(company_id)s
-        ORDER BY date, invoice_type, is_debit_note, invoice_number, line_id
+        ORDER BY date, invoice_type, invoice_number, line_id
         """
         q_vals = {
             'inv_type': tuple(self._get_move_types()),
@@ -581,160 +694,6 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
         # Obtenemos el resultado de la consulta
         return self._cr.dictfetchall()
 
-    # DATA QUE SE NECESITA PARA ARMAR EL REPORTE PDF IVA PRORRATEABLE
-    def _get_moves_data(self):
-        query = """
-        SELECT
-            afp.id as fiscal_position_id,
-            aml.move_id,
-            aml.id,
-            aml.fiscal_credit,
-            aml.price_subtotal,
-            aml.price_total,
-            amlat.account_tax_id as applied_tax_id,
-            am.currency_rate,
-            am.move_type
-        FROM account_move_line aml
-        JOIN account_move am ON aml.move_id = am.id
-        JOIN account_fiscal_position afp ON am.fiscal_position_id = afp.id
-        LEFT JOIN account_move_line_account_tax_rel amlat ON aml.id = amlat.account_move_line_id
-        WHERE
-            am.state = 'posted' AND
-            am.move_type in %(move_types)s AND
-            am.date >= %(date_start)s AND
-            am.date <= %(date_end)s AND
-            am.company_id = %(company)s AND
-            aml.display_type = 'product'
-        ORDER BY
-            afp.id, aml.move_id, aml.id
-        """
-        vals = {
-            'move_types': tuple(self._get_move_types()),
-            'date_start': self.date_from,
-            'date_end': self.date_to,
-            'company': self.company_id.id,
-        }
-        self.env.cr.execute(query, vals)
-        res = self.env.cr.fetchall()
-        return res
-
-    def _parse_lines(self):
-        sale_data = self._get_moves_data()
-        by_fiscal_credit = {
-            'direct_taxed': {
-                '10.5': [0.0, 0.0],
-                '21': [0.0, 0.0],
-                '27': [0.0, 0.0],
-            },
-            'apport': {
-                '10.5': [0.0, 0.0],
-                '21': [0.0, 0.0],
-                '27': [0.0, 0.0],
-            },
-            'direct_exempt': {
-                '10.5': [0.0, 0.0],
-                '21': [0.0, 0.0],
-                '27': [0.0, 0.0],
-            },
-            'direct_taxed_refund': {
-                '10.5': [0.0, 0.0],
-                '21': [0.0, 0.0],
-                '27': [0.0, 0.0],
-            },
-            'apport_refund': {
-                '10.5': [0.0, 0.0],
-                '21': [0.0, 0.0],
-                '27': [0.0, 0.0],
-            },
-            'direct_exempt_refund': {
-                '10.5': [0.0, 0.0],
-                '21': [0.0, 0.0],
-                '27': [0.0, 0.0],
-            },
-            'exempt': 0.0,
-            'untaxed': 0.0,
-            'ni_nr_ex_mon': 0.0,
-            'exempt_refund': 0.0,
-            'untaxed_refund': 0.0,
-            'ni_nr_ex_mon_refund': 0.0,
-        }
-
-        vat_type = None
-        for i, line in enumerate(sale_data):
-            next_line = sale_data[i + 1] if i + 1 < len(sale_data) else None
-            next_is_same_aml = next_line[2] == line[2] if next_line else False
-
-            if line[0] == self.env.ref('l10n_ar_eynes.fiscal_position_ri').id:
-                if (
-                    line[6]
-                    == self.env.ref(
-                        'l10n_ar_eynes.10_50_percent_tax_' + self.based_on
-                    ).id
-                ):
-                    vat_type = '10.5'
-                elif (
-                    line[6]
-                    == self.env.ref(
-                        'l10n_ar_eynes.21_percent_tax_' + self.based_on
-                    ).id
-                ):
-                    vat_type = '21'
-                elif (
-                    line[6]
-                    == self.env.ref(
-                        'l10n_ar_eynes.27_percent_tax_' + self.based_on
-                    ).id
-                ):
-                    vat_type = '27'
-                elif (
-                    line[6]
-                    == self.env.ref(
-                        'l10n_ar_eynes.exempt_percent_tax_' + self.based_on
-                    ).id
-                ):
-                    vat_type = 'exempt'
-            else:
-                vat_type = 'ni_nr_ex_mon'
-
-            if not next_is_same_aml:
-                total = line[5] * line[7]
-                if not vat_type:
-                    vat_type = 'untaxed'
-
-                if vat_type in ['exempt', 'ni_nr_ex_mon', 'untaxed']:
-                    if line[8].endswith('_refund'):
-                        vat_type = vat_type + '_refund'
-                        total = total * -1
-                    by_fiscal_credit[vat_type] += total
-                else:
-                    fiscal_credit = line[3]
-                    net = line[4] * line[7]
-                    vat = total - net
-                    if line[8].endswith('_refund'):
-                        fiscal_credit = fiscal_credit + '_refund'
-                        net = net * -1
-                        vat = vat * -1
-                    by_fiscal_credit[fiscal_credit][vat_type][0] += net
-                    by_fiscal_credit[fiscal_credit][vat_type][1] += vat
-                vat_type = None
-
-        for fiscal_type in (
-            'direct_taxed',
-            'apport',
-            'direct_exempt',
-            'direct_taxed_refund',
-            'apport_refund',
-            'direct_exempt_refund',
-        ):
-            aliquots = (
-                by_fiscal_credit[fiscal_type]['10.5'],
-                by_fiscal_credit[fiscal_type]['21'],
-                by_fiscal_credit[fiscal_type]['27'],
-            )
-            by_fiscal_credit[fiscal_type] = aliquots
-
-        return by_fiscal_credit
-
     def _get_retention_data(self):
         retention_query = """
         SELECT ret.name, -1 * sum(r.amount), conc.code FROM account_payment_order_retention_line r
@@ -757,16 +716,23 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
 
     def _get_perception_data(self):
         perception_query = """
-        SELECT per.name, sum(p.amount) FROM perception_tax_line p
+        SELECT
+            per.name,
+            sum(CASE
+                WHEN i.move_type IN %(neg_vouchers)s THEN -p.amount
+                ELSE p.amount
+            END)
+        FROM perception_tax_line p
         JOIN account_tax per ON p.perception_id = per.id
-        JOIN account_move i ON p.invoice_id=i.id
+        JOIN account_move i ON p.invoice_id = i.id
         WHERE p.date BETWEEN %(date_start)s AND %(date_end)s
         AND i.state = 'posted'
-        AND per.type_tax_use LIKE %(based_on)s
+        AND per.type_tax_use = %(based_on)s
         AND p.company_id = %(company)s
         GROUP BY per.id
         """
         vals = {
+            'neg_vouchers': tuple(('in_refund',)),
             'based_on': self.based_on,
             'date_start': self.date_from,
             'date_end': self.date_to,
@@ -809,14 +775,21 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             totals_nc,
             c_taxes,
             retention_perception_summary,
+            apportionable_vat_data,
         ) = self._get_lines(cols, vat_cols)
 
-        invoice_list_header = ['Base', '%', 'IVA', 'Asig.CF']
+        invoice_list_header = [
+            'Neto Grav.',
+            '%',
+            'IVA',
+            'Asig.CF',
+            'No Gravado',
+        ]
         for i, col in enumerate(cols):
             if c_taxes[i] > 0:
                 invoice_list_header.append(_clean_tax_name(col['name']))
+        invoice_list_header.append('Total')
 
-        apportionable_vat_data = self._parse_lines()
         retention_perception = self._parse_retention_perception()
 
         return self.env.ref(
@@ -848,10 +821,10 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                 'direct_exempt_refund': apportionable_vat_data[
                     'direct_exempt_refund'
                 ],
-                'exempt': apportionable_vat_data['exempt'],
+                'exempt': apportionable_vat_data['Exento'],
                 'untaxed': apportionable_vat_data['untaxed'],
                 'ni_nr_ex_mon': apportionable_vat_data['ni_nr_ex_mon'],
-                'exempt_refund': apportionable_vat_data['exempt_refund'],
+                'exempt_refund': apportionable_vat_data['Exento_refund'],
                 'untaxed_refund': apportionable_vat_data['untaxed_refund'],
                 'ni_nr_ex_mon_refund': apportionable_vat_data[
                     'ni_nr_ex_mon_refund'
