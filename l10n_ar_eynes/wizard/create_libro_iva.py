@@ -279,7 +279,9 @@ class LibroIVAExporterWizard(models.TransientModel):
 
     def _get_partner_name(self, invoice, errors):
         try:
-            partner_name = '%.30s' % invoice.partner_id.name.ljust(30, ' ')
+            partner_name = '%.30s' % invoice.partner_id.get_clean_name().ljust(
+                30, ' '
+            )
         except Exception as e:
             _logger.error(
                 'Error on field %s: %s' % ('account_move.partner_id.name', e)
