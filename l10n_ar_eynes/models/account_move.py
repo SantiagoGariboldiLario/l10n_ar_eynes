@@ -1655,7 +1655,7 @@ class AccountMove(models.Model):
 
     # --------------------------------------------------------------------------------
     # *********      MÉTODOS PARA OBTENER MONTOS SEGÚN TIPO DE IVA: *********
-    def _get_amounts_by_vat_aliquot(self, aliquot, currency='company'):
+    def get_amounts_by_vat_aliquot(self, aliquot, currency='company'):
         """
         Returns a dictionary with the amounts of the invoice grouped by tax type.
         :param aliquot: string or float representing the aliquot type, can be 'no_taxed', 'exempt', 0.0,

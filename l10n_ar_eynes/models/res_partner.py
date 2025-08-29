@@ -1,4 +1,7 @@
 import logging
+import re
+import unicodedata
+
 from collections import defaultdict
 
 from odoo import _, api, fields, models
@@ -555,6 +558,12 @@ class ResPartner(models.Model):
 
     def get_applicable_internals(self):
         return self.property_account_position_id.internal_taxes_ids
+
+    def get_clean_name(self):
+        """Get the partner name without special characters for electronic invoicing and exporters."""
+        self.ensure_one()
+        normalized = unicodedata.normalize("NFD", self.name)
+        return re.sub(r'[\u0300-\u036f]', '', normalized)
 
 
 class ResPartnerRetention(models.Model):
