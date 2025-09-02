@@ -922,7 +922,7 @@ class LibroIVAExporterWizard(models.TransientModel):
                 + purchase_aliquot_err
                 + import_aliquot_err
             )
-        
+
         elif self.file_format == 'xlsx':
             sale_err, sale_aliquot_err = self.create_sales_voucher_file_xlsx(invoices)
 
@@ -970,7 +970,7 @@ class LibroIVAExporterWizard(models.TransientModel):
     def create_attachment_xlsx(self, filename, data):
         wb = Workbook()
         ws = wb.active
-        
+
         for row in data:
             ws.append(row)
 
