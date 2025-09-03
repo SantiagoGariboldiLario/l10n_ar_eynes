@@ -3823,6 +3823,7 @@ msgstr "Fecha de finalización"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_perception_exporter_wizard__date_to
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_retention_exporter_wizard__date_to
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_arciba_generated_files__date_to
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__date_to
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_libroiva_generated_files__date_to
 msgid "Date To"
 msgstr "Fecha hasta"
@@ -6181,6 +6182,18 @@ msgstr "Es consumidor final"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order__message_is_follower
 msgid "Is Follower"
 msgstr "Es seguidor"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_bank_statement_line__is_opening
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_move__is_opening
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment__is_opening
+msgid "Is Opening"
+msgstr "Es Apertura"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__is_simple_vat
+msgid "Is Simple VAT?"
+msgstr "Es IVA Simple?"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__issue_date

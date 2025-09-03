@@ -9,6 +9,7 @@ from calendar import monthrange
 from openpyxl import Workbook
 
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -18,10 +19,12 @@ class LibroIVAExporterWizard(models.TransientModel):
     _description = 'Libro IVA Digital Exporter Wizard'
 
     date_from = fields.Date(required=True)
+    date_to = fields.Date(required=True)
     company_id = fields.Many2one('res.company', 'Company', required=True)
     company_id_domain = fields.Char(
         default=lambda self: self._default_company_ids()
     )
+    is_simple_vat = fields.Boolean('Is Simple VAT?', default=False)
     notes = fields.Text('Notes', readonly=True)
     state = fields.Selection(
         [('init', 'Start'), ('done', 'Done')], 'State', default='init'
@@ -39,9 +42,11 @@ class LibroIVAExporterWizard(models.TransientModel):
             [('id', 'in', self.env.context.get('allowed_company_ids', []))]
         )
 
-    def _get_date_to(self):
+    def _check_date_to(self):
         end_of_month = monthrange(self.date_from.year, self.date_from.month)[1]
-        return self.date_from.replace(day=end_of_month)
+        limit = self.date_from.replace(day=end_of_month)
+        if self.date_to > limit:
+            raise UserError(_('Date to must be less or equal than %s') % limit)
 
     # METHODS TO GET NEEDED FIELDS:
     def _get_invoice_tax_lines(self, invoice):
@@ -97,7 +102,11 @@ class LibroIVAExporterWizard(models.TransientModel):
         qty = 0
         if invoice.denomination in ['C']:
             return u'{}'.format(qty)
-        qty += len(self._get_invoice_vat_tax_lines(invoice))
+        qty += len(
+            invoice.invoice_line_ids.mapped('tax_ids')
+            .filtered(lambda tax: tax.tax_group_id.group_type == 'vat')
+            .ids
+        )
         return u'{}'.format(qty) if qty < 10 else False
 
     def _get_amount_original_currency(self, invoice, amount, amount_cur):
@@ -288,7 +297,9 @@ class LibroIVAExporterWizard(models.TransientModel):
 
     def _get_partner_name(self, invoice, errors):
         try:
-            partner_name = '%.30s' % invoice.partner_id.name.ljust(30, ' ')
+            partner_name = '%.30s' % invoice.partner_id.get_clean_name().ljust(
+                30, ' '
+            )
         except Exception as e:
             _logger.error(
                 'Error on field %s: %s' % ('account_move.partner_id.name', e)
@@ -416,7 +427,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         )
 
     # METHODS TO GIVE FORMAT TO EACH LINES:
-    def _format_sale_aliquot_line(self, tax_line, invoice, null=False):
+    def _format_sale_aliquot_line(self, tax_line, invoice, zero_base=False):
         errors = []
         pos = self._get_invoice_point_of_sale(invoice, errors)
         voucher_type = self._get_invoice_voucher_type(invoice, errors)
@@ -424,12 +435,12 @@ class LibroIVAExporterWizard(models.TransientModel):
             invoice, errors
         )
 
-        if null:
+        if zero_base:
             line = [
                 voucher_type,
                 pos,
                 internal_number_formatted,
-                ('%016.2f' % invoice.amount_total).replace('.', ''),
+                ('%016.2f' % zero_base).replace('.', ''),
                 ('%.4s' % '3'.rjust(4, '0')),
                 ('%016.2f' % 0).replace('.', ''),
             ]
@@ -455,7 +466,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             return (False, errors)
         return (True, line)
 
-    def _format_aliquot_purchase_line(self, tax_line, invoice):
+    def _format_aliquot_purchase_line(self, tax_line, invoice, zero_base=False):
         errors = []
         pos = self._get_invoice_point_of_sale(invoice, errors)
         voucher_type = self._get_invoice_voucher_type(invoice, errors)
@@ -465,25 +476,37 @@ class LibroIVAExporterWizard(models.TransientModel):
             invoice, errors
         )
 
-        tax_base = tax_line.tax_base_amount
-        if invoice.is_multi_currency:
-            rate = invoice.currency_rate
-            if invoice.currency_id.preciated:
-                rate = 1 / rate
-            tax_base = tax_base * rate
+        if zero_base:
+            line = [
+                voucher_type,
+                pos,
+                internal_number_formatted,
+                partner_document_type,
+                partner_vat,
+                ('%016.2f' % zero_base).replace('.', ''),
+                ('%.4s' % '3'.rjust(4, '0')),
+                ('%016.2f' % 0).replace('.', ''),
+            ]
+        else:
+            tax_base = tax_line.tax_base_amount
+            if invoice.is_multi_currency:
+                rate = invoice.currency_rate
+                if invoice.currency_id.preciated:
+                    rate = 1 / rate
+                tax_base = tax_base * rate
 
-        tax_amount = abs(tax_line.amount_currency)
+            tax_amount = abs(tax_line.amount_currency)
 
-        line = [
-            voucher_type,
-            pos,
-            internal_number_formatted,
-            partner_document_type,
-            partner_vat,
-            ('%016.2f' % tax_base).replace('.', ''),
-            ('%.4s' % str(tax_line.tax_line_id.afip_code).rjust(4, '0')),
-            ('%016.2f' % tax_amount).replace('.', ''),
-        ]
+            line = [
+                voucher_type,
+                pos,
+                internal_number_formatted,
+                partner_document_type,
+                partner_vat,
+                ('%016.2f' % tax_base).replace('.', ''),
+                ('%.4s' % str(tax_line.tax_line_id.afip_code).rjust(4, '0')),
+                ('%016.2f' % tax_amount).replace('.', ''),
+            ]
         if False in line:
             errors = '\n'.join(errors)
             return (False, errors)
@@ -618,13 +641,16 @@ class LibroIVAExporterWizard(models.TransientModel):
         errors = []
         if invoice.denomination in ['C']:
             return (True, aliquot_lines)
-        if len(self._get_invoice_tax_lines(invoice)) == 0:
+        zero_vat_values = invoice.get_amounts_by_vat_aliquot(0, 'invoice')
+        if zero_vat_values and zero_vat_values.get('base', 0):
             line = self._format_sale_aliquot_line(
-                self._get_invoice_tax_lines(invoice), invoice, null=True
+                None, invoice, zero_base=zero_vat_values['base']
             )
             if line[0]:
                 aliquot_line = ''.join(line[1]) if not split_vals else line[1]
                 aliquot_lines.append(aliquot_line)
+            else:
+                errors.append(line[1])
         for tax_line in self._get_invoice_vat_tax_lines(invoice):
             line = self._format_sale_aliquot_line(tax_line, invoice)
             if line[0]:
@@ -719,6 +745,16 @@ class LibroIVAExporterWizard(models.TransientModel):
                 aliquot_lines.append(aliquot_line)
             else:
                 errors.append(line[1])
+        zero_vat_values = invoice.get_amounts_by_vat_aliquot(0, 'invoice')
+        if zero_vat_values and zero_vat_values.get('base', 0):
+            line = self._format_aliquot_purchase_line(
+                None, invoice, zero_base=zero_vat_values['base']
+            )
+            if line[0]:
+                aliquot_line = ''.join(line[1])
+                aliquot_lines.append(aliquot_line)
+            else:
+                errors.append(line[1])
         if len(errors) > 0:
             return (False, errors)
         return (True, aliquot_lines)
@@ -752,7 +788,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             {
                 'code': filename,
                 'date_from': self.date_from,
-                'date_to': self._get_date_to(),
+                'date_to': self.date_to,
                 'company_id': self.company_id.id,
             }
         )
@@ -817,18 +853,23 @@ class LibroIVAExporterWizard(models.TransientModel):
         return (sale_errors, aliquot_errors)
 
     def create_purchases_voucher_file(self, invoices):  # noqa
-        import_aliquot_errors = []
-        import_aliquots = []
-        purchase_aliquot_errors = []
-        purchase_aliquots = []
-        purchase_errors = []
         purchases = []
+        purchase_aliquots = []
+        imports = []
+        import_aliquots = []
+        purchase_errors = []
+        purchase_aliquot_errors = []
+        imports_errors = []
+        import_aliquot_errors = []
 
         for invoice in invoices:
+            is_import = invoice.iva_digital_operation_code in ['X', 'Z']
+            add_purchase_line = True
             line = self._create_purchase_line(invoice)
             if line[0]:
-                aliquot_line = self._create_aliquot_purchase_line(invoice)
-                if invoice.iva_digital_operation_code in ['X', 'Z']:
+                if is_import:
+                    if self.is_simple_vat:
+                        add_purchase_line = False
                     aliquot_import_line = (
                         self._create_aliquot_import_purchase_line(invoice)
                     )
@@ -837,17 +878,34 @@ class LibroIVAExporterWizard(models.TransientModel):
                     else:
                         if aliquot_import_line[1]:
                             import_aliquot_errors.append(aliquot_import_line[1])
-
-                if aliquot_line and aliquot_line[0]:
-                    purchase_aliquots += aliquot_line[1]
-                elif aliquot_line and not aliquot_line[0]:
-                    if aliquot_line[1]:
+                else:
+                    aliquot_line = self._create_aliquot_purchase_line(invoice)
+                    if aliquot_line[0]:
+                        purchase_aliquots += aliquot_line[1]
+                    else:
                         purchase_aliquot_errors.append(aliquot_line[1])
-
-                purchases.append(''.join(line[1]))
-            else:
-                if line[1]:
+                if add_purchase_line:
+                    purchases.append(''.join(line[1]))
+                else:
+                    imports.append(''.join(line[1]))
+            elif line[1]:
+                if is_import:
+                    imports_errors.append(line[1])
+                else:
                     purchase_errors.append(line[1])
+
+        if imports_errors:
+            imports_errors.insert(
+                0, _('\nImport File Errors\n================\n')
+            )
+
+        suffix = ".libroivadigitalimport"
+        filename = (
+            "LIBRO_IVA_IMPORTACION_BIENES_%s.txt"
+            % self.company_id.name.replace(' ', '-')
+        )
+        if imports:
+            self.create_attachment(suffix, filename, imports)
 
         if import_aliquot_errors:
             import_aliquot_errors.insert(
@@ -892,12 +950,14 @@ class LibroIVAExporterWizard(models.TransientModel):
 
     # INIT:
     def create_files(self):
+        self._check_date_to()
+
         AccountMove = self.env['account.move']
 
         domain = [
             ('company_id', '=', self.company_id.id),
             ('date', '>=', self.date_from),
-            ('date', '<=', self._get_date_to()),
+            ('date', '<=', self.date_to),
             ('state', '=', 'posted'),
         ]
 

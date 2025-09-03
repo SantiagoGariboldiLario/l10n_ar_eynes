@@ -11,10 +11,12 @@
                 </p>
                 <separator colspan="4" />
                 <group>
-                    <field name="date_from" widget="month_year_format" />
+                    <field name="date_from" />
+                    <field name="date_to" />
                     <field name="company_id_domain" invisible="True" />
                     <field name="company_id" domain="company_id_domain" />
                     <field name="file_format" />
+                    <field name="is_simple_vat" />
                 </group>
                 <separator string="Validation Errors" colspan="4" />
                 <field name="notes" readonly="1" nolabel="1" colspan="4" />
