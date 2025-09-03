@@ -6,12 +6,16 @@ import json
 import logging
 import tempfile
 from calendar import monthrange
-from openpyxl import Workbook
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
+
+try:
+    from openpyxl import Workbook
+except ImportError:
+    _logger.warning('Could not import library openpyxl')
 
 
 class LibroIVAExporterWizard(models.TransientModel):
