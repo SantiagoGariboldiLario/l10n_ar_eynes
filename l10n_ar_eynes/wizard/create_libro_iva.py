@@ -204,7 +204,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             internal_number = invoice.supplier_move_reference
         if not internal_number:
             internal_number = "/"
-        if invoice.iva_digital_operation_code in ['X', 'Z']:
+        if self._check_invoice_is_import(invoice):
             import_clearance = internal_number.rjust(16, ' ')
             internal_number = '0'
         else:
@@ -415,6 +415,11 @@ class LibroIVAExporterWizard(models.TransientModel):
                 for line in invoice.line_ids
             )
             or len(self._get_invoice_tax_lines(invoice)) == 0
+        )
+
+    def _check_invoice_is_import(self, invoice):
+        return invoice.voucher_type_id == self.env.ref(
+            'l10n_ar_eynes.factura_despacho_importacion'
         )
 
     # METHODS TO GIVE FORMAT TO EACH LINES:
@@ -854,7 +859,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         import_aliquot_errors = []
 
         for invoice in invoices:
-            is_import = invoice.iva_digital_operation_code in ['X', 'Z']
+            is_import = self._check_invoice_is_import(invoice)
             add_purchase_line = True
             line = self._create_purchase_line(invoice)
             if line[0]:
