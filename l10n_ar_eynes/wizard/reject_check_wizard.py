@@ -211,36 +211,40 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
                     )
                 )
 
-            # Valores originales
+            if check.third_party_check_state not in (
+                'in_wallet',
+                'delivered',
+                'deposited',
+            ):
+                raise UserError(
+                    _(
+                        'ERROR! This check is not Delivered, Deposited or In Wallet!'
+                    )
+                )
+
+            missing_fields = (
+                self._missing_config_fields_for_delivered_third_party_check(
+                    config
+                )
+            )
+            if missing_fields:
+                raise ValidationError(
+                    _(
+                        'Missing config params for check. Go to Configuration/Check configuration and'
+                        ' complete the following fields for company %(company)s: \n\n\t* %(fields)s',
+                        company=check.company_id.name,
+                        fields='\n\t* '.join(missing_fields),
+                    )
+                )
+
             params = {
                 'move_ref': _(
                     'Reject Check %(check_number)s', check_number=check.number
                 ),
-                'move_journal_id': check.deposit_bank_id.journal_id.id,
+                'move_journal_id': config.rejected_issued_checks_journal_id.id,
+                'move_line_credit_account_id': self.get_account(config, check),
                 'move_line_debit_account_id': config.rejected_account_id.id,
-                'move_line_credit_account_id': check.deposit_bank_id.account_id.id,
             }
-
-            if check.internal_type == 'third_party':
-                if check.third_party_check_state == 'delivered':
-                    missing_fields = self._missing_config_fields_for_delivered_third_party_check(
-                        config
-                    )
-                    if missing_fields:
-                        raise ValidationError(
-                            _(
-                                'Missing config params for check. Go to Configuration/Check configuration and'
-                                ' complete the following fields for company %(company)s: \n\n\t* %(fields)s',
-                                company=check.company_id.name,
-                                fields='\n\t* '.join(missing_fields),
-                            )
-                        )
-                    params = {
-                        'move_ref': _('Reject %(check)s', check=check.number),
-                        'move_journal_id': config.rejected_issued_checks_journal_id.id,
-                        'move_line_debit_account_id': config.receivable_rejected_account_id.id,
-                        'move_line_credit_account_id': config.rejected_account_id.id,
-                    }
             self._create_account_move_line(check, config, params)
 
         return {'type': 'ir.actions.act_window_close'}
@@ -259,9 +263,9 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
         account_id = False
         state = check.third_party_check_state
         if state == 'delivered':
-            account_id = config.rejected_account_id.id
+            account_id = config.receivable_rejected_account_id.id
         elif state == 'deposited':
-            account_id = check.deposit_bank_id.account_id.id
+            account_id = check.deposit_bank_id.journal_id.suspense_account_id.id
         elif state == 'in_wallet':
             account_id = config.account_id.id
         return account_id
