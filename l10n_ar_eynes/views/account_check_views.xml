@@ -382,7 +382,7 @@
                         string="Reject Check"
                         type="action"
                         class="oe_highlight"
-                        invisible="third_party_check_state not in ('accredited', 'delivered')"
+                        invisible="third_party_check_state not in ('in_wallet', 'delivered', 'deposited')"
                     />
                     <field
                         name="third_party_check_state"

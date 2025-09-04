@@ -222,7 +222,11 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
             }
 
             if check.internal_type == 'third_party':
-                if check.third_party_check_state == 'delivered':
+                if check.third_party_check_state in (
+                    'in_wallet',
+                    'delivered',
+                    'deposited',
+                ):
                     missing_fields = self._missing_config_fields_for_delivered_third_party_check(
                         config
                     )
