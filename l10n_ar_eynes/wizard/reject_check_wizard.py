@@ -265,7 +265,7 @@ class RejectThirdPartyCheckWizard(models.TransientModel):
         if state == 'delivered':
             account_id = config.receivable_rejected_account_id.id
         elif state == 'deposited':
-            account_id = check.deposit_bank_id.account_id.id
+            account_id = check.deposit_bank_id.journal_id.suspense_account_id.id
         elif state == 'in_wallet':
             account_id = config.account_id.id
         return account_id
