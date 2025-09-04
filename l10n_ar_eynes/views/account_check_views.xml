@@ -476,7 +476,7 @@
                             <field name="deposit_bank_id" readonly="third_party_check_state != 'in_wallet'" />
                         </group>
                     </group>
-                     <group string="Check Accreditation" invisible="third_party_check_state != 'accredited'">
+                     <group string="Check Accreditation">
                         <group>
                             <field name="accredit_date" readonly="third_party_check_state != 'deposited'" />
                             <field
