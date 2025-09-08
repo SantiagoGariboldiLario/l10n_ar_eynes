@@ -760,7 +760,7 @@ class LibroIVAExporterWizard(models.TransientModel):
                 None, invoice, zero_base=zero_vat_values['base']
             )
             if line[0]:
-                aliquot_line = ''.join(line[1])
+                aliquot_line = ''.join(line[1]) if not split_vals else line[1]
                 aliquot_lines.append(aliquot_line)
             else:
                 errors.append(line[1])
@@ -1068,7 +1068,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             {
                 'code': filename,
                 'date_from': self.date_from,
-                'date_to': self._get_date_to(),
+                'date_to': self.date_to,
                 'company_id': self.company_id.id,
                 'attachment_id': attachment.id,
             }
@@ -1094,6 +1094,7 @@ class LibroIVAExporterWizard(models.TransientModel):
                 else:
                     if aliquot_line[1]:
                         aliquot_errors.append(aliquot_line[1])
+
                 sales.append(self.format_sale_line_xlsx(line[1]))
             else:
                 if line[1]:
@@ -1126,20 +1127,23 @@ class LibroIVAExporterWizard(models.TransientModel):
         return (sale_errors, aliquot_errors)
 
     def create_purchases_voucher_file_xlsx(self, invoices):  # noqa
-        import_aliquot_errors = []
-        import_aliquots = []
-        purchase_aliquot_errors = []
-        purchase_aliquots = []
-        purchase_errors = []
         purchases = []
+        purchase_aliquots = []
+        imports = []
+        import_aliquots = []
+        purchase_errors = []
+        purchase_aliquot_errors = []
+        imports_errors = []
+        import_aliquot_errors = []
 
         for invoice in invoices:
+            is_import = self._check_invoice_is_import(invoice)
+            add_purchase_line = True
             line = self._create_purchase_line(invoice)
             if line[0]:
-                aliquot_line = self._create_aliquot_purchase_line(
-                    invoice, split_vals=True
-                )
-                if invoice.iva_digital_operation_code in ['X', 'Z']:
+                if is_import:
+                    if self.is_simple_vat:
+                        add_purchase_line = False
                     aliquot_import_line = (
                         self._create_aliquot_import_purchase_line(invoice)
                     )
@@ -1148,17 +1152,25 @@ class LibroIVAExporterWizard(models.TransientModel):
                     else:
                         if aliquot_import_line[1]:
                             import_aliquot_errors.append(aliquot_import_line[1])
-                if aliquot_line and aliquot_line[0]:
-                    purchase_aliquots += [
-                        self.format_purchase_aliquot_line_xlsx(line)
-                        for line in aliquot_line[1]
-                    ]
-                elif aliquot_line and not aliquot_line[0]:
-                    if aliquot_line[1]:
+                else:
+                    aliquot_line = self._create_aliquot_purchase_line(
+                        invoice, split_vals=True
+                    )
+                    if aliquot_line[0]:
+                        purchase_aliquots += [
+                            self.format_purchase_aliquot_line_xlsx(line)
+                            for line in aliquot_line[1]
+                        ]
+                    else:
                         purchase_aliquot_errors.append(aliquot_line[1])
-                purchases.append(self.format_purchase_line_xlsx(line[1]))
-            else:
-                if line[1]:
+                if add_purchase_line:
+                    purchases.append(self.format_purchase_line_xlsx(line[1]))
+                else:
+                    imports.append(''.join(line[1]))
+            elif line[1]:
+                if is_import:
+                    imports_errors.append(line[1])
+                else:
                     purchase_errors.append(line[1])
 
         if purchase_aliquot_errors:
