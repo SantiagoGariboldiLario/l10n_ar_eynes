@@ -12,6 +12,7 @@ class AccountFiscalPosition(models.Model):
             ("c", "C"),
             ("e", "E"),
             ('m', 'M'),
+            ('ana', 'ANA'),
             ('oc', 'OC'),
             ("not_defined", "Not Defined"),
         ],
@@ -73,7 +74,7 @@ class AccountFiscalPosition(models.Model):
     is_final_consumer = fields.Boolean("Is Final Consumer")
 
     def unlink(self):
-        """ Override unlink to prevent remove fiscal positions """
+        """Override unlink to prevent remove fiscal positions"""
         for fiscal_position in self:
             # This prevents the deletion of fiscal positions with IDs 1 to 20,
             # which are typically reserved for system use or default fiscal positions.

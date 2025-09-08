@@ -11,6 +11,7 @@
                 <field name="date_to" />
                 <field name="attachment_id" />
                 <field name="company_id" />
+                <field name="create_date" />
             </tree>
         </field>
     </record>
@@ -29,7 +30,6 @@
                         <label for="datas" string="Generated File" />
                         <div class="oe_inline">
                             <field name="datas" filename="code" class="pr-3" />
-                            <field name="attachment_id" />
                         </div>
                         <field name="company_id" />
                     </group>
