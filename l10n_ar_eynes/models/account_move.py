@@ -822,8 +822,10 @@ class AccountMove(models.Model):
         if self.disable_perceptions:
             self.perception_ids.unlink()
             self.invoice_line_ids.link_perception_to_move_lines()
+            return {'value': {'disable_perceptions': True}}
         else:
             self._automatic_perception_calculation()
+            return {'value': {'disable_perceptions': False}}
 
     @api.onchange(
         'invoice_date',
