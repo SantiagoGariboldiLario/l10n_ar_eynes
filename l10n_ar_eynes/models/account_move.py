@@ -1334,20 +1334,49 @@ class AccountMove(models.Model):
                     move.write({'denomination': denomination})
         return res
 
+    def are_sale_documents(self):
+        return all(move.is_sale_document() for move in self)
+
+    def are_purchase_documents(self):
+        return all(move.is_purchase_document() for move in self)
+
+    def _action_register_multi_payments(self, partners, view_id, context):
+        payment_orders = self.env['account.payment.order']
+        for partner in partners:
+            invoices = self.filtered(lambda move: move.partner_id == partner)
+            po = self.env['account.payment.order'].create(
+                invoices._get_payment_order_vals()
+            )
+            payment_orders += po
+
+        return {
+            'name': _('Register Payment'),
+            'res_model': 'account.payment.order',
+            'domain': [('id', 'in', payment_orders.ids)],
+            'view_mode': 'tree',
+            'views': [
+                [
+                    self.env.ref(
+                        'l10n_ar_eynes.account_payment_order_view_tree'
+                    ).id,
+                    'list',
+                ],
+                [view_id.id, 'form'],
+            ],
+            'target': 'current',
+            'context': context,
+            'type': 'ir.actions.act_window',
+        }
+
     def action_register_payment(self):
         '''Open the account.payment.register wizard to pay the selected journal entries.
         :return: An action opening the account.payment.register wizard.
         '''
-        try:
-            self.ensure_one()
-        except ValueError:
-            return super(AccountMove, self).action_register_payment()
-
         view_id = self.env.ref(
             'l10n_ar_eynes.account_supplier_payment_order_view_form'
         )
         context = self.env.context.copy()
-        if self.is_sale_document():
+        if self.are_sale_documents():
             view_id = self.env.ref(
                 'l10n_ar_eynes.account_customer_payment_order_view_form'
             )
@@ -1356,6 +1385,21 @@ class AccountMove(models.Model):
                     'default_type': 'receipt',
                 }
             )
+        elif not self.are_purchase_documents():
+            raise UserError(
+                _(
+                    "You can only register payments for customers or suppliers at the same time."
+                )
+            )
+
+        try:
+            self.ensure_one()
+        except ValueError:
+            partners = self.mapped('partner_id')
+            if len(partners) > 1:
+                return self._action_register_multi_payments(
+                    partners, view_id, context
+                )
 
         po = self.env['account.payment.order'].create(
             self._get_payment_order_vals()
@@ -1373,73 +1417,58 @@ class AccountMove(models.Model):
         }
 
     def _get_payment_order_vals(self):
-        move_line_domain = [
-            ('id', 'in', self.line_ids.ids),
-            ('reconciled', '=', False),
-        ]
-        if self.is_sale_document():
-            if self.move_type == 'out_refund':
+        debt_line_ids = []
+        income_line_ids = []
+        for invoice in self:
+            move_line_domain = [
+                ('id', 'in', invoice.line_ids.ids),
+                ('reconciled', '=', False),
+            ]
+            if invoice.move_type in ['out_refund', 'in_invoice']:
                 move_line_domain += [
                     ('debit', '=', 0),
                     ('credit', '>', 0),
                 ]
-            else:
+                add_to = debt_line_ids
+            elif invoice.move_type in ['out_invoice', 'in_refund']:
                 move_line_domain += [
                     ('debit', '>', 0),
                     ('credit', '=', 0),
                 ]
-        else:
-            if self.move_type == 'in_refund':
-                move_line_domain += [
-                    ('debit', '>', 0),
-                    ('credit', '=', 0),
-                ]
-            else:
-                move_line_domain += [
-                    ('debit', '=', 0),
-                    ('credit', '>', 0),
-                ]
+                add_to = income_line_ids
 
-        move_lines = self.env['account.move.line'].search(move_line_domain)
+            move_lines = self.env['account.move.line'].search(move_line_domain)
 
-        po_move_lines = []
-        for move_line in move_lines:
-            po_move_lines.append(
-                (
-                    0,
-                    0,
-                    {
-                        'invoice_id': self.id,
-                        'move_line_id': move_line.id,
-                        'account_id': move_line.account_id.id,
-                        'original_currency_id': move_line.company_id.currency_id.id,
-                        'currency_id': move_line.currency_id.id,
-                    },
+            for move_line in move_lines:
+                add_to.append(
+                    (
+                        0,
+                        0,
+                        {
+                            'invoice_id': invoice.id,
+                            'move_line_id': move_line.id,
+                            'account_id': move_line.account_id.id,
+                            'original_currency_id': move_line.company_id.currency_id.id,
+                            'currency_id': move_line.currency_id.id,
+                        },
+                    )
                 )
-            )
 
-        _type = 'receipt' if self.is_sale_document() else 'payment'
+        _type = 'receipt' if self.are_sale_documents() else 'payment'
         po_vals = {
             'type': _type,
-            'partner_id': self.partner_id.id,
-            'journal_id': self._get_payment_order_journal(_type).id,
-            'currency_id': self.currency_id.id,
+            'partner_id': invoice.partner_id.id,
+            'journal_id': invoice._get_payment_order_journal(_type).id,
+            'currency_id': invoice.currency_id.id,
+            'debt_line_ids': debt_line_ids,
+            'income_line_ids': income_line_ids,
         }
 
-        if self.currency_id != self.company_id.currency_id:
-            po_vals['payment_rate'] = self.currency_rate
+        if invoice.currency_id != invoice.company_id.currency_id:
+            po_vals['payment_rate'] = invoice.currency_rate
 
-        if self.is_sale_document():
+        if self.are_sale_documents():
             po_vals['disable_retentions'] = True
-            if self.move_type == 'out_refund':
-                po_vals['debt_line_ids'] = po_move_lines
-            else:
-                po_vals['income_line_ids'] = po_move_lines
-        else:
-            if self.move_type == 'in_refund':
-                po_vals['income_line_ids'] = po_move_lines
-            else:
-                po_vals['debt_line_ids'] = po_move_lines
 
         return po_vals
 
