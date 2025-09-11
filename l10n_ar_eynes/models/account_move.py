@@ -1995,14 +1995,15 @@ class AccountMove(models.Model):
             and (move.cae or move.cae_due_date)
         ):
             return True
-        if self.env['ws.request.detail'].search(
+        return bool(self._get_ws_request_details_with_data())
+
+    def _get_ws_request_details_with_data(self):
+        return self.env['ws.request.detail'].search(
             [
                 ('invoice_id', 'in', self.ids),
-                ('result', '=', 'A'),
+                ('result', 'in', ('A', 'P')),
             ]
-        ):
-            return True
-        return False
+        )
 
     def _validate_electronic_invoices(self, soft=False):
         if self:
@@ -2012,21 +2013,31 @@ class AccountMove(models.Model):
             for inv in self:
                 if inv._check_electronic_invoice_approved_before():
                     _logger.info("Invoice informed before.")
-                    self.env['ws.request.detail'].create(
-                        {
-                            'invoice_id': inv.id,
-                            'result': 'E',
-                            'request_id': request_id,
-                            'errors': _(
-                                "This invoice: %(name)s [id: %(id)s] has been informed to AFIP. "
-                                "You cannot validate it again. "
-                                "Try to syncronize it using the wizard from Action menu.",
-                                name=inv.display_name,
-                                id=inv.id,
-                            ),
-                        }
-                    )
-                    self.env.cr.commit()  # pylint: disable=invalid-commit
+                    ws_requests = inv._get_ws_request_details_with_data()
+                    syncronized = False
+                    for req in ws_requests:
+                        if req.voucher_number > 0 and not syncronized:
+                            context = self.env.context.copy()
+                            context['active_id'] = inv.id
+                            context['from_validate_button'] = True
+                            context['ws_id'] = ws.id
+                            sync_wiz = (
+                                self.env['afip.sinchronize.voucher']
+                                .with_context(**context)
+                                .create(
+                                    {
+                                        'pos_id': inv.journal_id.id,
+                                        'voucher_number': req.voucher_number,
+                                    }
+                                )
+                            )
+                            sync_wiz._compute_sync_values()
+                            try:
+                                sync_wiz.relate_invoice()
+                                posted_moves += inv
+                                syncronized = True
+                            except UserError:
+                                _logger.error(sync_wiz.error_msg)
                 else:
                     if inv._check_must_be_fce():
                         inv._ensure_fce_values()

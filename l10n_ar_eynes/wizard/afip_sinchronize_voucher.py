@@ -95,7 +95,6 @@ class AFIPSinchronizeVoucher(models.TransientModel):
     @api.model
     def default_get(self, fields):
         defaults = super(AFIPSinchronizeVoucher, self).default_get(fields)
-
         invoice_id = self.env.context.get('active_id')
         active_invoice = self.env['account.move'].browse(invoice_id)
         defaults.update(
@@ -107,21 +106,35 @@ class AFIPSinchronizeVoucher(models.TransientModel):
             }
         )
         if active_invoice.local:
-            defaults.update(
-                {
-                    'wsfe_config_id': self.env['wsfe.config']
-                    .with_context(company_id=self.env.company.id)
-                    .get_config(),
-                }
-            )
+            if self.env.context.get('from_validate_button'):
+                defaults.update(
+                    {
+                        'wsfe_config_id': self.env.context.get('ws_id'),
+                    }
+                )
+            else:
+                defaults.update(
+                    {
+                        'wsfe_config_id': self.env['wsfe.config']
+                        .with_context(company_id=self.env.company.id)
+                        .get_config(),
+                    }
+                )
         else:
-            defaults.update(
-                {
-                    'wsfex_config_id': self.env['wsfex.config']
-                    .with_context(company_id=self.env.company.id)
-                    .get_config(),
-                }
-            )
+            if self.env.context.get('from_validate_button'):
+                defaults.update(
+                    {
+                        'wsfex_config_id': self.env.context.get('ws_id'),
+                    }
+                )
+            else:
+                defaults.update(
+                    {
+                        'wsfex_config_id': self.env['wsfex.config']
+                        .with_context(company_id=self.env.company.id)
+                        .get_config(),
+                    }
+                )
 
         return defaults
 
