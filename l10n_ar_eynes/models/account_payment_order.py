@@ -2732,6 +2732,9 @@ class AccountPaymentOrderIssuedCheckLine(models.Model):
         string='Check',
         required=True,
     )
+    echeq_without_number = fields.Boolean(
+        related='checkbook_id.echeq_without_number'
+    )
     bank_id = fields.Many2one(
         comodel_name='res.bank',
         related='issued_check_id.bank_id',
