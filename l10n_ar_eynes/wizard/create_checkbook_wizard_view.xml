@@ -17,16 +17,12 @@
                     </group>
                     <group>
                         <group>
-                            <field
-                                name="start_num"
-                                required="1"
-                            />
+                            <field name="required_num_readonly" />
+                            <field name="required_num" readonly="required_num_readonly" />
+                            <field name="start_num" required="required_num" invisible="not required_num" />
                         </group>
                         <group>
-                            <field
-                                name="end_num"
-                                required="1"                                
-                            />
+                            <field name="end_num" required="required_num" invisible="not required_num" />
                         </group>
                     </group>
                     <group>
@@ -34,18 +30,16 @@
                             <field name="checkbook_format" />
                         </group>
                         <group>
-                            <field
-                                name="type"
-                                required="1"
-                            />
+                            <field name="type" required="1" />
                         </group>
                     </group>
+                    <div invisible="required_num" class="text-danger">
+                        <p>
+                            Echeqs without number will be created on the Payment Order when you have the real number assigned by bank.
+                        </p>
+                    </div>
                     <footer>
-                        <button
-                            name="create_checkbook"
-                            type="object"
-                            class="btn btn-primary"
-                        >
+                        <button name="create_checkbook" type="object" class="btn btn-primary">
                             Create Checkbook
                         </button>
                         <button string="Cancel" class="btn-default" special="cancel" />
