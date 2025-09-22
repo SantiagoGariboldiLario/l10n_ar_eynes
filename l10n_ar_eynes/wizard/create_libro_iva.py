@@ -768,14 +768,14 @@ class LibroIVAExporterWizard(models.TransientModel):
             return (False, errors)
         return (True, aliquot_lines)
 
-    def _create_aliquot_import_purchase_line(self, invoice):
+    def _create_aliquot_import_purchase_line(self, invoice, split_vals=False):
         aliquot_lines = []
         errors = []
 
         for tax_line in self._get_invoice_vat_tax_lines(invoice):
             line = self._format_aliquot_import_line(tax_line, invoice)
             if line[0]:
-                aliquot_line = ''.join(line[1])
+                aliquot_line = ''.join(line[1]) if not split_vals else line[1]
                 aliquot_lines.append(aliquot_line)
             else:
                 errors.append(line[1])
@@ -1145,10 +1145,15 @@ class LibroIVAExporterWizard(models.TransientModel):
                     if self.is_simple_vat:
                         add_purchase_line = False
                     aliquot_import_line = (
-                        self._create_aliquot_import_purchase_line(invoice)
+                        self._create_aliquot_import_purchase_line(
+                            invoice, split_vals=True
+                        )
                     )
                     if aliquot_import_line[0]:
-                        import_aliquots += aliquot_import_line[1]
+                        import_aliquots += [
+                            self.format_import_aliquot_line_xlsx(line)
+                            for line in aliquot_import_line[1]
+                        ]
                     else:
                         if aliquot_import_line[1]:
                             import_aliquot_errors.append(aliquot_import_line[1])
@@ -1166,12 +1171,38 @@ class LibroIVAExporterWizard(models.TransientModel):
                 if add_purchase_line:
                     purchases.append(self.format_purchase_line_xlsx(line[1]))
                 else:
-                    imports.append(''.join(line[1]))
+                    imports.append(self.format_purchase_line_xlsx(line[1]))
             elif line[1]:
                 if is_import:
                     imports_errors.append(line[1])
                 else:
                     purchase_errors.append(line[1])
+
+        if imports_errors:
+            imports_errors.insert(
+                0, _('\nImport File Errors\n================\n')
+            )
+
+        if imports:
+            filename = (
+                "LIBRO_IVA_IMPORTACION_BIENES_%s.xlsx"
+                % self.company_id.name.replace(' ', '-')
+            )
+            data = [self.get_purchase_fields()] + imports
+            self.create_attachment_xlsx(filename, data)
+
+        if import_aliquot_errors:
+            import_aliquot_errors.insert(
+                0, _('\nImport Aliquot File Errors\n================\n')
+            )
+
+        if import_aliquots:
+            filename = (
+                "LIBRO_IVA_IMPORTACION_BIENES_ALICUOTA_%s.xlsx"
+                % self.company_id.name.replace(' ', '-')
+            )
+            data = [self.get_import_aliquot_fields()] + import_aliquots
+            self.create_attachment_xlsx(filename, data)
 
         if purchase_aliquot_errors:
             purchase_aliquot_errors.insert(
@@ -1278,6 +1309,14 @@ class LibroIVAExporterWizard(models.TransientModel):
             'Impuesto liquidado',
         ]
 
+    def get_import_aliquot_fields(self):
+        return [
+            'Despacho de importación',
+            'Importe neto gravado',
+            'Alícuota de IVA',
+            'Impuesto liquidado',
+        ]
+
     def format_sale_line_xlsx(self, line):
         # 13 enteros 2 decimales
         amount_indexes = [
@@ -1341,6 +1380,16 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount_indexes = [
             5,  # Importe neto gravado
             7,  # Impuesto Liquidado
+        ]
+        for index in amount_indexes:
+            line[index] = line[index][:13] + ',' + line[index][13:]
+        return line
+
+    def format_import_aliquot_line_xlsx(self, line):
+        # 13 enteros 2 decimales
+        amount_indexes = [
+            1,  # Importe neto gravado
+            3,  # Impuesto liquidado
         ]
         for index in amount_indexes:
             line[index] = line[index][:13] + ',' + line[index][13:]
