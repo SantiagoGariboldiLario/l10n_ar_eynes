@@ -86,7 +86,9 @@ class PortalAccount(PortalAccount):
             return request.redirect('/my')
 
         if report_type in ('html', 'pdf', 'text'):
-            report_name = invoice_sudo._get_name_invoice_report()
+            report_name = 'l10n_ar_eynes.account_move_report'
+            if invoice_sudo.fiscal_type == 'internal':
+                report_name = 'account.account_invoices'
             return self._show_report(
                 model=invoice_sudo,
                 report_type=report_type,
