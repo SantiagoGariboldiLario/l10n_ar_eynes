@@ -1,5 +1,7 @@
+import base64
 import binascii
 import codecs
+import io
 import json
 import logging
 import tempfile
@@ -9,6 +11,11 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
+
+try:
+    from openpyxl import Workbook
+except ImportError:
+    _logger.warning('Could not import library openpyxl')
 
 
 class LibroIVAExporterWizard(models.TransientModel):
@@ -25,6 +32,12 @@ class LibroIVAExporterWizard(models.TransientModel):
     notes = fields.Text('Notes', readonly=True)
     state = fields.Selection(
         [('init', 'Start'), ('done', 'Done')], 'State', default='init'
+    )
+    file_format = fields.Selection(
+        [('txt', 'TXT'), ('xlsx', 'XLSX')],
+        string='File Format',
+        default='txt',
+        required=True,
     )
 
     @api.model
@@ -632,7 +645,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             return (False, errors)
         return (True, line)
 
-    def _create_sale_aliq_line(self, invoice):
+    def _create_sale_aliq_line(self, invoice, split_vals=False):
         aliquot_lines = []
         errors = []
         if invoice.denomination in ['C']:
@@ -643,14 +656,14 @@ class LibroIVAExporterWizard(models.TransientModel):
                 None, invoice, zero_base=zero_vat_values['base']
             )
             if line[0]:
-                aliquot_line = ''.join(line[1])
+                aliquot_line = ''.join(line[1]) if not split_vals else line[1]
                 aliquot_lines.append(aliquot_line)
             else:
                 errors.append(line[1])
         for tax_line in self._get_invoice_vat_tax_lines(invoice):
             line = self._format_sale_aliquot_line(tax_line, invoice)
             if line[0]:
-                aliquot_line = ''.join(line[1])
+                aliquot_line = ''.join(line[1]) if not split_vals else line[1]
                 aliquot_lines.append(aliquot_line)
             else:
                 errors.append(line[1])
@@ -729,7 +742,7 @@ class LibroIVAExporterWizard(models.TransientModel):
 
         return (True, line)
 
-    def _create_aliquot_purchase_line(self, invoice):
+    def _create_aliquot_purchase_line(self, invoice, split_vals=False):
         aliquot_lines = []
         errors = []
         if invoice.denomination in ['C']:
@@ -737,7 +750,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         for tax_line in self._get_invoice_vat_tax_lines(invoice):
             line = self._format_aliquot_purchase_line(tax_line, invoice)
             if line[0]:
-                aliquot_line = ''.join(line[1])
+                aliquot_line = ''.join(line[1]) if not split_vals else line[1]
                 aliquot_lines.append(aliquot_line)
             else:
                 errors.append(line[1])
@@ -747,7 +760,7 @@ class LibroIVAExporterWizard(models.TransientModel):
                 None, invoice, zero_base=zero_vat_values['base']
             )
             if line[0]:
-                aliquot_line = ''.join(line[1])
+                aliquot_line = ''.join(line[1]) if not split_vals else line[1]
                 aliquot_lines.append(aliquot_line)
             else:
                 errors.append(line[1])
@@ -755,14 +768,14 @@ class LibroIVAExporterWizard(models.TransientModel):
             return (False, errors)
         return (True, aliquot_lines)
 
-    def _create_aliquot_import_purchase_line(self, invoice):
+    def _create_aliquot_import_purchase_line(self, invoice, split_vals=False):
         aliquot_lines = []
         errors = []
 
         for tax_line in self._get_invoice_vat_tax_lines(invoice):
             line = self._format_aliquot_import_line(tax_line, invoice)
             if line[0]:
-                aliquot_line = ''.join(line[1])
+                aliquot_line = ''.join(line[1]) if not split_vals else line[1]
                 aliquot_lines.append(aliquot_line)
             else:
                 errors.append(line[1])
@@ -960,25 +973,49 @@ class LibroIVAExporterWizard(models.TransientModel):
         invoices = AccountMove.search(
             [('move_type', 'in', ('out_invoice', 'out_refund'))] + domain
         )
-        sale_err, sale_aliquot_err = self.create_sales_voucher_file(invoices)
 
         invoice_purchase_ids = AccountMove.search(
             [('move_type', 'in', ('in_invoice', 'in_refund'))] + domain
         )
 
-        (
-            purchase_err,
-            purchase_aliquot_err,
-            import_aliquot_err,
-        ) = self.create_purchases_voucher_file(invoice_purchase_ids)
+        if self.file_format == 'txt':
+            sale_err, sale_aliquot_err = self.create_sales_voucher_file(
+                invoices
+            )
 
-        errors = (
-            sale_err
-            + sale_aliquot_err
-            + purchase_err
-            + purchase_aliquot_err
-            + import_aliquot_err
-        )
+            (
+                purchase_err,
+                purchase_aliquot_err,
+                import_aliquot_err,
+            ) = self.create_purchases_voucher_file(invoice_purchase_ids)
+
+            errors = (
+                sale_err
+                + sale_aliquot_err
+                + purchase_err
+                + purchase_aliquot_err
+                + import_aliquot_err
+            )
+
+        elif self.file_format == 'xlsx':
+            sale_err, sale_aliquot_err = self.create_sales_voucher_file_xlsx(
+                invoices
+            )
+
+            (
+                purchase_err,
+                purchase_aliquot_err,
+                import_aliquot_err,
+            ) = self.create_purchases_voucher_file_xlsx(invoice_purchase_ids)
+
+            errors = (
+                sale_err
+                + sale_aliquot_err
+                + purchase_err
+                + purchase_aliquot_err
+                + import_aliquot_err
+            )
+
         if errors:
             self.write({'notes': '\n'.join(errors)})
 
@@ -1005,3 +1042,355 @@ class LibroIVAExporterWizard(models.TransientModel):
             'view_mode': 'tree,form',
             'view_type': 'form',
         }
+
+    def create_attachment_xlsx(self, filename, data):
+        wb = Workbook()
+        ws = wb.active
+
+        for row in data:
+            ws.append(row)
+
+        fp = io.BytesIO()
+        wb.save(fp)
+        fp.seek(0)
+
+        attachment = self.env['ir.attachment'].create(
+            {
+                'name': filename,
+                'datas': base64.b64encode(fp.read()),
+                'res_model': 'libroiva.generated.files',
+                'res_id': self.id,
+                'type': 'binary',
+            }
+        )
+
+        self.env['libroiva.generated.files'].create(
+            {
+                'code': filename,
+                'date_from': self.date_from,
+                'date_to': self.date_to,
+                'company_id': self.company_id.id,
+                'attachment_id': attachment.id,
+            }
+        )
+
+    def create_sales_voucher_file_xlsx(self, invoices):
+        aliquots = []
+        aliquot_errors = []
+        sales = []
+        sale_errors = []
+
+        for invoice in invoices:
+            line = self._create_sale_line(invoice)
+            if line[0]:
+                aliquot_line = self._create_sale_aliq_line(
+                    invoice, split_vals=True
+                )
+                if aliquot_line[0]:
+                    aliquots += [
+                        self.format_sale_aliquot_line_xlsx(line)
+                        for line in aliquot_line[1]
+                    ]
+                else:
+                    if aliquot_line[1]:
+                        aliquot_errors.append(aliquot_line[1])
+
+                sales.append(self.format_sale_line_xlsx(line[1]))
+            else:
+                if line[1]:
+                    sale_errors.append(line[1])
+
+        if aliquot_errors:
+            aliquot_errors.insert(
+                0, _('\nSale Aliquot File Errors\n================\n')
+            )
+
+        if aliquots:
+            filename = (
+                "LIBRO_IVA_VENTAS_ALICUOTAS_%s.xlsx"
+                % self.company_id.name.replace(' ', '-')
+            )
+            data = [self.get_sale_aliquot_fields()] + aliquots
+            self.create_attachment_xlsx(filename, data)
+
+        if sale_errors:
+            sale_errors.insert(0, _('\nSale File Errors\n================\n'))
+
+        if sales:
+            filename = (
+                "LIBRO_IVA_VENTAS_CBTE_%s.xlsx"
+                % self.company_id.name.replace(' ', '-')
+            )
+            data = [self.get_sale_fields()] + sales
+            self.create_attachment_xlsx(filename, data)
+
+        return (sale_errors, aliquot_errors)
+
+    def create_purchases_voucher_file_xlsx(self, invoices):  # noqa
+        purchases = []
+        purchase_aliquots = []
+        imports = []
+        import_aliquots = []
+        purchase_errors = []
+        purchase_aliquot_errors = []
+        imports_errors = []
+        import_aliquot_errors = []
+
+        for invoice in invoices:
+            is_import = self._check_invoice_is_import(invoice)
+            add_purchase_line = True
+            line = self._create_purchase_line(invoice)
+            if line[0]:
+                if is_import:
+                    if self.is_simple_vat:
+                        add_purchase_line = False
+                    aliquot_import_line = (
+                        self._create_aliquot_import_purchase_line(
+                            invoice, split_vals=True
+                        )
+                    )
+                    if aliquot_import_line[0]:
+                        import_aliquots += [
+                            self.format_import_aliquot_line_xlsx(line)
+                            for line in aliquot_import_line[1]
+                        ]
+                    else:
+                        if aliquot_import_line[1]:
+                            import_aliquot_errors.append(aliquot_import_line[1])
+                else:
+                    aliquot_line = self._create_aliquot_purchase_line(
+                        invoice, split_vals=True
+                    )
+                    if aliquot_line[0]:
+                        purchase_aliquots += [
+                            self.format_purchase_aliquot_line_xlsx(line)
+                            for line in aliquot_line[1]
+                        ]
+                    else:
+                        purchase_aliquot_errors.append(aliquot_line[1])
+                if add_purchase_line:
+                    purchases.append(self.format_purchase_line_xlsx(line[1]))
+                else:
+                    imports.append(self.format_purchase_line_xlsx(line[1]))
+            elif line[1]:
+                if is_import:
+                    imports_errors.append(line[1])
+                else:
+                    purchase_errors.append(line[1])
+
+        if imports_errors:
+            imports_errors.insert(
+                0, _('\nImport File Errors\n================\n')
+            )
+
+        if imports:
+            filename = (
+                "LIBRO_IVA_IMPORTACION_BIENES_%s.xlsx"
+                % self.company_id.name.replace(' ', '-')
+            )
+            data = [self.get_purchase_fields()] + imports
+            self.create_attachment_xlsx(filename, data)
+
+        if import_aliquot_errors:
+            import_aliquot_errors.insert(
+                0, _('\nImport Aliquot File Errors\n================\n')
+            )
+
+        if import_aliquots:
+            filename = (
+                "LIBRO_IVA_IMPORTACION_BIENES_ALICUOTA_%s.xlsx"
+                % self.company_id.name.replace(' ', '-')
+            )
+            data = [self.get_import_aliquot_fields()] + import_aliquots
+            self.create_attachment_xlsx(filename, data)
+
+        if purchase_aliquot_errors:
+            purchase_aliquot_errors.insert(
+                0, _('\nPurchase Aliquot File Errors\n================\n')
+            )
+
+        if purchase_aliquots:
+            filename = (
+                "LIBRO_IVA_COMPRAS_ALICUOTAS_%s.xlsx"
+                % self.company_id.name.replace(' ', '-')
+            )
+            data = [self.get_purchase_aliquot_fields()] + purchase_aliquots
+            self.create_attachment_xlsx(filename, data)
+
+        if purchase_errors:
+            purchase_errors.insert(
+                0, _('\nPurchase File Errors\n================\n')
+            )
+
+        if purchases:
+            filename = (
+                "LIBRO_IVA_COMPRAS_CBTE_%s.xlsx"
+                % self.company_id.name.replace(' ', '-')
+            )
+            data = [self.get_purchase_fields()] + purchases
+            self.create_attachment_xlsx(filename, data)
+
+        return (purchase_errors, purchase_aliquot_errors, import_aliquot_errors)
+
+    def get_sale_fields(self):
+        return [
+            'Fecha de comprobante',
+            'Tipo de comprobante',
+            'Punto de venta',
+            'Número de comprobante',
+            'Número de comprobante hasta',
+            'Código de documento del comprador',
+            'Número de identificación del comprador',
+            'Apellido y nombre o denominación del comprador',
+            'Importe total de la operación',
+            'Importe total de conceptos que no integran el precio neto gravado',
+            'Percepción a no categorizados',
+            'Importe de operaciones exentas',
+            'Importe de percepciones o pagos a cuenta de impuestos Nacionales',
+            'Importe de percepciones de Ingresos Brutos',
+            'Importe de percepciones impuestos Municipales',
+            'Importe impuestos internos',
+            'Código de moneda',
+            'Tipo de cambio',
+            'Cantidad de alícuotas de IVA',
+            'Código de operación',
+            'Otros Tributos',
+            'Fecha de Vencimiento o Pago',
+        ]
+
+    def get_sale_aliquot_fields(self):
+        return [
+            'Tipo de comprobante',
+            'Punto de venta',
+            'Número de comprobante',
+            'Importe neto gravado',
+            'Alícuota de IVA',
+            'Impuesto Liquidado',
+        ]
+
+    def get_purchase_fields(self):
+        return [
+            'Fecha de comprobante o fecha de oficialización',
+            'Tipo de comprobante',
+            'Punto de venta',
+            'Número de comprobante',
+            'Despacho de importación',
+            'Código de documento del vendedor',
+            'Número de identificación del vendedor',
+            'Apellido y nombre o denominación del vendedor',
+            'Importe total de la operación',
+            'Importe total de conceptos que no integran el precio neto gravado',
+            'Importe de operaciones exentas',
+            'Importe de percepciones o pagos a cuenta del Impuesto al Valor Agregado',
+            'Importe de percepciones o pagos a cuenta de otros impuestos nacionales',
+            'Importe de percepciones de Ingresos Brutos',
+            'Importe de percepciones de Impuestos Municipales',
+            'Importe de Impuestos Internos',
+            'Código de moneda',
+            'Tipo de cambio',
+            'Cantidad de alícuotas de IVA',
+            'Código de operación',
+            'Crédito Fiscal Computable',
+            'Otros Tributos',
+            'CUIT emisor/corredor',
+            'Denominación del emisor/corredor',
+            'IVA comisión',
+        ]
+
+    def get_purchase_aliquot_fields(self):
+        return [
+            'Tipo de comprobante',
+            'Punto de venta',
+            'Número de comprobante',
+            'Código de documento del vendedor',
+            'Número de identificación del vendedor',
+            'Importe neto gravado',
+            'Alícuota de IVA',
+            'Impuesto liquidado',
+        ]
+
+    def get_import_aliquot_fields(self):
+        return [
+            'Despacho de importación',
+            'Importe neto gravado',
+            'Alícuota de IVA',
+            'Impuesto liquidado',
+        ]
+
+    def format_sale_line_xlsx(self, line):
+        # 13 enteros 2 decimales
+        amount_indexes = [
+            8,  # Importe total de la operación
+            9,  # Importe total de conceptos que no integran el precio neto gravado
+            10,  # Percepción a no categorizados
+            11,  # Importe de operaciones exentas
+            12,  # Importe de percepciones o pagos a cuenta de impuestos Nacionales
+            13,  # Importe de percepciones de Ingresos Brutos
+            14,  # Importe de percepciones impuestos Municipales
+            15,  # Importe impuestos internos
+            20,  # Otros Tributos
+        ]
+        for index in amount_indexes:
+            line[index] = line[index][:13] + ',' + line[index][13:]
+        # 4 enteros 6 decimales
+        amount_indexes = [
+            17,  # Tipo de cambio
+        ]
+        for index in amount_indexes:
+            line[index] = line[index][:4] + ',' + line[index][4:]
+        return line
+
+    def format_sale_aliquot_line_xlsx(self, line):
+        # 13 enteros 2 decimales
+        amount_indexes = [
+            3,  # Importe neto gravado
+            5,  # Impuesto Liquidado
+        ]
+        for index in amount_indexes:
+            line[index] = line[index][:13] + ',' + line[index][13:]
+        return line
+
+    def format_purchase_line_xlsx(self, line):
+        # 13 enteros 2 decimales
+        amount_indexes = [
+            8,  # Importe total de la operación
+            9,  # mporte total de conceptos que no integran el precio neto gravado
+            10,  # Importe de operaciones exentas
+            11,  # Importe de percepciones o pagos a cuenta del Impuesto al Valor Agregado
+            12,  # Importe de percepciones o pagos a cuenta de otros impuestos nacionales
+            13,  # Importe de percepciones de Ingresos Brutos
+            14,  # Importe de percepciones de Impuestos Municipales
+            15,  # Importe de Impuestos Internos
+            20,  # Crédito Fiscal Computable
+            21,  # Otros Tributos
+            24,  # IVA comisión
+        ]
+        for index in amount_indexes:
+            line[index] = line[index][:13] + ',' + line[index][13:]
+        # 4 enteros 6 decimales
+        amount_indexes = [
+            17,  # Tipo de cambio
+        ]
+        for index in amount_indexes:
+            line[index] = line[index][:4] + ',' + line[index][4:]
+        return line
+
+    def format_purchase_aliquot_line_xlsx(self, line):
+        # 13 enteros 2 decimales
+        amount_indexes = [
+            5,  # Importe neto gravado
+            7,  # Impuesto Liquidado
+        ]
+        for index in amount_indexes:
+            line[index] = line[index][:13] + ',' + line[index][13:]
+        return line
+
+    def format_import_aliquot_line_xlsx(self, line):
+        # 13 enteros 2 decimales
+        amount_indexes = [
+            1,  # Importe neto gravado
+            3,  # Impuesto liquidado
+        ]
+        for index in amount_indexes:
+            line[index] = line[index][:13] + ',' + line[index][13:]
+        return line

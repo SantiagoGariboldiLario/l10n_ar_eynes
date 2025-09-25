@@ -5180,6 +5180,11 @@ msgid "File Content (base64)"
 msgstr "Contenido de archivo (base64)"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_libro_iva_exporter_wizard__file_format
+msgid "File Format"
+msgstr "Formato de archivo"
+
+#. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.report_files_view_form
 msgid "Files"
 msgstr "Archivos"
