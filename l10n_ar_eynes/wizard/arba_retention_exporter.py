@@ -34,6 +34,16 @@ class ArbaRetentionExporterWizard(models.TransientModel):
     )
     date_from = fields.Date(string='Date From')
     date_to = fields.Date(string='Date To')
+    mode = fields.Selection(
+        [
+            ('monthly', 'Monthly'),
+            ('first_fortnight', 'First Fortnight'),
+            ('second_fortnight', 'Second Fortnight'),
+        ],
+        string='Mode',
+        default='monthly',
+        required=True,
+    )
 
     @api.model
     def _default_company_ids(self):
@@ -124,6 +134,10 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         filename = 'AR-{}-{}{}-{}-{}'.format(
             company_vat, year, month, activity_num, lot_name
         )
+        if self.mode == 'first_fortnight':
+            filename += '-LOTE1'
+        elif self.mode == 'second_fortnight':
+            filename += '-LOTE2'
 
         return filename
 

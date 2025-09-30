@@ -5278,6 +5278,12 @@ msgid "Fiscal position '%(name)s' doesn't have AFIP code configured"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__arba_perception_exporter_wizard__mode__first_fortnight
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__arba_retention_exporter_wizard__mode__first_fortnight
+msgid "First Fortnight"
+msgstr "Primer Quincena"
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_mapping_fiscal_year_closing__source_account_type__asset_fixed
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_mapping_fiscal_year_closing_loss_profit__source_account_type__asset_fixed
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_mapping_fiscal_year_closing_net_loss_profit__source_account_type__asset_fixed
@@ -6806,6 +6812,12 @@ msgid "MiPyme"
 msgstr ""
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_perception_exporter_wizard__mode
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_arba_retention_exporter_wizard__mode
+msgid "Mode"
+msgstr "Modalidad"
+
+#. module: l10n_ar_eynes
 #: model:ir.model,name:l10n_ar_eynes.model_account_payment_order_issued_check_line
 msgid "Model to communicate issued checks with payment orders"
 msgstr "Modelo para comunicar cheques emitidos con órdenes de pago"
@@ -6819,6 +6831,12 @@ msgstr ""
 #: model:account.fiscal.position,name:l10n_ar_eynes.fiscal_position_ms
 msgid "Monotributista Social"
 msgstr ""
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__arba_perception_exporter_wizard__mode__monthly
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__arba_retention_exporter_wizard__mode__monthly
+msgid "Monthly"
+msgstr "Mensual"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__fcred_minimum_amount
@@ -9718,6 +9736,12 @@ msgstr "Buscar cheque de terceros"
 #: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__account_tax_subjournal__base_position__second
 msgid "Second"
 msgstr "Segundo"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__arba_perception_exporter_wizard__mode__second_fortnight
+#: model:ir.model.fields.selection,name:l10n_ar_eynes.selection__arba_retention_exporter_wizard__mode__second_fortnight
+msgid "Second Fortnight"
+msgstr "Segunda Quincena"
 
 #. module: l10n_ar_eynes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_wsaa_config_form
