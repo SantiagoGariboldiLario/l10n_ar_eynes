@@ -357,21 +357,22 @@
                         <field
                             name="export_type_id"
                             widget="selection"
-                            required="not created_from_rej_check and not local and move_type in ('out_invoice', 'out_refund')"
+                            required="not created_from_rej_check and not local and move_type in ('out_invoice', 'out_refund') and fiscal_type == 'electronic'"
                         />
                         <field
                             name="dst_country_id"
-                            required="not created_from_rej_check and not local and move_type in ('out_invoice', 'out_refund')"
+                            required="not created_from_rej_check and not local and move_type in ('out_invoice', 'out_refund') and fiscal_type == 'electronic'"
                         />
                     </group>
-                    <group string="Shipping Permissions">
-                        <field name="shipping_perm_ids" nolabel="1">
-                            <tree editable="bottom">
-                                <field name="name" />
-                                <field name="dst_country_id" />
-                            </tree>
-                        </field>
-                    </group>
+                    <div
+                        class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small"
+                    >Shipping Permissions</div>
+                    <field name="shipping_perm_ids" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="name" />
+                            <field name="dst_country_id" />
+                        </tree>
+                    </field>
                 </page>
 
                 <page string="WS Requests" invisible="move_type not in ('out_invoice', 'out_refund')">
