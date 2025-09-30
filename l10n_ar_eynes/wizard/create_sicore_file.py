@@ -214,7 +214,7 @@ class CreateSicoreFiles(models.TransientModel):
                 ]
 
             amount_total = amount_untaxed  # tax_line.voucher_id.amount
-            base_amount = tax_line.base  # Importe total de la factura
+            base_amount = tax_line.base_amount
             ret_aplicada = tax_line.amount  # Importe retenido
             nro_cert_propio = re.sub('[-]', '', tax_line.certificate_no or '')
             reg_code = (
