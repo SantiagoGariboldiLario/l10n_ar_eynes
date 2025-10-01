@@ -26,6 +26,7 @@ class AccountPaymentMethodLine(models.Model):
         selection=[('common', 'Common'), ('deferred', 'Deferred')],
         string='Type',
     )
+    echeq_without_number = fields.Boolean()
     format = fields.Selection(
         selection=[
             ('physical', 'Physical'),

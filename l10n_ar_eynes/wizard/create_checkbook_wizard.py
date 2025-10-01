@@ -28,6 +28,18 @@ class CreateCheckbookWizard(models.TransientModel):
     )
     start_num = fields.Char('Start Number', size=8)
     end_num = fields.Char('End Number', size=8)
+    required_num = fields.Boolean()
+    required_num_readonly = fields.Boolean(
+        compute='_compute_required_num_readonly'
+    )
+
+    @api.depends('checkbook_format')
+    def _compute_required_num_readonly(self):
+        for rec in self:
+            required = True
+            if rec.checkbook_format == 'echeq':
+                required = False
+            rec.required_num_readonly = required
 
     def create_checkbook(self):
         payment_method = self.env.ref(
@@ -41,6 +53,7 @@ class CreateCheckbookWizard(models.TransientModel):
             number=self.number,
         )
 
+        echeq_without_number = not self.required_num
         self.journal_id.outbound_payment_method_line_ids = [
             (
                 0,
@@ -52,32 +65,33 @@ class CreateCheckbookWizard(models.TransientModel):
                     'number': self.number,
                     'format': self.checkbook_format,
                     'type': self.type,
+                    'echeq_without_number': echeq_without_number,
                 },
             )
         ]
+        if not echeq_without_number:
+            self.check_range()
 
-        self.check_range()
+            start_numer = int(self.start_num)
+            end_number = int(self.end_num)
 
-        start_numer = int(self.start_num)
-        end_number = int(self.end_num)
-
-        vals = []
-        for i in range(start_numer, end_number + 1):
-            vals.append(
-                {
-                    'number': str(i).zfill(8),
-                    'journal_id': self.journal_id.id,
-                    'bank_id': self.journal_id.bank_id.id,
-                    'checkbook_id': self.env['account.payment.method.line']
-                    .search([('name', '=', payment_method_name)])
-                    .id,
-                    'checkbook_format': self.checkbook_format,
-                    'internal_type': 'issued',
-                    'issued_check_state': 'draft',
-                    'type': self.type,
-                }
-            )
-        self.env['account.check'].create(vals)
+            vals = []
+            for i in range(start_numer, end_number + 1):
+                vals.append(
+                    {
+                        'number': str(i).zfill(8),
+                        'journal_id': self.journal_id.id,
+                        'bank_id': self.journal_id.bank_id.id,
+                        'checkbook_id': self.env['account.payment.method.line']
+                        .search([('name', '=', payment_method_name)])
+                        .id,
+                        'checkbook_format': self.checkbook_format,
+                        'internal_type': 'issued',
+                        'issued_check_state': 'draft',
+                        'type': self.type,
+                    }
+                )
+            self.env['account.check'].create(vals)
 
         return {'type': 'ir.actions.client', 'tag': 'reload'}
 
