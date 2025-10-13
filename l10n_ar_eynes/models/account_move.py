@@ -65,6 +65,9 @@ class AccountMove(models.Model):
             )
         return super()._auto_init()
 
+    # *******************************************************************************************************
+    #                                       MISCELANEOUS FIELDS:
+    # *******************************************************************************************************
     amount_exempt = fields.Monetary(
         string='Except',
         compute='_compute_amount_custom',
@@ -87,6 +90,7 @@ class AccountMove(models.Model):
     )
     is_closing = fields.Boolean(default=False)
     is_opening = fields.Boolean(default=False)
+    local = fields.Boolean(related='fiscal_position_id.local')
     show_fiscal_credit = fields.Boolean(
         default=lambda self: self.env["ir.config_parameter"]
         .sudo()
@@ -143,7 +147,6 @@ class AccountMove(models.Model):
     inform_period_date_from = fields.Date()
     inform_period_date_to = fields.Date()
     is_debit_note = fields.Boolean('Debit Note', default=False)
-    local = fields.Boolean(related='fiscal_position_id.local')
     voucher_type_domain = fields.Binary(compute="_compute_voucher_type_domain")
     voucher_type_id = fields.Many2one(
         comodel_name='res.voucher.type',
