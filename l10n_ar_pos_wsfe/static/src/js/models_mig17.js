@@ -198,7 +198,11 @@ patch(Order.prototype, {
 
 patch(PaymentScreen.prototype, {
     get_invoice_report_action: function () {
-        return "l10n_ar_eynes.account_move_report";
+        if (this.currentOrder.is_electronic_invoice()) {
+            return "l10n_ar_eynes.account_move_report";
+        } else {
+            return "l10n_ar_pos_wsfe.account_invoices";
+        }
     },
 
     async _finalizeValidation() {
