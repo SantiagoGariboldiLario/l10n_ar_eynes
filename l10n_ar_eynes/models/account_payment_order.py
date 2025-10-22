@@ -515,22 +515,6 @@ class AccountPaymentOrder(models.Model):
         }
         return retention_line_vals
 
-    def recompute_voucher_lines(
-        self, partner_id, journal_id, price, currency_id, ttype, date
-    ):
-        res = super(AccountPaymentOrder, self).recompute_voucher_lines(
-            partner_id, journal_id, price, currency_id, ttype, date
-        )
-
-        # Si es un pago, quitamos todo el calculo de imputacion automatica
-        # porque interfiere en el calculo de retenciones automaticas
-        if ttype == 'payment' and not self._context.get('immediate_payment'):
-            all_l = res['value']['line_cr_ids'] + res['value']['line_dr_ids']
-            for line in all_l:
-                line['amount'] = 0.0
-                line['reconcile'] = False
-        return res
-
     def calculate_retentions(self):
         self.ensure_one()
         # Computamos todas las retenciones para el voucher
