@@ -28,7 +28,7 @@ class CreateCheckbookWizard(models.TransientModel):
     )
     start_num = fields.Char('Start Number', size=8)
     end_num = fields.Char('End Number', size=8)
-    required_num = fields.Boolean()
+    required_num = fields.Boolean(compute='_compute_required_num')
     required_num_readonly = fields.Boolean(
         compute='_compute_required_num_readonly'
     )
@@ -40,6 +40,14 @@ class CreateCheckbookWizard(models.TransientModel):
             if rec.checkbook_format == 'echeq':
                 required = False
             rec.required_num_readonly = required
+
+    @api.depends('checkbook_format', 'required_num_readonly')
+    def _compute_required_num(self):
+        for rec in self:
+            required = rec.required_num
+            if rec.checkbook_format == 'physical':
+                required = True
+            rec.required_num = required
 
     def create_checkbook(self):
         payment_method = self.env.ref(
