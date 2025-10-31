@@ -10,27 +10,15 @@
                     <group>
                         <group>
                             <field name="journal_id" />
+                            <field name="checkbook_format" />
+                            <field name="type" required="1" />
+                            <field name="required_num_readonly" invisible="True" />
+                            <field name="required_num" readonly="required_num_readonly" />
                         </group>
                         <group>
                             <field name="number" />
-                        </group>
-                    </group>
-                    <group>
-                        <group>
-                            <field name="required_num_readonly" />
-                            <field name="required_num" readonly="required_num_readonly" />
                             <field name="start_num" required="required_num" invisible="not required_num" />
-                        </group>
-                        <group>
                             <field name="end_num" required="required_num" invisible="not required_num" />
-                        </group>
-                    </group>
-                    <group>
-                        <group>
-                            <field name="checkbook_format" />
-                        </group>
-                        <group>
-                            <field name="type" required="1" />
                         </group>
                     </group>
                     <div invisible="required_num" class="text-danger">
