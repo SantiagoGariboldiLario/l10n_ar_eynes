@@ -1738,7 +1738,10 @@ class AccountMove(models.Model):
         elif val == 0.0:
             for line in self.invoice_line_ids:
                 for tax in line.tax_ids:
-                    if tax.amount == 0.0:
+                    if (
+                        tax.tax_group_id.group_type == 'vat'
+                        and tax.amount == 0.0
+                    ):
                         amounts['base'] += (
                             line.price_subtotal
                             if currency == 'invoice'
