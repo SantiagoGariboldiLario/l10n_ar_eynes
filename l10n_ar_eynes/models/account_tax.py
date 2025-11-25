@@ -437,10 +437,25 @@ class AccountTax(models.Model):
                 self.env.ref('l10n_ar_eynes.nota_credito_a_con_leyenda'),
             ]
             and not retention.is_for_voucher_with_legend
+            and retention.retention_type in ['vat', 'profit']
         ):
             _logger.info(
                 f"El comprobante {move.name} es A con leyenda, "
                 "la retencion no aplica."
+            )
+            return {}
+        if (
+            move.voucher_type_id
+            not in [
+                self.env.ref('l10n_ar_eynes.factura_a_con_leyenda'),
+                self.env.ref('l10n_ar_eynes.nota_debito_a_con_leyenda'),
+                self.env.ref('l10n_ar_eynes.nota_credito_a_con_leyenda'),
+            ]
+            and retention.is_for_voucher_with_legend
+        ):
+            _logger.info(
+                f"El comprobante {move.name} es A, "
+                f"la retencion {retention.name} no aplica."
             )
             return {}
 
