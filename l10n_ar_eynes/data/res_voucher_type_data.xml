@@ -121,6 +121,30 @@
         <field name="denomination">m</field>
     </record>
 
+    <record id="factura_a_con_leyenda" model="res.voucher.type">
+        <field name="name">FACTURAS A CON LEYENDA "OPERACIÓN SUJETA A RETENCIÓN"</field>
+        <field name="afip_code">051</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">b</field>
+        <field name="denomination">a</field>
+    </record>
+
+    <record id="nota_debito_a_con_leyenda" model="res.voucher.type">
+        <field name="name">NOTAS DE DEBITO A CON LEYENDA "OPERACIÓN SUJETA A RETENCIÓN"</field>
+        <field name="afip_code">052</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">dn</field>
+        <field name="denomination">a</field>
+    </record>
+
+    <record id="nota_credito_a_con_leyenda" model="res.voucher.type">
+        <field name="name">NOTAS DE CREDITO A CON LEYENDA "OPERACIÓN SUJETA A RETENCIÓN"</field>
+        <field name="afip_code">053</field>
+        <field name="voucher_model">Factura/NC/ND</field>
+        <field name="doc_type">cn</field>
+        <field name="denomination">a</field>
+    </record>
+
     <record id="factura_credito_electronica_a" model="res.voucher.type">
         <field name="name">FACTURA DE CRÉDITO ELECTRÓNICA MiPyMEs (FCE) A</field>
         <field name="afip_code">201</field>

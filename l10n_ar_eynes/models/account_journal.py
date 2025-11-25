@@ -230,6 +230,14 @@ class AccountJournal(models.Model):
         inverse='_inverse_nde_seq_number_next',
     )
 
+    @api.constrains('denomination')
+    def _check_denomination_not_m(self):
+        for record in self:
+            if record.denomination == 'm':
+                raise ValidationError(
+                    _("M denomination is not allowed since December 1° 2025.")
+                )
+
     @api.depends('type')
     def _compute_default_account_type(self):
         super(AccountJournal, self)._compute_default_account_type()

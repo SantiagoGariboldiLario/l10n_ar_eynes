@@ -37,6 +37,7 @@
 
                     <group col="6" string="Tax Application">
                         <field name="retention_type" />
+                        <field name="is_for_voucher_with_legend" />
                         <field name="apply_custom_code" />
                         <field
                             name="python_code"
