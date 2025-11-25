@@ -17,6 +17,13 @@ class ResCompany(models.Model):
         store=True,
     )
     apportionable_vat = fields.Boolean()
+    cbu = fields.Char(
+        string='CBU para Facturas A',
+        size=32,
+        required=False,
+        copy=False,
+        help='CBU informado para Facturas A debe estar previamente informado en ARCA.',
+    )
     cot_pass = fields.Char(string="COT Password")
     cot_url = fields.Char(string="COT URL")
     cot_user = fields.Char(string="COT User (NIF)")

@@ -97,6 +97,16 @@
                             FACTURA
                         </span>
                         <br />
+                        <span
+                            t-if="denomination_name == 'A' and o.voucher_type_id.afip_code in ['051', '052', '053']"
+                            style="font-size: 16px;"
+                        >
+                            OPERACIÓN SUJETA A RETENCIÓN
+                        </span>
+                        <span t-elif="o.inform_cbu" style="font-size: 16px;">
+                            PAGO EN CBU INFORMADA
+                        </span>
+                        <br />
                         <span>N° <span t-esc="denomination" /></span>
                         <br />
                         <span>
