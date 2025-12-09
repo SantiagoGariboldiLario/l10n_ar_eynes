@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- LEVEL 2 -->
+    <menuitem
+        parent="l10n_ar_eynes.menu_taxes_reports"
+        id="menu_iibb_ddjj"
+        name="IIBB DDJJ Report"
+        sequence="8"
+    />
+
+    <menuitem
+        id="menu_iibb_ddjj_config"
+        parent="l10n_ar_eynes.taxes_submenu"
+        name="IIBB DDJJ Report Configuration"
+        sequence="2"
+        action="action_iibb_ddjj_config"
+    />
+
+    <!-- LEVEL 3 -->
+    <menuitem
+        parent="menu_iibb_ddjj"
+        id="iibb_ddjj_report"
+        name="IIBB DDJJ Report"
+        sequence="1"
+        action="action_iibb_ddjj"
+    />
+</odoo>
