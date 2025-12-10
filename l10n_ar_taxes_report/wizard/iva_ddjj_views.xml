@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="iva_ddjj_wizard" model="ir.ui.view">
+        <field name="name">iva.ddjj.wizard</field>
+        <field name="model">iva.ddjj</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="company_id" />
+                <field name="config_id" />
+                <field name="period" />
+                <footer>
+                    <button name="create_pdf" string="Generar" type="object" class="btn-primary" />
+                    <button special="cancel" string="Cancelar" class="btn-default" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_iva_ddjj" model="ir.actions.act_window">
+        <field name="name">IVA DDJJ Report</field>
+        <field name="res_model">iva.ddjj</field>
+        <field name="view_mode">form</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

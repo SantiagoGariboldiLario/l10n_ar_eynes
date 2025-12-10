@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <!-- LEVEL 2 -->
-    <menuitem
-        parent="l10n_ar_eynes.menu_taxes_reports"
-        id="menu_iibb_ddjj"
-        name="IIBB DDJJ Report"
-        sequence="8"
-    />
+    <menuitem parent="l10n_ar_eynes.menu_taxes_reports" id="menu_ddjj" name="DDJJ Report" sequence="8" />
 
     <menuitem
         id="menu_iibb_ddjj_config"
@@ -15,13 +10,27 @@
         sequence="2"
         action="action_iibb_ddjj_config"
     />
+    <menuitem
+        id="menu_iva_ddjj_config"
+        parent="l10n_ar_eynes.taxes_submenu"
+        name="IVA DDJJ Report Configuration"
+        sequence="3"
+        action="action_iva_ddjj_config"
+    />
 
     <!-- LEVEL 3 -->
     <menuitem
-        parent="menu_iibb_ddjj"
+        parent="menu_ddjj"
         id="iibb_ddjj_report"
         name="IIBB DDJJ Report"
         sequence="1"
         action="action_iibb_ddjj"
+    />
+    <menuitem
+        parent="menu_ddjj"
+        id="iva_ddjj_report"
+        name="IVA DDJJ Report"
+        sequence="1"
+        action="action_iva_ddjj"
     />
 </odoo>

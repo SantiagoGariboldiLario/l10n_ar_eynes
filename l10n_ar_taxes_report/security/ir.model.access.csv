@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+l10n_ar_taxes_report.access_iibb_ddjj_config_jurisdiction_line,access_iibb_ddjj_config_jurisdiction_line,l10n_ar_taxes_report.model_iibb_ddjj_config_jurisdiction_line,base.group_user,1,1,1,1
+l10n_ar_taxes_report.access_iibb_ddjj_config,access_iibb_ddjj_config,l10n_ar_taxes_report.model_iibb_ddjj_config,base.group_user,1,1,1,1
+l10n_ar_taxes_report.access_iva_ddjj_config,access_iva_ddjj_config,l10n_ar_taxes_report.model_iva_ddjj_config,base.group_user,1,1,1,1
+l10n_ar_taxes_report.access_iibb_ddjj,access_iibb_ddjj,l10n_ar_taxes_report.model_iibb_ddjj,base.group_user,1,1,1,1
+l10n_ar_taxes_report.access_iva_ddjj,access_iva_ddjj,l10n_ar_taxes_report.model_iva_ddjj,base.group_user,1,1,1,1
