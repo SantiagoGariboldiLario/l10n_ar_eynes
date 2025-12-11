@@ -1883,6 +1883,11 @@ class AccountMove(models.Model):
 
         return res
 
+    def _force_voucher_type(self):
+        self.voucher_type_id = self.env['res.voucher.type'].search(
+            self.voucher_type_domain, limit=1
+        )
+
     def _ensure_fce_values(self):
         """
         If invoice must be of type FCE, ensure certain values are set.
@@ -1900,6 +1905,7 @@ class AccountMove(models.Model):
         # Ensure Fiscal Type FCE
         self.is_FCE_invoice = True
         self._compute_voucher_type_domain()
+        self._force_voucher_type()
 
         if not self.optional_ids:
             conf = self._get_ws_conf()
@@ -1980,6 +1986,7 @@ class AccountMove(models.Model):
     def _clean_fce_values(self):
         self.is_FCE_invoice = False
         self._compute_voucher_type_domain()
+        self._force_voucher_type()
         self.optional_ids.unlink()
 
     def _create_ws_request(self):
