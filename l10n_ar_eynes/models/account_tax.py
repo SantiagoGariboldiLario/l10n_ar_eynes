@@ -29,6 +29,7 @@ class AccountTax(models.Model):
         + "this perception is always applicable",
     )
     is_bank_settlement = fields.Boolean('Is Bank Settlement')
+    is_for_voucher_with_legend = fields.Boolean(default=False)
     always_apply_padron = fields.Boolean(
         'Always Apply from Padron',
         default=False,
@@ -426,7 +427,38 @@ class AccountTax(models.Model):
     ):
         tax_app_obj = self.env['retention.tax.application']
         retention = self
+
         move = move_line.move_id
+        if (
+            move.voucher_type_id
+            in [
+                self.env.ref('l10n_ar_eynes.factura_a_con_leyenda'),
+                self.env.ref('l10n_ar_eynes.nota_debito_a_con_leyenda'),
+                self.env.ref('l10n_ar_eynes.nota_credito_a_con_leyenda'),
+            ]
+            and not retention.is_for_voucher_with_legend
+            and retention.retention_type in ['vat', 'profit']
+        ):
+            _logger.info(
+                f"El comprobante {move.name} es A con leyenda, "
+                "la retencion no aplica."
+            )
+            return {}
+        if (
+            move.voucher_type_id
+            not in [
+                self.env.ref('l10n_ar_eynes.factura_a_con_leyenda'),
+                self.env.ref('l10n_ar_eynes.nota_debito_a_con_leyenda'),
+                self.env.ref('l10n_ar_eynes.nota_credito_a_con_leyenda'),
+            ]
+            and retention.is_for_voucher_with_legend
+        ):
+            _logger.info(
+                f"El comprobante {move.name} es A, "
+                f"la retencion {retention.name} no aplica."
+            )
+            return {}
+
         # Obtenemos el concepto desde la cuenta contable
         _logger.info(
             "Parseando lineas del asiento: %s [%s]" % (move.name, move.ref)

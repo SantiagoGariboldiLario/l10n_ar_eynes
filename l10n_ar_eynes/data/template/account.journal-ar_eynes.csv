@@ -61,6 +61,8 @@
 "iva_retentions_e","Retenciones IVA efectuadas","RIVAE","retentions","tax_iva_retentions_e"
 "ganancias_retentions_e","Retenciones Ganancias Efectuadas","RGANE","retentions","tax_ganancias_retentions_e"
 "ganancias_retentions_s","Retenciones Ganancias Sufridas","RGANS","retentions","tax_ganancias_retentions_s"
+"ganancias_retentions_a_con_leyenda_e","Retenciones Ganancias Fact. A con leyenda Efectuadas","RGNLE","retentions","tax_ganancias_a_con_leyenda_retentions_e"
+"iva_a_con_leyenda_retentions_e","Retenciones IVA Fact. A con leyenda efectuadas","RIVALE","retentions","tax_iva_a_con_leyenda_retentions_e"
 "ganancias_retentions_m_e","Retenciones Ganancias M Efectuadas","RGNME","retentions","tax_ganancias_m_retentions_e"
 "iibb_arba_retentions_s","Retenciones IIBB ARBA Sufridas","RISARB","retentions","tax_iibb_arba_retentions_s"
 "iibb_caba_retentions_s","Retenciones IIBB CABA Sufridas","RISCAB","retentions","tax_iibb_caba_retentions_s"

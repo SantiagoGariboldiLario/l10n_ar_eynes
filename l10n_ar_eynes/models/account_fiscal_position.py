@@ -1,4 +1,5 @@
-from odoo import fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class AccountFiscalPosition(models.Model):
@@ -72,6 +73,14 @@ class AccountFiscalPosition(models.Model):
         'like invoice number validation, etc.',
     )
     is_final_consumer = fields.Boolean("Is Final Consumer")
+
+    @api.constrains('denomination')
+    def _check_denomination_not_m(self):
+        for record in self:
+            if record.denomination == 'm':
+                raise ValidationError(
+                    _("M denomination is not allowed since December 1° 2025.")
+                )
 
     def unlink(self):
         """Override unlink to prevent remove fiscal positions"""

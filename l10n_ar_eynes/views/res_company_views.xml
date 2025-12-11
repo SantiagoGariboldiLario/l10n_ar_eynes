@@ -15,6 +15,7 @@
                 <field name="apartment" placeholder="Apartment" readonly="False" />
             </field>
             <xpath expr="//field[@name='sequence']" position="after">
+                <field name="cbu" />
                 <field name="fcred_cbu_emitter" />
                 <field name="fcred_minimum_amount" />
                 <field name="fcred_is_fce_emitter" />

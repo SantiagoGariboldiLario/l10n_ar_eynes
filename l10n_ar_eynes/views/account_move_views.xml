@@ -121,9 +121,13 @@
                     required="move_type in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')"
                     domain="voucher_type_domain"
                     widget="selection"
-                    readonly="state != 'draft' or move_type in ('out_invoice', 'out_refund')"
+                    readonly="state != 'draft'"
                 />
                 <field name="fiscal_type" invisible="move_type not in ('out_invoice', 'out_refund')" />
+                <field
+                    name="inform_cbu"
+                    invisible="move_type not in ('out_invoice', 'out_refund') or denomination != 'a'"
+                />
             </xpath>
 
             <!-- NUEVOS CAMPOS MULTI MONEDA -->

@@ -1,5 +1,4 @@
 import base64
-import datetime
 import json
 import logging
 import urllib.parse
@@ -143,6 +142,7 @@ class AccountMove(models.Model):
         related='journal_id.fiscal_type',
         store=True,
     )
+    inform_cbu = fields.Boolean(default=False)
     inform_period = fields.Boolean(default=False)
     inform_period_date_from = fields.Date()
     inform_period_date_to = fields.Date()
@@ -334,6 +334,14 @@ class AccountMove(models.Model):
                     _(
                         'The due date must be equal to or later than the invoice date.'
                     )
+                )
+
+    @api.constrains('denomination')
+    def _check_denomination_not_m(self):
+        for record in self:
+            if record.denomination == 'm':
+                raise ValidationError(
+                    _("M denomination is not allowed since December 1° 2025.")
                 )
 
     @api.depends('supplier_move_reference')
@@ -768,11 +776,6 @@ class AccountMove(models.Model):
                 domain.append(('afip_code', sign, AFIP_FCE_CODE_START))
 
             inv.voucher_type_domain = domain
-
-            if inv.is_sale_document(include_receipts=True):
-                inv.voucher_type_id = self.env['res.voucher.type'].search(
-                    domain, limit=1
-                )
 
     @api.onchange('voucher_type_id')
     def _set_is_FCE(self):
@@ -1328,7 +1331,9 @@ class AccountMove(models.Model):
         for move in res:
             if move.is_invoice():
                 if not move.invoice_date:
-                    move.write({'invoice_date': datetime.date.today()})
+                    move.write(
+                        {'invoice_date': fields.Date.context_today(self)}
+                    )
                 if not move.denomination:
                     if move.is_sale_document():
                         denomination = move.journal_id.denomination
