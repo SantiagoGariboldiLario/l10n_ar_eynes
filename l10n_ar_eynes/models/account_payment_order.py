@@ -1187,27 +1187,28 @@ class AccountPaymentOrder(models.Model):
 
     def _check_lines_not_reconciled(self):
         for line in self.income_line_ids + self.debt_line_ids:
-            amount_residual = abs(
-                line.move_line_id.amount_residual_currency
-                if self.currency_id == line.move_line_id.currency_id
-                else line.move_line_id.amount_residual
-            )
-            if line.move_line_id.reconciled:
-                raise ValidationError(
-                    _(
-                        "Invoice '%s' is already reconciled, "
-                        "you cannot validate this payment order."
-                    )
-                    % line.move_line_id.move_id.name
+            if line.amount > 0:
+                amount_residual = abs(
+                    line.move_line_id.amount_residual_currency
+                    if self.currency_id == line.move_line_id.currency_id
+                    else line.move_line_id.amount_residual
                 )
-            elif (line.amount > 0) and (line.amount > amount_residual):
-                raise ValidationError(
-                    _(
-                        "Invoice '%s' residual amount is lower that actual payment, "
-                        "you cannot validate this payment order."
+                if line.move_line_id.reconciled:
+                    raise ValidationError(
+                        _(
+                            "Invoice '%s' is already reconciled, "
+                            "you cannot validate this payment order."
+                        )
+                        % line.move_line_id.move_id.name
                     )
-                    % line.move_line_id.move_id.name
-                )
+                elif line.amount > amount_residual:
+                    raise ValidationError(
+                        _(
+                            "Invoice '%s' residual amount is lower that actual payment, "
+                            "you cannot validate this payment order."
+                        )
+                        % line.move_line_id.move_id.name
+                    )
         return True
 
     def proforma_voucher(self):
