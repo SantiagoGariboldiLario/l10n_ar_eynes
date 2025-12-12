@@ -74,11 +74,16 @@ class AccountPaymentOrder(models.Model):
             result['amount'] = default_amount
 
         # DIARIO
-        domain = [('company_id', '=', default_company.id)]
+        domain = [
+            ('company_id', '=', default_company.id),
+            '|',
+            ('currency_id', '=', default_company.currency_id.id),
+            ('currency_id', '=', False),
+        ]
         if default_type:
             domain.append(('type', '=', default_type))
         default_journal = self.env['account.journal'].search(domain, limit=1)
-        if 'journal_id' in fields:
+        if 'journal_id' in fields and default_journal:
             result['journal_id'] = default_journal.id
 
         if 'payment_rate_currency_id' in fields:
