@@ -1655,7 +1655,7 @@ class AccountMove(models.Model):
             )
             return pdf_content, pdf_name
         else:
-            super().get_invoice_pdf_report_attachment()
+            return super().get_invoice_pdf_report_attachment()
 
     def action_invoice_print(self):
         """
