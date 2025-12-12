@@ -1000,9 +1000,8 @@ class AccountPaymentOrder(models.Model):
             if self.currency_id == move_line.currency_id:
                 if move_line.amount_residual_currency <= 0:
                     return True
-            else:
-                if move_line.amount_residual <= 0:
-                    return True
+            elif move_line.amount_residual <= 0:
+                return True
         return False
 
     def _prepare_income_debt_lines(self, lines_type, move_lines):
@@ -1186,6 +1185,32 @@ class AccountPaymentOrder(models.Model):
             number_next = self.journal_id.sequence_id.next_by_id()
         return number_next
 
+    def _check_lines_not_reconciled(self):
+        for line in self.income_line_ids + self.debt_line_ids:
+            if line.amount > 0:
+                amount_residual = abs(
+                    line.move_line_id.amount_residual_currency
+                    if self.currency_id == line.move_line_id.currency_id
+                    else line.move_line_id.amount_residual
+                )
+                if line.move_line_id.reconciled:
+                    raise ValidationError(
+                        _(
+                            "Invoice '%s' is already reconciled, "
+                            "you cannot validate this payment order."
+                        )
+                        % line.move_line_id.move_id.name
+                    )
+                elif line.amount > amount_residual:
+                    raise ValidationError(
+                        _(
+                            "Invoice '%s' residual amount is lower that actual payment, "
+                            "you cannot validate this payment order."
+                        )
+                        % line.move_line_id.move_id.name
+                    )
+        return True
+
     def proforma_voucher(self):
         self.ensure_one()
         # Chequeamos si la writeoff_amount no es negativa
@@ -1208,6 +1233,7 @@ class AccountPaymentOrder(models.Model):
                 _("You cannot validate a voucher with a payment rate of 0.0")
             )
 
+        self._check_lines_not_reconciled()
         self._clean_payment_lines()
         try:
             move_id = self.action_move_line_create()
