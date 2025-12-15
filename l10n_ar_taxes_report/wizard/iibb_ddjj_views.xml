@@ -5,9 +5,13 @@
         <field name="model">iibb.ddjj</field>
         <field name="arch" type="xml">
             <form>
-                <field name="company_id" />
-                <field name="config_id" />
-                <field name="period" />
+                <sheet>
+                    <group>
+                        <field name="company_id" />
+                        <field name="config_id" />
+                        <field name="period" />
+                    </group>
+                </sheet>
                 <footer>
                     <button name="create_pdf" string="Generar" type="object" class="btn-primary" />
                     <button special="cancel" string="Cancelar" class="btn-default" />

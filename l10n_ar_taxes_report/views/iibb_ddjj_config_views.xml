@@ -17,12 +17,14 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <field name="company_id" />
-                    <field name="name" />
+                    <group>
+                        <field name="company_id" />
+                        <field name="name" />
+                    </group>
                     <field name="jurisdiction_line_ids">
                         <tree editable="top">
-                            <field name="config_id" />
-                            <field name="company_id" />
+                            <field name="config_id" column_invisible="True" />
+                            <field name="company_id" column_invisible="True" />
                             <field name="account_id" />
                             <field name="state_id" />
                         </tree>

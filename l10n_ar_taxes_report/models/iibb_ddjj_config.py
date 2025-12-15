@@ -14,17 +14,15 @@ class IIBBDDJJConfigLine(models.Model):
     config_id = fields.Many2one(
         comodel_name="iibb.ddjj.config",
         string="Configuration",
-        required=True,
         ondelete="cascade",
     )
     company_id = fields.Many2one(
-        'res.country',
+        'res.company',
         string="Company",
         related='config_id.company_id',
         store=True,
         readonly=True,
     )
-    name = fields.Char(string="Jurisdiction Name", required=True)
     state_id = fields.Many2one(
         'res.country.state',
         string="State",

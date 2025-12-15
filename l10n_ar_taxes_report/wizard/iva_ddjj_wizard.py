@@ -7,7 +7,7 @@ class IVADDJJ(models.TransientModel):
 
     company_id = fields.Many2one('res.company', string="Company", required=True)
     config_id = fields.Many2one(
-        'iva.ddjj.config', string="Company", required=True
+        'iva.ddjj.config', string="Configuration", required=True
     )
     period = fields.Date(string="Period", required=True)
 

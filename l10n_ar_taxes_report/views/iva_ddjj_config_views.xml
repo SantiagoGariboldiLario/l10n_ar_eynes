@@ -17,10 +17,12 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <field name="company_id" />
-                    <field name="free_availability_balance_account_id" />
-                    <field name="last_period_balance_account_id" />
-                    <field name="technical_balance_account_id" />
+                    <group>
+                        <field name="company_id" />
+                        <field name="free_availability_balance_account_id" />
+                        <field name="last_period_balance_account_id" />
+                        <field name="technical_balance_account_id" />
+                    </group>
                 </sheet>
             </form>
         </field>

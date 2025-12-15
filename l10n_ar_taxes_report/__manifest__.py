@@ -32,6 +32,7 @@
         'views/iva_ddjj_config_views.xml',
         'wizard/iva_ddjj_views.xml',
         'views/menuitems.xml',
+        'security/ir.model.access.csv',
     ],
     "demo": [],
     'assets': {},

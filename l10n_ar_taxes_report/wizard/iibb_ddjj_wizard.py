@@ -7,7 +7,7 @@ class IIBBDDJJ(models.TransientModel):
 
     company_id = fields.Many2one('res.company', string="Company", required=True)
     config_id = fields.Many2one(
-        'iibb.ddjj.config', string="Company", required=True
+        'iibb.ddjj.config', string="Configuration", required=True
     )
     period = fields.Date(string="Period", required=True)
 
