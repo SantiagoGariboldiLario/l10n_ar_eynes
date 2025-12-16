@@ -21,12 +21,15 @@
                         <field name="company_id" />
                         <field name="name" />
                     </group>
+                    <h2 class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small">Relación de Provincias con su Cuenta de Saldo a Favor</h2>
                     <field name="jurisdiction_line_ids">
                         <tree editable="top">
                             <field name="config_id" column_invisible="True" />
                             <field name="company_id" column_invisible="True" />
-                            <field name="account_id" />
                             <field name="state_id" />
+                            <field name="account_id" />
+                            <field name="coefficient" />
+                            <field name="percentage" />
                         </tree>
                     </field>
                 </sheet>
