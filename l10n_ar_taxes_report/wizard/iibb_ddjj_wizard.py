@@ -42,7 +42,7 @@ class IIBBDDJJ(models.TransientModel):
                 AND aa.account_type NOT LIKE '%%receivable'
                 AND
         """
-        query += 'am.invoice_date'  if report_type == 'sale' else 'am.date'
+        query += 'am.invoice_date' if report_type == 'sale' else 'am.date'
         query += """ BETWEEN %(date_from)s AND %(date_to)s
                 AND am.move_type IN %(inv_type)s
                 AND am.company_id = %(company_id)s
