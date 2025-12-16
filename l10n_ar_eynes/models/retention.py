@@ -273,8 +273,6 @@ class RetentionTaxApplication(models.Model):
 
         # Obtenemos las fechas de mes calendario
         # al que corresponde este voucher
-
-        # dt = datetime.strptime(date, DSDF)
         dt = datetime.strptime(str(date), DSDF)
         date_start = (dt + relatived(day=1)).strftime(DSDF)
         date_finish = (dt + relatived(day=31)).strftime(DSDF)
@@ -282,7 +280,6 @@ class RetentionTaxApplication(models.Model):
 
     def get_period_partner_payments(self, partner, concept, po_date=False):
         AccountPaymentOrder = self.env['account.payment.order']
-        AccountPaymentOrderLine = self.env['account.payment.order.line']
         date_start, date_finish = self._get_month_date_span_from_date(po_date)
         prev_pos = AccountPaymentOrder.search(
             [
@@ -293,64 +290,41 @@ class RetentionTaxApplication(models.Model):
                 ('date', '<=', date_finish),
             ]
         )
-        debt_moves = prev_pos.mapped('debt_line_ids.move_line_id.move_id')
-        debt_untax_mls = debt_moves.mapped('line_ids').filtered(
-            lambda ml: ml.account_id in concept.account_ids
-            and ml.tax_ids
-            and not ml.tax_line_id
-        )
-        income_moves = prev_pos.mapped('income_line_ids.move_line_id.move_id')
-        income_untax_mls = income_moves.mapped('line_ids').filtered(
-            lambda ml: ml.account_id in concept.account_ids
-            and ml.tax_ids
-            and not ml.tax_line_id
-        )
+        debt_moves = prev_pos.mapped('debt_line_ids')
+        income_moves = prev_pos.mapped('income_line_ids')
         # Use the proportional amount of line being paid, searching in
         # the old apo's and gathering the apol related to the untaxed ones
         debt_untax_mls_ok = []
-        for ml in debt_untax_mls:
-            amls_w_tax = ml.move_id.mapped('line_ids').filtered(
-                lambda ml: ml.account_id.account_type in ['payable']
+        for line in debt_moves:
+            move = line.move_line_id.move_id
+            percentage_paid = line.amount / line.amount_original
+            move_lines_with_concept = move.line_ids.filtered(
+                lambda ml: ml.account_id in concept.account_ids
+                and ml.tax_ids
+                and not ml.tax_line_id
             )
-            domain = [
-                ('payment_order_id', 'in', prev_pos.ids),
-                ('move_line_id', 'in', amls_w_tax.ids),
-            ]
-            pol_todo = AccountPaymentOrderLine.search(domain)
-            amount = ml.credit or ml.debit
-            factor = 0.0
-            for pol in pol_todo:
-                factor += pol.amount / pol.amount_original
-
-            if factor:
-                amount = round(amount * factor, 2)
-            #            if pol_todo:
-            #                factor = pol_todo.amount / pol_todo.amount_original
-            #                amount = amount * factor
+            amount_with_concept = sum(
+                move_lines_with_concept.mapped('credit')
+            ) + sum(move_lines_with_concept.mapped('debit'))
+            amount = round(amount_with_concept * percentage_paid, 2)
             debt_untax_mls_ok.append(amount)
-        # Use the proportional amount of line being paid, searching in
-        # the old apo's and gathering the apol related to the untaxed ones
-        income_untax_mls_ok = []
-        for ml in income_untax_mls:
-            amls_w_tax = ml.move_id.mapped('line_ids').filtered(
-                lambda ml: ml.account_id.account_type in ['payable']
-            )
-            domain = [
-                ('payment_order_id', 'in', prev_pos.ids),
-                ('move_line_id', 'in', amls_w_tax.ids),
-            ]
-            pol_todo = AccountPaymentOrderLine.search(domain)
-            amount = ml.credit or ml.debit
-            factor = 0.0
-            for pol in pol_todo:
-                factor += pol.amount / pol.amount_original
 
-            if factor:
-                amount = round(amount * factor, 2)
-            income_untax_mls_ok.append(amount)
-        untaxed_debt = sum(debt_untax_mls_ok)
-        untaxed_inc = sum(income_untax_mls_ok)
-        untaxed_amount = untaxed_debt - untaxed_inc
+        income_untax_mls_ok = []
+        for line in income_moves:
+            move = line.move_line_id.move_id
+            percentage_paid = line.amount / line.amount_original
+            move_lines_with_concept = move.line_ids.filtered(
+                lambda ml: ml.account_id in concept.account_ids
+                and ml.tax_ids
+                and not ml.tax_line_id
+            )
+            amount_with_concept = sum(
+                move_lines_with_concept.mapped('credit')
+            ) + sum(move_lines_with_concept.mapped('debit'))
+            amount = round(amount_with_concept * percentage_paid, 2)
+            debt_untax_mls_ok.append(amount)
+
+        untaxed_amount = sum(debt_untax_mls_ok) - sum(income_untax_mls_ok)
         untaxed_amount += self.get_period_partner_advance_payments(prev_pos)
         return untaxed_amount
 
