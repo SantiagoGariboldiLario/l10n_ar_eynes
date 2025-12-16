@@ -29,6 +29,8 @@
     'data': [
         'views/iibb_ddjj_config_views.xml',
         'wizard/iibb_ddjj_views.xml',
+        'report/iibb_ddjj_report.xml',
+        'report/iibb_ddjj_qweb.xml',
         'views/iva_ddjj_config_views.xml',
         'wizard/iva_ddjj_views.xml',
         'views/menuitems.xml',
