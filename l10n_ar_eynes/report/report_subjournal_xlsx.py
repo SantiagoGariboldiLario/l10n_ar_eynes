@@ -49,16 +49,6 @@ class SubjournalXlsx(models.AbstractModel):
         else:
             return ['in_invoice', 'in_refund', 'in_debit']
 
-    # def _get_exempt_taxes(self, cols):
-    #     exempt_vat_ids = set()
-    #     for tax in cols:
-    #         if tax.get('is_exempt', False):
-    #             if tax.get('id', False):
-    #                 exempt_vat_ids.add(tax.get('id', False))
-    #             for tid in tax.get('ids', []):
-    #                 exempt_vat_ids.add(tid)
-    #     return exempt_vat_ids
-
     def get_invoice_type(self, inv_type, denom, is_debit):
         fiscal_type = "F"
         if inv_type in ('out_refund', 'in_refund'):
@@ -193,7 +183,6 @@ class SubjournalXlsx(models.AbstractModel):
 
         c_taxes = [0] * len(cols)
         final_consumer_id = self.env.ref('l10n_ar_eynes.fiscal_position_cf').id
-        # self._get_exempt_taxes(cols)
 
         lines = {}
         last_line_id = -1
@@ -256,6 +245,9 @@ class SubjournalXlsx(models.AbstractModel):
             if last_line_id != line_id:
                 last_line_id = line_id
                 lines[key]['total'] += amount
+                lines[key]['no_taxed'] = lines[key]['total'] - sum(
+                    lines[key]['taxes']
+                )
 
             for i, tax in enumerate(cols):
                 if obj.perception_retention_grouped:
@@ -287,10 +279,6 @@ class SubjournalXlsx(models.AbstractModel):
                     lines[key]['taxes'][i] += amount
                     if lines[key]['taxes'][i] != 0:
                         c_taxes[i] += 1
-
-            if not (line['tax_line_id'] or line['tax_ids']):
-                # SI NO ES LINEA DE IMPUESTO O ES LINEA SIN IMPUESTOS CORRESPONDE A NO GRAVADO
-                lines[key]['no_taxed'] += amount
 
         return lines, c_taxes, retention_perception_summary
 
