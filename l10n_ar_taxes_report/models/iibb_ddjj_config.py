@@ -9,7 +9,6 @@ class IIBBDDJJConfigLine(models.Model):
         'account.account',
         string="Account",
         required=True,
-        domain=lambda self: [('company_id', '=', self.company_id.id)]
     )
     coefficient = fields.Float(string="Coefficient", required=True)
     config_id = fields.Many2one(
