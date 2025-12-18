@@ -50,7 +50,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- DIRECTO GRAVADO -->
                                 <t t-foreach="state_info" t-as="state">
                                     <tr class="global-row">
                                         <td class="text-col"><t t-out="state[0]" /></td>
