@@ -33,6 +33,8 @@
         'report/iibb_ddjj_qweb.xml',
         'views/iva_ddjj_config_views.xml',
         'wizard/iva_ddjj_views.xml',
+        'report/iva_ddjj_report.xml',
+        'report/iva_ddjj_qweb.xml',
         'views/menuitems.xml',
         'security/ir.model.access.csv',
     ],
