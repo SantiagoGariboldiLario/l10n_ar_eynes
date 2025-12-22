@@ -101,10 +101,12 @@ patch(PaymentScreen.prototype, {
             this.render();
         } catch (error) {
             if (error instanceof ConnectionLostError) {
-                this.env.services.popup.add(ErrorPopup, {
-                    title: _t("Error"),
-                    body: _t("Unable to get next sequence."),
-                });
+                // this.env.services.popup.add(ErrorPopup, {
+                //     title: _t("Error"),
+                //     body: _t("Unable to get next sequence."),
+                // });
+                this.setSequenceValues();
+                this.render();
             } else {
                 this.setSequenceValues();
                 throw error;
