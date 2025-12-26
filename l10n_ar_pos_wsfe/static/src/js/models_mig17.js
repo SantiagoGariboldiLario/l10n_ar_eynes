@@ -186,14 +186,15 @@ patch(Order.prototype, {
      * Returns false if the current order is empty and has no payments.
      * @returns {boolean}
      */
-    _isValidEmptyOrder() {
-        let res = super._isValidEmptyOrder();
-        if (!this.invoice_journal_id) {
-            return false;
-        } else {
-            return res;
-        }
-    },
+    // _isValidEmptyOrder() {
+    //     let res = super._isValidEmptyOrder();
+    //     if (!this.invoice_journal_id) {
+    //         console.log("No invoice journal");
+    //         return false;
+    //     } else {
+    //         return res;
+    //     }
+    // },
 });
 
 patch(PaymentScreen.prototype, {
