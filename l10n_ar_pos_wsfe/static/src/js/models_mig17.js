@@ -62,6 +62,7 @@ patch(Order.prototype, {
         json.inv_electronic_mode = this.inv_electronic_mode ? this.inv_electronic_mode : false;
         json.invoice_journal_id = this.invoice_journal_id || false;
         json.to_invoice = true;
+        json.offline = false;
         json.doc_origin = this.doc_origin || "";
         json.partner_final_consumer = this.partner_final_consumer;
         return json;

@@ -12,6 +12,19 @@ patch(PosStore.prototype, {
         await super._processData(...arguments);
         this.all_doc_types = loadedData["res.document.type"];
     },
+
+    _after_flush_orders(orders) {
+        const res = super._after_flush_orders(...arguments);
+        console.log("Patched _after_flush_orders called");
+        for (const order of orders) {
+            console.log(order);
+            if (this.synch?.status === "disconnected") {
+                console.log("Setting offline flag for order");
+                order.data.offline = true;
+            }
+        }
+        return res;
+    },
 });
 
 patch(PaymentScreen.prototype, {

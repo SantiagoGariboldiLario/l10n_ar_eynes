@@ -25,6 +25,7 @@ class PosOrder(models.Model):
         string='Is Electronic Invoice',
         copy=False,
     )
+    synced_from_offline = fields.Boolean("Synced From Offline", default=False)
 
     @api.model
     def create_from_ui(self, orders, draft=False):
@@ -52,6 +53,7 @@ class PosOrder(models.Model):
         res = super(PosOrder, self)._order_fields(ui_order)
         res['invoice_journal_id'] = ui_order.get('invoice_journal_id')
         res['is_wsfe'] = ui_order.get('inv_electronic_mode')
+        res['synced_from_offline'] = ui_order.get('offline', False)
         return res
 
     def _prepare_invoice_vals(self):
@@ -68,6 +70,8 @@ class PosOrder(models.Model):
             res['associated_inv_ids'] = [
                 (6, 0, self.refunded_order_ids.mapped('account_move').ids)
             ]
+        if self.synced_from_offline:
+            res['disable_perceptions'] = True
         return res
 
     def _hook_recompute_account_move(self, new_move):
@@ -82,6 +86,8 @@ class PosOrder(models.Model):
 
     def _create_invoice(self, move_vals):
         res = super(PosOrder, self)._create_invoice(move_vals)
+        if not self.invoice_journal_id:
+            res.sudo().with_company(self.company_id)._onchange_partner()
         self._hook_recompute_account_move(res)
         self._check_balanced(res)
         return res
