@@ -115,7 +115,7 @@ class CreateArcibaFiles(models.TransientModel):
             head_regs.append(fixed_width.line)
 
         head_filename = tempfile.mkstemp(suffix='.arciba')[1]
-        f = codecs.open(head_filename, "w", "latin-1")
+        f = codecs.open(head_filename, "w", "utf-8")
 
         for r in head_regs:
             r2 = [a for a in r]
@@ -127,7 +127,7 @@ class CreateArcibaFiles(models.TransientModel):
 
         f.close()
 
-        f = codecs.open(head_filename, "r", "latin-1")
+        f = codecs.open(head_filename, "r", "utf-8")
 
         name = 'eARCIBA_%s_%s.txt' % (
             self.period_start,
@@ -144,7 +144,7 @@ class CreateArcibaFiles(models.TransientModel):
 
         data_attach = {
             'name': name,
-            'datas': binascii.b2a_base64(f.read().encode('latin-1')),
+            'datas': binascii.b2a_base64(f.read().encode('utf-8')),
             # 'datas_fname': name,
             'res_model': 'arciba.generated.files',
             'res_id': generated_file_rec.id,
@@ -421,11 +421,16 @@ class CreateArcibaFiles(models.TransientModel):
 
             # Ret / Per applied
             # ret_per_applied = perc.amount
-            ret_per_applied = (
-                perc.amount
-                if inv.company_id.currency_id == inv.currency_id
-                else perc.amount_secondary_currency
-            )
+            ret_per_applied = 0
+            if inv.company_id.currency_id == inv.currency_id:
+                ret_per_applied = perc.amount
+            else:
+                # ((perc.amount / perc.base) * 100) redondeado a 2
+                ret_per_applied = (
+                    round(((perc.amount / perc.base) * 100), 2)
+                    / 100
+                    * perc.base_secondary_currency
+                )
 
             # Ret / Per base
             base_amount = (
@@ -453,17 +458,8 @@ class CreateArcibaFiles(models.TransientModel):
             if denomination_name in ('A', 'M'):
                 inv_iva_amount = self._get_invoice_iva_total(inv)
 
-            # amount_others = abs(
-            #     round(inv_amount_total - inv_iva_amount - base_amount, 2)
-            # )
             amount_others = abs(
-                round(
-                    inv_amount_total
-                    - inv_iva_amount
-                    - base_amount
-                    - ret_per_applied,
-                    2,
-                )
+                round(inv_amount_total - inv_iva_amount - base_amount, 2)
             )
 
             # Partner Data
@@ -808,7 +804,7 @@ class CreateArcibaNcFile(models.TransientModel):
             head_regs.append(fixed_width.line)
 
         head_filename = tempfile.mkstemp(suffix='.arciba')[1]
-        f = codecs.open(head_filename, "w", "latin-1")
+        f = codecs.open(head_filename, "w", "utf-8")
         for r in head_regs:
             r2 = [a for a in r]
             try:
@@ -818,7 +814,7 @@ class CreateArcibaNcFile(models.TransientModel):
             f.write('\r\n')
 
         f.close()
-        f = codecs.open(head_filename, 'r', "latin-1")
+        f = codecs.open(head_filename, 'r', "utf-8")
 
         name = 'eARCIBA_NC_%s_%s.txt' % (
             self.period_start,
@@ -835,7 +831,7 @@ class CreateArcibaNcFile(models.TransientModel):
 
         data_attach = {
             'name': name,
-            'datas': binascii.b2a_base64(f.read().encode('latin-1')),
+            'datas': binascii.b2a_base64(f.read().encode('utf-8')),
             # 'datas_fname': name,
             'res_model': 'arciba.generated.files',
             'res_id': generated_file_rec.id,
