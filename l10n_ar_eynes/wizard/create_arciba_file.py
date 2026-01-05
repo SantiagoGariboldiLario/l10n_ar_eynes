@@ -396,7 +396,7 @@ class CreateArcibaFiles(models.TransientModel):
             denomination_name = inv.denomination.upper()
 
             # Internal number
-            internal_number = inv.internal_number.replace('-', '')[1:]
+            internal_number = re.sub(r'\D', '', inv.internal_number)
 
             # Invoice total
             inv_amount_total = inv.amount_total
@@ -421,7 +421,7 @@ class CreateArcibaFiles(models.TransientModel):
             # Ret / Per base
             base_amount = (
                 perc.base
-                if not inv.is_multi_currency
+                if inv.company_id.currency_id == inv.currency_id
                 else perc.base_secondary_currency
             )
 
@@ -697,12 +697,12 @@ class CreateArcibaNcFile(models.TransientModel):
             denomination_name = inv.denomination.upper()
 
             # Internal number
-            internal_number = inv.internal_number.replace('-', '')[1:]
+            internal_number = re.sub(r'\D', '', inv.internal_number)
 
             # Perception base
             inv_base = (
                 perc.base
-                if not inv.is_multi_currency
+                if inv.company_id.currency_id == inv.currency_id
                 else perc.base_secondary_currency
             )
 
