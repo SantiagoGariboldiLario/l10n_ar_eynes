@@ -872,6 +872,9 @@ class LibroIVAExporterWizard(models.TransientModel):
         import_aliquot_errors = []
 
         for invoice in invoices:
+            is_E_invoice = invoice.denomination == 'e'
+            if is_E_invoice and self.is_simple_vat:
+                continue
             is_import = self._check_invoice_is_import(invoice)
             add_purchase_line = True
             line = self._create_purchase_line(invoice)
@@ -1137,6 +1140,10 @@ class LibroIVAExporterWizard(models.TransientModel):
         import_aliquot_errors = []
 
         for invoice in invoices:
+            is_E_invoice = invoice.denomination == 'e'
+            if is_E_invoice and self.is_simple_vat:
+                continue
+
             is_import = self._check_invoice_is_import(invoice)
             add_purchase_line = True
             line = self._create_purchase_line(invoice)
