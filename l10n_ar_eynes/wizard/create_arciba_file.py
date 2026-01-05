@@ -171,7 +171,10 @@ class CreateArcibaFiles(models.TransientModel):
         iva_amount = 0
         for inv in invoices:
             iva_lines = self._get_invoice_vat_tax_lines(inv)
-            iva_amount += sum(iva_lines.mapped('price_unit'))
+            # iva_amount += sum(iva_lines.mapped('price_unit'))
+            for line in iva_lines:
+                iva_amount += line.debit + line.credit
+
         return iva_amount
 
     @api.model
@@ -399,7 +402,8 @@ class CreateArcibaFiles(models.TransientModel):
             internal_number = re.sub(r'\D', '', inv.internal_number)
 
             # Invoice total
-            inv_amount_total = inv.amount_total
+            # inv_amount_total = inv.amount_total
+            inv_amount_total = abs(inv.amount_total_signed)
 
             # Type of document partner
             nro_doc_retenido = (
@@ -416,7 +420,12 @@ class CreateArcibaFiles(models.TransientModel):
                 continue
 
             # Ret / Per applied
-            ret_per_applied = perc.amount
+            # ret_per_applied = perc.amount
+            ret_per_applied = (
+                perc.amount
+                if inv.company_id.currency_id == inv.currency_id
+                else perc.amount_secondary_currency
+            )
 
             # Ret / Per base
             base_amount = (
@@ -444,8 +453,17 @@ class CreateArcibaFiles(models.TransientModel):
             if denomination_name in ('A', 'M'):
                 inv_iva_amount = self._get_invoice_iva_total(inv)
 
+            # amount_others = abs(
+            #     round(inv_amount_total - inv_iva_amount - base_amount, 2)
+            # )
             amount_others = abs(
-                round(inv_amount_total - inv_iva_amount - base_amount, 2)
+                round(
+                    inv_amount_total
+                    - inv_iva_amount
+                    - base_amount
+                    - ret_per_applied,
+                    2,
+                )
             )
 
             # Partner Data
