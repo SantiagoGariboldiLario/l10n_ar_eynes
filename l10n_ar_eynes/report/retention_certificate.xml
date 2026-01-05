@@ -272,6 +272,22 @@
                                 <span style="font-size:21px;" t-esc="related_moves" />
                             </td>
                         </tr>
+                        <tr>
+                            <td style="padding:9px;">
+                                <strong
+                                        style="font-size:21px;"
+                                    >Monto del comprobante que origina la Retención: </strong>
+                                <t
+                                        t-set="related_moves_amount"
+                                        t-value="sum(list(set((r.mapped('retention_move_line_ids.move_id.amount_total')))))"
+                                    />
+                                <span
+                                        style="font-size:21px;"
+                                        t-esc="related_moves_amount"
+                                        t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'
+                                    />
+                            </td>
+                        </tr>
                     </table>
                 </div>
                 <div class="footer" style="page-break-after:always;">
