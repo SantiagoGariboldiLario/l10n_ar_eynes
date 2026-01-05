@@ -205,7 +205,7 @@
                                     />
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
-                                <t t-set="applied_aliquot" t-value="'%.2f' % (100 * amount / base)" />
+                                <t t-set="applied_aliquot" t-value="r.applied_aliquot" />
                                 <span t-esc="applied_aliquot" style="font-size:21px;" />
                             </td>
                             <td style="width:25%;text-align:center;padding:9px;">
