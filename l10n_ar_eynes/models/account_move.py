@@ -1888,9 +1888,9 @@ class AccountMove(models.Model):
             and self.fiscal_type == 'electronic'
         ):
             amount_total = (
-                self.amount_total_cur
-                if self.is_multi_currency
-                else self.amount_total
+                self.amount_total
+                if self.currency_id == self.company_currency_id
+                else self.amount_total_cur
             )
             try:
                 res = self._check_fce_using_ws(amount_total)
