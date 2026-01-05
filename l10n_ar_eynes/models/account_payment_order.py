@@ -2406,6 +2406,13 @@ class AccountPaymentOrderRetentionLine(models.Model):
                     domain.append(('type_tax_use', '=', 'sale'))
             line.retention_id_domain = domain
 
+    @api.model_create_multi
+    def create(self, vals):
+        res = super().create(vals)
+        for ret in res:
+            ret.default_retention_move_lines()
+        return res
+
     def create_retention_lines(self):
         """This method creates the retention move lines and return the ID's"""
         move_line_ids = []
