@@ -134,17 +134,17 @@ class WSFEXParser(WSParser):
                     )
                 )
 
-            uom_code = uom_codes[0].code
-
             items.append(
                 {
                     'Pro_codigo': line.product_id.default_code or '',
                     'Pro_ds': line.name,
                     'Pro_qty': line.quantity,
-                    'Pro_umed': uom_code,
+                    'Pro_umed': uom_codes[0].code,
                     'Pro_precio_uni': line.price_unit,
                     'Pro_total_item': line.price_subtotal,
-                    'Pro_bonificacion': line.discount,
+                    'Pro_bonificacion': round(
+                        line.quantity * line.price_unit * line.discount / 100, 2
+                    ),
                 }
             )
         return items
