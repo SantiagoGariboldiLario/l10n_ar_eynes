@@ -195,7 +195,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <t t-set="base" t-value="r.base_amount" />
+                            <t t-set="base" t-value="r.base" />
                             <t t-set="amount" t-value="r.amount" />
                             <td style="width:25%;text-align:center;padding:9px;">
                                 <span
