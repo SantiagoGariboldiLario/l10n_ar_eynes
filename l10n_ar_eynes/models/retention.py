@@ -352,6 +352,7 @@ class RetentionTaxApplication(models.Model):
         domain = [
             ('partner_id', '=', partner.id),
             ('retention_id.retention_type', '=', 'profit'),
+            ('retention_id.type_tax_use', '=', 'purchase'),
             ('concept_id', '=', concept.id),
             ('date', '>=', date_start),
             ('date', '<=', date_finish),
@@ -450,11 +451,11 @@ class RetentionTaxApplication(models.Model):
         # ya practicadas para este concepto
         # en el mes calendario en pagos previos a este proveedor
         if self.retention_tax_id.retention_type == 'profit':
-            amount -= period_amount
             _logger.info(
                 "Descuenta monto del periodo %s al MONTO CALCULADO %s"
                 % (period_amount, amount)
             )
+            amount -= period_amount
 
         # Chequeamos contra el minimo a percibir
         if amount < self.tax_minimum and period_amount == 0.0:

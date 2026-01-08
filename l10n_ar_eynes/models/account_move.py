@@ -757,7 +757,7 @@ class AccountMove(models.Model):
             pos_code.zfill(5) + '-' + move_code.zfill(8)
         )
 
-    @api.depends('denomination', 'move_type', 'is_debit_note')
+    @api.depends('denomination', 'move_type', 'is_debit_note', 'is_FCE_invoice')
     def _compute_voucher_type_domain(self):
         for inv in self:
             inv_type = 'b'
@@ -820,6 +820,23 @@ class AccountMove(models.Model):
                     "price_subtotal"
                 )
             )
+
+    @api.onchange('associated_inv_ids')
+    def _set_cn_dn_is_FCE(self):
+        if self.is_debit_note or self.move_type == 'out_refund':
+            are_FCE_invoices = self.associated_inv_ids.mapped('is_FCE_invoice')
+            if len(are_FCE_invoices) > 1:
+                raise UserError(
+                    _(
+                        "All associated invoices must be of the same type: FCE or non-FCE."
+                    )
+                )
+            elif len(are_FCE_invoices) == 1:
+                are_FCE_invoices = are_FCE_invoices[0]
+                if are_FCE_invoices != self.is_FCE_invoice:
+                    self.is_FCE_invoice = are_FCE_invoices
+            elif len(are_FCE_invoices) == 0:
+                self.is_FCE_invoice = False
 
     # --------------------------------------------------------------------------------
     # *********      MÉTODOS PARA PERCEPCIONES: *********
@@ -1871,9 +1888,9 @@ class AccountMove(models.Model):
             and self.fiscal_type == 'electronic'
         ):
             amount_total = (
-                self.amount_total_cur
-                if self.is_multi_currency
-                else self.amount_total
+                self.amount_total
+                if self.currency_id == self.company_currency_id
+                else self.amount_total_cur
             )
             try:
                 res = self._check_fce_using_ws(amount_total)
