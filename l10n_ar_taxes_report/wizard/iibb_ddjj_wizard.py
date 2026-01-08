@@ -27,16 +27,10 @@ class IIBBDDJJ(models.TransientModel):
         date_from, date_to = self._get_period_domain()
         query = """
             SELECT
-                sum(aml.balance * %(sign)s) AS total,
-                COALESCE(rcs2.id, rcs.id) AS Province,
-                COALESCE(rcs2.name, rcs.name) AS Jurisdiccion
+                sum(aml.balance * %(sign)s) AS total
             FROM account_move_line aml
             LEFT JOIN account_move am ON aml.move_id = am.id
             LEFT JOIN account_account aa ON aml.account_id = aa.id
-            LEFT JOIN res_partner rp ON rp.id = am.partner_id
-            LEFT JOIN res_partner rp2 ON am.partner_shipping_id = rp2.id
-            LEFT JOIN res_country_state rcs ON rcs.id = rp.state_id
-            LEFT JOIN res_country_state rcs2 ON rcs2.id = rp2.state_id
             WHERE
                 aa.account_type NOT LIKE '%%payable'
                 AND aa.account_type NOT LIKE '%%receivable'
@@ -48,7 +42,6 @@ class IIBBDDJJ(models.TransientModel):
                 AND am.company_id = %(company_id)s
                 AND am.state = 'posted'
                 AND aml.tax_line_id IS NULL
-            GROUP BY Province, Jurisdiccion
         """
         q_vals = {
             'sign': sign,
@@ -58,8 +51,8 @@ class IIBBDDJJ(models.TransientModel):
             'company_id': self.company_id.id,
         }
         self._cr.execute(query, q_vals)
-        res = self._cr.dictfetchall()
-        return res
+        res = self._cr.dictfetchone()
+        return res['total']
 
     def _get_overpayment_moves(self):
         date_from, _date_to = self._get_period_domain()
@@ -137,20 +130,12 @@ class IIBBDDJJ(models.TransientModel):
         retention_amount = self._get_retention_data()
         perception_amount = self._get_perception_data()
         state_info = {}
-        for sale in sales_amount:
-            state_id = sale['province']
-            state_identifier = (state_id, sale['jurisdiccion'])
+        for state_config in self.config_id.jurisdiction_line_ids:
+            state_identifier = (state_config.state_id.id, state_config.state_id.name)
             state_info.setdefault(state_identifier, {'debts': 0.0})
-            base = sale['total']
-            config_state_line = self.config_id.jurisdiction_line_ids.filtered(
-                lambda line:
-                    line.state_id.id == state_id
-            )
-            percentage = 0.0
-            if config_state_line:
-                percentage = config_state_line.percentage
+            base = round(sales_amount * state_config.coefficient, 2)
             state_info[state_identifier]['sale_total'] = base
-            state_info[state_identifier]['tax_amount'] = round(base * percentage, 2)
+            state_info[state_identifier]['tax_amount'] = round(base * state_config.percentage / 100, 2)
         for overpayment in overpayment_amount:
             state_identifier = (overpayment['state_id'], overpayment['name'])
             state_info.setdefault(state_identifier, {'debts': 0.0})
