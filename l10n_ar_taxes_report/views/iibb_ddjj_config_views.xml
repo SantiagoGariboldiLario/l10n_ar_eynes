@@ -22,13 +22,16 @@
                         <field name="name" />
                     </group>
                     <h2 class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small">Relación de Provincias con su Cuenta de Saldo a Favor</h2>
+                    <p class="o_form_description">
+                        Coeficientes expresados entre 0 y 1. La suma de los coeficientes no debe superar 1.
+                    </p>
                     <field name="jurisdiction_line_ids">
                         <tree editable="top">
                             <field name="config_id" column_invisible="True" />
                             <field name="company_id" column_invisible="True" />
                             <field name="state_id" />
                             <field name="account_id" />
-                            <field name="coefficient" />
+                            <field name="coefficient" sum="coefficient"/>
                             <field name="percentage" />
                         </tree>
                     </field>
