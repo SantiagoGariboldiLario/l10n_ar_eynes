@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="weblearns_layout_iibb_ddjj">
+        <div class="header">
+            <table style="width: 100%; margin: 40px auto; border: transparent;">
+                <thead>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: left; font-size: small;">
+                            <strong> <t t-out="o.company_id.name" /> </strong>
+                        </td>
+                        <td style="width: 50%; text-align: center; font-size: medium;">
+                            <strong> CM03 </strong>
+                        </td>
+                        <td style="width: 30%; text-align: right; font-size: small;">
+                            <span>Desde el: <t t-out="date_start" /> </span>
+                            <br />
+                            <span>Hasta el: <t t-out="date_end" /> </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div
+            class="article"
+            t-att-data-oe-model="o and o._name"
+            t-att-data-oe-id="o and o.id"
+            t-att-data-oe-lang="o and o.env.context.get('lang')"
+        >
+          <t t-out="0" />
+        </div>
+    </template>
+
+    <template id="iibb_ddjj_qweb">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="l10n_ar_taxes_report.weblearns_layout_iibb_ddjj">
+                    <div class="page">
+                        <!-- REPORT BODY -->
+                        <table style="width: 90%; margin: 10px auto;">
+                            <thead class="header-row">
+                                <tr>
+                                    <th class="text-col">Jurisdicción</th>
+                                    <th class="numeric-col">Antic. Imp. Determinado</th>
+                                    <th class="numeric-col">Valores Restan</th>
+                                    <th class="numeric-col">Valores Suman</th>
+                                    <th class="numeric-col">A Favor Contribuy.</th>
+                                    <th class="numeric-col">A Favor Fisco</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state_info" t-as="state">
+                                    <tr class="global-row">
+                                        <td class="text-col"><t t-out="state[0]" /></td>
+                                        <td class="numeric-col">
+                                            <t t-set="tax_amount" t-value="float(state[1])" />
+                                            <t
+                                                t-set="tax_amount_formatted"
+                                                t-value="'{:,.2f}'.format(tax_amount).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                            />
+                                            <t t-out="tax_amount_formatted" />
+                                        </td>
+                                        <td class="numeric-col">
+                                            <t t-set="debts" t-value="float(state[2])" />
+                                            <t
+                                                t-set="debts_formatted"
+                                                t-value="'{:,.2f}'.format(debts).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                            />
+                                            <t t-out="debts_formatted" />
+                                        </td>
+                                        <td class="numeric-col">
+                                            <t t-set="adds" t-value="float(state[3])" />
+                                            <t
+                                                t-set="adds_formatted"
+                                                t-value="'{:,.2f}'.format(adds).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                            />
+                                            <t t-out="adds_formatted" />
+                                        </td>
+                                        <td class="numeric-col">
+                                            <t t-set="to_partner" t-value="float(state[4])" />
+                                            <t
+                                                t-set="to_partner_formatted"
+                                                t-value="'{:,.2f}'.format(to_partner).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                            />
+                                            <t t-out="to_partner_formatted" />
+                                        </td>
+                                        <td class="numeric-col">
+                                            <t t-set="to_arca" t-value="float(state[5])" />
+                                            <t
+                                                t-set="to_arca_formatted"
+                                                t-value="'{:,.2f}'.format(to_arca).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                            />
+                                            <t t-out="to_arca_formatted" />
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                    <style>
+                        .header-row td {
+                            border-top-width: 1px !important;
+                            border-top-color: black !important;
+                            border-top-style: solid !important;
+                            font-weight: bold;
+                            font-size: medium;
+                        }
+                        .total-row td {
+                            border-top-width: 1px !important;
+                            border-top-color: black !important;
+                            border-top-style: solid !important;
+                            border-bottom-width: 1px !important;
+                            border-bottom-color: black !important;
+                            border-bottom-style: solid !important;
+                            font-weight: bold;
+                            font-size: medium;
+                        }
+                        .global-row {
+                            font-size: medium;
+                        }
+                        .text-col {
+                            text-align: left;
+                        }
+                        .numeric-col {
+                            text-align: right;
+                        }
+                    </style>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
