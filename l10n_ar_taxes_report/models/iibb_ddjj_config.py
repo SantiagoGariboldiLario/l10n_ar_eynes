@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -50,7 +50,7 @@ class IIBBDDJJConfig(models.Model):
     def _check_total_coefficient(self):
         for record in self:
             if record.total_coeficient > 1.0:
-                raise UserError("The total coefficient of all jurisdictions cannot exceed 1.")
+                raise UserError(_("The total coefficient of all jurisdictions cannot exceed 1."))
 
     @api.depends('jurisdiction_line_ids.coefficient')
     def _compute_total_coefficient(self):
