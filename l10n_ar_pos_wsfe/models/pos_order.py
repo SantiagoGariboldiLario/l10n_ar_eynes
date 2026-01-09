@@ -82,6 +82,8 @@ class PosOrder(models.Model):
 
     def _create_invoice(self, move_vals):
         res = super(PosOrder, self)._create_invoice(move_vals)
+        if not self.invoice_journal_id:
+            res.sudo().with_company(self.company_id)._onchange_partner()
         self._hook_recompute_account_move(res)
         self._check_balanced(res)
         return res

@@ -26,6 +26,18 @@ msgid "Accounting journals used to create invoices."
 msgstr "Diarios contables utilizados para crear facturas."
 
 #. module: l10n_ar_pos_wsfe
+#: model:ir.model.fields,field_description:l10n_ar_pos_wsfe.field_pos_config__block_invoice_offline
+msgid "Block RI Invoices Offline"
+msgstr "Bloquear Facturas RI Offline"
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#, python-format
+msgid "Check from backend and solve this situation"
+msgstr "Revisar desde el backend y solucionar esta situación"
+
+#. module: l10n_ar_pos_wsfe
 #: model:ir.model,name:l10n_ar_pos_wsfe.model_res_company
 msgid "Companies"
 msgstr ""
@@ -94,6 +106,13 @@ msgstr "Factura Electrónica"
 #, python-format
 msgid "Error"
 msgstr "¡Error!"
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#, python-format
+msgid "Error with ARCA"
+msgstr "Error con ARCA"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
@@ -241,6 +260,13 @@ msgstr ""
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#, python-format
+msgid "Offline Mode with perceptions"
+msgstr "Modo sin conexión con percepciones"
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-javascript
 #: code:addons/l10n_ar_pos_wsfe/static/src/xml/TicketScreen.xml:0
 #: code:addons/l10n_ar_pos_wsfe/static/src/xml/TicketScreen.xml:0
 #, python-format
@@ -309,6 +335,17 @@ msgid "Ship Later"
 msgstr "Enviar después"
 
 #. module: l10n_ar_pos_wsfe
+#: model:ir.model.fields,help:l10n_ar_pos_wsfe.field_pos_config__block_invoice_offline
+msgid ""
+"The POS will block the validation of invoices for customers classified with "
+"this Fiscal Positions when the system is offline, to avoid issues with "
+"perception calculations."
+msgstr ""
+"El PdV bloqueará la validación de facturas para clientes clasificados con "
+"estas Posiciones Fiscales cuando el sistema esté offline, para evitar problemas "
+"con los cálculos de percepciones."
+
+#. module: l10n_ar_pos_wsfe
 #. odoo-python
 #: code:addons/l10n_ar_pos_wsfe/models/pos_order.py:0
 #, python-format
@@ -357,6 +394,17 @@ msgid ""
 msgstr ""
 "No puede cerrar el PdV cuando hay facturas que no han sido validadas.\n"
 "Vaya al menú Órdenes --> Órdenes y use el filtro de Facturas en Borrador para solucionarlo."
+
+#. module: l10n_ar_pos_wsfe
+#. odoo-javascript
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#, python-format
+msgid ""
+"You cannot validate this invoice because it's impossible to get perceptions "
+"for this partner."
+msgstr ""
+"No puede validar esta factura porque es imposible obtener percepciones "
+"para este cliente."
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript

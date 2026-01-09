@@ -12,6 +12,18 @@ patch(PosStore.prototype, {
         await super._processData(...arguments);
         this.all_doc_types = loadedData["res.document.type"];
     },
+
+    // _after_flush_orders(orders) {
+    //     const res = super._after_flush_orders(...arguments);
+    //     console.log("Patched _after_flush_orders called");
+    //     for (const order of orders) {
+    //         if (this.synch?.status === "disconnected") {
+    //             console.log("Setting offline flag for order");
+    //             order.data.offline = true;
+    //         }
+    //     }
+    //     return res;
+    // },
 });
 
 patch(PaymentScreen.prototype, {
@@ -101,10 +113,12 @@ patch(PaymentScreen.prototype, {
             this.render();
         } catch (error) {
             if (error instanceof ConnectionLostError) {
-                this.env.services.popup.add(ErrorPopup, {
-                    title: _t("Error"),
-                    body: _t("Unable to get next sequence."),
-                });
+                // this.env.services.popup.add(ErrorPopup, {
+                //     title: _t("Error"),
+                //     body: _t("Unable to get next sequence."),
+                // });
+                this.setSequenceValues();
+                this.render();
             } else {
                 this.setSequenceValues();
                 throw error;
@@ -127,6 +141,98 @@ patch(PaymentScreen.prototype, {
             });
             result = false;
         }
+
+        let block_invoice_offline = false;
+        for (const item of this.currentOrder.pos.config.block_invoice_offline) {
+            if (item === partner.property_account_position_id[0]) {
+                block_invoice_offline = true;
+            }
+        }
+        if (block_invoice_offline && !this.currentOrder.can_compute_perceptions) {
+            this.popup.add(ErrorPopup, {
+                title: _t("Offline Mode with perceptions"),
+                body: _t(
+                    "You cannot validate this invoice because it's impossible to get perceptions for this partner."
+                ),
+            });
+            result = false;
+        }
         return result;
+    },
+
+    get_invoice_report_action: function () {
+        if (this.currentOrder.is_electronic_invoice()) {
+            return "l10n_ar_eynes.account_move_report";
+        } else {
+            return "l10n_ar_pos_wsfe.account_invoices";
+        }
+    },
+
+    async _finalizeValidation() {
+        if (this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) {
+            this.hardwareProxy.openCashbox();
+        }
+
+        this.currentOrder.date_order = luxon.DateTime.now();
+        for (const line of this.paymentLines) {
+            if (!line.amount === 0) {
+                this.currentOrder.remove_paymentline(line);
+            }
+        }
+        this.currentOrder.finalized = true;
+
+        this.env.services.ui.block();
+        let syncOrderResult;
+        let invoice_state_draft = false;
+        try {
+            // 1. Save order to server.
+            syncOrderResult = await this.pos.push_single_order(this.currentOrder);
+            if (!syncOrderResult) {
+                return;
+            }
+
+            // 2. Invoice.
+            if (this.shouldDownloadInvoice()) {
+                if (syncOrderResult[0]?.account_move) {
+                    if (syncOrderResult[0]?.invoice_state == "draft") {
+                        invoice_state_draft = true;
+                    } else {
+                        await this.report.doAction(this.get_invoice_report_action(), [
+                            syncOrderResult[0].account_move,
+                        ]);
+                    }
+                } else {
+                    throw {
+                        code: 401,
+                        message: "Backend Invoice",
+                        data: {order: this.currentOrder},
+                    };
+                }
+            }
+        } catch (error) {
+            if (error instanceof ConnectionLostError) {
+                this.pos.showScreen(this.nextScreen);
+                Promise.reject(error);
+                return error;
+            } else {
+                throw error;
+            }
+        } finally {
+            this.env.services.ui.unblock();
+        }
+
+        // 3. Post process.
+        if (syncOrderResult && syncOrderResult.length > 0 && this.currentOrder.wait_for_push_order()) {
+            await this.postPushOrderResolve(syncOrderResult.map((res) => res.id));
+        }
+
+        await this.afterOrderValidation(!!syncOrderResult && syncOrderResult.length > 0);
+
+        if (invoice_state_draft) {
+            this.env.services.popup.add(ErrorPopup, {
+                title: _t("Error with ARCA"),
+                body: _t("Check from backend and solve this situation"),
+            });
+        }
     },
 });
