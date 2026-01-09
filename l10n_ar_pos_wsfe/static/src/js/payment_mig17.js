@@ -150,7 +150,7 @@ patch(PaymentScreen.prototype, {
         }
         if (block_invoice_offline && !this.currentOrder.can_compute_perceptions) {
             this.popup.add(ErrorPopup, {
-                title: _t("Offline Mode with IVA Responsable"),
+                title: _t("Offline Mode with perceptions"),
                 body: _t(
                     "You cannot validate this invoice because it's impossible to get perceptions for this partner."
                 ),
