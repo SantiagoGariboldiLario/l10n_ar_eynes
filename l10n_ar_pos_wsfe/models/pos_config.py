@@ -8,6 +8,17 @@ _logger = logging.getLogger(__name__)
 class PosConfig(models.Model):
     _inherit = 'pos.config'
 
+    block_invoice_offline = fields.Many2many(
+        'account.fiscal.position',
+        'pos_config_fiscal_position_rel',
+        'pos_config_id',
+        'fiscal_position_id',
+        string='Block RI Invoices Offline',
+        default=True,
+        help="The POS will block the validation of invoices for "
+        "customers classified with this Fiscal Positions when the system "
+        "is offline, to avoid issues with perception calculations.",
+    )
     default_invoice_mode = fields.Selection(
         [('manual', 'Manual'), ('electronic', 'Electronic')],
         default='electronic',
