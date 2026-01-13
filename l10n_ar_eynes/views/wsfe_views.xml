@@ -20,7 +20,7 @@
                 <notebook colspan="4">
                     <page string="Points Of Sale">
                         <field name="point_of_sale_ids" nolabel="1">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="pos_id" domain="[('wsfe_config_id', '=', parent.id)]" />
                                 <field name="code" readonly="True" />
                                 <field name="name" readonly="True" />
@@ -32,7 +32,7 @@
                                 />
                                 <field name="priority" />
                                 <field name="from_afip" readonly="True" />
-                            </tree>
+                            </list>
                         </field>
                     </page>
 
@@ -42,37 +42,37 @@
                             nolabel="1"
                             options="{'no_create_edit': True, 'no_quick_create': True}"
                         >
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="code" readonly="True" />
                                 <field name="name" readonly="True" />
                                 <field name="from_date" readonly="True" />
                                 <field name="to_date" readonly="True" />
                                 <field name="tax_id" />
                                 <field name="from_afip" readonly="True" />
-                            </tree>
+                            </list>
                         </field>
                         <field
                             name="exempt_operations_tax_ids"
                             context="{'default_exempt_operations': True}"
                             nolabel="1"
                         >
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="name" />
                                 <field name="tax_id" />
                                 <field name="exempt_operations" invisible="1" />
-                            </tree>
+                            </list>
                         </field>
                     </page>
 
                     <page string="Optionals">
                         <field name="optional_ids" nolabel="1">
-                            <tree readonly="True">
+                            <list readonly="True">
                                 <field name="code" />
                                 <field name="name" />
                                 <field name="from_date" />
                                 <field name="to_date" />
                                 <field name="from_afip" />
-                            </tree>
+                            </list>
                         </field>
                     </page>
 
@@ -82,14 +82,14 @@
                             nolabel="1"
                             options="{'no_create_edit': True, 'no_quick_create': True}"
                         >
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="code" readonly="True" />
                                 <field name="name" readonly="True" />
                                 <field name="from_date" readonly="True" />
                                 <field name="to_date" readonly="True" />
                                 <field name="currency_id" />
                                 <field name="from_afip" readonly="True" />
-                            </tree>
+                            </list>
                         </field>
                     </page>
 
@@ -109,12 +109,12 @@
         <field name="name">WSFE Config</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">wsfe.config</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">list</field>
         <field
             name="view_ids"
             eval="[
         (5, 0, 0),
-        (0, 0, {'view_mode': 'tree', 'view_id': ref('view_ws_config_tree')}),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('view_ws_config_tree')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('view_wsfe_config_form')})
         ]"
         />

@@ -5,7 +5,6 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.tools import pytz
 
 
 class WsRequest(models.Model):
@@ -32,11 +31,10 @@ class WsRequest(models.Model):
 
     @api.model_create_multi
     def create(self, vals):
-        now_time = fields.Datetime.now()
-        tz = pytz.timezone(self.env.user.tz) if self.env.user.tz else pytz.utc
-        user_tz_date = pytz.utc.localize(now_time).astimezone(tz)
+        # Use naive UTC datetime to match field expectations in v19
+        user_tz_date = fields.Datetime.now()
         for val in vals:
-            val.update({'date_request': user_tz_date.replace(tzinfo=None)})
+            val.update({'date_request': user_tz_date})
         return super(WsRequest, self).create(vals)
 
     def unlink(self):

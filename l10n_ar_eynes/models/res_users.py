@@ -74,13 +74,20 @@ class UsersJournalPriorityRel(models.Model):
                 )
 
     def create(self, vals):
-        last_user_record = self.env['users.journals.priority.rel'].search(
-            [('user_id', '=', vals[0]['user_id'])],
-            order='priority desc',
-            limit=1,
-        )
-        last_user_priority = last_user_record.priority
-        for val in vals:
+        vals_list = vals if isinstance(vals, list) else [vals]
+        last_user_priority = 0
+        if vals_list and vals_list[0].get('user_id'):
+            last_user_record = (
+                self.env['users.journals.priority.rel']
+                .sudo()
+                .search(
+                    [('user_id', '=', vals_list[0]['user_id'])],
+                    order='priority desc',
+                    limit=1,
+                )
+            )
+            last_user_priority = last_user_record.priority
+        for val in vals_list:
             last_user_priority += 1
             val.update({'priority': last_user_priority})
 

@@ -315,18 +315,19 @@ class AccountTax(models.Model):
         is_refund=False,
         handle_price_include=True,
         include_caba_tags=False,
-        fixed_multiplicator=1,
+        rounding_method=None,
+        fixed_multiplicator=1,  # retained for backward compat with legacy calls
     ):
         res = super(AccountTax, self).compute_all(
-            price_unit,
-            currency,
-            quantity,
-            product,
-            partner,
-            is_refund,
-            handle_price_include,
-            include_caba_tags,
-            fixed_multiplicator,
+            price_unit=price_unit,
+            currency=currency,
+            quantity=quantity,
+            product=product,
+            partner=partner,
+            is_refund=is_refund,
+            handle_price_include=handle_price_include,
+            include_caba_tags=include_caba_tags,
+            rounding_method=rounding_method,
         )
         res_tax_vals = res.get('taxes', [])
         for res_tax in res_tax_vals:

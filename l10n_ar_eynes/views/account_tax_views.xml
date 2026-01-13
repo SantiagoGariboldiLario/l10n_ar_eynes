@@ -54,7 +54,7 @@
                             invisible="apply_custom_code"
                             context="{'default_perception_tax_id': id}"
                         >
-                            <tree>
+                            <list>
                                 <field name="retention_tax_id" column_invisible="True" />
                                 <field name="reg_code" />
                                 <field name="concept_id_domain" column_invisible="True" />
@@ -68,7 +68,7 @@
                                 <field name="aliq_type" required="1" />
                                 <field name="percent" />
                                 <field name="scale_id" />
-                            </tree>
+                            </list>
                             <form>
                                 <group>
                                     <field name="retention_tax_id" invisible="True" />
@@ -151,7 +151,7 @@
                             invisible="apply_custom_code"
                             context="{'default_perception_tax_id': id}"
                         >
-                            <tree>
+                            <list>
                                 <field name="perception_tax_id" column_invisible="True" />
                                 <field name="reg_code" />
                                 <field name="concept_id_domain" column_invisible="True" />
@@ -163,7 +163,7 @@
                                 <field name="calculation_base" required="1" />
                                 <field name="tax_minimum" />
                                 <field name="percent" />
-                            </tree>
+                            </list>
                             <form>
                                 <group>
                                     <field name="perception_tax_id" invisible="True" />

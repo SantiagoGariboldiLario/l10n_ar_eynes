@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
+    <record id="account_mapping_fycl_loss_profit_tree" model="ir.ui.view">
+        <field name="name">account.mapping.fycl.loss.profit.tree</field>
+        <field name="model">account.mapping.fiscal.year.closing.loss.profit</field>
+        <field name="arch" type="xml">
+            <list editable="top">
+                <field name="source_account_type" widget="account_hierarchy_selection" />
+                <field name="destination_account_id" domain="[('company_ids', 'in', parent.company_id)]" />
+            </list>
+        </field>
+    </record>
+
+    <record id="account_mapping_fycl_closing_tree" model="ir.ui.view">
+        <field name="name">account.mapping.fycl.closing.tree</field>
+        <field name="model">account.mapping.fiscal.year.closing</field>
+        <field name="arch" type="xml">
+            <list editable="top">
+                <field name="source_account_type" widget="account_hierarchy_selection" />
+                <field name="destination_account_id" domain="[('company_ids', 'in', parent.company_id)]" />
+            </list>
+        </field>
+    </record>
+
     <record id="fiscal_year_closing_view_form" model="ir.ui.view">
         <field name="name">fiscal.year.closing.view.form</field>
         <field name="model">fiscal.year.closing</field>
@@ -106,19 +128,8 @@
                                         name="loss_profit_account_mapping_ids"
                                         nolabel="1"
                                         readonly="state in ('done', 'cancel')"
-                                    >
-                                        <tree editable="top">
-                                            <field
-                                                name="source_account_type"
-                                                widget="account_hierarchy_selection"
-                                            />
-                                            <field
-                                                name="destination_account_id"
-                                                required="True"
-                                                domain="[('company_id', '=', parent.company_id)]"
-                                            />
-                                        </tree>
-                                    </field>
+                                        views="[(ref('account_mapping_fycl_loss_profit_tree'), 'tree')]"
+                                    />
                                 </page>
                                 <page string="Closing">
                                     <group>
@@ -145,18 +156,8 @@
                                         name="closing_account_mapping_ids"
                                         nolabel="1"
                                         readonly="state in ('done', 'cancel')"
-                                    >
-                                        <tree editable="top">
-                                            <field
-                                                name="source_account_type"
-                                                widget="account_hierarchy_selection"
-                                            />
-                                            <field
-                                                name="destination_account_id"
-                                                domain="[('company_id', '=', parent.company_id)]"
-                                            />
-                                        </tree>
-                                    </field>
+                                        views="[(ref('account_mapping_fycl_closing_tree'), 'tree')]"
+                                    />
                                 </page>
                                 <page string="Opening">
                                     <group>
@@ -213,9 +214,9 @@
     <record id="fiscal_year_closing_view_tree" model="ir.ui.view">
         <field name="name">fiscal.year.closing.view.tree</field>
         <field name="model">fiscal.year.closing</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree
+            <list
                 decoration-danger="state == 'new'"
                 decoration-primary="state == 'draft'"
                 decoration-success="state == 'in_progress'"
@@ -225,7 +226,7 @@
                 <field name="closing_id" select="1" />
                 <field name="opening_id" select="1" />
                 <field name="state" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -234,7 +235,7 @@
         <field name="res_model">fiscal.year.closing</field>
         <field name="type">ir.actions.act_window</field>
         <field name="view_id" ref="fiscal_year_closing_view_form" />
-        <field name="view_mode">form,tree</field>
+        <field name="view_mode">form,list</field>
     </record>
 
     <record model="ir.actions.act_window" id="action_fiscal_year_closing_tree">
@@ -242,6 +243,6 @@
         <field name="res_model">fiscal.year.closing</field>
         <field name="type">ir.actions.act_window</field>
         <field name="view_id" ref="fiscal_year_closing_view_tree" />
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 </odoo>

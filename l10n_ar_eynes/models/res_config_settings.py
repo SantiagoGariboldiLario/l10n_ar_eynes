@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class ResConfigSettings(models.TransientModel):
@@ -11,14 +11,13 @@ class ResConfigSettings(models.TransientModel):
         default=False,
     )
     case_convertion = fields.Selection(
-        [
+        selection=[
             ('title', 'Titlecase'),
             ('lower', 'Lowercase'),
             ('upper', 'Uppercase'),
             ('capitalize', 'Capitalize'),
         ],
         help="Converts fetched text to specific case.",
-        required=True,
         default='title',
         config_parameter='l10n_ar_eynes.case_convertion',
     )
@@ -48,3 +47,29 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='l10n_ar_eynes.special_partner_required_fields',
         readonly=False,
     )
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        if 'case_convertion' in fields_list:
+            allowed = {opt[0] for opt in self._fields['case_convertion'].selection}
+            param_val = (
+                res.get('case_convertion')
+                or self.env['ir.config_parameter']
+                .sudo()
+                .get_param('l10n_ar_eynes.case_convertion')
+            )
+            if param_val not in allowed:
+                res['case_convertion'] = 'title'
+        return res
+
+    def get_values(self):
+        res = super().get_values()
+        allowed = {opt[0] for opt in self._fields['case_convertion'].selection}
+        param_val = res.get('case_convertion')
+        if param_val not in allowed:
+            res['case_convertion'] = 'title'
+            self.env['ir.config_parameter'].sudo().set_param(
+                'l10n_ar_eynes.case_convertion', 'title'
+            )
+        return res

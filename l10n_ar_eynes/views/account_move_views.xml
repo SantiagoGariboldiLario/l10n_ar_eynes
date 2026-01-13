@@ -197,7 +197,7 @@
             </xpath>
 
             <!-- MODIFICACION EN LAS LÍNEAS DE FACTURA POR IVA PRORRATEABLE -->
-            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='product_id']" position="after">
+            <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='product_id']" position="after">
                 <field name="required_fiscal_credit" column_invisible="True" />
                 <field
                     name="fiscal_credit"
@@ -263,7 +263,7 @@
                         invisible="inform_period"
                         readonly="state != 'draft'"
                     >
-                        <tree>
+                        <list>
                             <field name="partner_id" groups="base.group_user" />
                             <field name="date" />
                             <field name="denomination" />
@@ -272,7 +272,7 @@
                             <field name="amount_untaxed" sum="Untaxed Amount" />
                             <field name="amount_total" sum="Total Amount" />
                             <field name="state" />
-                        </tree>
+                        </list>
                     </field>
                 </div>
             </page>
@@ -290,7 +290,7 @@
                         context="{'default_partner_id': partner_id, 'default_company_id': company_id, 'default_date': date}"
                         readonly="state != 'draft'"
                     >
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="name" column_invisible="True" force_save="True" />
                             <field name="partner_id" column_invisible="True" force_save="True" />
                             <field name="company_id" column_invisible="True" force_save="True" />
@@ -314,7 +314,7 @@
                                 column_invisible="not parent.is_multi_currency"
                             />
                             <field name="state_id" />
-                        </tree>
+                        </list>
                     </field>
                 </page>
 
@@ -329,27 +329,27 @@
                         context="{'default_company_id': company_id}"
                         readonly="state != 'draft'"
                     >
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="name" column_invisible="True" force_save="True" />
                             <field name="company_id" column_invisible="True" force_save="True" />
                             <field name="tax_id_domain" column_invisible="True" />
                             <field name="tax_id" string="Internal tax" domain="tax_id_domain" />
                             <field name="base" />
                             <field name="amount" />
-                        </tree>
+                        </list>
                     </field>
                 </page>
 
                 <page string="FCRED" invisible="not is_FCE_invoice">
                     <field name="optional_ids">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="code" />
                             <field
                                 name="optional_id"
                                 options="{'no_create': True, 'no_create_edit':True, 'no_open':True}"
                             />
                             <field name="value" />
-                        </tree>
+                        </list>
                     </field>
                 </page>
 
@@ -372,23 +372,23 @@
                         class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small"
                     >Shipping Permissions</div>
                     <field name="shipping_perm_ids" nolabel="1">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="name" />
                             <field name="dst_country_id" />
-                        </tree>
+                        </list>
                     </field>
                 </page>
 
                 <page string="WS Requests" invisible="move_type not in ('out_invoice', 'out_refund')">
                     <sheet>
                         <field name="ws_request_ids" readonly="1">
-                            <tree>
+                            <list>
                                 <field name="request_id" />
                                 <field name="result" />
                                 <field name="errors" />
                                 <field name="observations" />
                                 <field name="events" />
-                            </tree>
+                            </list>
                         </field>
                         <button
                             name="delete_all_requests"
@@ -530,7 +530,7 @@
     <record id="account_invoice_action_debit_note" model="ir.actions.act_window">
         <field name="name">Customer Debit Notes</field>
         <field name="res_model">account.move</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field eval="False" name="view_id" />
         <field name="domain">[('move_type','=','out_invoice'), ('is_debit_note','=', True)]</field>
         <field name="context">{
@@ -550,7 +550,7 @@
     <record id="account_invoice_action_debit_note_supplier" model="ir.actions.act_window">
         <field name="name">Supplier Debit Notes</field>
         <field name="res_model">account.move</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field eval="False" name="view_id" />
         <field name="domain">[('move_type','=','in_invoice'), ('is_debit_note','=', True)]</field>
         <field name="context">{
@@ -570,11 +570,6 @@
     <record id="account.action_move_out_invoice_type" model="ir.actions.act_window">
         <field name="name">Customer Invoices</field>
         <field name="domain">[('move_type','=','out_invoice'), ('is_debit_note','=', False)]</field>
-    </record>
-
-    <record id="account.menu_action_move_out_receipt_type" model="ir.ui.menu">
-        <field name="name">Receipts</field>
-        <field name="active" eval="False" />
     </record>
 
     <record id="account.action_move_in_invoice_type" model="ir.actions.act_window">

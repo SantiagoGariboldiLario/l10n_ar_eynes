@@ -17,14 +17,14 @@
                         <page string="Request Details">
                             <separator string="Details" colspan="4" />
                             <field name="detail_ids" colspan="4" nolabel="1">
-                                <tree>
+                                <list>
                                     <field name="invoice_id" />
                                     <field name="cae" />
                                     <field name="result" />
                                     <field name="events" />
                                     <field name="observations" />
                                     <field name="errors" />
-                                </tree>
+                                </list>
                                 <form>
                                     <separator string="Main Information" colspan="4" />
                                     <group colspan="4" col="6">
@@ -63,13 +63,13 @@
     <record id="view_ws_request_tree" model="ir.ui.view">
         <field name="name">ws.request.tree</field>
         <field name="model">ws.request</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree create="false" delete="false">
+            <list create="false" delete="false">
                 <field name="id" />
                 <field name="date_request" />
                 <field name="nregs" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -77,6 +77,6 @@
         <field name="name">WS Request</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ws.request</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 </odoo>

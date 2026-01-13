@@ -3,16 +3,16 @@
     <record id="view_sicore_generated_files_tree" model="ir.ui.view">
         <field name="name">sicore.generated.files.tree</field>
         <field name="model">sicore.generated.files</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree create="false" edit="false">
+            <list create="false" edit="false">
                 <field name="code" />
                 <field name="period_start" />
                 <field name="period_end" />
                 <field name="presentation_date" />
                 <field name="attachment_id" />
                 <field name="company_id" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -43,17 +43,17 @@
     <record id="action_sicore_generated_files" model="ir.actions.act_window">
         <field name="name">Sicore generated files</field>
         <field name="res_model">sicore.generated.files</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <record id="view_sicore_config_tree" model="ir.ui.view">
         <field name="name">sicore.config.tree</field>
         <field name="model">sicore.config</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -70,10 +70,10 @@
                     <notebook>
                         <page string="Fiscal Positions">
                             <field name="fiscal_position_ids">
-                                <tree>
+                                <list>
                                     <field name="fiscal_position" />
                                     <field name="code" />
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
@@ -85,7 +85,7 @@
     <record id="action_sicore_config" model="ir.actions.act_window">
         <field name="name">Sicore Configuration</field>
         <field name="res_model">sicore.config</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <menuitem

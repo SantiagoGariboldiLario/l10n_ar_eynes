@@ -2286,7 +2286,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
     )
     company_id = fields.Many2one(
         string='Company',
-        related='account_id.company_id',
+        related='payment_order_id.company_id',
         store=True,
         readonly=True,
     )

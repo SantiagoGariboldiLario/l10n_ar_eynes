@@ -160,7 +160,7 @@
                     <page string="Payment Information" name="payment_information" groups="base.group_user">
                         <label for="payment_mode_line_ids" />
                         <field name="payment_mode_line_ids" readonly="state != 'draft'">
-                            <tree editable="bottom" decoration-muted="amount == 0">
+                            <list editable="bottom" decoration-muted="amount == 0">
                                 <field
                                         name="payment_mode_id"
                                         invisible="0"
@@ -190,7 +190,7 @@
                                         column_invisible="not parent.is_multi_currency"
                                         groups="base.group_multi_currency"
                                     />
-                            </tree>
+                            </list>
                         </field>
                         <label for="concept_line_ids" />
                         <field
@@ -198,7 +198,7 @@
                                 context="{'journal_id':journal_id}"
                                 readonly="state != 'draft'"
                             >
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="name" />
                                 <field name="account_id" />
                                 <field name="journal_id" domain="[('type', 'in', ['bank', 'cash'])]" />
@@ -207,7 +207,7 @@
                                         name="account_analytic_id"
                                         groups="analytic.group_analytic_accounting"
                                     />
-                            </tree>
+                            </list>
                         </field>
                         <group col="3">
                             <group>
@@ -231,7 +231,7 @@
                                 readonly="state != 'draft'"
                                 invisible="type == 'payment'"
                             >
-                            <tree>
+                            <list>
                                 <field name="number" />
                                 <field name="reception_date" />
                                 <field name="issue_date" />
@@ -240,7 +240,7 @@
                                 <field name="type" />
                                 <field name="amount" sum="Total" />
                                 <field name="third_party_check_state" />
-                            </tree>
+                            </list>
                             <form string="Third Checks">
                                 <field name="source_partner_id" invisible="1" />
                                 <group>
@@ -287,7 +287,7 @@
                                 readonly="state != 'draft'"
                                 invisible="type == 'receipt'"
                             >
-                            <tree>
+                            <list>
                                 <field name="issued_check_id" />
                                 <field name="type" />
                                 <field name="issue_date" />
@@ -301,7 +301,7 @@
                                         column_invisible="not parent.is_multi_currency"
                                         sum="Total Amount"
                                     />
-                            </tree>
+                            </list>
                             <form string="Issued Checks">
                                 <group>
                                     <group>
@@ -372,7 +372,7 @@
                             ]"
                                 context="{'tree_view_ref': 'l10n_ar_eynes.account_third_party_check_view_tree'}"
                             >
-                            <tree create="false">
+                            <list create="false">
                                 <field name="currency_id" column_invisible="1" />
                                 <field name="number" />
                                 <field name="source_partner_id" />
@@ -389,7 +389,7 @@
                                         sum="Total Amount"
                                     />
                                 <field name="third_party_check_state" column_invisible="1" />
-                            </tree>
+                            </list>
                         </field>
                         <!-- ********************************* FIN PAGOS ********************************* -->
                     </page>
@@ -398,7 +398,7 @@
                             <field name="move_id" />
                         </group>
                         <field name="move_line_ids" readonly="True">
-                            <tree>
+                            <list>
                                 <field name="move_id" />
                                 <field name="ref" />
                                 <field name="date" />
@@ -415,7 +415,7 @@
                                         column_invisible="not parent.is_multi_currency"
                                     />
                                 <field name="currency_id" groups="base.group_multi_currency" />
-                            </tree>
+                            </list>
                         </field>
                     </page>
                 </notebook>
@@ -431,7 +431,7 @@
     <record id="other_receipts_action" model="ir.actions.act_window">
         <field name="name">Other Receipts</field>
         <field name="res_model">account.payment.order</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field
             name="domain"
         >[('journal_id.type','=','receipt'), ('type','=','receipt'), ('other_payment', '=', True)]</field>
@@ -441,7 +441,7 @@
         <field
             name="view_ids"
             eval="[(5, 0, 0),
-        (0, 0, {'view_mode': 'tree', 'view_id': ref('account_payment_order_view_tree')}),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('account_payment_order_view_tree')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('other_payment_view_form')})]"
         />
         <field name="help" type="html">
@@ -456,7 +456,7 @@
     <record id="other_payments_action" model="ir.actions.act_window">
         <field name="name">Other Payments</field>
         <field name="res_model">account.payment.order</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field
             name="domain"
         >[('journal_id.type','=','payment'), ('type','=','payment'), ('other_payment', '=', True), ('employee_payment', '=', False)]</field>
@@ -466,7 +466,7 @@
         <field
             name="view_ids"
             eval="[(5, 0, 0),
-        (0, 0, {'view_mode': 'tree', 'view_id': ref('account_payment_order_view_tree')}),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('account_payment_order_view_tree')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('other_payment_view_form')})]"
         />
         <field name="help" type="html">

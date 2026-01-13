@@ -16,31 +16,31 @@
                 <field name="afip_code" />
                 <field name="local" />
             </xpath>
-            <page name="tax_mapping" position="after">
+            <xpath expr="//page[@name='account_mapping']" position="after">
                 <page name="applied_perceptions" string="Applied Perceptions">
                     <field name="perception_ids" nolabel="1">
-                        <tree>
+                        <list>
                             <field name="name" />
                             <field name="state_id" />
-                        </tree>
+                        </list>
                     </field>
                 </page>
                 <page name="applied_retentions" string="Applied Retentions">
                     <field name="retention_ids" nolabel="1">
-                        <tree>
+                        <list>
                             <field name="name" />
                             <field name="state_id" />
-                        </tree>
+                        </list>
                     </field>
                 </page>
                 <page name="applied_internal_taxes" string="Applied Internal Taxes">
                     <field name="internal_taxes_ids" nolabel="1">
-                        <tree>
+                        <list>
                             <field name="name" />
-                        </tree>
+                        </list>
                     </field>
                 </page>
-            </page>
+            </xpath>
         </field>
     </record>
 

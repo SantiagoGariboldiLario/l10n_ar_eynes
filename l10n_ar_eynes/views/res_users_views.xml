@@ -6,16 +6,16 @@
         <field name="model">res.users</field>
         <field name="inherit_id" ref="base.view_users_form" />
         <field name="arch" type="xml">
-            <xpath expr="//group[@name='preferences']" position="inside">
+            <xpath expr="//page[@name='preferences']/group/group" position="inside">
                 <field name="used_journals_domain" invisible="True" />
                 <field name="journal_rel_ids">
-                    <tree editable="bottom">
+                    <list editable="bottom">
                         <field name="priority" />
                         <field name="used_journals_domain" column_invisible="True" />
                         <field name="journal_id" domain="used_journals_domain" />
                         <field name="code" />
                         <field name="company_id" />
-                    </tree>
+                    </list>
                 </field>
             </xpath>
         </field>

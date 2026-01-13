@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class ResDocumentType(models.Model):
@@ -18,6 +18,7 @@ class ResDocumentType(models.Model):
         string='Verification required', required=True, default=False
     )
 
+    @api.model
     def get_website_sale_documents(self, mode='billing'):
         cuit = self.sudo().env.ref('l10n_ar_eynes.document_cuit').name
         cuil = self.sudo().env.ref('l10n_ar_eynes.document_cuil').name

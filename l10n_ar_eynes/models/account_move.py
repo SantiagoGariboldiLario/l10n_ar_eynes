@@ -416,31 +416,35 @@ class AccountMove(models.Model):
                 res['amount_total_cur'] += res['amount_no_taxed_cur']
                 res['amount_total_cur'] += res['amount_exempt_cur']
 
-                for subtotal in invoice.tax_totals['groups_by_subtotal']:
-                    for tax in invoice.tax_totals['groups_by_subtotal'][
-                        subtotal
-                    ]:
-                        group = self.env['account.tax.group'].browse(
-                            tax['tax_group_id']
-                        )
-                        if group.group_type == 'vat':
-                            res['amount_subtotal_cur'] = (
-                                tax['tax_group_base_amount']
-                                * invoice.currency_rate
+                if invoice.tax_totals and invoice.tax_totals.get('subtotals'):
+                    for subtotal in invoice.tax_totals['subtotals']:
+                        for tax in subtotal.get('tax_groups', []):
+                            group = self.env['account.tax.group'].browse(
+                                tax['id']
                             )
-                            res['amount_tax_cur'] = (
-                                tax['tax_group_amount'] * rate
+                            base_amount_currency = tax.get(
+                                'base_amount_currency', 0.0
                             )
-
-                            res['amount_total_cur'] += res['amount_tax_cur']
-                        elif group.group_type == 'perception':
-                            res['amount_perception_curr'] = (
-                                tax['tax_group_amount'] * rate
+                            tax_amount_currency = tax.get(
+                                'tax_amount_currency', 0.0
                             )
-
-                            res['amount_total_cur'] += res[
-                                'amount_perception_curr'
-                            ]
+                            if group.group_type == 'vat':
+                                res['amount_subtotal_cur'] = (
+                                    base_amount_currency * invoice.currency_rate
+                                )
+                                res['amount_tax_cur'] = (
+                                    tax_amount_currency * rate
+                                )
+                                res['amount_total_cur'] += res[
+                                    'amount_tax_cur'
+                                ]
+                            elif group.group_type == 'perception':
+                                res['amount_perception_curr'] = (
+                                    tax_amount_currency * rate
+                                )
+                                res['amount_total_cur'] += res[
+                                    'amount_perception_curr'
+                                ]
 
             invoice.update(res)
 
@@ -564,83 +568,104 @@ class AccountMove(models.Model):
         super(AccountMove, self)._compute_tax_totals()
         for move in self:
             if move.is_invoice(include_receipts=True):
-                if move.perception_ids or (
-                    move.is_purchase_document() and move.internal_taxes_ids
-                ):
-                    totals = move.tax_totals
-                    groups_by_subtotal = defaultdict(list)
-                    for subtotal in totals['groups_by_subtotal']:
-                        for tax in totals['groups_by_subtotal'][subtotal]:
-                            group = self.env['account.tax.group'].browse(
-                                tax['tax_group_id']
+                totals = move.tax_totals
+                if not totals:
+                    continue
+                currency = move.currency_id
+                company_currency = move.company_currency_id
+
+                for subtotal in totals.get('subtotals', []):
+                    for tax_group in subtotal.get('tax_groups', []):
+                        group = self.env['account.tax.group'].browse(
+                            tax_group['id']
+                        )
+                        if group.group_type not in ('perception', 'internals'):
+                            continue
+                        if group.group_type == 'internals' and not move.is_purchase_document():
+                            continue
+
+                        old_tax_amount_currency = tax_group.get(
+                            'tax_amount_currency', 0.0
+                        )
+                        old_tax_amount = tax_group.get('tax_amount', 0.0)
+                        old_base_amount_currency = tax_group.get(
+                            'base_amount_currency', 0.0
+                        )
+                        old_base_amount = tax_group.get('base_amount', 0.0)
+
+                        if group.group_type == 'perception':
+                            base_currency = sum(
+                                move.perception_ids.mapped('base')
                             )
-                            if group.group_type == 'perception':
-                                old_amount = tax['tax_group_amount']
-                                base = sum(move.perception_ids.mapped('base'))
-                                amount = sum(
-                                    move.perception_ids.mapped('amount')
-                                )
-                                tax['tax_group_base_amount'] = base
-                                tax['tax_group_amount'] = amount
-                                tax['formatted_tax_group_amount'] = formatLang(
-                                    self.env,
-                                    base,
-                                    currency_obj=move.currency_id,
-                                )
-                                tax[
-                                    'formatted_tax_group_base_amount'
-                                ] = formatLang(
-                                    self.env,
-                                    amount,
-                                    currency_obj=move.currency_id,
-                                )
-                                groups_by_subtotal[subtotal].append(tax)
-                                totals['amount_total'] = (
-                                    totals['amount_total'] - old_amount + amount
-                                )
-                                totals['formatted_amount_total'] = formatLang(
-                                    self.env,
-                                    totals['amount_total'],
-                                    currency_obj=move.currency_id,
-                                )
-                            elif (
-                                group.group_type == 'internals'
-                                and move.is_purchase_document()
-                            ):
-                                old_amount = tax['tax_group_amount']
-                                base = sum(
-                                    move.internal_taxes_ids.mapped('base')
-                                )
-                                amount = sum(
-                                    move.internal_taxes_ids.mapped('amount')
-                                )
-                                tax['tax_group_base_amount'] = base
-                                tax['tax_group_amount'] = amount
-                                tax['formatted_tax_group_amount'] = formatLang(
-                                    self.env,
-                                    base,
-                                    currency_obj=move.currency_id,
-                                )
-                                tax[
-                                    'formatted_tax_group_base_amount'
-                                ] = formatLang(
-                                    self.env,
-                                    amount,
-                                    currency_obj=move.currency_id,
-                                )
-                                groups_by_subtotal[subtotal].append(tax)
-                                totals['amount_total'] = (
-                                    totals['amount_total'] - old_amount + amount
-                                )
-                                totals['formatted_amount_total'] = formatLang(
-                                    self.env,
-                                    totals['amount_total'],
-                                    currency_obj=move.currency_id,
-                                )
-                            else:
-                                groups_by_subtotal[subtotal].append(tax)
-                    totals['groups_by_subtotal'] = groups_by_subtotal
-                    move.tax_totals = totals
+                            amount_currency = sum(
+                                move.perception_ids.mapped('amount')
+                            )
+                        else:
+                            base_currency = sum(
+                                move.internal_taxes_ids.mapped('base')
+                            )
+                            amount_currency = sum(
+                                move.internal_taxes_ids.mapped('amount')
+                            )
+
+                        base_amount = currency._convert(
+                            base_currency,
+                            company_currency,
+                            move.company_id,
+                            move.date or fields.Date.context_today(move),
+                        )
+                        tax_amount = currency._convert(
+                            amount_currency,
+                            company_currency,
+                            move.company_id,
+                            move.date or fields.Date.context_today(move),
+                        )
+
+                        tax_group.update(
+                            {
+                                'base_amount_currency': base_currency,
+                                'tax_amount_currency': amount_currency,
+                                'base_amount': base_amount,
+                                'tax_amount': tax_amount,
+                            }
+                        )
+
+                        delta_tax_currency = (
+                            amount_currency - old_tax_amount_currency
+                        )
+                        delta_tax = tax_amount - old_tax_amount
+                        delta_base_currency = (
+                            base_currency - old_base_amount_currency
+                        )
+                        delta_base = base_amount - old_base_amount
+
+                        subtotal['tax_amount_currency'] += delta_tax_currency
+                        subtotal['tax_amount'] += delta_tax
+                        subtotal['base_amount_currency'] += delta_base_currency
+                        subtotal['base_amount'] += delta_base
+
+                        totals['tax_amount_currency'] += delta_tax_currency
+                        totals['tax_amount'] += delta_tax
+                        totals['base_amount_currency'] += delta_base_currency
+                        totals['base_amount'] += delta_base
+
+                cash_rounding_base_amount_currency = totals.get(
+                    'cash_rounding_base_amount_currency', 0.0
+                )
+                cash_rounding_base_amount = totals.get(
+                    'cash_rounding_base_amount', 0.0
+                )
+                totals['total_amount_currency'] = (
+                    totals['base_amount_currency']
+                    + totals['tax_amount_currency']
+                    + cash_rounding_base_amount_currency
+                )
+                totals['total_amount'] = (
+                    totals['base_amount']
+                    + totals['tax_amount']
+                    + cash_rounding_base_amount
+                )
+                move.tax_totals = totals
 
     @api.onchange('invoice_date')
     def _onchange_currency_id(self):
@@ -1069,14 +1094,13 @@ class AccountMove(models.Model):
         if self.is_sale_document():
             amount = 0.0
             base = 0.0
-            for subtotal in self.tax_totals['groups_by_subtotal']:
-                for tax in self.tax_totals['groups_by_subtotal'][subtotal]:
-                    group = self.env['account.tax.group'].browse(
-                        tax['tax_group_id']
-                    )
+            groups = (self.tax_totals or {}).get('groups_by_subtotal') or {}
+            for taxes in groups.values():
+                for tax in taxes:
+                    group = self.env['account.tax.group'].browse(tax.get('tax_group_id'))
                     if group.group_type == 'internals':
-                        amount = tax['tax_group_amount']
-                        base = tax['tax_group_base_amount']
+                        amount = tax.get('tax_group_amount', 0.0) or amount
+                        base = tax.get('tax_group_base_amount', 0.0) or base
             if amount > 0:
                 # Se generan las líneas de impuestos internos y se asocian a la factura
                 internal_tax_group = self.env['account.tax.group'].search(

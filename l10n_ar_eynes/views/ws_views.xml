@@ -24,14 +24,14 @@
     <record id="view_ws_config_tree" model="ir.ui.view">
         <field name="name">ws.config.tree</field>
         <field name="model">ws.config</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name" />
                 <field name="company_id" />
                 <field name="cuit" />
                 <field name="url" />
-            </tree>
+            </list>
         </field>
     </record>
 </odoo>

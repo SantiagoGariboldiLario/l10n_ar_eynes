@@ -6,7 +6,7 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_only_form_view" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='uom_po_id']" position="after">
+            <xpath expr="//field[@name='categ_id']" position="after">
                 <field name="cot_nomenclature_id" />
                 <field name="area_id" />
             </xpath>
@@ -32,7 +32,7 @@
         <field name="model">product.product</field>
         <field name="inherit_id" ref="product.product_normal_form_view" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='uom_po_id']" position="after">
+            <xpath expr="//field[@name='categ_id']" position="after">
                 <field name="cot_nomenclature_id" />
             </xpath>
             <xpath expr="//notebook" position="inside">
@@ -57,7 +57,7 @@
         <field name="model">uom.uom</field>
         <field name="inherit_id" ref="uom.product_uom_form_view" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='uom_type']" position="after">
+            <xpath expr="//field[@name='name']" position="after">
                 <field name="cot_code" />
             </xpath>
         </field>
@@ -80,17 +80,17 @@
         <field name="name">cot.nomenclature.view.tree</field>
         <field name="model">cot.nomenclature</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="code" />
                 <field name="name" />
-            </tree>
+            </list>
         </field>
     </record>
 
     <record id="con_nomenclature_action" model="ir.actions.act_window">
         <field name="name">COT Nomenclature</field>
         <field name="res_model">cot.nomenclature</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <menuitem

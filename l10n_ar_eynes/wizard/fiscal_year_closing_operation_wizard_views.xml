@@ -25,6 +25,6 @@
         <field name="target">new</field>
         <field name="type">ir.actions.act_window</field>
         <field name="view_id" ref="fiscal_year_closing_operation_wizard_view"/>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 </odoo>

@@ -316,14 +316,14 @@ class AccountCheck(models.Model):
                 if self.env.context.get('is_expired', False):
                     check.write(
                         {
-                            'expired_date': fields.date.today(),
+                            'expired_date': fields.Date.today(),
                             'expired_move_id': move_id.id,
                         }
                     )
                 else:
                     check.write(
                         {
-                            'cancel_date': fields.date.today(),
+                            'cancel_date': fields.Date.today(),
                             'cancel_move_id': move_id.id,
                         }
                     )
@@ -412,7 +412,7 @@ class AccountCheck(models.Model):
             move_id._post()
             self.write(
                 {
-                    'expired_date': fields.date.today(),
+                    'expired_date': fields.Date.today(),
                     'expired_move_id': move_id.id,
                     'issued_check_state': 'expired',
                 }

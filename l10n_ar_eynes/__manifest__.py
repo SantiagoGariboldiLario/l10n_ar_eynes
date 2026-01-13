@@ -19,8 +19,8 @@
 # pylint: disable=manifest-required-author, missing-readme, pointless-statement
 
 {
-    'name': 'l10n Argentina',
-    'version': '17.0.4.4.5',
+    'name': 'l10n Argentina (Eynes v19)',
+    'version': '19.0.0.0.1',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
     'license': 'AGPL-3',
@@ -39,7 +39,7 @@
         'delivery',
         'hr',
         'mail',
-        # 'month_year_widget',  # To pick only month and year in date fields
+        'month_year_widget',  # To pick only month and year in date fields
         'multi_step_wizard',
         'om_fiscal_year',
         'popup_messages',
@@ -71,7 +71,7 @@
         "data/sifere_data.xml",
         "report/account_move_report.xml",
         "data/mail_template.xml",
-        "data/res_city_data.xml",
+        # "data/res_city_data.xml",
         'security/cot_security.xml',
         'security/delivery_cot_security.xml',
         'security/account_security.xml',
@@ -176,6 +176,7 @@
     'assets': {
         'web.assets_backend': [
             'l10n_ar_eynes/static/src/js/form_controller.js',
+            'l10n_ar_eynes/static/src/js/selection_field_patch.js',
         ],
     },
     'installable': True,

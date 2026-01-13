@@ -6,6 +6,12 @@
 import logging
 from datetime import datetime
 
+# pyafipws uses SafeConfigParser, removed in Python 3.12; patch it before import.
+import configparser
+
+if not hasattr(configparser, 'SafeConfigParser'):
+    configparser.SafeConfigParser = configparser.ConfigParser
+
 from pyafipws.ws_sr_padron import WSSrPadronA5
 from pysimplesoap.client import SoapFault
 

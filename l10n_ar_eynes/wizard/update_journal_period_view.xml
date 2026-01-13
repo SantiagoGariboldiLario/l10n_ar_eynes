@@ -17,11 +17,11 @@
                         invisible="selection_type != 'some'"
                         class="custom-control custom-checkbox"
                     >
-                        <tree create="false" delete="false" editable="bottom">
+                        <list create="false" delete="false" editable="bottom">
                             <field name="selected" />
                             <field name="journal_id" readonly="1" />
                             <field name="journal_due_date" readonly="1" />
-                        </tree>
+                        </list>
                     </field>
                     <footer>
                         <button
@@ -53,7 +53,7 @@
         id="update_journals_period_menu"
         name="Update journals period"
         action="update_journals_period_action"
-        parent="account.menu_finance_entries_actions"
+        parent="account.account_transactions_menu"
     />
 
 </odoo>

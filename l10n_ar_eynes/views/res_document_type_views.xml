@@ -26,13 +26,13 @@
         <field name="name">res.document.type.view.tree</field>
         <field name="model">res.document.type</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name" />
                 <field name="afip_code" />
                 <field name="verification_required" />
                 <field name="check_duplicated" />
                 <field name="dst_cuit" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -41,7 +41,7 @@
         <field name="name">Document Types</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">res.document.type</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="view_id" ref="res_document_type_view_tree" />
     </record>
 

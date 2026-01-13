@@ -82,8 +82,13 @@ class AccountMoveLine(models.Model):
         'quantity',
     )
     def _compute_all_tax(self):
-        # pylint: disable=missing-return
-        super(AccountMoveLine, self)._compute_all_tax()
+        # In v19 the base model no longer exposes _compute_all_tax/compute_all_tax;
+        # guard for backward compatibility and skip if the structure is absent.
+        compute_super = getattr(super(AccountMoveLine, self), "_compute_all_tax", None)
+        if compute_super:
+            compute_super()
+        if not hasattr(self, "compute_all_tax"):
+            return
 
         def _distribute_rounded_values(total_base, total_amount, lines):
             # Distribute rounded values and remainder to last line

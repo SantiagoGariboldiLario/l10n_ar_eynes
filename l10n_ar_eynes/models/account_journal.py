@@ -90,7 +90,7 @@ class AccountJournal(models.Model):
     image = fields.Binary("Image", attachment=True)
     image_filename = fields.Char()
     activity_start_date = fields.Date(
-        string="Activity Start Date", default=fields.date.today()
+        string="Activity Start Date", default=fields.Date.today()
     )
     warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse',
@@ -135,7 +135,7 @@ class AccountJournal(models.Model):
         help="Bank statements transactions will be posted on the suspense account until the final reconciliation "
         "allowing finding the right account.",
         string='Suspense Account',
-        domain=lambda self: "[('deprecated', '=', False), ('company_id', '=', company_id), \
+        domain=lambda self: "[('company_ids', 'parent_of', [company_id]), \
                              ('account_type', 'not in', ('asset_receivable', 'liability_payable'))]",
     )
 
@@ -383,20 +383,21 @@ class AccountJournal(models.Model):
 
     @api.constrains('fcred_is_fce_emitter', 'warehouse_id')
     def _check_no_more_than_one_pos_fce_per_company(self):
-        if self.fcred_is_fce_emitter:
-            pos = self.env['account.journal'].search_count(
-                [
-                    ('warehouse_id', '=', self.warehouse_id.id),
-                    ('fcred_is_fce_emitter', '=', True),
-                ]
-            )
-            if pos > 1:
-                raise ValidationError(
-                    _(
-                        "You are not allowed to have more than "
-                        "one PoS per shop with FCE Enabled."
-                    )
+        for journal in self:
+            if journal.fcred_is_fce_emitter:
+                pos = self.env['account.journal'].search_count(
+                    [
+                        ('warehouse_id', '=', journal.warehouse_id.id),
+                        ('fcred_is_fce_emitter', '=', True),
+                    ]
                 )
+                if pos > 1:
+                    raise ValidationError(
+                        _(
+                            "You are not allowed to have more than "
+                            "one PoS per shop with FCE Enabled."
+                        )
+                    )
 
     def get_pos_number(self):
         num = re.sub("[^0-9]", "", self.code)
@@ -406,17 +407,18 @@ class AccountJournal(models.Model):
 
     @api.model
     def create(self, vals):
-        res = super().create(vals)
-        if res and res.type in (
-            'sale',
-            'receipt',
-            'payment',
-            'retentions',
-            'perceptions',
-        ):
-            sequence_vals = res.create_pos_sequence()
-            res.write(sequence_vals)
-        return res
+        journals = super().create(vals)
+        for journal in journals:
+            if journal.type in (
+                'sale',
+                'receipt',
+                'payment',
+                'retentions',
+                'perceptions',
+            ):
+                sequence_vals = journal.create_pos_sequence()
+                journal.write(sequence_vals)
+        return journals
 
     def _default_outbound_payment_methods(self):
         res = super()._default_outbound_payment_methods()
@@ -485,3 +487,16 @@ class AccountJournal(models.Model):
             if invoice.is_FCE_invoice:
                 return self.fce_sequence_id
             return self.sequence_id
+
+    def _get_journal_dashboard_data_batched(self):
+        """Ensure custom journal types also provide drag/drop settings to the dashboard."""
+        dashboard_data = super()._get_journal_dashboard_data_batched()
+        fallback_drag_drop = {
+            'image': '/web/static/img/folder.svg',
+            'text': _('Drop to create journal entries.'),
+        }
+        for journal in self:
+            journal_data = dashboard_data.get(journal.id)
+            if journal_data is not None and 'drag_drop_settings' not in journal_data:
+                journal_data['drag_drop_settings'] = fallback_drag_drop
+        return dashboard_data

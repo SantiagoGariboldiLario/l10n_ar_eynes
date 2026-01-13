@@ -3,16 +3,16 @@
     <record id="libro_iva_generated_files_tree_view" model="ir.ui.view">
         <field name="name">Libro.iva.generated.files.tree</field>
         <field name="model">libroiva.generated.files</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree create="false" edit="false">
+            <list create="false" edit="false">
                 <field name="code" />
                 <field name="date_from" />
                 <field name="date_to" />
                 <field name="attachment_id" />
                 <field name="company_id" />
                 <field name="create_date" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -41,7 +41,7 @@
     <record id="action_libro_IVA_generated_files" model="ir.actions.act_window">
         <field name="name">Libro IVA generated files</field>
         <field name="res_model">libroiva.generated.files</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
 </odoo>

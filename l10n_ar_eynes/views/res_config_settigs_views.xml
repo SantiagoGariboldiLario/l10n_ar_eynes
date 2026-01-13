@@ -29,24 +29,10 @@
                         <field name="group_check_cot" class="oe_inline" />
                     </group>
                 </group>
-                <div id="afip_case_text">
-                    <div class='row mt16 o_settings_container afip_case_text' name="afip_case_text">
-                        <div class="col-12 col-lg-6 o_setting_box" id="afip_case_text">
-
-                            <div class='o_setting_right_pane'>
-                                <div class="o_form_label">
-                                    AFIP Text Case
-                                </div>
-                                <div class="text-muted">
-                                    Select the defaul text case to use when fetch values from PADRON
-                                </div>
-                                <div class="o_setting_left_pane">
-                                    <field name="case_convertion" class="oe_inline" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- <setting id="afip_case_text" string="AFIP Text Case"
+                    help="Default text case for data fetched from PADRON.">
+                    <field name="case_convertion" class="oe_inline"/>
+                </setting> -->
             </xpath>
             <xpath expr="//block[@name='contacts_setting_container']" position="inside">
                 <div class="col-12 col-lg-6 o_setting_box" id="partner_required_fields">

@@ -23,13 +23,13 @@
         <field name="name">res.voucher.type.view.tree</field>
         <field name="model">res.voucher.type</field>
         <field name="arch" type="xml">
-            <tree default_order="afip_code">
+            <list default_order="afip_code">
                 <field name="name" />
                 <field name="afip_code" />
                 <field name="voucher_model" />
                 <field name="doc_type" />
                 <field name="denomination" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -38,7 +38,7 @@
         <field name="name">Voucher Types</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">res.voucher.type</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="view_id" ref="res_voucher_type_view_tree" />
     </record>
 
@@ -46,7 +46,7 @@
         <field name="name">Contacts</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">res.partner</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <menuitem

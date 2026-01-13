@@ -57,7 +57,7 @@ class ResCompany(models.Model):
     )
     num = fields.Char(
         string="Number",
-        related="partner_id.floor",
+        related="partner_id.num",
         size=5,
         store=True,
     )

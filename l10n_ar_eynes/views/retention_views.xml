@@ -28,11 +28,11 @@
                     <notebook>
                         <page string="Accounts Associated" name="accounts">
                             <field name="account_ids">
-                                <tree>
+                                <list>
                                     <field name="name" />
                                     <field name="code" />
                                     <field name="account_type" />
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
@@ -46,21 +46,21 @@
     <record id="view_retention_concept_tree" model="ir.ui.view">
         <field name="name">retention.concept.tree</field>
         <field name="model">retention.concept</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="code" />
                 <field name="type" />
                 <field name="name" />
                 <field name="no_subject" />
-            </tree>
+            </list>
         </field>
     </record>
 
     <record model="ir.actions.act_window" id="action_retention_concept">
         <field name="name">Concepts</field>
         <field name="res_model">retention.concept</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <!-- ************************ -->
@@ -99,21 +99,21 @@
     <record id="view_retention_activity_tree" model="ir.ui.view">
         <field name="name">retention.activity.tree</field>
         <field name="model">retention.activity</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree editable="bottom">
+            <list editable="bottom">
                 <field name="code" />
                 <field name="type" />
                 <field name="name" />
                 <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" />
-            </tree>
+            </list>
         </field>
     </record>
 
     <record model="ir.actions.act_window" id="action_retention_activity">
         <field name="name">Activities</field>
         <field name="res_model">retention.activity</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <!-- ************************ -->
@@ -132,11 +132,11 @@
                     <notebook>
                         <page string="Lines" name="lines">
                             <field name="line_ids" colspan="4" nolabel="1">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="name" />
                                     <field name="limit" />
                                     <field name="percent" />
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
@@ -148,18 +148,18 @@
     <record id="view_retention_scale_tree" model="ir.ui.view">
         <field name="name">retention.scale.tree</field>
         <field name="model">retention.scale</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name" />
-            </tree>
+            </list>
         </field>
     </record>
 
     <record model="ir.actions.act_window" id="action_retention_scale">
         <field name="name">Retention Scales</field>
         <field name="res_model">retention.scale</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <!-- ************************ -->
@@ -170,7 +170,7 @@
         <field name="name">account.payment.order.retention.line.view.tree</field>
         <field name="model">account.payment.order.retention.line</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="date" />
                 <field name="date_applied" />
                 <field name="reg_code" />
@@ -188,21 +188,21 @@
                 <field name="company_id" groups="base.group_multi_company" />
                 <field name="account_id" invisible="1" />
                 <field name="payment_order_id" invisible="1" />
-            </tree>
+            </list>
         </field>
     </record>
 
     <record id="supported_retentions_action" model="ir.actions.act_window">
         <field name="name">Supported Retentions</field>
         <field name="res_model">account.payment.order.retention.line</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">list</field>
         <field name="domain">[('retention_id.type_tax_use', '=', 'sale')]</field>
     </record>
 
     <record id="applied_retentions_action" model="ir.actions.act_window">
         <field name="name">Applied Retentions</field>
         <field name="res_model">account.payment.order.retention.line</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">list</field>
         <field name="domain">[('retention_id.type_tax_use', '=', 'purchase')]</field>
     </record>
 

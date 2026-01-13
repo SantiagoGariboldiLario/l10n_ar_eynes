@@ -31,9 +31,9 @@
     <record id="account_check_view_tree_config" model="ir.ui.view">
         <field name="name">account.check.config.view.tree</field>
         <field name="model">account.check.config</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="company_id" />
                 <field name="account_id" />
                 <field name="deferred_account_id" />
@@ -42,7 +42,7 @@
                 <field name="expired_issued_checks_account_id" />
                 <field name="rejected_issued_checks_journal_id" />
                 <field name="deferred_journal_id" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -50,7 +50,7 @@
     <record id="account_check_config_action" model="ir.actions.act_window">
         <field name="name">Check Config</field>
         <field name="res_model">account.check.config</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <!-- ISSUED CHECK FILTERS AND GROUPS -->
@@ -216,7 +216,7 @@
         <field name="name">account.issued.check.view.tree</field>
         <field name="model">account.check</field>
         <field name="arch" type="xml">
-            <tree create="false">
+            <list create="false">
                 <field name="number" />
                 <field name="checkbook_id" />
                 <field name="bank_id" />
@@ -230,7 +230,7 @@
                 <field name="journal_bank_id" />
                 <field name="issued_check_state" string="State" />
                 <field name="company_id" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -265,13 +265,13 @@
     <record id="account_issued_check_action" model="ir.actions.act_window">
         <field name="name">Issued Checks</field>
         <field name="res_model">account.check</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="domain">[('internal_type', '=', 'issued')]</field>
         <field name="search_view_id" ref="issued_checks_filter" />
         <field
             name="view_ids"
             eval="[(5, 0, 0),
-        (0, 0, {'view_mode': 'tree', 'view_id': ref('account_issued_check_view_tree')}),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('account_issued_check_view_tree')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('account_issued_check_view_form')})]"
         />
     </record>
@@ -529,7 +529,7 @@
         <field name="name">account.third.party.check.view.tree</field>
         <field name="model">account.check</field>
         <field name="arch" type="xml">
-            <tree create="false" delete="false">
+            <list create="false" delete="false">
                 <field name="number" />
                 <field name="checkbook_format" />
                 <field name="type" />
@@ -545,7 +545,7 @@
                 <field name="amount" />
                 <field name="third_party_check_state" string="State" />
                 <field name="company_id" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -608,13 +608,13 @@
     <record id="account_third_party_check_action" model="ir.actions.act_window">
         <field name="name">Third Party Checks</field>
         <field name="res_model">account.check</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="domain">[('internal_type', '=', 'third_party')]</field>
         <field name="search_view_id" ref="third_party_checks_filter" />
         <field
             name="view_ids"
             eval="[(5, 0, 0),
-        (0, 0, {'view_mode': 'tree', 'view_id': ref('account_third_party_check_view_tree')}),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('account_third_party_check_view_tree')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('account_third_party_check_view_form')})]"
         />
     </record>

@@ -26,11 +26,11 @@
                 </group>
                 <separator string="Accounts Associated" />
                 <field name="account_ids">
-                    <tree>
+                    <list>
                         <field name="name" />
                         <field name="code" />
                         <field name="account_type" />
-                    </tree>
+                    </list>
                 </field>
                 <separator string="Notes" />
                 <field name="notes" colspan="4" nolabel="1" />
@@ -41,14 +41,14 @@
     <record id="view_perception_concept_tree" model="ir.ui.view">
         <field name="name">perception.concept.tree</field>
         <field name="model">perception.concept</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="code" />
                 <field name="type" />
                 <field name="name" />
                 <field name="no_subject" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -56,7 +56,7 @@
         <field name="name">Concepts</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">perception.concept</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <!-- ************************ -->
@@ -81,14 +81,14 @@
     <record id="view_perception_activity_tree" model="ir.ui.view">
         <field name="name">perception.activity.tree</field>
         <field name="model">perception.activity</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree editable="bottom">
+            <list editable="bottom">
                 <field name="code" />
                 <field name="type" />
                 <field name="name" />
                 <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -96,7 +96,7 @@
         <field name="name">Activities</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">perception.activity</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <!-- ************************ -->
@@ -105,9 +105,9 @@
     <record id="perception_tax_line_view_tree" model="ir.ui.view">
         <field name="name">perception.tax.line.tree</field>
         <field name="model">perception.tax.line</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="reg_code" />
                 <field name="concept_id" />
                 <field name="date" />
@@ -119,21 +119,21 @@
                 <field name="base" sum="Base Total" />
                 <field name="state_id" />
                 <field name="company_id" />
-            </tree>
+            </list>
         </field>
     </record>
 
     <record id="supported_perceptions_action" model="ir.actions.act_window">
         <field name="name">Supported perceptions</field>
         <field name="res_model">perception.tax.line</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">list</field>
         <field name="domain">[('perception_id.type_tax_use', '=', 'purchase')]</field>
     </record>
 
     <record id="applied_perceptions_action" model="ir.actions.act_window">
         <field name="name">Applied perceptions</field>
         <field name="res_model">perception.tax.line</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">list</field>
         <field name="domain">[('perception_id.type_tax_use', '=', 'sale')]</field>
     </record>
 </odoo>

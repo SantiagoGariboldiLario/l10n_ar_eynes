@@ -5,13 +5,13 @@
         <field name="name">wsaa.certificate.request.tree</field>
         <field name="model">wsaa.certificate.request</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name" />
                 <field name="partner_id" />
                 <field name="date" />
                 <field name="due_date" />
                 <field name="state" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -203,7 +203,7 @@
         <field name="name">Certificate Request</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">wsaa.certificate.request</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
 </odoo>

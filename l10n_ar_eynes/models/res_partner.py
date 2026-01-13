@@ -375,20 +375,25 @@ class ResPartner(models.Model):
 
     @api.model
     def create(self, vals):
-        vals = self._parse_vat_string(vals)
-        if vals.get('gross_income_ids'):
-            for rec in vals.get('gross_income_ids'):
-                if not rec[-1].get('type_taxpayer'):
-                    raise ValidationError(
-                        _(
-                            "You must complete 'Type of taxpayer' field on Gross income configuration."
+        vals_list = vals if isinstance(vals, list) else [vals]
+        for val in vals_list:
+            self._parse_vat_string(val)
+            gross_income_ids = val.get('gross_income_ids') or []
+            for rec in gross_income_ids:
+                payload = rec[-1]
+                if payload and not isinstance(payload, int):
+                    if not payload.get('type_taxpayer'):
+                        raise ValidationError(
+                            _(
+                                "You must complete 'Type of taxpayer' field on Gross income configuration."
+                            )
                         )
-                    )
-        res = super(ResPartner, self).create(vals)
-        res._set_multicompany_account_fiscal_position(
-            vals.get('property_account_position_id', False)
-        )
-        return res
+        partners = super(ResPartner, self).create(vals_list)
+        for partner, val in zip(partners, vals_list):
+            partner._set_multicompany_account_fiscal_position(
+                val.get('property_account_position_id', False)
+            )
+        return partners
 
     def _parse_vat_string(self, vals):
         vat = vals.get('vat')

@@ -34,10 +34,10 @@ class AccountChartTemplate(models.AbstractModel):
         }
         return mapping
 
-    def _load(self, template_code, company, install_demo):
+    def _load(self, template_code, company, install_demo=False, force_create=False):
         template_code = 'ar_eynes'
         return super(AccountChartTemplate, self)._load(
-            template_code, company, install_demo
+            template_code, company, install_demo, force_create
         )
 
     def _setup_utility_bank_accounts(

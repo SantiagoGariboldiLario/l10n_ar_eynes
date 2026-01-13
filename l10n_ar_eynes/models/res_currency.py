@@ -18,12 +18,16 @@ class ResCurrency(models.Model):
     afip_code = fields.Char(string="AFIP Code", size=4)
     preciated = fields.Boolean('Currency preciated', default=False)
 
-    def _get_conversion_rate(self, from_currency, to_currency, company, date):
+    def _get_conversion_rate(
+        self, from_currency, to_currency, company=None, date=None
+    ):
         """
         Estas modificaciones se realizaron para que funcione el wizard account_change_currency
         """
         currency1, rate1 = self._context.get('currency1', (False, False))
         currency2, rate2 = self._context.get('currency2', (False, False))
+        company = company or self.env.company
+        date = date or fields.Date.context_today(self)
 
         if currency1 and rate1 and currency2 and rate2:
             if currency1.preciated:
@@ -35,10 +39,9 @@ class ResCurrency(models.Model):
             elif currency2 == from_currency and currency1 == to_currency:
                 return rate1 / rate2
 
-        res = super(ResCurrency, self)._get_conversion_rate(
-            from_currency, to_currency, company, date
+        return super(ResCurrency, self)._get_conversion_rate(
+            from_currency, to_currency, company=company, date=date
         )
-        return res
 
     def get_currency_rate(self, company, date):
         self.ensure_one()

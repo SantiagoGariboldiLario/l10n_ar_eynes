@@ -45,7 +45,7 @@
                     <notebook>
                         <page string="Errors" invisible="error_ids == []">
                             <field name="error_ids">
-                                <tree decoration-danger="type=='error'">
+                                <list decoration-danger="type=='error'">
                                     <button
                                         type="object"
                                         name="goto"
@@ -56,15 +56,15 @@
                                     <field name="resource_name" />
                                     <field name="error" />
                                     <field name="type" />
-                                </tree>
+                                </list>
                             </field>
                         </page>
                         <page string="Files">
                             <field name="attachment_ids">
-                                <tree>
+                                <list>
                                     <field name="name" />
                                     <field name="write_date" />
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
@@ -78,14 +78,14 @@
         <field name="name">report.files.tree</field>
         <field name="model">report.files</field>
         <field name="arch" type="xml">
-            <tree create="false">
+            <list create="false">
                 <field name="name" />
                 <field name="exporter_id" />
                 <field name="date_start" />
                 <field name="date_stop" />
                 <field name="state" />
                 <field name="company_id" />
-            </tree>
+            </list>
         </field>
     </record>
 

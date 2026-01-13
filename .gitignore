@@ -1,3 +1,9 @@
+# Dev temp
+/base_odoo17/
+/base_odoo19/
+/l10n_ar_eynes_v17/
+/llm/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

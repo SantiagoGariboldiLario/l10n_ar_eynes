@@ -35,7 +35,7 @@
                                     readonly="1"
                                 />
                                 <field name="issued_check_ids">
-                                    <tree name="issued_checks" create="false" edit="false" delete="false">
+                                    <list name="issued_checks" create="false" edit="false" delete="false">
                                         <field name="number" />
                                         <field name="receiving_partner_id" />
                                         <field name="issue_date" />
@@ -45,7 +45,7 @@
                                         <field name="payment_order_id" />
                                         <field name="issued_check_state" />
                                         <field name="amount" sum="Total Amount" />
-                                    </tree>
+                                    </list>
                                 </field>
                             </group>
                         </page>
@@ -59,21 +59,21 @@
         <field name="name">account.checkbook.view.tree</field>
         <field name="model">account.payment.method.line</field>
         <field name="arch" type="xml">
-            <tree create="false" edit="false">
+            <list create="false" edit="false">
                 <field name="number" />
                 <field name="journal_id" />
                 <field name="bank_account_id" />
                 <field name="bank_id" />
                 <field name="format" />
                 <field name="account_check_id" />
-            </tree>
+            </list>
         </field>
     </record>
 
     <record id="account_checkbook_action" model="ir.actions.act_window">
         <field name="name">Checkbooks</field>
         <field name="res_model">account.payment.method.line</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="domain">[('code', '=', 'checks')]</field>
         <field name="view_id" ref="account_checkbook_view_tree" />
     </record>

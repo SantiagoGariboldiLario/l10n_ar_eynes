@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <template id="report_invoice_document" inherit_id="account.report_invoice_document">
-        <xpath expr="//div[hasclass('page')]/h2/span[last()]" position="before">
-            <span t-field="o.denomination" />
+        <xpath expr="//t[@t-set='layout_document_title']" position="inside">
+            <span t-if="o.denomination" class="ms-2" t-field="o.denomination" />
         </xpath>
         <xpath expr="//div[hasclass('page')]" position="after">
             <table

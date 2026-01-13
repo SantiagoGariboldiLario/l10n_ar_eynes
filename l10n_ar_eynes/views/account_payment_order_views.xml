@@ -172,7 +172,7 @@
                         >
                             <label for="payment_mode_line_ids" />
                             <field name="payment_mode_line_ids" readonly="state != 'draft'">
-                                <tree editable="bottom" decoration-muted="amount == 0">
+                                <list editable="bottom" decoration-muted="amount == 0">
                                     <field
                                         name="payment_mode_id"
                                         required="True"
@@ -205,7 +205,7 @@
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
                                     />
-                                </tree>
+                                </list>
                             </field>
                             <div class="o-form-buttonbox d-flex w-md-auto o_not_full">
                                 <button
@@ -229,7 +229,7 @@
                                 context="{'journal_id':journal_id, 'type':type, 'partner_id':partner_id}"
                                 readonly="state != 'draft'"
                             >
-                                <tree
+                                <list
                                     editable="bottom"
                                     decoration-muted="amount == 0"
                                     decoration-success="amount == amount_unreconciled"
@@ -317,7 +317,7 @@
                                         groups="base.group_multi_currency"
                                     />
                                     <field string="Full" name="reconcile" class="reconcile_bullseye" />
-                                </tree>
+                                </list>
                             </field>
                             <div class="o-form-buttonbox d-flex w-md-auto o_not_full">
                                 <button
@@ -336,7 +336,7 @@
                                 readonly="state != 'draft'"
                                 context="{'journal_id':journal_id, 'partner_id':partner_id}"
                             >
-                                <tree
+                                <list
                                     editable="bottom"
                                     decoration-muted="amount == 0"
                                     decoration-success="amount == amount_unreconciled"
@@ -426,7 +426,7 @@
                                         groups="base.group_multi_currency"
                                     />
                                     <field string="Full" name="reconcile" class="reconcile_bullseye" />
-                                </tree>
+                                </list>
                             </field>
                             <group col="3">
                                 <group string="Notes">
@@ -449,7 +449,7 @@
                                 context="{'default_internal_type': 'third_party'}"
                                 readonly="state != 'draft'"
                             >
-                                <tree>
+                                <list>
                                     <field name="number" />
                                     <field name="reception_date" />
                                     <field name="issue_date" />
@@ -458,7 +458,7 @@
                                     <field name="type" />
                                     <field name="amount" sum="Total" />
                                     <field name="third_party_check_state" />
-                                </tree>
+                                </list>
                                 <form string="Third Checks">
                                     <field name="source_partner_id" invisible="1" />
                                     <field name="third_party_check_state" invisible="1" />
@@ -503,7 +503,7 @@
                                 <field name="move_id" />
                             </group>
                             <field name="move_line_ids" readonly="1">
-                                <tree>
+                                <list>
                                     <field name="move_id" />
                                     <field name="ref" />
                                     <field name="date" />
@@ -520,7 +520,7 @@
                                         column_invisible="not parent.is_multi_currency"
                                     />
                                     <field name="currency_id" groups="base.group_multi_currency" />
-                                </tree>
+                                </list>
                             </field>
                         </page>
 
@@ -531,7 +531,7 @@
                                 nolabel="1"
                                 readonly="state != 'draft'"
                             >
-                                <tree>
+                                <list>
                                     <field name="currency_id" column_invisible="1" />
                                     <field name="name" column_invisible="1" />
                                     <field name="state_id" column_invisible="1" />
@@ -566,7 +566,7 @@
                                         sum="Amount currency"
                                     />
                                     <field name="account_id" column_invisible="1" />
-                                </tree>
+                                </list>
                                 <form>
                                     <group>
                                         <group string="Information" name="info">
@@ -622,7 +622,7 @@
         <field name="name">account.payment.order.view.tree</field>
         <field name="model">account.payment.order</field>
         <field name="arch" type="xml">
-            <tree decoration-info="state == 'draft'" decoration-muted="state  == 'cancel'">
+            <list decoration-info="state == 'draft'" decoration-muted="state  == 'cancel'">
                 <field name="date" />
                 <field name="number" />
                 <field name="reference" />
@@ -630,14 +630,14 @@
                 <field name="currency_id" />
                 <field name="amount" />
                 <field name="state" />
-            </tree>
+            </list>
         </field>
     </record>
 
     <record id="account_customer_payment_order_action" model="ir.actions.act_window">
         <field name="name">Account customer payment order</field>
         <field name="res_model">account.payment.order</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="context">{
             'default_type' : 'receipt',
             'default_disable_retentions': True}</field>
@@ -645,7 +645,7 @@
         <field
             name="view_ids"
             eval="[(5, 0, 0),
-        (0, 0, {'view_mode': 'tree', 'view_id': ref('account_payment_order_view_tree')}),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('account_payment_order_view_tree')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('account_customer_payment_order_view_form')})]"
         />
     </record>
@@ -829,7 +829,7 @@
                         <page string="Payment Information" name="payment_information">
                             <label for="payment_mode_line_ids" />
                             <field name="payment_mode_line_ids" readonly="state != 'draft'">
-                                <tree editable="bottom" decoration-muted="amount == 0">
+                                <list editable="bottom" decoration-muted="amount == 0">
                                     <field
                                         name="payment_mode_id"
                                         required="True"
@@ -863,7 +863,7 @@
                                         widget="monetary"
                                         options="{'currency_field': 'currency_id'}"
                                     />
-                                </tree>
+                                </list>
                             </field>
                             <field name="invoice_ids" widget="many2many_tags" invisible="1" />
                             <div class="o-form-buttonbox d-flex w-md-auto o_not_full">
@@ -887,7 +887,7 @@
                                 context="{'journal_id':journal_id,
                                 'type':type, 'partner_id':partner_id, 'account_id':account_id}"
                             >
-                                <tree
+                                <list
                                     editable="bottom"
                                     decoration-muted="amount == 0"
                                     decoration-success="amount == amount_unreconciled"
@@ -976,7 +976,7 @@
                                         groups="base.group_multi_currency"
                                     />
                                     <field string="Full" name="reconcile" class="reconcile_bullseye" />
-                                </tree>
+                                </list>
                             </field>
                             <div class="o-form-buttonbox d-flex w-md-auto o_not_full">
                                 <button
@@ -995,7 +995,7 @@
                                 context="{'journal_id':journal_id, 'partner_id':partner_id}"
                                 readonly="state != 'draft'"
                             >
-                                <tree
+                                <list
                                     editable="bottom"
                                     decoration-muted="amount == 0"
                                     decoration-success="amount == amount_unreconciled"
@@ -1089,7 +1089,7 @@
                                         groups="base.group_multi_currency"
                                     />
                                     <field string="Full" name="reconcile" class="reconcile_bullseye" />
-                                </tree>
+                                </list>
                             </field>
                             <group>
                                 <group string="Internal Notes">
@@ -1106,7 +1106,7 @@
                                 colspan="4"
                                 readonly="state != 'draft'"
                             >
-                                <tree>
+                                <list>
                                     <field name="issued_check_id" />
                                     <field name="type" />
                                     <field name="issue_date" />
@@ -1120,7 +1120,7 @@
                                         column_invisible="not parent.is_multi_currency"
                                         sum="Total Amount"
                                     />
-                                </tree>
+                                </list>
                                 <form string="Issued Checks">
                                     <group>
                                         <group>
@@ -1216,7 +1216,7 @@
                                 ]"
                                 context="{'tree_view_ref': 'l10n_ar_eynes.account_third_party_check_view_tree'}"
                             >
-                                <tree>
+                                <list>
                                     <field name="currency_id" column_invisible="1" />
                                     <field name="number" />
                                     <field name="source_partner_id" />
@@ -1233,7 +1233,7 @@
                                         sum="Total Amount"
                                     />
                                     <field name="third_party_check_state" column_invisible="1" />
-                                </tree>
+                                </list>
                             </field>
                         </page>
 
@@ -1244,7 +1244,7 @@
                                 nolabel="1"
                                 readonly="not disable_retentions or state != 'draft'"
                             >
-                                <tree>
+                                <list>
                                     <field name="currency_id" column_invisible="1" />
                                     <field name="name" column_invisible="1" />
                                     <field name="state_id" column_invisible="1" />
@@ -1279,7 +1279,7 @@
                                         sum="Amount currency"
                                     />
                                     <field name="account_id" column_invisible="1" />
-                                </tree>
+                                </list>
                                 <form>
                                     <group>
                                         <group string="Information" name="info">
@@ -1320,13 +1320,13 @@
                                         invisible="retention_type != 'profit' or parent.disable_retentions"
                                     >
                                         <field name="retention_move_line_ids">
-                                            <tree>
+                                            <list>
                                                 <field name="payment_order_line_id" column_invisible="1" />
                                                 <field name="payment_order_reference" string="OP reference" />
                                                 <field name="move_name" string="Name" force_save="1" />
                                                 <field name="move_type" string="Type" force_save="1" />
                                                 <field name="total_without_vat" sum="Total" force_save="1" />
-                                            </tree>
+                                            </list>
                                         </field>
                                         <field name="retention_move_lines_total" />
                                         <group name="concept" string="Concept">
@@ -1346,7 +1346,7 @@
                                 <field name="move_id" />
                             </group>
                             <field name="move_line_ids" readonly="1">
-                                <tree>
+                                <list>
                                     <field name="move_id" />
                                     <field name="ref" />
                                     <field name="date" />
@@ -1364,7 +1364,7 @@
                                         groups="base.group_multi_currency"
                                     />
                                     <field name="currency_id" groups="base.group_multi_currency" />
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
@@ -1382,12 +1382,12 @@
         <field name="name">Account supplier payment order</field>
         <field name="res_model">account.payment.order</field>
         <field name="context">{'default_type' : 'payment'}</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="domain">[('journal_id.type', '=', 'payment'), ('type','=','payment')]</field>
         <field
             name="view_ids"
             eval="[(5, 0, 0),
-        (0, 0, {'view_mode': 'tree', 'view_id': ref('account_payment_order_view_tree')}),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('account_payment_order_view_tree')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('account_supplier_payment_order_view_form')})]"
         />
     </record>

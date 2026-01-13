@@ -14,7 +14,7 @@
                 <field name="door" placeholder="Door" readonly="False" />
                 <field name="apartment" placeholder="Apartment" readonly="False" />
             </field>
-            <xpath expr="//field[@name='sequence']" position="after">
+            <xpath expr="//field[@name='currency_id']" position="after">
                 <field name="cbu" />
                 <field name="fcred_cbu_emitter" />
                 <field name="fcred_minimum_amount" />

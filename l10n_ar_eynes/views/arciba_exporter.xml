@@ -26,22 +26,22 @@
     <record id="view_arciba_generated_files_tree" model="ir.ui.view">
         <field name="name">arciba.generated.files.tree</field>
         <field name="model">arciba.generated.files</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree create="false" edit="false">
+            <list create="false" edit="false">
                 <field name="code" />
                 <field name="date_from" />
                 <field name="date_to" />
                 <field name="attachment_id" />
                 <field name="company_id" />
-            </tree>
+            </list>
         </field>
     </record>
 
     <record id="action_arciba_generated_files" model="ir.actions.act_window">
         <field name="name">ArciBA generated files</field>
         <field name="res_model">arciba.generated.files</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
 </odoo>
