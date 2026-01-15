@@ -503,22 +503,67 @@ class AccountJournal(models.Model):
 
     @api.depends('type', 'code')
     def _compute_name_placeholder(self):
-        custom_types = ['perceptions', 'retentions']
-        custom_journals = self.filtered(lambda j: j.type in custom_types)
+        custom_type_names = {
+            'receipt': _("Receipt"),
+            'payment': _("Payment"),
+            'third_party_checks': _("Third Party Checks"),
+            'rejected_issued_checks': _("Rejected Issued Checks"),
+            'retentions': _("Retentions"),
+            'perceptions': _("Perceptions"),
+        }
+        custom_journals = self.filtered(lambda j: j.type in custom_type_names)
         standard_journals = self - custom_journals
         
         if standard_journals:
             super(AccountJournal, standard_journals)._compute_name_placeholder()
             
         for journal in custom_journals:
-            name = _("Journal")
-            if journal.type == 'perceptions':
-                name = _("Perceptions")
-            elif journal.type == 'retentions':
-                name = _("Retentions")
+            name = custom_type_names.get(journal.type, _("Journal"))
             
             # Mimic standard behavior: "Type (ShortCode)"
             if journal.code:
                 journal.name_placeholder = f"{name} ({journal.code})"
             else:
                 journal.name_placeholder = name
+
+    @api.depends('type', 'company_id')
+    def _compute_code(self):
+        """Compute default code for custom journal types.
+        
+        This fixes TypeError when creating journals with custom types since
+        the core Odoo _get_next_journal_default_code doesn't recognize 
+        these types and returns None for the code base.
+        """
+        custom_type_codes = {
+            'receipt': 'REC',
+            'payment': 'PAY',
+            'third_party_checks': 'TPC',
+            'rejected_issued_checks': 'RIC',
+            'retentions': 'RET',
+            'perceptions': 'PER',
+        }
+        
+        custom_journals = self.filtered(lambda j: j.type in custom_type_codes)
+        standard_journals = self - custom_journals
+        
+        if standard_journals:
+            super(AccountJournal, standard_journals)._compute_code()
+        
+        for journal in custom_journals:
+            if not journal.code:
+                base_code = custom_type_codes[journal.type]
+                # Find the next available code for this type
+                existing_codes = self.env['account.journal'].search([
+                    ('code', '=like', base_code + '%'),
+                    ('company_id', '=', journal.company_id.id),
+                ]).mapped('code')
+                
+                if base_code not in existing_codes:
+                    journal.code = base_code
+                else:
+                    # Find next available numbered code
+                    counter = 1
+                    while f"{base_code}{counter}" in existing_codes:
+                        counter += 1
+                    journal.code = f"{base_code}{counter}"
+
