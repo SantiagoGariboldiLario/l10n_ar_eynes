@@ -11,7 +11,7 @@
         <field name="arch" type="xml">
 
             <xpath
-                expr="//field[@name='perception_ids']/tree/field[@name='percent']"
+                expr="//field[@name='perception_ids']/list/field[@name='percent']"
                 position="before"
             >
                 <field name="coeficient" />
@@ -20,7 +20,7 @@
             </xpath>
 
             <xpath
-                expr="//field[@name='retention_ids']/tree/field[@name='percent']"
+                expr="//field[@name='retention_ids']/list/field[@name='percent']"
                 position="before"
             >
             </xpath>
