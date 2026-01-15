@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+from contextlib import contextmanager
 import urllib.parse
 from base64 import b64encode
 from collections import defaultdict
@@ -63,7 +64,126 @@ class AccountMove(models.Model):
                 """
             )
         return super()._auto_init()
-
+    # ==================================================================================
+    # ============================================================================
+    # COMMENTED OUT - Using _prepare_tax_lines override instead (cleaner approach)
+    # Uncomment this block if _prepare_tax_lines approach doesn't work
+    # ============================================================================
+    #
+    # # v19 Migration: _sync_tax_lines override to redistribute perception/internal taxes
+    # # This replaces the v17 _compute_all_tax logic that no longer exists in v19
+    # # ==================================================================================
+    # @contextmanager
+    # def _sync_tax_lines(self, container):
+    # """
+    # Override to redistribute perception and internal tax amounts across product lines.
+    # Replicates the v17 _compute_all_tax logic.
+    #
+    # CAMBIO v19: En v17, _compute_all_tax modificaba el campo binario compute_all_tax.
+    # En v19, ese campo no existe, así que modificamos directamente las líneas de impuestos
+    # después de que el método padre las cree.
+    # """
+    # # Call the parent implementation first
+    # with super()._sync_tax_lines(container) as result:
+    # yield result
+    #
+    # # After yield: tax lines have been created/updated by the parent
+    # # Now apply the Argentinian perception/internal tax redistribution
+    # for move in container['records']:
+    # if move.state != 'draft':
+    # continue
+    # self._redistribute_argentinian_taxes(move)
+    #
+    # def _redistribute_argentinian_taxes(self, move):
+    # """
+    # Redistribute perception and internal tax amounts proportionally across product lines.
+    # This replicates the logic from v17's _compute_all_tax in account.move.line.
+    #
+    # LÓGICA ORIGINAL: El método original en v17 tomaba los totales de perception_ids e
+    # internal_taxes_ids y los redistribuía proporcionalmente entre las líneas de producto.
+    # Ahora hacemos lo mismo pero escribiendo directamente a las tax lines.
+    # """
+    # if not move.is_invoice(include_receipts=True):
+    # return
+    #
+    # sign = -1 if move.is_inbound() else 1
+    # product_lines = move.line_ids.filtered(lambda l: l.display_type == 'product')
+    # tax_lines = move.line_ids.filtered(lambda l: l.display_type == 'tax')
+    #
+    # # ==================== PERCEPTIONS ====================
+    # # CAMBIO v19: En v17 se modificaba compute_all_tax[key]['balance'].
+    # # En v19, escribimos directamente a la línea de impuesto correspondiente.
+    # if hasattr(move, 'perception_ids') and move.perception_ids:
+    # perception_taxes = product_lines.tax_ids.filtered(
+    # lambda tax: tax.tax_group_id and tax.tax_group_id.group_type == 'perception'
+    # )
+    # for perception in perception_taxes:
+    # perception = perception._origin
+    # # Find the tax line for this perception
+    # # NOTA: En v19, tax_line_id es el impuesto que generó esta línea
+    # perception_tax_line = tax_lines.filtered(
+    # lambda tl: tl.tax_line_id == perception
+    # )
+    # if not perception_tax_line:
+    # continue
+    #
+    # # Get total from perception_ids (the user-entered values)
+    # # LÓGICA ORIGINAL: Igual que en v17, sumamos base y amount de perception_ids
+    # perception_total_base = sum(
+    # move.perception_ids.filtered(
+    # lambda ptl: ptl.perception_id == perception
+    # ).mapped('base')
+    # )
+    # perception_total_amount = sum(
+    # move.perception_ids.filtered(
+    # lambda ptl: ptl.perception_id == perception
+    # ).mapped('amount')
+    # )
+    #
+    # # Update the tax line with the correct amounts
+    # # CAMBIO v19: Write directo en lugar de modificar diccionario
+    # rate = perception_tax_line.currency_rate or 1.0
+    # perception_tax_line.write({
+    # 'amount_currency': sign * perception_total_amount,
+    # 'balance': sign * perception_total_amount / rate,
+    # })
+    #
+    # # ==================== INTERNAL TAXES ====================
+    # # LÓGICA ORIGINAL: Solo para documentos de compra con internal_taxes_ids
+    # if move.is_purchase_document() and hasattr(move, 'internal_taxes_ids') and move.internal_taxes_ids:
+    # internal_taxes = product_lines.tax_ids.filtered(
+    # lambda tax: tax.tax_group_id and tax.tax_group_id.group_type == 'internals'
+    # )
+    # for internal_tax in internal_taxes:
+    # internal_tax = internal_tax._origin
+    # # Find the tax line for this internal tax
+    # internal_tax_line = tax_lines.filtered(
+    # lambda tl: tl.tax_line_id == internal_tax
+    # )
+    # if not internal_tax_line:
+    # continue
+    #
+    # # Get total from internal_taxes_ids
+    # internal_total_base = sum(
+    # move.internal_taxes_ids.filtered(
+    # lambda ptl: ptl.tax_id == internal_tax
+    # ).mapped('base')
+    # )
+    # internal_total_amount = sum(
+    # move.internal_taxes_ids.filtered(
+    # lambda ptl: ptl.tax_id == internal_tax
+    # ).mapped('amount')
+    # )
+    #
+    # # Update the tax line
+    # # CAMBIO v19: Write directo
+    # rate = internal_tax_line.currency_rate or 1.0
+    # internal_tax_line.write({
+    # 'amount_currency': sign * internal_total_amount,
+    # 'balance': sign * internal_total_amount / rate,
+    # })
+    #
+    #
     # *******************************************************************************************************
     #                                       MISCELANEOUS FIELDS:
     # *******************************************************************************************************
@@ -639,15 +759,18 @@ class AccountMove(models.Model):
                         )
                         delta_base = base_amount - old_base_amount
 
+                        # FIX v19: Solo sumar deltas de tax_amount, NO de base_amount
+                        # El base_amount ya está correctamente calculado por el core.
+                        # Sumar delta_base causaba doble conteo del subtotal.
                         subtotal['tax_amount_currency'] += delta_tax_currency
                         subtotal['tax_amount'] += delta_tax
-                        subtotal['base_amount_currency'] += delta_base_currency
-                        subtotal['base_amount'] += delta_base
+                        # subtotal['base_amount_currency'] += delta_base_currency  # REMOVED: causa doble conteo
+                        # subtotal['base_amount'] += delta_base  # REMOVED: causa doble conteo
 
                         totals['tax_amount_currency'] += delta_tax_currency
                         totals['tax_amount'] += delta_tax
-                        totals['base_amount_currency'] += delta_base_currency
-                        totals['base_amount'] += delta_base
+                        # totals['base_amount_currency'] += delta_base_currency  # REMOVED: causa doble conteo
+                        # totals['base_amount'] += delta_base  # REMOVED: causa doble conteo
 
                 cash_rounding_base_amount_currency = totals.get(
                     'cash_rounding_base_amount_currency', 0.0
@@ -665,6 +788,7 @@ class AccountMove(models.Model):
                     + totals['tax_amount']
                     + cash_rounding_base_amount
                 )
+                # import wdb; wdb.set_trace();
                 move.tax_totals = totals
 
     @api.onchange('invoice_date')

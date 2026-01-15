@@ -81,6 +81,23 @@ class AccountMoveLine(models.Model):
         'price_unit',
         'quantity',
     )
+    def _get_line_tax_details(self):
+        self.ensure_one()
+        base_line = self.move_id._prepare_product_base_line_for_taxes_computation(self)
+        self.env['account.tax']._add_tax_details_in_base_line(base_line, self.company_id)
+        return base_line['tax_details']
+    
+    @api.depends(
+        'tax_ids',
+        'currency_id',
+        'partner_id',
+        'analytic_distribution',
+        'balance',
+        'partner_id',
+        'move_id.partner_id',
+        'price_unit',
+        'quantity',
+    )
     def _compute_all_tax(self):
         # In v19 the base model no longer exposes _compute_all_tax/compute_all_tax;
         # guard for backward compatibility and skip if the structure is absent.
@@ -291,7 +308,7 @@ class AccountMoveLine(models.Model):
                         to_add += new
                 line.tax_ids -= to_clean
                 line.tax_ids += to_add
-        self._compute_all_tax()
+        
 
     def force_compute_tax_ids(self):
         # pylint: disable=missing-return
@@ -331,7 +348,6 @@ class AccountMoveLine(models.Model):
                         to_add += new
                 line.tax_ids -= to_clean
                 line.tax_ids += to_add
-        self._compute_all_tax()
 
     def price_unit_to_PDF(self):
         price_unit = self.price_unit
