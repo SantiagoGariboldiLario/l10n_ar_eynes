@@ -167,12 +167,18 @@ class WsPOSLine(models.Model):
             journal.fiscal_type = 'electronic'
         return super(WsPOSLine, self).write(vals)
 
-    @api.model
-    def create(self, vals):
-        journal_id = vals.get('journal_id', None)
+    def _set_journal_electronic(self, journal_id):
         if journal_id:
             journal = self.env['account.journal'].browse(journal_id)
             journal.fiscal_type = 'electronic'
+
+    @api.model
+    def create(self, vals):
+        if isinstance(vals, list):
+            for entry in vals:
+                self._set_journal_electronic(entry.get('journal_id'))
+            return super(WsPOSLine, self).create(vals)
+        self._set_journal_electronic(vals.get('journal_id'))
         return super(WsPOSLine, self).create(vals)
 
     def unlink(self):
@@ -280,7 +286,8 @@ class WsConfig(models.Model):
         if not service:
             raise UserError(_("Webservice not implemented."))
 
-        company_id = vals['company_id'] if vals else self.company_id.id
+        data = vals[0] if isinstance(vals, (list, tuple)) else vals
+        company_id = data.get('company_id') if data else self.env.company.id
 
         # WSAA are unique per company. Search the WSAA for current company:
         wsaa = WSAAConfig.search([('company_id', '=', company_id)])
@@ -315,9 +322,12 @@ class WsConfig(models.Model):
         """
         Create Ticket Access for the Webservice at the same time it is created.
         """
-        ta_vals = self._create_ta(vals)
-        vals.update(ta_vals)
-        return super(WsConfig, self).create(vals)
+        records = []
+        for record_vals in vals:
+            ta_vals = self._create_ta(record_vals)
+            record_vals.update(ta_vals)
+            records.append(record_vals)
+        return super(WsConfig, self).create(records)
 
     def unlink(self):
         for ws_conf in self:

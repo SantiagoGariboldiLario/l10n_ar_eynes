@@ -500,3 +500,25 @@ class AccountJournal(models.Model):
             if journal_data is not None and 'drag_drop_settings' not in journal_data:
                 journal_data['drag_drop_settings'] = fallback_drag_drop
         return dashboard_data
+
+    @api.depends('type', 'code')
+    def _compute_name_placeholder(self):
+        custom_types = ['perceptions', 'retentions']
+        custom_journals = self.filtered(lambda j: j.type in custom_types)
+        standard_journals = self - custom_journals
+        
+        if standard_journals:
+            super(AccountJournal, standard_journals)._compute_name_placeholder()
+            
+        for journal in custom_journals:
+            name = _("Journal")
+            if journal.type == 'perceptions':
+                name = _("Perceptions")
+            elif journal.type == 'retentions':
+                name = _("Retentions")
+            
+            # Mimic standard behavior: "Type (ShortCode)"
+            if journal.code:
+                journal.name_placeholder = f"{name} ({journal.code})"
+            else:
+                journal.name_placeholder = name
