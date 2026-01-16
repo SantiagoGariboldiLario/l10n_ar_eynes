@@ -115,7 +115,6 @@ class AccountTax(models.Model):
         track_visibility='onchange',
     )
 
-    @api.constrains('python_code')
     # ==================================================================================
     # v19 Migration: Override _prepare_tax_lines to modify tax dict BEFORE lines are created
     # This is cleaner than using write() after _sync_tax_lines
