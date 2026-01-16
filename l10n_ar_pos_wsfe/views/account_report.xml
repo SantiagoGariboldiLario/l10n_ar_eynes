@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
-        <!-- QWeb Reports -->
-        <record id="account_invoices" model="ir.actions.report">
-            <field name="name">Invoices</field>
-            <field name="model">account.move</field>
-            <field name="report_type">qweb-pdf</field>
-            <field name="report_name">account.report_invoice_with_payments</field>
-            <field name="report_file">account.report_invoice_with_payments</field>
-            <field name="print_report_name">(object._get_report_base_filename())</field>
-            <field name="attachment" />
-            <field name="binding_model_id" eval="False" />
-            <field name="binding_type">report</field>
-        </record>
-    </data>
+    <!-- QWeb Reports -->
+    <record id="account_invoices" model="ir.actions.report">
+        <field name="name">Invoices</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">account.report_invoice_with_payments</field>
+        <field name="report_file">account.report_invoice_with_payments</field>
+        <field name="print_report_name">(object._get_report_base_filename())</field>
+        <field name="attachment" />
+        <field name="binding_model_id" eval="False" />
+        <field name="binding_type">report</field>
+    </record>
 </odoo>

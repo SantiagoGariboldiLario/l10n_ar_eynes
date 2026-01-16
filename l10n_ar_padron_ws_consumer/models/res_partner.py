@@ -107,6 +107,7 @@ class ResPartner(models.Model):
             padron_url,
             data=json.dumps(payload),
             headers=headers,
+            timeout=60,
         ).json()
         if not response.get('result'):
             if from_cron:
@@ -473,6 +474,7 @@ class ResPartner(models.Model):
                     padron_url,
                     headers=HEADERS,
                     data=json.dumps(payload),
+                    timeout=60,
                 )
                 if response.status_code != 200:
                     raise ValidationError(

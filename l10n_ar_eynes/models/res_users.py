@@ -91,7 +91,7 @@ class UsersJournalPriorityRel(models.Model):
             last_user_priority += 1
             val.update({'priority': last_user_priority})
 
-        return super(UsersJournalPriorityRel, self).create(vals)
+        return super().create(vals)
 
     def _recompute_user_priorities(self, users):
         for user in users:

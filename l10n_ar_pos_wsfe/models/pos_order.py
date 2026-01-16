@@ -28,7 +28,7 @@ class PosOrder(models.Model):
 
     @api.model
     def create_from_ui(self, orders, draft=False):
-        res = super(PosOrder, self).create_from_ui(orders, draft)
+        res = super().create_from_ui(orders, draft)
         for order in res:
             state = self.env['account.move'].search_read(
                 domain=[('id', '=', order.get('account_move'))],
@@ -40,7 +40,7 @@ class PosOrder(models.Model):
         return res
 
     def _export_for_ui(self, order):
-        res = super(PosOrder, self)._export_for_ui(order)
+        res = super()._export_for_ui(order)
         refunded_moves = order.refunded_order_ids.mapped('account_move')
         res['doc_origin'] = ', '.join(
             refunded_moves.mapped(lambda x: x.get_pretty_sequence())
@@ -49,13 +49,13 @@ class PosOrder(models.Model):
 
     @api.model
     def _order_fields(self, ui_order):
-        res = super(PosOrder, self)._order_fields(ui_order)
+        res = super()._order_fields(ui_order)
         res['invoice_journal_id'] = ui_order.get('invoice_journal_id')
         res['is_wsfe'] = ui_order.get('inv_electronic_mode')
         return res
 
     def _prepare_invoice_vals(self):
-        res = super(PosOrder, self)._prepare_invoice_vals()
+        res = super()._prepare_invoice_vals()
         if self.invoice_journal_id:
             res['journal_id'] = self.invoice_journal_id.id
         fiscal_position = self.partner_id.property_account_position_id
@@ -81,7 +81,7 @@ class PosOrder(models.Model):
         return True
 
     def _create_invoice(self, move_vals):
-        res = super(PosOrder, self)._create_invoice(move_vals)
+        res = super()._create_invoice(move_vals)
         if not self.invoice_journal_id:
             res.sudo().with_company(self.company_id)._onchange_partner()
         self._hook_recompute_account_move(res)

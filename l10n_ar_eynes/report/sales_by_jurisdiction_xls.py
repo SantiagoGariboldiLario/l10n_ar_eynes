@@ -371,9 +371,11 @@ class SalesExportXlsx(models.AbstractModel):
             'date_start': data['date_start'],
             'date_stop': data['date_stop'],
             'company_id': company,
-            'move_type': ('out_invoice', 'out_refund')
-            if report_type == 'sale'
-            else ('in_invoice', 'in_refund'),
+            'move_type': (
+                ('out_invoice', 'out_refund')
+                if report_type == 'sale'
+                else ('in_invoice', 'in_refund')
+            ),
             'sign': -1 if report_type == 'sale' else 1,
         }
         self._cr.execute(query, query_vals)

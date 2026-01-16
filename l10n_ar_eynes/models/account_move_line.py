@@ -56,7 +56,7 @@ class AccountMoveLine(models.Model):
     )
     def _compute_currency_rate(self):
         # pylint: disable=missing-return
-        super(AccountMoveLine, self)._compute_currency_rate()
+        super()._compute_currency_rate()
         for line in self:
             if not line.is_same_currency:
                 new_rate = (
@@ -83,173 +83,177 @@ class AccountMoveLine(models.Model):
     )
     def _get_line_tax_details(self):
         self.ensure_one()
-        base_line = self.move_id._prepare_product_base_line_for_taxes_computation(self)
-        self.env['account.tax']._add_tax_details_in_base_line(base_line, self.company_id)
+        base_line = (
+            self.move_id._prepare_product_base_line_for_taxes_computation(self)
+        )
+        self.env['account.tax']._add_tax_details_in_base_line(
+            base_line, self.company_id
+        )
         return base_line['tax_details']
-    
-    @api.depends(
-        'tax_ids',
-        'currency_id',
-        'partner_id',
-        'analytic_distribution',
-        'balance',
-        'partner_id',
-        'move_id.partner_id',
-        'price_unit',
-        'quantity',
-    )
-    def _compute_all_tax(self):
-        # In v19 the base model no longer exposes _compute_all_tax/compute_all_tax;
-        # guard for backward compatibility and skip if the structure is absent.
-        compute_super = getattr(super(AccountMoveLine, self), "_compute_all_tax", None)
-        if compute_super:
-            compute_super()
-        if not hasattr(self, "compute_all_tax"):
-            return
 
-        def _distribute_rounded_values(total_base, total_amount, lines):
-            # Distribute rounded values and remainder to last line
-            num_lines = len(lines)
-            rounded_bases = []
-            rounded_amounts = []
-            for i, _aml in enumerate(lines):
-                if i < num_lines - 1:
-                    rounded_base = inv.currency_id.round(total_base / num_lines)
-                    rounded_amount = inv.currency_id.round(
-                        total_amount / num_lines
-                    )
-                    rounded_bases.append(rounded_base)
-                    rounded_amounts.append(rounded_amount)
-                else:
-                    # Last line gets the remainder
-                    rounded_base = total_base - sum(rounded_bases)
-                    rounded_amount = total_amount - sum(rounded_amounts)
-                    rounded_bases.append(rounded_base)
-                    rounded_amounts.append(rounded_amount)
-            return rounded_amounts, rounded_bases
+    # @api.depends(
+    #     'tax_ids',
+    #     'currency_id',
+    #     'partner_id',
+    #     'analytic_distribution',
+    #     'balance',
+    #     'partner_id',
+    #     'move_id.partner_id',
+    #     'price_unit',
+    #     'quantity',
+    # )
+    # def _compute_all_tax(self):
+    #     # In v19 the base model no longer exposes _compute_all_tax/compute_all_tax;
+    #     # guard for backward compatibility and skip if the structure is absent.
+    #     compute_super = getattr(super(), "_compute_all_tax", None)
+    #     if compute_super:
+    #         compute_super()
+    #     if not hasattr(self, "compute_all_tax"):
+    #         return
 
-        def _assign_distributed_values(
-            lines, tax_name, sign, rounded_amounts, rounded_bases
-        ):
-            # Assign distributed values to lines
-            for idx, aml in enumerate(lines):
-                rate = aml.currency_rate
-                for key in aml.compute_all_tax:
-                    if aml.compute_all_tax[key].get('name', '') == tax_name:
-                        aml.compute_all_tax[key]['balance'] = (
-                            sign * rounded_amounts[idx] / rate
-                        )
-                        aml.compute_all_tax[key]['amount_currency'] = (
-                            sign * rounded_amounts[idx]
-                        )
-                        aml.compute_all_tax[key]['tax_base_amount'] = (
-                            rounded_bases[idx] / rate
-                        )
+    #     def _distribute_rounded_values(total_base, total_amount, lines):
+    #         # Distribute rounded values and remainder to last line
+    #         num_lines = len(lines)
+    #         rounded_bases = []
+    #         rounded_amounts = []
+    #         for i, _aml in enumerate(lines):
+    #             if i < num_lines - 1:
+    #                 rounded_base = inv.currency_id.round(total_base / num_lines)
+    #                 rounded_amount = inv.currency_id.round(
+    #                     total_amount / num_lines
+    #                 )
+    #                 rounded_bases.append(rounded_base)
+    #                 rounded_amounts.append(rounded_amount)
+    #             else:
+    #                 # Last line gets the remainder
+    #                 rounded_base = total_base - sum(rounded_bases)
+    #                 rounded_amount = total_amount - sum(rounded_amounts)
+    #                 rounded_bases.append(rounded_base)
+    #                 rounded_amounts.append(rounded_amount)
+    #         return rounded_amounts, rounded_bases
 
-        product_with_perception_lines = self.filtered(
-            lambda aml: aml.display_type == 'product'
-            and aml.move_id.is_invoice(True)
-            and 'perception' in aml.tax_ids.tax_group_id.mapped('group_type')
-        )
-        invoices = product_with_perception_lines.mapped('move_id')
-        for inv in invoices:
-            inv_product_with_perception_lines = (
-                product_with_perception_lines.filtered(
-                    lambda aml: aml.move_id == inv
-                )
-            )
-            if inv.perception_ids:
-                sign = -1 if inv.is_inbound() else 1
-                perceptions = (
-                    inv_product_with_perception_lines.tax_ids.filtered(
-                        lambda tax: tax.tax_group_id.group_type == 'perception'
-                    )
-                )
-                for perception in perceptions:
-                    perception = perception._origin
-                    lines_with_perception = (
-                        inv_product_with_perception_lines.filtered(
-                            lambda aml: perception in aml.tax_ids._origin
-                        )
-                    )
-                    if lines_with_perception:
-                        perception_total_base = sum(
-                            inv.perception_ids.filtered(
-                                lambda ptl: ptl.perception_id == perception
-                            ).mapped('base')
-                        )
-                        perception_total_amount = sum(
-                            inv.perception_ids.filtered(
-                                lambda ptl: ptl.perception_id == perception
-                            ).mapped('amount')
-                        )
-                        (
-                            rounded_amounts,
-                            rounded_bases,
-                        ) = _distribute_rounded_values(
-                            perception_total_base,
-                            perception_total_amount,
-                            lines_with_perception,
-                        )
-                        _assign_distributed_values(
-                            lines_with_perception,
-                            perception.name,
-                            sign,
-                            rounded_amounts,
-                            rounded_bases,
-                        )
+    #     def _assign_distributed_values(
+    #         lines, tax_name, sign, rounded_amounts, rounded_bases
+    #     ):
+    #         # Assign distributed values to lines
+    #         for idx, aml in enumerate(lines):
+    #             rate = aml.currency_rate
+    #             for key in aml.compute_all_tax:
+    #                 if aml.compute_all_tax[key].get('name', '') == tax_name:
+    #                     aml.compute_all_tax[key]['balance'] = (
+    #                         sign * rounded_amounts[idx] / rate
+    #                     )
+    #                     aml.compute_all_tax[key]['amount_currency'] = (
+    #                         sign * rounded_amounts[idx]
+    #                     )
+    #                     aml.compute_all_tax[key]['tax_base_amount'] = (
+    #                         rounded_bases[idx] / rate
+    #                     )
 
-        product_lines = self.filtered(
-            lambda aml: aml.display_type == 'product'
-            and aml.move_id.is_invoice(True)
-        )
-        invoices = product_lines.mapped('move_id').filtered(
-            lambda inv: inv.is_purchase_document()
-        )
-        for inv in invoices:
-            inv_product_with_internal_taxes_lines = product_lines.filtered(
-                lambda aml: aml.move_id == inv
-            )
-            if inv.is_purchase_document() and inv.internal_taxes_ids:
-                sign = -1 if inv.is_inbound() else 1
-                internals = (
-                    inv_product_with_internal_taxes_lines.tax_ids.filtered(
-                        lambda tax: tax.tax_group_id.group_type == 'internals'
-                    )
-                )
-                for internal_tax in internals:
-                    internal_tax = internal_tax._origin
-                    lines_with_internals = (
-                        inv_product_with_internal_taxes_lines.filtered(
-                            lambda aml: internal_tax in aml.tax_ids._origin
-                        )
-                    )
-                    if lines_with_internals:
-                        internal_tax_total_base = sum(
-                            inv.internal_taxes_ids.filtered(
-                                lambda ptl: ptl.tax_id == internal_tax
-                            ).mapped('base')
-                        )
-                        internal_tax_total_amount = sum(
-                            inv.internal_taxes_ids.filtered(
-                                lambda ptl: ptl.tax_id == internal_tax
-                            ).mapped('amount')
-                        )
-                        (
-                            rounded_amounts,
-                            rounded_bases,
-                        ) = _distribute_rounded_values(
-                            internal_tax_total_base,
-                            internal_tax_total_amount,
-                            lines_with_internals,
-                        )
-                        _assign_distributed_values(
-                            lines_with_internals,
-                            internal_tax.name,
-                            sign,
-                            rounded_amounts,
-                            rounded_bases,
-                        )
+    #     product_with_perception_lines = self.filtered(
+    #         lambda aml: aml.display_type == 'product'
+    #         and aml.move_id.is_invoice(True)
+    #         and 'perception' in aml.tax_ids.tax_group_id.mapped('group_type')
+    #     )
+    #     invoices = product_with_perception_lines.mapped('move_id')
+    #     for inv in invoices:
+    #         inv_product_with_perception_lines = (
+    #             product_with_perception_lines.filtered(
+    #                 lambda aml: aml.move_id == inv
+    #             )
+    #         )
+    #         if inv.perception_ids:
+    #             sign = -1 if inv.is_inbound() else 1
+    #             perceptions = (
+    #                 inv_product_with_perception_lines.tax_ids.filtered(
+    #                     lambda tax: tax.tax_group_id.group_type == 'perception'
+    #                 )
+    #             )
+    #             for perception in perceptions:
+    #                 perception = perception._origin
+    #                 lines_with_perception = (
+    #                     inv_product_with_perception_lines.filtered(
+    #                         lambda aml: perception in aml.tax_ids._origin
+    #                     )
+    #                 )
+    #                 if lines_with_perception:
+    #                     perception_total_base = sum(
+    #                         inv.perception_ids.filtered(
+    #                             lambda ptl: ptl.perception_id == perception
+    #                         ).mapped('base')
+    #                     )
+    #                     perception_total_amount = sum(
+    #                         inv.perception_ids.filtered(
+    #                             lambda ptl: ptl.perception_id == perception
+    #                         ).mapped('amount')
+    #                     )
+    #                     (
+    #                         rounded_amounts,
+    #                         rounded_bases,
+    #                     ) = _distribute_rounded_values(
+    #                         perception_total_base,
+    #                         perception_total_amount,
+    #                         lines_with_perception,
+    #                     )
+    #                     _assign_distributed_values(
+    #                         lines_with_perception,
+    #                         perception.name,
+    #                         sign,
+    #                         rounded_amounts,
+    #                         rounded_bases,
+    #                     )
+
+    #     product_lines = self.filtered(
+    #         lambda aml: aml.display_type == 'product'
+    #         and aml.move_id.is_invoice(True)
+    #     )
+    #     invoices = product_lines.mapped('move_id').filtered(
+    #         lambda inv: inv.is_purchase_document()
+    #     )
+    #     for inv in invoices:
+    #         inv_product_with_internal_taxes_lines = product_lines.filtered(
+    #             lambda aml: aml.move_id == inv
+    #         )
+    #         if inv.is_purchase_document() and inv.internal_taxes_ids:
+    #             sign = -1 if inv.is_inbound() else 1
+    #             internals = (
+    #                 inv_product_with_internal_taxes_lines.tax_ids.filtered(
+    #                     lambda tax: tax.tax_group_id.group_type == 'internals'
+    #                 )
+    #             )
+    #             for internal_tax in internals:
+    #                 internal_tax = internal_tax._origin
+    #                 lines_with_internals = (
+    #                     inv_product_with_internal_taxes_lines.filtered(
+    #                         lambda aml: internal_tax in aml.tax_ids._origin
+    #                     )
+    #                 )
+    #                 if lines_with_internals:
+    #                     internal_tax_total_base = sum(
+    #                         inv.internal_taxes_ids.filtered(
+    #                             lambda ptl: ptl.tax_id == internal_tax
+    #                         ).mapped('base')
+    #                     )
+    #                     internal_tax_total_amount = sum(
+    #                         inv.internal_taxes_ids.filtered(
+    #                             lambda ptl: ptl.tax_id == internal_tax
+    #                         ).mapped('amount')
+    #                     )
+    #                     (
+    #                         rounded_amounts,
+    #                         rounded_bases,
+    #                     ) = _distribute_rounded_values(
+    #                         internal_tax_total_base,
+    #                         internal_tax_total_amount,
+    #                         lines_with_internals,
+    #                     )
+    #                     _assign_distributed_values(
+    #                         lines_with_internals,
+    #                         internal_tax.name,
+    #                         sign,
+    #                         rounded_amounts,
+    #                         rounded_bases,
+    #                     )
 
     def _get_computed_perceptions(self):
         tax_ids = self.env['account.tax']
@@ -308,14 +312,13 @@ class AccountMoveLine(models.Model):
                         to_add += new
                 line.tax_ids -= to_clean
                 line.tax_ids += to_add
-        
 
     def force_compute_tax_ids(self):
         # pylint: disable=missing-return
-        super(AccountMoveLine, self)._compute_tax_ids()
+        super()._compute_tax_ids()
 
     def _get_computed_taxes(self):
-        tax_ids = super(AccountMoveLine, self)._get_computed_taxes()
+        tax_ids = super()._get_computed_taxes()
 
         if (
             self.move_id.is_sale_document(include_receipts=True)

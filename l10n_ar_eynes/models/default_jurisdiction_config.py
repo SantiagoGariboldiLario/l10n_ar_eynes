@@ -54,9 +54,12 @@ class DefaultJurisdictionConfiguration(models.Model):
                     )
                 )
 
-    def name_get(self):
-        res = []
+    display_name = fields.Char(compute='_compute_display_name', store=True)
+
+    @api.depends('pos_ar_id.name', 'state_id.name')
+    def _compute_display_name(self):
         for rec in self:
-            name = '%s -> %s' % (rec.pos_ar_id.name, rec.state_id.name)
-            res.append((rec.id, name))
-        return res
+            rec.display_name = '%s -> %s' % (
+                rec.pos_ar_id.name,
+                rec.state_id.name,
+            )

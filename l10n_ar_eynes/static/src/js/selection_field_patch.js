@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { registry } from "@web/core/registry";
-import { SelectionField } from "@web/views/fields/selection/selection_field";
+import {registry} from "@web/core/registry";
+import {SelectionField} from "@web/views/fields/selection/selection_field";
 
 /**
  * Safe selection field to avoid crashes when the stored value is not present
@@ -24,8 +24,10 @@ class SafeSelectionField extends SelectionField {
     }
 }
 
-registry.category("fields").add(
-    "selection",
-    { component: SafeSelectionField, supportedTypes: ["selection", "many2one"] },
-    { force: true }
-);
+registry
+    .category("fields")
+    .add(
+        "selection",
+        {component: SafeSelectionField, supportedTypes: ["selection", "many2one"]},
+        {force: true}
+    );

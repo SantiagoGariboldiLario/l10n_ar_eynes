@@ -22,7 +22,7 @@ patch(Order.prototype, {
     },
     _isRefundAndSaleOrder: function () {
         if (this.orderlines.length && this.orderlines.refunded_orderline_id) return true;
-        else return false;
+        return false;
     },
     set_invoice_number: function (seq_vals) {
         if (!seq_vals) {
@@ -68,7 +68,7 @@ patch(Order.prototype, {
         json.can_compute_perceptions = this.can_compute_perceptions;
         return json;
     },
-    // eslint-disable-next-line no-unused-vars
+
     init_from_JSON(json) {
         this._on_init_json = true;
         super.init_from_JSON(...arguments);
@@ -133,7 +133,7 @@ patch(Order.prototype, {
         const order_vals = this._prepare_order_vals();
         const self = this;
         try {
-            let amount = await this.pos.orm.call("pos.order", "compute_perceptions", [order_vals]);
+            const amount = await this.pos.orm.call("pos.order", "compute_perceptions", [order_vals]);
             this.set_perception(amount);
             this.can_compute_perceptions = true;
         } catch (error) {

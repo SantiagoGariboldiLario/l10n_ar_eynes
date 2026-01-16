@@ -40,7 +40,7 @@ class AccountJournal(models.Model):
                     ],
                 ]
             )
-        return super(AccountJournal, self).name_search(
+        return super().name_search(
             name=name,
             args=args,
             operator=operator,

@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from dateutil.relativedelta import relativedelta as relatived
 
 from odoo import api, fields, models
@@ -13,7 +14,11 @@ class IIBBDDJJ(models.TransientModel):
     config_id = fields.Many2one(
         'iibb.ddjj.config', string="Configuration", required=True
     )
-    period = fields.Date(string="Period", required=True, default=lambda self: fields.Date.today().replace(day=1))
+    period = fields.Date(
+        string="Period",
+        required=True,
+        default=lambda self: fields.Date.today().replace(day=1),
+    )
 
     def _get_period_domain(self):
         dt = datetime.strptime(str(self.period), DSDF)
@@ -22,7 +27,11 @@ class IIBBDDJJ(models.TransientModel):
         return date_start, date_finish
 
     def _get_invoice_moves(self, report_type):
-        move_type = ('out_invoice', 'out_refund') if report_type == 'sale' else ('in_invoice', 'in_refund')
+        move_type = (
+            ('out_invoice', 'out_refund')
+            if report_type == 'sale'
+            else ('in_invoice', 'in_refund')
+        )
         sign = -1 if report_type == 'sale' else 1
         date_from, date_to = self._get_period_domain()
         query = """
@@ -84,7 +93,8 @@ class IIBBDDJJ(models.TransientModel):
 
     def _get_retention_data(self):
         query = """
-        SELECT at.state_id AS province, rcs.name AS jurisdiccion, sum(r.amount) AS amount FROM account_payment_order_retention_line r
+        SELECT at.state_id AS province, rcs.name AS jurisdiccion, sum(r.amount)
+        AS amount FROM account_payment_order_retention_line r
         JOIN account_tax at ON r.retention_id = at.id
         JOIN res_country_state rcs ON rcs.id = at.state_id
         WHERE r.date BETWEEN %(date_start)s AND %(date_end)s
@@ -131,16 +141,25 @@ class IIBBDDJJ(models.TransientModel):
         perception_amount = self._get_perception_data()
         state_info = {}
         for state_config in self.config_id.jurisdiction_line_ids:
-            state_identifier = (state_config.state_id.id, state_config.state_id.name)
+            state_identifier = (
+                state_config.state_id.id,
+                state_config.state_id.name,
+            )
             state_info.setdefault(state_identifier, {'debts': 0.0})
             base = round(sales_amount * state_config.coefficient, 2)
             state_info[state_identifier]['sale_total'] = base
-            state_info[state_identifier]['tax_amount'] = round(base * state_config.percentage / 100, 2)
+            state_info[state_identifier]['tax_amount'] = round(
+                base * state_config.percentage / 100, 2
+            )
         for overpayment in overpayment_amount:
             state_identifier = (overpayment['state_id'], overpayment['name'])
             state_info.setdefault(state_identifier, {'debts': 0.0})
-            if not (state_info[state_identifier].get('overpayment_total', 0.0) > 0.0):
-                state_info[state_identifier]['overpayment_total'] = overpayment['amount']
+            if not (
+                state_info[state_identifier].get('overpayment_total', 0.0) > 0.0
+            ):
+                state_info[state_identifier]['overpayment_total'] = overpayment[
+                    'amount'
+                ]
         for perc_ret in retention_amount + perception_amount:
             state_id = perc_ret['province']
             state_identifier = (state_id, perc_ret['jurisdiccion'])
@@ -152,7 +171,9 @@ class IIBBDDJJ(models.TransientModel):
         state_info_list = []
         for key, value in state_info.items():
             tax_amount = value.get('tax_amount', 0.0)
-            debts = value.get('overpayment_total', 0.0) + value.get('debts', 0.0)
+            debts = value.get('overpayment_total', 0.0) + value.get(
+                'debts', 0.0
+            )
             result = tax_amount - debts
             state_result = [
                 key[1],

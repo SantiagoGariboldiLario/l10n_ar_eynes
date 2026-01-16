@@ -205,7 +205,7 @@ class SubjournalXlsx(models.AbstractModel):
                 line['is_debit_note'],
             )
             key = line['invoice_id']
-            line['line_id']
+            # line['line_id']
             amount = (line['credit'] - line['debit']) * based_sign
 
             if (
@@ -512,9 +512,11 @@ class SubjournalXlsx(models.AbstractModel):
             sheet.write('E' + str(p), line['partner_vat'], cell_format)
             sheet.write(
                 'F' + str(p),
-                line['partner_fiscal_pos'][self.env.lang]
-                if self.env.lang in line['partner_fiscal_pos']
-                else line['partner_fiscal_pos']['en_US'],
+                (
+                    line['partner_fiscal_pos'][self.env.lang]
+                    if self.env.lang in line['partner_fiscal_pos']
+                    else line['partner_fiscal_pos']['en_US']
+                ),
                 cell_format,
             )
             sheet.write('G' + str(p), line['invoice_type'], cell_format)
@@ -624,9 +626,11 @@ class SubjournalXlsx(models.AbstractModel):
             keyval_row = keyval_row + 1
             sheet.write(
                 key_col + str(keyval_row),
-                val[0][self.env.lang]
-                if self.env.lang in val[0]
-                else val[0]['en_US'],
+                (
+                    val[0][self.env.lang]
+                    if self.env.lang in val[0]
+                    else val[0]['en_US']
+                ),
             )
             sheet.write(val_col + str(keyval_row), val[1])
 

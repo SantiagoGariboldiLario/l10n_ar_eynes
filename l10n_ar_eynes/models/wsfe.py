@@ -80,7 +80,7 @@ class WsfeConfig(models.Model):
         self.env['ws.tax.codes'].search(
             [('wsfe_config_id', '=', self.id)]
         ).unlink()
-        return super(WsfeConfig, self).unlink()
+        return super().unlink()
 
     def _create_records_from_afip_result(self, ws, result, model_to_create):
         helper = WSFEParser()
@@ -409,12 +409,14 @@ class WsfeConfig(models.Model):
             cbt_desde=number,
             cbt_hasta=number,
             imp_total=data['total_amount'],
-            imp_tot_conc=0.00
-            if invoice.denomination == 'c'
-            else data['no_taxed_amount'],
-            imp_neto=vat_data['base_vat_amount']
-            if invoice.denomination != 'c'
-            else (data['total_amount'] - tribute_data['tribute_total']),
+            imp_tot_conc=(
+                0.00 if invoice.denomination == 'c' else data['no_taxed_amount']
+            ),
+            imp_neto=(
+                vat_data['base_vat_amount']
+                if invoice.denomination != 'c'
+                else (data['total_amount'] - tribute_data['tribute_total'])
+            ),
             imp_iva=vat_data['total_vat_amount'],
             imp_trib=tribute_data['tribute_total'],
             imp_op_ex=data['exempt_amount'],

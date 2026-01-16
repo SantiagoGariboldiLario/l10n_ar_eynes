@@ -12,7 +12,7 @@ class AccountDebitNote(models.TransientModel):
         comodel_name='account.journal',
         string='Use Specific Journal',
         help='If empty, uses the journal of the journal entry to be debited.',
-        default=default_journal,
+        default=lambda self: self.default_journal(),
     )
 
     def _get_voucher_type(self, move):
@@ -26,7 +26,7 @@ class AccountDebitNote(models.TransientModel):
         )
 
     def _prepare_default_values(self, move):
-        res = super(AccountDebitNote, self)._prepare_default_values(move)
+        res = super()._prepare_default_values(move)
 
         # Add perception lines
         perceptions = []

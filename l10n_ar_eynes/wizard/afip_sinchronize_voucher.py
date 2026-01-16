@@ -94,7 +94,7 @@ class AFIPSinchronizeVoucher(models.TransientModel):
 
     @api.model
     def default_get(self, fields):
-        defaults = super(AFIPSinchronizeVoucher, self).default_get(fields)
+        defaults = super().default_get(fields)
         invoice_id = self.env.context.get('active_id')
         active_invoice = self.env['account.move'].browse(invoice_id)
         defaults.update(

@@ -34,15 +34,15 @@ class AccountPaymentOrder(models.Model):
 
         return _('%s created', doc_name)
 
-    def name_get(self):
-        result = []
+    display_name = fields.Char(compute='_compute_display_name', store=True)
+
+    @api.depends('number')
+    def _compute_display_name(self):
         for payment in self:
-            name = payment.number or _('New')
-            result.append((payment.id, name))
-        return result
+            payment.display_name = payment.number or _('New')
 
     def default_get(self, fields):
-        result = super(AccountPaymentOrder, self).default_get(fields)
+        result = super().default_get(fields)
         # COMPAÑIA
         default_company = self.env.company
         if 'company_id' in fields:
@@ -443,9 +443,11 @@ class AccountPaymentOrder(models.Model):
             if not ret_vals:
                 raise ValidationError(
                     _(
-                        f"Retention {advance_ret.retention_id.name} "
-                        "is not configured for Partner "
-                        f"Fiscal Position {self.partner_id.property_account_position_id.name}"
+                        "Retention %s is not configured for Partner Fiscal Position %s"
+                    )
+                    % (
+                        advance_ret.retention_id.name,
+                        self.partner_id.property_account_position_id.name,
                     )
                 )
             taxapp = tax_app_obj.search(
@@ -460,18 +462,24 @@ class AccountPaymentOrder(models.Model):
                 raise ValidationError(
                     _(
                         "Retention Error!\n"
-                        "There is no configured a Retention Application "
-                        f"({advance_ret.retention_id.name}) "
-                        f"that corresponds to Concept: {advance_ret.concept_id.name}"
+                        "There is no configured Retention Application (%s) "
+                        "that corresponds to Concept: %s"
+                    )
+                    % (
+                        advance_ret.retention_id.name,
+                        advance_ret.concept_id.name,
                     )
                 )
             if len(taxapp) > 1:
                 raise ValidationError(
                     _(
                         "Retention Error!\n"
-                        "There is more than one Retention Application "
-                        f"({advance_ret.retention_id.name}) configured "
-                        f"that corresponds to Concept: {advance_ret.concept_id.name}"
+                        "There is more than one Retention Application (%s) configured "
+                        "that corresponds to Concept: %s"
+                    )
+                    % (
+                        advance_ret.retention_id.name,
+                        advance_ret.concept_id.name,
                     )
                 )
             vals = {
@@ -907,20 +915,29 @@ class AccountPaymentOrder(models.Model):
         self.recompute_payment_lines('income_line_ids')
 
     def unlink(self):
-        self._check_retentions_unlinkable()
-        for state in set(self.mapped('state')):
-            if state not in ['draft', 'cancel']:
-                raise ValidationError(
-                    _(
-                        "Error!\nYou can't unlink a posted payment order.\n"
-                        "First you should unreconcile It."
-                    )
-                )
+        """
+        Unlink payment orders was moved to api.ondelete method
+        """
         for voucher in self:
             if voucher.type == 'receipt':
                 voucher.third_party_check_ids.unlink()
             voucher.issued_check_line_ids.unlink()
-        return super(AccountPaymentOrder, self).unlink()
+        return super().unlink()
+
+    @api.ondelete(at_uninstall=False)
+    def _check_payment_order_unlink(self):
+        self._check_retentions_unlinkable()
+
+        invalid_states = self.filtered(
+            lambda r: r.state not in ['draft', 'cancel']
+        )
+        if invalid_states:
+            raise ValidationError(
+                _(
+                    "Error!\nYou can't unlink a posted payment order.\n"
+                    "First you should unreconcile it."
+                )
+            )
 
     def _check_retentions_unlinkable(self):
         for voucher in self:
@@ -2335,7 +2352,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
         comodel_name='retention.move.line',
         inverse_name='payment_order_line_id',
         string='Retention move lines',
-        default=default_retention_move_lines,
+        default=lambda self: self.default_retention_move_lines(),
         readonly=True,
     )
     retention_move_lines_total = fields.Float(
@@ -2646,16 +2663,22 @@ class AccountPaymentOrderRetentionLine(models.Model):
         rl_id = self.id
         rl_name = self.name
         rl_partner_name = self.partner_id.name or 'Undefined'
-        name = u"RTL(#{})[{}-{}]".format(rl_id, rl_name, rl_partner_name)
+        name = "RTL(#{})[{}-{}]".format(rl_id, rl_name, rl_partner_name)
         return name
 
     def unlink(self):
-        if self.filtered(lambda rec: not rec.unlinkable):
+        """
+        Unlink retention lines restrictions was moved to api.ondelete method
+        """
+        return super().unlink()
+
+    @api.ondelete(at_uninstall=False)
+    def _check_retention_unlink(self):
+        non_unlinkable = self.filtered(lambda rec: not rec.unlinkable)
+        if non_unlinkable:
             raise UserError(
                 _("You can't delete a retention of a Posted Payment Order")
             )
-        res = super(AccountPaymentOrderRetentionLine, self).unlink()
-        return res
 
     def write_defaults(self, retention_vals, disable_retentions):
         for rec in self:
@@ -2815,13 +2838,22 @@ class AccountPaymentOrderIssuedCheckLine(models.Model):
         return res
 
     def unlink(self):
+        """
+        Unlink restrictions was moved to api.ondelete method
+        """
         for line in self:
-            if line.issued_check_id.issued_check_state != 'draft':
-                raise ValidationError(
-                    _("Your are trying to delete a check that is not in draft")
-                )
             line.issued_check_id.write(self.clear_check_vals())
         return super().unlink()
+
+    @api.ondelete(at_uninstall=False)
+    def _check_issued_check_unlink(self):
+        non_draft_checks = self.filtered(
+            lambda line: line.issued_check_id.issued_check_state != 'draft'
+        )
+        if non_draft_checks:
+            raise ValidationError(
+                _("You are trying to delete a check that is not in draft")
+            )
 
     def prepare_line_vals(self, line=False):
         line = line or self

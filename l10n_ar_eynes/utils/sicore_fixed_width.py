@@ -67,8 +67,7 @@ def moneyfmt(
     return ''.join(reversed(result))
 
 
-class FixedWidth(object):
-
+class FixedWidth:
     """
     Class for converting between Python dictionaries and fixed-width
     strings.
@@ -92,7 +91,6 @@ class FixedWidth(object):
     """
 
     def __init__(self, config):
-
         """
         Arguments:
             config: required, dict defining fixed-width format
@@ -204,7 +202,6 @@ class FixedWidth(object):
             current_pos = current_pos + config[field_name]['length']
 
     def update(self, **kwargs):
-
         """
         Update self.data using the kwargs sent.
         """
@@ -212,7 +209,6 @@ class FixedWidth(object):
         self.data.update(kwargs)
 
     def validate(self):
-
         """
         ensure the data in self.data is consistant with self.config
         """
@@ -279,7 +275,6 @@ class FixedWidth(object):
         return True
 
     def _build_line(self):
-
         """
         Returns a fixed-width line made up of self.data, using
         self.config.
@@ -317,7 +312,6 @@ class FixedWidth(object):
     is_valid = property(validate)
 
     def _string_to_dict(self, fw_string):
-
         """
         Take a fixed-width string and use it to
         populate self.data, based on self.config.

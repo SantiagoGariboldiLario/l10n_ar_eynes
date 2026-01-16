@@ -62,7 +62,7 @@ class SaleOrder(models.Model):
         return invoice_vals
 
     def action_confirm(self):
-        res = super(SaleOrder, self).action_confirm()
+        res = super().action_confirm()
         # carrier_license_id = False
         # trailer_license_id = False
 

@@ -108,7 +108,7 @@ class AccountMove(models.Model):
         )[0]
 
     def _validate_electronic_invoices(self, soft=False):
-        res = super(AccountMove, self)._validate_electronic_invoices(soft=soft)
+        res = super()._validate_electronic_invoices(soft=soft)
 
         # Para facturas que provienen desde el POS, tenemos que vincular los pagos:
         posted = self.filtered(lambda inv: inv.state == 'posted')
@@ -124,7 +124,7 @@ class AccountMove(models.Model):
         return res
 
     def get_sale_orders_name(self):
-        names = super(AccountMove, self).get_sale_orders_name()
+        names = super().get_sale_orders_name()
         if self.pos_order_ids:
             names = ','.join(self.pos_order_ids.mapped('pos_reference'))
         return names

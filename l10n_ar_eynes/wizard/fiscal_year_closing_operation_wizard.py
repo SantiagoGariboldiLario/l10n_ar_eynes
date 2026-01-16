@@ -234,9 +234,9 @@ class FiscalYearClosingOperationWizard(models.TransientModel):
         for mapping in mapping_ids:
             destination_account = mapping.destination_account_id
             if destination_account:
-                destination_account_totals[
-                    destination_account.id
-                ] = destination_account_totals.get(destination_account.id, 0)
+                destination_account_totals[destination_account.id] = (
+                    destination_account_totals.get(destination_account.id, 0)
+                )
 
             group = mapping.source_account_type
             accounts = self._get_accounts_from_group(group, closing)

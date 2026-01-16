@@ -75,7 +75,8 @@ class AfipBigCompany(models.Model):
         Retrieves all the cuits from AFIP endpoint
         """
         REQ = requests.post(
-            'https://servicioscf.afip.gob.ar/FCEServicioConsulta/api/fceconsulta.aspx/getGrandesEmpresas'  # noqa
+            'https://servicioscf.afip.gob.ar/FCEServicioConsulta/api/fceconsulta.aspx/getGrandesEmpresas',  # noqa
+            timeout=300,
         )
         raw_response = REQ.text
         list_of_cuit = re.findall('Cuit..([0-9]*)', raw_response)

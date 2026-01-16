@@ -241,11 +241,10 @@ class CreateSicoreFiles(models.TransientModel):
             if not codigo_impuesto:
                 raise UserError(
                     _(
-                        """
-                        Error: Add field 'afip code' to retention
-                        (Accounting->Configuration->Retentions->{}->AFIP Code)
-                        """
-                    ).format(tax_journal.name)
+                        "Error: Add field 'afip code' to retention\n"
+                        "(Accounting->Configuration->Retentions->%s->AFIP Code)"
+                    )
+                    % tax_journal.name
                 )
             line = {
                 'codigo_comprobante': '06',
@@ -264,15 +263,15 @@ class CreateSicoreFiles(models.TransientModel):
                 'porcentaje_exclusion': self._format_monetary(
                     porcentaje_exclusion
                 ),
-                'fecha_emision_boletin': date_emited
-                if porcentaje_exclusion != 0
-                else "",  # Solo si hay exclusion
+                'fecha_emision_boletin': (
+                    date_emited if porcentaje_exclusion != 0 else ""
+                ),  # Solo si hay exclusion
                 'tipo_documento_retenido': tipo_doc_retenido,
                 'numero_documento_retenido': nro_doc_retenido,
                 'numero_certificado_original': nro_cert_propio,
-                'denominacion_ordenante': ''
-                if is_local
-                else tax_line.partner_id.name[:30],
+                'denominacion_ordenante': (
+                    '' if is_local else tax_line.partner_id.name[:30]
+                ),
                 'acrecentamiento': '' if is_local else '0',  # Segun longport
                 'cuit_pais_retenido': '' if is_local else '',  # TODO
                 'cuit_ordenante': '' if is_local else '',  # TODO
@@ -382,11 +381,11 @@ class CreateSicoreFiles(models.TransientModel):
         created = (
             "LOCAL & EXT"
             if success_local and success_ext
-            else "LOCAL"
-            if success_local
-            else "EXT"
-            if success_ext
-            else "No success"
+            else (
+                "LOCAL"
+                if success_local
+                else "EXT" if success_ext else "No success"
+            )
         )
 
         if retention_errors_local or retention_errors_ext:

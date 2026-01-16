@@ -253,7 +253,7 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
 
         file.close()
 
-        file = open(head_filename, 'r', encoding='utf-8')
+        file = open(head_filename, encoding='utf-8')
 
         name = self._get_arba_filename()
         name += '.TXT'

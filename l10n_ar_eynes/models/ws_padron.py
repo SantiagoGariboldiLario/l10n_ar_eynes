@@ -3,11 +3,10 @@
 #   License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 ##############################################################################
 
-import logging
-from datetime import datetime
-
 # pyafipws uses SafeConfigParser, removed in Python 3.12; patch it before import.
 import configparser
+import logging
+from datetime import datetime
 
 if not hasattr(configparser, 'SafeConfigParser'):
     configparser.SafeConfigParser = configparser.ConfigParser
@@ -39,7 +38,11 @@ class WsPadronConfig(models.Model):
         url_prod = self.env.ref('l10n_ar_eynes.url_prod_padron').value
         url_homo = self.env.ref('l10n_ar_eynes.url_homo_padron').value
         for rec in self:
-            rec.url = url_homo.strip() if rec.config_id.homologation else url_prod.strip()
+            rec.url = (
+                url_homo.strip()
+                if rec.config_id.homologation
+                else url_prod.strip()
+            )
 
     def _get_webservice(self):
         return self.env.ref('l10n_ar_eynes.afipws_service_ws_padron')

@@ -165,7 +165,7 @@ class WsPOSLine(models.Model):
         if journal_id:
             journal = self.env['account.journal'].browse(journal_id)
             journal.fiscal_type = 'electronic'
-        return super(WsPOSLine, self).write(vals)
+        return super().write(vals)
 
     def _set_journal_electronic(self, journal_id):
         if journal_id:
@@ -177,14 +177,14 @@ class WsPOSLine(models.Model):
         if isinstance(vals, list):
             for entry in vals:
                 self._set_journal_electronic(entry.get('journal_id'))
-            return super(WsPOSLine, self).create(vals)
+            return super().create(vals)
         self._set_journal_electronic(vals.get('journal_id'))
-        return super(WsPOSLine, self).create(vals)
+        return super().create(vals)
 
     def unlink(self):
         if self.journal_id:
             self.journal_id.fiscal_type = 'internal'
-        return super(WsPOSLine, self).unlink()
+        return super().unlink()
 
 
 class WsTaxCodes(models.Model):
@@ -327,12 +327,12 @@ class WsConfig(models.Model):
             ta_vals = self._create_ta(record_vals)
             record_vals.update(ta_vals)
             records.append(record_vals)
-        return super(WsConfig, self).create(records)
+        return super().create(records)
 
     def unlink(self):
         for ws_conf in self:
             ws_conf.wsaa_ticket_id.unlink()
-        return super(WsConfig, self).unlink()
+        return super().unlink()
 
     @api.model
     def get_config(self):

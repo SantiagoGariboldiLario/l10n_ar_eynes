@@ -208,7 +208,7 @@ class ReportFiles(models.Model):
         # Remove related records from error_ids
         for rec in self:
             rec.error_ids.unlink()
-        return super(ReportFiles, self).unlink()
+        return super().unlink()
 
 
 class ReportFilesError(models.Model):

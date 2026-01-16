@@ -18,20 +18,23 @@ class AccountMoveReversal(models.TransientModel):
 
     @api.model
     def default_get(self, fields):
-        res = super(AccountMoveReversal, self).default_get(fields)
+        res = super().default_get(fields)
         if 'refund_method' in fields:
             res['refund_method'] = 'refund'
         return res
 
     def _get_voucher_type(self, move):
-        return self.env['res.voucher.type'].search([
-            ('denomination', '=', move.denomination),
-            ('doc_type', '=', 'cn'),
-            ('afip_code', '>' if move.is_FCE_invoice else '<', 200)
-        ], limit=1)
+        return self.env['res.voucher.type'].search(
+            [
+                ('denomination', '=', move.denomination),
+                ('doc_type', '=', 'cn'),
+                ('afip_code', '>' if move.is_FCE_invoice else '<', 200),
+            ],
+            limit=1,
+        )
 
     def _prepare_default_reversal(self, move):
-        vals = super(AccountMoveReversal, self)._prepare_default_reversal(move)
+        vals = super()._prepare_default_reversal(move)
         vals.update(
             {
                 'associated_inv_ids': [move.id],

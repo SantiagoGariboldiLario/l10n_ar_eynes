@@ -22,7 +22,7 @@
     'name': 'l10n Argentina (Eynes v19)',
     'version': '19.0.0.0.1',
     'author': 'Eynes',
-    'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
+    'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes/',
     'license': 'AGPL-3',
     'category': 'Accounting/Accounting',
     'excludes': [
@@ -71,7 +71,7 @@
         "data/sifere_data.xml",
         "report/account_move_report.xml",
         "data/mail_template.xml",
-        # "data/res_city_data.xml",
+        "data/res_city_data.xml",
         'security/cot_security.xml',
         'security/delivery_cot_security.xml',
         'security/account_security.xml',

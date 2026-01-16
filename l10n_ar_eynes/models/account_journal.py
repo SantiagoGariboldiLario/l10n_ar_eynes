@@ -95,7 +95,7 @@ class AccountJournal(models.Model):
     warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse',
         string='Warehouse',
-        default=get_default_warehouse,
+        default=lambda self: self.get_default_warehouse(),
     )
     due_date = fields.Date(
         string='Due Date',
@@ -240,7 +240,7 @@ class AccountJournal(models.Model):
 
     @api.depends('type')
     def _compute_default_account_type(self):
-        super(AccountJournal, self)._compute_default_account_type()
+        super()._compute_default_account_type()
         default_account_id_types = {
             'receipt': 'income%',
             'payment': 'expense%',
@@ -433,9 +433,9 @@ class AccountJournal(models.Model):
                 'number_next_actual': self.sequence_number_next,
                 'implementation': 'no_gap',
                 'padding': 8 if self.type == 'sale' else 0,
-                'prefix': '%s-' % self.get_pos_number()
-                if self.type == 'sale'
-                else '',
+                'prefix': (
+                    '%s-' % self.get_pos_number() if self.type == 'sale' else ''
+                ),
             },
         }
         if self.type == 'sale':
@@ -497,7 +497,10 @@ class AccountJournal(models.Model):
         }
         for journal in self:
             journal_data = dashboard_data.get(journal.id)
-            if journal_data is not None and 'drag_drop_settings' not in journal_data:
+            if (
+                journal_data is not None
+                and 'drag_drop_settings' not in journal_data
+            ):
                 journal_data['drag_drop_settings'] = fallback_drag_drop
         return dashboard_data
 
@@ -513,13 +516,13 @@ class AccountJournal(models.Model):
         }
         custom_journals = self.filtered(lambda j: j.type in custom_type_names)
         standard_journals = self - custom_journals
-        
+
         if standard_journals:
             super(AccountJournal, standard_journals)._compute_name_placeholder()
-            
+
         for journal in custom_journals:
             name = custom_type_names.get(journal.type, _("Journal"))
-            
+
             # Mimic standard behavior: "Type (ShortCode)"
             if journal.code:
                 journal.name_placeholder = f"{name} ({journal.code})"
@@ -529,9 +532,9 @@ class AccountJournal(models.Model):
     @api.depends('type', 'company_id')
     def _compute_code(self):
         """Compute default code for custom journal types.
-        
+
         This fixes TypeError when creating journals with custom types since
-        the core Odoo _get_next_journal_default_code doesn't recognize 
+        the core Odoo _get_next_journal_default_code doesn't recognize
         these types and returns None for the code base.
         """
         custom_type_codes = {
@@ -542,22 +545,28 @@ class AccountJournal(models.Model):
             'retentions': 'RET',
             'perceptions': 'PER',
         }
-        
+
         custom_journals = self.filtered(lambda j: j.type in custom_type_codes)
         standard_journals = self - custom_journals
-        
+
         if standard_journals:
             super(AccountJournal, standard_journals)._compute_code()
-        
+
         for journal in custom_journals:
             if not journal.code:
                 base_code = custom_type_codes[journal.type]
                 # Find the next available code for this type
-                existing_codes = self.env['account.journal'].search([
-                    ('code', '=like', base_code + '%'),
-                    ('company_id', '=', journal.company_id.id),
-                ]).mapped('code')
-                
+                existing_codes = (
+                    self.env['account.journal']
+                    .search(
+                        [
+                            ('code', '=like', base_code + '%'),
+                            ('company_id', '=', journal.company_id.id),
+                        ]
+                    )
+                    .mapped('code')
+                )
+
                 if base_code not in existing_codes:
                     journal.code = base_code
                 else:
@@ -566,4 +575,3 @@ class AccountJournal(models.Model):
                     while f"{base_code}{counter}" in existing_codes:
                         counter += 1
                     journal.code = f"{base_code}{counter}"
-

@@ -22,16 +22,16 @@ class AccountIncoterms(models.Model):
     _name = 'account.incoterms'
     _inherit = 'account.incoterms'
 
-    def name_get(self):
-        res = []
+    display_name = fields.Char(compute='_compute_display_name', store=True)
+
+    @api.depends('code', 'name')
+    def _compute_display_name(self):
         for inc in self:
             name_lst = []
             if inc.code:
                 name_lst.append("[%s]" % inc.code)
             name_lst.append(inc.name)
-            name = (" ").join(name_lst)
-            res.append((inc.id, name))
-        return res
+            inc.display_name = (" ").join(name_lst)
 
 
 class WsfexShippingPermission(models.Model):
@@ -189,7 +189,7 @@ class WsfexConfig(models.Model):
         self.env['wsfex.uom.codes'].search(
             [('wsfex_config_id', '=', self.id)]
         ).unlink()
-        return super(WsfexConfig, self).unlink()
+        return super().unlink()
 
     def _create_records_from_afip_result_no_date(
         self, ws, result, model_to_create

@@ -57,7 +57,7 @@ class AccountChangeCurrency(models.TransientModel):
     actual_currency_id = fields.Many2one(
         'res.currency',
         string="Actual Currency",
-        default=_get_actual_currency_id,
+        default=lambda self: self._get_actual_currency_id(),
         readonly=True,
     )
     actual_currency_preciated = fields.Boolean(
@@ -68,11 +68,11 @@ class AccountChangeCurrency(models.TransientModel):
     actual_currency_rate = fields.Float(
         digits=(12, 8),
         string="Actual Currency Rate",
-        default=_get_actual_currency_rate,
+        default=lambda self: self._get_actual_currency_rate(),
         readonly=True,
     )
     company_currency = fields.Many2one(
-        'res.currency', default=_get_company_currency_id
+        'res.currency', default=lambda self: self._get_company_currency_id()
     )
     new_currency_id = fields.Many2one('res.currency', string="New Currency")
     new_currency_preciated = fields.Boolean(

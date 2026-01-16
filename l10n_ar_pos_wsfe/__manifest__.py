@@ -20,9 +20,9 @@
 
 {
     'name': 'Pos AR WSFE',
-    'version': '17.0.1.3.0',
+    'version': '19.0.1.3.0',
     'author': 'Eynes',
-    'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
+    'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes/',
     'license': 'AGPL-3',
     'category': 'Accounting/Accounting',
     'depends': [
@@ -51,6 +51,6 @@
         ],
     },
     "external_dependencies": {},
-    'installable': True,
+    'installable': False,
     'application': True,
 }

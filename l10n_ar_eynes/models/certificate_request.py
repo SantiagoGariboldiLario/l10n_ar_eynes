@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 try:
     from cryptography.hazmat.primitives import serialization
     from OpenSSL import crypto
-except (ImportError, IOError) as e:
+except (ImportError, OSError) as e:
     _logger.debug("Cannot import crypto from OpenSSL: \n%s" % repr(e))
 
 
@@ -96,13 +96,13 @@ class WSAACertificateRequest(models.Model):
                     crypto.FILETYPE_PEM, self.old_certificate
                 )
                 CertSubj = Cert.get_subject()
-            except Exception:
+            except Exception as err:
                 raise ValidationError(
                     _(
                         "Either the Request Information or the "
                         + "Old Certificate must be complete!"
                     )
-                )
+                ) from err
         CReqSubj.C = self.subj_c or CertSubj.C
         CReqSubj.O = self.subj_o or CertSubj.O  # noqa
         CReqSubj.CN = self.subj_cn or CertSubj.CN

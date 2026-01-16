@@ -39,7 +39,7 @@ class ResCurrency(models.Model):
             elif currency2 == from_currency and currency1 == to_currency:
                 return rate1 / rate2
 
-        return super(ResCurrency, self)._get_conversion_rate(
+        return super()._get_conversion_rate(
             from_currency, to_currency, company=company, date=date
         )
 
@@ -56,7 +56,9 @@ class ResCurrency(models.Model):
         return rate_id
 
     # pylint: disable=redefined-builtin
-    def _convert(self, from_amount, to_currency, company=None, date=None, round=True):
+    def _convert(
+        self, from_amount, to_currency, company=None, date=None, round=True
+    ):
         if (
             self._context.get('currency_rate')
             and self._context.get('currency_rate') != 0

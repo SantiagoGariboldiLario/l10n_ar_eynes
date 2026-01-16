@@ -61,11 +61,6 @@
         <field name="type">gross_income</field>
     </record>
 
-    <record forcecreate="0" id="perception_concept_caba" model="perception.concept">
-        <field name="name">Ciudad Autónoma de Buenos Aires</field>
-        <field name="type">gross_income</field>
-    </record>
-
     <record forcecreate="0" id="perception_concept_catamarca" model="perception.concept">
         <field name="name">Catamarca</field>
         <field name="type">gross_income</field>

@@ -87,12 +87,6 @@
         <field name="code">119</field>
     </record>
 
-    <record forcecreate="0" id="retention_concept_no_subject" model="retention.concept">
-        <field name="name">No Sujeto</field>
-        <field name="type">profit</field>
-        <field name="no_subject">True</field>
-    </record>
-
     <record forcecreate="0" id="retention_concept_3" model="retention.concept">
         <field name="name">Ret. Ga. Locaciones de Bs. y Serv RI</field>
         <field name="type">profit</field>
@@ -117,11 +111,6 @@
         <field name="name">No sujeto</field>
         <field name="type">gross_income</field>
         <field name="no_subject">True</field>
-    </record>
-
-    <record forcecreate="0" id="retention_concept_caba" model="retention.concept">
-        <field name="name">Ciudad Autónoma de Buenos Aires</field>
-        <field name="type">gross_income</field>
     </record>
 
     <record forcecreate="0" id="retention_concept_ba" model="retention.concept">

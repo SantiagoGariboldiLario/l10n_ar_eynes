@@ -62,7 +62,9 @@ class WSAALoadConfig(models.TransientModel):
         }
         obj.write(write_vals)
 
-    certificate = fields.Binary('Certificate of Approval', help="You certificate (.crt)")
+    certificate = fields.Binary(
+        'Certificate of Approval', help="You certificate (.crt)"
+    )
     cert_name = fields.Char('Cert FileName')
     key = fields.Binary('Private Key', help="You Privary Key Here")
     key_name = fields.Char('Key FileName')

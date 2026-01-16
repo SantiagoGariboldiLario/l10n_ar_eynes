@@ -98,7 +98,7 @@ class StockPicking(models.Model):
             self.dom_partner_id = self.carrier_id.id
 
     def _action_done(self):
-        res = super(StockPicking, self)._action_done()
+        res = super()._action_done()
         picking_ids = self.env.context.get('button_validate_picking_ids', [])
 
         for picking_id in picking_ids:
@@ -146,7 +146,7 @@ class StockPicking(models.Model):
                     'declared_value': reg._get_declared_value(),
                 }
             )
-        return super(StockPicking, self).button_validate()
+        return super().button_validate()
 
     def is_refund(self):
         usage_origin = self.location_id.usage

@@ -113,7 +113,7 @@ patch(PaymentScreen.prototype, {
             this.render();
         } catch (error) {
             if (error instanceof ConnectionLostError) {
-                // this.env.services.popup.add(ErrorPopup, {
+                // This.env.services.popup.add(ErrorPopup, {
                 //     title: _t("Error"),
                 //     body: _t("Unable to get next sequence."),
                 // });
@@ -163,9 +163,8 @@ patch(PaymentScreen.prototype, {
     get_invoice_report_action: function () {
         if (this.currentOrder.is_electronic_invoice()) {
             return "l10n_ar_eynes.account_move_report";
-        } else {
-            return "l10n_ar_pos_wsfe.account_invoices";
         }
+        return "l10n_ar_pos_wsfe.account_invoices";
     },
 
     async _finalizeValidation() {
@@ -214,9 +213,8 @@ patch(PaymentScreen.prototype, {
                 this.pos.showScreen(this.nextScreen);
                 Promise.reject(error);
                 return error;
-            } else {
-                throw error;
             }
+            throw error;
         } finally {
             this.env.services.ui.unblock();
         }
@@ -226,7 +224,7 @@ patch(PaymentScreen.prototype, {
             await this.postPushOrderResolve(syncOrderResult.map((res) => res.id));
         }
 
-        await this.afterOrderValidation(!!syncOrderResult && syncOrderResult.length > 0);
+        await this.afterOrderValidation(Boolean(syncOrderResult) && syncOrderResult.length > 0);
 
         if (invoice_state_draft) {
             this.env.services.popup.add(ErrorPopup, {

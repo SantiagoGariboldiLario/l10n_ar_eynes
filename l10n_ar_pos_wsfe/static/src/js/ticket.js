@@ -1,7 +1,4 @@
 odoo.define("l10n_ar_pos_wsfe.WSFETicketScreen", function (require) {
-    "use strict";
-
-    // eslint-disable-next-line no-shadow
     const TicketScreen = require("point_of_sale.TicketScreen");
     const Registries = require("point_of_sale.Registries");
 

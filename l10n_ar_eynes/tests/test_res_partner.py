@@ -1,4 +1,3 @@
-# -- coding: utf-8 --
 ##############################################################################
 #
 #   Copyright (c) 2022-2023 Eynes SRL (Eynes - Ingenieria del software)
@@ -9,9 +8,8 @@
 import logging
 import unittest
 
-from odoo.tests.common import TransactionCase, Form
 from odoo.exceptions import ValidationError
-
+from odoo.tests.common import Form, TransactionCase
 
 _logger = logging.getLogger(__name__)
 
@@ -19,7 +17,7 @@ _logger = logging.getLogger(__name__)
 class TestResPartnerForm(TransactionCase):
 
     def setUp(self):
-        super(TestResPartnerForm, self).setUp()
+        super().setUp()
         self.ResPartner = self.env["res.partner"]
         self.company_types = ("person", "company")
         self.form = Form(self.ResPartner)
@@ -29,7 +27,7 @@ class TestResPartnerForm(TransactionCase):
 class TestResPartnerDocumentTypeAndVat(TestResPartnerForm):
 
     def setUp(self):
-        super(TestResPartnerDocumentTypeAndVat, self).setUp()
+        super().setUp()
         self.ResDocumentType = self.env["res.document.type"]
 
     def test_CUIT(self):

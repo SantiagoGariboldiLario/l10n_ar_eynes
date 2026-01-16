@@ -57,17 +57,15 @@ class AccountCheckConfig(models.Model):
         string='Rejected check Product ID',
         help='Product to be use on Debit Note when a Third Party check is rejected',
     )
+    display_name = fields.Char(compute='_compute_display_name', store=True)
 
-    def name_get(self):
-        ret = []
+    @api.depends('company_id.name', 'account_id.name')
+    def _compute_display_name(self):
         for config in self:
-            ret.append(
-                (
-                    config.id,
-                    "%s: %s" % (config.company_id.name, config.account_id.name),
-                )
+            config.display_name = "%s: %s" % (
+                config.company_id.name,
+                config.account_id.name,
             )
-        return ret
 
 
 class AccountCheck(models.Model):
@@ -88,7 +86,7 @@ class AccountCheck(models.Model):
         comodel_name='account.journal',
         string='Journal',
         required=True,
-        default=_get_default_journal,
+        default=lambda self: self._get_default_journal(),
     )
     journal_bank_id = fields.Many2one(
         related='journal_id.bank_account_id', string="Journal Bank Account"
@@ -211,27 +209,30 @@ class AccountCheck(models.Model):
             if not val.get('company_id', False):
                 # No lo solicitaron pero para mi tiene que agregarse esta validación
                 val['company_id'] = self.env.company.id
-        return super(AccountCheck, self).create(vals_list)
+        return super().create(vals_list)
 
     def unlink(self):
         """
-        method gets overrided to ensure that check must be in specif state to get
-        deleted
+        Unlink checks was moved to api.ondelete method
         """
-        for check in self:
-            if check.internal_type == 'third_party':
-                if check.third_party_check_state != 'draft':
-                    raise UserError(
-                        _(
-                            "Check Error! You cannot delete a third check that is "
-                            "not in Draft"
-                        )
-                    )
-            elif check.internal_type == 'issued':
-                raise UserError(
-                    _("Check Error! You cannot delete an Issued Check")
+        return super().unlink()
+
+    @api.ondelete(at_uninstall=False)
+    def _check_unlink_constraints(self):
+        undeletable_third_party = self.filtered(
+            lambda c: c.internal_type == 'third_party'
+            and c.third_party_check_state != 'draft'
+        )
+        if undeletable_third_party:
+            raise UserError(
+                _(
+                    "Check Error! You cannot delete a third check that is not in Draft"
                 )
-        return super(AccountCheck, self).unlink()
+            )
+
+        issued_checks = self.filtered(lambda c: c.internal_type == 'issued')
+        if issued_checks:
+            raise UserError(_("Check Error! You cannot delete an Issued Check"))
 
     def cancel_check(self, reason):
         """
@@ -611,7 +612,6 @@ class AccountCheck(models.Model):
                 )
             )
 
-        self.checkbook_id.bank_account_id.currency_id.id
         debit = credit = 0.0
         if voucher.type in ('purchase', 'payment'):
             credit = self.amount
@@ -862,8 +862,8 @@ class AccountCheck(models.Model):
 
         # TODO: Chequear que funcione bien en
         # multicurrency estas dos lineas de abajo
-        voucher.company_id.currency_id.id
-        self.currency_id.id
+        # voucher.company_id.currency_id.id
+        # self.currency_id.id
 
         # amount_in_company_currency = (
         #     voucher._convert_paid_amount_in_company_currency(self.amount)
@@ -970,7 +970,7 @@ class AccountCheck(models.Model):
             }
 
     def get_formview_id(self, access_uid=None):
-        res = super(AccountCheck, self).get_formview_id(access_uid=access_uid)
+        res = super().get_formview_id(access_uid=access_uid)
         if (
             self._context.get('internal_type', '') == 'third_party'
             or self.internal_type == 'third_party'

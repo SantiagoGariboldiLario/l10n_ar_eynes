@@ -35,11 +35,11 @@ class WsRequest(models.Model):
         user_tz_date = fields.Datetime.now()
         for val in vals:
             val.update({'date_request': user_tz_date})
-        return super(WsRequest, self).create(vals)
+        return super().create(vals)
 
     def unlink(self):
         self.detail_ids.unlink()
-        return super(WsRequest, self).unlink()
+        return super().unlink()
 
 
 class WsRequestDetail(models.Model):
@@ -81,28 +81,40 @@ class WsRequestDetail(models.Model):
     events = fields.Char('Events', readonly=True)
     errors = fields.Text('Errors', readonly=True)
 
-    def unlink(self):
-        if (
-            self.env.user.has_group(
-                'l10n_ar_eynes.group_arca_request_administrator'
-            )
-            or self.is_currency_request
+    @api.ondelete(at_uninstall=False)
+    def _check_ws_request_detail_unlink(self):
+        user = self.env.user
+
+        if not (
+            user.has_group('l10n_ar_eynes.group_arca_request_administrator')
+            or any(self.mapped('is_currency_request'))
         ):
-            for rec in self:
-                if rec.result == 'A':
-                    raise ValidationError(
-                        _('You cannot delete a request with approved status.')
-                    )
-                if self.env['ws.request.detail'].search(
-                    [
-                        ('request_id', '=', rec.request_id.id),
-                    ]
-                ) == rec and not self.env.context.get('delete_parent', False):
-                    return rec.request_id.with_context(
-                        delete_parent=True
-                    ).unlink()
-                return super(WsRequestDetail, rec).unlink()
-        else:
             raise ValidationError(
                 _('You do not have permission to delete this record.')
             )
+
+        approved_requests = self.filtered(lambda r: r.result == 'A')
+        if approved_requests:
+            raise ValidationError(
+                _('You cannot delete a request with approved status.')
+            )
+
+    def unlink(self):
+        """
+        Unlink request restrictions was moved to api.ondelete method
+        """
+        WsRequestDetail = self.env['ws.request.detail']
+
+        for rec in self:
+            # Si este es el único detail del request y no venimos del padre
+            other_details = WsRequestDetail.search(
+                [('request_id', '=', rec.request_id.id)]
+            )
+            if other_details == rec and not self.env.context.get(
+                'delete_parent', False
+            ):
+                rec.request_id.with_context(delete_parent=True).unlink()
+            else:
+                super(WsRequestDetail, rec).unlink()
+
+        return True

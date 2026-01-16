@@ -20,7 +20,7 @@ class PurchaseOrder(models.Model):
         Add currency rate to invoice_vals
         (Allow to compute correctly amount fields)
         """
-        invoice_vals = super(PurchaseOrder, self)._prepare_invoice()
+        invoice_vals = super()._prepare_invoice()
         date_invoice = fields.Date.today()
         company = self.env.company
         company_currency = company.currency_id
@@ -38,7 +38,7 @@ class PurchaseOrder(models.Model):
         return invoice_vals
 
     def action_view_invoice(self, invoices=False):
-        res = super(PurchaseOrder, self).action_view_invoice(invoices=invoices)
+        res = super().action_view_invoice(invoices=invoices)
         if not invoices:
             # Invoice_ids may be filtered depending on the user. To ensure we get all
             # invoices related to the purchase order, we read them in sudo to fill the

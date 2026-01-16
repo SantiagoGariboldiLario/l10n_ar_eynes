@@ -6,19 +6,19 @@ import {patch} from "@web/core/utils/patch";
 patch(PaymentScreenStatus.prototype, {
     getTaxesTotals(taxNameContains) {
         let total = 0.0;
-        let groupTaxes = {};
+        const groupTaxes = {};
 
         this.props.order.orderlines.forEach(function (line) {
-            let taxDetails = line.get_tax_details();
-            let taxIds = Object.keys(taxDetails);
+            const taxDetails = line.get_tax_details();
+            const taxIds = Object.keys(taxDetails);
 
             for (let t = 0; t < taxIds.length; t++) {
-                let taxId = taxIds[t];
+                const taxId = taxIds[t];
                 if (!(taxId in groupTaxes)) {
                     groupTaxes[taxId] = 0;
                 }
 
-                let taxAmount = parseFloat(taxDetails[taxId].amount);
+                const taxAmount = parseFloat(taxDetails[taxId].amount);
                 if (!isNaN(taxAmount)) {
                     groupTaxes[taxId] += taxAmount;
                 } else {
@@ -27,11 +27,11 @@ patch(PaymentScreenStatus.prototype, {
             }
         });
 
-        let taxIds = Object.keys(groupTaxes);
+        const taxIds = Object.keys(groupTaxes);
 
         for (let j = 0; j < taxIds.length; j++) {
-            let taxAmount = groupTaxes[taxIds[j]];
-            let taxName = this.env.services.pos.taxes_by_id[taxIds[j]].name;
+            const taxAmount = groupTaxes[taxIds[j]];
+            const taxName = this.env.services.pos.taxes_by_id[taxIds[j]].name;
 
             if (taxName.toLowerCase().startsWith(taxNameContains)) {
                 total += taxAmount;
@@ -41,7 +41,7 @@ patch(PaymentScreenStatus.prototype, {
     },
 
     get total_iva_and_retentions() {
-        let total_value = this.getTaxesTotals("iva");
+        const total_value = this.getTaxesTotals("iva");
         return this.env.utils.formatCurrency(total_value);
     },
 

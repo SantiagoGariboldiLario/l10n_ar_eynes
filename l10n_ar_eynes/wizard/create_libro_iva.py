@@ -105,13 +105,13 @@ class LibroIVAExporterWizard(models.TransientModel):
     def _get_tax_lines_qty(self, invoice):
         qty = 0
         if invoice.denomination in ['C']:
-            return u'{}'.format(qty)
+            return '{}'.format(qty)
         qty += len(
             invoice.invoice_line_ids.mapped('tax_ids')
             .filtered(lambda tax: tax.tax_group_id.group_type == 'vat')
             .ids
         )
-        return u'{}'.format(qty) if qty < 10 else False
+        return '{}'.format(qty) if qty < 10 else False
 
     def _get_amount_original_currency(self, invoice, amount, amount_cur):
         return ('%016.2f' % amount).replace('.', '')
@@ -569,7 +569,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         if has_iva_exempt:
             amount_total_no_taxed = ('%016.2f' % 0).replace('.', '')
             amount_exempt = ('%016.2f' % 0).replace('.', '')
-            tax_lines_qty = u'{}'.format(1)
+            tax_lines_qty = '{}'.format(1)
             operation_code = 'E'
 
         uncategorized_perception = ('%016.2f' % 0).replace(

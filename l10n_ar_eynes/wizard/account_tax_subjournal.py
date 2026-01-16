@@ -31,7 +31,7 @@ class AccountTaxSubjournal(models.TransientModel):
     date_to = fields.Date(string='End of period', default=fields.Date.today)
     report_id = fields.Many2one(
         'ir.actions.report',
-        default=_get_report_id,
+        default=lambda self: self._get_report_id(),
         string='Report',
     )
     based_on = fields.Selection(

@@ -1,6 +1,5 @@
 from odoo import api, models
 
-
 FIELDS_RECURSION_LIMIT = 3
 
 
@@ -9,7 +8,7 @@ class Import(models.TransientModel):
 
     @api.model
     def get_fields_tree(self, model, depth=FIELDS_RECURSION_LIMIT):
-        res = super(Import, self).get_fields_tree(model, depth=depth)
+        res = super().get_fields_tree(model, depth=depth)
         if model == 'account.check':
             res.extend(
                 [

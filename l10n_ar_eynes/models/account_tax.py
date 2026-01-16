@@ -119,7 +119,7 @@ class AccountTax(models.Model):
     # ==================================================================================
     # v19 Migration: Override _prepare_tax_lines to modify tax dict BEFORE lines are created
     # This is cleaner than using write() after _sync_tax_lines
-    # 
+    #
     # LÓGICA: Interceptamos el diccionario tax_results antes de que se procese.
     # Modificamos los valores de percepciones e impuestos internos según lo ingresado
     # en perception_ids e internal_taxes_ids del move.
@@ -129,139 +129,181 @@ class AccountTax(models.Model):
         """
         Override to adjust perception and internal tax amounts based on
         perception_ids and internal_taxes_ids from the move.
-        
+
         CAMBIO v19: En v17, _compute_all_tax modificaba el campo compute_all_tax.
         En v19, interceptamos tax_results aquí y modificamos los valores
         ANTES de que se creen las líneas de impuestos.
         """
         # 1. Call super to get the standard tax results
-        tax_results = super()._prepare_tax_lines(base_lines, company, tax_lines=tax_lines)
-        
+        tax_results = super()._prepare_tax_lines(
+            base_lines, company, tax_lines=tax_lines
+        )
+
         # 2. Get the move from the base_lines (if available)
         # base_lines es una lista de dicts que tienen 'record' apuntando al account.move.line
         if not base_lines:
             return tax_results
-        
+
         # Get the first record to find the move
         first_base = base_lines[0]
         record = first_base.get('record')
         if not record or not hasattr(record, 'move_id'):
             return tax_results
-        
+
         move = record.move_id
         if not move or not move.is_invoice(include_receipts=True):
             return tax_results
-        
+
         # 3. Adjust perception tax amounts
         # LÓGICA ORIGINAL: Tomamos los totales de perception_ids y los usamos
         # en lugar de los valores calculados por el motor de impuestos estándar
         if hasattr(move, 'perception_ids') and move.perception_ids:
             self._adjust_perception_tax_results(move, tax_results)
-        
+
         # 4. Adjust internal tax amounts (only for purchase documents)
         # LÓGICA ORIGINAL: Solo aplica para documentos de compra con impuestos internos
-        if move.is_purchase_document() and hasattr(move, 'internal_taxes_ids') and move.internal_taxes_ids:
+        if (
+            move.is_purchase_document()
+            and hasattr(move, 'internal_taxes_ids')
+            and move.internal_taxes_ids
+        ):
             self._adjust_internal_tax_results(move, tax_results)
-        
+
         return tax_results
-    
+
     def _adjust_perception_tax_results(self, move, tax_results):
         """
         Adjust tax_results for perceptions based on perception_ids.
-        
-        LÓGICA ORIGINAL v17: Se tomaban los valores de perception_ids.base y 
+
+        LÓGICA ORIGINAL v17: Se tomaban los valores de perception_ids.base y
         perception_ids.amount y se redistribuían en compute_all_tax.
-        
+
         CAMBIO v19: Ahora modificamos directamente tax_results['tax_lines_to_add']
         y tax_results['tax_lines_to_update'].
-        
+
         FIX: En v19, el grouping_key usa 'tax_repartition_line_id', no 'tax_id'.
         Debemos obtener las repartition lines de la percepción y comparar contra eso.
         """
         sign = -1 if move.is_inbound() else 1
-        
+
         # Get all perception taxes from perception_ids
         for perception_line in move.perception_ids:
             perception_tax = perception_line.perception_id
             if not perception_tax:
                 continue
-            
+
             perception_amount = perception_line.amount
-            
+
             # FIX v19: Obtener las repartition lines de la percepción
             # para poder hacer el match correcto con el grouping_key
-            perception_repartition_line_ids = perception_tax.invoice_repartition_line_ids.filtered(
-                lambda r: r.repartition_type == 'tax'
-            ).ids
-            if move.is_purchase_document():
-                perception_repartition_line_ids = perception_tax.refund_repartition_line_ids.filtered(
+            perception_repartition_line_ids = (
+                perception_tax.invoice_repartition_line_ids.filtered(
                     lambda r: r.repartition_type == 'tax'
                 ).ids
-            
+            )
+            if move.is_purchase_document():
+                perception_repartition_line_ids = (
+                    perception_tax.refund_repartition_line_ids.filtered(
+                        lambda r: r.repartition_type == 'tax'
+                    ).ids
+                )
+
             # Check tax_lines_to_add
             # FIX: El dict tiene 'tax_repartition_line_id' como campo, no 'tax_id'
-            for i, tax_vals in enumerate(tax_results.get('tax_lines_to_add', [])):
+            for i, tax_vals in enumerate(
+                tax_results.get('tax_lines_to_add', [])
+            ):
                 rep_line_id = tax_vals.get('tax_repartition_line_id')
-                if rep_line_id and rep_line_id in perception_repartition_line_ids:
+                if (
+                    rep_line_id
+                    and rep_line_id in perception_repartition_line_ids
+                ):
                     # CAMBIO v19: Modificamos el dict en lugar de escribir al campo
                     # Usamos el monto de perception_ids
                     rate = move.currency_rate or 1.0
                     # Actualizamos los valores con los de la percepción ingresada
-                    tax_results['tax_lines_to_add'][i]['amount_currency'] = sign * perception_amount
-                    tax_results['tax_lines_to_add'][i]['balance'] = sign * perception_amount / rate
-            
+                    tax_results['tax_lines_to_add'][i]['amount_currency'] = (
+                        sign * perception_amount
+                    )
+                    tax_results['tax_lines_to_add'][i]['balance'] = (
+                        sign * perception_amount / rate
+                    )
+
             # Check tax_lines_to_update
-            for i, (tax_line_vals, grouping_key, amounts) in enumerate(tax_results.get('tax_lines_to_update', [])):
+            for _i, (_tax_line_vals, grouping_key, amounts) in enumerate(
+                tax_results.get('tax_lines_to_update', [])
+            ):
                 # FIX: Usamos grouping_key que tiene 'tax_repartition_line_id'
-                rep_line_id = grouping_key.get('tax_repartition_line_id') if isinstance(grouping_key, dict) else None
-                if rep_line_id and rep_line_id in perception_repartition_line_ids:
+                rep_line_id = (
+                    grouping_key.get('tax_repartition_line_id')
+                    if isinstance(grouping_key, dict)
+                    else None
+                )
+                if (
+                    rep_line_id
+                    and rep_line_id in perception_repartition_line_ids
+                ):
                     # CAMBIO v19: Modificamos el dict amounts
                     rate = move.currency_rate or 1.0
                     amounts['amount_currency'] = sign * perception_amount
                     amounts['balance'] = sign * perception_amount / rate
-    
+
     def _adjust_internal_tax_results(self, move, tax_results):
         """
         Adjust tax_results for internal taxes based on internal_taxes_ids.
-        
+
         LÓGICA ORIGINAL v17: Igual que percepciones pero para impuestos internos.
         FIX: Usar tax_repartition_line_id en lugar de tax_id.
         """
         sign = -1 if move.is_inbound() else 1
-        
+
         for internal_line in move.internal_taxes_ids:
             internal_tax = internal_line.tax_id
             if not internal_tax:
                 continue
-            
+
             internal_amount = internal_line.amount
-            
+
             # FIX v19: Obtener las repartition lines del impuesto interno
-            internal_repartition_line_ids = internal_tax.invoice_repartition_line_ids.filtered(
-                lambda r: r.repartition_type == 'tax'
-            ).ids
-            if move.is_purchase_document():
-                internal_repartition_line_ids = internal_tax.refund_repartition_line_ids.filtered(
+            internal_repartition_line_ids = (
+                internal_tax.invoice_repartition_line_ids.filtered(
                     lambda r: r.repartition_type == 'tax'
                 ).ids
-            
+            )
+            if move.is_purchase_document():
+                internal_repartition_line_ids = (
+                    internal_tax.refund_repartition_line_ids.filtered(
+                        lambda r: r.repartition_type == 'tax'
+                    ).ids
+                )
+
             # Check tax_lines_to_add
             # FIX: El dict tiene 'tax_repartition_line_id' como campo
-            for i, tax_vals in enumerate(tax_results.get('tax_lines_to_add', [])):
+            for i, tax_vals in enumerate(
+                tax_results.get('tax_lines_to_add', [])
+            ):
                 rep_line_id = tax_vals.get('tax_repartition_line_id')
                 if rep_line_id and rep_line_id in internal_repartition_line_ids:
                     rate = move.currency_rate or 1.0
-                    tax_results['tax_lines_to_add'][i]['amount_currency'] = sign * internal_amount
-                    tax_results['tax_lines_to_add'][i]['balance'] = sign * internal_amount / rate
-            
+                    tax_results['tax_lines_to_add'][i]['amount_currency'] = (
+                        sign * internal_amount
+                    )
+                    tax_results['tax_lines_to_add'][i]['balance'] = (
+                        sign * internal_amount / rate
+                    )
+
             # Check tax_lines_to_update
-            for i, (tax_line_vals, grouping_key, amounts) in enumerate(tax_results.get('tax_lines_to_update', [])):
+            for _i, (tax_line_vals, _grouping_key, amounts) in enumerate(
+                tax_results.get('tax_lines_to_update', [])
+            ):
                 tax_line_record = tax_line_vals.get('record')
-                if tax_line_record and tax_line_record.tax_line_id == internal_tax:
+                if (
+                    tax_line_record
+                    and tax_line_record.tax_line_id == internal_tax
+                ):
                     rate = move.currency_rate or 1.0
                     amounts['amount_currency'] = sign * internal_amount
                     amounts['balance'] = sign * internal_amount / rate
-
 
     def _check_syntax_python_code(self):
         for reg in self:
@@ -465,7 +507,7 @@ class AccountTax(models.Model):
         rounding_method=None,
         fixed_multiplicator=1,  # retained for backward compat with legacy calls
     ):
-        res = super(AccountTax, self).compute_all(
+        res = super().compute_all(
             price_unit=price_unit,
             currency=currency,
             quantity=quantity,
@@ -862,9 +904,10 @@ class AccountTax(models.Model):
             if not partner_state:
                 raise UserError(
                     _(
-                        'There is no State/Province configured for '
-                        f'the Supplier while computing Retention: {self.name}'
+                        "There is no State/Province configured for the Supplier "
+                        "while computing Retention: %s"
                     )
+                    % self.name
                 )
 
         elif self.applicable_state == 'source':

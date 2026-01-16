@@ -23,7 +23,9 @@ class ReportExporter(models.Model):
     codename = fields.Char(required=True, readonly=True)
     company_id = fields.Many2one('res.company')
     group_ids = fields.Many2many(
-        'res.groups', string='Groups', default=_default_groups
+        'res.groups',
+        string='Groups',
+        default=lambda self: self._default_groups(),
     )
     # related_ui_ids = fields.Many2many('ir.model.data')
 

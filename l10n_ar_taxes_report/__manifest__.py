@@ -20,9 +20,9 @@
 
 {
     'name': 'Argentinian DDJJ Taxes Report',
-    'version': '17.0.1.0.0',
+    'version': '19.0.1.0.0',
     'author': 'Eynes',
-    'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
+    'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes/',
     'license': 'AGPL-3',
     'category': 'Accounting/Accounting',
     'depends': ['l10n_ar_eynes'],
@@ -40,6 +40,6 @@
     ],
     "demo": [],
     'assets': {},
-    'installable': True,
+    'installable': False,
     "external_dependencies": {"python": []},
 }

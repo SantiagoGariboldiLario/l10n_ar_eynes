@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from dateutil.relativedelta import relativedelta as relatived
 
 from odoo import api, fields, models
@@ -13,7 +14,11 @@ class IVADDJJ(models.TransientModel):
     config_id = fields.Many2one(
         'iva.ddjj.config', string="Configuration", required=True
     )
-    period = fields.Date(string="Period", required=True, default=lambda self: fields.Date.today().replace(day=1))
+    period = fields.Date(
+        string="Period",
+        required=True,
+        default=lambda self: fields.Date.today().replace(day=1),
+    )
 
     def _get_period_domain(self):
         dt = datetime.strptime(str(self.period), DSDF)
@@ -22,7 +27,11 @@ class IVADDJJ(models.TransientModel):
         return date_start, date_finish
 
     def _get_invoice_vat_moves(self, report_type):
-        move_type = ('out_invoice', 'out_refund') if report_type == 'sale' else ('in_invoice', 'in_refund')
+        move_type = (
+            ('out_invoice', 'out_refund')
+            if report_type == 'sale'
+            else ('in_invoice', 'in_refund')
+        )
         sign = -1 if report_type == 'sale' else 1
         date_from, date_to = self._get_period_domain()
         query = """
@@ -97,9 +106,15 @@ class IVADDJJ(models.TransientModel):
             if not last_date:
                 last_date = res_date
             if res_date == last_date:
-                if res['account_id'] == self.config_id.free_availability_balance_account_id.id:
+                if (
+                    res['account_id']
+                    == self.config_id.free_availability_balance_account_id.id
+                ):
                     previous_free_availability_balance = res['amount']
-                elif res['account_id'] == self.config_id.last_period_balance_account_id.id:
+                elif (
+                    res['account_id']
+                    == self.config_id.last_period_balance_account_id.id
+                ):
                     previous_balance = res['amount']
             else:
                 break
@@ -151,15 +166,25 @@ class IVADDJJ(models.TransientModel):
     def _get_vat_info(self):
         sales_amount = self._get_invoice_vat_moves('sale')
         purchase_amount = self._get_invoice_vat_moves('purchase')
-        previous_balance, previous_free_availability_balance = self._get_overpayment_moves()
+        previous_balance, previous_free_availability_balance = (
+            self._get_overpayment_moves()
+        )
         retention_amount = self._get_retention_data()
         perception_amount = self._get_perception_data()
 
         technical_balance = sales_amount - purchase_amount - previous_balance
-        technical_balance_partner = abs(technical_balance) if technical_balance < 0 else 0.0
-        technical_balance_arca = abs(technical_balance) if technical_balance > 0 else 0.0
+        technical_balance_partner = (
+            abs(technical_balance) if technical_balance < 0 else 0.0
+        )
+        technical_balance_arca = (
+            abs(technical_balance) if technical_balance > 0 else 0.0
+        )
 
-        free_availability_balance = - previous_free_availability_balance - retention_amount - perception_amount
+        free_availability_balance = (
+            -previous_free_availability_balance
+            - retention_amount
+            - perception_amount
+        )
         result = technical_balance + free_availability_balance
         result_arca = result if result > 0 else 0.0
 
@@ -167,12 +192,21 @@ class IVADDJJ(models.TransientModel):
             ['IVA Débito Fiscal', sales_amount],
             ['IVA Crédito Fiscal', -1 * purchase_amount],
             ['IVA Saldo a Favor del Período Anterior', -1 * previous_balance],
-            ['IVA Saldo Técnico a Favor del Contribuyente', technical_balance_partner],
+            [
+                'IVA Saldo Técnico a Favor del Contribuyente',
+                technical_balance_partner,
+            ],
             ['IVA Saldo Técnico a Favor del ARCA', technical_balance_arca],
             ['Retenciones IVA', -1 * retention_amount],
             ['Percepciones IVA', -1 * perception_amount],
-            ['IVA Saldo a Favor de Libre Disponibilidad del Período Anterior', -1 * previous_free_availability_balance],
-            ['IVA Saldo a Favor de Libre Disponibilidad del Período', free_availability_balance],
+            [
+                'IVA Saldo a Favor de Libre Disponibilidad del Período Anterior',
+                -1 * previous_free_availability_balance,
+            ],
+            [
+                'IVA Saldo a Favor de Libre Disponibilidad del Período',
+                free_availability_balance,
+            ],
             ['IVA Saldo del Impuesto a Favor del ARCA', result_arca],
         ]
 

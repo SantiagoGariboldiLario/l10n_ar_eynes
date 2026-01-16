@@ -7,7 +7,6 @@
 
 import binascii
 import codecs
-import itertools
 import json
 import logging
 
@@ -17,6 +16,7 @@ from decimal import Decimal
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.tools import groupby
 
 from ..utils.arba_fixed_width_dicts import HEAD_LINES_RET
 from ..utils.sicore_fixed_width import FixedWidth, moneyfmt
@@ -165,8 +165,8 @@ class ArbaRetentionExporterWizard(models.TransientModel):
 
         retention_data_filtered = []
 
-        for _key, group in itertools.groupby(
-            retention_data_sorted, lambda x: x['certificate_no']
+        for _key, group in groupby(
+            retention_data_sorted, key=lambda x: x['certificate_no']
         ):
             groups = list(group)
             amount_total = sum(item['amount'] for item in groups)
@@ -229,7 +229,7 @@ class ArbaRetentionExporterWizard(models.TransientModel):
 
         tmp_file.close()
 
-        file = open(head_filename, 'r')
+        file = open(head_filename)
 
         name = self._get_arba_filename()
         name += '.TXT'

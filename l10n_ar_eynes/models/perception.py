@@ -156,7 +156,7 @@ class PerceptionTaxLine(models.Model):
         ptl_id = self.id
         ptl_name = self.name
         ptl_partner_name = self.partner_id.name or 'Undefined'
-        name = u"RTL(#{})[{}-{}]".format(ptl_id, ptl_name, ptl_partner_name)
+        name = "RTL(#{})[{}-{}]".format(ptl_id, ptl_name, ptl_partner_name)
         return name
 
 
@@ -280,7 +280,7 @@ class PerceptionTaxApplication(models.Model):
             ('amount_no_taxed', 'Invoice Net Untaxed'),
             ('amount_total', 'Invoice Total'),
             ('amount_untaxed', 'Invoice Subtotal'),
-            ('proportional_vat', 'Rate Proportional VAT')
+            ('proportional_vat', 'Rate Proportional VAT'),
             # Alicuota proporcional al IVA
         ],
         'Calculation Base',

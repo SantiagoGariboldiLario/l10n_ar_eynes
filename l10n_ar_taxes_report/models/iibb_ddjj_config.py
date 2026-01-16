@@ -44,15 +44,25 @@ class IIBBDDJJConfig(models.Model):
         string="Jurisdiction Lines",
     )
     name = fields.Char(string="Configuration Name", required=True)
-    total_coeficient = fields.Float(string="Total Coefficient", compute='_compute_total_coefficient', store=True)
+    total_coeficient = fields.Float(
+        string="Total Coefficient",
+        compute='_compute_total_coefficient',
+        store=True,
+    )
 
     @api.constrains('total_coeficient')
     def _check_total_coefficient(self):
         for record in self:
             if record.total_coeficient > 1.0:
-                raise UserError(_("The total coefficient of all jurisdictions cannot exceed 1."))
+                raise UserError(
+                    _(
+                        "The total coefficient of all jurisdictions cannot exceed 1."
+                    )
+                )
 
     @api.depends('jurisdiction_line_ids.coefficient')
     def _compute_total_coefficient(self):
         for record in self:
-            record.total_coeficient = sum(line.coefficient for line in record.jurisdiction_line_ids)
+            record.total_coeficient = sum(
+                line.coefficient for line in record.jurisdiction_line_ids
+            )

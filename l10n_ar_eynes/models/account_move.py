@@ -1,17 +1,15 @@
 import base64
 import json
 import logging
-from contextlib import contextmanager
 import urllib.parse
 from base64 import b64encode
-from collections import defaultdict
 from io import BytesIO
 
 import qrcode
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import file_open, formatLang
+from odoo.tools import file_open
 from odoo.tools.sql import (
     column_exists,
     create_column,
@@ -64,6 +62,7 @@ class AccountMove(models.Model):
                 """
             )
         return super()._auto_init()
+
     # ==================================================================================
     # ============================================================================
     # COMMENTED OUT - Using _prepare_tax_lines override instead (cleaner approach)
@@ -555,9 +554,7 @@ class AccountMove(models.Model):
                                 res['amount_tax_cur'] = (
                                     tax_amount_currency * rate
                                 )
-                                res['amount_total_cur'] += res[
-                                    'amount_tax_cur'
-                                ]
+                                res['amount_total_cur'] += res['amount_tax_cur']
                             elif group.group_type == 'perception':
                                 res['amount_perception_curr'] = (
                                     tax_amount_currency * rate
@@ -633,7 +630,7 @@ class AccountMove(models.Model):
     def _onchange_partner(self):
         if not self.partner_id:
             return
-        super(AccountMove, self)._onchange_partner_id()
+        super()._onchange_partner_id()
         if self.is_sale_document():
             partner_fiscal_position = (
                 self.partner_id.property_account_position_id
@@ -685,7 +682,7 @@ class AccountMove(models.Model):
         Only set on invoices.
         """
         # pylint: disable=missing-return
-        super(AccountMove, self)._compute_tax_totals()
+        super()._compute_tax_totals()
         for move in self:
             if move.is_invoice(include_receipts=True):
                 totals = move.tax_totals
@@ -701,17 +698,20 @@ class AccountMove(models.Model):
                         )
                         if group.group_type not in ('perception', 'internals'):
                             continue
-                        if group.group_type == 'internals' and not move.is_purchase_document():
+                        if (
+                            group.group_type == 'internals'
+                            and not move.is_purchase_document()
+                        ):
                             continue
 
                         old_tax_amount_currency = tax_group.get(
                             'tax_amount_currency', 0.0
                         )
                         old_tax_amount = tax_group.get('tax_amount', 0.0)
-                        old_base_amount_currency = tax_group.get(
-                            'base_amount_currency', 0.0
-                        )
-                        old_base_amount = tax_group.get('base_amount', 0.0)
+                        # old_base_amount_currency = tax_group.get(
+                        #     'base_amount_currency', 0.0
+                        # )
+                        # old_base_amount = tax_group.get('base_amount', 0.0)
 
                         if group.group_type == 'perception':
                             base_currency = sum(
@@ -754,10 +754,10 @@ class AccountMove(models.Model):
                             amount_currency - old_tax_amount_currency
                         )
                         delta_tax = tax_amount - old_tax_amount
-                        delta_base_currency = (
-                            base_currency - old_base_amount_currency
-                        )
-                        delta_base = base_amount - old_base_amount
+                        # delta_base_currency = (
+                        #     base_currency - old_base_amount_currency
+                        # )
+                        # base_amount - old_base_amount
 
                         # FIX v19: Solo sumar deltas de tax_amount, NO de base_amount
                         # El base_amount ya está correctamente calculado por el core.
@@ -820,7 +820,7 @@ class AccountMove(models.Model):
 
     @api.onchange('date')
     def _onchange_date(self):
-        super(AccountMove, self)._onchange_date()
+        super()._onchange_date()
         for move in self:
             move._onchange_currency_id()
         return
@@ -828,7 +828,7 @@ class AccountMove(models.Model):
     @api.onchange('currency_id')
     def _inverse_currency_id(self):
         currency_has_change = self._origin.currency_id != self.currency_id
-        super(AccountMove, self)._inverse_currency_id()
+        super()._inverse_currency_id()
         if (
             not self.env.context.get('force_rate', False)
             and currency_has_change
@@ -871,7 +871,7 @@ class AccountMove(models.Model):
             self.inform_period_date_to = False
 
     def _get_refund_common_fields(self):
-        res = super(AccountMove, self)._get_refund_common_fields()
+        res = super()._get_refund_common_fields()
         res.append('currency_rate')
         return res
 
@@ -1221,7 +1221,9 @@ class AccountMove(models.Model):
             groups = (self.tax_totals or {}).get('groups_by_subtotal') or {}
             for taxes in groups.values():
                 for tax in taxes:
-                    group = self.env['account.tax.group'].browse(tax.get('tax_group_id'))
+                    group = self.env['account.tax.group'].browse(
+                        tax.get('tax_group_id')
+                    )
                     if group.group_type == 'internals':
                         amount = tax.get('tax_group_amount', 0.0) or amount
                         base = tax.get('tax_group_base_amount', 0.0) or base
@@ -1361,7 +1363,7 @@ class AccountMove(models.Model):
                     sequence = inv._get_fce_prefix() + sequence
                 inv.write({'internal_number': sequence})
 
-        posted_moves = super(AccountMove, self)._post(soft=soft)
+        posted_moves = super()._post(soft=soft)
         posted_moves._set_perception_date()
 
         return posted_moves
@@ -1416,6 +1418,13 @@ class AccountMove(models.Model):
         return data_list
 
     def unlink(self):
+        """
+        Unlink moves was moved to api.ondelete method
+        """
+        return super().unlink()
+
+    @api.ondelete(at_uninstall=False)
+    def _check_electronic_invoice_unlink(self):
         if self._check_electronic_invoice_informed_before():
             raise UserError(
                 _(
@@ -1423,13 +1432,14 @@ class AccountMove(models.Model):
                     "If you have any problems, please contact our support service."
                 )
             )
-        return super(AccountMove, self).unlink()
 
     def _check_closed_journal_moves(self):
         closed_journal_moves = self.filtered(
-            lambda move: move.date < move.journal_id.due_date
-            if move.journal_id.due_date
-            else False
+            lambda move: (
+                move.date < move.journal_id.due_date
+                if move.journal_id.due_date
+                else False
+            )
         )
 
         if closed_journal_moves:
@@ -1455,7 +1465,7 @@ class AccountMove(models.Model):
                 )
             )
 
-        return super(AccountMove, self).button_cancel()
+        return super().button_cancel()
 
     def button_draft(self):
         self._check_closed_journal_moves()
@@ -1468,7 +1478,7 @@ class AccountMove(models.Model):
                 )
             )
 
-        return super(AccountMove, self).button_draft()
+        return super().button_draft()
 
     def validate_denomination(self):
         if not self.denomination or self.denomination == 'not_defined':
@@ -1695,9 +1705,7 @@ class AccountMove(models.Model):
             )
 
     def _reverse_move_vals(self, default_values, cancel=True):
-        vals = super(AccountMove, self)._reverse_move_vals(
-            default_values, cancel=cancel
-        )
+        vals = super()._reverse_move_vals(default_values, cancel=cancel)
 
         perceptions = []
         for p in self.perception_ids:
@@ -1828,7 +1836,7 @@ class AccountMove(models.Model):
         Print the invoice and mark it as sent, so that we can see more
         easily the next step of the workflow
         """
-        super(AccountMove, self).action_invoice_print()
+        super().action_invoice_print()
         return self.env.ref(self._get_name_invoice_report()).report_action(self)
 
     def get_afip_logo_path(self):

@@ -1,7 +1,6 @@
 import logging
 import re
 import unicodedata
-
 from collections import defaultdict
 
 from odoo import _, api, fields, models
@@ -180,7 +179,7 @@ class ResPartner(models.Model):
             ws.Consultar(cuit)
         except Exception as e:
             if ws.ErrMsg:
-                raise UserError(f'ERROR: {ws.ErrMsg}') from e
+                raise UserError(_("ERROR: %s") % ws.ErrMsg) from e
             else:
                 raise UserError(
                     _(
@@ -367,7 +366,7 @@ class ResPartner(models.Model):
         if len(self) == 1 and "vat" not in vals:
             vals["vat"] = self.vat
 
-        res = super(ResPartner, self).write(vals)
+        res = super().write(vals)
         self._set_multicompany_account_fiscal_position(
             vals.get('property_account_position_id', False)
         )
@@ -388,7 +387,7 @@ class ResPartner(models.Model):
                                 "You must complete 'Type of taxpayer' field on Gross income configuration."
                             )
                         )
-        partners = super(ResPartner, self).create(vals_list)
+        partners = super().create(vals_list)
         for partner, val in zip(partners, vals_list):
             partner._set_multicompany_account_fiscal_position(
                 val.get('property_account_position_id', False)
@@ -440,9 +439,7 @@ class ResPartner(models.Model):
 
     @api.model
     def _commercial_fields(self):
-        return super(ResPartner, self)._commercial_fields() + [
-            'document_type_id'
-        ]
+        return super()._commercial_fields() + ['document_type_id']
 
     def check_vat_ar(self, vat):
         """

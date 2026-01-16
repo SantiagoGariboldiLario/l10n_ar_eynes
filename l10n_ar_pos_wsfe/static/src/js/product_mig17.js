@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
+import {ProductScreen} from "@point_of_sale/app/screens/product_screen/product_screen";
 import {patch} from "@web/core/utils/patch";
 
 patch(ProductScreen.prototype, {
@@ -21,5 +21,5 @@ patch(ProductScreen.prototype, {
         const res = super._updateSelectedOrderline(...arguments);
         await this.env.pos.get_order().compute_perceptions();
         return res;
-    }
+    },
 });
