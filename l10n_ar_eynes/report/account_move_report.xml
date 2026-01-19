@@ -356,7 +356,7 @@
                     t-att-data-oe-model="o and o._name"
                     t-att-data-oe-id="o and o.id"
                 >
-                    <div t-call="l10n_ar_eynes.weblearns_layout">
+                    <t t-call="l10n_ar_eynes.weblearns_layout">
                         <div class="page">
                             <!--Partner-->
                             <table class="partner-table">
@@ -758,7 +758,7 @@
                                 <span t-esc="o.narration" />
                             </div>
                         </div>
-                    </div>
+                    </t>
                     <style>
                         /*Taxes table*/
                         .taxes-table,
