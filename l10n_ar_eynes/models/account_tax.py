@@ -195,14 +195,15 @@ class AccountTax(models.Model):
 
             # FIX v19: Obtener las repartition lines de la percepción
             # para poder hacer el match correcto con el grouping_key
-            perception_repartition_line_ids = (
-                perception_tax.invoice_repartition_line_ids.filtered(
-                    lambda r: r.repartition_type == 'tax'
-                ).ids
-            )
-            if move.is_purchase_document():
+            if move.move_type in ('out_refund', 'in_refund'):
                 perception_repartition_line_ids = (
                     perception_tax.refund_repartition_line_ids.filtered(
+                        lambda r: r.repartition_type == 'tax'
+                    ).ids
+                )
+            else:
+                perception_repartition_line_ids = (
+                    perception_tax.invoice_repartition_line_ids.filtered(
                         lambda r: r.repartition_type == 'tax'
                     ).ids
                 )
@@ -264,14 +265,16 @@ class AccountTax(models.Model):
             internal_amount = internal_line.amount
 
             # FIX v19: Obtener las repartition lines del impuesto interno
-            internal_repartition_line_ids = (
-                internal_tax.invoice_repartition_line_ids.filtered(
-                    lambda r: r.repartition_type == 'tax'
-                ).ids
-            )
-            if move.is_purchase_document():
+            # IMPORTANTE: Refunds (NC) usan refund_repartition_line_ids
+            if move.move_type in ('out_refund', 'in_refund'):
                 internal_repartition_line_ids = (
                     internal_tax.refund_repartition_line_ids.filtered(
+                        lambda r: r.repartition_type == 'tax'
+                    ).ids
+                )
+            else:
+                internal_repartition_line_ids = (
+                    internal_tax.invoice_repartition_line_ids.filtered(
                         lambda r: r.repartition_type == 'tax'
                     ).ids
                 )

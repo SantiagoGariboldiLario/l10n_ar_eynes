@@ -196,7 +196,7 @@ class WSFEParser(WSParser):
                 amount = (
                     tax_line.credit or tax_line.debit
                 ) * tax_line.currency_rate
-                base = -(tax_line.tax_base_amount) * tax_line.currency_rate
+                base = (abs(tax_line.tax_base_amount)) * tax_line.currency_rate
             if code not in vat_dict:
                 vat_dict[code] = {
                     'Importe': amount,
