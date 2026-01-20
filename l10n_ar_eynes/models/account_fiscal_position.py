@@ -82,6 +82,26 @@ class AccountFiscalPosition(models.Model):
                     _("M denomination is not allowed since December 1° 2025.")
                 )
 
+    def map_tax(self, taxes):
+        """
+        Override to fix v19 behavior that removes all taxes when fiscal position has no tax mappings.
+
+        v17 behavior: empty fiscal position = no tax changes
+        v19 behavior: empty fiscal position = remove ALL taxes
+
+        This override restores v17 behavior: if fiscal position has no tax mappings,
+        return the original taxes unchanged.
+        """
+        if not self:
+            return taxes
+
+        # If fiscal position has NO tax mappings, return taxes unchanged (v17 behavior)
+        if not self.tax_ids:
+            return taxes
+
+        # If fiscal position HAS tax mappings, use v19 standard behavior
+        return super().map_tax(taxes)
+
     def unlink(self):
         """Override unlink to prevent remove fiscal positions"""
         for fiscal_position in self:
