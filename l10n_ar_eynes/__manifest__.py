@@ -162,6 +162,8 @@
         'wizard/sale_vat_wizard_view.xml',
         'report/sale_vat_qweb.xml',
         'report/sale_vat_report.xml',
+        'wizard/create_iva_per_ret_files_view.xml',
+        'views/iva_per_ret_exporter_views.xml',
         'views/menuitems_treasury.xml',
         'views/menuitems_taxes.xml',
         'views/menuitems.xml',
