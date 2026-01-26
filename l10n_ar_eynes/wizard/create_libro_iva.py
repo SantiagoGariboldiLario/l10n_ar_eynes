@@ -84,14 +84,14 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount = 0.0
         for tax_id in self._get_invoice_tax_lines(invoice):
             if tax_id.tax_line_id.tax_group_id.group_type == fee_type:
-                amount += tax_id.price_total
+                amount += tax_id.price_total or tax_id.amount_currency
         return ('%016.2f' % amount).replace('.', '')
 
     def _get_taxes_with_type_others(self, invoice):
         amount = 0.0
         for tax_id in self._get_invoice_tax_lines(invoice):
             if tax_id.tax_line_id.tax_group_id.group_type == 'others':
-                amount += tax_id.price_total
+                amount += tax_id.price_total or tax_id.amount_currency
         for perception_id in invoice.perception_ids:
             if perception_id.perception_id.retention_type == 'other':
                 amount += perception_id.amount
@@ -578,7 +578,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount_national_perception = self._get_perception_with_type(
             invoice, 'nacional'
         )
-        amount_iibb = self._get_perception_with_type(invoice, 'provincial')
+        amount_provincial_perception = self._get_perception_with_type(invoice, 'provincial')
         amount_municipal_perception = self._get_perception_with_type(
             invoice, 'municipal'
         )
@@ -630,7 +630,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             uncategorized_perception,
             amount_exempt,
             amount_national_perception,
-            amount_iibb,
+            amount_provincial_perception,
             amount_municipal_perception,
             amount_internal_taxes,
             currency_code,
@@ -697,7 +697,8 @@ class LibroIVAExporterWizard(models.TransientModel):
         fiscal_credit = self._get_fiscal_credit_currency(invoice)
         fiscal_credit = ('%016.2f' % fiscal_credit).replace('.', '')
         amount_ganancias = self._get_perception_with_type(invoice, 'profit')
-        amount_iibb = self._get_perception_with_type(invoice, 'provincial')
+        amount_provincial_perception = self._get_perception_with_type(invoice, 'provincial')
+        amount_national_perception = self._get_perception_with_type(invoice, 'nacional')
         amount_municipal_perception = self._get_perception_with_type(
             invoice, 'municipal'
         )
@@ -723,7 +724,8 @@ class LibroIVAExporterWizard(models.TransientModel):
             amount_exempt,
             amount_iva,
             amount_ganancias,
-            amount_iibb,
+            amount_national_perception,
+            amount_provincial_perception,
             amount_municipal_perception,
             amount_internal_taxes,
             currency_code,
