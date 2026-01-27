@@ -13,7 +13,7 @@
                     </group>
                     <field
                         name="journal_ids"
-                        mode="tree"
+                        mode="list"
                         invisible="selection_type != 'some'"
                         class="custom-control custom-checkbox"
                     >
