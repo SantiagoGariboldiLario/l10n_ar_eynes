@@ -578,7 +578,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount_national_perception = self._get_perception_with_type(
             invoice, 'nacional'
         )
-        amount_provincial_perception = self._get_perception_with_type(invoice, 'provincial')
+        amount_iibb = self._get_perception_with_type(invoice, 'provincial')
         amount_municipal_perception = self._get_perception_with_type(
             invoice, 'municipal'
         )
@@ -630,7 +630,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             uncategorized_perception,
             amount_exempt,
             amount_national_perception,
-            amount_provincial_perception,
+            amount_iibb,
             amount_municipal_perception,
             amount_internal_taxes,
             currency_code,
@@ -696,9 +696,8 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount_iva = self._get_perception_with_type(invoice, 'vat')
         fiscal_credit = self._get_fiscal_credit_currency(invoice)
         fiscal_credit = ('%016.2f' % fiscal_credit).replace('.', '')
-        amount_ganancias = self._get_perception_with_type(invoice, 'profit')
-        amount_provincial_perception = self._get_perception_with_type(invoice, 'provincial')
-        amount_national_perception = self._get_perception_with_type(invoice, 'nacional')
+        amount_ganancias = self._get_perception_with_type(invoice, ['profit'])
+        amount_iibb = self._get_perception_with_type(invoice, 'provincial')
         amount_municipal_perception = self._get_perception_with_type(
             invoice, 'municipal'
         )
@@ -711,32 +710,31 @@ class LibroIVAExporterWizard(models.TransientModel):
         iva_commission = '%.15s' % '0'.ljust(15, '0')
 
         line = [
-            date,
-            voucher_type,
-            pos,
-            internal_number_formatted,
-            import_clearance,
-            partner_document_type,
-            partner_vat,
-            partner_name,
-            amount_total,
-            amount_total_no_taxed,
-            amount_exempt,
-            amount_iva,
-            amount_ganancias,
-            amount_national_perception,
-            amount_provincial_perception,
-            amount_municipal_perception,
-            amount_internal_taxes,
-            currency_code,
-            currency_rate,
-            tax_lines_qty,
-            operation_code,
-            fiscal_credit,
-            amount_other_taxes,
-            emitter_cuit,
-            emitter_denomination,
-            iva_commission,
+            date,                               # Fecha de comprobante o fecha de oficialización
+            voucher_type,                       # Tipo de comprobante
+            pos,                                # Punto de venta
+            internal_number_formatted,          # Número de comprobante
+            import_clearance,                   # Despacho de importación
+            partner_document_type,              # Código de documento del vendedor
+            partner_vat,                        # Número de identificación del vendedor
+            partner_name,                       # Apellido y nombre o denominación del vendedor
+            amount_total,                       # Importe total de la operación
+            amount_total_no_taxed,              # Importe total de conceptos que no integran el precio neto gravado
+            amount_exempt,                      # Importe de operaciones exentas
+            amount_iva,                         # Importe de percepciones o pagos a cuenta del Impuesto al Valor Agregado
+            amount_ganancias,                   # Importe de percepciones o pagos a cuenta de otros impuestos nacionales
+            amount_iibb,                        # Importe de percepciones de Ingresos Brutos
+            amount_municipal_perception,        # Importe de percepciones de Impuestos Municipales
+            amount_internal_taxes,              # Importe de Impuestos Internos
+            currency_code,                      # Código de moneda
+            currency_rate,                      # Tipo de cambio
+            tax_lines_qty,                      # Cantidad de alícuotas de IVA
+            operation_code,                     # Código de la operación
+            fiscal_credit,                      # Crédito Fiscal Computable
+            amount_other_taxes,                 # Otros Tributos
+            emitter_cuit,                       # CUIT emisor/corredor
+            emitter_denomination,               # Denominación del emisor/corredor
+            iva_commission,                     # IVA comisión
         ]
         if False in line:
             errors = '\n'.join(errors)
