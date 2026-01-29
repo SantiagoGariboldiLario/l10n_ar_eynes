@@ -13,7 +13,7 @@
                             <field name="checkbook_format" />
                             <field name="type" required="1" />
                             <field name="required_num_readonly" invisible="True" />
-                            <field name="required_num" readonly="required_num_readonly" />
+                            <field name="required_num" readonly="required_num_readonly" force_save="1" />
                         </group>
                         <group>
                             <field name="number" />
