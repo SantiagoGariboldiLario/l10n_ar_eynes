@@ -189,7 +189,10 @@ class SubjournalXlsx(models.AbstractModel):
         lines_quantity = len(query_vals)
         current_invoice_accum = 0.0
         for il, line in enumerate(query_vals):
-            if il == 0 or query_vals[il-1]['invoice_id'] != line['invoice_id']:
+            if (
+                il == 0
+                or query_vals[il - 1]['invoice_id'] != line['invoice_id']
+            ):
                 current_invoice_accum = 0.0
 
             next_line_index = il + 1
