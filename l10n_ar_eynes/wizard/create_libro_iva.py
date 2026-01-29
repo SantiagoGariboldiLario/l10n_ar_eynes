@@ -696,7 +696,7 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount_iva = self._get_perception_with_type(invoice, 'vat')
         fiscal_credit = self._get_fiscal_credit_currency(invoice)
         fiscal_credit = ('%016.2f' % fiscal_credit).replace('.', '')
-        amount_ganancias = self._get_perception_with_type(invoice, ['profit'])
+        amount_ganancias = self._get_perception_with_type(invoice, 'profit')
         amount_iibb = self._get_perception_with_type(invoice, 'provincial')
         amount_municipal_perception = self._get_perception_with_type(
             invoice, 'municipal'
