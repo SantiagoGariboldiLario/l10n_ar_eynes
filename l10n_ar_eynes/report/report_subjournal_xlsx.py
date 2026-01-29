@@ -187,7 +187,11 @@ class SubjournalXlsx(models.AbstractModel):
         lines = {}
         retention_perception_summary = {}
         lines_quantity = len(query_vals)
+        current_invoice_accum = 0.0
         for il, line in enumerate(query_vals):
+            if il == 0 or query_vals[il-1]['invoice_id'] != line['invoice_id']:
+                current_invoice_accum = 0.0
+
             next_line_index = il + 1
             next_line = (
                 query_vals[next_line_index]
@@ -207,6 +211,7 @@ class SubjournalXlsx(models.AbstractModel):
             key = line['invoice_id']
             # line['line_id']
             amount = (line['credit'] - line['debit']) * based_sign
+            current_invoice_accum += amount
 
             if (
                 obj.grouped
@@ -281,7 +286,7 @@ class SubjournalXlsx(models.AbstractModel):
             if next_line_invoice_id != line['invoice_id']:
                 invoice_total = (
                     line['invoice_total']
-                    if amount > 0
+                    if current_invoice_accum > 0
                     else (-1 * line['invoice_total'])
                 )
                 lines[key]['total'] = invoice_total
