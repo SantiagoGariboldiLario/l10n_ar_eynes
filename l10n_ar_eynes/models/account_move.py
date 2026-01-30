@@ -1156,28 +1156,29 @@ class AccountMove(models.Model):
 
     def _update_perception_move_line_amount(self):
         for perception in self.perception_ids.mapped('perception_id'):
-            perception_line = self.line_ids.filtered(
+            perception_lines = self.line_ids.filtered(
                 lambda line: line.tax_line_id == perception
             )
-            amount = sum(
-                self.perception_ids.filtered(
-                    lambda line: line.perception_id == perception
-                ).mapped('amount')
-            )
-            amount_currency = amount
-            if self.is_multi_currency:
+            for perception_line in perception_lines:
                 amount = sum(
                     self.perception_ids.filtered(
                         lambda line: line.perception_id == perception
-                    ).mapped('amount_secondary_currency')
+                    ).mapped('amount')
                 )
-            sign = -1 if perception_line.balance < 0 else 1
-            perception_line.write(
-                {
-                    'balance': sign * amount,
-                    'amount_currency': sign * amount_currency,
-                }
-            )
+                amount_currency = amount
+                if self.is_multi_currency:
+                    amount = sum(
+                        self.perception_ids.filtered(
+                            lambda line: line.perception_id == perception
+                        ).mapped('amount_secondary_currency')
+                    )
+                sign = -1 if perception_line.balance < 0 else 1
+                perception_line.write(
+                    {
+                        'balance': sign * amount,
+                        'amount_currency': sign * amount_currency,
+                    }
+                )
 
     def add_perceptions(self):
         for move in self:
