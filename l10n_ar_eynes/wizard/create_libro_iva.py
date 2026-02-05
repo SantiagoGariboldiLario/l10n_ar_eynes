@@ -1042,8 +1042,7 @@ class LibroIVAExporterWizard(models.TransientModel):
             'name': _('Libro IVA generated files'),
             'res_model': 'libroiva.generated.files',
             'type': 'ir.actions.act_window',
-            'view_mode': 'tree,form',
-            'view_type': 'form',
+            'view_mode': 'list,form',
         }
 
     def create_attachment_xlsx(self, filename, data):
