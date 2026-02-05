@@ -226,7 +226,7 @@ class AccountTax(models.Model):
                         sign * perception_amount
                     )
                     tax_results['tax_lines_to_add'][i]['balance'] = (
-                        sign * perception_amount / rate
+                        sign * perception_amount * rate
                     )
 
             # Check tax_lines_to_update
@@ -246,7 +246,7 @@ class AccountTax(models.Model):
                     # CAMBIO v19: Modificamos el dict amounts
                     rate = move.currency_rate or 1.0
                     amounts['amount_currency'] = sign * perception_amount
-                    amounts['balance'] = sign * perception_amount / rate
+                    amounts['balance'] = sign * perception_amount * rate
 
     def _adjust_internal_tax_results(self, move, tax_results):
         """
