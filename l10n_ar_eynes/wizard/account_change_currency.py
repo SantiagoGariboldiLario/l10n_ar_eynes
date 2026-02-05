@@ -135,6 +135,10 @@ class AccountChangeCurrency(models.TransientModel):
         for perception_line in invoice.perception_ids:
             perception_line.base *= rate
             perception_line.amount *= rate
+
+        invoice.with_context(
+            skip_invoice_line_sync=True
+        )._update_perception_move_line_amount()
         for line in invoice.invoice_line_ids:
             line.write(
                 {
@@ -155,6 +159,10 @@ class AccountChangeCurrency(models.TransientModel):
             'secondary_currency_id': self.actual_currency_id,
         }
         invoice.with_context(force_rate=True).write(inv_vals)
+
+        invoice.with_context(
+            skip_invoice_line_sync=True
+        )._update_perception_move_line_amount()
 
         # Mensaje de pesificacion
         msg = _(
