@@ -120,7 +120,8 @@
                     invisible="move_type not in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')"
                     required="move_type in ('in_invoice', 'in_refund', 'out_invoice', 'out_refund')"
                     domain="voucher_type_domain"
-                    widget="selection"
+                    widget="many2one"
+                    options="{'no_create': True, 'no_create_edit': True}"
                     readonly="state != 'draft'"
                 />
                 <field name="fiscal_type" invisible="move_type not in ('out_invoice', 'out_refund')" />

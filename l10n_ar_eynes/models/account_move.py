@@ -10,6 +10,7 @@ import qrcode
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import file_open
+from odoo.tools.safe_eval import safe_eval
 from odoo.tools.sql import (
     column_exists,
     create_column,
@@ -266,7 +267,7 @@ class AccountMove(models.Model):
     inform_period_date_from = fields.Date()
     inform_period_date_to = fields.Date()
     is_debit_note = fields.Boolean('Debit Note', default=False)
-    voucher_type_domain = fields.Binary(compute="_compute_voucher_type_domain")
+    voucher_type_domain = fields.Char(compute="_compute_voucher_type_domain")
     voucher_type_id = fields.Many2one(
         comodel_name='res.voucher.type',
         string='Voucher type',
@@ -920,11 +921,10 @@ class AccountMove(models.Model):
                 ('denomination', '=', inv.denomination),
             ]
 
-            if inv.is_sale_document(include_receipts=True):
-                sign = '>' if inv.is_FCE_invoice else '<'
-                domain.append(('afip_code', sign, AFIP_FCE_CODE_START))
-
-            inv.voucher_type_domain = domain
+            sign = '>=' if inv.is_FCE_invoice else '<'
+            threshold = f"{AFIP_FCE_CODE_START:03d}"
+            domain.append(('afip_code', sign, threshold))
+            inv.voucher_type_domain = json.dumps(domain)
 
     @api.onchange('voucher_type_id')
     def _set_is_FCE(self):
@@ -2057,9 +2057,21 @@ class AccountMove(models.Model):
         return res
 
     def _force_voucher_type(self):
-        self.voucher_type_id = self.env['res.voucher.type'].search(
-            self.voucher_type_domain, limit=1
-        )
+        for move in self:
+            domain = move.voucher_type_domain or []
+            if isinstance(domain, str):
+                try:
+                    domain = safe_eval(domain)
+                except Exception:
+                    _logger.warning(
+                        "Invalid voucher_type_domain on move %s: %s",
+                        move.display_name,
+                        move.voucher_type_domain,
+                    )
+                    domain = []
+            move.voucher_type_id = self.env['res.voucher.type'].search(
+                domain, limit=1
+            )
 
     def _ensure_fce_values(self):
         """
