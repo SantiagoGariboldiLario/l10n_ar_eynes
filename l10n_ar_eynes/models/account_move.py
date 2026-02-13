@@ -1089,14 +1089,20 @@ class AccountMove(models.Model):
                 for (
                     perception
                 ) in self.partner_id.get_python_application_perceptions():
+                    # Buscar dato de la linea de perc en el partner
+                    perc_data = {}
+                    application = self.env["perception.tax.application"]
+                    perc_data = application.get_perception_data(
+                        self.partner_id, self.invoice_date, tax_id=perception
+                    )
                     perceptions_applications = (
                         perception.calculate_python_custom_tax(
-                            self.partner_id, self
+                            self.partner_id, self, perc_data=perc_data
                         )
                     )
                     for application in perceptions_applications:
-                        base = application['base']
-                        amount = application['amount']
+                        base = application.get("base", 0)
+                        amount = application.get("amount", 0)
                         if base > 0 and amount > 0:
                             perception_tax_line_vals.append(
                                 {
