@@ -1560,11 +1560,27 @@ class AccountPaymentOrder(models.Model):
         if self.reference:
             name += 'Ref: ' + self.reference + ' - '
         name += self.number
+
+        # Fallback to the suspense account if the journal doesnt have an account defined
+        # If not, raise a legible error to the user to configure it
+        account = (
+            journal_id.suspense_account_id
+            or journal_id.company_id.account_journal_suspense_account_id
+        )
+        if not account:
+            raise ValidationError(
+                _(
+                    "El diario '%s' necesita una Cuenta de Suspenso (diario o empresa)"
+                    " para publicar líneas de pago. Por favor, configure una y vuelva a intentarlo."
+                )
+                % journal_id.display_name
+            )
+
         move_line = {
             'name': name,
             'debit': debit,
             'credit': credit,
-            'account_id': journal_id.suspense_account_id.id,
+            'account_id': account.id,
             'move_id': move_id,
             'journal_id': self.journal_id.id,
             'partner_id': self.partner_id.id,
