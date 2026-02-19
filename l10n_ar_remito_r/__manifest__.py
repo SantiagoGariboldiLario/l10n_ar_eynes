@@ -33,6 +33,6 @@
     ],
     "demo": [],
     'assets': {},
-    'installable': False,
+    'installable': True,
     "external_dependencies": {"python": []},
 }

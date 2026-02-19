@@ -286,67 +286,25 @@ class ResPartner(models.Model):
     def _set_multicompany_account_fiscal_position(
         self, property_account_position_id
     ):
-        if property_account_position_id:
-            property_account_position_id = self.env[
-                'account.fiscal.position'
-            ].browse(property_account_position_id)
-            companies = self.env['res.company'].search([]) - self.env.company
-            for company in companies:
-                Property = self.env['ir.property'].sudo().with_company(company)
-                property_account_position_field_id = (
-                    self.env['ir.model.fields']
-                    .sudo()
-                    .search(
-                        [
-                            ('model', '=', 'res.partner'),
-                            ('relation', '=', 'account.fiscal.position'),
-                            ('name', '=', 'property_account_position_id'),
-                        ]
-                    )
-                    .id
+        if not property_account_position_id:
+            return
+
+        fiscal_position = self.env['account.fiscal.position'].browse(
+            property_account_position_id
+        )
+        companies = self.env['res.company'].search([]) - self.env.company
+
+        for company in companies:
+            company_fiscal_position = self._get_company_fiscal_position(
+                fiscal_position, company
+            )
+            for partner in self:
+                partner_company = partner.sudo().with_company(company)
+                partner_company.property_account_position_id = (
+                    company_fiscal_position.id
+                    if company_fiscal_position
+                    else False
                 )
-                for partner in self:
-                    fiscal_position = partner._get_company_fiscal_position(
-                        property_account_position_id, company
-                    )
-                    prev_property = Property.search(
-                        [
-                            ('company_id', '=', company.id),
-                            ('name', '=', 'property_account_position_id'),
-                            (
-                                'res_id',
-                                '=',
-                                'res.partner,' + str(partner.id),
-                            ),
-                            (
-                                'fields_id',
-                                '=',
-                                property_account_position_field_id,
-                            ),
-                        ]
-                    )
-                    if fiscal_position:
-                        if prev_property:
-                            prev_property.write(
-                                {
-                                    'value_reference': 'account.fiscal.position,'
-                                    + str(fiscal_position.id),
-                                }
-                            )
-                        else:
-                            Property.create(
-                                {
-                                    'name': 'property_account_position_id',
-                                    'res_id': 'res.partner,' + str(partner.id),
-                                    'company_id': company.id,
-                                    'fields_id': property_account_position_field_id,
-                                    'value_reference': 'account.fiscal.position,'
-                                    + str(fiscal_position.id),
-                                    'type': 'many2one',
-                                }
-                            )
-                    else:
-                        prev_property.unlink()
 
     def write(self, vals):
         vals = self._parse_vat_string(vals)

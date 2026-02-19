@@ -156,7 +156,7 @@
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-foreach="list_of_copy" t-as="n">
-                    <div t-call="l10n_ar_remito_r.weblearns_layout_remito_r">
+                    <t t-call="l10n_ar_remito_r.weblearns_layout_remito_r">
                         <div class="page">
                             <span>Datos de entrega: </span>
                             <table class="partner-table">
@@ -213,7 +213,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr t-foreach="o.move_ids_without_package" t-as="line">
+                                    <tr t-foreach="o.move_ids" t-as="line">
 
                                         <td class="product-description-column">
                                             [<span t-esc="line.product_id.default_code" />] <span
@@ -328,7 +328,7 @@
                             text-align: left !important;
                         }
                         </style>
-                    </div>
+                    </t>
                 </t>
             </t>
         </t>
