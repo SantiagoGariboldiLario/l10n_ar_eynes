@@ -18,7 +18,7 @@
 ###############################################################################
 {
     'name': 'Print check',
-    'author': 'Eynes SRL',
+    'author': 'Eynes SRL, Odoo Community Association (OCA)',
     'license': 'AGPL-3',
     'version': '17.0.0.0.0',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes',
