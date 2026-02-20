@@ -325,19 +325,17 @@ class ResPartner(models.Model):
                         ("from_padron", "=", True),
                     ]
                 )
+                data = {"from_padron": True}
                 percent = coeficient.get("V")
-                coeficient = coeficient.get("C")
-                if percent:
-                    percent = str(percent).replace(",", ".")
+                coef_val = coeficient.get("C")
 
-                if coeficient:
-                    coeficient = str(coeficient).replace(",", ".")
-                    data = {
-                        "coeficient": coeficient,
-                        "coeficient_percent": percent,
-                        "from_padron": True,
-                    }
-                if coeficient == 'E':
+                if percent is not None:
+                    data["coeficient_percent"] = str(percent).replace(",", ".")
+
+                if coef_val is not None:
+                    data["coeficient"] = str(coef_val).replace(",", ".")
+
+                if coef_val == 'E':
                     data["coeficient"] = 0
                     data["coeficient_percent"] = 0
                     data["excluded_percent"] = 1
