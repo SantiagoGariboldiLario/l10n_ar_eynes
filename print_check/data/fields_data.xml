@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+
+    <record id="monto" model="sign.oca.field" forcecreate="1">
+        <field name="name">monto</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="monto_escrito" model="sign.oca.field" forcecreate="1">
+        <field name="name">monto_escrito</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="mes" model="sign.oca.field" forcecreate="1">
+        <field name="name">mes</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="año" model="sign.oca.field" forcecreate="1">
+        <field name="name">año</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="dia" model="sign.oca.field" forcecreate="1">
+        <field name="name">dia</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="receptor" model="sign.oca.field" forcecreate="1">
+        <field name="name">receptor</field>
+        <field name="field_type">text</field>
+    </record>
+
+    <record id="monto2" model="sign.oca.field" forcecreate="1">
+        <field name="name">monto2</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="monto_escrito2" model="sign.oca.field" forcecreate="1">
+        <field name="name">monto_escrito2</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="mes2" model="sign.oca.field" forcecreate="1">
+        <field name="name">mes2</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="año2" model="sign.oca.field" forcecreate="1">
+        <field name="name">año2</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="dia2" model="sign.oca.field" forcecreate="1">
+        <field name="name">dia2</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="receptor2" model="sign.oca.field" forcecreate="1">
+        <field name="name">receptor2</field>
+        <field name="field_type">text</field>
+    </record>
+
+    <record id="monto3" model="sign.oca.field" forcecreate="1">
+        <field name="name">monto3</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="monto_escrito3" model="sign.oca.field" forcecreate="1">
+        <field name="name">monto_escrito3</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="mes3" model="sign.oca.field" forcecreate="1">
+        <field name="name">mes3</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="año3" model="sign.oca.field" forcecreate="1">
+        <field name="name">año3</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="dia3" model="sign.oca.field" forcecreate="1">
+        <field name="name">dia3</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="receptor3" model="sign.oca.field" forcecreate="1">
+        <field name="name">receptor3</field>
+        <field name="field_type">text</field>
+    </record>
+
+    <record id="monto4" model="sign.oca.field" forcecreate="1">
+        <field name="name">monto4</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="monto_escrito4" model="sign.oca.field" forcecreate="1">
+        <field name="name">monto_escrito4</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="mes4" model="sign.oca.field" forcecreate="1">
+        <field name="name">mes4</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="año4" model="sign.oca.field" forcecreate="1">
+        <field name="name">año4</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="dia4" model="sign.oca.field" forcecreate="1">
+        <field name="name">dia4</field>
+        <field name="field_type">text</field>
+    </record>
+    <record id="receptor4" model="sign.oca.field" forcecreate="1">
+        <field name="name">receptor4</field>
+        <field name="field_type">text</field>
+    </record>
+
+
+</odoo>

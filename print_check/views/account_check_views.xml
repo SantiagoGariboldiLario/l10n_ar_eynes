@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_account_check_form_inherit_print" model="ir.ui.view">
+        <field name="name">account.check.form.inherit.print</field>
+        <field name="model">account.check</field>
+        <field name="inherit_id" ref="l10n_ar_eynes.account_issued_check_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='bank_id']" position="after">
+                <group>
+                    <field name="check_printed" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
