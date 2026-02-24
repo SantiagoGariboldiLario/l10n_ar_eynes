@@ -72,7 +72,9 @@ class ResPartner(models.Model):
         return res
 
     def _get_padron_url(self):
-        padron_url = self.env["ir.config_parameter"].get_param("padron_url", "")
+        padron_url = (
+            self.env["ir.config_parameter"].sudo().get_param("padron_url", "")
+        )
 
         if not padron_url:
             raise ValidationError(
