@@ -68,7 +68,10 @@ class ResPartner(models.Model):
     @api.model
     def create(self, vals):
         res = super().create(vals)
-        self.with_context(active_ids=res.ids).do_update_from_padron()
+        use_special_padron = self.env.company.use_special_padron
+        self.with_context(active_ids=res.ids).do_update_from_padron(
+            use_special_padron=use_special_padron
+        )
         return res
 
     def _get_padron_url(self):
@@ -140,7 +143,7 @@ class ResPartner(models.Model):
                 domain.append(
                     ("padron_state_id", '=', self.env.ref('base.state_ar_b').id)
                 )
-            elif padron_name == "CABA":
+            elif padron_name in ("CABA", "SPECIAL"):
                 domain.append(
                     ("padron_state_id", '=', self.env.ref('base.state_ar_c').id)
                 )
@@ -443,11 +446,13 @@ class ResPartner(models.Model):
             )
         return valid
 
-    def do_update_from_padron(
+    def do_update_from_padron(  # noqa: C901
         self,
         padron_name=None,
         padron_type=None,
         from_cron=None,
+        only_from_today=False,
+        use_special_padron=None,
         check_server_state=False,
     ):
         if padron_name is None:
@@ -455,6 +460,8 @@ class ResPartner(models.Model):
 
         if padron_type is None:
             padron_type = []
+        if use_special_padron is None:
+            use_special_padron = self.env.company.use_special_padron
 
         padron_url = self._get_padron_url()
         payload = {
@@ -500,6 +507,9 @@ class ResPartner(models.Model):
             ('parent_id', '=', False),
             ('vat', '!=', False),
         ]
+        if only_from_today:
+            today = date.today()
+            domain.append(('create_date', '>=', today))
         partner_ids = self.env.context.get('active_ids', [])
         if partner_ids:
             domain_append = [('id', 'in', partner_ids)]
@@ -523,12 +533,29 @@ class ResPartner(models.Model):
             _logger.info('Padron Information Fetched')
             for vat, partner_values in response.items():
                 try:
-                    perceptions = [
-                        d
-                        for d in partner_values
-                        if d["T"] == "P" and d["P"] != "SALT"
-                    ]
-                    retentions = [d for d in partner_values if d["T"] == "R"]
+                    perceptions = False
+                    retentions = False
+                    if use_special_padron:
+                        perceptions = [
+                            d
+                            for d in partner_values
+                            if d["P"] == "SPECIAL" and d["T"] == "P"
+                        ]
+                        retentions = [
+                            d
+                            for d in partner_values
+                            if d["P"] == "SPECIAL" and d["T"] == "R"
+                        ]
+                    if not perceptions:
+                        perceptions = [
+                            d
+                            for d in partner_values
+                            if d["T"] == "P" and d["P"] != "SALT"
+                        ]
+                    if not retentions:
+                        retentions = [
+                            d for d in partner_values if d["T"] == "R"
+                        ]
                     coeficients = [
                         d
                         for d in partner_values
@@ -562,7 +589,9 @@ class ResPartner(models.Model):
                     }
                     updates.update(new_values)
                 except Exception:
-                    _logger.info(_("No partners to check. All updated."))
+                    _logger.exception(
+                        "Error updating partner from padron for VAT %s", vat
+                    )
 
             return {
                 'type': 'ir.actions.client',
