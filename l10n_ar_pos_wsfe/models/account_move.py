@@ -103,9 +103,11 @@ class AccountMove(models.Model):
 
     def select_default_voucher_type(self):
         self._compute_voucher_type_domain()
-        self.voucher_type_id = self.env['res.voucher.type'].search(
-            self.voucher_type_domain
-        )[0]
+        # voucher_type_domain is computed in l10n_ar_eynes as a JSON string.
+        # Since v19 the search domain must be a list/Domain object, not a
+        # string, otherwise Domain() raises TypeError. Reuse the helper that
+        # already normalises the domain before searching.
+        self._force_voucher_type()
 
     def _validate_electronic_invoices(self, soft=False):
         res = super()._validate_electronic_invoices(soft=soft)
@@ -118,7 +120,8 @@ class AccountMove(models.Model):
                 .sudo()
                 .search([('account_move', '=', inv.id)])
             )
-            if order:
+            # _apply_invoice_payments no longer exists in v19; guard the call.
+            if order and hasattr(order, "_apply_invoice_payments"):
                 order._apply_invoice_payments()
 
         return res
@@ -128,3 +131,19 @@ class AccountMove(models.Model):
         if self.pos_order_ids:
             names = ','.join(self.pos_order_ids.mapped('pos_reference'))
         return names
+
+    def get_pos_invoice_download_data(self):
+        """Return the download strategy for POS invoice printing/reprinting.
+
+        We explicitly block draft invoices to avoid account's proforma fallback.
+        """
+        self.ensure_one()
+        report_action = (
+            'l10n_ar_eynes.account_move_report'
+            if self.journal_id.fiscal_type == 'electronic'
+            else 'l10n_ar_pos_wsfe.account_invoices'
+        )
+        return {
+            'state': self.state,
+            'report_action': report_action,
+        }

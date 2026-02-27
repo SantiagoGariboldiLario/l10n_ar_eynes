@@ -26,6 +26,42 @@ class PosSession(models.Model):
         """
         return True
 
+    def _check_pos_receivable_accounts_configuration(self):
+        for session in self:
+            if session.company_id.account_default_pos_receivable_account_id:
+                continue
+            used_payment_methods = (
+                session._get_closed_orders().payment_ids.payment_method_id
+            )
+            missing_accounts = used_payment_methods.filtered(
+                lambda pm: not pm.split_transactions
+                and not pm.receivable_account_id
+            )
+            if missing_accounts:
+                raise UserError(
+                    _(
+                        "Cannot close POS session %(session)s.\n"
+                        "The company has no 'Default PoS Receivable Account' and these payment methods "
+                        "also have no receivable account: %(methods)s.\n"
+                        "Configure one of them in Accounting settings or on each payment method.",
+                        session=session.display_name,
+                        methods=", ".join(missing_accounts.mapped("name")),
+                    )
+                )
+
+    def action_pos_session_validate(
+        self,
+        balancing_account=False,
+        amount_to_balance=0,
+        bank_payment_method_diffs=None,
+    ):
+        self._check_pos_receivable_accounts_configuration()
+        return super().action_pos_session_validate(
+            balancing_account=balancing_account,
+            amount_to_balance=amount_to_balance,
+            bank_payment_method_diffs=bank_payment_method_diffs,
+        )
+
     def _loader_params_account_fiscal_position(self):
         domain = [('active', '=', True)]
         if self.config_id.tax_regime_selection:

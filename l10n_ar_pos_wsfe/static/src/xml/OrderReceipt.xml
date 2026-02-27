@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+
+    <!-- Keep only the OrderReceipt extension for perceptions and total -->
+
+    <!-- Receipt: add perceptions line and adjust total to include perceptions -->
+    <t t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <!-- Add perceptions line before total block -->
+        <xpath expr="//div[hasclass('pos-receipt-amount') and hasclass('receipt-total')]" position="before">
+            <div class="d-flex" t-if="order.get_total_perception()">
+                <span>Percepciones</span>
+                <span t-out="formatCurrency(order.get_total_perception())" class="ms-auto font-monospace"/>
+            </div>
+        </xpath>
+        <!-- Replace total amount to include perceptions explicitly -->
+        <xpath expr="//div[hasclass('pos-receipt-amount') and hasclass('receipt-total')]//span[contains(@class,'pos-receipt-right-align')]" position="replace">
+            <span class="pos-receipt-right-align font-monospace"
+                t-out="formatCurrency(totalWithPerception)"/>
+        </xpath>
+    </t>
+
+</templates>

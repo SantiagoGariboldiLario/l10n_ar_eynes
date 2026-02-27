@@ -14,7 +14,6 @@ class PosConfig(models.Model):
         'pos_config_id',
         'fiscal_position_id',
         string='Block RI Invoices Offline',
-        default=True,
         help="The POS will block the validation of invoices for "
         "customers classified with this Fiscal Positions when the system "
         "is offline, to avoid issues with perception calculations.",

@@ -17,7 +17,7 @@ patch(ProductScreen.prototype, {
             useWithBarcode: true,
         });
     },
-    async _updateSelectedOrderline(event) {
+    async _updateSelectedOrderline() {
         const res = super._updateSelectedOrderline(...arguments);
         await this.env.pos.get_order().compute_perceptions();
         return res;

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('o_fiscal_position_button')]" position="replace">
+            <button
+                class="control-button o_fiscal_position_button"
+                t-att-class="buttonClass"
+                t-on-click="() => this.clickFiscalPosition()"
+            >
+                <i class="fa fa-book me-1" role="img" aria-label="Set fiscal position" title="Set fiscal position" />
+                <t t-if="currentOrder?.fiscal_position_id" t-esc="currentOrder.fiscal_position_id.display_name" />
+                <t t-else="">Seleccionar posición fiscal</t>
+            </button>
+        </xpath>
+    </t>
+</templates>
