@@ -1210,11 +1210,18 @@ class AccountPaymentOrder(models.Model):
     def _check_lines_not_reconciled(self):
         for line in self.income_line_ids + self.debt_line_ids:
             if line.amount > 0:
-                amount_residual = abs(
-                    line.move_line_id.amount_residual_currency
-                    if self.currency_id == line.move_line_id.currency_id
-                    else line.move_line_id.amount_residual
-                )
+                if self.currency_id == line.move_line_id.currency_id:
+                    amount_residual = abs(
+                        line.move_line_id.amount_residual_currency
+                    )
+                    amount_to_compare = (
+                        abs(line.amount_currency)
+                        if self.is_multi_currency
+                        else abs(line.amount)
+                    )
+                else:
+                    amount_residual = abs(line.move_line_id.amount_residual)
+                    amount_to_compare = abs(line.amount)
                 if line.move_line_id.reconciled:
                     raise ValidationError(
                         _(
@@ -1223,7 +1230,7 @@ class AccountPaymentOrder(models.Model):
                         )
                         % line.move_line_id.move_id.name
                     )
-                elif line.amount > amount_residual:
+                elif amount_to_compare > amount_residual:
                     raise ValidationError(
                         _(
                             "Invoice '%s' residual amount is lower that actual payment, "
