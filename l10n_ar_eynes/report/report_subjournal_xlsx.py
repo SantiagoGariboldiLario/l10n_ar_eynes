@@ -311,7 +311,7 @@ class SubjournalXlsx(models.AbstractModel):
                 i.is_debit_note AS is_debit_note,
                 i.denomination AS denomination,
                 i.currency_id AS currency,
-                i.amount_total AS invoice_total,
+                ABS(i.amount_total_signed) AS invoice_total,
                 l.id AS line_id,
                 l.tax_line_id AS tax_line_id,
                 l.credit AS credit,
