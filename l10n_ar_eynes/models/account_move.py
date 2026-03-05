@@ -1013,12 +1013,11 @@ class AccountMove(models.Model):
     @api.onchange('disable_perceptions')
     def _onchange_disable_perceptions(self):
         if self.disable_perceptions:
-            self.perception_ids.unlink()
+            # In onchange context, clear one2many values without calling unlink().
+            self.perception_ids = [(5, 0, 0)]
             self.invoice_line_ids.link_perception_to_move_lines()
-            return {'value': {'disable_perceptions': True}}
         else:
             self._automatic_perception_calculation()
-            return {'value': {'disable_perceptions': False}}
 
     @api.onchange(
         'invoice_date',
