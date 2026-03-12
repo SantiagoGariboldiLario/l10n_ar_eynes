@@ -800,6 +800,7 @@ class AccountMove(models.Model):
             vals = {
                 'is_multi_currency': False,
                 'currency_rate': 1.0,
+                'invoice_currency_rate': 1.0,
             }
             if self.currency_id:
                 company = self.env.company
@@ -813,11 +814,31 @@ class AccountMove(models.Model):
                     vals['is_multi_currency'] = True
                     if currency.preciated:
                         vals['currency_rate'] = curr_rate.inverse_company_rate
+                        vals['invoice_currency_rate'] = (
+                            1 / vals['currency_rate']
+                            if vals['currency_rate']
+                            else 0.0
+                        )
                     else:
                         vals['currency_rate'] = curr_rate.company_rate
+                        vals['invoice_currency_rate'] = vals['currency_rate']
             self.write(vals)
 
             self._onchange_payment_term_date_invoice()
+
+    @api.onchange('currency_rate')
+    def _onchange_currency_rate(self):
+        for move in self.filtered(
+            lambda m: m.state == 'draft' and m.is_invoice(include_receipts=True)
+        ):
+            if move.currency_id == move.company_currency_id:
+                move.invoice_currency_rate = 1.0
+            elif move.currency_id.preciated:
+                move.invoice_currency_rate = (
+                    1 / move.currency_rate if move.currency_rate else 0.0
+                )
+            else:
+                move.invoice_currency_rate = move.currency_rate
 
     @api.onchange('date')
     def _onchange_date(self):
