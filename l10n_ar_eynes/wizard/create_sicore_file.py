@@ -63,6 +63,10 @@ class CreateSicoreFiles(models.TransientModel):
             [('id', 'in', self.env.context.get('allowed_company_ids', []))]
         )
 
+    def _table_exists(self, table_name):
+        self.env.cr.execute("SELECT to_regclass(%s)", (table_name,))
+        return bool(self.env.cr.fetchone()[0])
+
     @api.model
     def _parse_move_lines(self, move):
         tax_lines = {}
@@ -606,6 +610,17 @@ class CreateSicoreFiles(models.TransientModel):
         rrhh_code = self.rrhh_ret_profit_code
         if not rrhh_code:
             raise ValidationError(_('Invalid RRHH Code.'))
+        if not (
+            self._table_exists('hr_payslip')
+            and self._table_exists('hr_payslip_line')
+        ):
+            raise UserError(
+                _(
+                    'Export Error\n'
+                    'The RRHH SICORE export requires the Payroll module '
+                    'to be installed in this database.'
+                )
+            )
         errors = ''
 
         q = """
