@@ -411,8 +411,6 @@ class AccountPaymentOrder(models.Model):
             domain = [('company_id', '=', rec.company_id.id)]
             if rec.type:
                 domain.append(('type', '=', rec.type))
-            if rec.currency_id and rec.currency_id != self.env.ref('base.ARS'):
-                domain.append(('currency_id', '=', rec.currency_id.id))
             rec.journal_id_domain = domain
 
     @api.onchange(
