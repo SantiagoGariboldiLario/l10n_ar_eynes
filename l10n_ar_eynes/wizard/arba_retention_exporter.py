@@ -53,6 +53,13 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         )
 
     def create_file(self):
+        if self.company_id.arba_a122r_enforced:
+            raise ValidationError(
+                _(
+                    'ARBA TXT export is disabled because ARBA A122R enforcement '
+                    'is enabled for this company.'
+                )
+            )
         query = (
             'SELECT rtl.id '
             'FROM account_payment_order_retention_line rtl '

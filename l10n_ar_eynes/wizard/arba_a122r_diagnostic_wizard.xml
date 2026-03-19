@@ -1,0 +1,168 @@
+<odoo>
+    <record id="arba_a122r_diagnostic_wizard_view_form" model="ir.ui.view">
+        <field name="name">arba.a122r.diagnostic.wizard.view.form</field>
+        <field name="model">arba.a122r.diagnostic.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Diagnóstico ARBA A122R">
+                <sheet>
+                    <group>
+                        <field name="company_id_domain" invisible="1" />
+                        <field name="company_id" domain="company_id_domain" />
+                        <field name="activity_line_id" />
+                        <field name="anio" />
+                        <field name="mes" />
+                        <field name="quincena" />
+                        <field name="remote_state" />
+                    </group>
+                    <group string="Resumen" col="4">
+                        <field name="execution_date" readonly="1" />
+                        <field name="applied_date" readonly="1" />
+                        <field name="matched_count" readonly="1" />
+                        <field name="only_remote_count" readonly="1" />
+                        <field name="only_local_count" readonly="1" />
+                        <field name="conflict_count" readonly="1" />
+                    </group>
+                    <group string="Resultados">
+                        <field name="result_line_ids" readonly="1" nolabel="1">
+                            <tree create="false" edit="false" delete="false">
+                                <field name="diagnostic_state" />
+                                <field name="payment_order_id" />
+                                <field name="local_line_id" />
+                                <field name="n_transaccion_agente" />
+                                <field name="local_sync_state" />
+                                <field name="arba_id_dj" />
+                                <field name="arba_id_comprobante" />
+                                <field name="arba_nro_emision" />
+                                <field name="heuristic_candidate" />
+                                <field name="heuristic_match_key" />
+                                <field name="note" />
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+                <footer>
+                    <button
+                        name="action_run_diagnostic"
+                        type="object"
+                        string="Ejecutar diagnóstico"
+                        class="oe_highlight"
+                    />
+                    <button
+                        name="action_apply_matched"
+                        type="object"
+                        string="Aplicar matcheadas"
+                        invisible="matched_count == 0"
+                    />
+                    <button
+                        name="action_apply_heuristic"
+                        type="object"
+                        string="Vincular por regla"
+                        groups="base.group_no_one"
+                        invisible="only_remote_count == 0 or (only_local_count == 0 and conflict_count == 0)"
+                    />
+                    <button string="Cerrar" special="cancel" class="oe_link" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="arba_a122r_diagnostic_line_view_tree" model="ir.ui.view">
+        <field name="name">arba.a122r.diagnostic.line.view.tree</field>
+        <field name="model">arba.a122r.diagnostic.line</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false">
+                <field name="diagnostic_state" />
+                <field name="payment_order_id" />
+                <field name="local_line_id" />
+                <field name="n_transaccion_agente" />
+                <field name="local_sync_state" />
+                <field name="arba_id_dj" />
+                <field name="arba_id_comprobante" />
+                <field name="arba_nro_emision" />
+                <field name="heuristic_candidate" />
+                <field name="heuristic_match_key" />
+                <field name="note" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="arba_a122r_diagnostic_line_view_form" model="ir.ui.view">
+        <field name="name">arba.a122r.diagnostic.line.view.form</field>
+        <field name="model">arba.a122r.diagnostic.line</field>
+        <field name="arch" type="xml">
+            <form string="Resultado diagnóstico ARBA A122R" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <field name="diagnostic_state" />
+                        <field name="payment_order_id" />
+                        <field name="local_line_id" />
+                        <field name="n_transaccion_agente" />
+                        <field name="local_sync_state" />
+                        <field name="arba_id_dj" />
+                        <field name="arba_id_comprobante" />
+                        <field name="arba_nro_emision" />
+                        <field name="heuristic_candidate" />
+                        <field name="heuristic_match_key" />
+                        <field name="note" />
+                        <field name="remote_payload" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="arba_a122r_diagnostic_line_view_search" model="ir.ui.view">
+        <field name="name">arba.a122r.diagnostic.line.view.search</field>
+        <field name="model">arba.a122r.diagnostic.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="diagnostic_state" />
+                <field name="payment_order_id" />
+                <field name="local_line_id" />
+                <field name="n_transaccion_agente" />
+                <filter name="matched" string="Matcheadas" domain="[('diagnostic_state', '=', 'matched')]" />
+                <filter
+                    name="only_remote"
+                    string="Solo remotas"
+                    domain="[('diagnostic_state', '=', 'only_remote')]"
+                />
+                <filter
+                    name="only_local"
+                    string="Solo locales"
+                    domain="[('diagnostic_state', '=', 'only_local')]"
+                />
+                <filter
+                    name="conflict"
+                    string="Conflictos"
+                    domain="[('diagnostic_state', '=', 'conflict')]"
+                />
+                <filter
+                    name="heuristic_candidate"
+                    string="Candidatas regla"
+                    domain="[('heuristic_candidate', '=', True)]"
+                />
+                <group expand="0" string="Agrupar por">
+                    <filter
+                        name="group_by_state"
+                        string="Estado"
+                        context="{'group_by': 'diagnostic_state'}"
+                    />
+                    <filter
+                        name="group_by_payment"
+                        string="Orden de pago"
+                        context="{'group_by': 'payment_order_id'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_arba_a122r_diagnostic_wizard" model="ir.actions.act_window">
+        <field name="name">Diagnóstico ARBA A122R</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">arba.a122r.diagnostic.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="arba_a122r_diagnostic_wizard_view_form" />
+        <field name="target">new</field>
+    </record>
+</odoo>
