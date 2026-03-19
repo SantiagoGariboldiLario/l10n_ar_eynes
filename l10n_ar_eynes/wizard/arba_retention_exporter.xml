@@ -13,7 +13,6 @@
                 <field name="company_id" domain="company_id_domain" />
                 <field name="date_from" />
                 <field name="date_to" />
-                <field name="mode" />
             </group>
             <footer>
                 <button name="create_file" type="object" string="Create File" class="oe_highlight" />
