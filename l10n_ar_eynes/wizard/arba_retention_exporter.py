@@ -35,6 +35,16 @@ class ArbaRetentionExporterWizard(models.TransientModel):
     )
     date_from = fields.Date(string='Date From')
     date_to = fields.Date(string='Date To')
+    mode = fields.Selection(
+        [
+            ('monthly', 'Monthly'),
+            ('first_fortnight', 'First Fortnight'),
+            ('second_fortnight', 'Second Fortnight'),
+        ],
+        string='Mode',
+        default='monthly',
+        required=True,
+    )
 
     @api.model
     def _default_company_ids(self):
@@ -119,10 +129,14 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         company_vat = self._sanitize_vat(self.company_id.vat)
         lot_name = 'RET'
         period = self._get_period_code()
-
-        return 'AR-{}-{}-{}-{}'.format(
+        filename = 'AR-{}-{}-{}-{}'.format(
             company_vat, period, activity_num, lot_name
         )
+        if self.mode == 'first_fortnight':
+            filename += '-LOTE1'
+        elif self.mode == 'second_fortnight':
+            filename += '-LOTE2'
+        return filename
 
     @api.model
     def _sanitize_vat(self, vat):
@@ -147,11 +161,22 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         last_day = calendar.monthrange(
             self.date_from.year, self.date_from.month
         )[1]
-        fortnight = '0'
-        if self.date_from.day == 1 and self.date_to.day <= 15:
-            fortnight = '1'
-        elif self.date_from.day >= 16 and self.date_to.day == last_day:
-            fortnight = '2'
+        if self.mode == 'first_fortnight':
+            expected_from, expected_to, fortnight = 1, 15, '1'
+        elif self.mode == 'second_fortnight':
+            expected_from, expected_to, fortnight = 16, last_day, '2'
+        else:
+            expected_from, expected_to, fortnight = 1, last_day, '0'
+
+        if (
+            self.date_from.day != expected_from
+            or self.date_to.day != expected_to
+        ):
+            raise ValidationError(
+                _(
+                    'Selected mode does not match the date range for ARBA export.'
+                )
+            )
 
         return '{}{:02d}{}'.format(
             self.date_from.year, self.date_from.month, fortnight
