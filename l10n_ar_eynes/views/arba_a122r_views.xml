@@ -67,28 +67,6 @@
         <field name="context">{'create': False}</field>
     </record>
 
-    <record id="view_arba_a122r_dj_search" model="ir.ui.view">
-        <field name="name">arba.a122r.dj.search</field>
-        <field name="model">arba.a122r.dj</field>
-        <field name="arch" type="xml">
-            <search>
-                <field name="company_id" />
-                <field name="cuit_agente" />
-                <field name="actividad_id" />
-                <field name="anio" />
-                <field name="mes" />
-                <field name="quincena" />
-                <filter name="open" string="Abiertas" domain="[('state', '=', 'open')]" />
-                <group expand="0" string="Agrupar por">
-                    <filter name="group_by_company" string="Compañía" context="{'group_by': 'company_id'}" />
-                    <filter name="group_by_anio" string="Año" context="{'group_by': 'anio'}" />
-                    <filter name="group_by_mes" string="Mes" context="{'group_by': 'mes'}" />
-                    <filter name="group_by_quincena" string="Quincena" context="{'group_by': 'quincena'}" />
-                </group>
-            </search>
-        </field>
-    </record>
-
     <record id="view_arba_a122r_dj_tree" model="ir.ui.view">
         <field name="name">arba.a122r.dj.tree</field>
         <field name="model">arba.a122r.dj</field>
@@ -184,7 +162,6 @@
         <field name="name">Períodos DJ A122R</field>
         <field name="res_model">arba.a122r.dj</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_arba_a122r_dj_search" />
         <field name="context">{}</field>
         <field
             name="view_ids"

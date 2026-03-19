@@ -111,52 +111,6 @@
         </field>
     </record>
 
-    <record id="arba_a122r_diagnostic_line_view_search" model="ir.ui.view">
-        <field name="name">arba.a122r.diagnostic.line.view.search</field>
-        <field name="model">arba.a122r.diagnostic.line</field>
-        <field name="arch" type="xml">
-            <search>
-                <field name="diagnostic_state" />
-                <field name="payment_order_id" />
-                <field name="local_line_id" />
-                <field name="n_transaccion_agente" />
-                <filter name="matched" string="Matcheadas" domain="[('diagnostic_state', '=', 'matched')]" />
-                <filter
-                    name="only_remote"
-                    string="Solo remotas"
-                    domain="[('diagnostic_state', '=', 'only_remote')]"
-                />
-                <filter
-                    name="only_local"
-                    string="Solo locales"
-                    domain="[('diagnostic_state', '=', 'only_local')]"
-                />
-                <filter
-                    name="conflict"
-                    string="Conflictos"
-                    domain="[('diagnostic_state', '=', 'conflict')]"
-                />
-                <filter
-                    name="heuristic_candidate"
-                    string="Candidatas regla"
-                    domain="[('heuristic_candidate', '=', True)]"
-                />
-                <group expand="0" string="Agrupar por">
-                    <filter
-                        name="group_by_state"
-                        string="Estado"
-                        context="{'group_by': 'diagnostic_state'}"
-                    />
-                    <filter
-                        name="group_by_payment"
-                        string="Orden de pago"
-                        context="{'group_by': 'payment_order_id'}"
-                    />
-                </group>
-            </search>
-        </field>
-    </record>
-
     <record id="action_arba_a122r_diagnostic_wizard" model="ir.actions.act_window">
         <field name="name">Diagnóstico ARBA A122R</field>
         <field name="type">ir.actions.act_window</field>
