@@ -1,0 +1,29 @@
+<odoo>
+    <record id="arba_a122r_reprocess_wizard_view" model="ir.ui.view">
+        <field name="name">arba.a122r.reprocess.wizard.view</field>
+        <field name="model">arba.a122r.reprocess.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reprocesar retenciones ARBA A122R">
+                <group>
+                    <field name="company_id_domain" invisible="1" />
+                    <field name="company_id" domain="company_id_domain" />
+                    <field name="date_from" />
+                    <field name="date_to" />
+                    <field name="include_observed" />
+                </group>
+                <footer>
+                    <button name="action_reprocess" type="object" string="Reprocesar" class="oe_highlight" />
+                    <button string="Cancelar" special="cancel" class="oe_link" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_arba_a122r_reprocess_wizard" model="ir.actions.act_window">
+        <field name="name">Reprocesar retenciones ARBA A122R</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">arba.a122r.reprocess.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

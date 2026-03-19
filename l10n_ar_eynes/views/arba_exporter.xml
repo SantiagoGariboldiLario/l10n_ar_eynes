@@ -13,7 +13,8 @@
                         <field name="date_to" />
                         <label for="datas" string="Generated File" />
                         <div class="oe_inline">
-                            <field name="datas" class="pr-3" />
+                            <field name="datas" class="pr-3" filename="datas_fname" />
+                            <field name="datas_fname" invisible="1" />
                             <field name="attachment_id" />
                         </div>
                         <field name="company_id" />
