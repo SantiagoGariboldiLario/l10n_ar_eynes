@@ -24,7 +24,7 @@
                     </group>
                     <group string="Resultados">
                         <field name="result_line_ids" readonly="1" nolabel="1">
-                            <tree create="false" edit="false" delete="false">
+                            <list create="false" edit="false" delete="false">
                                 <field name="diagnostic_state" />
                                 <field name="payment_order_id" />
                                 <field name="local_line_id" />
@@ -36,7 +36,7 @@
                                 <field name="heuristic_candidate" />
                                 <field name="heuristic_match_key" />
                                 <field name="note" />
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </sheet>
@@ -70,7 +70,7 @@
         <field name="name">arba.a122r.diagnostic.line.view.tree</field>
         <field name="model">arba.a122r.diagnostic.line</field>
         <field name="arch" type="xml">
-            <tree create="false" edit="false" delete="false">
+            <list create="false" edit="false" delete="false">
                 <field name="diagnostic_state" />
                 <field name="payment_order_id" />
                 <field name="local_line_id" />
@@ -82,7 +82,7 @@
                 <field name="heuristic_candidate" />
                 <field name="heuristic_match_key" />
                 <field name="note" />
-            </tree>
+            </list>
         </field>
     </record>
 

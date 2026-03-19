@@ -8,6 +8,7 @@ from datetime import datetime, time, timedelta
 
 import requests
 
+# pylint: disable=deprecated-odoo-model-method
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
@@ -33,6 +34,7 @@ class ResCompanyArbaA122rActivity(models.Model):
     _description = 'ARBA A122R Activity by Company'
     _order = 'is_default desc, activity_code'
 
+    display_name = fields.Char(compute='_compute_display_name', store=True)
     company_id = fields.Many2one(
         'res.company', required=True, ondelete='cascade'
     )
@@ -43,13 +45,10 @@ class ResCompanyArbaA122rActivity(models.Model):
     )
     is_default = fields.Boolean(string='Habitual')
 
-    _sql_constraints = [
-        (
-            'res_company_arba_a122r_activity_unique',
-            'unique(company_id, activity_code)',
-            'La actividad ARBA A122R ya está configurada para esta compañía.',
-        )
-    ]
+    _res_company_arba_a122r_activity_unique = models.Constraint(
+        'UNIQUE(company_id, activity_code)',
+        'La actividad ARBA A122R ya está configurada para esta compañía.',
+    )
 
     @api.constrains('is_default', 'company_id')
     def _check_single_default(self):
@@ -78,17 +77,15 @@ class ResCompanyArbaA122rActivity(models.Model):
             )
             others.update({'is_default': False})
 
-    def name_get(self):
+    @api.depends('activity_code')
+    def _compute_display_name(self):
         selection_map = dict(ARBA_A122R_ACTIVITY_SELECTION)
-        result = []
         for rec in self:
-            label = (
+            rec.display_name = (
                 selection_map.get(rec.activity_code)
                 or rec.activity_code
                 or str(rec.id)
             )
-            result.append((rec.id, label))
-        return result
 
 
 class ArbaA122rDj(models.Model):
@@ -96,6 +93,7 @@ class ArbaA122rDj(models.Model):
     _description = 'ARBA A122R DJ Cache'
     _order = 'anio desc, mes desc, quincena desc, id desc'
 
+    display_name = fields.Char(compute='_compute_display_name', store=True)
     company_id = fields.Many2one(
         'res.company',
         required=True,
@@ -136,16 +134,13 @@ class ArbaA122rDj(models.Model):
         compute='_compute_retention_counts',
     )
 
-    _sql_constraints = [
-        (
-            'arba_a122r_dj_unique_key',
-            'unique(company_id, cuit_agente, actividad_id, anio, mes, quincena)',
-            'Ya existe un registro de DJ para este período y actividad.',
-        )
-    ]
+    _arba_a122r_dj_unique_key = models.Constraint(
+        'UNIQUE(company_id, cuit_agente, actividad_id, anio, mes, quincena)',
+        'Ya existe un registro de DJ para este período y actividad.',
+    )
 
-    def name_get(self):
-        result = []
+    @api.depends('arba_id_dj', 'anio', 'mes', 'quincena', 'actividad_id')
+    def _compute_display_name(self):
         for rec in self:
             if rec.quincena == 0:
                 period_label = '%s/%s Mensual' % (
@@ -159,13 +154,11 @@ class ArbaA122rDj(models.Model):
                     rec.quincena,
                 )
             dj_label = rec.arba_id_dj or '-'
-            name = 'DJ %s - %s - Act %s' % (
+            rec.display_name = 'DJ %s - %s - Act %s' % (
                 dj_label,
                 period_label,
                 rec.actividad_id,
             )
-            result.append((rec.id, name))
-        return result
 
     @api.model
     def _sanitize_company_cuit(self, company):
@@ -310,7 +303,7 @@ class ArbaA122rDj(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Retenciones ARBA del período'),
             'res_model': 'account.payment.order.retention.line',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': self._get_period_retention_domain(),
             'context': {'search_default_group_by_payment_order_id': 1},
         }
@@ -321,7 +314,7 @@ class ArbaA122rDj(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Retenciones ARBA informadas'),
             'res_model': 'account.payment.order.retention.line',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': self._get_period_retention_domain()
             + [('arba_sync_state', 'in', ('sent', 'observed', 'deleted'))],
             'context': {'search_default_group_by_payment_order_id': 1},
@@ -973,22 +966,26 @@ class ArbaA122rService(models.AbstractModel):
             self.env['arba.a122r.request.log'].sudo().create(
                 {
                     'company_id': company.id,
-                    'payment_order_id': payment_order.id
-                    if payment_order
-                    else False,
-                    'retention_line_id': retention_line.id
-                    if retention_line
-                    else False,
+                    'payment_order_id': (
+                        payment_order.id if payment_order else False
+                    ),
+                    'retention_line_id': (
+                        retention_line.id if retention_line else False
+                    ),
                     'endpoint': path,
                     'method': method,
                     'status_code': status_code or 0,
                     'state': 'error' if error_message else 'ok',
-                    'request_payload': json.dumps(payload, ensure_ascii=True)
-                    if isinstance(payload, (dict, list))
-                    else (str(payload) if payload else False),
-                    'response_payload': json.dumps(response, ensure_ascii=True)
-                    if isinstance(response, (dict, list))
-                    else (str(response) if response else False),
+                    'request_payload': (
+                        json.dumps(payload, ensure_ascii=True)
+                        if isinstance(payload, (dict, list))
+                        else (str(payload) if payload else False)
+                    ),
+                    'response_payload': (
+                        json.dumps(response, ensure_ascii=True)
+                        if isinstance(response, (dict, list))
+                        else (str(response) if response else False)
+                    ),
                     'error_message': error_message or False,
                 }
             )
@@ -1535,11 +1532,13 @@ class ArbaA122rService(models.AbstractModel):
                     'arba_id_comprobante': values['id'] or False,
                     'arba_nro_emision': values['nroEmision'] or False,
                     'arba_observacion': values['observacion'] or False,
-                    'arba_last_response': json.dumps(
-                        response_data, ensure_ascii=True, sort_keys=True
-                    )
-                    if isinstance(response_data, (dict, list))
-                    else str(response_data),
+                    'arba_last_response': (
+                        json.dumps(
+                            response_data, ensure_ascii=True, sort_keys=True
+                        )
+                        if isinstance(response_data, (dict, list))
+                        else str(response_data)
+                    ),
                 }
             )
             if line.arba_id_comprobante:
@@ -1568,9 +1567,9 @@ class ArbaA122rService(models.AbstractModel):
                     recovered = self._recover_comprobante_from_api(
                         company,
                         line,
-                        request_payload=payload
-                        if 'payload' in locals()
-                        else False,
+                        request_payload=(
+                            payload if 'payload' in locals() else False
+                        ),
                     )
                 line.write(
                     {
@@ -1695,11 +1694,11 @@ class ArbaA122rService(models.AbstractModel):
         line.write(
             {
                 'arba_sync_state': 'deleted',
-                'arba_last_response': json.dumps(
-                    response_data, ensure_ascii=True
-                )
-                if isinstance(response_data, (dict, list))
-                else str(response_data),
+                'arba_last_response': (
+                    json.dumps(response_data, ensure_ascii=True)
+                    if isinstance(response_data, (dict, list))
+                    else str(response_data)
+                ),
             }
         )
         try:
@@ -1807,7 +1806,7 @@ class AccountPaymentOrder(models.Model):
         for line in lines:
             line.action_arba_send(raise_on_error=raise_on_error)
 
-    @api.model
+    @api.model  # pylint: disable=deprecated-odoo-model-method
     def fields_view_get(
         self, view_id=None, view_type='form', toolbar=False, submenu=False
     ):
@@ -1868,13 +1867,10 @@ class AccountPaymentOrderRetentionLine(models.Model):
         string='PDF comprobante ARBA',
     )
 
-    _sql_constraints = [
-        (
-            'arba_n_transaccion_agente_uniq',
-            'unique(arba_n_transaccion_agente)',
-            'El número de transacción ARBA debe ser único.',
-        )
-    ]
+    _arba_n_transaccion_agente_uniq = models.Constraint(
+        'UNIQUE(arba_n_transaccion_agente)',
+        'El número de transacción ARBA debe ser único.',
+    )
 
     @api.depends(
         'retention_id',

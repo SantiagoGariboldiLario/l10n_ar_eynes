@@ -4,13 +4,13 @@
         <field name="name">res.company.tree.arba.a122r.config</field>
         <field name="model">res.company</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name" />
                 <field name="arba_a122r_enabled" />
                 <field name="arba_a122r_mode" />
                 <field name="arba_a122r_sucursal" />
                 <field name="arba_a122r_quincena_mode" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -35,10 +35,10 @@
                     </group>
                     <group string="Actividades ARBA A122R" invisible="not arba_a122r_enabled">
                         <field name="arba_a122r_activity_ids" nolabel="1">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="activity_code" />
                                 <field name="is_default" />
-                            </tree>
+                            </list>
                         </field>
                     </group>
                     <group string="Configuración técnica" invisible="not arba_a122r_enabled">
@@ -59,10 +59,10 @@
     <record id="action_res_company_arba_a122r_config" model="ir.actions.act_window">
         <field name="name">Configuración A122R ARBA</field>
         <field name="res_model">res.company</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field
             name="view_ids"
-            eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('view_res_company_tree_arba_a122r_config')}), (0, 0, {'view_mode': 'form', 'view_id': ref('view_res_company_form_arba_a122r_config')})]"
+            eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_res_company_tree_arba_a122r_config')}), (0, 0, {'view_mode': 'form', 'view_id': ref('view_res_company_form_arba_a122r_config')})]"
         />
         <field name="context">{'create': False}</field>
     </record>
@@ -93,7 +93,7 @@
         <field name="name">arba.a122r.dj.tree</field>
         <field name="model">arba.a122r.dj</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="company_id" />
                 <field name="cuit_agente" />
                 <field name="actividad_id" />
@@ -112,7 +112,7 @@
                     invisible="state == 'closed'"
                 />
                 <button name="action_mark_open" type="object" string="Reabrir" invisible="state == 'open'" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -183,12 +183,12 @@
     <record id="action_arba_a122r_dj" model="ir.actions.act_window">
         <field name="name">Períodos DJ A122R</field>
         <field name="res_model">arba.a122r.dj</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_arba_a122r_dj_search" />
         <field name="context">{}</field>
         <field
             name="view_ids"
-            eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('view_arba_a122r_dj_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('view_arba_a122r_dj_form')})]"
+            eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_arba_a122r_dj_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('view_arba_a122r_dj_form')})]"
         />
     </record>
 
@@ -236,7 +236,7 @@
             <xpath expr="//field[@name='retention_ids']" position="before">
                 <field name="has_arba_digital_retentions" invisible="1" />
             </xpath>
-            <xpath expr="//field[@name='retention_ids']/tree/field[@name='certificate_no']" position="after">
+            <xpath expr="//field[@name='retention_ids']/list/field[@name='certificate_no']" position="after">
                 <field name="is_arba_digital" invisible="1" />
                 <field
                     name="arba_sync_state"
@@ -264,7 +264,7 @@
                     column_invisible="not parent.has_arba_digital_retentions"
                 />
             </xpath>
-            <xpath expr="//field[@name='retention_ids']/tree/field[@name='amount']" position="after">
+            <xpath expr="//field[@name='retention_ids']/list/field[@name='amount']" position="after">
                 <button
                     name="action_arba_send"
                     type="object"
@@ -302,7 +302,7 @@
                 <field name="arba_observacion" invisible="not is_arba_digital" readonly="1" />
                 <field name="arba_last_error" invisible="not is_arba_digital" readonly="1" />
                 <field name="arba_history_ids" invisible="not is_arba_digital" readonly="1">
-                    <tree>
+                    <list>
                         <field name="create_date" />
                         <field name="action" />
                         <field name="state" />
@@ -317,7 +317,7 @@
                             string="PDF"
                             invisible="arba_id_comprobante == 0"
                         />
-                    </tree>
+                    </list>
                     <form>
                         <group>
                             <field name="create_date" readonly="1" />
@@ -342,7 +342,7 @@
             <xpath expr="//notebook" position="inside">
                 <page string="ARBA A122R Log" invisible="not has_arba_digital_retentions">
                     <field name="arba_a122r_request_log_ids" nolabel="1" readonly="1">
-                        <tree>
+                        <list>
                             <field name="create_date" />
                             <field name="retention_line_id" />
                             <field name="method" />
@@ -350,7 +350,7 @@
                             <field name="status_code" />
                             <field name="state" />
                             <field name="error_message" />
-                        </tree>
+                        </list>
                         <form>
                             <group>
                                 <field name="create_date" readonly="1" />
