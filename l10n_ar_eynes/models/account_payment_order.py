@@ -815,7 +815,13 @@ class AccountPaymentOrder(models.Model):
 
     def action_clean_lines(self):
         """reset income and debt lines"""
+        arba_service = self.env['arba.a122r.service']
         for rec in self:
+            if rec.type == 'payment':
+                rec._check_arba_retentions_recompute_allowed()
+                arba_service.orphan_retention_records(
+                    rec.retention_ids.filtered('arba_retention_record_id')
+                )
             rec.income_line_ids = [(5, 0, 0)]
             rec.debt_line_ids = [(5, 0, 0)]
             rec.retention_ids = [(5, 0, 0)]
@@ -1167,10 +1173,15 @@ class AccountPaymentOrder(models.Model):
         'income_line_ids', 'debt_line_ids', 'disable_retentions', 'date'
     )
     def onchange_lines(self):
+        arba_service = self.env['arba.a122r.service']
         for po in self:
             if po.type != 'payment':
                 return
 
+            po._check_arba_retentions_recompute_allowed()
+            arba_service.orphan_retention_records(
+                po.retention_ids.filtered('arba_retention_record_id')
+            )
             po.retention_ids = [(5, 0, 0)]
 
             if not po.disable_retentions:
