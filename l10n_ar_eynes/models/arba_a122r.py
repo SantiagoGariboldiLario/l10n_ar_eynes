@@ -133,6 +133,10 @@ class ArbaA122rDj(models.Model):
         string='Retenciones informadas',
         compute='_compute_retention_counts',
     )
+    informed_record_count = fields.Integer(
+        string='Registros informados',
+        compute='_compute_retention_counts',
+    )
 
     _arba_a122r_dj_unique_key = models.Constraint(
         'UNIQUE(company_id, cuit_agente, actividad_id, anio, mes, quincena)',
@@ -192,6 +196,14 @@ class ArbaA122rDj(models.Model):
             if rec.activity_line_id:
                 rec.actividad_id = int(rec.activity_line_id.activity_code)
 
+    @api.model
+    def _find_company_activity_line(self, company, actividad_id):
+        if not company or not actividad_id:
+            return self.env['res.company.arba.a122r.activity']
+        return company.arba_a122r_activity_ids.filtered(
+            lambda line: int(line.activity_code) == int(actividad_id)
+        )[:1]
+
     @api.constrains('company_id', 'actividad_id', 'quincena')
     def _check_company_activity(self):
         for rec in self:
@@ -244,6 +256,12 @@ class ArbaA122rDj(models.Model):
                 )
                 if activity:
                     vals['actividad_id'] = int(activity.activity_code)
+            elif vals.get('actividad_id') and not vals.get('activity_line_id'):
+                activity = self._find_company_activity_line(
+                    company, vals['actividad_id']
+                )
+                if activity:
+                    vals['activity_line_id'] = activity.id
             if not vals.get('cuit_agente'):
                 vals['cuit_agente'] = self._sanitize_company_cuit(company)
             if not vals.get('anio'):
@@ -287,13 +305,30 @@ class ArbaA122rDj(models.Model):
             ('retention_id.inform_arba', '=', True),
         ]
 
+    def _get_period_retention_record_domain(self):
+        self.ensure_one()
+        start_date, end_date = self._get_period_date_range()
+        return [
+            ('company_id', '=', self.company_id.id),
+            ('payment_order_id.type', '=', 'payment'),
+            ('payment_order_id.date', '>=', start_date),
+            ('payment_order_id.date', '<=', end_date),
+            ('arba_actividad_id_used', '=', self.actividad_id),
+        ]
+
     def _compute_retention_counts(self):
         RetentionLine = self.env['account.payment.order.retention.line']
+        RetentionRecord = self.env['arba.a122r.retention.record']
         for record in self:
-            domain = record._get_period_retention_domain()
-            record.retention_count = RetentionLine.search_count(domain)
+            line_domain = record._get_period_retention_domain()
+            record_domain = record._get_period_retention_record_domain()
+            record.retention_count = RetentionLine.search_count(line_domain)
             record.informed_retention_count = RetentionLine.search_count(
-                domain
+                line_domain
+                + [('arba_sync_state', 'in', ('sent', 'observed', 'deleted'))]
+            )
+            record.informed_record_count = RetentionRecord.search_count(
+                record_domain
                 + [('arba_sync_state', 'in', ('sent', 'observed', 'deleted'))]
             )
 
@@ -316,6 +351,32 @@ class ArbaA122rDj(models.Model):
             'res_model': 'account.payment.order.retention.line',
             'view_mode': 'list,form',
             'domain': self._get_period_retention_domain()
+            + [('arba_sync_state', 'in', ('sent', 'observed', 'deleted'))],
+            'context': {'search_default_group_by_payment_order_id': 1},
+        }
+
+    def action_view_period_informed_records(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Registros ARBA informados'),
+            'res_model': 'arba.a122r.retention.record',
+            'view_mode': 'list,form',
+            'views': [
+                (
+                    self.env.ref(
+                        'l10n_ar_eynes.view_arba_a122r_retention_record_tree'
+                    ).id,
+                    'list',
+                ),
+                (
+                    self.env.ref(
+                        'l10n_ar_eynes.view_arba_a122r_retention_record_form'
+                    ).id,
+                    'form',
+                ),
+            ],
+            'domain': self._get_period_retention_record_domain()
             + [('arba_sync_state', 'in', ('sent', 'observed', 'deleted'))],
             'context': {'search_default_group_by_payment_order_id': 1},
         }
@@ -373,8 +434,14 @@ class ArbaA122rRequestLog(models.Model):
 
     company_id = fields.Many2one('res.company', required=True, index=True)
     payment_order_id = fields.Many2one('account.payment.order', index=True)
+    retention_record_id = fields.Many2one(
+        'arba.a122r.retention.record',
+        string='Registro ARBA persistente',
+        index=True,
+        ondelete='set null',
+    )
     retention_line_id = fields.Many2one(
-        'account.payment.order.retention.line', index=True
+        'account.payment.order.retention.line', index=True, ondelete='set null'
     )
     endpoint = fields.Char(required=True)
     method = fields.Char(required=True)
@@ -392,14 +459,24 @@ class ArbaA122rComprobanteHistory(models.Model):
     _description = 'ARBA A122R Comprobante History'
     _order = 'create_date desc, id desc'
 
-    retention_line_id = fields.Many2one(
-        'account.payment.order.retention.line',
-        required=True,
+    retention_record_id = fields.Many2one(
+        'arba.a122r.retention.record',
+        string='Registro ARBA persistente',
+        index=True,
         ondelete='cascade',
     )
-    payment_order_id = fields.Many2one(
-        related='retention_line_id.payment_order_id', store=True, readonly=True
+    retention_line_id = fields.Many2one(
+        'account.payment.order.retention.line',
+        string='Línea de retención',
+        index=True,
+        ondelete='set null',
     )
+    payment_order_id = fields.Many2one(
+        'account.payment.order',
+        index=True,
+        readonly=True,
+    )
+    company_id = fields.Many2one('res.company', readonly=True, index=True)
     action = fields.Selection(
         [('send', 'Envío'), ('delete', 'Baja')], required=True, default='send'
     )
@@ -426,7 +503,14 @@ class ArbaA122rComprobanteHistory(models.Model):
                     'Esta línea del historial no tiene ID de comprobante ARBA para descargar PDF.'
                 )
             )
-        company = self.retention_line_id.payment_order_id.company_id
+        company = (
+            self.company_id
+            or self.payment_order_id.company_id
+            or self.retention_line_id.payment_order_id.company_id
+        )
+        payment_order = (
+            self.payment_order_id or self.retention_line_id.payment_order_id
+        )
         service = self.env['arba.a122r.service']
         response = service._do_request(
             company,
@@ -441,7 +525,8 @@ class ArbaA122rComprobanteHistory(models.Model):
             payload={'id': int(self.arba_id_comprobante)},
             response='binary/pdf' if isinstance(response, bytes) else response,
             status_code=200,
-            payment_order=self.retention_line_id.payment_order_id,
+            payment_order=payment_order,
+            retention_record=self.retention_record_id,
             retention_line=self.retention_line_id,
         )
         pdf_data = service._extract_pdf_bytes(response)
@@ -455,6 +540,154 @@ class ArbaA122rComprobanteHistory(models.Model):
                 'res_id': self.id,
                 'mimetype': 'application/pdf',
             }
+        )
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/web/content/%s?download=true' % attachment.id,
+            'target': 'self',
+        }
+
+
+class ArbaA122rRetentionRecord(models.Model):
+    _name = 'arba.a122r.retention.record'
+    _description = 'Registro persistente de retención ARBA A122R'
+    _order = 'create_date desc, id desc'
+
+    name = fields.Char(compute='_compute_name', string='Descripción')
+    company_id = fields.Many2one('res.company', required=True, index=True)
+    payment_order_id = fields.Many2one(
+        'account.payment.order', required=True, index=True, ondelete='cascade'
+    )
+    partner_id = fields.Many2one('res.partner', index=True, ondelete='set null')
+    current_retention_line_id = fields.Many2one(
+        'account.payment.order.retention.line',
+        string='Línea actual',
+        index=True,
+        ondelete='set null',
+    )
+    current_history_entry_id = fields.Many2one(
+        'arba.a122r.comprobante.history',
+        string='Último comprobante',
+        ondelete='set null',
+    )
+    current = fields.Boolean(default=True, index=True)
+    lifecycle_state = fields.Selection(
+        [
+            ('linked', 'Vinculada'),
+            ('orphaned', 'Huérfana'),
+            ('superseded', 'Reemplazada'),
+        ],
+        default='linked',
+        required=True,
+        index=True,
+    )
+    superseded_by_id = fields.Many2one(
+        'arba.a122r.retention.record',
+        string='Reemplazada por',
+        ondelete='set null',
+    )
+    replaces_record_id = fields.Many2one(
+        'arba.a122r.retention.record',
+        string='Reemplaza a',
+        ondelete='set null',
+    )
+    retention_id = fields.Many2one(
+        'account.journal',
+        string='Retención',
+        ondelete='set null',
+    )
+    tax_id = fields.Many2one(
+        'account.tax', string='Impuesto', ondelete='set null'
+    )
+    base_amount = fields.Float(string='Base imponible', digits='Account')
+    retention_amount = fields.Float(
+        string='Importe retención', digits='Account'
+    )
+    alicuota = fields.Float(string='Alícuota', digits='Account')
+    arba_fecha_operacion = fields.Date(copy=False)
+    arba_actividad_id_used = fields.Integer(copy=False, readonly=True)
+    cuit_contribuyente = fields.Char(copy=False)
+    razon_social_contribuyente = fields.Char(copy=False)
+    sucursal = fields.Char(copy=False)
+    arba_sync_state = fields.Selection(
+        selection=[
+            ('pending', 'Pendiente'),
+            ('sent', 'Informada'),
+            ('observed', 'Observada'),
+            ('error', 'Error'),
+            ('deleted', 'Dada de baja'),
+        ],
+        default=False,
+        copy=False,
+        index=True,
+    )
+    arba_id_dj = fields.Integer(copy=False, index=True)
+    arba_id_comprobante = fields.Integer(copy=False, index=True)
+    arba_nro_emision = fields.Char(copy=False)
+    arba_observacion = fields.Char(copy=False)
+    arba_last_request = fields.Text(copy=False)
+    arba_last_response = fields.Text(copy=False)
+    arba_last_error = fields.Text(copy=False)
+    arba_n_transaccion_agente = fields.Char(copy=False, index=True)
+    arba_pdf_attachment_id = fields.Many2one(
+        'ir.attachment',
+        copy=False,
+        readonly=True,
+        string='PDF comprobante ARBA',
+    )
+    history_ids = fields.One2many(
+        'arba.a122r.comprobante.history',
+        'retention_record_id',
+        string='Historial de comprobantes',
+        readonly=True,
+    )
+    request_log_ids = fields.One2many(
+        'arba.a122r.request.log',
+        'retention_record_id',
+        string='Solicitudes ARBA',
+        readonly=True,
+    )
+
+    @api.depends(
+        'payment_order_id.number',
+        'arba_n_transaccion_agente',
+        'partner_id',
+        'arba_id_comprobante',
+    )
+    def _compute_name(self):
+        for rec in self:
+            parts = [rec.payment_order_id.number or _('Sin OP')]
+            if rec.arba_n_transaccion_agente:
+                parts.append(_('Tx %s') % rec.arba_n_transaccion_agente)
+            if rec.arba_id_comprobante:
+                parts.append(_('Comp. %s') % rec.arba_id_comprobante)
+            if rec.partner_id:
+                parts.append(rec.partner_id.display_name)
+            rec.name = ' - '.join(parts)
+
+    def action_open_current_line(self):
+        self.ensure_one()
+        if not self.current_retention_line_id:
+            raise UserError(
+                _(
+                    'Este registro persistente ya no tiene una línea de retención vigente.'
+                )
+            )
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Línea de retención'),
+            'res_model': 'account.payment.order.retention.line',
+            'res_id': self.current_retention_line_id.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
+    def action_arba_download_pdf(self):
+        self.ensure_one()
+        service = self.env['arba.a122r.service']
+        force_refresh = self.arba_sync_state == 'deleted'
+        attachment = service.get_comprobante_pdf_from_record(
+            self, force_refresh=force_refresh
         )
         return {
             'type': 'ir.actions.act_url',
@@ -518,6 +751,22 @@ class ResCompany(models.Model):
         required=True,
         string='Periodicidad DJ',
     )
+
+    def action_arba_a122r_test_connection(self):
+        self.ensure_one()
+        self.env['arba.a122r.service']._get_token(self, force_refresh=True)
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('ARBA A122R'),
+                'message': _(
+                    'Conexión validada correctamente. Las credenciales OAuth de ARBA son válidas.'
+                ),
+                'type': 'success',
+                'sticky': False,
+            },
+        }
 
     @api.constrains('arba_a122r_sucursal')
     def _check_arba_a122r_sucursal(self):
@@ -684,22 +933,159 @@ class ArbaA122rService(models.AbstractModel):
             next_suffix += 1
 
     @api.model
-    def _create_comprobante_history(
-        self, retention_line, action, state, notes=False
-    ):
-        self.env['arba.a122r.comprobante.history'].sudo().create(
+    def _get_or_create_retention_record(self, retention_line):
+        record = retention_line.arba_retention_record_id
+        tax = retention_line._get_retention_tax()
+        if record:
+            vals = {'current_retention_line_id': retention_line.id}
+            if record.lifecycle_state != 'linked':
+                vals.update({'lifecycle_state': 'linked', 'current': True})
+            record.sudo().write(vals)
+            return record
+        record = (
+            self.env['arba.a122r.retention.record']
+            .sudo()
+            .create(
+                {
+                    'company_id': retention_line.payment_order_id.company_id.id,
+                    'payment_order_id': retention_line.payment_order_id.id,
+                    'partner_id': (
+                        retention_line.partner_id
+                        or retention_line.payment_order_id.partner_id
+                    ).id,
+                    'current_retention_line_id': retention_line.id,
+                    'current': True,
+                    'lifecycle_state': 'linked',
+                    'retention_id': retention_line.retention_id.id,
+                    'tax_id': tax.id,
+                }
+            )
+        )
+        retention_line.sudo().write({'arba_retention_record_id': record.id})
+        return record
+
+    @api.model
+    def orphan_retention_records(self, retention_lines):
+        records = retention_lines.mapped('arba_retention_record_id').filtered(
+            lambda rec: rec
+        )
+        if not records:
+            return
+        records.sudo().write(
             {
-                'retention_line_id': retention_line.id,
-                'action': action,
-                'state': state,
-                'arba_id_dj': retention_line.arba_id_dj or 0,
-                'arba_id_comprobante': retention_line.arba_id_comprobante or 0,
-                'arba_nro_emision': retention_line.arba_nro_emision or False,
-                'arba_n_transaccion_agente': retention_line.arba_n_transaccion_agente
-                or False,
-                'notes': notes or False,
+                'current_retention_line_id': False,
+                'lifecycle_state': 'orphaned',
+                'current': False,
             }
         )
+        retention_lines.sudo().write({'arba_retention_record_id': False})
+
+    @api.model
+    def _build_record_snapshot_from_line(self, retention_line, payload=False):
+        partner = (
+            retention_line.partner_id
+            or retention_line.payment_order_id.partner_id
+        )
+        tax = retention_line._get_retention_tax()
+        snapshot = {
+            'company_id': retention_line.payment_order_id.company_id.id,
+            'payment_order_id': retention_line.payment_order_id.id,
+            'partner_id': partner.id if partner else False,
+            'current_retention_line_id': retention_line.id,
+            'retention_id': retention_line.retention_id.id,
+            'tax_id': tax.id,
+            'base_amount': retention_line.base,
+            'retention_amount': retention_line.amount,
+            'arba_fecha_operacion': retention_line.arba_fecha_operacion,
+            'arba_actividad_id_used': retention_line.arba_actividad_id_used,
+            'arba_sync_state': retention_line.arba_sync_state,
+            'arba_id_dj': retention_line.arba_id_dj,
+            'arba_id_comprobante': retention_line.arba_id_comprobante,
+            'arba_nro_emision': retention_line.arba_nro_emision,
+            'arba_observacion': retention_line.arba_observacion,
+            'arba_last_request': retention_line.arba_last_request,
+            'arba_last_response': retention_line.arba_last_response,
+            'arba_last_error': retention_line.arba_last_error,
+            'arba_n_transaccion_agente': retention_line.arba_n_transaccion_agente,
+            'cuit_contribuyente': (
+                ''.join([c for c in (partner.vat or '') if c.isdigit()])
+                if partner
+                else False
+            ),
+            'razon_social_contribuyente': partner.name if partner else False,
+            'sucursal': retention_line.payment_order_id.company_id.arba_a122r_sucursal,
+        }
+        payload = payload or {}
+        if payload.get('alicuota') is not None:
+            snapshot['alicuota'] = payload.get('alicuota')
+        return snapshot
+
+    @api.model
+    def _ensure_record_snapshot_from_line(
+        self, retention_line, retention_record=False
+    ):
+        record = retention_record or self._get_or_create_retention_record(
+            retention_line
+        )
+        record.sudo().write(
+            self._build_record_snapshot_from_line(retention_line)
+        )
+        self._sync_line_from_record(record, retention_line)
+        return record
+
+    @api.model
+    def _sync_line_from_record(self, record, retention_line=False):
+        line = retention_line or record.current_retention_line_id
+        if not line:
+            return
+        line.sudo().write(
+            {
+                'arba_retention_record_id': record.id,
+                'arba_sync_state': record.arba_sync_state,
+                'arba_id_dj': record.arba_id_dj,
+                'arba_id_comprobante': record.arba_id_comprobante,
+                'arba_nro_emision': record.arba_nro_emision,
+                'arba_observacion': record.arba_observacion,
+                'arba_last_request': record.arba_last_request,
+                'arba_last_response': record.arba_last_response,
+                'arba_last_error': record.arba_last_error,
+                'arba_n_transaccion_agente': record.arba_n_transaccion_agente,
+                'arba_fecha_operacion': record.arba_fecha_operacion,
+                'arba_actividad_id_used': record.arba_actividad_id_used,
+                'arba_pdf_attachment_id': record.arba_pdf_attachment_id.id,
+            }
+        )
+
+    @api.model
+    def _create_comprobante_history(
+        self, retention_line, retention_record, action, state, notes=False
+    ):
+        history = (
+            self.env['arba.a122r.comprobante.history']
+            .sudo()
+            .create(
+                {
+                    'retention_record_id': retention_record.id,
+                    'retention_line_id': (
+                        retention_line.id if retention_line else False
+                    ),
+                    'payment_order_id': retention_record.payment_order_id.id,
+                    'company_id': retention_record.company_id.id,
+                    'action': action,
+                    'state': state,
+                    'arba_id_dj': retention_record.arba_id_dj or 0,
+                    'arba_id_comprobante': retention_record.arba_id_comprobante
+                    or 0,
+                    'arba_nro_emision': retention_record.arba_nro_emision
+                    or False,
+                    'arba_n_transaccion_agente': retention_record.arba_n_transaccion_agente
+                    or False,
+                    'notes': notes or False,
+                }
+            )
+        )
+        retention_record.sudo().write({'current_history_entry_id': history.id})
+        return history
 
     @api.model
     def _extract_pdf_bytes(self, response):
@@ -739,31 +1125,35 @@ class ArbaA122rService(models.AbstractModel):
         )
 
     @api.model
-    def _store_comprobante_pdf_attachment(self, retention_line, pdf_data):
+    def _store_comprobante_pdf_attachment(self, retention_record, pdf_data):
         if not pdf_data:
             return False
         vals = {
             'name': 'ARBA-Comprobante-%s.pdf'
-            % (retention_line.arba_id_comprobante or retention_line.id),
+            % (retention_record.arba_id_comprobante or retention_record.id),
             'type': 'binary',
             'datas': base64.b64encode(pdf_data),
-            'res_model': 'account.payment.order.retention.line',
-            'res_id': retention_line.id,
+            'res_model': 'arba.a122r.retention.record',
+            'res_id': retention_record.id,
             'mimetype': 'application/pdf',
         }
-        attachment = retention_line.arba_pdf_attachment_id.sudo()
+        attachment = retention_record.arba_pdf_attachment_id.sudo()
         if attachment:
             attachment.write(vals)
         else:
             attachment = self.env['ir.attachment'].sudo().create(vals)
-            retention_line.sudo().write(
+            retention_record.sudo().write(
+                {'arba_pdf_attachment_id': attachment.id}
+            )
+        if retention_record.current_retention_line_id:
+            retention_record.current_retention_line_id.sudo().write(
                 {'arba_pdf_attachment_id': attachment.id}
             )
         return attachment
 
     @api.model
-    def _get_cached_comprobante_pdf(self, retention_line):
-        attachment = retention_line.arba_pdf_attachment_id
+    def _get_cached_comprobante_pdf(self, retention_record):
+        attachment = retention_record.arba_pdf_attachment_id
         if attachment and attachment.datas:
             return base64.b64decode(attachment.datas)
         return False
@@ -799,11 +1189,12 @@ class ArbaA122rService(models.AbstractModel):
             )
 
     @api.model
-    def _get_token(self, company):
+    def _get_token(self, company, force_refresh=False):
         self._ensure_company_config(company)
         now = fields.Datetime.now()
         if (
-            company.arba_a122r_access_token
+            not force_refresh
+            and company.arba_a122r_access_token
             and company.arba_a122r_token_expiration
             and fields.Datetime.to_datetime(company.arba_a122r_token_expiration)
             > fields.Datetime.to_datetime(now) + timedelta(seconds=30)
@@ -960,6 +1351,7 @@ class ArbaA122rService(models.AbstractModel):
         error_message=None,
         status_code=False,
         payment_order=False,
+        retention_record=False,
         retention_line=False,
     ):
         try:
@@ -968,6 +1360,9 @@ class ArbaA122rService(models.AbstractModel):
                     'company_id': company.id,
                     'payment_order_id': (
                         payment_order.id if payment_order else False
+                    ),
+                    'retention_record_id': (
+                        retention_record.id if retention_record else False
                     ),
                     'retention_line_id': (
                         retention_line.id if retention_line else False
@@ -1066,16 +1461,21 @@ class ArbaA122rService(models.AbstractModel):
 
     @api.model
     def _recover_comprobante_from_logs(self, retention_line):
+        record = retention_line.arba_retention_record_id
         log = (
             self.env['arba.a122r.request.log']
             .sudo()
             .search(
                 [
-                    ('retention_line_id', '=', retention_line.id),
                     ('endpoint', '=', '/external/comprobante'),
                     ('method', '=', 'POST'),
                     ('state', '=', 'ok'),
-                ],
+                ]
+                + (
+                    [('retention_record_id', '=', record.id)]
+                    if record
+                    else [('retention_line_id', '=', retention_line.id)]
+                ),
                 order='id desc',
                 limit=1,
             )
@@ -1183,6 +1583,12 @@ class ArbaA122rService(models.AbstractModel):
             limit=1,
         )
         if cache and cache.arba_id_dj:
+            if not cache.activity_line_id:
+                activity_line = DjCache._find_company_activity_line(
+                    company, actividad_id
+                )
+                if activity_line:
+                    cache.write({'activity_line_id': activity_line.id})
             return cache
 
         payload = {
@@ -1289,10 +1695,14 @@ class ArbaA122rService(models.AbstractModel):
                 _('No se pudo resolver el ID de DJ ARBA para el período.')
             )
 
+        activity_line = DjCache._find_company_activity_line(
+            company, actividad_id
+        )
         vals = {
             'company_id': company.id,
             'cuit_agente': cuit_agente,
             'actividad_id': actividad_id,
+            'activity_line_id': activity_line.id or False,
             'anio': anio,
             'mes': mes,
             'quincena': quincena,
@@ -1461,6 +1871,15 @@ class ArbaA122rService(models.AbstractModel):
             return False
 
         company = line.payment_order_id.company_id
+        record = self._get_or_create_retention_record(line)
+        if (
+            line.arba_sync_state in ('sent', 'observed')
+            or line.arba_id_comprobante
+            or record.arba_sync_state in ('sent', 'observed')
+            or record.arba_id_comprobante
+        ):
+            self._sync_line_from_record(record, line)
+            return True
         stage = 'dj'
         try:
             if line.arba_sync_state == 'deleted':
@@ -1496,17 +1915,28 @@ class ArbaA122rService(models.AbstractModel):
                 actividad_id=actividad_id,
             )
             payload = self._prepare_payload(line, dj_cache.arba_id_dj)
-            line.write(
-                {
-                    'arba_sync_state': 'pending',
-                    'arba_id_dj': dj_cache.arba_id_dj,
-                    'arba_actividad_id_used': actividad_id,
-                    'arba_last_request': json.dumps(
-                        payload, ensure_ascii=True, sort_keys=True
+            pending_vals = {
+                'arba_sync_state': 'pending',
+                'arba_id_dj': dj_cache.arba_id_dj,
+                'arba_actividad_id_used': actividad_id,
+                'arba_last_request': json.dumps(
+                    payload, ensure_ascii=True, sort_keys=True
+                ),
+                'arba_last_error': False,
+                'arba_last_response': False,
+                'arba_observacion': False,
+                'arba_fecha_operacion': line.arba_fecha_operacion,
+                'arba_n_transaccion_agente': line.arba_n_transaccion_agente,
+            }
+            record.sudo().write(
+                dict(
+                    self._build_record_snapshot_from_line(
+                        line, payload=payload
                     ),
-                    'arba_last_error': False,
-                }
+                    **pending_vals
+                )
             )
+            self._sync_line_from_record(record, line)
             stage = 'comprobante'
             response_data = self._do_request(
                 company,
@@ -1522,11 +1952,12 @@ class ArbaA122rService(models.AbstractModel):
                 response=response_data,
                 status_code=200,
                 payment_order=line.payment_order_id,
+                retention_record=record,
                 retention_line=line,
             )
             values = self._extract_comprobante_values(response_data)
             state = 'observed' if values['observacion'] else 'sent'
-            line.write(
+            record.sudo().write(
                 {
                     'arba_sync_state': state,
                     'arba_id_comprobante': values['id'] or False,
@@ -1539,11 +1970,18 @@ class ArbaA122rService(models.AbstractModel):
                         if isinstance(response_data, (dict, list))
                         else str(response_data)
                     ),
+                    'arba_last_error': False,
+                    'current_retention_line_id': line.id,
+                    'lifecycle_state': 'linked',
+                    'current': True,
                 }
             )
-            if line.arba_id_comprobante:
+            self._sync_line_from_record(record, line)
+            if record.arba_id_comprobante:
                 try:
-                    self.get_comprobante_pdf(line, force_refresh=True)
+                    self.get_comprobante_pdf_from_record(
+                        record, force_refresh=True
+                    )
                 except Exception:
                     _logger.warning(
                         'No se pudo cachear el PDF ARBA de la línea %s luego del envío.',
@@ -1551,6 +1989,7 @@ class ArbaA122rService(models.AbstractModel):
                     )
             self._create_comprobante_history(
                 line,
+                record,
                 action='send',
                 state=state,
                 notes=values['observacion'] or False,
@@ -1571,14 +2010,14 @@ class ArbaA122rService(models.AbstractModel):
                             payload if 'payload' in locals() else False
                         ),
                     )
-                line.write(
+                record.sudo().write(
                     {
                         'arba_sync_state': 'sent',
                         'arba_id_comprobante': recovered['id']
-                        or line.arba_id_comprobante
+                        or record.arba_id_comprobante
                         or False,
                         'arba_nro_emision': recovered['nroEmision']
-                        or line.arba_nro_emision
+                        or record.arba_nro_emision
                         or False,
                         'arba_observacion': recovered['observacion']
                         or _(
@@ -1587,17 +2026,21 @@ class ArbaA122rService(models.AbstractModel):
                         'arba_last_error': False,
                     }
                 )
+                self._sync_line_from_record(record, line)
                 self._create_comprobante_history(
                     line,
+                    record,
                     action='send',
                     state='sent',
                     notes=_(
                         'Reenvío omitido: ARBA indicó que la transacción ya fue informada.'
                     ),
                 )
-                if line.arba_id_comprobante:
+                if record.arba_id_comprobante:
                     try:
-                        self.get_comprobante_pdf(line, force_refresh=False)
+                        self.get_comprobante_pdf_from_record(
+                            record, force_refresh=False
+                        )
                     except Exception:
                         _logger.warning(
                             'No se pudo recuperar/cachear el PDF ARBA de la línea %s.',
@@ -1612,6 +2055,7 @@ class ArbaA122rService(models.AbstractModel):
                         error_message=error_message,
                         status_code=400,
                         payment_order=line.payment_order_id,
+                        retention_record=record,
                         retention_line=line,
                     )
                 return True
@@ -1624,14 +2068,16 @@ class ArbaA122rService(models.AbstractModel):
                     error_message=error_message,
                     status_code=400,
                     payment_order=line.payment_order_id,
+                    retention_record=record,
                     retention_line=line,
                 )
-            line.write(
+            record.sudo().write(
                 {
                     'arba_sync_state': 'error',
                     'arba_last_error': error_message,
                 }
             )
+            self._sync_line_from_record(record, line)
             payment = line.payment_order_id
             if payment:
                 payment.message_post(
@@ -1648,17 +2094,20 @@ class ArbaA122rService(models.AbstractModel):
     @api.model
     def delete_remote_comprobante(self, retention_line):
         line = retention_line
-        if not line.arba_id_comprobante:
+        record = self._ensure_record_snapshot_from_line(
+            line, line.arba_retention_record_id
+        )
+        if not record.arba_id_comprobante:
             raise ValidationError(
                 _('Esta línea de retención no tiene ID de comprobante ARBA.')
             )
         previous_values = {
-            'arba_id_comprobante': line.arba_id_comprobante,
-            'arba_nro_emision': line.arba_nro_emision,
-            'arba_n_transaccion_agente': line.arba_n_transaccion_agente,
-            'arba_id_dj': line.arba_id_dj,
+            'arba_id_comprobante': record.arba_id_comprobante,
+            'arba_nro_emision': record.arba_nro_emision,
+            'arba_n_transaccion_agente': record.arba_n_transaccion_agente,
+            'arba_id_dj': record.arba_id_dj,
         }
-        endpoint = '/external/comprobante/%s' % line.arba_id_comprobante
+        endpoint = '/external/comprobante/%s' % record.arba_id_comprobante
         try:
             response_data = self._do_request(
                 line.payment_order_id.company_id,
@@ -1674,6 +2123,7 @@ class ArbaA122rService(models.AbstractModel):
                 error_message=error_text,
                 status_code=400,
                 payment_order=line.payment_order_id,
+                retention_record=record,
                 retention_line=line,
             )
             if 'Comprobante ya fue borrado' not in error_text:
@@ -1689,9 +2139,10 @@ class ArbaA122rService(models.AbstractModel):
             response=response_data,
             status_code=200,
             payment_order=line.payment_order_id,
+            retention_record=record,
             retention_line=line,
         )
-        line.write(
+        record.sudo().write(
             {
                 'arba_sync_state': 'deleted',
                 'arba_last_response': (
@@ -1701,69 +2152,95 @@ class ArbaA122rService(models.AbstractModel):
                 ),
             }
         )
+        self._sync_line_from_record(record, line)
         try:
             # Refresh cached PDF so it reflects "dado de baja" status from ARBA.
-            self.get_comprobante_pdf(line, force_refresh=True)
+            self.get_comprobante_pdf_from_record(record, force_refresh=True)
         except Exception:
             _logger.warning(
                 'No se pudo refrescar el PDF ARBA de la línea %s luego de la baja.',
                 line.id,
             )
-        self.env['arba.a122r.comprobante.history'].sudo().create(
-            {
-                'retention_line_id': line.id,
-                'action': 'delete',
-                'state': 'deleted',
-                'arba_id_dj': previous_values['arba_id_dj'] or 0,
-                'arba_id_comprobante': previous_values['arba_id_comprobante']
-                or 0,
-                'arba_nro_emision': previous_values['arba_nro_emision']
-                or False,
-                'arba_n_transaccion_agente': previous_values[
-                    'arba_n_transaccion_agente'
-                ]
-                or False,
-                'notes': (
-                    'ARBA indicó que el comprobante ya estaba dado de baja.'
-                    if isinstance(response_data, dict)
-                    and response_data.get('detalle')
-                    == 'Comprobante ya borrado en ARBA'
-                    else False
-                ),
-            }
+        history = (
+            self.env['arba.a122r.comprobante.history']
+            .sudo()
+            .create(
+                {
+                    'retention_record_id': record.id,
+                    'retention_line_id': line.id,
+                    'payment_order_id': line.payment_order_id.id,
+                    'company_id': line.payment_order_id.company_id.id,
+                    'action': 'delete',
+                    'state': 'deleted',
+                    'arba_id_dj': previous_values['arba_id_dj'] or 0,
+                    'arba_id_comprobante': previous_values[
+                        'arba_id_comprobante'
+                    ]
+                    or 0,
+                    'arba_nro_emision': previous_values['arba_nro_emision']
+                    or False,
+                    'arba_n_transaccion_agente': previous_values[
+                        'arba_n_transaccion_agente'
+                    ]
+                    or False,
+                    'notes': (
+                        'ARBA indicó que el comprobante ya estaba dado de baja.'
+                        if isinstance(response_data, dict)
+                        and response_data.get('detalle')
+                        == 'Comprobante ya borrado en ARBA'
+                        else False
+                    ),
+                }
+            )
         )
+        record.sudo().write({'current_history_entry_id': history.id})
         return True
 
     @api.model
     def get_comprobante_pdf(self, retention_line, force_refresh=False):
         line = retention_line
-        if not line.arba_id_comprobante:
+        record = self._ensure_record_snapshot_from_line(
+            line, line.arba_retention_record_id
+        )
+        attachment = self.get_comprobante_pdf_from_record(
+            record, force_refresh=force_refresh
+        )
+        if attachment and line.arba_pdf_attachment_id != attachment:
+            line.sudo().write({'arba_pdf_attachment_id': attachment.id})
+        return base64.b64decode(attachment.datas)
+
+    @api.model
+    def get_comprobante_pdf_from_record(
+        self, retention_record, force_refresh=False
+    ):
+        record = retention_record
+        if not record.arba_id_comprobante:
             raise ValidationError(
-                _('Esta línea de retención no tiene ID de comprobante ARBA.')
+                _('Este registro persistente no tiene ID de comprobante ARBA.')
             )
         if not force_refresh:
-            cached_pdf = self._get_cached_comprobante_pdf(line)
+            cached_pdf = self._get_cached_comprobante_pdf(record)
             if cached_pdf:
-                return cached_pdf
+                return record.arba_pdf_attachment_id
         response = self._do_request(
-            line.payment_order_id.company_id,
+            record.company_id,
             method='GET',
             path='/external/comprobantePdf',
-            params={'id': int(line.arba_id_comprobante)},
+            params={'id': int(record.arba_id_comprobante)},
         )
         self._create_request_log(
-            line.payment_order_id.company_id,
+            record.company_id,
             '/external/comprobantePdf',
             'GET',
-            payload={'id': int(line.arba_id_comprobante)},
+            payload={'id': int(record.arba_id_comprobante)},
             response='binary/pdf' if isinstance(response, bytes) else response,
             status_code=200,
-            payment_order=line.payment_order_id,
-            retention_line=line,
+            payment_order=record.payment_order_id,
+            retention_record=record,
+            retention_line=record.current_retention_line_id,
         )
         pdf_data = self._extract_pdf_bytes(response)
-        self._store_comprobante_pdf_attachment(line, pdf_data)
-        return pdf_data
+        return self._store_comprobante_pdf_attachment(record, pdf_data)
 
 
 class AccountPaymentOrder(models.Model):
@@ -1778,16 +2255,84 @@ class AccountPaymentOrder(models.Model):
     has_arba_digital_retentions = fields.Boolean(
         compute='_compute_has_arba_digital_retentions'
     )
+    has_active_arba_retentions = fields.Boolean(
+        compute='_compute_has_active_arba_retentions'
+    )
+    arba_retention_record_ids = fields.One2many(
+        'arba.a122r.retention.record',
+        'payment_order_id',
+        string='Registros persistentes ARBA',
+        readonly=True,
+    )
+    arba_retention_record_count = fields.Integer(
+        compute='_compute_arba_retention_record_stats'
+    )
+    has_orphaned_arba_retention_records = fields.Boolean(
+        compute='_compute_arba_retention_record_stats'
+    )
 
-    @api.depends('retention_ids', 'retention_ids.is_arba_digital')
+    @api.depends(
+        'retention_ids',
+        'retention_ids.is_arba_digital',
+    )
     def _compute_has_arba_digital_retentions(self):
         for payment in self:
             payment.has_arba_digital_retentions = any(
                 line.is_arba_digital for line in payment.retention_ids
             )
 
+    @api.depends(
+        'type',
+        'retention_ids',
+        'retention_ids.is_arba_digital',
+        'retention_ids.arba_sync_state',
+    )
+    def _compute_has_active_arba_retentions(self):
+        for payment in self:
+            payment.has_active_arba_retentions = bool(
+                payment._get_active_arba_retention_lines()
+            )
+
+    @api.depends(
+        'arba_retention_record_ids',
+        'arba_retention_record_ids.lifecycle_state',
+    )
+    def _compute_arba_retention_record_stats(self):
+        for payment in self:
+            payment.arba_retention_record_count = len(
+                payment.arba_retention_record_ids
+            )
+            payment.has_orphaned_arba_retention_records = any(
+                record.lifecycle_state == 'orphaned'
+                for record in payment.arba_retention_record_ids
+            )
+
+    def _get_active_arba_retention_lines(self):
+        self.ensure_one()
+        return self.retention_ids.filtered(
+            lambda line: line.is_arba_digital
+            and line.arba_sync_state in ('sent', 'observed')
+        )
+
+    def _check_arba_retentions_recompute_allowed(self):
+        for payment in self:
+            active_lines = payment._get_active_arba_retention_lines()
+            if active_lines:
+                raise ValidationError(
+                    _(
+                        'No se pueden recalcular las retenciones porque la '
+                        'orden de pago tiene retenciones ARBA ya informadas.\n'
+                        'Primero debe dar de baja manualmente esas retenciones en ARBA y luego volver a editar el pago.'
+                    )
+                )
+
     def action_move_line_create(self):
-        result = super().action_move_line_create()
+        return super().action_move_line_create()
+
+    def proforma_voucher(self):
+        result = super().proforma_voucher()
+        if result is not True:
+            return result
         for payment in self.filtered(
             lambda p: p.type == 'payment' and p.state == 'posted'
         ):
@@ -1800,13 +2345,15 @@ class AccountPaymentOrder(models.Model):
         self.ensure_one()
         lines = self.retention_ids.filtered(
             lambda line: line._is_arba_retention_syncable()
+            and line.arba_sync_state not in ('sent', 'observed')
+            and not line.arba_id_comprobante
         )
         if not lines:
             return
         for line in lines:
             line.action_arba_send(raise_on_error=raise_on_error)
 
-    @api.model  # pylint: disable=deprecated-odoo-model-method
+    @api.model
     def fields_view_get(
         self, view_id=None, view_type='form', toolbar=False, submenu=False
     ):
@@ -1832,6 +2379,13 @@ class AccountPaymentOrder(models.Model):
 class AccountPaymentOrderRetentionLine(models.Model):
     _inherit = 'account.payment.order.retention.line'
 
+    arba_retention_record_id = fields.Many2one(
+        'arba.a122r.retention.record',
+        string='Registro persistente ARBA',
+        copy=False,
+        readonly=True,
+        ondelete='set null',
+    )
     arba_sync_state = fields.Selection(
         selection=[
             ('pending', 'Pendiente'),
@@ -1854,6 +2408,11 @@ class AccountPaymentOrderRetentionLine(models.Model):
     arba_fecha_operacion = fields.Date(copy=False)
     arba_actividad_id_used = fields.Integer(copy=False, readonly=True)
     is_arba_digital = fields.Boolean(compute='_compute_is_arba_digital')
+    payment_order_state = fields.Selection(
+        related='payment_order_id.state',
+        readonly=True,
+        string='Estado orden de pago',
+    )
     arba_history_ids = fields.One2many(
         'arba.a122r.comprobante.history',
         'retention_line_id',
@@ -1872,15 +2431,19 @@ class AccountPaymentOrderRetentionLine(models.Model):
         'El número de transacción ARBA debe ser único.',
     )
 
-    @api.depends(
-        'retention_id',
-        'retention_id.retention_type',
-        'retention_id.inform_arba',
-        'payment_order_id.type',
-    )
+    def _get_retention_tax(self):
+        self.ensure_one()
+        retention = self.retention_id
+        if not retention:
+            return self.env['account.tax']
+        if retention._name == 'account.tax':
+            return retention
+        return retention.tax_id
+
+    @api.depends('retention_id', 'retention_type')
     def _compute_is_arba_digital(self):
         for rec in self:
-            tax = rec.retention_id
+            tax = rec._get_retention_tax()
             rec.is_arba_digital = bool(
                 tax
                 and tax.retention_type == 'gross_income'
@@ -1890,7 +2453,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
 
     def _is_arba_retention_syncable(self):
         self.ensure_one()
-        tax = self.retention_id
+        tax = self._get_retention_tax()
         return bool(
             tax
             and self.payment_order_id.type == 'payment'
@@ -1902,7 +2465,7 @@ class AccountPaymentOrderRetentionLine(models.Model):
     def _get_arba_syncability_issues(self):
         self.ensure_one()
         issues = []
-        tax = self.retention_id
+        tax = self._get_retention_tax()
         if self.payment_order_id.type != 'payment':
             issues.append(
                 _(
@@ -1939,6 +2502,12 @@ class AccountPaymentOrderRetentionLine(models.Model):
         error_lines = self.env['account.payment.order.retention.line']
         skipped = []
         for line in self:
+            if line.payment_order_id.state != 'posted':
+                raise UserError(
+                    _(
+                        'Solo se puede informar una retención ARBA cuando la orden de pago ya fue validada.'
+                    )
+                )
             issues = line._get_arba_syncability_issues()
             if issues:
                 skipped.append(
@@ -2018,41 +2587,81 @@ class AccountPaymentOrderRetentionLine(models.Model):
         force_refresh = self.arba_sync_state == 'deleted'
         service.get_comprobante_pdf(self, force_refresh=force_refresh)
         attachment = self.arba_pdf_attachment_id
-        if not attachment:
-            pdf_data = service.get_comprobante_pdf(self, force_refresh=True)
-            attachment = self.env['ir.attachment'].create(
-                {
-                    'name': 'ARBA-Comprobante-%s.pdf'
-                    % (self.arba_id_comprobante or self.id),
-                    'type': 'binary',
-                    'datas': base64.b64encode(pdf_data),
-                    'res_model': self._name,
-                    'res_id': self.id,
-                    'mimetype': 'application/pdf',
-                }
-            )
         return {
             'type': 'ir.actions.act_url',
             'url': '/web/content/%s?download=true' % attachment.id,
             'target': 'self',
         }
 
+    def action_open_arba_retention_record(self):
+        self.ensure_one()
+        if not self.arba_retention_record_id:
+            self.env['arba.a122r.service']._ensure_record_snapshot_from_line(
+                self
+            )
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Registro persistente ARBA'),
+            'res_model': 'arba.a122r.retention.record',
+            'res_id': self.arba_retention_record_id.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
+    def unlink(self):
+        service = self.env['arba.a122r.service']
+        service.orphan_retention_records(
+            self.filtered('arba_retention_record_id')
+        )
+        return super().unlink()
+
 
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
 
-    def _render_qweb_pdf(self, res_ids=None, data=None):
-        self.ensure_one()
+    def _render_qweb_pdf(self, report_ref, res_ids=None, data=None):
+        report = self._get_report(report_ref)
+        report.ensure_one()
         handled_reports = {
             'l10n_ar_eynes.report_arba_a122r_cached_pdf',
             'l10n_ar_eynes.report_arba_a122r_payment_order_cached_pdf',
+            'l10n_ar_eynes.report_arba_a122r_record_cached_pdf',
         }
-        if self.report_name not in handled_reports:
-            return super()._render_qweb_pdf(res_ids=res_ids, data=data)
+        if report.report_name not in handled_reports:
+            return super()._render_qweb_pdf(
+                report_ref, res_ids=res_ids, data=data
+            )
 
         res_ids = res_ids or self.env.context.get('active_ids') or []
         if (
-            self.report_name
+            report.report_name
+            == 'l10n_ar_eynes.report_arba_a122r_record_cached_pdf'
+        ):
+            records = self.env['arba.a122r.retention.record'].browse(res_ids)
+            if not records:
+                raise UserError(
+                    _('No hay registros persistentes ARBA para imprimir.')
+                )
+            service = self.env['arba.a122r.service']
+            streams = []
+            for record in records:
+                if not record.arba_id_comprobante:
+                    raise UserError(
+                        _(
+                            'El registro %(record)s no tiene comprobante ARBA informado para imprimir.',
+                            record=record.display_name,
+                        )
+                    )
+                force_refresh = record.arba_sync_state == 'deleted'
+                attachment = service.get_comprobante_pdf_from_record(
+                    record, force_refresh=force_refresh
+                )
+                streams.append(io.BytesIO(base64.b64decode(attachment.datas)))
+            if len(streams) == 1:
+                return streams[0].getvalue(), 'pdf'
+            return report._merge_pdfs(streams), 'pdf'
+        if (
+            report.report_name
             == 'l10n_ar_eynes.report_arba_a122r_payment_order_cached_pdf'
         ):
             orders = self.env['account.payment.order'].browse(res_ids)
@@ -2090,4 +2699,4 @@ class IrActionsReport(models.Model):
 
         if len(streams) == 1:
             return streams[0].getvalue(), 'pdf'
-        return self._merge_pdfs(streams), 'pdf'
+        return report._merge_pdfs(streams), 'pdf'
