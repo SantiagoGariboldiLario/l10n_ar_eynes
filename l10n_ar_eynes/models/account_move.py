@@ -3,6 +3,7 @@ import json
 import logging
 import urllib.parse
 from base64 import b64encode
+from contextlib import nullcontext
 from io import BytesIO
 
 import qrcode
@@ -1434,9 +1435,12 @@ class AccountMove(models.Model):
             )
 
     def copy_data(self, default=None):
+        default = dict(default or {})
         data_list = super().copy_data(default)
         for move, data in zip(self, data_list):
-            if move.move_type in ('out_invoice', 'in_invoice'):
+            if move.is_invoice(include_receipts=True):
+                if 'invoice_currency_rate' not in default:
+                    data['invoice_currency_rate'] = move.invoice_currency_rate
                 data['perception_ids'] = [
                     (command, _id, line_vals)
                     for command, _id, line_vals in data['perception_ids']
@@ -1533,9 +1537,21 @@ class AccountMove(models.Model):
         for move in res:
             if move.is_invoice():
                 if not move.invoice_date:
-                    move.write(
-                        {'invoice_date': fields.Date.context_today(self)}
+                    is_manual_rate = (
+                        move.invoice_currency_rate
+                        != move.expected_currency_rate
                     )
+                    protect_rate = (
+                        self.env.protecting(
+                            [self._fields['invoice_currency_rate']], move
+                        )
+                        if is_manual_rate
+                        else nullcontext()
+                    )
+                    with protect_rate:
+                        move.write(
+                            {'invoice_date': fields.Date.context_today(self)}
+                        )
                 if not move.denomination:
                     if move.is_sale_document():
                         denomination = move.journal_id.denomination
