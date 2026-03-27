@@ -1391,7 +1391,19 @@ class AccountMove(models.Model):
                     sequence = inv._get_fce_prefix() + sequence
                 inv.write({'internal_number': sequence})
 
-        posted_moves = super()._post(soft=soft)
+        manual_rate_moves = self.filtered(
+            lambda move: move.is_invoice(include_receipts=True)
+            and move.invoice_currency_rate != move.expected_currency_rate
+        )
+        protect_rate = (
+            self.env.protecting(
+                [self._fields['invoice_currency_rate']], manual_rate_moves
+            )
+            if manual_rate_moves
+            else nullcontext()
+        )
+        with protect_rate:
+            posted_moves = super()._post(soft=soft)
         posted_moves._set_perception_date()
 
         return posted_moves
@@ -2394,7 +2406,18 @@ class AccountMove(models.Model):
             }
 
             # Escribimos los campos necesarios de la factura
-            inv.write(invoice_vals)
+            is_manual_rate = (
+                inv.invoice_currency_rate != inv.expected_currency_rate
+            )
+            protect_rate = (
+                self.env.protecting(
+                    [self._fields['invoice_currency_rate']], inv
+                )
+                if is_manual_rate
+                else nullcontext()
+            )
+            with protect_rate:
+                inv.write(invoice_vals)
 
             # Tomamos la factura y mandamos a realizar
             # el asiento contable.

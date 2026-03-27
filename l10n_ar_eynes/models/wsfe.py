@@ -4,6 +4,7 @@
 ##############################################################################
 
 import logging
+from contextlib import nullcontext
 
 from pyafipws.wsfev1 import WSFEv1
 from pysimplesoap.client import SoapFault
@@ -551,7 +552,18 @@ class WsfeConfig(models.Model):
                 'name': inv_name,
                 'invoice_date': invoice_date,
             }
-            invoice.write(inv_vals)
+            is_manual_rate = (
+                invoice.invoice_currency_rate != invoice.expected_currency_rate
+            )
+            protect_rate = (
+                self.env.protecting(
+                    [invoice._fields['invoice_currency_rate']], invoice
+                )
+                if is_manual_rate
+                else nullcontext()
+            )
+            with protect_rate:
+                invoice.write(inv_vals)
             _logger.info(
                 "Approved\n UPDATED invoice id: %s fields: %s"
                 % (invoice.id, inv_vals)
