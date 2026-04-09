@@ -316,7 +316,6 @@ class AccountTax(models.Model):
                     reg.python_code.strip(),
                     {},
                     mode="exec",
-                    nocopy=True,
                 )
             except SyntaxError as e:
                 raise ValidationError(
@@ -464,7 +463,6 @@ class AccountTax(models.Model):
                 self.python_code.strip(),
                 eval_context,
                 mode="exec",
-                nocopy=True,
             )
         except ValidationError as e:
             raise e
