@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- IVA Retention Supported File Generation -->
+    <record id="view_create_iva_retention_file" model="ir.ui.view">
+        <field name="name">IVA Retention Supported File Generation</field>
+        <field name="model">create.iva.retention.file</field>
+        <field name="arch" type="xml">
+            <form string="Create iva retention file">
+                <group string="This wizard allows you to export a file with retentions supported(IVA)">
+                    <group>
+                        <field name="date_start" />
+                        <field name="date_stop" />
+                        <field name="company_id_domain" invisible="True" />
+                        <field name="company_id" domain="company_id_domain" />
+                    </group>
+                </group>
+                <separator string="Validation Errors" colspan="4" />
+                <field name="notes" nolabel="1" colspan="4" widget="text" />
+                <footer>
+                    <button special="cancel" string="Cancel" />
+                    <button
+                        name="create_retention_file"
+                        string="Generate"
+                        colspan="1"
+                        type="object"
+                        class="oe_highlight"
+                    />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_create_iva_retention_file" model="ir.actions.act_window">
+        <field name="name">IVA Retention Supported File Generation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">create.iva.retention.file</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+
+    <!-- IVA Perception Supported File Generation -->
+    <record id="view_create_iva_perception_file" model="ir.ui.view">
+        <field name="name">IVA Perception Supported File Generation</field>
+        <field name="model">create.iva.perception.file</field>
+        <field name="arch" type="xml">
+            <form string="Create iva retention file">
+                <group string="This wizard allows you to export a file with retentions supported(IVA)">
+                    <group>
+                        <field name="date_start" />
+                        <field name="date_stop" />
+                        <field name="company_id_domain" invisible="True" />
+                        <field name="company_id" domain="company_id_domain" />
+                    </group>
+                </group>
+                <separator string="Validation Errors" colspan="4" />
+                <field name="notes" nolabel="1" colspan="4" widget="text" />
+                <footer>
+                    <button special="cancel" string="Cancel" />
+                    <button
+                        name="create_perception_file"
+                        string="Generate"
+                        colspan="1"
+                        type="object"
+                        class="oe_highlight"
+                    />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_create_iva_perception_file" model="ir.actions.act_window">
+        <field name="name">IVA Perception Supported File Generation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">create.iva.perception.file</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

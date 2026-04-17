@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="print_check_wizard_view_form" model="ir.ui.view">
+        <field name="name">print.check.wizard.view.form</field>
+        <field name="model">print.check.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Check Printing Wizard">
+                <sheet>
+                    <group>
+                        <field name="checkbook_id" />
+                        <field name="check_template_id" />
+                        <field name="check_ids" />
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Print Checks" type="object" name="print_check" class="btn-primary" />
+                    <button string="Cancel" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_print_check_wizard" model="ir.actions.act_window">
+        <field name="name">Print Check</field>
+        <field name="res_model">print.check.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="print_check_wizard_view_form" />
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        id="print_check_menu"
+        name="Print Check"
+        action="action_print_check_wizard"
+        parent="l10n_ar_eynes.treasury_menu"
+        groups="base.group_user"
+        sequence="2"
+    />
+
+</odoo>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" inherit_id="point_of_sale_template" xml:space="preserve">
+
+    <!-- Extend PaymentScreenButtons sub-template -->
+    <t t-inherit="point_of_sale.PaymentScreenButtons" t-inherit-mode="extension">
+        <!-- Replace payment buttons section -->
+        <xpath expr="//div[hasclass('payment-buttons')]" position="replace">
+            <div class="payment-buttons d-flex flex-column gap-1">
+                <div class="d-flex flex-column flex-sm-row gap-1 w-100">
+                    <button
+                        class="button partner-button btn btn-lg w-100 w-md-50 lh-lg text-truncate"
+                        t-att-class="{ 'highlight text-action': currentOrder.getPartner() }"
+                        t-attf-class="{{ currentOrder.isCustomerRequired ? 'btn-primary' : 'btn-secondary' }}"
+                        t-on-click="() => this.pos.selectPartner()"
+                    >
+                        <i class="fa fa-user me-2" role="img" title="Customer" />
+                        <span class="partner-name">
+                            <t t-if="currentOrder.getPartner()" t-esc="currentOrder.getPartner().name" />
+                            <t t-else="">Customer</t>
+                        </span>
+                    </button>
+
+                    <button
+                        class="button js_manual_invoice btn btn-secondary btn-lg w-100 w-md-50 lh-lg"
+                        t-att-class="{'highlight active text-action': currentOrder.is_manual_invoice()}"
+                        t-on-click="toggleIsElectronicInvoice"
+                    >
+                        <i class='fa fa-pencil me-2' />
+                        Manual Mode
+                    </button>
+                </div>
+
+                <div class="d-flex flex-column gap-1 w-100">
+                    <button
+                        class="button js_invoice btn btn-secondary btn-lg d-flex justify-content-between align-items-baseline w-100 lh-lg"
+                        t-att-class="{'highlight active text-action': currentOrder.is_electronic_invoice()}"
+                        t-on-click="toggleIsManualInvoice"
+                    >
+                        <span>
+                            <i class="fa fa-file-text-o me-2" />
+                            Electronic Invoice
+                        </span>
+                        <span t-if="currentOrder.getInvoiceNumber()" t-esc="currentOrder.getInvoiceNumber()" class="text-muted" />
+                    </button>
+
+                    <button
+                        t-if="pos.config.ship_later"
+                        class="button btn btn-secondary btn-lg d-flex justify-content-between align-items-baseline w-100 lh-lg"
+                        t-att-class="{ 'highlight active text-action': currentOrder.getShippingDate() }"
+                        t-on-click="toggleShippingDatePicker"
+                    >
+                        <span t-attf-class="{{currentOrder.getShippingDate() ? 'me-auto' : 'mx-auto' }}">
+                            <i class="fa fa-clock-o me-2" />Ship Later
+                        </span>
+                        <span t-if="currentOrder.getShippingDate()">
+                            <t t-esc="currentOrder.getShippingDate()" />
+                        </span>
+                    </button>
+
+                    <button
+                        t-if="pos.config.iface_tipproduct and pos.config.tip_product_id"
+                        class="button btn btn-secondary btn-lg d-flex justify-content-between align-items-baseline w-100 lh-lg"
+                        t-att-class="{ 'highlight active text-action': currentOrder.getTip() }"
+                        t-on-click="addTip"
+                    >
+                        <span t-attf-class="{{currentOrder.getTip() ? 'me-auto' : 'mx-auto' }}">
+                            <i class="fa fa-heart me-2" />Tip
+                        </span>
+                        <t t-if="currentOrder.getTip() != 0">
+                            <t t-esc="env.utils.formatCurrency(currentOrder.getTip())" />
+                        </t>
+                    </button>
+                </div>
+            </div>
+        </xpath>
+    </t>
+
+    <!-- Extend PaymentScreenDue to show taxes/perceptions under the big total -->
+    <t t-inherit="point_of_sale.PaymentScreenDue" t-inherit-mode="extension">
+        <xpath expr="//section[hasclass('paymentlines-container')]" position="inside">
+            <div class="fs-5 mt-2 text-center d-flex flex-column align-items-center gap-1">
+                <div>
+                    <span class="text-muted">Impuestos: </span>
+                    <span class="fw-bold" t-esc="env.utils.formatCurrency(currentOrder.amountTaxes)"/>
+                </div>
+                <div>
+                    <span class="text-muted">Percepciones: </span>
+                    <span class="fw-bold" t-esc="env.utils.formatCurrency(currentOrder.get_total_perception())"/>
+                </div>
+            </div>
+        </xpath>
+    </t>
+
+</templates>

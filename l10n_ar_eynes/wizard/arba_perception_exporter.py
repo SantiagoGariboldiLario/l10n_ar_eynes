@@ -5,12 +5,14 @@
 #
 ##############################################################################
 
-import binascii
-import codecs
+import base64
+import calendar
+import hashlib
+import io
 import json
 import logging
 import re
-import tempfile
+import zipfile
 from decimal import Decimal
 
 from odoo import _, api, fields, models
@@ -132,22 +134,74 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
 
     @api.model
     def _get_arba_filename(self):
-        activity_num = '7'  # 7 Alícuota general
-        company_vat = self.company_id.vat
+        activity_code = 'P7'
+        company_vat = self._sanitize_vat(self.company_id.vat)
         lot_name = 'PER'
-
-        month = str(self.date_from.month).zfill(2)
-        year = str(self.date_from.year)
-
-        filename = 'AR-{}-{}{}-{}-{}'.format(
-            company_vat, year, month, activity_num, lot_name
+        period = self._get_period_code()
+        filename = 'AR-{}-{}-{}-{}'.format(
+            company_vat, period, activity_code, lot_name
         )
         if self.mode == 'first_fortnight':
             filename += '-LOTE1'
         elif self.mode == 'second_fortnight':
             filename += '-LOTE2'
-
         return filename
+
+    @api.model
+    def _sanitize_vat(self, vat):
+        return ''.join(filter(str.isdigit, vat or ''))
+
+    @api.model
+    def _get_period_code(self):
+        if not self.date_from or not self.date_to:
+            raise ValidationError(
+                _('Both date from and date to are required for ARBA export.')
+            )
+        if (
+            self.date_from.year != self.date_to.year
+            or self.date_from.month != self.date_to.month
+        ):
+            raise ValidationError(
+                _(
+                    'ARBA export requires a single monthly or fortnightly period.'
+                )
+            )
+
+        last_day = calendar.monthrange(
+            self.date_from.year, self.date_from.month
+        )[1]
+        if self.mode == 'first_fortnight':
+            expected_from, expected_to, fortnight = 1, 15, '1'
+        elif self.mode == 'second_fortnight':
+            expected_from, expected_to, fortnight = 16, last_day, '2'
+        else:
+            expected_from, expected_to, fortnight = 1, last_day, '0'
+
+        if (
+            self.date_from.day != expected_from
+            or self.date_to.day != expected_to
+        ):
+            raise ValidationError(
+                _(
+                    'Selected mode does not match the date range for ARBA export.'
+                )
+            )
+
+        return '{}{:02d}{}'.format(
+            self.date_from.year, self.date_from.month, fortnight
+        )
+
+    @api.model
+    def _build_attachment_payload(self, txt_filename, txt_content):
+        txt_bytes = txt_content.encode('latin-1')
+        md5_hash = hashlib.md5(txt_bytes).hexdigest().upper()
+        zip_basename = '{}_{}'.format(txt_filename[:-4], md5_hash)
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(
+            zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED
+        ) as zip_file:
+            zip_file.writestr(txt_filename, txt_bytes)
+        return zip_basename + '.zip', zip_buffer.getvalue()
 
     @api.model
     def _get_voucher_type(self, invoice_id):
@@ -158,14 +212,22 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
         'C': Nota de crédito
         'D': Nota de débito
         """
-        res = 'F'
-
+        if not invoice_id:
+            return False
+        inv_name = invoice_id.name or ''
+        if 'FCE' in inv_name:
+            return 'E'
+        if 'NCE' in inv_name:
+            return 'H'
+        if 'NDE' in inv_name:
+            return 'I'
+        if invoice_id.move_type == 'out_receipt':
+            return 'R'
         if invoice_id.move_type == 'out_refund':
-            res = 'C'
-        elif invoice_id.is_debit_note:
-            res = 'D'
-
-        return res
+            return 'C'
+        if invoice_id.is_debit_note:
+            return 'D'
+        return 'F'
 
     @api.model
     def _generate_perception_file(self, perception_ids):
@@ -195,6 +257,8 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
             if match:
                 inv_name = inv_name.replace(match.group(), '')
             pos, number = inv_name.split('-')
+            pos = ''.join(filter(str.isdigit, pos))
+            number = ''.join(filter(str.isdigit, number))
 
             if line.partner_id.document_type_id not in [
                 self.env.ref('l10n_ar_eynes.document_cuit'),
@@ -221,42 +285,38 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
                 base *= invoice_rate
                 amount *= invoice_rate
 
-            line = {
+            aliquot = 0.0
+            if base:
+                aliquot = round(abs(amount / base) * 100, 2)
+            elif line.percent:
+                aliquot = round(abs(line.percent), 2)
+
+            vals = {
                 'cuit': f_cuit,
                 'fecha_percepcion': date,
                 'tipo_comprobante': voucher_type,
-                'letra_comprobante': line.invoice_id.denomination.upper(),
-                'numero_sucursal': pos[-4:],
+                'letra_comprobante': (
+                    line.invoice_id.denomination or ' '
+                ).upper(),
+                'numero_sucursal': pos,
                 'numero_emision': number,
                 'monto_imponible': moneyfmt(
-                    Decimal(base) * sign, places=2, ndigits=10, dp=','
+                    Decimal(str(base)) * sign, places=2, ndigits=12, dp=','
+                ),
+                'alicuota': moneyfmt(
+                    Decimal(str(aliquot)), places=2, ndigits=4, dp=','
                 ),
                 'importe_percepcion': moneyfmt(
-                    Decimal(amount) * sign, places=2, ndigits=9, dp=','
+                    Decimal(str(amount)) * sign, places=2, ndigits=11, dp=','
                 ),
                 'tipo_operacion': 'A',
             }
 
-            fixed_width.update(**line)
+            fixed_width.update(**vals)
             head_regs.append(fixed_width.line)
-
-        head_filename = tempfile.mkstemp(suffix='.arba')[1]
-        file = codecs.open(head_filename, 'w', 'latin-1')
-
-        for r in head_regs:
-            r2 = [a for a in r]
-            try:
-                file.write(''.join(r2))
-            except Exception as e:
-                raise e
-            file.write('\r\n')
-
-        file.close()
-
-        file = open(head_filename, encoding='utf-8')
-
-        name = self._get_arba_filename()
-        name += '.TXT'
+        txt_name = self._get_arba_filename() + '.TXT'
+        txt_content = ''.join(''.join(reg) + '\r\n' for reg in head_regs)
+        name, payload = self._build_attachment_payload(txt_name, txt_content)
         generated_file_rec = ArbaGeneratedFiles.create(
             {
                 'code': name,
@@ -268,15 +328,12 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
 
         data_attach = {
             'name': name,
-            'datas': binascii.b2a_base64(file.read().encode('latin-1')),
-            # 'datas_fname': name,
+            'datas': base64.b64encode(payload),
             'res_model': 'arba.generated.files',
             'res_id': generated_file_rec.id,
         }
 
         attach_id = IrAttachment.create(data_attach)
         generated_file_rec.write({'attachment_id': attach_id.id})
-
-        file.close()
 
         return True

@@ -407,6 +407,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             'direct_exempt': 'Directo Exento',
             'apport': 'Prorrateable',
         }
+        unassigned_fiscal_credit_name = _('Sin clasificar')
 
         by_fiscal_credit = {
             # TIENEN RELACIONADO IVA PERO TIENEN FISCAL_CREDIT = direct_taxed, apport, direct_exempt
@@ -500,12 +501,26 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     new_line.insert(5, base_vat_amount)
                     new_line.insert(6, vat_aliquot)
                     new_line.insert(7, vat_amount)
-                    new_line.insert(8, fiscal_credit_name[fiscal_credit])
+                    new_line.insert(
+                        8,
+                        fiscal_credit_name.get(
+                            fiscal_credit, unassigned_fiscal_credit_name
+                        ),
+                    )
                     new_lines.append(new_line)
                     first_vat = False
 
                     totals[0] += base_vat_amount
                     totals[1] += vat_amount
+                    if fiscal_credit not in fiscal_credit_name:
+                        _logger.warning(
+                            "Skipping apportionable VAT fiscal credit summary "
+                            "for invoice %s (%s): unexpected fiscal_credit=%r",
+                            line['invoice_number'],
+                            line['invoice_type'],
+                            fiscal_credit,
+                        )
+                        continue
                     if line['invoice_type'].startswith('NC'):
                         totals_nc[0] += base_vat_amount
                         totals_nc[1] += vat_amount

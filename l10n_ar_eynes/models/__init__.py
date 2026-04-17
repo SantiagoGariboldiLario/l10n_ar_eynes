@@ -61,3 +61,5 @@ from . import product_area
 from . import internal_taxes
 from . import ir_ui_menu
 from . import account_chart_template
+from . import iva_per_ret_exporter
+from . import arba_a122r

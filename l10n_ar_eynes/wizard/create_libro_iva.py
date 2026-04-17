@@ -28,6 +28,7 @@ class LibroIVAExporterWizard(models.TransientModel):
     company_id_domain = fields.Char(
         default=lambda self: self._default_company_ids()
     )
+    include_internal = fields.Boolean('Incluir internas?', default=False)
     is_simple_vat = fields.Boolean('Is Simple VAT?', default=False)
     notes = fields.Text('Notes', readonly=True)
     state = fields.Selection(
@@ -84,14 +85,14 @@ class LibroIVAExporterWizard(models.TransientModel):
         amount = 0.0
         for tax_id in self._get_invoice_tax_lines(invoice):
             if tax_id.tax_line_id.tax_group_id.group_type == fee_type:
-                amount += tax_id.price_total
+                amount += tax_id.price_total or tax_id.amount_currency
         return ('%016.2f' % amount).replace('.', '')
 
     def _get_taxes_with_type_others(self, invoice):
         amount = 0.0
         for tax_id in self._get_invoice_tax_lines(invoice):
             if tax_id.tax_line_id.tax_group_id.group_type == 'others':
-                amount += tax_id.price_total
+                amount += tax_id.price_total or tax_id.amount_currency
         for perception_id in invoice.perception_ids:
             if perception_id.perception_id.retention_type == 'other':
                 amount += perception_id.amount
@@ -710,31 +711,31 @@ class LibroIVAExporterWizard(models.TransientModel):
         iva_commission = '%.15s' % '0'.ljust(15, '0')
 
         line = [
-            date,
-            voucher_type,
-            pos,
-            internal_number_formatted,
-            import_clearance,
-            partner_document_type,
-            partner_vat,
-            partner_name,
-            amount_total,
-            amount_total_no_taxed,
-            amount_exempt,
-            amount_iva,
-            amount_ganancias,
-            amount_iibb,
-            amount_municipal_perception,
-            amount_internal_taxes,
-            currency_code,
-            currency_rate,
-            tax_lines_qty,
-            operation_code,
-            fiscal_credit,
-            amount_other_taxes,
-            emitter_cuit,
-            emitter_denomination,
-            iva_commission,
+            date,  # Fecha de comprobante o fecha de oficialización
+            voucher_type,  # Tipo de comprobante
+            pos,  # Punto de venta
+            internal_number_formatted,  # Número de comprobante
+            import_clearance,  # Despacho de importación
+            partner_document_type,  # Código de documento del vendedor
+            partner_vat,  # Número de identificación del vendedor
+            partner_name,  # Apellido y nombre o denominación del vendedor
+            amount_total,  # Importe total de la operación
+            amount_total_no_taxed,  # Importe total de conceptos que no integran el precio neto gravado
+            amount_exempt,  # Importe de operaciones exentas
+            amount_iva,  # Importe de percepciones o pagos a cuenta del Impuesto al Valor Agregado
+            amount_ganancias,  # Importe de percepciones o pagos a cuenta de otros impuestos nacionales
+            amount_iibb,  # Importe de percepciones de Ingresos Brutos
+            amount_municipal_perception,  # Importe de percepciones de Impuestos Municipales
+            amount_internal_taxes,  # Importe de Impuestos Internos
+            currency_code,  # Código de moneda
+            currency_rate,  # Tipo de cambio
+            tax_lines_qty,  # Cantidad de alícuotas de IVA
+            operation_code,  # Código de la operación
+            fiscal_credit,  # Crédito Fiscal Computable
+            amount_other_taxes,  # Otros Tributos
+            emitter_cuit,  # CUIT emisor/corredor
+            emitter_denomination,  # Denominación del emisor/corredor
+            iva_commission,  # IVA comisión
         ]
         if False in line:
             errors = '\n'.join(errors)
@@ -973,13 +974,17 @@ class LibroIVAExporterWizard(models.TransientModel):
             ('state', '=', 'posted'),
         ]
 
-        invoices = AccountMove.search(
-            [('move_type', 'in', ('out_invoice', 'out_refund'))] + domain
-        )
+        sales_domain = [('move_type', 'in', ('out_invoice', 'out_refund'))]
+        purchase_domain = [('move_type', 'in', ('in_invoice', 'in_refund'))]
+        if not self.include_internal:
+            sales_domain.append(('journal_id.fiscal_type', '!=', 'internal'))
+            # purchase_domain.append(
+            #     ('journal_id.fiscal_type', '!=', 'internal')
+            # )
 
-        invoice_purchase_ids = AccountMove.search(
-            [('move_type', 'in', ('in_invoice', 'in_refund'))] + domain
-        )
+        invoices = AccountMove.search(sales_domain + domain)
+
+        invoice_purchase_ids = AccountMove.search(purchase_domain + domain)
 
         if self.file_format == 'txt':
             sale_err, sale_aliquot_err = self.create_sales_voucher_file(

@@ -316,7 +316,6 @@ class AccountTax(models.Model):
                     reg.python_code.strip(),
                     {},
                     mode="exec",
-                    nocopy=True,
                 )
             except SyntaxError as e:
                 raise ValidationError(
@@ -422,10 +421,10 @@ class AccountTax(models.Model):
 
     def calculate_python_custom_tax(
         self,
-        # perc_data,
         partner,
         origin,
         origin_vals=None,
+        perc_data=None,
     ):
         """
         Execute the python code to know
@@ -440,6 +439,7 @@ class AccountTax(models.Model):
         """
         self.ensure_one()
         origin_vals = origin_vals or {}
+        perc_data = perc_data or {}
         eval_context = self._get_eval_code_context()
         # Pasamos el parent partner como variable en caso de
         # que exista para poder tomar sus percepciones
@@ -452,7 +452,7 @@ class AccountTax(models.Model):
         eval_context.update(
             {
                 **origin_eval_ctx,
-                # 'perc_data': perc_data,
+                'perc_data': perc_data,
                 'perception': self,
                 'retention': self,
                 'partner': partner,
@@ -463,7 +463,6 @@ class AccountTax(models.Model):
                 self.python_code.strip(),
                 eval_context,
                 mode="exec",
-                nocopy=True,
             )
         except ValidationError as e:
             raise e

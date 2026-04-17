@@ -32,7 +32,7 @@ msgstr "Bloquear Facturas RI Offline"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
 #, python-format
 msgid "Check from backend and solve this situation"
 msgstr "Revisar desde el backend y solucionar esta situación"
@@ -49,8 +49,8 @@ msgstr ""
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml:0
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreen.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreen.xml:0
 #, python-format
 msgid "Customer"
 msgstr "Cliente"
@@ -61,20 +61,6 @@ msgstr "Cliente"
 #, python-format
 msgid "Customer Invoice"
 msgstr "Factura de Cliente"
-
-#. module: l10n_ar_pos_wsfe
-#. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/ClientDetailsEdit.xml:0
-#, python-format
-msgid "Doc Type"
-msgstr "Tipo de documento"
-
-#. module: l10n_ar_pos_wsfe
-#. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
-#, python-format
-msgid "Doc Type Required"
-msgstr "Tipo de documento Requerido"
 
 #. module: l10n_ar_pos_wsfe
 #: model_terms:ir.ui.view,arch_db:l10n_ar_pos_wsfe.view_pos_order_filter
@@ -90,47 +76,33 @@ msgstr "Electrónica"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreen.xml:0
 #, python-format
 msgid "Electronic Invoice"
 msgstr "Factura Electrónica"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/models_mig17.js:0
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/models.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
 #, python-format
 msgid "Error"
 msgstr "¡Error!"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
 #, python-format
 msgid "Error with ARCA"
 msgstr "Error con ARCA"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/ClientDetailsEdit.xml:0
-#, python-format
-msgid "Fiscal Position"
-msgstr "Posición Fiscal"
-
-#. module: l10n_ar_pos_wsfe
-#. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
-#, python-format
-msgid "Fiscal Position Is Required"
-msgstr "La posición fiscal es requerida"
-
-#. module: l10n_ar_pos_wsfe
-#. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenStatus.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreen.xml:0
 #, python-format
 msgid "Impuestos:"
 msgstr ""
@@ -191,7 +163,7 @@ msgstr "Asiento contable"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreen.xml:0
 #, python-format
 msgid "Manual Mode"
 msgstr "Factura manual"
@@ -216,7 +188,7 @@ msgstr "Monto máximo en que una factura puede ser emitida a un Consumidor Final
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
 #, python-format
 msgid "Missing fields on partner"
 msgstr "Campos faltantes en el Contacto"
@@ -229,14 +201,14 @@ msgstr ""
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
 #, python-format
 msgid "Missing fields on partner"
 msgstr "Campos faltantes en el Contacto"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/client_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
 #, python-format
 msgid "NIF Required"
 msgstr ""
@@ -252,31 +224,14 @@ msgstr "No se encontró ningún diario de tipo %(fiscal_type)s para la posición
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/ClientDetailsEdit.xml:0
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/ClientDetailsEdit.xml:0
-#, python-format
-msgid "None"
-msgstr ""
-
-#. module: l10n_ar_pos_wsfe
-#. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/order_payment_validation.js:0
 #, python-format
 msgid "Offline Mode with perceptions"
 msgstr "Modo sin conexión con percepciones"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/TicketScreen.xml:0
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/TicketScreen.xml:0
-#, python-format
-msgid "Origin"
-msgstr "Origen"
-
-#. module: l10n_ar_pos_wsfe
-#. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenStatus.xml:0
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/TicketScreen.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreen.xml:0
 #, python-format
 msgid "Percepciones:"
 msgstr ""
@@ -329,7 +284,7 @@ msgstr ""
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreenButtons.xml:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/xml/PaymentScreen.xml:0
 #, python-format
 msgid "Ship Later"
 msgstr "Enviar después"
@@ -354,7 +309,7 @@ msgstr "El producto %(product)s no tiene una cuenta configurada."
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
 #, python-format
 msgid "The selected customer needs a fiscal position."
 msgstr "El cliente seleccionado necesita posición fiscal"
@@ -368,7 +323,7 @@ msgstr "No hay ninguna secuencia configurada para el diario %s"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
 #, python-format
 msgid "Unable to get next sequence."
 msgstr "No se puede obtener la siguiente secuencia."
@@ -397,7 +352,7 @@ msgstr ""
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
 #, python-format
 msgid ""
 "You cannot validate this invoice because it's impossible to get perceptions "
@@ -408,14 +363,14 @@ msgstr ""
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/payment.js:0
 #, python-format
 msgid "You must first select a client."
 msgstr "Debe seleccionar un cliente"
 
 #. module: l10n_ar_pos_wsfe
 #. odoo-javascript
-#: code:addons/l10n_ar_pos_wsfe/static/src/js/models_mig17.js:0
+#: code:addons/l10n_ar_pos_wsfe/static/src/js/models.js:0
 #, python-format
 msgid "You must inform Final Consumer data to ARCA, create new Customer"
 msgstr "Debe informar los datos del Consumidor Final a ARCA, cree un nuevo Cliente."

@@ -50,6 +50,26 @@
         action="action_libro_IVA_generated_files"
     />
 
+    <menuitem parent="menu_libro_iva" id="menu_ret_iva_exporter" action="action_create_iva_retention_file" />
+
+    <menuitem
+        parent="menu_libro_iva"
+        id="menu_perc_iva_exporter"
+        action="action_create_iva_perception_file"
+    />
+
+    <menuitem
+        parent="menu_libro_iva"
+        id="menu_iva_ret_generated_files"
+        action="action_iva_ret_generated_files"
+    />
+
+    <menuitem
+        parent="menu_libro_iva"
+        id="menu_iva_per_generated_files"
+        action="action_iva_per_generated_files"
+    />
+
     <menuitem
         parent="menu_parent_exporters_sifere"
         id="menu_sifere_export"

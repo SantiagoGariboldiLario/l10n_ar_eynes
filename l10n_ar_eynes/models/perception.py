@@ -426,8 +426,8 @@ class PerceptionTaxApplication(models.Model):
             return True
         return False
 
-    def get_perception_data(self, partner, invoice_date):
-        perception = self.perception_tax_id
+    def get_perception_data(self, partner, invoice_date, tax_id=None):
+        perception = self.perception_tax_id or tax_id
         # Partimos de la configuración básica de la aplicación de la percepción
         data = {
             'activity_id': self.activity_id.id,

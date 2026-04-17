@@ -281,6 +281,7 @@ class SalesExportXlsx(models.AbstractModel):
         select_extra, join_extra, where_extra, sort_selection = self.env[
             'account.move'
         ]._report_xls_query_extra()
+        company_rec = self.env['res.company'].browse(company)
 
         # SQL select for performance reasons, as a consequence, there are no
         # field value translations.
@@ -315,7 +316,10 @@ class SalesExportXlsx(models.AbstractModel):
             rp.name AS Nombre_Cliente,
             COALESCE(rcs2.name, rcs.name, rcs_def.name) AS Jurisdiccion,
             rp.zip AS CP,
-            aa.code AS Codigo_Cuenta,
+            COALESCE(
+                aa.code_store->>%(root_company_id)s,
+                ''
+            ) AS Codigo_Cuenta,
             aa.name AS Nombre_Cuenta_Contable,
             (%(sign)s * ail.balance) AS Monto,
         CASE
@@ -371,6 +375,7 @@ class SalesExportXlsx(models.AbstractModel):
             'date_start': data['date_start'],
             'date_stop': data['date_stop'],
             'company_id': company,
+            'root_company_id': str(company_rec.root_id.id),
             'move_type': (
                 ('out_invoice', 'out_refund')
                 if report_type == 'sale'

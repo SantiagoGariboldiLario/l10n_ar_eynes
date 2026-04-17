@@ -14,6 +14,7 @@ class ArbaGeneratedFiles(models.Model):
     code = fields.Char()
     company_id = fields.Many2one('res.company')
     datas = fields.Binary(related='attachment_id.datas')
+    datas_fname = fields.Char(related='attachment_id.name')
     date_from = fields.Date(string='Date From')
     date_to = fields.Date(string='Date To')
     attachment_id = fields.Many2one('ir.attachment')

@@ -52,7 +52,10 @@ class AccountMoveLine(models.Model):
             rec.fiscal_credit = fiscal_credit
 
     @api.depends(
-        'currency_id', 'company_id', 'move_id.date', 'move_id.currency_rate'
+        'currency_id',
+        'company_id',
+        'move_id.date',
+        'move_id.invoice_currency_rate',
     )
     def _compute_currency_rate(self):
         # pylint: disable=missing-return
@@ -60,12 +63,7 @@ class AccountMoveLine(models.Model):
         for line in self:
             if not line.is_same_currency:
                 new_rate = (
-                    (1 / line.move_id.currency_rate)
-                    if (
-                        line.move_id.currency_id.preciated
-                        and line.move_id.currency_rate
-                    )
-                    else (line.move_id.currency_rate or line.currency_rate)
+                    line.move_id.invoice_currency_rate or line.currency_rate
                 )
                 if line.currency_rate != new_rate:
                     line.currency_rate = new_rate

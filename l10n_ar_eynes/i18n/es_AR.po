@@ -11237,6 +11237,8 @@ msgstr "Validar"
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.libro_iva_exporter_view
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_files
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_arciba_nc_file
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_iva_perception_file
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_iva_retention_file
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_sicore_files
 msgid "Validation Errors"
 msgstr "Errores de validación"
@@ -12156,3 +12158,41 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} Órden de Pago (Ref {{ object.number or 'n/a' "
 "}})"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_iva_per_ret_files.py:0
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_create_iva_perception_file
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_perc_iva_exporter
+#, python-format
+msgid "IVA Perception Supported File Generation"
+msgstr "Generación archivo de percepciones IVA soportadas"
+
+#. module: l10n_ar_eynes
+#: code:addons/l10n_ar_eynes/wizard/create_iva_per_ret_files.py:0
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_create_iva_retention_file
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_ret_iva_exporter
+#, python-format
+msgid "IVA Retention Supported File Generation"
+msgstr "Generación archivo de retenciones IVA soportadas"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_iva_retention_file
+msgid "This wizard allows you to export a file with retentions supported(IVA)"
+msgstr "Este asistente le permite exportar un archivo de retenciones de IVA soportadas."
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_create_iva_perception_file
+msgid "This wizard allows you to export a file with retentions supported(IVA)"
+msgstr "Este asistente le permite exportar un archivo de percepciones de IVA soportadas."
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_iva_per_generated_files
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_iva_per_generated_files
+msgid "iva per generated files"
+msgstr "Archivos generados Percepciones IVA"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.action_iva_ret_generated_files
+#: model:ir.ui.menu,name:l10n_ar_eynes.menu_iva_ret_generated_files
+msgid "iva ret generated files"
+msgstr "Archivos generados Retenciones IVA"

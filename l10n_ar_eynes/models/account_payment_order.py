@@ -411,8 +411,6 @@ class AccountPaymentOrder(models.Model):
             domain = [('company_id', '=', rec.company_id.id)]
             if rec.type:
                 domain.append(('type', '=', rec.type))
-            if rec.currency_id and rec.currency_id != self.env.ref('base.ARS'):
-                domain.append(('currency_id', '=', rec.currency_id.id))
             rec.journal_id_domain = domain
 
     @api.onchange(
@@ -817,7 +815,13 @@ class AccountPaymentOrder(models.Model):
 
     def action_clean_lines(self):
         """reset income and debt lines"""
+        arba_service = self.env['arba.a122r.service']
         for rec in self:
+            if rec.type == 'payment':
+                rec._check_arba_retentions_recompute_allowed()
+                arba_service.orphan_retention_records(
+                    rec.retention_ids.filtered('arba_retention_record_id')
+                )
             rec.income_line_ids = [(5, 0, 0)]
             rec.debt_line_ids = [(5, 0, 0)]
             rec.retention_ids = [(5, 0, 0)]
@@ -1169,10 +1173,15 @@ class AccountPaymentOrder(models.Model):
         'income_line_ids', 'debt_line_ids', 'disable_retentions', 'date'
     )
     def onchange_lines(self):
+        arba_service = self.env['arba.a122r.service']
         for po in self:
             if po.type != 'payment':
                 return
 
+            po._check_arba_retentions_recompute_allowed()
+            arba_service.orphan_retention_records(
+                po.retention_ids.filtered('arba_retention_record_id')
+            )
             po.retention_ids = [(5, 0, 0)]
 
             if not po.disable_retentions:
@@ -1210,11 +1219,18 @@ class AccountPaymentOrder(models.Model):
     def _check_lines_not_reconciled(self):
         for line in self.income_line_ids + self.debt_line_ids:
             if line.amount > 0:
-                amount_residual = abs(
-                    line.move_line_id.amount_residual_currency
-                    if self.currency_id == line.move_line_id.currency_id
-                    else line.move_line_id.amount_residual
-                )
+                if self.currency_id == line.move_line_id.currency_id:
+                    amount_residual = abs(
+                        line.move_line_id.amount_residual_currency
+                    )
+                    amount_to_compare = (
+                        abs(line.amount_currency)
+                        if self.is_multi_currency
+                        else abs(line.amount)
+                    )
+                else:
+                    amount_residual = abs(line.move_line_id.amount_residual)
+                    amount_to_compare = abs(line.amount)
                 if line.move_line_id.reconciled:
                     raise ValidationError(
                         _(
@@ -1223,7 +1239,7 @@ class AccountPaymentOrder(models.Model):
                         )
                         % line.move_line_id.move_id.name
                     )
-                elif line.amount > amount_residual:
+                elif amount_to_compare > amount_residual:
                     raise ValidationError(
                         _(
                             "Invoice '%s' residual amount is lower that actual payment, "

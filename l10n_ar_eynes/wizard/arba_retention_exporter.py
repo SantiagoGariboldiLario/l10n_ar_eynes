@@ -5,13 +5,14 @@
 #
 ##############################################################################
 
-import binascii
-import codecs
+import base64
+import calendar
+import hashlib
+import io
 import json
 import logging
-
-# import re
-import tempfile
+import re
+import zipfile
 from decimal import Decimal
 
 from odoo import _, api, fields, models
@@ -52,6 +53,13 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         )
 
     def create_file(self):
+        if self.company_id.arba_a122r_enforced:
+            raise ValidationError(
+                _(
+                    'ARBA TXT export is disabled because ARBA A122R enforcement '
+                    'is enabled for this company.'
+                )
+            )
         query = (
             'SELECT rtl.id '
             'FROM account_payment_order_retention_line rtl '
@@ -125,21 +133,87 @@ class ArbaRetentionExporterWizard(models.TransientModel):
     @api.model
     def _get_arba_filename(self):
         activity_num = '6'  # 6 ~Alicuota gral
-        company_vat = self.company_id.vat
+        company_vat = self._sanitize_vat(self.company_id.vat)
         lot_name = 'RET'
-
-        month = str(self.date_from.month).zfill(2)
-        year = str(self.date_from.year)
-
-        filename = 'AR-{}-{}{}-{}-{}'.format(
-            company_vat, year, month, activity_num, lot_name
+        period = self._get_period_code()
+        filename = 'AR-{}-{}-{}-{}'.format(
+            company_vat, period, activity_num, lot_name
         )
         if self.mode == 'first_fortnight':
             filename += '-LOTE1'
         elif self.mode == 'second_fortnight':
             filename += '-LOTE2'
-
         return filename
+
+    @api.model
+    def _sanitize_vat(self, vat):
+        return ''.join(filter(str.isdigit, vat or ''))
+
+    @api.model
+    def _get_period_code(self):
+        if not self.date_from or not self.date_to:
+            raise ValidationError(
+                _('Both date from and date to are required for ARBA export.')
+            )
+        if (
+            self.date_from.year != self.date_to.year
+            or self.date_from.month != self.date_to.month
+        ):
+            raise ValidationError(
+                _(
+                    'ARBA export requires a single monthly or fortnightly period.'
+                )
+            )
+
+        last_day = calendar.monthrange(
+            self.date_from.year, self.date_from.month
+        )[1]
+        if self.mode == 'first_fortnight':
+            expected_from, expected_to, fortnight = 1, 15, '1'
+        elif self.mode == 'second_fortnight':
+            expected_from, expected_to, fortnight = 16, last_day, '2'
+        else:
+            expected_from, expected_to, fortnight = 1, last_day, '0'
+
+        if (
+            self.date_from.day != expected_from
+            or self.date_to.day != expected_to
+        ):
+            raise ValidationError(
+                _(
+                    'Selected mode does not match the date range for ARBA export.'
+                )
+            )
+
+        return '{}{:02d}{}'.format(
+            self.date_from.year, self.date_from.month, fortnight
+        )
+
+    @api.model
+    def _build_attachment_payload(self, txt_filename, txt_content):
+        txt_bytes = txt_content.encode('latin-1')
+        md5_hash = hashlib.md5(txt_bytes).hexdigest().upper()
+        zip_basename = '{}_{}'.format(txt_filename[:-4], md5_hash)
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(
+            zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED
+        ) as zip_file:
+            zip_file.writestr(txt_filename, txt_bytes)
+        return zip_basename + '.zip', zip_buffer.getvalue()
+
+    @api.model
+    def _get_certificate_parts(self, certificate_no):
+        sanitized = (certificate_no or '').strip()
+        match = re.search(r'(\d{4,5})-(\d{1,8})$', sanitized)
+        if match:
+            return match.group(1), match.group(2)
+
+        digits = ''.join(filter(str.isdigit, sanitized))
+        if not digits:
+            return '1', '0'
+        if len(digits) > 8:
+            return digits[:-8], digits[-8:]
+        return '1', digits
 
     @api.model
     def _generate_retention_file(self, retention_ids):
@@ -152,6 +226,8 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         retention_data = [
             {
                 'amount': r.amount,
+                'base': r.base,
+                'applied_aliquot': r.applied_aliquot,
                 'certificate_no': r.certificate_no,
                 'date': r.date,
                 'partner_vat': r.partner_id.vat,
@@ -170,11 +246,14 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         ):
             groups = list(group)
             amount_total = sum(item['amount'] for item in groups)
+            base_total = sum(item['base'] for item in groups)
 
             first_group = groups[0]
             retention_data_filtered.append(
                 {
                     'amount': amount_total,
+                    'base': base_total,
+                    'applied_aliquot': first_group['applied_aliquot'],
                     'certificate_no': first_group['certificate_no'],
                     'date': first_group['date'],
                     'partner_vat': first_group['partner_vat'],
@@ -195,44 +274,39 @@ class ArbaRetentionExporterWizard(models.TransientModel):
             if _vat:
                 vat = '{}-{}-{}'.format(_vat[:2], _vat[2:10], _vat[10])
 
-            # certificate_no = '0000-00000000'
-            # certificate = re.search(r'\d{4}-\d{8}$', line['certificate_no'])
-            # if certificate:
-            #     certificate_no = certificate.group(0)
-            # certificate_no_split = certificate_no.split('-')
+            base = line['base']
+            amount = line['amount']
+            aliquot = 0.0
+            if base:
+                aliquot = round(abs(amount / base) * 100, 2)
+            elif line['applied_aliquot']:
+                aliquot = round(abs(line['applied_aliquot']), 2)
 
-            line = {
+            branch_number, issue_number = self._get_certificate_parts(
+                line['certificate_no']
+            )
+
+            vals = {
                 'cuit': vat,
                 'fecha_retencion': date,
-                'importe_retencion': moneyfmt(
-                    Decimal(line['amount']), places=2, ndigits=8, dp=','
+                'numero_sucursal': branch_number,
+                'numero_emision': issue_number,
+                'monto_imponible': moneyfmt(
+                    Decimal(str(base)), places=2, ndigits=12, dp=','
                 ),
-                # 'numero_sucursal': certificate_no_split[0],
-                # 'numero_emision': certificate_no_split[1],
-                'numero_sucursal': '1',
-                'numero_emision': line['certificate_no'],
+                'alicuota': moneyfmt(
+                    Decimal(str(aliquot)), places=2, ndigits=4, dp=','
+                ),
+                'importe_retencion': moneyfmt(
+                    Decimal(str(amount)), places=2, ndigits=11, dp=','
+                ),
                 'tipo_operacion': 'A',
             }
-            fixed_width.update(**line)
+            fixed_width.update(**vals)
             head_regs.append(fixed_width.line)
-
-        head_filename = tempfile.mkstemp(suffix='.arba')[1]
-        tmp_file = codecs.open(head_filename, 'w', 'latin-1')
-
-        for head in head_regs:
-            r2 = [a for a in head]
-            try:
-                tmp_file.write(''.join(r2))
-            except Exception as e:
-                raise e
-            tmp_file.write('\r\n')
-
-        tmp_file.close()
-
-        file = open(head_filename)
-
-        name = self._get_arba_filename()
-        name += '.TXT'
+        txt_name = self._get_arba_filename() + '.TXT'
+        txt_content = ''.join(''.join(reg) + '\r\n' for reg in head_regs)
+        name, payload = self._build_attachment_payload(txt_name, txt_content)
         generated_file_rec = ArbaGeneratedFiles.create(
             {
                 'code': name,
@@ -244,15 +318,12 @@ class ArbaRetentionExporterWizard(models.TransientModel):
 
         data_attach = {
             'name': name,
-            'datas': binascii.b2a_base64(file.read().encode('latin-1')),
-            # 'datas_fname': name,
+            'datas': base64.b64encode(payload),
             'res_model': 'arba.generated.files',
             'res_id': generated_file_rec.id,
         }
 
         attach_id = IrAttachment.create(data_attach)
         generated_file_rec.write({'attachment_id': attach_id.id})
-
-        file.close()
 
         return True

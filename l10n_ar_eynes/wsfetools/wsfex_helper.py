@@ -67,7 +67,7 @@ class WSFEXParser(WSParser):
             invoice, tipo_cbte, export_type
         )
         pais_dst = int(invoice.dst_country_id.code)
-        dst_cuit = None
+        dst_cuit = invoice.partner_id.vat
         if invoice.partner_id.dst_cuit_id:
             dst_cuit = invoice.partner_id.dst_cuit_id.code
         partner_cuit = invoice.partner_id.vat

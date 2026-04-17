@@ -3,6 +3,7 @@ import json
 import logging
 import urllib.parse
 from base64 import b64encode
+from contextlib import nullcontext
 from io import BytesIO
 
 import qrcode
@@ -800,6 +801,7 @@ class AccountMove(models.Model):
             vals = {
                 'is_multi_currency': False,
                 'currency_rate': 1.0,
+                'invoice_currency_rate': 1.0,
             }
             if self.currency_id:
                 company = self.env.company
@@ -813,11 +815,31 @@ class AccountMove(models.Model):
                     vals['is_multi_currency'] = True
                     if currency.preciated:
                         vals['currency_rate'] = curr_rate.inverse_company_rate
+                        vals['invoice_currency_rate'] = (
+                            1 / vals['currency_rate']
+                            if vals['currency_rate']
+                            else 0.0
+                        )
                     else:
                         vals['currency_rate'] = curr_rate.company_rate
+                        vals['invoice_currency_rate'] = vals['currency_rate']
             self.write(vals)
 
             self._onchange_payment_term_date_invoice()
+
+    @api.onchange('currency_rate')
+    def _onchange_currency_rate(self):
+        for move in self.filtered(
+            lambda m: m.state == 'draft' and m.is_invoice(include_receipts=True)
+        ):
+            if move.currency_id == move.company_currency_id:
+                move.invoice_currency_rate = 1.0
+            elif move.currency_id.preciated:
+                move.invoice_currency_rate = (
+                    1 / move.currency_rate if move.currency_rate else 0.0
+                )
+            else:
+                move.invoice_currency_rate = move.currency_rate
 
     @api.onchange('date')
     def _onchange_date(self):
@@ -992,12 +1014,11 @@ class AccountMove(models.Model):
     @api.onchange('disable_perceptions')
     def _onchange_disable_perceptions(self):
         if self.disable_perceptions:
-            self.perception_ids.unlink()
+            # In onchange context, clear one2many values without calling unlink().
+            self.perception_ids = [(5, 0, 0)]
             self.invoice_line_ids.link_perception_to_move_lines()
-            return {'value': {'disable_perceptions': True}}
         else:
             self._automatic_perception_calculation()
-            return {'value': {'disable_perceptions': False}}
 
     @api.onchange(
         'invoice_date',
@@ -1089,14 +1110,20 @@ class AccountMove(models.Model):
                 for (
                     perception
                 ) in self.partner_id.get_python_application_perceptions():
+                    # Buscar dato de la linea de perc en el partner
+                    perc_data = {}
+                    application = self.env["perception.tax.application"]
+                    perc_data = application.get_perception_data(
+                        self.partner_id, self.invoice_date, tax_id=perception
+                    )
                     perceptions_applications = (
                         perception.calculate_python_custom_tax(
-                            self.partner_id, self
+                            self.partner_id, self, perc_data=perc_data
                         )
                     )
                     for application in perceptions_applications:
-                        base = application['base']
-                        amount = application['amount']
+                        base = application.get("base", 0)
+                        amount = application.get("amount", 0)
                         if base > 0 and amount > 0:
                             perception_tax_line_vals.append(
                                 {
@@ -1156,28 +1183,29 @@ class AccountMove(models.Model):
 
     def _update_perception_move_line_amount(self):
         for perception in self.perception_ids.mapped('perception_id'):
-            perception_line = self.line_ids.filtered(
+            perception_lines = self.line_ids.filtered(
                 lambda line: line.tax_line_id == perception
             )
-            amount = sum(
-                self.perception_ids.filtered(
-                    lambda line: line.perception_id == perception
-                ).mapped('amount')
-            )
-            amount_currency = amount
-            if self.is_multi_currency:
+            for perception_line in perception_lines:
                 amount = sum(
                     self.perception_ids.filtered(
                         lambda line: line.perception_id == perception
-                    ).mapped('amount_secondary_currency')
+                    ).mapped('amount')
                 )
-            sign = -1 if perception_line.balance < 0 else 1
-            perception_line.write(
-                {
-                    'balance': sign * amount,
-                    'amount_currency': sign * amount_currency,
-                }
-            )
+                amount_currency = amount
+                if self.is_multi_currency:
+                    amount = sum(
+                        self.perception_ids.filtered(
+                            lambda line: line.perception_id == perception
+                        ).mapped('amount_secondary_currency')
+                    )
+                sign = -1 if perception_line.balance < 0 else 1
+                perception_line.write(
+                    {
+                        'balance': sign * amount,
+                        'amount_currency': sign * amount_currency,
+                    }
+                )
 
     def add_perceptions(self):
         for move in self:
@@ -1363,7 +1391,19 @@ class AccountMove(models.Model):
                     sequence = inv._get_fce_prefix() + sequence
                 inv.write({'internal_number': sequence})
 
-        posted_moves = super()._post(soft=soft)
+        manual_rate_moves = self.filtered(
+            lambda move: move.is_invoice(include_receipts=True)
+            and move.invoice_currency_rate != move.expected_currency_rate
+        )
+        protect_rate = (
+            self.env.protecting(
+                [self._fields['invoice_currency_rate']], manual_rate_moves
+            )
+            if manual_rate_moves
+            else nullcontext()
+        )
+        with protect_rate:
+            posted_moves = super()._post(soft=soft)
         posted_moves._set_perception_date()
 
         return posted_moves
@@ -1407,9 +1447,12 @@ class AccountMove(models.Model):
             )
 
     def copy_data(self, default=None):
+        default = dict(default or {})
         data_list = super().copy_data(default)
         for move, data in zip(self, data_list):
-            if move.move_type in ('out_invoice', 'in_invoice'):
+            if move.is_invoice(include_receipts=True):
+                if 'invoice_currency_rate' not in default:
+                    data['invoice_currency_rate'] = move.invoice_currency_rate
                 data['perception_ids'] = [
                     (command, _id, line_vals)
                     for command, _id, line_vals in data['perception_ids']
@@ -1506,9 +1549,21 @@ class AccountMove(models.Model):
         for move in res:
             if move.is_invoice():
                 if not move.invoice_date:
-                    move.write(
-                        {'invoice_date': fields.Date.context_today(self)}
+                    is_manual_rate = (
+                        move.invoice_currency_rate
+                        != move.expected_currency_rate
                     )
+                    protect_rate = (
+                        self.env.protecting(
+                            [self._fields['invoice_currency_rate']], move
+                        )
+                        if is_manual_rate
+                        else nullcontext()
+                    )
+                    with protect_rate:
+                        move.write(
+                            {'invoice_date': fields.Date.context_today(self)}
+                        )
                 if not move.denomination:
                     if move.is_sale_document():
                         denomination = move.journal_id.denomination
@@ -2351,7 +2406,18 @@ class AccountMove(models.Model):
             }
 
             # Escribimos los campos necesarios de la factura
-            inv.write(invoice_vals)
+            is_manual_rate = (
+                inv.invoice_currency_rate != inv.expected_currency_rate
+            )
+            protect_rate = (
+                self.env.protecting(
+                    [self._fields['invoice_currency_rate']], inv
+                )
+                if is_manual_rate
+                else nullcontext()
+            )
+            with protect_rate:
+                inv.write(invoice_vals)
 
             # Tomamos la factura y mandamos a realizar
             # el asiento contable.

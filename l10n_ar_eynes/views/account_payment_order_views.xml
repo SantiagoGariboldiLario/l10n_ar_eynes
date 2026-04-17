@@ -24,8 +24,15 @@
                         name="cancel_voucher"
                         string="Unreconcile"
                         type="object"
-                        invisible="state != 'posted'"
+                        invisible="has_active_arba_retentions or state != 'posted'"
                         confirm="Are you sure to unreconcile and cancel this record ?"
+                    />
+                    <button
+                        name="cancel_voucher"
+                        string="Unreconcile"
+                        type="object"
+                        invisible="not has_active_arba_retentions or state != 'posted'"
+                        confirm="¿Estás seguro de no conciliar y cancelar este registro?. Existen retenciones ARBA informadas, el pago puede quedar desalineado respecto de lo informado en ARBA. ¿Desea continuar igualmente?"
                     />
                     <button
                         name="action_cancel_draft"
@@ -55,6 +62,7 @@
                     />
                 </header>
                 <sheet>
+                    <field name="has_active_arba_retentions" invisible="1" />
                     <h1>
                         <label for="number" string="Number" />
                         <field name="number" readonly="1" />
@@ -677,8 +685,15 @@
                         name="cancel_voucher"
                         string="Unreconcile"
                         type="object"
-                        invisible="state != 'posted' or context.get('line_type', False)"
+                        invisible="has_active_arba_retentions or state != 'posted' or context.get('line_type', False)"
                         confirm="Are you sure to unreconcile and cancel this record ?"
+                    />
+                    <button
+                        name="cancel_voucher"
+                        string="Unreconcile"
+                        type="object"
+                        invisible="not has_active_arba_retentions or state != 'posted' or context.get('line_type', False)"
+                        confirm="¿Estás seguro de no conciliar y cancelar este registro?. Existen retenciones ARBA informadas, el pago puede quedar desalineado respecto de lo informado en ARBA. ¿Desea continuar igualmente?"
                     />
                     <button
                         name="action_cancel_draft"
@@ -707,6 +722,7 @@
                     />
                 </header>
                 <sheet>
+                    <field name="has_active_arba_retentions" invisible="1" />
                     <h1>
                         <label for="number" string="Number" />
                         <field name="number" readonly="1" />

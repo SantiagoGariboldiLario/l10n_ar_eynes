@@ -37,6 +37,7 @@
         'data/retention_data.xml',
         'data/ir_config_parameter.xml',
         'views/account_journal_view.xml',
+        'views/res_company_view.xml',
         'views/res_partner_view.xml',
         'views/res_config_settings_view.xml',
     ],

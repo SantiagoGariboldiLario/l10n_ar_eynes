@@ -2,28 +2,16 @@
 
 import {PaymentScreen} from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import {patch} from "@web/core/utils/patch";
-import {ConnectionLostError} from "@web/core/network/rpc_service";
+import {ConnectionLostError} from "@web/core/network/rpc";
 import {_t} from "@web/core/l10n/translation";
-import {ErrorPopup} from "@point_of_sale/app/errors/popups/error_popup";
-import {PosStore} from "@point_of_sale/app/store/pos_store";
+import {AlertDialog} from "@web/core/confirmation_dialog/confirmation_dialog";
+import {PosStore} from "@point_of_sale/app/services/pos_store";
 
 patch(PosStore.prototype, {
     async _processData(loadedData) {
         await super._processData(...arguments);
         this.all_doc_types = loadedData["res.document.type"];
     },
-
-    // _after_flush_orders(orders) {
-    //     const res = super._after_flush_orders(...arguments);
-    //     console.log("Patched _after_flush_orders called");
-    //     for (const order of orders) {
-    //         if (this.synch?.status === "disconnected") {
-    //             console.log("Setting offline flag for order");
-    //             order.data.offline = true;
-    //         }
-    //     }
-    //     return res;
-    // },
 });
 
 patch(PaymentScreen.prototype, {
@@ -56,8 +44,8 @@ patch(PaymentScreen.prototype, {
     },
 
     checkCustomerSelected() {
-        if (!this.currentOrder.get_partner()) {
-            this.env.services.popup.add(ErrorPopup, {
+        if (!this.currentOrder.getPartner()) {
+            this.dialog.add(AlertDialog, {
                 title: _t("Error"),
                 body: _t("You must first select a client."),
             });
@@ -67,7 +55,7 @@ patch(PaymentScreen.prototype, {
     onMounted() {
         super.onMounted();
         // By default set invoice type
-        if (this.currentOrder.pos.config.default_invoice_mode == "electronic") {
+        if (this.pos.config.default_invoice_mode == "electronic") {
             this.toggleIsManualInvoice();
         } else {
             this.toggleIsElectronicInvoice();
@@ -90,18 +78,18 @@ patch(PaymentScreen.prototype, {
     },
 
     async setNextInvoiceSequence() {
-        const customer = this.currentOrder.get_partner();
+        const customer = this.currentOrder.getPartner();
         if (!customer) {
             this.setSequenceValues();
             this.render();
             return;
         }
-        const config = this.currentOrder.pos.config;
-        const amount_total = this.currentOrder.get_total_with_tax();
+        const config = this.pos.config;
+        const amount_total = this.currentOrder.priceIncl;
         const fiscal_type = this.currentOrder.is_electronic_invoice() ? "electronic" : "internal";
         const move_type = this.currentOrder._isRefundAndSaleOrder() ? "out_refund" : "out_invoice";
         try {
-            const seq_vals = await this.orm.call("account.move", "get_next_sequence_from_pos", [
+            const seq_vals = await this.pos.data.orm.call("account.move", "get_next_sequence_from_pos", [
                 false,
                 customer.id,
                 config.id,
@@ -113,10 +101,6 @@ patch(PaymentScreen.prototype, {
             this.render();
         } catch (error) {
             if (error instanceof ConnectionLostError) {
-                // This.env.services.popup.add(ErrorPopup, {
-                //     title: _t("Error"),
-                //     body: _t("Unable to get next sequence."),
-                // });
                 this.setSequenceValues();
                 this.render();
             } else {
@@ -131,35 +115,6 @@ patch(PaymentScreen.prototype, {
         this.setNextInvoiceSequence();
     },
 
-    async _isOrderValid(isForceValidate) {
-        let result = super._isOrderValid(isForceValidate);
-        const partner = this.currentOrder.get_partner();
-        if (partner && !partner.property_account_position_id) {
-            this.popup.add(ErrorPopup, {
-                title: _t("Missing fields on partner"),
-                body: _t("The selected customer needs a fiscal position."),
-            });
-            result = false;
-        }
-
-        let block_invoice_offline = false;
-        for (const item of this.currentOrder.pos.config.block_invoice_offline) {
-            if (item === partner.property_account_position_id[0]) {
-                block_invoice_offline = true;
-            }
-        }
-        if (block_invoice_offline && !this.currentOrder.can_compute_perceptions) {
-            this.popup.add(ErrorPopup, {
-                title: _t("Offline Mode with perceptions"),
-                body: _t(
-                    "You cannot validate this invoice because it's impossible to get perceptions for this partner."
-                ),
-            });
-            result = false;
-        }
-        return result;
-    },
-
     get_invoice_report_action: function () {
         if (this.currentOrder.is_electronic_invoice()) {
             return "l10n_ar_eynes.account_move_report";
@@ -168,20 +123,20 @@ patch(PaymentScreen.prototype, {
     },
 
     async _finalizeValidation() {
-        if (this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) {
+        if (this.currentOrder.isPaidWithCash() || this.currentOrder.change) {
             this.hardwareProxy.openCashbox();
         }
 
         this.currentOrder.date_order = luxon.DateTime.now();
         for (const line of this.paymentLines) {
-            if (!line.amount === 0) {
+            if (line.amount === 0) {
                 this.currentOrder.remove_paymentline(line);
             }
         }
         this.currentOrder.finalized = true;
 
         this.env.services.ui.block();
-        let syncOrderResult;
+        let syncOrderResult = [];
         let invoice_state_draft = false;
         try {
             // 1. Save order to server.
@@ -227,7 +182,7 @@ patch(PaymentScreen.prototype, {
         await this.afterOrderValidation(Boolean(syncOrderResult) && syncOrderResult.length > 0);
 
         if (invoice_state_draft) {
-            this.env.services.popup.add(ErrorPopup, {
+            this.dialog.add(AlertDialog, {
                 title: _t("Error with ARCA"),
                 body: _t("Check from backend and solve this situation"),
             });

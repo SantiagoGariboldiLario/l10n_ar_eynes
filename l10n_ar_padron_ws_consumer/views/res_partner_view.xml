@@ -4,10 +4,7 @@
     <record id="l10n_ar_eynes_inherit_l10n_ar_padron" model="ir.ui.view">
         <field name="name">l10n.ar.eynes.inherit.l10n.ar.padron</field>
         <field name="model">res.partner</field>
-        <field
-            name="inherit_id"
-            ref="l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes"
-        />
+        <field name="inherit_id" ref="l10n_ar_eynes.res_partner_view_form_inherit_l10n_ar_eynes" />
         <field name="arch" type="xml">
 
             <xpath
@@ -34,7 +31,9 @@
         <field name="model_id" ref="model_res_partner" />
         <field name="binding_model_id" ref="model_res_partner" />
         <field name="state">code</field>
-        <field name="code">action = records.do_update_from_padron()</field>
+        <field name="code">
+            action = records.do_update_from_padron(use_special_padron=env.company.use_special_padron)
+        </field>
     </record>
 
 </odoo>

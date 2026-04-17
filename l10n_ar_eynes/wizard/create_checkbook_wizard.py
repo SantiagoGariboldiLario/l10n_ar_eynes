@@ -53,6 +53,7 @@ class CreateCheckbookWizard(models.TransientModel):
         payment_method = self.env.ref(
             'l10n_ar_eynes.account_payment_method_check'
         )
+        payment_method_line_model = self.env['account.payment.method.line']
 
         payment_method_name = _(
             'Checkbook %(name)s %(format)s-%(number)s',
@@ -62,21 +63,28 @@ class CreateCheckbookWizard(models.TransientModel):
         )
 
         echeq_without_number = not self.required_num
-        self.journal_id.outbound_payment_method_line_ids = [
-            (
-                0,
-                0,
+        checkbook_number = int(self.number)
+        checkbook_line = payment_method_line_model.search(
+            [
+                ('journal_id', '=', self.journal_id.id),
+                ('payment_method_id', '=', payment_method.id),
+                ('format', '=', self.checkbook_format),
+                ('number', '=', checkbook_number),
+            ],
+            limit=1,
+        )
+        if not checkbook_line:
+            checkbook_line = payment_method_line_model.create(
                 {
                     'journal_id': self.journal_id.id,
                     'payment_method_id': payment_method.id,
                     'name': payment_method_name,
-                    'number': self.number,
+                    'number': checkbook_number,
                     'format': self.checkbook_format,
                     'type': self.type,
                     'echeq_without_number': echeq_without_number,
-                },
+                }
             )
-        ]
         if not echeq_without_number:
             self.check_range()
 
@@ -90,9 +98,7 @@ class CreateCheckbookWizard(models.TransientModel):
                         'number': str(i).zfill(8),
                         'journal_id': self.journal_id.id,
                         'bank_id': self.journal_id.bank_id.id,
-                        'checkbook_id': self.env['account.payment.method.line']
-                        .search([('name', '=', payment_method_name)])
-                        .id,
+                        'checkbook_id': checkbook_line.id,
                         'checkbook_format': self.checkbook_format,
                         'internal_type': 'issued',
                         'issued_check_state': 'draft',

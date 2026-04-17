@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_iva_per_generated_files_form" model="ir.ui.view">
+        <field name="name">iva.per.generated.files.form</field>
+        <field name="model">iva.per.generated.files</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="IVA per generated files" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <field name="code" />
+                        <field name="date_from" />
+                        <field name="date_to" />
+                        <label for="datas" string="Generated File" />
+                        <div class="oe_inline">
+                            <field name="datas" class="pr-3" />
+                            <field name="attachment_id" />
+                        </div>
+                        <field name="company_id" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_iva_per_generated_files_tree" model="ir.ui.view">
+        <field name="name">iva.per.generated.files.tree</field>
+        <field name="model">iva.per.generated.files</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false">
+                <field name="code" />
+                <field name="date_from" />
+                <field name="date_to" />
+                <field name="attachment_id" />
+                <field name="company_id" />
+            </list>
+        </field>
+    </record>
+
+    <record id="action_iva_per_generated_files" model="ir.actions.act_window">
+        <field name="name">iva per generated files</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">iva.per.generated.files</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_iva_ret_generated_files_form" model="ir.ui.view">
+        <field name="name">iva.ret.generated.files.form</field>
+        <field name="model">iva.ret.generated.files</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="IVA ret generated files" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <field name="code" />
+                        <field name="date_from" />
+                        <field name="date_to" />
+                        <label for="datas" string="Generated File" />
+                        <div class="oe_inline">
+                            <field name="datas" class="pr-3" />
+                            <field name="attachment_id" />
+                        </div>
+                        <field name="company_id" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_iva_ret_generated_files_tree" model="ir.ui.view">
+        <field name="name">iva.ret.generated.files.tree</field>
+        <field name="model">iva.ret.generated.files</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false">
+                <field name="code" />
+                <field name="date_from" />
+                <field name="date_to" />
+                <field name="attachment_id" />
+                <field name="company_id" />
+            </list>
+        </field>
+    </record>
+
+    <record id="action_iva_ret_generated_files" model="ir.actions.act_window">
+        <field name="name">iva ret generated files</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">iva.ret.generated.files</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

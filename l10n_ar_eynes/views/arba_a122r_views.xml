@@ -1,0 +1,636 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_res_company_tree_arba_a122r_config" model="ir.ui.view">
+        <field name="name">res.company.tree.arba.a122r.config</field>
+        <field name="model">res.company</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" />
+                <field name="arba_a122r_enabled" />
+                <field name="arba_a122r_mode" />
+                <field name="arba_a122r_sucursal" />
+                <field name="arba_a122r_quincena_mode" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_res_company_form_arba_a122r_config" model="ir.ui.view">
+        <field name="name">res.company.form.arba.a122r.config</field>
+        <field name="model">res.company</field>
+        <field name="arch" type="xml">
+            <form string="Configuración ARBA A122R">
+                <sheet>
+                    <group string="Configuración funcional">
+                        <field name="name" readonly="1" />
+                        <field name="arba_a122r_enabled" />
+                        <field name="arba_a122r_enforced" invisible="not arba_a122r_enabled" />
+                        <field name="arba_a122r_mode" invisible="not arba_a122r_enabled" />
+                        <field name="arba_a122r_quincena_mode" invisible="not arba_a122r_enabled" />
+                        <field
+                            name="arba_a122r_sucursal"
+                            invisible="not arba_a122r_enabled"
+                            required="arba_a122r_enabled"
+                        />
+                        <field name="arba_a122r_actividad_id" invisible="1" />
+                    </group>
+                    <group string="Credenciales OAuth ARBA" invisible="not arba_a122r_enabled">
+                        <field name="arba_a122r_username" />
+                        <field name="arba_a122r_password" password="True" />
+                    </group>
+                    <group string="Actividades ARBA A122R" invisible="not arba_a122r_enabled">
+                        <field name="arba_a122r_activity_ids" nolabel="1" colspan="2">
+                            <list editable="bottom">
+                                <field name="activity_code" />
+                                <field name="is_default" />
+                            </list>
+                        </field>
+                    </group>
+                    <group string="Configuración técnica" invisible="not arba_a122r_enabled">
+                        <field name="arba_a122r_block_validation_on_error" />
+                        <field name="arba_a122r_timeout" />
+                        <field name="arba_a122r_token_url" />
+                        <field name="arba_a122r_base_url" />
+                        <field name="arba_a122r_client_id" password="True" />
+                        <field name="arba_a122r_client_secret" password="True" />
+                        <field name="arba_a122r_access_token" readonly="1" password="True" />
+                        <field name="arba_a122r_token_expiration" readonly="1" />
+                        <button
+                            name="action_arba_a122r_test_connection"
+                            type="object"
+                            string="Comprobar conexión"
+                            class="oe_highlight"
+                        />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_res_company_arba_a122r_config" model="ir.actions.act_window">
+        <field name="name">Configuración A122R ARBA</field>
+        <field name="res_model">res.company</field>
+        <field name="view_mode">list,form</field>
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_res_company_tree_arba_a122r_config')}), (0, 0, {'view_mode': 'form', 'view_id': ref('view_res_company_form_arba_a122r_config')})]"
+        />
+        <field name="context">{'create': False}</field>
+    </record>
+
+    <record id="view_arba_a122r_dj_tree" model="ir.ui.view">
+        <field name="name">arba.a122r.dj.tree</field>
+        <field name="model">arba.a122r.dj</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="company_id" />
+                <field name="cuit_agente" />
+                <field name="actividad_id" />
+                <field name="anio" />
+                <field name="mes" />
+                <field name="quincena" />
+                <field name="arba_id_dj" />
+                <field name="state" />
+                <field name="retention_count" />
+                <field name="informed_retention_count" />
+                <field name="last_sync" />
+                <button
+                    name="action_mark_closed"
+                    type="object"
+                    string="Cerrar"
+                    invisible="state == 'closed'"
+                />
+                <button name="action_mark_open" type="object" string="Reabrir" invisible="state == 'open'" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_arba_a122r_dj_form" model="ir.ui.view">
+        <field name="name">arba.a122r.dj.form</field>
+        <field name="model">arba.a122r.dj</field>
+        <field name="arch" type="xml">
+            <form string="DJ ARBA A122R">
+                <header>
+                    <button
+                        name="action_open_remote_dj"
+                        type="object"
+                        string="Alta DJ"
+                        class="oe_highlight"
+                    />
+                    <button
+                        name="action_mark_closed"
+                        type="object"
+                        string="Cerrar DJ"
+                        invisible="state == 'closed'"
+                    />
+                    <button
+                        name="action_mark_open"
+                        type="object"
+                        string="Reabrir DJ"
+                        invisible="state == 'open'"
+                    />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            name="action_view_period_retentions"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-list"
+                        >
+                            <field name="retention_count" widget="statinfo" string="Retenciones período" />
+                        </button>
+                        <button
+                            name="action_view_period_informed_retentions"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-check-circle"
+                        >
+                            <field
+                                name="informed_retention_count"
+                                widget="statinfo"
+                                string="Retenciones informadas"
+                            />
+                        </button>
+                        <button
+                            name="action_view_period_informed_records"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-history"
+                        >
+                            <field
+                                name="informed_record_count"
+                                widget="statinfo"
+                                string="Registros informados"
+                            />
+                        </button>
+                    </div>
+                    <group>
+                        <field name="company_id" invisible="1" />
+                        <field name="cuit_agente" invisible="1" />
+                        <field name="activity_line_id" />
+                        <field name="anio" />
+                        <field name="mes" />
+                        <field name="quincena" />
+                        <field name="actividad_id" invisible="1" />
+                        <field name="arba_id_dj" invisible="1" />
+                        <field name="state" invisible="1" />
+                        <field name="rectificativa" invisible="1" />
+                        <field name="fecha_creacion" invisible="1" />
+                        <field name="fecha_cierre" invisible="1" />
+                        <field name="last_sync" invisible="1" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_arba_a122r_dj" model="ir.actions.act_window">
+        <field name="name">Períodos DJ A122R</field>
+        <field name="res_model">arba.a122r.dj</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_arba_a122r_dj_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('view_arba_a122r_dj_form')})]"
+        />
+    </record>
+
+    <record id="view_arba_a122r_retention_record_tree" model="ir.ui.view">
+        <field name="name">arba.a122r.retention.record.tree</field>
+        <field name="model">arba.a122r.retention.record</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="payment_order_id" />
+                <field name="current_retention_line_id" />
+                <field name="partner_id" />
+                <field name="arba_sync_state" />
+                <field name="arba_n_transaccion_agente" />
+                <field name="arba_id_dj" />
+                <field name="arba_id_comprobante" />
+                <field name="arba_nro_emision" />
+                <field name="arba_actividad_id_used" />
+                <field name="base_amount" />
+                <field name="retention_amount" />
+                <field name="lifecycle_state" />
+                <button
+                    name="action_open_current_line"
+                    type="object"
+                    string="Abrir línea"
+                    invisible="not current_retention_line_id"
+                />
+                <button
+                    name="action_arba_download_pdf"
+                    type="object"
+                    string="PDF"
+                    invisible="not arba_id_comprobante"
+                />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_arba_a122r_retention_record_form" model="ir.ui.view">
+        <field name="name">arba.a122r.retention.record.form</field>
+        <field name="model">arba.a122r.retention.record</field>
+        <field name="arch" type="xml">
+            <form string="Registro persistente ARBA A122R">
+                <header>
+                    <button
+                        name="action_open_current_line"
+                        type="object"
+                        string="Abrir línea actual"
+                        invisible="not current_retention_line_id"
+                    />
+                    <button
+                        name="action_arba_download_pdf"
+                        type="object"
+                        string="Descargar PDF"
+                        class="oe_highlight"
+                        invisible="not arba_id_comprobante"
+                    />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="payment_order_id" readonly="1" />
+                            <field name="current_retention_line_id" readonly="1" />
+                            <field name="partner_id" readonly="1" />
+                            <field name="retention_id" readonly="1" />
+                            <field name="tax_id" readonly="1" />
+                            <field name="lifecycle_state" readonly="1" />
+                            <field name="current" readonly="1" />
+                        </group>
+                        <group>
+                            <field name="arba_sync_state" readonly="1" />
+                            <field name="arba_id_dj" readonly="1" />
+                            <field name="arba_id_comprobante" readonly="1" />
+                            <field name="arba_nro_emision" readonly="1" />
+                            <field name="arba_n_transaccion_agente" readonly="1" />
+                            <field name="arba_actividad_id_used" readonly="1" />
+                        </group>
+                    </group>
+                    <group string="Snapshot informado">
+                        <group>
+                            <field name="base_amount" readonly="1" />
+                            <field name="retention_amount" readonly="1" />
+                            <field name="alicuota" readonly="1" />
+                            <field name="arba_fecha_operacion" readonly="1" />
+                            <field name="sucursal" readonly="1" />
+                        </group>
+                        <group>
+                            <field name="cuit_contribuyente" readonly="1" />
+                            <field name="razon_social_contribuyente" readonly="1" />
+                            <field name="arba_observacion" readonly="1" />
+                            <field name="arba_last_error" readonly="1" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Historial">
+                            <field name="history_ids" readonly="1">
+                                <list>
+                                    <field name="create_date" />
+                                    <field name="retention_line_id" />
+                                    <field name="action" />
+                                    <field name="state" />
+                                    <field name="arba_id_dj" />
+                                    <field name="arba_id_comprobante" />
+                                    <field name="arba_nro_emision" />
+                                    <field name="arba_n_transaccion_agente" />
+                                    <field name="notes" />
+                                    <button
+                                        name="action_arba_download_pdf"
+                                        type="object"
+                                        string="PDF"
+                                        invisible="not arba_id_comprobante"
+                                    />
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Solicitudes">
+                            <field name="request_log_ids" readonly="1">
+                                <list>
+                                    <field name="create_date" />
+                                    <field name="retention_line_id" />
+                                    <field name="method" />
+                                    <field name="endpoint" />
+                                    <field name="status_code" />
+                                    <field name="state" />
+                                    <field name="error_message" />
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Payload">
+                            <group>
+                                <field name="arba_last_request" readonly="1" />
+                                <field name="arba_last_response" readonly="1" />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_arba_a122r_retention_record" model="ir.actions.act_window">
+        <field name="name">Registros persistentes A122R</field>
+        <field name="res_model">arba.a122r.retention.record</field>
+        <field name="view_mode">list,form</field>
+        <field
+            name="view_ids"
+            eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_arba_a122r_retention_record_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('view_arba_a122r_retention_record_form')})]"
+        />
+    </record>
+
+    <record id="account_payment_order_retention_line_view_tree_inherit_arba_a122r" model="ir.ui.view">
+        <field name="name">account.payment.order.retention.line.view.tree.inherit.arba.a122r</field>
+        <field name="model">account.payment.order.retention.line</field>
+        <field name="inherit_id" ref="l10n_ar_eynes.account_payment_order_retention_line_view_tree" />
+        <field name="arch" type="xml">
+            <field name="certificate_no" position="after">
+                <field name="is_arba_digital" invisible="1" column_invisible="1" />
+                <field name="payment_order_state" invisible="1" column_invisible="1" />
+                <field name="arba_sync_state" />
+                <field name="arba_id_dj" />
+                <field name="arba_id_comprobante" />
+                <field name="arba_nro_emision" />
+                <field name="arba_actividad_id_used" />
+            </field>
+            <field name="amount" position="after">
+                <field name="arba_retention_record_id" invisible="1" column_invisible="1" />
+                <button
+                    name="action_arba_send"
+                    type="object"
+                    string="Enviar ARBA"
+                    invisible="not is_arba_digital or payment_order_state != 'posted' or arba_sync_state in ('sent', 'observed')"
+                />
+                <button
+                    name="action_arba_download_pdf"
+                    type="object"
+                    string="PDF"
+                    invisible="not is_arba_digital or not arba_id_comprobante"
+                />
+                <button
+                    name="action_arba_delete_remote"
+                    type="object"
+                    string="Dar baja"
+                    invisible="not is_arba_digital or not arba_id_comprobante or arba_sync_state == 'deleted'"
+                />
+            </field>
+        </field>
+    </record>
+
+    <record id="account_supplier_payment_order_view_form_inherit_arba_a122r" model="ir.ui.view">
+        <field name="name">account.supplier.payment.order.view.form.inherit.arba.a122r</field>
+        <field name="model">account.payment.order</field>
+        <field name="inherit_id" ref="l10n_ar_eynes.account_supplier_payment_order_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='retention_ids']" position="before">
+                <field name="has_arba_digital_retentions" invisible="1" />
+                <field name="has_active_arba_retentions" invisible="1" />
+                <field name="arba_retention_record_count" invisible="1" />
+            </xpath>
+            <xpath expr="//field[@name='retention_ids']/list/field[@name='certificate_no']" position="after">
+                <field name="is_arba_digital" invisible="1" column_invisible="1" />
+                <field name="payment_order_state" invisible="1" column_invisible="1" />
+                <field
+                    name="arba_sync_state"
+                    optional="show"
+                    column_invisible="not parent.has_arba_digital_retentions"
+                />
+                <field
+                    name="arba_id_comprobante"
+                    optional="hide"
+                    column_invisible="not parent.has_arba_digital_retentions"
+                />
+                <field
+                    name="arba_nro_emision"
+                    optional="hide"
+                    column_invisible="not parent.has_arba_digital_retentions"
+                />
+                <field
+                    name="arba_actividad_id_used"
+                    optional="hide"
+                    column_invisible="not parent.has_arba_digital_retentions"
+                />
+                <field
+                    name="arba_last_error"
+                    optional="hide"
+                    column_invisible="not parent.has_arba_digital_retentions"
+                />
+            </xpath>
+            <xpath expr="//field[@name='retention_ids']/list/field[@name='amount']" position="after">
+                <field name="arba_retention_record_id" invisible="1" column_invisible="1" />
+                <button
+                    name="action_arba_send"
+                    type="object"
+                    string="Enviar ARBA"
+                    invisible="not is_arba_digital or payment_order_state != 'posted' or arba_sync_state in ('sent', 'observed')"
+                    column_invisible="not parent.has_arba_digital_retentions"
+                />
+                <button
+                    name="action_arba_download_pdf"
+                    type="object"
+                    string="PDF"
+                    invisible="not is_arba_digital or not arba_id_comprobante"
+                    column_invisible="not parent.has_arba_digital_retentions"
+                />
+                <button
+                    name="action_arba_delete_remote"
+                    type="object"
+                    string="Dar baja"
+                    invisible="not is_arba_digital or not arba_id_comprobante or arba_sync_state == 'deleted'"
+                    column_invisible="not parent.has_arba_digital_retentions"
+                />
+            </xpath>
+            <xpath
+                expr="//field[@name='retention_ids']/form/group/group[@name='info']/field[@name='certificate_no']"
+                position="after"
+            >
+                <field name="is_arba_digital" invisible="1" />
+                <field name="arba_sync_state" invisible="not is_arba_digital" readonly="1" />
+                <field name="arba_id_dj" invisible="not is_arba_digital" readonly="1" />
+                <field name="arba_id_comprobante" invisible="not is_arba_digital" readonly="1" />
+                <field name="arba_nro_emision" invisible="not is_arba_digital" readonly="1" />
+                <field name="arba_actividad_id_used" invisible="not is_arba_digital" readonly="1" />
+                <field name="arba_retention_record_id" invisible="not is_arba_digital" readonly="1" />
+                <field name="arba_n_transaccion_agente" invisible="not is_arba_digital" />
+                <field name="arba_fecha_operacion" invisible="not is_arba_digital" />
+                <field name="arba_observacion" invisible="not is_arba_digital" readonly="1" />
+                <field name="arba_last_error" invisible="not is_arba_digital" readonly="1" />
+                <field name="arba_history_ids" invisible="not is_arba_digital" readonly="1">
+                    <list>
+                        <field name="create_date" />
+                        <field name="action" />
+                        <field name="state" />
+                        <field name="arba_id_dj" />
+                        <field name="arba_id_comprobante" />
+                        <field name="arba_nro_emision" />
+                        <field name="arba_n_transaccion_agente" />
+                        <field name="notes" />
+                        <button
+                            name="action_arba_download_pdf"
+                            type="object"
+                            string="PDF"
+                            invisible="not arba_id_comprobante"
+                        />
+                    </list>
+                    <form>
+                        <group>
+                            <field name="create_date" readonly="1" />
+                            <field name="action" readonly="1" />
+                            <field name="state" readonly="1" />
+                            <field name="arba_id_dj" readonly="1" />
+                            <field name="arba_id_comprobante" readonly="1" />
+                            <field name="arba_nro_emision" readonly="1" />
+                            <field name="arba_n_transaccion_agente" readonly="1" />
+                            <field name="notes" readonly="1" />
+                            <button
+                                name="action_arba_download_pdf"
+                                type="object"
+                                string="Descargar PDF"
+                                class="oe_highlight"
+                                invisible="not arba_id_comprobante"
+                            />
+                        </group>
+                    </form>
+                </field>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page
+                    string="ARBA A122R - Registros"
+                    invisible="not has_arba_digital_retentions and not arba_retention_record_count"
+                >
+                    <label for="arba_a122r_request_log_ids" />
+                    <field name="arba_a122r_request_log_ids" nolabel="1" readonly="1">
+                        <list>
+                            <field name="create_date" />
+                            <field name="retention_line_id" />
+                            <field name="method" />
+                            <field name="endpoint" />
+                            <field name="status_code" />
+                            <field name="state" />
+                            <field name="error_message" />
+                        </list>
+                        <form>
+                            <group>
+                                <field name="create_date" readonly="1" />
+                                <field name="retention_line_id" readonly="1" />
+                                <field name="method" readonly="1" />
+                                <field name="endpoint" readonly="1" />
+                                <field name="status_code" readonly="1" />
+                                <field name="state" readonly="1" />
+                                <field name="error_message" readonly="1" />
+                                <field name="request_payload" readonly="1" />
+                                <field name="response_payload" readonly="1" />
+                            </group>
+                        </form>
+                    </field>
+                    <label for="arba_retention_record_ids" />
+                    <field name="arba_retention_record_ids" nolabel="1" readonly="1">
+                        <list>
+                            <field name="current_retention_line_id" />
+                            <field name="partner_id" />
+                            <field name="arba_sync_state" />
+                            <field name="arba_n_transaccion_agente" />
+                            <field name="arba_id_dj" />
+                            <field name="arba_id_comprobante" />
+                            <field name="arba_nro_emision" />
+                            <field name="arba_actividad_id_used" />
+                            <field name="base_amount" />
+                            <field name="retention_amount" />
+                            <field name="lifecycle_state" />
+                        </list>
+                    </field>
+                </page>
+                <!-- <page
+                    string="Retenciones ARBA A122R"
+                    invisible="not arba_retention_record_count"
+                >
+
+                </page> -->
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_report_arba_a122r_cached_pdf" model="ir.actions.report">
+        <field name="name">Comprobante ARBA A122R</field>
+        <field name="model">account.payment.order.retention.line</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ar_eynes.report_arba_a122r_cached_pdf</field>
+        <field name="binding_model_id" ref="l10n_ar_eynes.model_account_payment_order_retention_line" />
+        <field name="binding_type">report</field>
+        <field
+            name="print_report_name"
+        >'Comprobante_ARBA_%s' % (object.arba_id_comprobante or object.id)</field>
+    </record>
+
+    <record id="action_report_arba_a122r_payment_order_cached_pdf" model="ir.actions.report">
+        <field name="name">Comprobantes ARBA A122R</field>
+        <field name="model">account.payment.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ar_eynes.report_arba_a122r_payment_order_cached_pdf</field>
+        <field name="binding_model_id" ref="l10n_ar_eynes.model_account_payment_order" />
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Comprobantes_ARBA_%s' % (object.name or object.id)</field>
+    </record>
+
+    <record id="action_report_arba_a122r_record_cached_pdf" model="ir.actions.report">
+        <field name="name">Comprobante ARBA A122R Persistente</field>
+        <field name="model">arba.a122r.retention.record</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ar_eynes.report_arba_a122r_record_cached_pdf</field>
+        <field name="binding_model_id" ref="l10n_ar_eynes.model_arba_a122r_retention_record" />
+        <field name="binding_type">report</field>
+        <field
+            name="print_report_name"
+        >'Comprobante_ARBA_%s' % (object.arba_id_comprobante or object.id)</field>
+    </record>
+
+    <menuitem
+        parent="account.menu_finance_configuration"
+        id="menu_arba_a122r_configuration_root"
+        name="A122R ARBA"
+        sequence="41"
+    />
+
+    <menuitem
+        parent="l10n_ar_eynes.menu_arba_a122r_configuration_root"
+        id="menu_arba_a122r_configuration"
+        name="Configuración"
+        action="l10n_ar_eynes.action_res_company_arba_a122r_config"
+        sequence="1"
+    />
+
+    <menuitem
+        parent="l10n_ar_eynes.menu_arba_a122r_configuration_root"
+        id="menu_arba_a122r_dj"
+        name="Períodos DJ"
+        action="l10n_ar_eynes.action_arba_a122r_dj"
+        sequence="2"
+    />
+
+    <menuitem
+        parent="l10n_ar_eynes.menu_arba_a122r_configuration_root"
+        id="menu_arba_a122r_retention_record"
+        name="Registros persistentes"
+        action="l10n_ar_eynes.action_arba_a122r_retention_record"
+        sequence="3"
+    />
+
+    <menuitem
+        parent="l10n_ar_eynes.menu_arba_a122r_configuration_root"
+        id="menu_arba_a122r_reprocess"
+        name="Reprocesar ARBA A122R"
+        action="l10n_ar_eynes.action_arba_a122r_reprocess_wizard"
+        groups="base.group_no_one"
+        sequence="4"
+    />
+
+    <menuitem
+        parent="l10n_ar_eynes.menu_arba_a122r_configuration_root"
+        id="menu_arba_a122r_diagnostic"
+        name="Diagnóstico ARBA A122R"
+        action="l10n_ar_eynes.action_arba_a122r_diagnostic_wizard"
+        groups="base.group_no_one"
+        sequence="5"
+    />
+</odoo>

@@ -19,6 +19,8 @@ from . import create_sicore_file  # noqa
 from . import create_sifere_file  # noqa
 from . import arba_retention_exporter  # noqa
 from . import arba_perception_exporter  # noqa
+from . import arba_a122r_reprocess_wizard  # noqa
+from . import arba_a122r_diagnostic_wizard  # noqa
 from . import create_arciba_file  # noqa
 from . import create_libro_iva
 from . import res_partner_afip_padron_wizard  # noqa
@@ -32,3 +34,4 @@ from . import libro_diario_wizard
 from . import purchase_vat_wizard
 from . import sale_vat_wizard
 from . import account_tax_subjournal_apportionable  # noqa
+from . import create_iva_per_ret_files

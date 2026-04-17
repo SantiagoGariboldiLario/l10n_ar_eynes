@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <menuitem
+        id="check_template_menu"
+        name="Templates"
+        action="sign_oca.sign_oca_template_act_window"
+        parent="l10n_ar_eynes.treasury_configuration_menu"
+        groups="base.group_user"
+        sequence="10"
+    />
+
+</odoo>

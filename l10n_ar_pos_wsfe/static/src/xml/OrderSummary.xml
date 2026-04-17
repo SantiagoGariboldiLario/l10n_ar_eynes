@@ -1,48 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<templates id="template" xml:space="preserve">
+<templates id="template" inherit_id="point_of_sale_template" xml:space="preserve">
 
-    <t t-name="OrderWidget" t-inherit="point_of_sale.OrderWidget" t-inherit-mode="extension">
-        <xpath expr="//div[hasclass('subentry')]" position="after">
-            <div t-if="props.perception_amount" class="fs-6 text-muted subentry">
-                Perceptions: <span class="value" t-esc="props.perception_amount" />
+    <!-- POS v19: extend the new OrderDisplay summary to show perceptions -->
+    <t t-inherit="point_of_sale.OrderDisplay" t-inherit-mode="extension">
+        <!-- Use hasclass() to avoid the template warning about @class filtering -->
+        <xpath expr="//div[hasclass('order-summary')]/div[hasclass('fs-3')]" position="before">
+            <div t-if="order.get_total_perception()" class="perception-line subtotal d-flex justify-content-between w-100 fs-6 text-muted">
+                <span>Percepciones</span>
+                <span class="perception-value" t-esc="formatCurrency(order.get_total_perception())"/>
             </div>
         </xpath>
     </t>
 
-    <t t-name="ProductScreen" t-inherit="point_of_sale.ProductScreen" t-inherit-mode="extension">
-        <xpath expr="//OrderWidget" position="replace">
-             <OrderWidget
-                lines="currentOrder.orderlines"
-                t-slot-scope="scope"
-                total="env.utils.formatCurrency(currentOrder.get_total_with_tax())"
-                tax="!env.utils.floatIsZero(currentOrder.get_total_tax()) and env.utils.formatCurrency(currentOrder.get_total_tax()) or ''"
-                perception_amount="!env.utils.floatIsZero(currentOrder.get_total_perception()) and env.utils.formatCurrency(currentOrder.get_total_perception()) or ''"
-            >
-             >
-                <t t-set="line" t-value="scope.line" />
-                <Orderline
-                    line="line.getDisplayData()"
-                    t-on-click="() => this.selectLine(line)"
-                    class="{ ...line.getDisplayClasses(), 'selected' : line.selected }"
-                >
-                    <t t-set-slot="product-name">
-                        <i
-                            t-if="line.get_product().isTracked()"
-                            t-on-click.stop="() => line.editPackLotLines()"
-                            role="img"
-                            t-attf-class="{{ line.has_valid_product_lot() ? 'text-success' : 'text-danger'}} fa fa-list line-lot-icon ms-1"
-                            t-attf-title="{{ line.has_valid_product_lot() ? 'Valid product lot' : 'Invalid product lot'}}"
-                        />
-                    </t>
-                    <ul t-if="line.pack_lot_lines">
-                        <li t-foreach="line.get_lot_lines()" t-as="lot" t-key="lot.cid">
-                            SN <t t-esc="lot.lot_name" />
-                        </li>
-                    </ul>
-                </Orderline>
-                <t t-set-slot="details" />
-            </OrderWidget>
-
-        </xpath>
-    </t>
 </templates>
