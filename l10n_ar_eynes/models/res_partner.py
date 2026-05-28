@@ -661,6 +661,11 @@ class ResPartnerPerception(models.Model):
     _description = "Perception Defined in Partner"
     _rec_name = 'perception_id'
 
+    _perception_partner_period_uniq = models.Constraint(
+        'UNIQUE (partner_id, perception_id, period)',
+        'Only one perception of the same type can be configured for the partner in the same period.',
+    )
+
     perception_id = fields.Many2one(
         'account.tax',
         'Perception',

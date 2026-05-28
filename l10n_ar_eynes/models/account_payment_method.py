@@ -77,10 +77,7 @@ class AccountPaymentMethodLine(models.Model):
         ],
     )
 
-    _sql_constraints = [
-        (
-            "unique_checkbook",
-            "unique(journal_id, format, number)",
-            _("This checkbook already exists for this journal"),
-        ),
-    ]
+    _unique_checkbook = models.Constraint(
+        "UNIQUE(journal_id, format, number)",
+        _("This checkbook already exists for this journal"),
+    )

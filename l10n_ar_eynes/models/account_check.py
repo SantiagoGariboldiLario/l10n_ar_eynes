@@ -984,10 +984,7 @@ class AccountCheck(models.Model):
             ).id
         return res
 
-    _sql_constraints = [
-        (
-            "unique_record",
-            "unique(number, checkbook_id, journal_id, checkbook_format)",
-            _("This record already exists"),
-        ),
-    ]
+    _unique_record = models.Constraint(
+        "UNIQUE(number, checkbook_id, journal_id, checkbook_format)",
+        _("This record already exists"),
+    )

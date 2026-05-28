@@ -15,10 +15,7 @@ class ProductArea(models.Model):
     code = fields.Integer(required=True)
     name = fields.Char('Description', required=True)
 
-    _sql_constraints = [
-        (
-            'unique_area_code',
-            'unique(code)',
-            _('This code is used.'),
-        )
-    ]
+    _unique_area_code = models.Constraint(
+        'UNIQUE(code)',
+        _('This code is used.'),
+    )

@@ -305,13 +305,10 @@ class PerceptionTaxApplication(models.Model):
         comodel_name='iibb.situation', string='Situation of IIBB'
     )
 
-    _sql_constraints = [
-        (
-            'concept_activity_uniq',
-            'unique (concept_id, activity_id, perception_tax_id)',
-            'The tuple of Concept, Activity must be unique per Perception !',
-        ),
-    ]
+    _concept_activity_uniq = models.Constraint(
+        'UNIQUE (concept_id, activity_id, perception_tax_id)',
+        'The tuple of Concept, Activity must be unique per Perception !',
+    )
 
     @api.depends('perception_tax_id')
     def _compute_concept_domain(self):

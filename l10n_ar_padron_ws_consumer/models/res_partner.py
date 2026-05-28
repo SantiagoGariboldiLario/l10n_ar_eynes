@@ -31,16 +31,13 @@ class ResPartnerPerception(models.Model):
     )
     is_multilateral = fields.Boolean()
 
-    _sql_constraints = [
-        (
-            'perception_partner_unique_period',
-            'unique(partner_id, perception_id, period)',
-            _(
-                'There must be only one perception of this type configured '
-                'for the partner in the same period'
-            ),
-        )
-    ]
+    _perception_partner_unique_period = models.Constraint(
+        'UNIQUE(partner_id, perception_id, period)',
+        _(
+            'There must be only one perception of this type configured '
+            'for the partner in the same period'
+        ),
+    )
 
 
 class ResPartnerRetention(models.Model):
@@ -48,16 +45,13 @@ class ResPartnerRetention(models.Model):
 
     is_multilateral = fields.Boolean()
 
-    _sql_constraints = [
-        (
-            'retention_partner_unique_period',
-            'unique(partner_id, retention_id, period)',
-            _(
-                'There must be only one retention of this type '
-                'configured for the partner in the same period'
-            ),
-        )
-    ]
+    _retention_partner_unique_period = models.Constraint(
+        'UNIQUE(partner_id, retention_id, period)',
+        _(
+            'There must be only one retention of this type '
+            'configured for the partner in the same period'
+        ),
+    )
 
 
 class ResPartner(models.Model):

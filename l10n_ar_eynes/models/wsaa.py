@@ -47,13 +47,10 @@ class WSAAConfig(models.Model):
         'wsaa.ta', 'config_id', string="Authorized Services"
     )
 
-    _sql_constraints = [
-        (
-            'company_uniq',
-            'unique (company_id)',
-            'The configuration must be unique per company !',
-        )
-    ]
+    _company_uniq = models.Constraint(
+        'UNIQUE (company_id)',
+        'The configuration must be unique per company !',
+    )
 
     @api.depends('homologation')
     def _compute_url(self):
@@ -91,13 +88,10 @@ class AfipWsService(models.Model):
     description = fields.Text('Description')
     name = fields.Char('Service Name', size=30, required=True)
 
-    _sql_constraints = [
-        (
-            'name_uniq',
-            'unique (name)',
-            'The name of the service must be unique!',
-        )
-    ]
+    _name_uniq = models.Constraint(
+        'UNIQUE (name)',
+        'The name of the service must be unique!',
+    )
 
 
 class WSAATa(models.Model):
@@ -111,13 +105,10 @@ class WSAATa(models.Model):
     sign = fields.Text('Sign', readonly=True)
     token = fields.Text('Token', readonly=True)
 
-    _sql_constraints = [
-        (
-            'company_name_uniq',
-            'unique (name, company_id)',
-            'The service must be unique per company!',
-        )
-    ]
+    _company_name_uniq = models.Constraint(
+        'UNIQUE (name, company_id)',
+        'The service must be unique per company!',
+    )
 
     def is_expired(self):
         if not self.expiration_time:

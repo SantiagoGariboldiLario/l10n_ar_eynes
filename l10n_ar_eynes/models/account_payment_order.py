@@ -1997,13 +1997,10 @@ class AccountPaymentOrder(models.Model):
             'context': ctx,
         }
 
-    _sql_constraints = [
-        (
-            "unique_number",
-            "unique(type, number, journal_id)",
-            _("Number must be unique"),
-        ),
-    ]
+    _unique_number = models.Constraint(
+        "UNIQUE(type, number, journal_id)",
+        _("Number must be unique"),
+    )
 
 
 class AccountPaymentOrderLine(models.Model):
