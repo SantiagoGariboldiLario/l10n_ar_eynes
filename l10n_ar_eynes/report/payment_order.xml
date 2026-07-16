@@ -59,7 +59,7 @@
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <div class="article o_report_layout_standard">
-                    <div t-call="l10n_ar_eynes.weblearns_layout_1">
+                    <t t-call="l10n_ar_eynes.weblearns_layout_1">
                         <div class="page">
                             <!-- Imprimir pago a proveedor o pago de cliente -->
                             <t t-if="o.type == 'payment'">
@@ -649,7 +649,7 @@
                                     Firma y Aclaracion
                                 </div>
                                 <div
-                                    style="text-align: center; font-size: 8pt; padding-left: 4px; padding-right: 4px; margin-top: 30px; margin-bottom: 15px;"
+                                    style="text-align: center; font-size: 8pt; padding-left: 4px; padding-right: 4px; margin-top: 40px; margin-bottom: 15px;"
                                 >
                                     COMPROBANTE NO VALIDO COMO FACTURA. ESTE DOCUMENTO CARECE DE VALIDEZ SI NO SE ENCUENTRA DEBIDAMENTE FIRMADO
                                 </div>
@@ -662,7 +662,7 @@
                                 border-color: gray;
                               }
                         </style>
-                    </div>
+                    </t>
                 </div>
             </t>
         </t>
