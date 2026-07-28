@@ -604,6 +604,17 @@ class AccountTax(models.Model):
             )
         return concepts
 
+    def _get_move_lines_amount(self, payment, move_lines):
+        """Importe contable de las lineas, con su signo original"""
+        return sum(
+            (
+                ml.amount_currency * payment.payment_rate
+                if payment.is_multi_currency
+                else ml.balance
+            )
+            for ml in move_lines
+        )
+
     # pylint: disable-next=dangerous-default-value
     def _compute_base_retention(
         self,
@@ -662,6 +673,12 @@ class AccountTax(models.Model):
             _logger.warning(
                 "No hay importe neto gravado al cual aplicar Retenciones. VERIFICAR FACTURA."
             )
+        # El signo lo tomamos del neto del comprobante y no de cada linea,
+        # asi las lineas negativas (ajustes, redondeos, descuentos) restan
+        # de la base en lugar de sumar
+        move_sign = (
+            -1.0 if self._get_move_lines_amount(payment, mls) < 0 else 1.0
+        )
         retentions = {}
         for ml in mls:
             # Evitamos la linea de la deuda
@@ -763,11 +780,7 @@ class AccountTax(models.Model):
             # ninguna informacion con respecto a Percepciones
 
             # Hacemos el computo de la Retencion por linea de factura
-            base = abs(
-                ml.amount_currency * payment.payment_rate
-                if payment.is_multi_currency
-                else ml.balance
-            )
+            base = self._get_move_lines_amount(payment, ml) * move_sign
             _logger.info(f"Base tomada: {base}")
             if line_type == 'income':
                 base *= -1
