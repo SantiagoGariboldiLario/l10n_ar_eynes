@@ -275,6 +275,22 @@ class RetentionTaxApplication(models.Model):
         date_finish = (dt + relatived(day=31)).strftime(DSDF)
         return date_start, date_finish
 
+    def _get_concept_paid_amount(self, po_line, concept):
+        """Neto del comprobante imputable al concepto, proporcional a lo pagado
+
+        Usa el mismo criterio que la base de la retencion: todas las lineas
+        de producto de las cuentas del concepto, gravadas o no.
+        """
+        move = po_line.move_line_id.move_id
+        concept_lines = move.invoice_line_ids.filtered(
+            lambda ml: ml.account_id in concept.account_ids
+        )
+        # El signo lo tomamos del total del comprobante y no de cada linea,
+        # asi las lineas negativas restan en lugar de sumar
+        amount_with_concept = abs(sum(concept_lines.mapped('balance')))
+        percentage_paid = po_line.amount / po_line.amount_original
+        return round(amount_with_concept * percentage_paid, 2)
+
     def get_period_partner_payments(self, partner, concept, po_date=False):
         AccountPaymentOrder = self.env['account.payment.order']
         date_start, date_finish = self._get_month_date_span_from_date(po_date)
@@ -287,39 +303,16 @@ class RetentionTaxApplication(models.Model):
                 ('date', '<=', date_finish),
             ]
         )
-        debt_moves = prev_pos.mapped('debt_line_ids')
-        income_moves = prev_pos.mapped('income_line_ids')
         # Use the proportional amount of line being paid, searching in
         # the old apo's and gathering the apol related to the untaxed ones
-        debt_untax_mls_ok = []
-        for line in debt_moves:
-            move = line.move_line_id.move_id
-            percentage_paid = line.amount / line.amount_original
-            move_lines_with_concept = move.line_ids.filtered(
-                lambda ml: ml.account_id in concept.account_ids
-                and ml.tax_ids
-                and not ml.tax_line_id
-            )
-            amount_with_concept = sum(
-                move_lines_with_concept.mapped('credit')
-            ) + sum(move_lines_with_concept.mapped('debit'))
-            amount = round(amount_with_concept * percentage_paid, 2)
-            debt_untax_mls_ok.append(amount)
-
-        income_untax_mls_ok = []
-        for line in income_moves:
-            move = line.move_line_id.move_id
-            percentage_paid = line.amount / line.amount_original
-            move_lines_with_concept = move.line_ids.filtered(
-                lambda ml: ml.account_id in concept.account_ids
-                and ml.tax_ids
-                and not ml.tax_line_id
-            )
-            amount_with_concept = sum(
-                move_lines_with_concept.mapped('credit')
-            ) + sum(move_lines_with_concept.mapped('debit'))
-            amount = round(amount_with_concept * percentage_paid, 2)
-            debt_untax_mls_ok.append(amount)
+        debt_untax_mls_ok = [
+            self._get_concept_paid_amount(line, concept)
+            for line in prev_pos.mapped('debt_line_ids')
+        ]
+        income_untax_mls_ok = [
+            self._get_concept_paid_amount(line, concept)
+            for line in prev_pos.mapped('income_line_ids')
+        ]
 
         untaxed_amount = sum(debt_untax_mls_ok) - sum(income_untax_mls_ok)
         untaxed_amount += self.get_period_partner_advance_payments(prev_pos)
