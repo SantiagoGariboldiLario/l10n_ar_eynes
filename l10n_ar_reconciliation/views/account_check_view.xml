@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="account_issued_check_view_form_reconcile" model="ir.ui.view">
+        <field name="name">account.issued.check.view.form.reconcile</field>
+        <field name="model">account.check</field>
+        <field name="inherit_id" ref="l10n_ar_eynes.account_issued_check_view_form" />
+        <field name="arch" type="xml">
+            <xpath
+                expr="//button[@name='%(l10n_ar_eynes.debit_one_check_wizard_action)d']"
+                position="attributes"
+            >
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="account_third_party_check_view_form_reconcile" model="ir.ui.view">
+        <field name="name">account.third.party.check.view.form.reconcile</field>
+        <field name="model">account.check</field>
+        <field name="inherit_id" ref="l10n_ar_eynes.account_third_party_check_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='%(l10n_ar_eynes.accredit_check_action)d']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
