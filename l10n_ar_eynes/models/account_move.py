@@ -1086,7 +1086,7 @@ class AccountMove(models.Model):
                 for application in perception_application_data.keys():
                     application_data = perception_application_data[application]
                     application_data['currency_rate'] = self.currency_rate
-                    base, amount = application.apply_perception(
+                    base, amount, percent = application.apply_perception(
                         application_data
                     )
                     if base > 0 and amount > 0:
@@ -1098,6 +1098,7 @@ class AccountMove(models.Model):
                                 'partner_id': self.partner_id.id,
                                 'base': base,
                                 'amount': amount,
+                                'percent': percent,
                                 'perception_id': application.perception_tax_id.id,
                                 'manual': False,
                                 'tax_app_id': application.id,
@@ -1373,10 +1374,24 @@ class AccountMove(models.Model):
                     _("You must complete supplier move reference.")
                 )
 
+    def validate_currency_rate(self):
+        if (
+            self.is_invoice()
+            and self.currency_id != self.company_currency_id
+            and not self.currency_rate
+        ):
+            raise ValidationError(
+                _(
+                    "The currency rate cannot be 0 for invoices in foreign currency. "
+                    "Please set a valid exchange rate before confirming."
+                )
+            )
+
     def _post(self, soft=True):
         self._required_supplier_move_reference()
         for move in self:
             move.validate_period()
+            move.validate_currency_rate()
             if move.is_sale_document() and move.id:
                 move.validate_denomination()
 
@@ -1453,6 +1468,13 @@ class AccountMove(models.Model):
             if move.is_invoice(include_receipts=True):
                 if 'invoice_currency_rate' not in default:
                     data['invoice_currency_rate'] = move.invoice_currency_rate
+                # [T15263] En la v17 las percepciones de venta se limpian aca
+                # y se recalculan en copy(). En v19 NO se porta: la
+                # recalculacion (add_perceptions) no repone las lineas, asi
+                # que limpiarlas hace que la copia pierda las percepciones.
+                # El arrastre de una alicuota vieja queda cubierto por el
+                # fallback percent or amount/base de
+                # _compute_base_amount_second_cur.
                 data['perception_ids'] = [
                     (command, _id, line_vals)
                     for command, _id, line_vals in data['perception_ids']

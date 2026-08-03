@@ -8,5 +8,5 @@ class SaleAdvancePaymentInv(models.TransientModel):
         invoices = super()._create_invoices(sale_orders)
         for invoice in invoices:
             invoice._onchange_currency_id()
-            invoice.add_perceptions()
+            invoice.with_company(invoice.company_id).add_perceptions()
         return invoices

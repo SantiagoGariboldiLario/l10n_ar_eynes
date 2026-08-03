@@ -193,7 +193,7 @@ class CreateIVARetentionFile(models.TransientModel):
             f.write('\r\n')
 
         f.close()
-        f = open(head_filename, 'r')
+        f = open(head_filename)
 
         name = 'IVA_RET_SUP_%s.csv' % self._get_period_name()
         generated_file_rec = self.env['iva.ret.generated.files'].create(
@@ -357,7 +357,7 @@ class CreateIVAPerceptionFile(models.TransientModel):
 
         f.close()
 
-        f = open(head_filename, 'r')
+        f = open(head_filename)
 
         name = 'IVA_PER_SUP_%s.csv' % self._get_period_name()
         generated_file_rec = self.env['iva.per.generated.files'].create(

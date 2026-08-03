@@ -586,6 +586,15 @@ class AccountTax(models.Model):
             )
             err_title = "Perception Error\n"
         if not concepts:
+            if (
+                retention
+                and retention.retention_type == 'suss'
+                and retention.type_tax_use == 'purchase'
+            ):
+                # Las cuentas sin un concepto SUSS Efectuada asociado se
+                # excluyen del calculo, no se exige que exista una
+                # configuracion
+                return concepts
             tax_name = ''
             if retention:
                 tax_name = retention.name
@@ -616,7 +625,7 @@ class AccountTax(models.Model):
         )
 
     # pylint: disable-next=dangerous-default-value
-    def _compute_base_retention(
+    def _compute_base_retention(  # noqa: C901
         self,
         payment,
         move_line,
@@ -667,6 +676,17 @@ class AccountTax(models.Model):
         )
         parsed_move = self._parse_move_lines(move)
 
+        # [T15410] Base imponible real de la factura discriminada por alicuota
+        # de IVA, para el calculo de retenciones "proportional_vat"
+        # (ej. 100% de la alicuota que corresponda segun el hecho imponible).
+        # Se toma el total de la factura (no se escala por factor_to_pay):
+        # segun la normativa, en pagos parciales la retencion se calcula
+        # sobre el importe total de la operacion, no sobre lo pagado.
+        vat_taxes_for_move = {
+            at.id: {'base_amount': sum(at_mls.mapped('tax_base_amount'))}
+            for at, at_mls in parsed_move.get('tax_lines', {}).items()
+        }
+
         # Por cada linea, nos fijamos la configuracion del producto
         mls = parsed_move.get("concept_lines")
         if not mls:
@@ -685,6 +705,18 @@ class AccountTax(models.Model):
             concepts = self._get_concepts_from_account(
                 ml.account_id, retention=retention
             )
+
+            if (
+                not concepts
+                and retention.retention_type == 'suss'
+                and retention.type_tax_use == 'purchase'
+            ):
+                _logger.info(
+                    f"Cuenta {ml.account_id.name} sin concepto SUSS "
+                    "Efectuada asociado, se excluye del calculo de la "
+                    "retencion."
+                )
+                continue
 
             _logger.info(f"Linea: {ml.name} [{ml.account_id.name}]")
 
@@ -767,9 +799,14 @@ class AccountTax(models.Model):
                 "Tax Application: [id: %s ; reg_code: %s] %s"
                 % (taxapp.id, taxapp.reg_code, taxapp.concept_id.name)
             )
+            # [T15410] El modo "proportional_vat" tambien debe recalcularse en
+            # cada pago parcial (no solo en el primero): la retencion se
+            # calcula siempre sobre el total de la factura, pero se topea
+            # a lo ya retenido en pagos anteriores (ver apply_retention).
             if taxapp.calculation_base not in [
                 'payment_amount',
                 'payment_amount_untaxed',
+                'proportional_vat',
             ] and len(prev_ret_ids):
                 continue
 
@@ -810,12 +847,14 @@ class AccountTax(models.Model):
                     'base_unrec': 0.0,
                     'taxapp': taxapp,
                     'lines': self.env['account.move.line'],
+                    'vat_taxes': {},
                 },
             )
             retentions[key]['base'] += base
             retentions[key]['base_to_pay'] += base_to_pay
             retentions[key]['base_unrec'] += base_unrec
             retentions[key]['lines'] += ml
+            retentions[key]['vat_taxes'] = vat_taxes_for_move
             _logger.info(
                 (
                     "Agregando a la key %s ==> Base: %f Base "
@@ -840,7 +879,9 @@ class AccountTax(models.Model):
         return retentions
 
     def _parse_move_lines(self, move):
-        tax_mls = move.invoice_line_ids.filtered(lambda ml: ml.tax_line_id)
+        # [T15410] Las lineas de impuesto calculado viven en move.line_ids, no
+        # en invoice_line_ids (que solo contiene las lineas de producto/gasto)
+        tax_mls = move.line_ids.filtered(lambda ml: ml.tax_line_id)
         taxed_mls = move.invoice_line_ids.filtered(lambda ml: ml.tax_ids)
         untaxed_mls = move.invoice_line_ids.filtered(
             lambda ml: not (ml.tax_line_id + ml.tax_ids)
@@ -860,12 +901,19 @@ class AccountTax(models.Model):
         #     for at in [at for at in taxed_mls.mapped('tax_ids')]
         # }
 
+        # [T14592] Por defecto la base de retencion toma solo las lineas
+        # gravadas (comportamiento de v15). Cada compania puede volver a
+        # incluir las no gravadas con retention_include_untaxed_lines.
+        concept_lines = taxed_mls
+        if move.company_id.retention_include_untaxed_lines:
+            concept_lines += untaxed_mls
+
         result = {
             'amount_untaxed': amount_untaxed,
             'amount_tax': amount_tax,
             'amount_no_taxed': amount_no_taxed,
             'amount_total': amount_total,
-            'concept_lines': taxed_mls + untaxed_mls,
+            'concept_lines': concept_lines,
             'tax_lines': tax_lines,
         }
         return result
