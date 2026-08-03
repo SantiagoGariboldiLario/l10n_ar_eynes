@@ -52,17 +52,21 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
         )
 
     def create_file(self):
+        # Se filtra por la fecha del comprobante (invoice_date) y no por
+        # perception_tax_line.date: esta última es un snapshot que se toma
+        # una sola vez y puede quedar desactualizado si el comprobante se
+        # refecha después (ver T17401).
         query = (
             'SELECT ptl.id '
             'FROM perception_tax_line ptl '
             'JOIN account_move ai ON ptl.invoice_id = ai.id '
             'JOIN account_tax at ON ptl.perception_id = at.id '
-            'WHERE ptl.date BETWEEN %(date_from)s AND %(date_to)s '
+            'WHERE ai.invoice_date BETWEEN %(date_from)s AND %(date_to)s '
             'AND ai.state IN %(state)s '
             'AND at.inform_arba = True '
             'AND at.retention_type IN %(type)s '
             'AND ai.company_id = %(company_id)s '
-            'ORDER BY ptl.date '
+            'ORDER BY ai.invoice_date '
         )
         cr = self.env.cr
 
@@ -241,12 +245,12 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
 
         lines = PerceptionTaxLine.browse(perception_ids)
         for line in lines:
-            date = str(line.date)
+            date = str(line.invoice_id.invoice_date)
             date = date.split('-')
             date = '{}/{}/{}'.format(date[2], date[1], date[0])
 
             voucher_type = self._get_voucher_type(line.invoice_id)
-            if voucher_type == 'C':
+            if voucher_type in ('C', 'H'):
                 sign = -1
             else:
                 sign = 1
@@ -285,11 +289,22 @@ class ArbaPerceptionExporterWizard(models.TransientModel):
                 base *= invoice_rate
                 amount *= invoice_rate
 
-            aliquot = 0.0
-            if base:
-                aliquot = round(abs(amount / base) * 100, 2)
-            elif line.percent:
-                aliquot = round(abs(line.percent), 2)
+            # Use the exact configured aliquot (line.percent, see [T15263])
+            # instead of deriving it from amount/base: for small USD-converted
+            # perceptions that division introduces rounding drift (e.g. 1.49
+            # instead of the real 1.50), which ARBA then rejects as invalid
+            # (see T15229). line.percent is not set for manual/python-code
+            # perceptions, so fall back to the division in that case.
+            aliquot = line.percent or (
+                round(abs(amount / base) * 100, 2) if base else 0.0
+            )
+
+            # Normalise base to 2 decimals (same precision moneyfmt will write),
+            # then recompute amount so ARBA's check base × alícuota / 100 == amount
+            # always holds exactly.
+            if aliquot and base:
+                base = round(base, 2)
+                amount = round(base * aliquot / 100, 2)
 
             vals = {
                 'cuit': f_cuit,

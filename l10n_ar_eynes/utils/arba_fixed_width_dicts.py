@@ -1,18 +1,18 @@
 HEAD_LINES_RET = {
-    'cuit': {
+    'numero_transaccion': {
         'alignment': 'right',
-        'length': 13,
+        'length': 20,
         'padding': '0',
         'required': True,
         'start_pos': 1,
         'type': 'string',
     },
-    'fecha_retencion': {
-        'alignment': 'left',
-        'length': 10,
-        'padding': ' ',
+    'cuit': {
+        'alignment': 'right',
+        'length': 11,
+        'padding': '0',
         'required': True,
-        'start_pos': 14,
+        'start_pos': 21,
         'type': 'string',
     },
     'numero_sucursal': {
@@ -20,21 +20,13 @@ HEAD_LINES_RET = {
         'length': 5,
         'padding': '0',
         'required': True,
-        'start_pos': 24,
+        'start_pos': 32,
         'type': 'string',
     },
-    'numero_emision': {
-        'alignment': 'right',
-        'length': 8,
-        'padding': '0',
-        'required': True,
-        'start_pos': 29,
-        'type': 'string',
-    },
-    'monto_imponible': {
-        'alignment': 'right',
-        'length': 14,
-        'padding': '0',
+    'fecha_retencion': {
+        'alignment': 'left',
+        'length': 10,
+        'padding': ' ',
         'required': True,
         'start_pos': 37,
         'type': 'string',
@@ -44,23 +36,15 @@ HEAD_LINES_RET = {
         'length': 5,
         'padding': '0',
         'required': True,
-        'start_pos': 51,
+        'start_pos': 47,
         'type': 'string',
     },
-    'importe_retencion': {
+    'monto_imponible': {
         'alignment': 'right',
-        'length': 13,
+        'length': 16,
         'padding': '0',
         'required': True,
-        'start_pos': 56,
-        'type': 'string',
-    },
-    'tipo_operacion': {
-        'alignment': 'right',
-        'length': 1,
-        'padding': ' ',
-        'required': True,
-        'start_pos': 69,
+        'start_pos': 52,
         'type': 'string',
     },
 }

@@ -46,66 +46,94 @@ class PrintCheckWizard(models.TransientModel):
         currency = self.env.company.currency_id
         mapping = {
             'monto': group[0].amount if group[0].amount > 0 else "",
-            'monto_escrito': currency.amount_to_text(group[0].amount)
-            .replace("Peso", "")
-            .strip()
-            if group[0].amount > 0
-            else "",
+            'monto_escrito': (
+                currency.amount_to_text(group[0].amount)
+                .replace("Peso", "")
+                .strip()
+                if group[0].amount > 0
+                else ""
+            ),
             'mes': months.get(group[0].payment_date.month, 'Mes Desconocido')
             or "",
             'año': str(group[0].payment_date.year) or "",
             'dia': str(group[0].payment_date.day) or "",
-            'receptor': group[0].receiving_partner_id.name
-            if group[0].receiving_partner_id
-            else '',
-            'monto2': group[1].amount
-            if len(group) > 1 and group[1].amount > 0
-            else "",
-            'monto_escrito2': currency.amount_to_text(group[1].amount)
-            .replace("Peso", "")
-            .strip()
-            if len(group) > 1 and group[1].amount > 0
-            else "",
-            'mes2': months.get(group[1].payment_date.month, 'Mes Desconocido')
-            if len(group) > 1
-            else "",
+            'receptor': (
+                group[0].receiving_partner_id.name
+                if group[0].receiving_partner_id
+                else ''
+            ),
+            'monto2': (
+                group[1].amount
+                if len(group) > 1 and group[1].amount > 0
+                else ""
+            ),
+            'monto_escrito2': (
+                currency.amount_to_text(group[1].amount)
+                .replace("Peso", "")
+                .strip()
+                if len(group) > 1 and group[1].amount > 0
+                else ""
+            ),
+            'mes2': (
+                months.get(group[1].payment_date.month, 'Mes Desconocido')
+                if len(group) > 1
+                else ""
+            ),
             'año2': str(group[1].payment_date.year) if len(group) > 1 else "",
             'dia2': str(group[1].payment_date.day) if len(group) > 1 else "",
-            'receptor2': group[1].receiving_partner_id.name
-            if len(group) > 1 and group[1].receiving_partner_id
-            else '',
-            'monto3': group[2].amount
-            if len(group) > 2 and group[2].amount > 0
-            else "",
-            'monto_escrito3': currency.amount_to_text(group[2].amount)
-            .replace("Peso", "")
-            .strip()
-            if len(group) > 2 and group[2].amount > 0
-            else "",
-            'mes3': months.get(group[2].payment_date.month, 'Mes Desconocido')
-            if len(group) > 2
-            else "",
+            'receptor2': (
+                group[1].receiving_partner_id.name
+                if len(group) > 1 and group[1].receiving_partner_id
+                else ''
+            ),
+            'monto3': (
+                group[2].amount
+                if len(group) > 2 and group[2].amount > 0
+                else ""
+            ),
+            'monto_escrito3': (
+                currency.amount_to_text(group[2].amount)
+                .replace("Peso", "")
+                .strip()
+                if len(group) > 2 and group[2].amount > 0
+                else ""
+            ),
+            'mes3': (
+                months.get(group[2].payment_date.month, 'Mes Desconocido')
+                if len(group) > 2
+                else ""
+            ),
             'año3': str(group[2].payment_date.year) if len(group) > 2 else "",
             'dia3': str(group[2].payment_date.day) if len(group) > 2 else "",
-            'receptor3': group[2].receiving_partner_id.name
-            if len(group) > 2 and group[2].receiving_partner_id
-            else '',
-            'monto4': group[3].amount
-            if len(group) > 3 and group[3].amount > 0
-            else "",
-            'monto_escrito4': currency.amount_to_text(group[3].amount)
-            .replace("Peso", "")
-            .strip()
-            if len(group) > 3 and group[3].amount > 0
-            else "",
-            'mes4': months.get(group[3].payment_date.month, 'Mes Desconocido')
-            if len(group) > 3
-            else "",
+            'receptor3': (
+                group[2].receiving_partner_id.name
+                if len(group) > 2 and group[2].receiving_partner_id
+                else ''
+            ),
+            'monto4': (
+                group[3].amount
+                if len(group) > 3 and group[3].amount > 0
+                else ""
+            ),
+            'monto_escrito4': (
+                currency.amount_to_text(group[3].amount)
+                .replace("Peso", "")
+                .strip()
+                if len(group) > 3 and group[3].amount > 0
+                else ""
+            ),
+            'mes4': (
+                months.get(group[3].payment_date.month, 'Mes Desconocido')
+                if len(group) > 3
+                else ""
+            ),
             'año4': str(group[3].payment_date.year) if len(group) > 3 else "",
             'dia4': str(group[3].payment_date.day) if len(group) > 3 else "",
-            'receptor4': group[3].receiving_partner_id.name
-            if len(group) > 3 and group[3].receiving_partner_id
-            else '',
+            'receptor4': (
+                group[3].receiving_partner_id.name
+                if len(group) > 3 and group[3].receiving_partner_id
+                else ''
+            ),
         }
 
         return mapping
@@ -134,7 +162,6 @@ class PrintCheckWizard(models.TransientModel):
                     continue
 
                 # 4. Conversión porcentaje → puntos
-                PAGE_WIDTH * item.width / 100
                 h = PAGE_HEIGHT * item.height / 100
                 y = PAGE_HEIGHT - (PAGE_HEIGHT * item.position_y / 100) - h
                 x = PAGE_WIDTH * item.position_x / 100

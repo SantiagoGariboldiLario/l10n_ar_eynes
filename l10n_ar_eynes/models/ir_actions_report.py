@@ -2,7 +2,9 @@ from odoo import _, models
 from odoo.exceptions import UserError
 
 
-class IrActionsReport(models.Model):
+class IrActionsReport(
+    models.Model
+):  # pylint: disable=consider-merging-classes-inherited
     _inherit = 'ir.actions.report'
 
     def _is_retention_certificate_report(self, report_ref):

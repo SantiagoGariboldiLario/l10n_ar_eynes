@@ -90,6 +90,16 @@
                                     <field name="name" />
                                     <field name="reg_code" />
                                 </group>
+                                <field
+                                    name="vat_tax_ids"
+                                    invisible="calculation_base != 'proportional_vat'"
+                                    context="{'default_application_id': id}"
+                                >
+                                    <list editable="bottom">
+                                        <field name="tax_id" />
+                                        <field name="rate" />
+                                    </list>
+                                </field>
                             </form>
                         </field>
                     </group>

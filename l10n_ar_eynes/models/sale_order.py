@@ -59,6 +59,7 @@ class SaleOrder(models.Model):
             currency_rate = 1.0
 
         invoice_vals['currency_rate'] = currency_rate
+        invoice_vals['is_multi_currency'] = currency != company_currency
         return invoice_vals
 
     def action_confirm(self):

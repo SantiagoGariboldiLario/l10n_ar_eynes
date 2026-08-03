@@ -982,9 +982,9 @@ class ArbaA122rDiagnosticWizard(models.TransientModel):
             'params': {
                 'title': _('Diagnóstico ARBA A122R'),
                 'message': message,
-                'type': 'warning'
-                if conflicts or result['skipped']
-                else 'success',
+                'type': (
+                    'warning' if conflicts or result['skipped'] else 'success'
+                ),
                 'sticky': bool(conflicts or result['skipped']),
             },
         }
