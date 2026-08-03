@@ -16,6 +16,7 @@
             </field>
             <xpath expr="//field[@name='currency_id']" position="after">
                 <field name="cbu" />
+                <field name="retention_include_untaxed_lines" />
                 <field name="fcred_cbu_emitter" />
                 <field name="fcred_minimum_amount" />
                 <field name="fcred_is_fce_emitter" />

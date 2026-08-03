@@ -8,7 +8,9 @@ from odoo import api, fields, models
 _logger = logging.getLogger(__name__)
 
 
-class ResCompany(models.Model):
+class ResCompany(
+    models.Model
+):  # pylint: disable=consider-merging-classes-inherited
     _inherit = "res.company"
 
     apartment = fields.Char(
@@ -17,6 +19,14 @@ class ResCompany(models.Model):
         store=True,
     )
     apportionable_vat = fields.Boolean()
+    retention_include_untaxed_lines = fields.Boolean(
+        string="Include untaxed lines in retention base",
+        default=False,
+        help=(
+            "When enabled, retention base parsing also considers untaxed "
+            "invoice lines."
+        ),
+    )
     cbu = fields.Char(
         string='CBU para Facturas A',
         size=32,

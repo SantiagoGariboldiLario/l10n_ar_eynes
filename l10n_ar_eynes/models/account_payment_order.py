@@ -546,11 +546,15 @@ class AccountPaymentOrder(models.Model):
 
             res = self.calculate_single_retention(partner_ret)
 
-            # Generamos la key
+            # [T15410] Generamos la key. Para "proportional_vat" cada factura
+            # genera su propia linea (necesario para el tope/arrastre por
+            # factura), asi que se agrega la factura a la key para no
+            # confundir eso con una duplicacion real.
             for ret in res:
                 key = (
                     ret['retention_id'],
                     ret['concept_id'],
+                    ret.get('invoice_id'),
                 )
                 if key not in retentions:
                     retentions[key] = ret
@@ -709,8 +713,18 @@ class AccountPaymentOrder(models.Model):
                 )
 
                 for (concept, _invoice), vals in retentions.items():
-                    # Agrupamos por concepto y factura
+                    # [T15410] Agrupamos por concepto y factura. El modo
+                    # "proportional_vat" se mantiene separado por factura
+                    # (no se mezcla con otras facturas del mismo pago),
+                    # porque el tope y el arrastre de excedente son
+                    # por factura.
                     key = (retention.id, concept)
+                    if (
+                        vals['taxapp']
+                        and vals['taxapp'].calculation_base
+                        == 'proportional_vat'
+                    ):
+                        key = (retention.id, concept, _invoice)
                     all_concepts.setdefault(
                         key,
                         {
@@ -718,10 +732,20 @@ class AccountPaymentOrder(models.Model):
                             'to_pay': 0.0,
                             'taxapp': vals['taxapp'],
                             'move_lines': self.env['account.move.line'],
+                            'vat_taxes': {},
+                            'invoice': _invoice,
+                            'payment_amount': 0.0,
                         },
                     )
                     all_concepts[key]['base'] += vals['base_unrec']
                     all_concepts[key]['to_pay'] += vals['base_to_pay']
+                    all_concepts[key]['vat_taxes'].update(
+                        vals.get('vat_taxes', {})
+                    )
+                    # Monto bruto que efectivamente se esta pagando ahora de
+                    # esta factura (no la base neta prorrateada), usado
+                    # para topear la retencion "proportional_vat".
+                    all_concepts[key]['payment_amount'] += abs(po_line.amount)
 
                     # Agregamos la move_line.
                     # En realidad nos interesa la voucher_line,
@@ -732,7 +756,11 @@ class AccountPaymentOrder(models.Model):
         # Ahora que tenemos las bases agrupadas por concepto
         # aplicamos el calculo de la retencion
         res = []
-        for (_ret, concept), vals in all_concepts.items():
+        for key, vals in all_concepts.items():
+            # [T15410] key es (retention_id, concept) o, para
+            # "proportional_vat", (retention_id, concept, invoice) -- se
+            # accede por posicion para admitir ambos largos de tupla.
+            concept = key[1]
             taxapp = vals['taxapp']
             if taxapp:
                 concept = concept.id
@@ -769,6 +797,13 @@ class AccountPaymentOrder(models.Model):
                 'base': base,
                 'amount': amount,
                 'base_amount': payment_order_base,
+                # [T15410] Necesario para el tope/arrastre por factura del
+                # modo "proportional_vat" (ver get_invoice_retained_amount).
+                'invoice_id': (
+                    all_concepts[key]['invoice'].id
+                    if all_concepts[key].get('invoice')
+                    else False
+                ),
                 'manual': False,  # La creamos por sistema
                 'retention_id': retention.id,
                 'certificate_no': '',
@@ -2491,13 +2526,21 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 [('payment_order_line_id', 'in', retention_line.ids)]
             )
             for rml in retention_move_lines:
+                # [T14555] En NC el neto debe restar de la base acumulada de
+                # Ganancias; si viene positivo se le invierte el signo.
+                total_without_vat = rml.total_without_vat
+                if (
+                    rml.move_id.move_type in ('in_refund', 'out_refund')
+                    and total_without_vat > 0
+                ):
+                    total_without_vat *= -1
                 move_line_ids.append(
                     self.env['retention.move.line'].create(
                         {
                             'payment_order_line_id': self.id,
                             'move_id': rml.move_id.id,
                             'move_type': rml.move_type,
-                            'total_without_vat': rml.total_without_vat,
+                            'total_without_vat': total_without_vat,
                             # La linea de origen se creo con la OP en borrador,
                             # asi que puede no tener referencia: la tomamos de
                             # la OP a la que pertenece, que ya esta posteada

@@ -103,6 +103,38 @@ class CreateArcibaFiles(models.TransientModel):
             code_fiscal_position = 3
         return code_fiscal_position
 
+    @api.model
+    def _get_arciba_perception_amounts(self, perc):
+        inv = perc.invoice_id
+        if inv.company_id.currency_id == inv.currency_id:
+            return perc.base, perc.amount
+        base = perc.base_secondary_currency
+        amount = perc.amount_secondary_currency
+        if not amount and base and perc.tax_app_id:
+            try:
+                data = perc.tax_app_id.get_perception_data(
+                    perc.partner_id, perc.date
+                )
+                padron_percent = data.get('percent', 0.0)
+                excluded = data.get('excluded_percent', 0.0)
+                effective = round(padron_percent * (1 - excluded), 2)
+                if effective:
+                    amount = round(base * effective / 100, 2)
+            except Exception:
+                # El padron es un respaldo: si no responde o no tiene datos
+                # para el partner, se sigue con el importe convertido tal
+                # cual y la linea se informa igual.
+                logger.warning(
+                    "ARCIBA: no se pudo obtener la alicuota de padron para "
+                    "la percepcion #%s (partner %s, fecha %s); se usa el "
+                    "importe convertido sin ajustar.",
+                    perc.id,
+                    perc.partner_id.display_name,
+                    perc.date,
+                    exc_info=True,
+                )
+        return base, amount
+
     def generate_fw_file(self, data_lst):
         self.ensure_one()
         generated_files_model = self.env['arciba.generated.files']
@@ -419,24 +451,9 @@ class CreateArcibaFiles(models.TransientModel):
                 errors.append(str(e))
                 continue
 
-            # Ret / Per applied
-            # ret_per_applied = perc.amount
-            ret_per_applied = 0
-            if inv.company_id.currency_id == inv.currency_id:
-                ret_per_applied = perc.amount
-            else:
-                # ((perc.amount / perc.base) * 100) redondeado a 2
-                ret_per_applied = (
-                    round(((perc.amount / perc.base) * 100), 2)
-                    / 100
-                    * perc.base_secondary_currency
-                )
-
-            # Ret / Per base
-            base_amount = (
-                perc.base
-                if inv.company_id.currency_id == inv.currency_id
-                else perc.base_secondary_currency
+            # ARCIBA expects perception values in company currency.
+            base_amount, ret_per_applied = self._get_arciba_perception_amounts(
+                perc
             )
 
             # Alicuota
@@ -679,6 +696,47 @@ class CreateArcibaNcFile(models.TransientModel):
         )
 
     @api.model
+    def _get_arciba_perception_amounts(self, perc):
+        inv = perc.invoice_id
+        if inv.company_id.currency_id == inv.currency_id:
+            return perc.base, perc.amount
+        base = perc.base_secondary_currency
+        amount = perc.amount_secondary_currency
+        if not amount and base and perc.tax_app_id:
+            try:
+                data = perc.tax_app_id.get_perception_data(
+                    perc.partner_id, perc.date
+                )
+                padron_percent = data.get('percent', 0.0)
+                excluded = data.get('excluded_percent', 0.0)
+                effective = round(padron_percent * (1 - excluded), 2)
+                if effective:
+                    amount = round(base * effective / 100, 2)
+            except Exception:
+                # El padron es un respaldo: si no responde o no tiene datos
+                # para el partner, se sigue con el importe convertido tal
+                # cual y la linea se informa igual.
+                logger.warning(
+                    "ARCIBA: no se pudo obtener la alicuota de padron para "
+                    "la percepcion #%s (partner %s, fecha %s); se usa el "
+                    "importe convertido sin ajustar.",
+                    perc.id,
+                    perc.partner_id.display_name,
+                    perc.date,
+                    exc_info=True,
+                )
+        return base, amount
+
+    @api.model
+    def _normalize_arciba_number(self, number, length):
+        digits = re.sub(r'\D', '', number or '')
+        if len(digits) > length:
+            # Preserve the document suffix when the source numbering scheme
+            # carries more digits than the official ARCIBA field allows.
+            digits = digits[-length:]
+        return digits
+
+    @api.model
     def _get_inv_data(self, perc_ids):
         """
         Iterates over invoices looking for perceptions and retrieve neccesary data
@@ -711,20 +769,28 @@ class CreateArcibaNcFile(models.TransientModel):
             denomination_name = inv.denomination.upper()
 
             # Internal number
-            internal_number = re.sub(r'\D', '', inv.internal_number)
+            internal_number = self._normalize_arciba_number(
+                inv.internal_number, HEAD_LINES_NC['nro_nc']['length']
+            )
+            if not internal_number:
+                errors.append(
+                    _(
+                        'ptl #%(per_id)s: Unable to build credit note number '
+                        'for %(per_name)s (Invoice ID %(inv_id)s)',
+                        per_id=perc.id,
+                        per_name=perc.name,
+                        inv_id=inv.id,
+                    )
+                )
+                continue
 
-            # Perception base
-            inv_base = (
-                perc.base
-                if inv.company_id.currency_id == inv.currency_id
-                else perc.base_secondary_currency
+            # ARCIBA expects perception values in company currency.
+            inv_base, ret_per_applied = self._get_arciba_perception_amounts(
+                perc
             )
 
             # Type of document partner
             nro_doc_retenido = inv.partner_id.vat.replace('-', '')
-
-            # Ret / Per applied
-            ret_per_applied = perc.amount
 
             # Alicuota
             percentage = round(ret_per_applied / inv_base * 100, 2)
@@ -742,14 +808,15 @@ class CreateArcibaNcFile(models.TransientModel):
 
             # Origin Voucher
             origin_voucher = ''
-            date_val = ''
             # Date original percep
             if inv.associated_inv_ids:
-                origin_voucher = str(
-                    inv.associated_inv_ids[0].name.replace('-', '')[1:]
+                associated_inv = inv.associated_inv_ids[0]
+                origin_voucher = self._normalize_arciba_number(
+                    associated_inv.internal_number or associated_inv.name,
+                    HEAD_LINES_NC['nro_comprobante']['length'],
                 )
                 date_val = time.strptime(
-                    str(inv.associated_inv_ids[0].date), '%Y-%m-%d'
+                    str(associated_inv.invoice_date), '%Y-%m-%d'
                 )  # String(YYYY-MM-DD)->Datetime
             elif inv.inform_period_date_from:
                 origin_voucher = time.strptime(
@@ -759,6 +826,16 @@ class CreateArcibaNcFile(models.TransientModel):
                 origin_voucher = time.strftime(
                     '%d%m%Y', origin_voucher
                 )  # Datetime->String: ddmmyyyy
+            else:
+                errors.append(
+                    _(
+                        'ptl #%(per_id)s: Credit note %(inv_name)s has no '
+                        'associated invoice or informed period.',
+                        per_id=perc.id,
+                        inv_name=inv.display_name,
+                    )
+                )
+                continue
 
             date_val = time.strftime(
                 '%d/%m/%Y', date_val
