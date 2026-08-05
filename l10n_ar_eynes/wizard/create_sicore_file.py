@@ -67,78 +67,6 @@ class CreateSicoreFiles(models.TransientModel):
         self.env.cr.execute("SELECT to_regclass(%s)", (table_name,))
         return bool(self.env.cr.fetchone()[0])
 
-    @api.model
-    def _parse_move_lines(self, move):
-        tax_lines = {}
-        concept_lines = {}
-
-        result = {}
-        amount_untaxed = 0.0
-        amount_tax = 0.0
-        amount_no_taxed = 0.0  # Conceptos no gravados
-        amount_total = 0.0
-
-        for line in move.line_id:
-            if line.account_id.type == 'payable':
-                amount_total = line.credit or line.debit
-                continue
-
-            # Lineas que son base de Impuestos de Percepcion
-            if not line.credit and not line.debit:
-                continue
-
-            if line.tax_code_id.id:
-
-                # Si la linea es una linea de IVA
-                q = (
-                    "SELECT t.id FROM account_tax t "
-                    "JOIN account_tax_code tc ON t.tax_code_id=tc.id "
-                    "WHERE tc.id=%s"
-                )
-
-                self.env.cr.execute(q, (line.tax_code_id.id,))
-
-                # Obtenemos el account_tax correspondiente
-                res = self.env.cr.fetchone()
-                if res:
-                    if res[0] in tax_lines:
-                        tax_lines[res[0]].append(line)
-                    else:
-                        tax_lines[res[0]] = [line]
-
-                    amount_tax += line.debit or line.credit
-                    continue
-
-                # Si la linea es una linea de concepto (producto)
-                # y obtenemos el impuesto asociado
-                q = (
-                    "SELECT t.id FROM account_tax t "
-                    "JOIN account_tax_code tc ON t.base_code_id=tc.id "
-                    "WHERE tc.id=%s"
-                )
-
-                self.env.cr.execute(q, (line.tax_code_id.id,))
-
-                # Obtenemos el account_tax correspondiente
-                res = self.env.cr.fetchone()
-                if res:
-                    if res[0] in concept_lines:
-                        concept_lines[res[0]].append(line)
-                    else:
-                        concept_lines[res[0]] = [line]
-                    amount_untaxed += line.debit or line.credit
-            else:
-                amount_no_taxed += line.debit or line.credit
-
-        # Neto sin impuestos
-        result['amount_untaxed'] = amount_untaxed
-        result['amount_tax'] = amount_tax
-        result['amount_no_taxed'] = amount_no_taxed
-        result['amount_total'] = amount_total
-        result['concept_lines'] = concept_lines
-        result['tax_lines'] = tax_lines
-        return result
-
     def _validate_before_create(self):
         if not self.period_start:
             raise UserError(_("You must enter 'start' date"))
@@ -209,15 +137,10 @@ class CreateSicoreFiles(models.TransientModel):
 
             porcentaje_exclusion = tax_line.excluded_percent * 100
 
-            # TODO: Esto ver si se trata del monto de la Orden de Pago
-            # incluyendo todas las Retenciones o no
-            amount_untaxed = 0.0
-            for move_line in tax_line.move_line_ids:
-                amount_untaxed += self._parse_move_lines(move_line.move_id)[
-                    'amount_untaxed'
-                ]
-
-            amount_total = amount_untaxed  # tax_line.voucher_id.amount
+            # Importe del comprobante: como 'codigo_comprobante' es siempre
+            # '06' (orden de pago), el importe que corresponde informar es el
+            # total de la OP, incluyendo las retenciones.
+            amount_total = tax_line.payment_order_id.amount
             base_amount = tax_line.base_amount
             ret_aplicada = tax_line.amount  # Importe retenido
             nro_cert_propio = re.sub('[-]', '', tax_line.certificate_no or '')
