@@ -478,6 +478,41 @@ class AccountCheck(models.Model):
                 else:
                     check.accredited = False
 
+    def action_check_operation_wizard(self):
+        """Open the debit or the deposit wizard depending on the kind of
+        checks the user selected.
+
+        Own checks are debited and third party checks are deposited, so a
+        single contextual action can serve both check lists. The dispatch is
+        done on the records themselves and not on the calling view because
+        contextual actions are bound to the model, not to the view.
+        """
+        if not self:
+            raise UserError(_("You must select at least one check."))
+
+        internal_types = set(self.mapped('internal_type'))
+        if len(internal_types) > 1:
+            raise UserError(
+                _(
+                    "You cannot mix own checks and third party checks in the "
+                    "same operation. Own checks are debited and third party "
+                    "checks are deposited."
+                )
+            )
+
+        if internal_types.pop() == 'third_party':
+            xml_id = 'l10n_ar_eynes.deposit_checks_wizard_action'
+        else:
+            xml_id = 'l10n_ar_eynes.debit_check_wizard_action'
+
+        action = self.env['ir.actions.act_window']._for_xml_id(xml_id)
+        action['context'] = {
+            'active_model': self._name,
+            'active_ids': self.ids,
+            'active_id': self.ids[0],
+        }
+        return action
+
     def debit_checks(self, date):
         """Method for issued checks debitation."""
         AccountCheckConfig = self.env['account.check.config']

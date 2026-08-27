@@ -75,6 +75,18 @@
                 action="create_checkbook_wizard_action"
                 sequence="2"
             />
+            <menuitem
+                id="debit_checks_menu"
+                name="Debit Checks"
+                action="debit_check_wizard_action"
+                sequence="3"
+            />
+            <menuitem
+                id="deposit_checks_menu"
+                name="Deposit Checks"
+                action="deposit_checks_wizard_action"
+                sequence="4"
+            />
         </menuitem>
     </menuitem>
 

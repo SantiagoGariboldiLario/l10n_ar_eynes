@@ -2693,6 +2693,7 @@ msgstr "Cambiar diario de un asiento publicado"
 #: model:ir.model,name:l10n_ar_eynes.model_account_check
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_payment_order_issued_check_line__issued_check_id
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_change_check_state_wizard__check_id
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__third_party_check_id
 msgid "Check"
 msgstr "Cheque"
 
@@ -3012,6 +3013,17 @@ msgstr "Elija su clave WSAA"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__clearance_move_id
 msgid "Clearance Account Move"
 msgstr "Cuenta de Acreditación"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_deposit_check_wizard__third_party_checks
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_check_deposit_form_view
+msgid "Checks to Deposit"
+msgstr "Cheques a depositar"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.debit_check_form_view
+msgid "Checks to Debit"
+msgstr "Cheques a debitar"
 
 #. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__clearing
@@ -3892,8 +3904,14 @@ msgid "Debit Check"
 msgstr "Debitar cheque"
 
 #. module: l10n_ar_eynes
+#: model:ir.actions.server,name:l10n_ar_eynes.check_operation_server_action
+msgid "Debit / Deposit Checks"
+msgstr "Debitar / Depositar cheques"
+
+#. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.debit_check_wizard_action
 #: model:ir.actions.act_window,name:l10n_ar_eynes.debit_one_check_wizard_action
+#: model:ir.ui.menu,name:l10n_ar_eynes.debit_checks_menu
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.debit_check_form_view
 msgid "Debit Checks"
 msgstr "Debitar cheques"
@@ -4078,6 +4096,12 @@ msgstr "Asiento de depósito"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_check__deposit_slip
 msgid "Deposit Slip"
 msgstr "Boleta de depósito"
+
+#. module: l10n_ar_eynes
+#: model:ir.actions.act_window,name:l10n_ar_eynes.deposit_checks_wizard_action
+#: model:ir.ui.menu,name:l10n_ar_eynes.deposit_checks_menu
+msgid "Deposit Checks"
+msgstr "Depositar cheques"
 
 #. module: l10n_ar_eynes
 #: model:ir.actions.act_window,name:l10n_ar_eynes.deposit_check_action
@@ -10028,7 +10052,6 @@ msgstr "Comienzo del Período"
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner_afip_padron_wizard__state
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_sifere_jurisdiction__state
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_wsaa_certificate_request__state
-#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_issued_check_view_tree
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.account_third_party_check_view_tree
 msgid "State"
 msgstr "Estado"
@@ -12196,3 +12219,21 @@ msgstr "Archivos generados Percepciones IVA"
 #: model:ir.ui.menu,name:l10n_ar_eynes.menu_iva_ret_generated_files
 msgid "iva ret generated files"
 msgstr "Archivos generados Retenciones IVA"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+#: code:addons/l10n_ar_eynes/wizard/debit_check_wizard.py:0
+#: code:addons/l10n_ar_eynes/wizard/deposit_check_wizard.py:0
+msgid "You must select at least one check."
+msgstr "Debe seleccionar al menos un cheque."
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/account_check.py:0
+msgid ""
+"You cannot mix own checks and third party checks in the same operation. Own "
+"checks are debited and third party checks are deposited."
+msgstr ""
+"No puede combinar cheques propios y cheques de terceros en la misma "
+"operación. Los cheques propios se debitan y los de terceros se depositan."
