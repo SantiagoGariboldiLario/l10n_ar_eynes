@@ -201,13 +201,10 @@ class RetentionTaxApplication(models.Model):
         required=True,
     )
 
-    _sql_constraints = [
-        (
-            'concept_activity_uniq',
-            'unique (concept_id, activity_id, retention_tax_id)',
-            'The tuple of Concept, Activity must be unique per Retention !',
-        ),
-    ]
+    _concept_activity_uniq = models.Constraint(
+        'UNIQUE (concept_id, activity_id, retention_tax_id)',
+        'The tuple of Concept, Activity must be unique per Retention !',
+    )
 
     @api.depends('retention_tax_id')
     def _compute_concept_domain(self):

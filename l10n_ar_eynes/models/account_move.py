@@ -425,23 +425,22 @@ class AccountMove(models.Model):
         copy=True,
     )
 
-    _sql_constraints = [
-        (
-            'unique_move',
-            'unique(partner_id, supplier_move_reference, is_debit_note, move_type)',
-            _('This invoice was already entered.'),
-        ),
-        (
-            'unique_name_customers',
-            '',
-            _('Another entry with the same name already exists.'),
-        ),
-        (
-            'unique_name_suppliers',
-            '',
-            _('Another entry with the same name already exists.'),
-        ),
-    ]
+    _unique_move = models.Constraint(
+        'UNIQUE(partner_id, supplier_move_reference, is_debit_note, move_type)',
+        _('This invoice was already entered.'),
+    )
+    _unique_name_customers = models.UniqueIndex(
+        "(name, journal_id, move_type, is_debit_note) "
+        "WHERE (state = 'posted' AND name != '/' "
+        "AND move_type IN ('out_invoice', 'out_refund', 'out_receipt'))",
+        _('Another entry with the same name already exists.'),
+    )
+    _unique_name_suppliers = models.UniqueIndex(
+        "(name, partner_id, journal_id, move_type, is_debit_note) "
+        "WHERE (state = 'posted' AND name != '/' "
+        "AND move_type IN ('in_invoice', 'in_refund', 'in_receipt'))",
+        _('Another entry with the same name already exists.'),
+    )
 
     @api.constrains('invoice_date_due', 'invoice_date')
     def _check_invoice_date_due_after_invoice(self):

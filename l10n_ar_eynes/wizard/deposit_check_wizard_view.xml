@@ -10,12 +10,31 @@
                 <group>
                     <group>
                         <field name="company_id" invisible="1" />
+                        <field name="multichecks" invisible="1" />
                         <field name="bank_account_id" />
                     </group>
                     <group>
                         <field name="date" />
                         <field name="voucher_number" />
                     </group>
+                </group>
+                <separator string="Checks to Deposit" invisible="not multichecks" />
+                <field
+                    name="third_party_checks"
+                    nolabel="1"
+                    invisible="not multichecks"
+                    domain="[('internal_type', '=', 'third_party'), ('third_party_check_state', '=', 'in_wallet')]"
+                >
+                    <list create="false">
+                        <field name="number" />
+                        <field name="source_partner_id" />
+                        <field name="bank_id" />
+                        <field name="payment_date" />
+                        <field name="amount" sum="Total" />
+                    </list>
+                </field>
+                <group invisible="multichecks">
+                    <field name="third_party_check_id" />
                 </group>
                 <footer>
                     <button type="object" name="action_deposit" string="Deposit" class="oe_highlight" />
@@ -26,8 +45,18 @@
         </field>
     </record>
 
+    <!-- Deposit a single check, opened from the third party check form -->
     <record id="deposit_check_action" model="ir.actions.act_window">
         <field name="name">Deposit check</field>
+        <field name="res_model">deposit.check.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'one_check': True}</field>
+    </record>
+
+    <!-- Deposit several checks -->
+    <record id="deposit_checks_wizard_action" model="ir.actions.act_window">
+        <field name="name">Deposit Checks</field>
         <field name="res_model">deposit.check.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
