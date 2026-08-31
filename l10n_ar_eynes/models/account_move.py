@@ -10,7 +10,12 @@ import qrcode
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import file_open
+from odoo.tools import (
+    file_open,
+    float_compare,
+    float_is_zero,
+    float_round,
+)
 from odoo.tools.safe_eval import safe_eval
 from odoo.tools.sql import (
     column_exists,
@@ -1019,6 +1024,114 @@ class AccountMove(models.Model):
         else:
             self._automatic_perception_calculation()
 
+    def _is_historical_refund(self):
+        """La NC/reverso proviene de un comprobante ya emitido."""
+        self.ensure_one()
+        return self.move_type in ('out_refund', 'in_refund') and bool(
+            self.reversed_entry_id
+        )
+
+    def _is_untouched_mirror(self):
+        """True si la NC no modifico las lineas respecto de la factura de
+        origen, es decir sigue siendo un espejo al 100%."""
+        self.ensure_one()
+        original = self.reversed_entry_id
+        if not original:
+            return False
+        currency = self.currency_id or self.company_id.currency_id
+        rounding = currency.rounding or 0.01
+        mine = self.invoice_line_ids
+        theirs = original.invoice_line_ids
+        if len(mine) != len(theirs):
+            return False
+        return (
+            float_compare(
+                abs(sum(mine.mapped('price_subtotal'))),
+                abs(sum(theirs.mapped('price_subtotal'))),
+                precision_rounding=rounding,
+            )
+            == 0
+        )
+
+    def _perception_fingerprint(self):
+        """Huella de las percepciones actuales, para detectar si un recalculo
+        realmente cambia algo."""
+        self.ensure_one()
+        currency = self.currency_id or self.company_id.currency_id
+        rounding = currency.rounding or 0.01
+        return sorted(
+            (
+                line.perception_id.id,
+                line.concept_id.id,
+                float_round(abs(line.base or 0.0), precision_rounding=rounding),
+                float_round(
+                    abs(line.amount or 0.0), precision_rounding=rounding
+                ),
+            )
+            for line in self.perception_ids
+        )
+
+    def _reverse_perception_ratio(self, original_line):
+        """Proporcion de la factura de origen que esta acreditando la NC,
+        medida con la misma base de calculo que uso la percepcion original."""
+        self.ensure_one()
+        original = self.reversed_entry_id
+        application = original_line.tax_app_id
+        rate = self.currency_rate or 1.0
+        if application:
+            base_now = application.compute_base(self.invoice_line_ids, rate)
+            base_origin = application.compute_base(
+                original.invoice_line_ids, rate
+            )
+        else:
+            # Percepciones por codigo python o de carga manual: no hay
+            # aplicacion con base configurada, usamos el neto del comprobante.
+            base_now = sum(self.invoice_line_ids.mapped('price_subtotal'))
+            base_origin = sum(
+                original.invoice_line_ids.mapped('price_subtotal')
+            )
+        if not base_origin:
+            return 0.0
+        return min(abs(base_now) / abs(base_origin), 1.0)
+
+    def _build_reverse_perception_lines(self):
+        """Percepciones de la NC calculadas a partir del comprobante de origen,
+        sin consultar el padron vigente."""
+        self.ensure_one()
+        currency = self.currency_id or self.company_id.currency_id
+        rounding = currency.rounding or 0.01
+        untouched = self._is_untouched_mirror()
+        new_lines = self.env['perception.tax.line']
+        for original_line in self.reversed_entry_id.perception_ids.sorted('id'):
+            base = abs(original_line.base or 0.0)
+            amount = abs(original_line.amount or 0.0)
+            if not untouched:
+                ratio = self._reverse_perception_ratio(original_line)
+                base = float_round(base * ratio, precision_rounding=rounding)
+                amount = float_round(
+                    amount * ratio, precision_rounding=rounding
+                )
+            if float_is_zero(amount, precision_rounding=rounding):
+                continue
+            new_lines += self.env['perception.tax.line'].new(
+                {
+                    'name': original_line.name,
+                    'date': self.invoice_date,
+                    'invoice_id': self.id,
+                    'partner_id': self.partner_id.id,
+                    'base': base,
+                    'amount': amount,
+                    'percent': original_line.percent,
+                    'perception_id': original_line.perception_id.id,
+                    'manual': original_line.manual,
+                    'tax_app_id': original_line.tax_app_id.id,
+                    'reg_code': original_line.reg_code,
+                    'concept_id': original_line.concept_id.id,
+                    'state_id': original_line.state_id.id,
+                }
+            )
+        return new_lines
+
     @api.onchange(
         'invoice_date',
         'currency_id',
@@ -1027,6 +1140,22 @@ class AccountMove(models.Model):
     )
     def _automatic_perception_calculation(self):
         if self.is_sale_document() and not self.disable_perceptions:
+            if self._is_historical_refund():
+                # NC generada desde una factura: las percepciones se heredan
+                # del comprobante de origen, sin volver a consultar el padron
+                # vigente ni recalcular por codigo. Si la NC no modifico las
+                # lineas es un espejo exacto; si es parcial, se prorratea.
+                previous = self._perception_fingerprint()
+                self.perception_ids = self._build_reverse_perception_lines()
+                if self._perception_fingerprint() == previous:
+                    # Ya tenia exactamente estas percepciones (espejo recien
+                    # creado por el reverso); no hay nada que actualizar.
+                    return
+                self.invoice_line_ids.link_perception_to_move_lines()
+                self.with_context(
+                    skip_invoice_line_sync=True
+                )._update_perception_move_line_amount()
+                return
             if self.partner_id:
                 # Se agrupan las líneas de la factura sobre las cuales se aplican las percepciones
                 # que corresponden (según concepto --> cuenta contable / posición fiscal --> partner)
@@ -1167,10 +1296,17 @@ class AccountMove(models.Model):
 
     @api.onchange('perception_ids', 'invoice_line_ids')
     def _onchange_perception_ids(self):
-        if self.is_purchase_document(include_receipts=True) or (
-            self.is_sale_document(include_receipts=True)
-            and self.disable_perceptions
+        if (
+            self.is_purchase_document(include_receipts=True)
+            or (
+                self.is_sale_document(include_receipts=True)
+                and self.disable_perceptions
+            )
+            or self._is_historical_refund()
         ):
+            # En una NC el importe de la percepcion no se deduce del porcentaje
+            # del impuesto (viene de la alicuota historica del comprobante de
+            # origen), asi que el apunte contable se toma de la linea.
             base = self._get_perception_manual_base()
             if base > 0:
                 self.perception_ids.autocomplete_base_amount(base)
@@ -1796,8 +1932,10 @@ class AccountMove(models.Model):
                         'manual': p.manual,
                         'name': p.name,
                         'partner_id': p.partner_id.id,
+                        'percent': p.percent,
                         'perception_id': p.perception_id.id,
                         'reg_code': p.reg_code,
+                        'state_id': p.state_id.id,
                         'tax_app_id': p.tax_app_id.id,
                     },
                 )
