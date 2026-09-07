@@ -170,22 +170,22 @@
         <field name="name">account.payment.order.retention.line.view.tree</field>
         <field name="model">account.payment.order.retention.line</field>
         <field name="arch" type="xml">
-            <list>
+            <list editable="bottom">
                 <field name="date" />
                 <field name="date_applied" />
-                <field name="reg_code" />
-                <field name="name" />
-                <field name="partner_id" />
-                <field name="vat" />
+                <field name="reg_code" readonly="1" />
+                <field name="name" readonly="1" />
+                <field name="partner_id" readonly="1" />
+                <field name="vat" readonly="1" />
                 <field name="certificate_no" />
-                <field name="voucher_number" />
+                <field name="voucher_number" readonly="1" />
                 <field name="concept_id" />
-                <field name="invoice_id" />
-                <field name="base" sum="Base Total" />
-                <field name="amount" sum="Amount Total" />
-                <field name="unlinkable" />
-                <field name="state_id" />
-                <field name="company_id" groups="base.group_multi_company" />
+                <field name="invoice_id" readonly="1" />
+                <field name="base" sum="Base Total" readonly="1" />
+                <field name="amount" sum="Amount Total" readonly="1" />
+                <field name="unlinkable" readonly="1" />
+                <field name="state_id" readonly="1" />
+                <field name="company_id" groups="base.group_multi_company" readonly="1" />
                 <field name="account_id" invisible="1" />
                 <field name="payment_order_id" invisible="1" />
             </list>

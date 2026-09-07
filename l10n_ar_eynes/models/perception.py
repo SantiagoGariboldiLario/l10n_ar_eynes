@@ -24,6 +24,7 @@ class PerceptionTaxLine(models.Model):
         size=64,
         compute='_compute_name',
         store=True,
+        readonly=False,
         copy=True,
     )
     date = fields.Date(index=True)
@@ -72,8 +73,9 @@ class PerceptionTaxLine(models.Model):
     state_id = fields.Many2one(
         'res.country.state',
         string="State/Province",
-        related='perception_id.state_id',
+        compute='_compute_state_id',
         store=True,
+        readonly=False,
     )
     aml_id = fields.Many2one(
         'account.move.line',
@@ -117,6 +119,11 @@ class PerceptionTaxLine(models.Model):
     def _compute_name(self):
         for rec in self:
             rec.name = '' if not rec.perception_id else rec.perception_id.name
+
+    @api.depends('perception_id')
+    def _compute_state_id(self):
+        for rec in self:
+            rec.state_id = rec.perception_id.state_id
 
     @api.depends('invoice_id')
     def _compute_perception_id_domain(self):
