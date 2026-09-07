@@ -583,7 +583,8 @@
                                             <field name="retention_id" domain="retention_id_domain" />
                                             <field name="certificate_no" required="True" />
                                             <field name="reg_code" />
-                                            <field name="concept_id" />
+                                            <field name="require_concept" invisible="1" />
+                                            <field name="concept_id" required="require_concept" />
                                             <field name="date_applied" />
                                             <field name="date" />
                                             <label
