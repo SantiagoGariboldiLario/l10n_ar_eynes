@@ -8978,6 +8978,32 @@ msgid "Request Information"
 msgstr "Informacion de solicitud"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_config_settings__require_perception_concept
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
+msgid "Require Perception Concept"
+msgstr "Requerir Concepto de Percepción"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
+msgid "Require Perception Concept Field in perception Supplier Invoice Lines."
+msgstr ""
+"Requerir Concepto de Percepción en las líneas de percepciones de la Factura "
+"de Proveedor."
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_config_settings__require_retention_concept
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
+msgid "Require Retention Concept"
+msgstr "Requerir Concepto de Retención"
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.res_config_settings_view_form_inherit_l10n_ar_eynes
+msgid "Require Retention Concept Field in retention Customer Payment Lines."
+msgstr ""
+"Requerir Concepto de Retención en las líneas de retenciones en Pagos a "
+"Clientes."
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_config_settings__special_partner_required_fields
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_partner__is_checked_special_partner_required_fields
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_users__is_checked_special_partner_required_fields

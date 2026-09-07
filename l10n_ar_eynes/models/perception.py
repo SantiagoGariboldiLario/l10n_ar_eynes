@@ -85,7 +85,14 @@ class PerceptionTaxLine(models.Model):
     tax_app_id = fields.Many2one(
         'perception.tax.application', 'Tax Application'
     )
-    concept_id = fields.Many2one('perception.concept', 'Concept')
+    concept_id = fields.Many2one('perception.concept', string='Concept')
+    require_concept = fields.Boolean(
+        default=lambda self: bool(
+            self.env['ir.config_parameter']
+            .sudo()
+            .get_param('l10n_ar_eynes.require_perception_concept')
+        )
+    )
     percent = fields.Float(
         string='Alícuota',
         digits='Account',
