@@ -8,6 +8,7 @@
             <form string="Check Printing Wizard">
                 <sheet>
                     <group>
+                        <field name="company_id" groups="base.group_multi_company" />
                         <field name="checkbook_id" />
                         <field name="check_template_id" />
                         <field name="check_ids" />

@@ -1,4 +1,4 @@
-from odoo import models, fields, _
+from odoo import api, models, fields, _
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
@@ -11,10 +11,16 @@ class PrintCheckWizard(models.TransientModel):
     _name = 'print.check.wizard'
     _description = 'Print Check Wizard'
 
+    company_id = fields.Many2one(
+        'res.company',
+        string='Company',
+        required=True,
+        default=lambda self: self.env.company,
+    )
     checkbook_id = fields.Many2one(
         'account.payment.method.line',
         string='Checkbook',
-        domain=[('code', '=', 'checks')],
+        domain="[('code', '=', 'checks'), ('company_id', '=', company_id)]",
     )
     check_template_id = fields.Many2one(
         'sign.oca.template', string='Check Template'
@@ -22,8 +28,18 @@ class PrintCheckWizard(models.TransientModel):
     check_ids = fields.Many2many(
         'account.check',
         string='Checks to Print',
-        domain="[('checkbook_id', '=', checkbook_id),('receiving_partner_id','!=', False),('check_printed','=',False)]",
-    )  # [('checkbook_id', '=', checkbook_id)]
+        domain="""[
+            ('checkbook_id', '=', checkbook_id),
+            ('company_id', '=', company_id),
+            ('receiving_partner_id', '!=', False),
+            ('check_printed', '=', False),
+        ]""",
+    )
+
+    @api.onchange('company_id')
+    def _onchange_company_id(self):
+        self.checkbook_id = False
+        self.check_ids = False
 
     def _mapping_checks_value(self, group):
         """
@@ -43,7 +59,7 @@ class PrintCheckWizard(models.TransientModel):
             11: 'Noviembre',
             12: 'Diciembre',
         }
-        currency = self.env.company.currency_id
+        currency = self.company_id.currency_id
         mapping = {
             'monto': group[0].amount if group[0].amount > 0 else "",
             'monto_escrito': (
