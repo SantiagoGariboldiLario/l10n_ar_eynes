@@ -381,7 +381,11 @@
                                 string="Perception Type"
                                 domain="perception_id_domain"
                             />
-                            <field name="concept_id" />
+                            <field name="require_concept" column_invisible="True" />
+                            <field
+                                name="concept_id"
+                                required="require_concept and parent.move_type in ('in_invoice', 'in_refund')"
+                            />
                             <field name="base" />
                             <field name="amount" />
                             <field

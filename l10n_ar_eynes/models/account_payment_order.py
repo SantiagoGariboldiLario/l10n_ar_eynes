@@ -2431,6 +2431,13 @@ class AccountPaymentOrderRetentionLine(models.Model):
         digits='Account',
         compute='_compute_total_retention_move_lines',
     )
+    require_concept = fields.Boolean(
+        default=lambda self: bool(
+            self.env['ir.config_parameter']
+            .sudo()
+            .get_param('l10n_ar_eynes.require_retention_concept')
+        )
+    )
     concept_id = fields.Many2one(
         comodel_name='retention.concept',
         string='Concept',
