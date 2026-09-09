@@ -884,7 +884,8 @@ class AccountTax(models.Model):
         tax_mls = move.line_ids.filtered(lambda ml: ml.tax_line_id)
         taxed_mls = move.invoice_line_ids.filtered(lambda ml: ml.tax_ids)
         untaxed_mls = move.invoice_line_ids.filtered(
-            lambda ml: not (ml.tax_line_id + ml.tax_ids)
+            lambda ml: ml.display_type == 'product'
+            and not (ml.tax_line_id + ml.tax_ids)
         )
 
         amount_tax = sum(ml.price_subtotal for ml in tax_mls)
@@ -901,12 +902,25 @@ class AccountTax(models.Model):
         #     for at in [at for at in taxed_mls.mapped('tax_ids')]
         # }
 
-        # [T14592] Por defecto la base de retencion toma solo las lineas
-        # gravadas (comportamiento de v15). Cada compania puede volver a
-        # incluir las no gravadas con retention_include_untaxed_lines.
+        # [T14593] Por defecto la base de retencion toma solo las lineas
+        # gravadas (comportamiento de v15): en los comprobantes migrados
+        # entraban tambien las lineas contables tecnicas del asiento y la base
+        # quedaba inflada. Cada compania puede volver a incluir las no
+        # gravadas con retention_include_untaxed_lines.
+        # (Los commits de ese cambio quedaron rotulados [T14592] por error.)
         concept_lines = taxed_mls
         if move.company_id.retention_include_untaxed_lines:
             concept_lines += untaxed_mls
+        # [T16373] Si el comprobante no discrimina ningun impuesto (Factura C,
+        # notas de debito/credito sin IVA, comprobantes de exportacion), la
+        # retencion se calcula igual sobre las lineas no gravadas: no hay
+        # "linea gravada" que tomar, pero la operacion sigue estando sujeta a
+        # retencion. Se limita a comprobantes para no reabrir T14593: en los
+        # asientos manuales (migracion de saldos) todas las lineas caen en
+        # invoice_line_ids, y ahi la unica linea que debe entrar a la base se
+        # marca con un impuesto dummy.
+        elif not taxed_mls and move.is_invoice(include_receipts=True):
+            concept_lines = untaxed_mls
 
         result = {
             'amount_untaxed': amount_untaxed,
