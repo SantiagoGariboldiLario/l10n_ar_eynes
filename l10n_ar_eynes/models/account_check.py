@@ -77,7 +77,11 @@ class AccountCheck(models.Model):
     def _get_default_journal(self):
         if self._context.get('default_internal_type') == 'third_party':
             return self.env['account.journal'].search(
-                [('type', '=', 'third_party_checks')]
+                [
+                    ('type', '=', 'third_party_checks'),
+                    ('company_id', '=', self.env.company.id),
+                ],
+                limit=1,
             )
         return False
 
