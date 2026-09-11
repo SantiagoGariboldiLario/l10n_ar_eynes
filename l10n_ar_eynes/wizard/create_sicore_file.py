@@ -40,6 +40,14 @@ from ..utils.sicore_fixed_width_dicts import (
 
 _logger = logging.getLogger(__name__)
 
+# Tabla de comprobantes de SICORE, para el comprobante que origina la
+# percepcion: 01 Factura, 02 Nota de debito, 03 Nota de credito.
+PERCEPTION_VOUCHER_CODES = {'b': 1, 'dn': 2, 'cn': 3}
+
+# Codigo de condicion usado cuando la posicion fiscal del cliente no esta
+# mapeada en la configuracion de SICORE (01: Inscripto).
+DEFAULT_CONDITION_CODE = '01'
+
 
 class CreateSicoreFiles(models.TransientModel):
     _name = 'create.sicore.files'
@@ -56,6 +64,14 @@ class CreateSicoreFiles(models.TransientModel):
         'Date of presentation', default=fields.Date.today()
     )
     rrhh_ret_profit_code = fields.Char('RRHH Rule Code', default='H348')
+    include_vat_perceptions = fields.Boolean(
+        'Include VAT perceptions',
+        default=False,
+        help="Include the VAT perceptions applied to customers in the "
+        "generated file, informed as operation code 2 (perception).\n"
+        "Requires the AFIP retention code to be set on the journal linked "
+        "to the perception tax.",
+    )
 
     @api.model
     def _default_company_ids(self):
@@ -77,7 +93,9 @@ class CreateSicoreFiles(models.TransientModel):
         return "{:,.2f}".format(value).replace(",", "").replace(".", ",")
 
     @api.model
-    def _generate_retention_file(self, retention_ids, exterior=False):
+    def _generate_retention_file(
+        self, retention_ids, exterior=False, perception_ids=None
+    ):
         head_file_errors = []
         head_regs = []
         fixed_width = (
@@ -208,6 +226,15 @@ class CreateSicoreFiles(models.TransientModel):
             fixed_width.update(**line)
             head_regs.append(fixed_width.line)
 
+        # Las percepciones se informan siempre en el archivo local: el layout
+        # de exterior pide datos del ordenante que la percepcion no tiene.
+        if is_local and perception_ids:
+            perception_errors, perception_regs = self._get_perception_regs(
+                fixed_width, perception_ids
+            )
+            head_file_errors += perception_errors
+            head_regs += perception_regs
+
         # Chequeamos si hubo errores
         if len(head_file_errors):
             return head_file_errors, False
@@ -262,6 +289,161 @@ class CreateSicoreFiles(models.TransientModel):
 
         return [], True
 
+    def _search_perception_ids(self):
+        """Percepciones de IVA efectuadas a clientes dentro del periodo.
+
+        Se filtra por la fecha del comprobante (invoice_date) y no por
+        perception_tax_line.date: esta ultima es un snapshot que se toma una
+        sola vez y puede quedar desactualizado si el comprobante se refecha
+        despues (ver T17401).
+        """
+        query = (
+            "SELECT ptl.id "
+            "FROM perception_tax_line ptl "
+            "JOIN account_move am ON ptl.invoice_id = am.id "
+            "JOIN account_tax at ON ptl.perception_id = at.id "
+            "WHERE am.invoice_date BETWEEN %(date_from)s AND %(date_to)s "
+            "AND am.state = 'posted' "
+            "AND at.retention_type = 'vat' AND at.type_tax_use = 'sale' "
+            "AND am.company_id = %(company_id)s "
+            "ORDER BY am.invoice_date"
+        )
+        self.env.cr.execute(
+            query,
+            {
+                'date_from': self.period_start,
+                'date_to': self.period_end,
+                'company_id': self.company_id.id,
+            },
+        )
+        return [row[0] for row in self.env.cr.fetchall()]
+
+    def _get_perception_afip_code(self, perception_tax):
+        """Codigo de impuesto SICORE, tomado del diario de la percepcion."""
+        journal = self.env['account.journal'].search(
+            [
+                ('tax_id', '=', perception_tax.id),
+                ('company_id', '=', self.company_id.id),
+            ],
+            limit=1,
+        )
+        return int(journal.afip_code) if journal.afip_code else 0
+
+    def _get_sicore_condition_code(self, partner):
+        """Codigo de condicion del sujeto percibido segun su posicion fiscal.
+
+        Usa el mapeo de Contabilidad->Configuracion->SICORE. Si la posicion
+        fiscal del cliente no esta mapeada, se informa como inscripto.
+        """
+        fiscal_position = partner.property_account_position_id
+        sicore_fiscal_position = self.env['sicore.fiscal.position'].search(
+            [('fiscal_position', '=', fiscal_position.id)], limit=1
+        )
+        code = sicore_fiscal_position.code or DEFAULT_CONDITION_CODE
+        return code.zfill(2)
+
+    def _get_perception_regs(self, fixed_width, perception_ids):
+        """Arma los registros SICORE de las percepciones de IVA efectuadas.
+
+        Devuelve (errores, registros). Los errores no cortan la generacion:
+        se acumulan para mostrarlos juntos en el recuadro de validacion del
+        asistente y que el usuario corrija toda la configuracion de una vez.
+        """
+        errors = []
+        regs = []
+        afip_code_by_tax = {}
+
+        perception_lines = self.env['perception.tax.line'].browse(
+            perception_ids
+        )
+        for perception in perception_lines:
+            invoice = perception.invoice_id
+            line_ident = 'Perception Tax Line #%s of Invoice %s' % (
+                perception.id,
+                invoice.name or invoice.id,
+            )
+            _logger.info(line_ident)
+
+            codigo_comprobante = PERCEPTION_VOUCHER_CODES.get(
+                invoice.voucher_type_id.doc_type
+            )
+            if not codigo_comprobante:
+                errors.append(
+                    _('%s: Voucher type not found on the invoice.') % line_ident
+                )
+                continue
+
+            numero_comprobante = re.sub(r"\D", "", invoice.name or '')
+            if not numero_comprobante:
+                errors.append(_('%s: Invoice number not found.') % line_ident)
+                continue
+
+            partner = perception.partner_id
+            tipo_doc_percibido = partner.document_type_id.afip_code
+            nro_doc_percibido = partner.vat
+            if not tipo_doc_percibido or not nro_doc_percibido:
+                errors.append(
+                    _('%s: Document type or VAT not found for partner %s.')
+                    % (line_ident, partner.name)
+                )
+                continue
+
+            perception_tax = perception.perception_id
+            if perception_tax.id not in afip_code_by_tax:
+                afip_code_by_tax[perception_tax.id] = (
+                    self._get_perception_afip_code(perception_tax)
+                )
+            codigo_impuesto = afip_code_by_tax[perception_tax.id]
+            if not codigo_impuesto:
+                errors.append(
+                    _(
+                        "%s: Add field 'AFIP retention code' to the journal "
+                        "of the perception '%s'\n"
+                        "(Accounting->Configuration->Journals)"
+                    )
+                    % (line_ident, perception_tax.name)
+                )
+                continue
+
+            reg_code = (
+                perception.reg_code
+                or perception.tax_app_id.reg_code
+                or perception.concept_id.code
+            )
+            reg_code = str(reg_code)[:3] if reg_code else 0
+
+            date_invoice = invoice.invoice_date.strftime('%d/%m/%Y')
+
+            line = {
+                'codigo_comprobante': codigo_comprobante,
+                'fecha_emision': date_invoice,
+                'numero_comprobante': int(numero_comprobante),
+                'monto_comprobante': self._format_monetary(
+                    invoice.amount_total
+                ),
+                'codigo_impuesto': codigo_impuesto,
+                'codigo_regimen': reg_code,
+                'codigo_operacion': 2,  # Cod. Percepciones
+                'base_calculo': self._format_monetary(perception.base),
+                # La percepcion se practica al emitir el comprobante.
+                'fecha_emision_retenc': date_invoice,
+                'codigo_condicion': self._get_sicore_condition_code(partner),
+                'sujetos_suspend': '',  # Beneficiarios en el exterior
+                'importe_retencion': self._format_monetary(perception.amount),
+                # Las percepciones no manejan certificado de exclusion.
+                'porcentaje_exclusion': self._format_monetary(0),
+                'fecha_emision_boletin': '',
+                'tipo_documento_retenido': str(tipo_doc_percibido),
+                'numero_documento_retenido': nro_doc_percibido,
+                'numero_certificado_original': '',
+            }
+
+            # Apendeamos el registro
+            fixed_width.update(**line)
+            regs.append(fixed_width.line)
+
+        return errors, regs
+
     def create_files(self):
         self._validate_before_create()
 
@@ -288,19 +470,28 @@ class CreateSicoreFiles(models.TransientModel):
             },
         )
         res = cr.fetchall()
-        if not len(res):
-            raise UserError(
-                _(
-                    """Export Error
+        retention_ids = [retention_ids[0] for retention_ids in res]
+
+        perception_ids = []
+        if self.include_vat_perceptions:
+            perception_ids = self._search_perception_ids()
+
+        if not retention_ids and not perception_ids:
+            message = _(
+                """Export Error
                     Applicable Retentions for export not found.
                     HINT:
                     The retention is of type vat or profit ?"""
-                )
             )
+            if self.include_vat_perceptions:
+                message += _(
+                    "\nNo VAT perceptions were found either. "
+                    "Are the invoices with perceptions posted?"
+                )
+            raise UserError(message)
 
-        retention_ids = [retention_ids[0] for retention_ids in res]
         retention_errors_local, success_local = self._generate_retention_file(
-            retention_ids
+            retention_ids, perception_ids=perception_ids
         )
         retention_errors_ext, success_ext = self._generate_retention_file(
             retention_ids, exterior=True

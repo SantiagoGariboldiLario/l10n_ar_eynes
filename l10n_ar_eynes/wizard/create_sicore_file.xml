@@ -17,6 +17,7 @@
                         <field name="presentation_date" />
                         <field name="company_id_domain" invisible="True" />
                         <field name="company_id" domain="company_id_domain" />
+                        <field name="include_vat_perceptions" />
                     </group>
                 </group>
                 <separator string="Validation Errors" colspan="4" />
