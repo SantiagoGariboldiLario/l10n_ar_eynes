@@ -234,9 +234,14 @@ class AccountCheck(models.Model):
                 )
             )
 
-        issued_checks = self.filtered(lambda c: c.internal_type == 'issued')
-        if issued_checks:
-            raise UserError(_("Check Error! You cannot delete an Issued Check"))
+        undeletable_issued = self.filtered(
+            lambda c: c.internal_type == 'issued'
+            and c.issued_check_state != 'draft'
+        )
+        if undeletable_issued:
+            raise UserError(
+                _("Check Error! You cannot delete a check that is not in Draft")
+            )
 
     def cancel_check(self, reason):
         """
