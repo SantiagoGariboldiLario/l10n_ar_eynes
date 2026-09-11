@@ -851,10 +851,17 @@ class AccountMove(models.Model):
     @api.onchange('currency_id')
     def _inverse_currency_id(self):
         currency_has_change = self._origin.currency_id != self.currency_id
+        multi_currency_is_stale = any(
+            move.is_multi_currency
+            != bool(
+                move.currency_id
+                and move.currency_id != move.env.company.currency_id
+            )
+            for move in self
+        )
         super()._inverse_currency_id()
-        if (
-            not self.env.context.get('force_rate', False)
-            and currency_has_change
+        if not self.env.context.get('force_rate', False) and (
+            currency_has_change or multi_currency_is_stale
         ):
             for move in self:
                 move._onchange_currency_id()
