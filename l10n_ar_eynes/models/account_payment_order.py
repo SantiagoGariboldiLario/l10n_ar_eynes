@@ -2882,13 +2882,13 @@ class AccountPaymentOrderConceptLine(models.Model):
     @api.onchange('journal_id')
     def change_journal_id(self):
         if self.journal_id:
-            self.account_id = self.journal_id.loss_account_id.id
+            self.account_id = self.journal_id.suspense_account_id.id
 
     @api.onchange('account_id')
     def change_account_id(self):
         if self.account_id:
             journal_ids = self.env['account.journal'].search(
-                [('loss_account_id', '=', self.account_id.id)]
+                [('suspense_account_id', '=', self.account_id.id)]
             )
             self.journal_id = journal_ids and journal_ids[0] or False
 
