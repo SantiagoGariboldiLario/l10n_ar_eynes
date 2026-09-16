@@ -279,12 +279,17 @@ class RetentionTaxApplication(models.Model):
     def _get_concept_paid_amount(self, po_line, concept):
         """Neto del comprobante imputable al concepto, proporcional a lo pagado
 
-        Usa el mismo criterio que la base de la retencion: todas las lineas
-        de producto de las cuentas del concepto, gravadas o no.
+        Usa el mismo criterio que la base de la retencion: delega en
+        _parse_move_lines en vez de filtrar por cuenta, para que los dos
+        momentos en que se mide el comprobante (la base del pago y los pagos
+        previos del mes) tomen siempre las mismas lineas.
+
         """
         move = po_line.move_line_id.move_id
-        concept_lines = move.invoice_line_ids.filtered(
-            lambda ml: ml.account_id in concept.account_ids
+        concept_lines = (
+            self.env['account.tax']
+            ._parse_move_lines(move)['concept_lines']
+            .filtered(lambda ml: ml.account_id in concept.account_ids)
         )
         # El signo lo tomamos del total del comprobante y no de cada linea,
         # asi las lineas negativas restan en lugar de sumar
