@@ -30,6 +30,9 @@
         'l10n_ar_eynes',
         'account_accountant',
     ],
+    'data': [
+        'views/bank_rec_widget_views.xml',
+    ],
     'assets': {
         'web.assets_backend': [
             'l10n_ar_eynes_accountant/static/src/js/bank_rec_reconcile_filters.js',
