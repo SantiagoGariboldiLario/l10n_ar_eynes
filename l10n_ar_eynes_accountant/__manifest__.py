@@ -20,7 +20,7 @@
 
 {
     'name': 'Localizacion AR - Contabilidad Enterprise',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes/',
     'license': 'AGPL-3',
