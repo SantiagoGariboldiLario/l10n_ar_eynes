@@ -298,13 +298,16 @@ class ResPartner(models.Model):
             company_fiscal_position = self._get_company_fiscal_position(
                 fiscal_position, company
             )
+            new_value = (
+                company_fiscal_position.id if company_fiscal_position else False
+            )
             for partner in self:
                 partner_company = partner.sudo().with_company(company)
-                partner_company.property_account_position_id = (
-                    company_fiscal_position.id
-                    if company_fiscal_position
-                    else False
-                )
+                if partner_company.property_account_position_id.id == new_value:
+                    continue
+                partner_company.with_context(
+                    skip_multicompany_fiscal_position_propagation=True
+                ).property_account_position_id = new_value
 
     def write(self, vals):
         vals = self._parse_vat_string(vals)
@@ -325,9 +328,12 @@ class ResPartner(models.Model):
             vals["vat"] = self.vat
 
         res = super().write(vals)
-        self._set_multicompany_account_fiscal_position(
-            vals.get('property_account_position_id', False)
-        )
+        if not self.env.context.get(
+            'skip_multicompany_fiscal_position_propagation'
+        ):
+            self._set_multicompany_account_fiscal_position(
+                vals.get('property_account_position_id', False)
+            )
         return res
 
     @api.model
