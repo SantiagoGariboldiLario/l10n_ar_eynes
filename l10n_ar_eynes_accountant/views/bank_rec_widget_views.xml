@@ -11,7 +11,7 @@
             <separator name="inject_after" position="after">
                 <filter
                         name="journal_accounts"
-                        string="Cuentas del diario"
+                        string="Cuenta provisoria"
                         domain="[('account_id', 'in', context.get('bank_rec_journal_account_ids'))]"
                         invisible="not context.get('bank_rec_journal_account_ids')"
                     />
