@@ -13,7 +13,7 @@ import {patch} from "@web/core/utils/patch";
  * conciliadas directo contra el extracto).
  *
  *   - el diario de la transaccion
- *   - las cuentas del propio diario: la bancaria y la provisoria
+ *   - la cuenta provisoria del propio diario
  *
  * Dejamos ademas el agrupado por cuenta disponible en el menu de agrupacion,
  * pero sin activarlo por defecto.
@@ -56,9 +56,9 @@ patch(BankRecButtonList.prototype, {
                 return addDialog(DialogClass, props, options);
             }
             const journal = this.statementLineData.journal_id;
-            const accountIds = [journal.default_account_id?.id, journal.suspense_account_id?.id].filter(
-                Boolean
-            );
+            // Solo la cuenta provisoria: la bancaria nunca es una contrapartida
+            // a conciliar, es el propio renglon del extracto.
+            const accountIds = [journal.suspense_account_id?.id].filter(Boolean);
             const journalProps = {
                 ...props,
                 context: {
