@@ -7,20 +7,22 @@ import {patch} from "@web/core/utils/patch";
  * de la transaccion) lista todo apunte no conciliado de la compania, sin mirar el
  * diario. Al conciliar un banco eso trae los movimientos de los demas bancos.
  *
- * Sumamos dos filtros por defecto del buscador, no dominios: quedan como
- * etiquetas removibles, asi el usuario las saca cuando la contrapartida vive en
- * otro diario o en otra cuenta (transferencias entre bancos, facturas
- * conciliadas directo contra el extracto).
+ * Sumamos la cuenta provisoria del propio diario como filtro por defecto del
+ * buscador, no como dominio: queda como etiqueta removible, asi el usuario la
+ * saca cuando la contrapartida vive en otra cuenta (transferencias entre
+ * bancos, facturas conciliadas directo contra el extracto).
  *
- *   - el diario de la transaccion
- *   - la cuenta provisoria del propio diario
+ * No filtramos por diario: el asiento de una transaccion bancaria vive en el
+ * diario del banco, pero su contrapartida vive en el diario de la orden de
+ * pago, asi que filtrar por diario descarta justamente lo que se busca.
  *
  * Dejamos ademas el agrupado por cuenta disponible en el menu de agrupacion,
  * pero sin activarlo por defecto.
  *
- * Las cuentas van por contexto y no como valor del filtro porque son dos y
- * search_default_<campo> admite una sola. El dominio del filtro
- * journal_accounts lee esa clave (ver views/bank_rec_widget_views.xml).
+ * La cuenta va por contexto y no como valor de un search_default sobre
+ * account_id para poder pasar mas de una si alguna vez hiciera falta. El
+ * dominio del filtro journal_accounts lee esa clave (ver
+ * views/bank_rec_widget_views.xml).
  *
  * Nos enganchamos en addDialog en lugar de reescribir reconcileOnReconcileLine()
  * para no duplicar el metodo entero y que no se desincronice en cada upgrade.
@@ -63,7 +65,6 @@ patch(BankRecButtonList.prototype, {
                 ...props,
                 context: {
                     ...props.context,
-                    search_default_journal_id: journal.id,
                     bank_rec_journal_account_ids: accountIds,
                     ...(accountIds.length ? {search_default_journal_accounts: 1} : {}),
                 },
