@@ -548,7 +548,9 @@ class ResPartner(models.Model):
                         ]
                     if not retentions:
                         retentions = [
-                            d for d in partner_values if d["T"] == "R"
+                            d
+                            for d in partner_values
+                            if d["T"] in ("R", "RM")
                         ]
                     coeficients = [
                         d
