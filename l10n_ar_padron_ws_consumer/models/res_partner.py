@@ -128,6 +128,7 @@ class ResPartner(models.Model):
     def _get_journal_from_padron_name(self, padron_name, padron_type):
         domain = [
             ("type", "=", padron_type),
+            # ("company_id", "=", self.env.company.id),
         ]
         if padron_name == "IVA":
             domain.append(("code", '=', 'PIVAE'))
@@ -173,6 +174,8 @@ class ResPartner(models.Model):
                 domain.append(
                     ("padron_state_id", '=', self.env.ref('base.state_ar_e').id)
                 )
+            else:
+                return self.env["account.journal"]
 
             if padron_type == 'perceptions':
                 domain.append(("code", 'like', 'PIE_'))
@@ -544,7 +547,8 @@ class ResPartner(models.Model):
                         perceptions = [
                             d
                             for d in partner_values
-                            if d["T"] == "P" and d["P"] != "SALT"
+                            if d["T"] in ("P", "PM")
+                            and d["P"] not in ("SALT", "SALTD")
                         ]
                     if not retentions:
                         retentions = [
