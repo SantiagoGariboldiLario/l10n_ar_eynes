@@ -17,3 +17,7 @@ class ArcibaGeneratedFiles(models.Model):
     date_from = fields.Date(string='Date From')
     date_to = fields.Date(string='Date To')
     attachment_id = fields.Many2one('ir.attachment')
+    notes = fields.Text(
+        readonly=True,
+        help='Warnings found when the file was generated.',
+    )

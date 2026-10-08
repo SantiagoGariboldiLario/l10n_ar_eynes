@@ -26,6 +26,7 @@ import logging
 import re
 import tempfile
 import time
+import unicodedata
 from decimal import ROUND_HALF_UP, Decimal
 
 from odoo import _, api, fields, models
@@ -52,6 +53,19 @@ def informed_amount(base_amount, percentage):
     return (
         Decimal(str(base_amount or 0.0)) * Decimal(str(percentage or 0.0)) / 100
     ).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+
+def arciba_text(value):
+    """Texto en ASCII para el archivo de AGIP.
+
+    El archivo es de ancho fijo: un caracter fuera de ASCII (tildes, ´, °)
+    ocupa mas de un byte y corre todas las columnas siguientes de la linea.
+    """
+    return (
+        unicodedata.normalize('NFKD', value or '')
+        .encode('ascii', 'ignore')
+        .decode('ascii')
+    )
 
 
 class CreateArcibaFiles(models.TransientModel):
@@ -193,6 +207,7 @@ class CreateArcibaFiles(models.TransientModel):
                 'date_from': self.period_start,
                 'date_to': self.period_end,
                 'company_id': self.company_id.id,
+                'notes': self.notes,
             }
         )
 
@@ -206,7 +221,36 @@ class CreateArcibaFiles(models.TransientModel):
         doc = self.env['ir.attachment'].create(data_attach)
         generated_file_rec.write({'attachment_id': doc.id})
 
-        return True
+        if not self.notes:
+            return True
+        # Los problemas no bloquean el archivo: quedan como avisos en el
+        # archivo generado para revisarlos antes de presentarlo.
+        self.notes = False
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('eARCIBA file generated with warnings'),
+                'message': _(
+                    'Some records were left out or need review. See the '
+                    'Warnings of the generated file %(code)s before '
+                    'submitting it to ARCIBA.',
+                    code=generated_file_rec.code,
+                ),
+                'type': 'warning',
+                'sticky': True,
+                'next': {'type': 'ir.actions.act_window_close'},
+            },
+        }
+
+    @api.model
+    def _add_arciba_notes(self, title, informed, total, warnings):
+        """Acumula en las notas del wizard los avisos no bloqueantes."""
+        if not warnings or not self:
+            return
+        lines = [f'{title}: {informed}/{total}'] + list(warnings)
+        notes = self.notes + '\n\n' if self.notes else ''
+        self.write({'notes': notes + '\n'.join(lines)})
 
     def _get_invoice_tax_lines(self, invoice):
         tax_line_ids = invoice.line_ids.filtered(lambda line: line.tax_line_id)
@@ -254,8 +298,10 @@ class CreateArcibaFiles(models.TransientModel):
             # resuelta la alicuota, se reemplaza por base x alicuota, que es lo
             # que AGIP valida.
             ret_per_applied = ret.amount
-            # Ret / Per base
-            base_amount = ret.base_amount
+            # Ret / Per base: la base sobre la que se calculo la retencion.
+            # base_amount en las retenciones cargadas a mano se completa al
+            # validar la OP con el total de la OP, no con la base.
+            base_amount = ret.base or ret.base_amount
 
             # **-------**  Datos desde la Orden de Pago: **--------**
             op = ret.payment_order_id
@@ -291,6 +337,10 @@ class CreateArcibaFiles(models.TransientModel):
                 if not percentage:
                     # Se aplicó alícuota general:
                     percentage = ret.applied_aliquot
+                if not percentage and base_amount:
+                    # Retencion manual sin padron ni aplicacion: alicuota
+                    # efectivamente retenida
+                    percentage = round(abs(ret.amount / base_amount) * 100, 2)
 
                 # El importe informado tiene que ser exactamente
                 # base x alicuota. El calculo de la retencion se hace en float
@@ -336,9 +386,7 @@ class CreateArcibaFiles(models.TransientModel):
                 else:
                     pos_fiscal_retenido = 1
 
-                razon_social_retenido = (
-                    (partner.name).replace('ñ', 'n').replace('Ñ', 'N')
-                )
+                razon_social_retenido = arciba_text(partner.name)
                 # IIBB
                 ppids = partner.retention_ids
                 ret_partner = ppids.filtered(
@@ -363,20 +411,11 @@ class CreateArcibaFiles(models.TransientModel):
                 op_lines = op.debt_line_ids.filtered(
                     lambda line: line.amount != 0
                 )
-                invoices = op_lines.mapped('invoice_id')
-                if not len(invoices):
-                    errors.append(
-                        _(
-                            'rtl #%(ret_id)s: Unable to get associated invoice (%(ret_name)s)',
-                            ret_id=ret.id,
-                            ret_name=ret.name,
-                        )
-                    )
-                    continue
                 # Denomination
                 denomination_name = ''
-                # Invoice total
-                op_amount_total = sum(op_lines.mapped('amount'))
+                # Invoice total: sin lineas de deuda (pago a cuenta) el total
+                # del comprobante es el importe de la OP.
+                op_amount_total = sum(op_lines.mapped('amount')) or op.amount
                 # Iva Amount
                 inv_iva_amount = 0.0
                 # # Monto de otros conceptos:
@@ -423,10 +462,11 @@ class CreateArcibaFiles(models.TransientModel):
                     'fecha_aceptacion': '',  # Para comprobantes mipyme
                 }
                 res.append(line)
-        if not errors:
-            return None, res
-        else:
-            return 1, errors
+        # Los errores no bloquean el archivo: quedan como avisos.
+        self._add_arciba_notes(
+            _('Retentions informed'), len(res), len(retention_ids), errors
+        )
+        return None, res
 
     @api.model
     def _get_perc_data(self, perc_ids):
@@ -534,9 +574,7 @@ class CreateArcibaFiles(models.TransientModel):
 
             # Partner Data
             pos_fiscal_retenido = self._get_partner_fiscal_position_code(inv)
-            razon_social_retenido = (
-                (inv.partner_id.name).replace('ñ', 'n').replace('Ñ', 'N')
-            )
+            razon_social_retenido = arciba_text(inv.partner_id.name)
 
             # IIBB
             ppids = perc.partner_id.perception_ids
@@ -600,10 +638,11 @@ class CreateArcibaFiles(models.TransientModel):
             }
             res.append(line)
 
-        if not errors:
-            return None, res
-        else:
-            return 1, errors
+        # Los errores no bloquean el archivo: quedan como avisos.
+        self._add_arciba_notes(
+            _('Perceptions informed'), len(res), len(perc_ids), errors
+        )
+        return None, res
 
     def create_files(self):
         """
