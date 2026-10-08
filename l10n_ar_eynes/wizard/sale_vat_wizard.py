@@ -99,32 +99,31 @@ class SaleVATWizard(models.TransientModel):
             'ni_nr_ex_mon_refund': 0.0,
         }
 
+        fiscal_position_ri_id = self.env.ref(
+            'l10n_ar_eynes.fiscal_position_ri'
+        ).id
+        chart_template = self.env['account.chart.template'].with_company(
+            self.company_id
+        )
+        vat_type_by_tax = {}
+        for vat_type, xmlid in (
+            ('10.5', '10_50_percent_tax_sale'),
+            ('21', '21_percent_tax_sale'),
+            ('27', '27_percent_tax_sale'),
+            ('exempt', 'exempt_percent_tax_sale'),
+        ):
+            tax = chart_template.ref(xmlid, raise_if_not_found=False)
+            if tax:
+                vat_type_by_tax[tax.id] = vat_type
+
         vat_type = None
         for i, line in enumerate(sale_data):
             next_line = sale_data[i + 1] if i + 1 < len(sale_data) else None
             next_is_same_aml = next_line[2] == line[2] if next_line else False
 
-            if line[0] == self.env.ref('l10n_ar_eynes.fiscal_position_ri').id:
-                if (
-                    line[6]
-                    == self.env.ref('l10n_ar_eynes.10_50_percent_tax_sale').id
-                ):
-                    vat_type = '10.5'
-                elif (
-                    line[6]
-                    == self.env.ref('l10n_ar_eynes.21_percent_tax_sale').id
-                ):
-                    vat_type = '21'
-                elif (
-                    line[6]
-                    == self.env.ref('l10n_ar_eynes.27_percent_tax_sale').id
-                ):
-                    vat_type = '27'
-                elif (
-                    line[6]
-                    == self.env.ref('l10n_ar_eynes.exempt_percent_tax_sale').id
-                ):
-                    vat_type = 'exempt'
+            if line[0] == fiscal_position_ri_id:
+                if line[6] in vat_type_by_tax:
+                    vat_type = vat_type_by_tax[line[6]]
             else:
                 vat_type = 'ni_nr_ex_mon'
 
