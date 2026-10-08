@@ -157,7 +157,7 @@ class RetentionTaxApplication(models.Model):
             ('payment_amount_untaxed', 'Payment Amount Untaxed'),
             # ('amount_taxed', 'Invoice Net Taxed'),
             # ('amount_no_taxed', 'Invoice Net Untaxed'),
-            # ('amount_total', 'Invoice Total'),
+            ('amount_total', 'Invoice Total'),
             # ('payment_amount', 'Payment Amount'),
         ],
         string='Calculation Base',

@@ -706,6 +706,11 @@ class AccountTax(models.Model):
         move_sign = (
             -1.0 if self._get_move_lines_amount(payment, mls) < 0 else 1.0
         )
+        # Para la base "Total de factura" cada linea se lleva a su
+        # parte del total del comprobante (IVA, percepciones y demas
+        # impuestos incluidos), en proporcion a su neto
+        mls_subtotal = sum(mls.mapped('price_subtotal')) if mls else 0.0
+        total_factor = move.amount_total / mls_subtotal if mls_subtotal else 1.0
         retentions = {}
         for ml in mls:
             # Evitamos la linea de la deuda
@@ -825,6 +830,8 @@ class AccountTax(models.Model):
 
             # Hacemos el computo de la Retencion por linea de factura
             base = self._get_move_lines_amount(payment, ml) * move_sign
+            if taxapp.calculation_base == 'amount_total':
+                base *= total_factor
             _logger.info(f"Base tomada: {base}")
             if line_type == 'income':
                 base *= -1
