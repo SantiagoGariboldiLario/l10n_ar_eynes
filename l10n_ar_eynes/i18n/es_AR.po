@@ -7323,6 +7323,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_perception_activity_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_perception_concept_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_activity_form
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_arciba_generated_files__notes
 #: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_retention_concept_form
 msgid "Notes"
 msgstr "Notas"
@@ -12330,3 +12331,41 @@ msgid ""
 msgstr ""
 "No puede combinar cheques propios y cheques de terceros en la misma "
 "operación. Los cheques propios se debitan y los de terceros se depositan."
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_arciba_generated_files__notes
+msgid "Warnings found when the file was generated."
+msgstr "Avisos encontrados al generar el archivo."
+
+#. module: l10n_ar_eynes
+#: model_terms:ir.ui.view,arch_db:l10n_ar_eynes.view_arciba_generated_files_form
+msgid "Warnings"
+msgstr "Avisos"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
+msgid "Perceptions informed"
+msgstr "Percepciones informadas"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
+msgid "Retentions informed"
+msgstr "Retenciones informadas"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
+msgid "eARCIBA file generated with warnings"
+msgstr "Archivo eARCIBA generado con avisos"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/wizard/create_arciba_file.py:0
+msgid ""
+"Some records were left out or need review. See the Warnings of the "
+"generated file %(code)s before submitting it to ARCIBA."
+msgstr ""
+"Algunos registros quedaron fuera del archivo o necesitan revisión. Revise "
+"los Avisos del archivo generado %(code)s antes de presentarlo en ARCIBA."
