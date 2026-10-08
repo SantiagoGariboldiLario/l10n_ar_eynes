@@ -10707,6 +10707,18 @@ msgstr "Deberia haber solo una linea de distribucion de facturas para '%s'"
 
 #. module: l10n_ar_eynes
 #. odoo-python
+#: code:addons/l10n_ar_eynes/wizard/purchase_vat_wizard.py:0
+msgid ""
+"The following invoice lines have VAT but no Fiscal Credit set. Please "
+"complete it to print the report:\n"
+"%s"
+msgstr ""
+"Las siguientes líneas de factura tienen IVA pero no tienen cargado el "
+"Crédito Fiscal. Complételo para poder imprimir el reporte:\n"
+"%s"
+
+#. module: l10n_ar_eynes
+#. odoo-python
 #: code:addons/l10n_ar_eynes/report/report_subjournal_xlsx.py:0
 #, python-format
 msgid "There were no moves for this period"

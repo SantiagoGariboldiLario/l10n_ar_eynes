@@ -1,7 +1,9 @@
 import json
 import logging
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
+from odoo.tools import format_amount
 
 _logger = logging.getLogger(__name__)
 
@@ -99,6 +101,24 @@ class PurchaseVATWizard(models.TransientModel):
             'ni_nr_ex_mon_refund': 0.0,
         }
 
+        fiscal_position_ri_id = self.env.ref(
+            'l10n_ar_eynes.fiscal_position_ri'
+        ).id
+        chart_template = self.env['account.chart.template'].with_company(
+            self.company_id
+        )
+        vat_type_by_tax = {}
+        for vat_type, xmlid in (
+            ('10.5', '10_50_percent_tax_purchase'),
+            ('21', '21_percent_tax_purchase'),
+            ('27', '27_percent_tax_purchase'),
+            ('exempt', 'exempt_percent_tax_purchase'),
+        ):
+            tax = chart_template.ref(xmlid, raise_if_not_found=False)
+            if tax:
+                vat_type_by_tax[tax.id] = vat_type
+
+        missing_fiscal_credit_ids = []
         vat_type = None
         for i, line in enumerate(purchase_data):
             next_line = (
@@ -106,31 +126,9 @@ class PurchaseVATWizard(models.TransientModel):
             )
             next_is_same_aml = next_line[2] == line[2] if next_line else False
 
-            if line[0] == self.env.ref('l10n_ar_eynes.fiscal_position_ri').id:
-                if (
-                    line[6]
-                    == self.env.ref(
-                        'l10n_ar_eynes.10_50_percent_tax_purchase'
-                    ).id
-                ):
-                    vat_type = '10.5'
-                elif (
-                    line[6]
-                    == self.env.ref('l10n_ar_eynes.21_percent_tax_purchase').id
-                ):
-                    vat_type = '21'
-                elif (
-                    line[6]
-                    == self.env.ref('l10n_ar_eynes.27_percent_tax_purchase').id
-                ):
-                    vat_type = '27'
-                elif (
-                    line[6]
-                    == self.env.ref(
-                        'l10n_ar_eynes.exempt_percent_tax_purchase'
-                    ).id
-                ):
-                    vat_type = 'exempt'
+            if line[0] == fiscal_position_ri_id:
+                if line[6] in vat_type_by_tax:
+                    vat_type = vat_type_by_tax[line[6]]
             else:
                 vat_type = 'ni_nr_ex_mon'
 
@@ -144,6 +142,8 @@ class PurchaseVATWizard(models.TransientModel):
                         vat_type = vat_type + '_refund'
                         total = total * -1
                     by_fiscal_credit[vat_type] += total
+                elif not line[3]:
+                    missing_fiscal_credit_ids.append(line[2])
                 else:
                     fiscal_credit = line[3]
                     net = line[4] * line[7]
@@ -155,6 +155,29 @@ class PurchaseVATWizard(models.TransientModel):
                     by_fiscal_credit[fiscal_credit][vat_type][0] += net
                     by_fiscal_credit[fiscal_credit][vat_type][1] += vat
                 vat_type = None
+
+        if missing_fiscal_credit_ids:
+            missing_lines = self.env['account.move.line'].browse(
+                missing_fiscal_credit_ids
+            )
+            raise UserError(
+                _(
+                    'The following invoice lines have VAT but no Fiscal '
+                    'Credit set. Please complete it to print the report:\n%s',
+                    '\n'.join(
+                        '- %s (%s): %s (%s)'
+                        % (
+                            line.move_id.name,
+                            line.partner_id.name,
+                            line.name or line.product_id.display_name,
+                            format_amount(
+                                self.env, line.price_subtotal, line.currency_id
+                            ),
+                        )
+                        for line in missing_lines
+                    ),
+                )
+            )
 
         for fiscal_type in (
             'direct_taxed',
