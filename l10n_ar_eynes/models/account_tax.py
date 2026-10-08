@@ -104,6 +104,13 @@ class AccountTax(models.Model):
         'Tax Application for Perceptions',
     )
     apply_custom_code = fields.Boolean(default=False)
+    sicore_tax_code = fields.Char(
+        string='SICORE Tax Code',
+        size=4,
+        help="SICORE tax code to report for this perception. If empty, the "
+        "AFIP code of the journal linked to this tax is used "
+        "(Accounting->Configuration->Journals->AFIP Code).",
+    )
     python_code = fields.Text(
         string='Python Code',
         default=(

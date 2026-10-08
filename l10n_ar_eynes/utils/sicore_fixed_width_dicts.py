@@ -1,3 +1,5 @@
+import copy
+
 HEAD_LINES = {
     'codigo_comprobante': {
         'type': 'integer',
@@ -172,6 +174,46 @@ HEAD_LINES_EXTERIOR = {
         'required': False,
     },
 }
+
+# Layout de retenciones y percepciones: numero de comprobante, importes, CUIT
+# y certificado alineados a izquierda y rellenos con espacios (no con ceros),
+# y el archivo local completo a 198 caracteres como el de exterior.
+# RRHH sigue usando HEAD_LINES / HEAD_LINES_EXTERIOR.
+_RET_FIELD_OVERRIDES = {
+    'numero_comprobante': {
+        'type': 'string',
+        'alignment': 'left',
+        'padding': ' ',
+    },
+    'monto_comprobante': {'alignment': 'left'},
+    'base_calculo': {'alignment': 'left'},
+    'importe_retencion': {'alignment': 'left'},
+    'numero_documento_retenido': {'alignment': 'left', 'padding': ' '},
+    'numero_certificado_original': {'alignment': 'left', 'padding': ' '},
+}
+
+
+def _ret_layout(base_config):
+    config = copy.deepcopy(base_config)
+    for field_name, changes in _RET_FIELD_OVERRIDES.items():
+        config[field_name].update(changes)
+    return config
+
+
+HEAD_LINES_RET_LOCAL = {
+    **_ret_layout(HEAD_LINES),
+    'relleno': {
+        'type': 'string',
+        'start_pos': 146,
+        'length': 53,
+        'alignment': 'left',
+        'padding': ' ',
+        'required': False,
+        'default': '',
+    },
+}
+
+HEAD_LINES_RET_EXTERIOR = _ret_layout(HEAD_LINES_EXTERIOR)
 
 HEAD_LINES_PADRON = {
     'cuil': {

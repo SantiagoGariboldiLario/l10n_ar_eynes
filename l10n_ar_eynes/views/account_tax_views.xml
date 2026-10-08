@@ -145,6 +145,7 @@
                     <group col="6" string="Tax Application">
                         <field name="retention_type" />
                         <field name="apply_custom_code" />
+                        <field name="sicore_tax_code" />
                         <separator name="tax_application" />
                         <field
                             name="python_code"

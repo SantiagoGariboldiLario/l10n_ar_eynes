@@ -12330,3 +12330,30 @@ msgid ""
 msgstr ""
 "No puede combinar cheques propios y cheques de terceros en la misma "
 "operación. Los cheques propios se debitan y los de terceros se depositan."
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_account_tax__sicore_tax_code
+msgid "SICORE Tax Code"
+msgstr "Código de impuesto SICORE"
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_account_tax__sicore_tax_code
+msgid ""
+"SICORE tax code to report for this perception. If empty, the AFIP code of "
+"the journal linked to this tax is used (Accounting->Configuration->Journals-"
+">AFIP Code)."
+msgstr ""
+"Código de impuesto SICORE a informar para esta percepción. Si está vacío, "
+"se usa el código AFIP del diario vinculado a este impuesto (Contabilidad->"
+"Configuración->Diarios->Código AFIP)."
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
+msgid ""
+"Retention File Errors (%s)\n"
+"================\n"
+msgstr ""
+"Errores del archivo de retenciones (%s)\n"
+"================\n"
+
