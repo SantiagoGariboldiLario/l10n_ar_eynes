@@ -1252,6 +1252,8 @@ class AccountMove(models.Model):
                     perc_data = application.get_perception_data(
                         self.partner_id, self.invoice_date, tax_id=perception
                     )
+                    if perc_data.get('excluded_percent', 0.0) == 1.0:
+                        continue
                     perceptions_applications = (
                         perception.calculate_python_custom_tax(
                             self.partner_id, self, perc_data=perc_data

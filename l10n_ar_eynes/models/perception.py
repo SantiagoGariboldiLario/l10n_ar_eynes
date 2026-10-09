@@ -525,6 +525,22 @@ class PerceptionTaxApplication(models.Model):
                 }
             )
 
+        # Si el registro del período no tiene exclusión, buscar en todos los
+        # registros del partner si existe un certificado de exclusión con rango
+        # de fechas que cubra la fecha de factura (puede estar en otro período).
+        if data['excluded_percent'] != 1.0:
+            active_exclusion = partner_perception_lines.filtered(
+                lambda line: line.excluded_percent == 1.0
+                and line.ex_date_from
+                and line.ex_date_to
+                and line.ex_date_from <= invoice_date <= line.ex_date_to
+                and (not line.period or line.period <= invoice_date)
+            )
+            if active_exclusion:
+                data['excluded_percent'] = 1.0
+                data['ex_date_from'] = active_exclusion[0].ex_date_from
+                data['ex_date_to'] = active_exclusion[0].ex_date_to
+
         return data
 
     def _get_base_from_account_move_lines(self, field, lines):
