@@ -288,13 +288,20 @@ class AccountMoveLine(models.Model):
     def link_perception_to_move_lines(self):
         to_clean = self.env['account.tax']
         for line in self:
+            needs_purchase_perception_fallback = (
+                line.move_id.is_purchase_document(include_receipts=True)
+                and line.move_id.perception_ids
+                and not line.move_id.invoice_line_ids.tax_ids.filtered(
+                    lambda tax: tax.tax_group_id.group_type == 'vat'
+                )
+            )
+            has_vat_tax = line.tax_ids.filtered(
+                lambda tax: tax.tax_group_id.group_type == 'vat'
+            )
             if (
                 line.display_type == 'product'
                 and line.product_id
-                and line.tax_ids
-                and line.tax_ids.filtered(
-                    lambda tax: tax.tax_group_id.group_type == 'vat'
-                )
+                and (has_vat_tax or needs_purchase_perception_fallback)
             ):
                 existing = line.tax_ids.filtered(
                     lambda tag: tag.tax_group_id.group_type == 'perception'
