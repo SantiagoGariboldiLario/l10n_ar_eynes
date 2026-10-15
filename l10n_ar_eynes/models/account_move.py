@@ -1296,12 +1296,21 @@ class AccountMove(models.Model):
             self.invoice_line_ids.link_perception_to_move_lines()
 
     def _get_perception_manual_base(self):
-        return sum(
+        base = sum(
             self.invoice_line_ids.filtered(
                 lambda line: line.tax_ids
                 and (True not in line.tax_ids.mapped('is_exempt'))
             ).mapped('price_subtotal')
         )
+        if not base and self.is_purchase_document(include_receipts=True):
+            # Comprobantes de compra sin IVA (ej. factura C o todo exento):
+            # la percepcion se carga igual, tomando como base el neto.
+            base = sum(
+                self.invoice_line_ids.filtered(
+                    lambda line: line.display_type == 'product'
+                ).mapped('price_subtotal')
+            )
+        return base
 
     @api.onchange('perception_ids', 'invoice_line_ids')
     def _onchange_perception_ids(self):
