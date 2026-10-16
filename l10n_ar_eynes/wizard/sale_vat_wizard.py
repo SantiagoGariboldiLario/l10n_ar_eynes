@@ -2,6 +2,7 @@ import json
 import logging
 
 from odoo import api, fields, models
+from odoo.tools import date_utils
 
 _logger = logging.getLogger(__name__)
 
@@ -99,29 +100,48 @@ class SaleVATWizard(models.TransientModel):
             'ni_nr_ex_mon_refund': 0.0,
         }
 
-        fiscal_position_ri_id = self.env.ref(
-            'l10n_ar_eynes.fiscal_position_ri'
-        ).id
-        chart_template = self.env['account.chart.template'].with_company(
-            self.company_id
+        # Cada compania tiene sus propias posiciones fiscales e impuestos
+        # (solo la primera tiene los xmlid de la loc), por eso el RI se
+        # reconoce por codigo AFIP y la alicuota por los datos del impuesto.
+        fiscal_position_ri_ids = set(
+            self.env['account.fiscal.position']
+            .with_context(active_test=False)
+            .search(
+                [
+                    ('company_id', '=', self.company_id.id),
+                    ('afip_code', '=', 1),
+                ]
+            )
+            .ids
         )
+        vat_taxes = (
+            self.env['account.tax']
+            .with_context(active_test=False)
+            .search(
+                [
+                    ('company_id', '=', self.company_id.id),
+                    ('type_tax_use', '=', 'sale'),
+                    ('tax_group_id.group_type', '=', 'vat'),
+                ]
+            )
+        )
+        vat_type_by_amount = {10.5: '10.5', 21.0: '21', 27.0: '27'}
         vat_type_by_tax = {}
-        for vat_type, xmlid in (
-            ('10.5', '10_50_percent_tax_sale'),
-            ('21', '21_percent_tax_sale'),
-            ('27', '27_percent_tax_sale'),
-            ('exempt', 'exempt_percent_tax_sale'),
-        ):
-            tax = chart_template.ref(xmlid, raise_if_not_found=False)
-            if tax:
-                vat_type_by_tax[tax.id] = vat_type
+        for tax in vat_taxes:
+            if tax.is_exempt:
+                vat_type_by_tax[tax.id] = 'exempt'
+            elif (
+                tax.amount_type == 'percent'
+                and tax.amount in vat_type_by_amount
+            ):
+                vat_type_by_tax[tax.id] = vat_type_by_amount[tax.amount]
 
         vat_type = None
         for i, line in enumerate(sale_data):
             next_line = sale_data[i + 1] if i + 1 < len(sale_data) else None
             next_is_same_aml = next_line[2] == line[2] if next_line else False
 
-            if line[0] == fiscal_position_ri_id:
+            if line[0] in fiscal_position_ri_ids:
                 if line[6] in vat_type_by_tax:
                     vat_type = vat_type_by_tax[line[6]]
             else:
@@ -228,6 +248,11 @@ class SaleVATWizard(models.TransientModel):
         return taxes_data_parsed
 
     def run(self):
+        # Las fechas se eligen con un selector de mes/anio que guarda
+        # el dia 1: sin esto 'Hasta' 09/2026 queda en 01/09 y el
+        # reporte toma un solo dia en vez del mes completo.
+        self.date_start = date_utils.start_of(self.date_start, 'month')
+        self.date_end = date_utils.end_of(self.date_end, 'month')
         tax_debit_refunds = self._parse_tax_debit_refunds()
         retention_perception = self._parse_retention_perception()
 
