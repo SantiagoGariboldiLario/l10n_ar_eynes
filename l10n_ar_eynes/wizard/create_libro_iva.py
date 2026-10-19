@@ -30,6 +30,13 @@ class LibroIVAExporterWizard(models.TransientModel):
     )
     include_internal = fields.Boolean('Incluir internas?', default=False)
     is_simple_vat = fields.Boolean('Is Simple VAT?', default=False)
+    global_fiscal_credit_proration = fields.Boolean(
+        'Prorrateo global de crédito fiscal',
+        compute='_compute_global_fiscal_credit_proration',
+        store=True,
+        readonly=False,
+        help='El Crédito Fiscal computable de cada comprobante de compra se informa en cero.',
+    )
     notes = fields.Text('Notes', readonly=True)
     state = fields.Selection(
         [('init', 'Start'), ('done', 'Done')], 'State', default='init'
@@ -40,6 +47,13 @@ class LibroIVAExporterWizard(models.TransientModel):
         default='txt',
         required=True,
     )
+
+    @api.depends('company_id')
+    def _compute_global_fiscal_credit_proration(self):
+        for wizard in self:
+            wizard.global_fiscal_credit_proration = (
+                wizard.company_id.apportionable_vat
+            )
 
     @api.model
     def _default_company_ids(self):
@@ -118,6 +132,9 @@ class LibroIVAExporterWizard(models.TransientModel):
         return ('%016.2f' % amount).replace('.', '')
 
     def _get_fiscal_credit_currency(self, invoice):
+        # Con prorrateo global ARCA exige el CF computable en cero
+        if self.global_fiscal_credit_proration:
+            return 0
         cfc = 0
         for tax_line in self._get_invoice_vat_tax_lines(invoice):
             cfc += abs(tax_line.amount_currency)
