@@ -169,16 +169,6 @@ msgid "Manual Mode"
 msgstr "Factura manual"
 
 #. module: l10n_ar_pos_wsfe
-#: model:ir.model.fields,help:l10n_ar_pos_wsfe.field_res_company__fcons_max_amount
-msgid ""
-"Maximun amount that invoice can be emitted to Final Consumer without "
-"identification. When you are making an invoice on PdV and it exceeds this "
-"amount, you will receive and alert before send it to ARCA."
-msgstr "Monto máximo en que la factura puede ser emitida a un Consumidor Final sin"
-"identificarlo. Cuando esté efectuando una factura en el PdV y se exceda este monto, "
-"recibirá una alerta antes de ser enviada a ARCA."
-
-#. module: l10n_ar_pos_wsfe
 #: model:ir.model.fields,help:l10n_ar_pos_wsfe.field_pos_config__fcons_max_amount
 msgid ""
 "Maximun amount that voucher can be emitted to Final Consumer without "
@@ -195,7 +185,6 @@ msgstr "Campos faltantes en el Contacto"
 
 #. module: l10n_ar_pos_wsfe
 #: model:ir.model.fields,field_description:l10n_ar_pos_wsfe.field_pos_config__fcons_max_amount
-#: model:ir.model.fields,field_description:l10n_ar_pos_wsfe.field_res_company__fcons_max_amount
 msgid "Monto Máximo Consumidor Final"
 msgstr ""
 

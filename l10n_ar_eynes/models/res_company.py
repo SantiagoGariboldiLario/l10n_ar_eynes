@@ -43,6 +43,12 @@ class ResCompany(
         size=3,
         store=True,
     )
+    fcons_max_amount = fields.Float(
+        string='Monto Máximo Consumidor Final',
+        help="Maximum amount that can be invoiced to an unidentified Final Consumer. "
+        "Electronic invoices that reach this amount cannot be confirmed until the "
+        "customer document is set. Zero means no limit.",
+    )
     fcred_cbu_emitter = fields.Char(string='CBU (FCE)')
     fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
     fcred_minimum_amount = fields.Float(
@@ -71,6 +77,9 @@ class ResCompany(
         size=5,
         store=True,
     )
+
+    def get_fc_max_amount(self):
+        return self.fcons_max_amount
 
 
 class AfipBigCompany(models.Model):
