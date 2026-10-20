@@ -4,6 +4,8 @@ import logging
 from odoo import api, fields, models
 from odoo.tools import date_utils
 
+from .purchase_vat_wizard import get_vat_amount_by_line
+
 _logger = logging.getLogger(__name__)
 
 
@@ -31,10 +33,8 @@ class SaleVATWizard(models.TransientModel):
             aml.move_id,
             aml.id,
             aml.fiscal_credit,
-            aml.price_subtotal,
-            aml.price_total,
+            aml.balance,
             amlat.account_tax_id as applied_tax_id,
-            am.currency_rate,
             am.move_type
         FROM account_move_line aml
         JOIN account_move am ON aml.move_id = am.id
@@ -136,35 +136,35 @@ class SaleVATWizard(models.TransientModel):
             ):
                 vat_type_by_tax[tax.id] = vat_type_by_amount[tax.amount]
 
+        vat_by_line = get_vat_amount_by_line(
+            self.env, {line[1] for line in sale_data}
+        )
         vat_type = None
         for i, line in enumerate(sale_data):
             next_line = sale_data[i + 1] if i + 1 < len(sale_data) else None
             next_is_same_aml = next_line[2] == line[2] if next_line else False
 
             if line[0] in fiscal_position_ri_ids:
-                if line[6] in vat_type_by_tax:
-                    vat_type = vat_type_by_tax[line[6]]
+                if line[5] in vat_type_by_tax:
+                    vat_type = vat_type_by_tax[line[5]]
             else:
                 vat_type = 'ni_nr_ex_mon'
 
             if not next_is_same_aml:
-                total = line[5] * line[7]
+                net = -line[4]
+                vat = -vat_by_line.get(line[2], 0.0)
+                total = net + vat
                 if not vat_type:
                     vat_type = 'untaxed'
 
                 if vat_type in ['exempt', 'ni_nr_ex_mon', 'untaxed']:
-                    if line[8] == 'out_refund':
+                    if line[6] == 'out_refund':
                         vat_type = vat_type + '_refund'
-                        total = total * -1
                     by_fiscal_credit[vat_type] += total
                 else:
                     fiscal_credit = line[3]
-                    net = line[4] * line[7]
-                    vat = total - net
-                    if line[8] == 'out_refund':
+                    if line[6] == 'out_refund':
                         fiscal_credit = fiscal_credit + '_refund'
-                        net = net * -1
-                        vat = vat * -1
                     by_fiscal_credit[fiscal_credit][vat_type][0] += net
                     by_fiscal_credit[fiscal_credit][vat_type][1] += vat
                 vat_type = None
@@ -207,10 +207,16 @@ class SaleVATWizard(models.TransientModel):
 
     def _get_perception_data(self):
         perception_query = """
-        SELECT per.name, sum(p.amount) FROM perception_tax_line p
+        SELECT
+            per.name,
+            sum(
+                CASE WHEN i.move_type = 'out_refund'
+                THEN -p.amount ELSE p.amount END
+            )
+        FROM perception_tax_line p
         JOIN account_tax per ON p.perception_id = per.id
         JOIN account_move i ON p.invoice_id=i.id
-        WHERE p.date BETWEEN %(date_start)s AND %(date_end)s
+        WHERE i.date BETWEEN %(date_start)s AND %(date_end)s
         AND i.state = 'posted'
         AND per.type_tax_use LIKE 'sale'
         AND p.company_id = %(company)s
@@ -226,6 +232,9 @@ class SaleVATWizard(models.TransientModel):
         return perception_res
 
     def _parse_retention_perception(self):
+        # (nombre, importe, codigo, es_percepcion): las retenciones de
+        # pagos se listan pero no suman al TOTAL RE ni al total del
+        # libro (el Subdiario solo tiene las percepciones de facturas).
         taxes_data_parsed = []
         taxes_data = self._get_retention_data()
         for line in taxes_data:
@@ -234,6 +243,7 @@ class SaleVATWizard(models.TransientModel):
                     line[0].get('es_AR', line[0].get('en_US', 'No name')),
                     line[1],
                     line[2],
+                    False,
                 )
             )
         taxes_data = self._get_perception_data()
@@ -243,6 +253,7 @@ class SaleVATWizard(models.TransientModel):
                     line[0].get('es_AR', line[0].get('en_US', 'No name')),
                     line[1],
                     '',
+                    True,
                 )
             )
         return taxes_data_parsed

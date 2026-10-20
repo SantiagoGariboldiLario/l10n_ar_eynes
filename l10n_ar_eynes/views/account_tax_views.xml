@@ -6,6 +6,9 @@
         <field name="model">account.tax</field>
         <field name="inherit_id" ref="account.view_tax_form" />
         <field name="arch" type="xml">
+            <field name="tax_group_id" position="after">
+                <field name="afip_code" />
+            </field>
             <notebook position="inside">
                 <field name="group_type" invisible="True" />
                 <page string="Retentions" invisible="group_type != 'retention'">

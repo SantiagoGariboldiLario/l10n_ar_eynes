@@ -467,12 +467,13 @@ class LibroIVAExporterWizard(models.TransientModel):
                 voucher_type,
                 pos,
                 internal_number_formatted,
-                ('%016.2f' % zero_base).replace('.', ''),
+                ('%016.2f' % abs(zero_base)).replace('.', ''),
                 ('%.4s' % '3'.rjust(4, '0')),
                 ('%016.2f' % 0).replace('.', ''),
             ]
         else:
-            tax_base = tax_line.tax_base_amount
+            # AFIP pide importes sin signo (en NC la base viene negativa)
+            tax_base = abs(tax_line.tax_base_amount)
             if invoice.is_multi_currency:
                 rate = invoice.currency_rate
                 if invoice.currency_id.preciated:
@@ -510,12 +511,13 @@ class LibroIVAExporterWizard(models.TransientModel):
                 internal_number_formatted,
                 partner_document_type,
                 partner_vat,
-                ('%016.2f' % zero_base).replace('.', ''),
+                ('%016.2f' % abs(zero_base)).replace('.', ''),
                 ('%.4s' % '3'.rjust(4, '0')),
                 ('%016.2f' % 0).replace('.', ''),
             ]
         else:
-            tax_base = tax_line.tax_base_amount
+            # AFIP pide importes sin signo (en NC la base viene negativa)
+            tax_base = abs(tax_line.tax_base_amount)
             if invoice.is_multi_currency:
                 rate = invoice.currency_rate
                 if invoice.currency_id.preciated:
@@ -545,7 +547,8 @@ class LibroIVAExporterWizard(models.TransientModel):
             invoice, errors
         )
 
-        tax_base = tax_line.tax_base_amount
+        # AFIP pide importes sin signo (en NC la base viene negativa)
+        tax_base = abs(tax_line.tax_base_amount)
         if invoice.is_multi_currency:
             rate = invoice.currency_rate
             if invoice.currency_id.preciated:
