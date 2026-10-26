@@ -1575,10 +1575,21 @@
                                         <t t-out="total_vat_globalformatted" />
                                     </td>
                                     <td>
-                                        <t t-out="total_vat_globalformatted" />
+                                        <t
+                                            t-set="total_computable_global"
+                                            t-value="direct_taxedvat + direct_taxed_refundvat"
+                                        />
+                                        <t
+                                            t-set="total_computable_globalformatted"
+                                            t-value="'{:,.2f}'.format(total_computable_global).replace(',', 'X').replace('.', ',').replace('X', '.')"
+                                        />
+                                        <t t-out="total_computable_globalformatted" />
                                     </td>
                                     <td>
-                                        <t t-set="total_global" t-value="float(total + total_refund)" />
+                                        <t
+                                            t-set="total_global"
+                                            t-value="float(total + total_refund + perception_total)"
+                                        />
                                         <t
                                             t-set="total_globalformatted"
                                             t-value="'{:,.2f}'.format(total_global).replace(',', 'X').replace('.', ',').replace('X', '.')"

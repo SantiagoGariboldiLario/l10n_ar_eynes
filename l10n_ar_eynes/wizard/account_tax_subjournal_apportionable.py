@@ -2,6 +2,7 @@ import json
 import logging
 import time
 from calendar import monthrange
+from collections import defaultdict
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -193,6 +194,10 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     'type': 'tax',
                 }
                 if tax.get('group_type', '') == 'vat':
+                    if not tax.get('is_exempt'):
+                        # The summary is keyed by aliquot ('21.0%'), so use the
+                        # tax rate instead of its name ('IVA Compras 21%')
+                        tax_vals['name'] = '%.2f%%' % (tax.get('amount') or 0.0)
                     vat_taxes.append(tax_vals)
                 else:
                     retention_type = tax.get('retention_type', '')
@@ -278,6 +283,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             raise UserError(_('There were no moves for this period'))
 
         c_taxes = [0] * len(cols)
+        vat_ids = {tax['id'] for tax in vat_cols}
         final_consumer_id = self.env.ref('l10n_ar_eynes.fiscal_position_cf').id
         ri_id = self.env.ref('l10n_ar_eynes.fiscal_position_ri').id
 
@@ -391,12 +397,51 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     lines[key]['vat_taxes'][tax_id][
                         line['fiscal_credit']
                     ] += amount
+            self._add_vat_tax_line(lines[key], line, vat_ids, amount)
 
             if not (line['tax_line_id'] or line['tax_ids']):
                 # SI NO ES LINEA DE IMPUESTO O ES LINEA SIN IMPUESTOS CORRESPONDE A NO GRAVADO
                 lines[key]['no_taxed'] += amount
 
         return lines, c_taxes, retention_perception_summary
+
+    def _add_vat_tax_line(self, invoice_vals, line, vat_ids, amount):
+        """Keep the VAT of the tax lines, to report the invoice amount
+        instead of recalculating it from the base."""
+        tax_id = line['tax_line_id']
+        if tax_id in vat_ids:
+            vat_amounts = invoice_vals.setdefault('vat_amounts', {})
+            vat_amounts[tax_id] = vat_amounts.get(tax_id, 0.0) + amount
+
+    def _split_vat_amount(self, invoice_vals, tax_id, vat_values):
+        """VAT amount by fiscal credit. Tax lines have no fiscal credit, so
+        the invoice VAT is split by base (the last one takes the rest).
+        Without tax line it is calculated from the base."""
+        bases = {
+            fiscal_credit: base
+            for fiscal_credit, base in vat_values.items()
+            if fiscal_credit not in ('name', 'is_exempt')
+        }
+        total = invoice_vals.get('vat_amounts', {}).get(tax_id)
+        if total is None:
+            try:
+                rate = float(vat_values['name'].replace('%', '')) / 100
+            except ValueError:
+                rate = 0.0
+            return {fc: round(base * rate, 2) for fc, base in bases.items()}
+        total_base = sum(bases.values())
+        fiscal_credits = list(bases)
+        res = {}
+        pending = total
+        for fiscal_credit in fiscal_credits[:-1]:
+            res[fiscal_credit] = (
+                round(total * bases[fiscal_credit] / total_base, 2)
+                if total_base
+                else 0.0
+            )
+            pending -= res[fiscal_credit]
+        res[fiscal_credits[-1]] = round(pending, 2)
+        return res
 
     def _get_lines(self, cols, vat_cols):
         lines, c_taxes, retention_perception_summary = self._group_lines_data(
@@ -478,9 +523,10 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
             )
 
             first_vat = True
-            for vat_values in line['vat_taxes'].values():
+            for tax_id, vat_values in line['vat_taxes'].items():
                 vat_split = list(vat_values.keys())
                 vat_split.remove('name')
+                vat_amounts = self._split_vat_amount(line, tax_id, vat_values)
                 for fiscal_credit in vat_split:
                     if not first_vat:
                         new_line = [''] * 5
@@ -489,14 +535,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                         )  # +2 for no_taxed and total
                     base_vat_amount = vat_values[fiscal_credit]
                     vat_aliquot = vat_values['name']
-                    try:
-                        vat_amount = round(
-                            base_vat_amount
-                            * (float(vat_aliquot.replace('%', '')) / 100),
-                            2,
-                        )
-                    except ValueError:
-                        vat_amount = 0.0
+                    vat_amount = vat_amounts[fiscal_credit]
 
                     new_line.insert(5, base_vat_amount)
                     new_line.insert(6, vat_aliquot)
@@ -668,7 +707,62 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
         self._cr.execute(q, q_vals)
 
         # Obtenemos el resultado de la consulta
-        return self._cr.dictfetchall()
+        return self._collapse_non_vat_lines(self._cr.dictfetchall())
+
+    def _collapse_non_vat_lines(self, rows):
+        """Product lines with taxes but no VAT (e.g. only perceptions) are
+        not taxed: keep a single row without tax_ids so they count as
+        No Gravado, like in the subjournal report."""
+        tax_ids = {row['tax_ids'] for row in rows if row['tax_ids']}
+        vat_ids = set(
+            self.env['account.tax']
+            .browse(tax_ids)
+            .filtered(lambda t: t.tax_group_id.group_type == 'vat')
+            .ids
+        )
+        line_taxes = defaultdict(set)
+        for row in rows:
+            if row['tax_ids'] and not row['tax_line_id']:
+                line_taxes[row['line_id']].add(row['tax_ids'])
+        non_vat_lines = {
+            line_id
+            for line_id, taxes in line_taxes.items()
+            if not taxes & vat_ids
+        }
+        res = []
+        seen = set()
+        for row in rows:
+            if row['line_id'] in non_vat_lines:
+                if row['line_id'] in seen:
+                    continue
+                seen.add(row['line_id'])
+                row = dict(row, tax_ids=None)
+            res.append(row)
+        return res
+
+    def _get_tax_line_totals(self, group_type):
+        """Amounts of the tax lines of the given tax group, taken from the
+        same lines as the report detail.
+        Returns {tax: [amount, refund_amount]}."""
+        based_sign = -1 if self.based_on == 'purchase' else 1
+        refund_types = ('out_refund', 'in_refund')
+        lines = {}
+        for row in self._get_line_vals():
+            if row['tax_line_id']:
+                lines[row['line_id']] = row
+        taxes = (
+            self.env['account.tax']
+            .browse({row['tax_line_id'] for row in lines.values()})
+            .filtered(lambda t: t.tax_group_id.group_type == group_type)
+        )
+        totals = {tax: [0.0, 0.0] for tax in taxes.sorted('sequence')}
+        for row in lines.values():
+            tax = taxes.browse(row['tax_line_id'])
+            if tax not in totals:
+                continue
+            amount = (row['credit'] - row['debit']) * based_sign
+            totals[tax][row['invoice_type'] in refund_types] += amount
+        return totals
 
     def _get_taxes_vals(self):
         q = """
@@ -677,7 +771,8 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                 atg.group_type,
                 at.retention_type,
                 at.is_exempt,
-                at.name
+                at.name,
+                at.amount
             FROM account_move_line l
             JOIN account_move i ON i.id = l.move_id
             LEFT JOIN account_move_line_account_tax_rel amlatr
@@ -695,7 +790,7 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                 AND a.account_type NOT LIKE '%%payable'
                 AND a.account_type NOT LIKE '%%receivable'
                 AND l.company_id = %(company_id)s
-            GROUP BY tax_id, atg.group_type, at.retention_type, at.is_exempt, at.name
+            GROUP BY tax_id, atg.group_type, at.retention_type, at.is_exempt, at.name, at.amount
         """
         q_vals = {
             'inv_type': tuple(self._get_move_types()),
@@ -730,32 +825,12 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
         return retention_res
 
     def _get_perception_data(self):
-        perception_query = """
-        SELECT
-            per.name,
-            sum(CASE
-                WHEN i.move_type IN %(neg_vouchers)s THEN -p.amount
-                ELSE p.amount
-            END)
-        FROM perception_tax_line p
-        JOIN account_tax per ON p.perception_id = per.id
-        JOIN account_move i ON p.invoice_id = i.id
-        WHERE p.date BETWEEN %(date_start)s AND %(date_end)s
-        AND i.state = 'posted'
-        AND per.type_tax_use = %(based_on)s
-        AND p.company_id = %(company)s
-        GROUP BY per.id
-        """
-        vals = {
-            'neg_vouchers': tuple(('in_refund',)),
-            'based_on': self.based_on,
-            'date_start': self.date_from,
-            'date_end': self.date_to,
-            'company': self.company_id.id,
-        }
-        self.env.cr.execute(perception_query, vals)
-        perception_res = self.env.cr.fetchall()
-        return perception_res
+        # Same source as the detail columns (accounting date, company
+        # currency) so the totals match
+        return [
+            ({'es_AR': tax.with_context(lang='es_AR').name}, sum(amounts))
+            for tax, amounts in self._get_tax_line_totals('perception').items()
+        ]
 
     def _parse_retention_perception(self):
         taxes_data_parsed = []
@@ -806,6 +881,14 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
         invoice_list_header.append('Total')
 
         retention_perception = self._parse_retention_perception()
+        perception_total = sum(
+            sum(amounts)
+            for amounts in self._get_tax_line_totals('perception').values()
+        )
+        internal_taxes = [0.0, 0.0]
+        for amounts in self._get_tax_line_totals('internals').values():
+            internal_taxes[0] += amounts[0]
+            internal_taxes[1] += amounts[1]
 
         return self.env.ref(
             'l10n_ar_eynes.action_report_report_subjournal_apportionable_vat'
@@ -845,11 +928,12 @@ class AccountTaxSubjournalApportionableWizard(models.TransientModel):
                     'ni_nr_ex_mon_refund'
                 ],
                 'retention_perception': retention_perception,
+                'perception_total': perception_total,
                 'cero': 0.0,
                 'fees': 0.0,
-                'internal_taxes': 0.0,
+                'internal_taxes': internal_taxes[0],
                 'cero_refund': 0.0,
                 'fees_refund': 0.0,
-                'internal_taxes_refund': 0.0,
+                'internal_taxes_refund': internal_taxes[1],
             },
         )

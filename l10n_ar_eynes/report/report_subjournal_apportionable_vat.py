@@ -15,8 +15,12 @@ class SubjournalApportionableReport(models.AbstractModel):
 
     @api.model
     def _get_report_values(self, docids, data=None):
-        model = self.env.context.get('active_model')
-        docs = self.env[model].browse(self.env.context.get('active_id'))
+        # Not active_model: after the document layout wizard the context
+        # points to base.document.layout
+        model = 'account.tax.subjournal.apportionable.wizard'
+        docs = self.env[model].browse(
+            docids or self.env.context.get('active_ids')
+        )
 
         return {
             'doc_ids': self.ids,
