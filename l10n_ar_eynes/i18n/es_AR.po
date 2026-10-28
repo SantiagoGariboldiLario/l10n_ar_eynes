@@ -6930,6 +6930,11 @@ msgid "Monthly"
 msgstr "Mensual"
 
 #. module: l10n_ar_eynes
+#: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__fcons_max_amount
+msgid "Monto Máximo Consumidor Final"
+msgstr ""
+
+#. module: l10n_ar_eynes
 #: model:ir.model.fields,field_description:l10n_ar_eynes.field_res_company__fcred_minimum_amount
 msgid "Monto Minimo (FCE)"
 msgstr ""
@@ -10424,6 +10429,27 @@ msgid ""
 "country format. You can use '/' to indicate that the partner is not subject "
 "to tax."
 msgstr ""
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/account_move.py:0
+msgid ""
+"The invoice reaches the maximum amount for an unidentified Final Consumer "
+"(%(amount)s). Set the document type and number of the customer %(partner)s."
+msgstr ""
+"La factura alcanza el monto máximo para un Consumidor Final sin identificar "
+"(%(amount)s). Cargue el tipo y número de documento del cliente %(partner)s."
+
+#. module: l10n_ar_eynes
+#: model:ir.model.fields,help:l10n_ar_eynes.field_res_company__fcons_max_amount
+msgid ""
+"Maximum amount that can be invoiced to an unidentified Final Consumer. "
+"Electronic invoices that reach this amount cannot be confirmed until the "
+"customer document is set. Zero means no limit."
+msgstr ""
+"Monto máximo que se puede facturar a un Consumidor Final sin identificar. Las "
+"facturas electrónicas que alcancen este monto no se podrán confirmar hasta "
+"cargar el documento del cliente. En cero no hay límite."
 
 #. module: l10n_ar_eynes
 #. odoo-python

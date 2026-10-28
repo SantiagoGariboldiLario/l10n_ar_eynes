@@ -1584,6 +1584,8 @@ class AccountMove(models.Model):
         if invalid_moves:
             raise ValidationError(_('The amount to validate cannot be $0.'))
 
+        self._check_final_consumer_max_amount()
+
         sale_invoices = self.filtered(lambda move: move.is_sale_document())
         electronic_invoices = sale_invoices.filtered(
             lambda move: move.fiscal_type == 'electronic'
@@ -1595,6 +1597,31 @@ class AccountMove(models.Model):
         return electronic_invoices.with_context(
             from_action_post=True
         )._validate_electronic_invoices()
+
+    def _check_final_consumer_max_amount(self):
+        for move in self.filtered(
+            lambda m: m.move_type == 'out_invoice'
+            and m.fiscal_type == 'electronic'
+        ):
+            max_amount = move.company_id.fcons_max_amount
+            partner = move.partner_id
+            if (
+                not max_amount
+                or move.fiscal_position_id.afip_code != 5
+                or abs(move.amount_total_signed) < max_amount
+            ):
+                continue
+            doc_type = partner.document_type_id.afip_code or '99'
+            if doc_type == '99' or not partner.vat:
+                raise ValidationError(
+                    _(
+                        'The invoice reaches the maximum amount for an unidentified '
+                        'Final Consumer (%(amount)s). Set the document type and '
+                        'number of the customer %(partner)s.',
+                        amount=move.company_currency_id.format(max_amount),
+                        partner=partner.display_name,
+                    )
+                )
 
     def validate_period(self):
         date = self.date or self.invoice_date or fields.Date.context_today(self)
