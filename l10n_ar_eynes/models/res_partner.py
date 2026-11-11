@@ -288,6 +288,8 @@ class ResPartner(models.Model):
     ):
         if not property_account_position_id:
             return
+        if self.env.context.get('skip_multicompany_fpos'):
+            return
 
         fiscal_position = self.env['account.fiscal.position'].browse(
             property_account_position_id
@@ -299,7 +301,9 @@ class ResPartner(models.Model):
                 fiscal_position, company
             )
             for partner in self:
-                partner_company = partner.sudo().with_company(company)
+                partner_company = partner.sudo().with_company(
+                    company
+                ).with_context(skip_multicompany_fpos=True)
                 partner_company.property_account_position_id = (
                     company_fiscal_position.id
                     if company_fiscal_position
