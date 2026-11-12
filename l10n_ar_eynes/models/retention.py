@@ -3,7 +3,7 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta as relatived
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DSDF
 
 _logger = logging.getLogger(__name__)
@@ -48,6 +48,48 @@ class RetentionConcept(models.Model):
         default=lambda self: self._get_company(),
         readonly=True,
     )
+
+    @api.onchange('type', 'account_ids')
+    def _onchange_account_ids_shared_profit(self):
+        """Avisa (sin bloquear) si una cuenta ya esta en otro concepto de
+        Ganancias: puede terminar en retenciones duplicadas."""
+        accounts = self.account_ids._origin
+        if self.type != 'profit' or not accounts:
+            return
+        others = self.search(
+            [
+                ('id', '!=', self._origin.id),
+                ('type', '=', 'profit'),
+                ('account_ids', 'in', accounts.ids),
+                ('company_id', 'in', [self.company_id.id, False]),
+            ]
+        )
+        if not others:
+            return
+        lines = [
+            '- %s: %s'
+            % (
+                account.display_name,
+                ', '.join(
+                    others.filtered(
+                        lambda c, a=account: a in c.account_ids
+                    ).mapped('display_name')
+                ),
+            )
+            for account in accounts & others.account_ids
+        ]
+        return {
+            'warning': {
+                'title': _("Account already used in another Profit concept"),
+                'message': _(
+                    "These accounts are already assigned to other Profit "
+                    "concepts:\n%(lines)s\n\nUsing the same account in more "
+                    "than one Profit concept can generate duplicated "
+                    "retentions. You can save anyway.",
+                    lines='\n'.join(lines),
+                ),
+            }
+        }
 
 
 class RetentionActivity(models.Model):
