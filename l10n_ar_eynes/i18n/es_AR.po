@@ -12433,3 +12433,35 @@ msgid ""
 msgstr ""
 "Algunos registros quedaron fuera del archivo o necesitan revisión. Revise "
 "los Avisos del archivo generado %(code)s antes de presentarlo en ARCIBA."
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/wizard/create_sicore_file.py:0
+msgid ""
+"Payment order %(order)s of %(date)s: the retention %(retention)s for "
+"%(amount)s has no partner. Check the retentions of that payment order."
+msgstr ""
+"Orden de pago %(order)s del %(date)s: la retención %(retention)s por "
+"%(amount)s no tiene proveedor. Revise las retenciones de esa orden de pago."
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/retention.py:0
+msgid "Account already used in another Profit concept"
+msgstr "Cuenta ya usada en otro concepto de Ganancias"
+
+#. module: l10n_ar_eynes
+#. odoo-python
+#: code:addons/l10n_ar_eynes/models/retention.py:0
+msgid ""
+"These accounts are already assigned to other Profit concepts:\n"
+"%(lines)s\n"
+"\n"
+"Using the same account in more than one Profit concept can generate "
+"duplicated retentions. You can save anyway."
+msgstr ""
+"Estas cuentas ya están asignadas a otros conceptos de Ganancias:\n"
+"%(lines)s\n"
+"\n"
+"Usar la misma cuenta en más de un concepto de Ganancias puede generar "
+"retenciones duplicadas. Puede guardar de todos modos."

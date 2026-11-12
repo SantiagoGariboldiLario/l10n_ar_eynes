@@ -30,6 +30,7 @@ from decimal import Decimal
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.misc import formatLang
 
 from ..utils.sicore_fixed_width import FixedWidth, moneyfmt
 from ..utils.sicore_fixed_width_dicts import (
@@ -123,6 +124,27 @@ class CreateSicoreFiles(models.TransientModel):
         reg_code = re.sub(r"\D", "", str(reg_code))[:3] if reg_code else ''
         return reg_code or '0'
 
+    def _get_no_partner_errors(self, tax_lines):
+        errors = []
+        for tax_line in tax_lines:
+            order = tax_line.payment_order_id
+            errors.append(
+                _(
+                    "Payment order %(order)s of %(date)s: the retention "
+                    "%(retention)s for %(amount)s has no partner. Check "
+                    "the retentions of that payment order.",
+                    order=order.number or order.reference or order.id,
+                    date=order.date.strftime('%d/%m/%Y'),
+                    retention=tax_line.retention_id.name or tax_line.name,
+                    amount=formatLang(
+                        self.env,
+                        tax_line.amount,
+                        currency_obj=order.currency_id,
+                    ),
+                )
+            )
+        return errors
+
     @api.model
     def _generate_retention_file(
         self,
@@ -143,6 +165,14 @@ class CreateSicoreFiles(models.TransientModel):
         tax_lines = self.env['account.payment.order.retention.line'].browse(
             retention_ids
         )
+
+        # Sin proveedor no se puede armar el registro ni saber si va al
+        # archivo local o al de exterior: se informa en que OP esta para que
+        # la corrijan. Se reporta una sola vez, en la pasada del archivo local.
+        no_partner_lines = tax_lines.filtered(lambda line: not line.partner_id)
+        if is_local:
+            head_file_errors += self._get_no_partner_errors(no_partner_lines)
+        tax_lines -= no_partner_lines
 
         # Filtrar lineas según si es local o no, para sacar los archivos separados.
         if is_local:
