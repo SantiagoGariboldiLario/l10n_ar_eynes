@@ -124,6 +124,27 @@ class CreateSicoreFiles(models.TransientModel):
         reg_code = re.sub(r"\D", "", str(reg_code))[:3] if reg_code else ''
         return reg_code or '0'
 
+    def _get_no_partner_errors(self, tax_lines):
+        errors = []
+        for tax_line in tax_lines:
+            order = tax_line.payment_order_id
+            errors.append(
+                _(
+                    "Payment order %(order)s of %(date)s: the retention "
+                    "%(retention)s for %(amount)s has no partner. Check "
+                    "the retentions of that payment order.",
+                    order=order.number or order.reference or order.id,
+                    date=order.date.strftime('%d/%m/%Y'),
+                    retention=tax_line.retention_id.name or tax_line.name,
+                    amount=formatLang(
+                        self.env,
+                        tax_line.amount,
+                        currency_obj=order.currency_id,
+                    ),
+                )
+            )
+        return errors
+
     @api.model
     def _generate_retention_file(
         self,
@@ -150,23 +171,7 @@ class CreateSicoreFiles(models.TransientModel):
         # la corrijan. Se reporta una sola vez, en la pasada del archivo local.
         no_partner_lines = tax_lines.filtered(lambda line: not line.partner_id)
         if is_local:
-            for tax_line in no_partner_lines:
-                order = tax_line.payment_order_id
-                head_file_errors.append(
-                    _(
-                        "Payment order %(order)s of %(date)s: the retention "
-                        "%(retention)s for %(amount)s has no partner. Check "
-                        "the retentions of that payment order.",
-                        order=order.number or order.reference or order.id,
-                        date=order.date.strftime('%d/%m/%Y'),
-                        retention=tax_line.retention_id.name or tax_line.name,
-                        amount=formatLang(
-                            self.env,
-                            tax_line.amount,
-                            currency_obj=order.currency_id,
-                        ),
-                    )
-                )
+            head_file_errors += self._get_no_partner_errors(no_partner_lines)
         tax_lines -= no_partner_lines
 
         # Filtrar lineas según si es local o no, para sacar los archivos separados.
