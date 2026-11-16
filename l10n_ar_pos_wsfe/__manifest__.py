@@ -33,7 +33,6 @@
         'views/account_report.xml',
         'views/pos_config_views.xml',
         'views/pos_order_views.xml',
-        'views/res_company_views.xml',
         'security/ir.model.access.csv',
     ],
     'assets': {

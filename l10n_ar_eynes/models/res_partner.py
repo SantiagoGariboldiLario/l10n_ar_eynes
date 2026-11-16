@@ -288,8 +288,6 @@ class ResPartner(models.Model):
     ):
         if not property_account_position_id:
             return
-        if self.env.context.get('skip_multicompany_fpos'):
-            return
 
         fiscal_position = self.env['account.fiscal.position'].browse(
             property_account_position_id
@@ -300,15 +298,16 @@ class ResPartner(models.Model):
             company_fiscal_position = self._get_company_fiscal_position(
                 fiscal_position, company
             )
+            new_value = (
+                company_fiscal_position.id if company_fiscal_position else False
+            )
             for partner in self:
-                partner_company = partner.sudo().with_company(
-                    company
-                ).with_context(skip_multicompany_fpos=True)
-                partner_company.property_account_position_id = (
-                    company_fiscal_position.id
-                    if company_fiscal_position
-                    else False
-                )
+                partner_company = partner.sudo().with_company(company)
+                if partner_company.property_account_position_id.id == new_value:
+                    continue
+                partner_company.with_context(
+                    skip_multicompany_fiscal_position_propagation=True
+                ).property_account_position_id = new_value
 
     def write(self, vals):
         vals = self._parse_vat_string(vals)
@@ -329,9 +328,12 @@ class ResPartner(models.Model):
             vals["vat"] = self.vat
 
         res = super().write(vals)
-        self._set_multicompany_account_fiscal_position(
-            vals.get('property_account_position_id', False)
-        )
+        if not self.env.context.get(
+            'skip_multicompany_fiscal_position_propagation'
+        ):
+            self._set_multicompany_account_fiscal_position(
+                vals.get('property_account_position_id', False)
+            )
         return res
 
     @api.model
@@ -664,6 +666,11 @@ class ResPartnerPerception(models.Model):
     _name = "res.partner.perception"
     _description = "Perception Defined in Partner"
     _rec_name = 'perception_id'
+
+    _perception_partner_period_uniq = models.Constraint(
+        'UNIQUE (partner_id, perception_id, period)',
+        'Only one perception of the same type can be configured for the partner in the same period.',
+    )
 
     perception_id = fields.Many2one(
         'account.tax',

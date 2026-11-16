@@ -3,7 +3,7 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta as relatived
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DSDF
 
 _logger = logging.getLogger(__name__)
@@ -24,6 +24,7 @@ class RetentionConcept(models.Model):
             ('vat', 'VAT'),
             ('gross_income', 'Gross Income'),
             ('profit', 'Profit'),
+            ('suss', 'SUSS'),
             ('other', 'Other'),
         ],
         string='Type',
@@ -47,6 +48,48 @@ class RetentionConcept(models.Model):
         default=lambda self: self._get_company(),
         readonly=True,
     )
+
+    @api.onchange('type', 'account_ids')
+    def _onchange_account_ids_shared_profit(self):
+        """Avisa (sin bloquear) si una cuenta ya esta en otro concepto de
+        Ganancias: puede terminar en retenciones duplicadas."""
+        accounts = self.account_ids._origin
+        if self.type != 'profit' or not accounts:
+            return
+        others = self.search(
+            [
+                ('id', '!=', self._origin.id),
+                ('type', '=', 'profit'),
+                ('account_ids', 'in', accounts.ids),
+                ('company_id', 'in', [self.company_id.id, False]),
+            ]
+        )
+        if not others:
+            return
+        lines = [
+            '- %s: %s'
+            % (
+                account.display_name,
+                ', '.join(
+                    others.filtered(
+                        lambda c, a=account: a in c.account_ids
+                    ).mapped('display_name')
+                ),
+            )
+            for account in accounts & others.account_ids
+        ]
+        return {
+            'warning': {
+                'title': _("Account already used in another Profit concept"),
+                'message': _(
+                    "These accounts are already assigned to other Profit "
+                    "concepts:\n%(lines)s\n\nUsing the same account in more "
+                    "than one Profit concept can generate duplicated "
+                    "retentions. You can save anyway.",
+                    lines='\n'.join(lines),
+                ),
+            }
+        }
 
 
 class RetentionActivity(models.Model):
@@ -156,7 +199,7 @@ class RetentionTaxApplication(models.Model):
             ('payment_amount_untaxed', 'Payment Amount Untaxed'),
             # ('amount_taxed', 'Invoice Net Taxed'),
             # ('amount_no_taxed', 'Invoice Net Untaxed'),
-            # ('amount_total', 'Invoice Total'),
+            ('amount_total', 'Invoice Total'),
             # ('payment_amount', 'Payment Amount'),
         ],
         string='Calculation Base',
@@ -200,13 +243,10 @@ class RetentionTaxApplication(models.Model):
         required=True,
     )
 
-    _sql_constraints = [
-        (
-            'concept_activity_uniq',
-            'unique (concept_id, activity_id, retention_tax_id)',
-            'The tuple of Concept, Activity must be unique per Retention !',
-        ),
-    ]
+    _concept_activity_uniq = models.Constraint(
+        'UNIQUE (concept_id, activity_id, retention_tax_id)',
+        'The tuple of Concept, Activity must be unique per Retention !',
+    )
 
     @api.depends('retention_tax_id')
     def _compute_concept_domain(self):
@@ -240,7 +280,7 @@ class RetentionTaxApplication(models.Model):
         for t in self.vat_tax_ids:
             vat_tax[t.tax_id.id] = t.rate
 
-        for tax_id, vals in line_vals['vat_taxes'].iteritems():
+        for tax_id, vals in line_vals.get('vat_taxes', {}).items():
             if tax_id in vat_tax:
                 base += vals['base_amount'] * vat_tax[tax_id]
 
@@ -278,6 +318,43 @@ class RetentionTaxApplication(models.Model):
         date_finish = (dt + relatived(day=31)).strftime(DSDF)
         return date_start, date_finish
 
+    def _get_concept_paid_amount(self, po_line, concept):
+        """Neto del comprobante imputable al concepto, proporcional a lo pagado
+
+        Usa el mismo criterio que la base de la retencion: delega en
+        _parse_move_lines en vez de filtrar por cuenta, para que los dos
+        momentos en que se mide el comprobante (la base del pago y los pagos
+        previos del mes) tomen siempre las mismas lineas.
+
+        """
+        move = po_line.move_line_id.move_id
+        concept_lines = (
+            self.env['account.tax']
+            ._parse_move_lines(move)['concept_lines']
+            .filtered(lambda ml: ml.account_id in concept.account_ids)
+        )
+        # El signo lo tomamos del total del comprobante y no de cada linea,
+        # asi las lineas negativas restan en lugar de sumar
+        amount_with_concept = abs(sum(concept_lines.mapped('balance')))
+        percentage_paid = po_line.amount / po_line.amount_original
+        return round(amount_with_concept * percentage_paid, 2)
+
+    def get_invoice_retained_amount(self, invoice, concept):
+        """[T15410] Total ya retenido de esta factura para este concepto.
+
+        Se usa en el modo "proportional_vat", donde la retencion se calcula
+        sobre el total de la factura y hay que descontar lo retenido en
+        pagos parciales anteriores.
+        """
+        domain = [
+            ('invoice_id', '=', invoice.id),
+            ('retention_id', '=', self.retention_tax_id.id),
+            ('concept_id', '=', concept.id),
+            ('payment_order_id.state', '=', 'posted'),
+        ]
+        lines = self.env['account.payment.order.retention.line'].search(domain)
+        return sum(lines.mapped('amount'))
+
     def get_period_partner_payments(self, partner, concept, po_date=False):
         AccountPaymentOrder = self.env['account.payment.order']
         date_start, date_finish = self._get_month_date_span_from_date(po_date)
@@ -290,39 +367,16 @@ class RetentionTaxApplication(models.Model):
                 ('date', '<=', date_finish),
             ]
         )
-        debt_moves = prev_pos.mapped('debt_line_ids')
-        income_moves = prev_pos.mapped('income_line_ids')
         # Use the proportional amount of line being paid, searching in
         # the old apo's and gathering the apol related to the untaxed ones
-        debt_untax_mls_ok = []
-        for line in debt_moves:
-            move = line.move_line_id.move_id
-            percentage_paid = line.amount / line.amount_original
-            move_lines_with_concept = move.line_ids.filtered(
-                lambda ml: ml.account_id in concept.account_ids
-                and ml.tax_ids
-                and not ml.tax_line_id
-            )
-            amount_with_concept = sum(
-                move_lines_with_concept.mapped('credit')
-            ) + sum(move_lines_with_concept.mapped('debit'))
-            amount = round(amount_with_concept * percentage_paid, 2)
-            debt_untax_mls_ok.append(amount)
-
-        income_untax_mls_ok = []
-        for line in income_moves:
-            move = line.move_line_id.move_id
-            percentage_paid = line.amount / line.amount_original
-            move_lines_with_concept = move.line_ids.filtered(
-                lambda ml: ml.account_id in concept.account_ids
-                and ml.tax_ids
-                and not ml.tax_line_id
-            )
-            amount_with_concept = sum(
-                move_lines_with_concept.mapped('credit')
-            ) + sum(move_lines_with_concept.mapped('debit'))
-            amount = round(amount_with_concept * percentage_paid, 2)
-            debt_untax_mls_ok.append(amount)
+        debt_untax_mls_ok = [
+            self._get_concept_paid_amount(line, concept)
+            for line in prev_pos.mapped('debt_line_ids')
+        ]
+        income_untax_mls_ok = [
+            self._get_concept_paid_amount(line, concept)
+            for line in prev_pos.mapped('income_line_ids')
+        ]
 
         untaxed_amount = sum(debt_untax_mls_ok) - sum(income_untax_mls_ok)
         untaxed_amount += self.get_period_partner_advance_payments(prev_pos)
@@ -394,7 +448,14 @@ class RetentionTaxApplication(models.Model):
 
         payment_order_base = base
         _logger.info("BASE DE LA OP: %s", payment_order_base)
-        if self.retention_tax_id.retention_type == 'profit':
+        # [T15410] La acumulacion mensual entre facturas es del regimen
+        # general de Ganancias. El modo "proportional_vat" (ej. Ganancias 6%
+        # de Factura A con leyenda) tiene su propio control de lo ya
+        # retenido, por factura, mas abajo.
+        if (
+            self.retention_tax_id.retention_type == 'profit'
+            and self.calculation_base != 'proportional_vat'
+        ):
             period_base, period_amount = self.get_period_base_amount(
                 partner, self.concept_id, po_date
             )
@@ -436,9 +497,34 @@ class RetentionTaxApplication(models.Model):
             )
 
         if self.calculation_base == 'proportional_vat':
-            # TODO: Chequear que esta funcion funcione correctamente
-            amount = self._compute_proportional_vat(percent, base)
+            amount = self._compute_proportional_vat(percent, vals)
             _logger.info("MONTO CALCULADO COMO 'proportional_vat' %s" % amount)
+
+            # [T15410] La retencion se calcula sobre el total de la factura,
+            # pero en pagos parciales no puede superar lo que se esta pagando
+            # ahora. Si ya se retuvo algo en pagos anteriores de esta misma
+            # factura, se descuenta, y el excedente que no entre en este
+            # pago queda pendiente para los proximos pagos parciales.
+            invoice = vals.get('invoice')
+            if invoice:
+                already_retained = self.get_invoice_retained_amount(
+                    invoice, self.concept_id
+                )
+                _logger.info(
+                    "Ya retenido en pagos anteriores de %s: %s"
+                    % (invoice.name, already_retained)
+                )
+                amount -= already_retained
+                if amount < 0.0:
+                    amount = 0.0
+                payment_amount = abs(vals.get('payment_amount') or 0.0)
+                if amount > payment_amount:
+                    _logger.info(
+                        "Monto %s supera lo que se esta pagando ahora (%s). "
+                        "Se topea, el excedente queda para proximos pagos."
+                        % (amount, payment_amount)
+                    )
+                    amount = payment_amount
         else:
             if self.aliq_type == 'percent':
                 amount = round(base * (percent / 100.0), 2)
@@ -450,7 +536,10 @@ class RetentionTaxApplication(models.Model):
         # Si es de ganancias, le detraemos las retenciones de ganancias
         # ya practicadas para este concepto
         # en el mes calendario en pagos previos a este proveedor
-        if self.retention_tax_id.retention_type == 'profit':
+        if (
+            self.retention_tax_id.retention_type == 'profit'
+            and self.calculation_base != 'proportional_vat'
+        ):
             _logger.info(
                 "Descuenta monto del periodo %s al MONTO CALCULADO %s"
                 % (period_amount, amount)

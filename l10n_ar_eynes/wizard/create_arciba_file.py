@@ -26,7 +26,8 @@ import logging
 import re
 import tempfile
 import time
-from decimal import Decimal
+import unicodedata
+from decimal import ROUND_HALF_UP, Decimal
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
@@ -35,6 +36,36 @@ from ..utils.arciba_fixed_width_dicts import HEAD_LINES, HEAD_LINES_NC
 from ..utils.sicore_fixed_width import FixedWidth, moneyfmt
 
 logger = logging.getLogger(__name__)
+
+
+def informed_amount(base_amount, percentage):
+    """Importe de retencion/percepcion a informar a AGIP.
+
+    AGIP no toma el importe tal cual: lo recalcula como base x alicuota y
+    exige que coincida al centavo, redondeando el medio centavo para arriba.
+    Por eso lo calculamos aca en lugar de arrastrar el importe contabilizado.
+
+    Se usa Decimal a partir de strings porque el float pierde el medio
+    centavo: 6160009.0 * 0.045 da 277200.40499999997 y se termina informando
+    277200,40 donde AGIP espera 277200,41. moneyfmt tampoco alcanza, porque
+    hace quantize con ROUND_HALF_EVEN.
+    """
+    return (
+        Decimal(str(base_amount or 0.0)) * Decimal(str(percentage or 0.0)) / 100
+    ).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+
+def arciba_text(value):
+    """Texto en ASCII para el archivo de AGIP.
+
+    El archivo es de ancho fijo: un caracter fuera de ASCII (tildes, ´, °)
+    ocupa mas de un byte y corre todas las columnas siguientes de la linea.
+    """
+    return (
+        unicodedata.normalize('NFKD', value or '')
+        .encode('ascii', 'ignore')
+        .decode('ascii')
+    )
 
 
 class CreateArcibaFiles(models.TransientModel):
@@ -79,6 +110,11 @@ class CreateArcibaFiles(models.TransientModel):
             self.env.ref('l10n_ar_eynes.iibb_situation_not_inscribed'): 4,
             self.env.ref('l10n_ar_eynes.iibb_situation_simplified_regime'): 5,
         }
+        if not iibb:
+            # Forzamos esto por el caso de Tommasi, que cambiaron la posición fiscal de los clientes
+            # y quedaron percepciones practicadas a gente que era de otra jurisdicción.
+            iibb = self.env.ref('l10n_ar_eynes.iibb_situation_local')
+
         code_iibb = dict_types.get(iibb, False)
         return code_iibb
 
@@ -102,6 +138,38 @@ class CreateArcibaFiles(models.TransientModel):
         ]:
             code_fiscal_position = 3
         return code_fiscal_position
+
+    @api.model
+    def _get_arciba_perception_amounts(self, perc):
+        inv = perc.invoice_id
+        if inv.company_id.currency_id == inv.currency_id:
+            return perc.base, perc.amount
+        base = perc.base_secondary_currency
+        amount = perc.amount_secondary_currency
+        if not amount and base and perc.tax_app_id:
+            try:
+                data = perc.tax_app_id.get_perception_data(
+                    perc.partner_id, perc.date
+                )
+                padron_percent = data.get('percent', 0.0)
+                excluded = data.get('excluded_percent', 0.0)
+                effective = round(padron_percent * (1 - excluded), 2)
+                if effective:
+                    amount = round(base * effective / 100, 2)
+            except Exception:
+                # El padron es un respaldo: si no responde o no tiene datos
+                # para el partner, se sigue con el importe convertido tal
+                # cual y la linea se informa igual.
+                logger.warning(
+                    "ARCIBA: no se pudo obtener la alicuota de padron para "
+                    "la percepcion #%s (partner %s, fecha %s); se usa el "
+                    "importe convertido sin ajustar.",
+                    perc.id,
+                    perc.partner_id.display_name,
+                    perc.date,
+                    exc_info=True,
+                )
+        return base, amount
 
     def generate_fw_file(self, data_lst):
         self.ensure_one()
@@ -139,6 +207,7 @@ class CreateArcibaFiles(models.TransientModel):
                 'date_from': self.period_start,
                 'date_to': self.period_end,
                 'company_id': self.company_id.id,
+                'notes': self.notes,
             }
         )
 
@@ -152,7 +221,36 @@ class CreateArcibaFiles(models.TransientModel):
         doc = self.env['ir.attachment'].create(data_attach)
         generated_file_rec.write({'attachment_id': doc.id})
 
-        return True
+        if not self.notes:
+            return True
+        # Los problemas no bloquean el archivo: quedan como avisos en el
+        # archivo generado para revisarlos antes de presentarlo.
+        self.notes = False
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('eARCIBA file generated with warnings'),
+                'message': _(
+                    'Some records were left out or need review. See the '
+                    'Warnings of the generated file %(code)s before '
+                    'submitting it to ARCIBA.',
+                    code=generated_file_rec.code,
+                ),
+                'type': 'warning',
+                'sticky': True,
+                'next': {'type': 'ir.actions.act_window_close'},
+            },
+        }
+
+    @api.model
+    def _add_arciba_notes(self, title, informed, total, warnings):
+        """Acumula en las notas del wizard los avisos no bloqueantes."""
+        if not warnings or not self:
+            return
+        lines = [f'{title}: {informed}/{total}'] + list(warnings)
+        notes = self.notes + '\n\n' if self.notes else ''
+        self.write({'notes': notes + '\n'.join(lines)})
 
     def _get_invoice_tax_lines(self, invoice):
         tax_line_ids = invoice.line_ids.filtered(lambda line: line.tax_line_id)
@@ -196,23 +294,31 @@ class CreateArcibaFiles(models.TransientModel):
             )  # Datetime->String: dd/mm/yyyy
             # Nro Cert
             nro_cert_propio = ret.certificate_no or '0000000000000000'
-            # Ret / Per applied
+            # Ret / Per applied: importe contabilizado. Mas abajo, una vez
+            # resuelta la alicuota, se reemplaza por base x alicuota, que es lo
+            # que AGIP valida.
             ret_per_applied = ret.amount
-            # Ret / Per base
-            base_amount = ret.base_amount
+            # Ret / Per base: la base sobre la que se calculo la retencion.
+            # base_amount en las retenciones cargadas a mano se completa al
+            # validar la OP con el total de la OP, no con la base.
+            base_amount = ret.base or ret.base_amount
 
             # **-------**  Datos desde la Orden de Pago: **--------**
             op = ret.payment_order_id
             partner = op.partner_id
-            # Alicuota
+            # Alicuota: ultimo padron vigente al periodo, no solo el del mes
+            # exacto, para no perder retenciones cuando el padron no se
+            # actualizo.
             percentage = (
                 self.env["res.partner.retention"]
                 .search(
                     [
                         ("retention_id", "=", ret.retention_id.id),
                         ("partner_id", "=", partner.id),
-                        ("period", "=", self.period_start),
-                    ]
+                        ("period", "<=", self.period_start),
+                    ],
+                    order='period desc',
+                    limit=1,
                 )
                 .percent
             )
@@ -227,7 +333,21 @@ class CreateArcibaFiles(models.TransientModel):
                     )
                 )
                 continue
-            elif percentage != 0.0:
+            else:
+                if not percentage:
+                    # Se aplicó alícuota general:
+                    percentage = ret.applied_aliquot
+                if not percentage and base_amount:
+                    # Retencion manual sin padron ni aplicacion: alicuota
+                    # efectivamente retenida
+                    percentage = round(abs(ret.amount / base_amount) * 100, 2)
+
+                # El importe informado tiene que ser exactamente
+                # base x alicuota. El calculo de la retencion se hace en float
+                # y pierde el medio centavo, asi que ret.amount puede venir un
+                # centavo abajo de lo que AGIP recalcula.
+                ret_per_applied = informed_amount(base_amount, percentage)
+
                 # Type of document partner
                 nro_doc_retenido = (
                     partner.vat.replace('-', '')
@@ -266,9 +386,7 @@ class CreateArcibaFiles(models.TransientModel):
                 else:
                     pos_fiscal_retenido = 1
 
-                razon_social_retenido = (
-                    (partner.name).replace('ñ', 'n').replace('Ñ', 'N')
-                )
+                razon_social_retenido = arciba_text(partner.name)
                 # IIBB
                 ppids = partner.retention_ids
                 ret_partner = ppids.filtered(
@@ -293,20 +411,11 @@ class CreateArcibaFiles(models.TransientModel):
                 op_lines = op.debt_line_ids.filtered(
                     lambda line: line.amount != 0
                 )
-                invoices = op_lines.mapped('invoice_id')
-                if not len(invoices):
-                    errors.append(
-                        _(
-                            'rtl #%(ret_id)s: Unable to get associated invoice (%(ret_name)s)',
-                            ret_id=ret.id,
-                            ret_name=ret.name,
-                        )
-                    )
-                    continue
                 # Denomination
                 denomination_name = ''
-                # Invoice total
-                op_amount_total = sum(op_lines.mapped('amount'))
+                # Invoice total: sin lineas de deuda (pago a cuenta) el total
+                # del comprobante es el importe de la OP.
+                op_amount_total = sum(op_lines.mapped('amount')) or op.amount
                 # Iva Amount
                 inv_iva_amount = 0.0
                 # # Monto de otros conceptos:
@@ -353,10 +462,11 @@ class CreateArcibaFiles(models.TransientModel):
                     'fecha_aceptacion': '',  # Para comprobantes mipyme
                 }
                 res.append(line)
-        if not errors:
-            return None, res
-        else:
-            return 1, errors
+        # Los errores no bloquean el archivo: quedan como avisos.
+        self._add_arciba_notes(
+            _('Retentions informed'), len(res), len(retention_ids), errors
+        )
+        return None, res
 
     @api.model
     def _get_perc_data(self, perc_ids):
@@ -419,28 +529,21 @@ class CreateArcibaFiles(models.TransientModel):
                 errors.append(str(e))
                 continue
 
-            # Ret / Per applied
-            # ret_per_applied = perc.amount
-            ret_per_applied = 0
-            if inv.company_id.currency_id == inv.currency_id:
-                ret_per_applied = perc.amount
-            else:
-                # ((perc.amount / perc.base) * 100) redondeado a 2
-                ret_per_applied = (
-                    round(((perc.amount / perc.base) * 100), 2)
-                    / 100
-                    * perc.base_secondary_currency
-                )
-
-            # Ret / Per base
-            base_amount = (
-                perc.base
-                if inv.company_id.currency_id == inv.currency_id
-                else perc.base_secondary_currency
+            # ARCIBA expects perception values in company currency.
+            base_amount, ret_per_applied = self._get_arciba_perception_amounts(
+                perc
             )
 
             # Alicuota
-            percentage = round(ret_per_applied / base_amount * 100, 2)
+            # Usamos la alicuota efectivamente aplicada. No la deducimos de
+            # importe/base porque el redondeo del importe (en moneda extranjera
+            # las percepciones son de centavos) deforma la alicuota y AGIP
+            # rechaza las que no existen en el padron.
+            percentage = perc.percent or (
+                round(ret_per_applied / base_amount * 100, 2)
+                if base_amount
+                else 0.0
+            )
             if percentage < 0 or percentage > 99.99:
                 errors.append(
                     _(
@@ -453,6 +556,13 @@ class CreateArcibaFiles(models.TransientModel):
                 )
                 continue
 
+            # AGIP recalcula el importe como base x alicuota, asi que
+            # informamos exactamente eso. En facturas en moneda extranjera el
+            # importe contabilizado no lo cumple: la percepcion se redondea en
+            # centavos de la moneda de la factura y ese redondeo se multiplica
+            # por la cotizacion al convertirlo.
+            ret_per_applied = informed_amount(base_amount, percentage)
+
             # Iva Amount
             inv_iva_amount = 0.0
             if denomination_name in ('A', 'M'):
@@ -464,9 +574,7 @@ class CreateArcibaFiles(models.TransientModel):
 
             # Partner Data
             pos_fiscal_retenido = self._get_partner_fiscal_position_code(inv)
-            razon_social_retenido = (
-                (inv.partner_id.name).replace('ñ', 'n').replace('Ñ', 'N')
-            )
+            razon_social_retenido = arciba_text(inv.partner_id.name)
 
             # IIBB
             ppids = perc.partner_id.perception_ids
@@ -477,12 +585,6 @@ class CreateArcibaFiles(models.TransientModel):
                 perc_partner[0] if len(perc_partner) > 1 else perc_partner
             )
             sit_iibb = self._get_partner_iibb_code(perc_partner.sit_iibb)
-            if not perc_partner:
-                # Forzamos esto por el caso de Tommasi, que cambiaron la posición fiscal de los clientes
-                # y quedaron percepciones practicadas a gente que era de otra jurisdicción.
-                sit_iibb = self._get_partner_iibb_code(
-                    self.env.ref('l10n_ar_eynes.iibb_situation_local')
-                )
             if not sit_iibb:
                 errors.append(
                     _(
@@ -536,10 +638,11 @@ class CreateArcibaFiles(models.TransientModel):
             }
             res.append(line)
 
-        if not errors:
-            return None, res
-        else:
-            return 1, errors
+        # Los errores no bloquean el archivo: quedan como avisos.
+        self._add_arciba_notes(
+            _('Perceptions informed'), len(res), len(perc_ids), errors
+        )
+        return None, res
 
     def create_files(self):
         """
@@ -679,6 +782,47 @@ class CreateArcibaNcFile(models.TransientModel):
         )
 
     @api.model
+    def _get_arciba_perception_amounts(self, perc):
+        inv = perc.invoice_id
+        if inv.company_id.currency_id == inv.currency_id:
+            return perc.base, perc.amount
+        base = perc.base_secondary_currency
+        amount = perc.amount_secondary_currency
+        if not amount and base and perc.tax_app_id:
+            try:
+                data = perc.tax_app_id.get_perception_data(
+                    perc.partner_id, perc.date
+                )
+                padron_percent = data.get('percent', 0.0)
+                excluded = data.get('excluded_percent', 0.0)
+                effective = round(padron_percent * (1 - excluded), 2)
+                if effective:
+                    amount = round(base * effective / 100, 2)
+            except Exception:
+                # El padron es un respaldo: si no responde o no tiene datos
+                # para el partner, se sigue con el importe convertido tal
+                # cual y la linea se informa igual.
+                logger.warning(
+                    "ARCIBA: no se pudo obtener la alicuota de padron para "
+                    "la percepcion #%s (partner %s, fecha %s); se usa el "
+                    "importe convertido sin ajustar.",
+                    perc.id,
+                    perc.partner_id.display_name,
+                    perc.date,
+                    exc_info=True,
+                )
+        return base, amount
+
+    @api.model
+    def _normalize_arciba_number(self, number, length):
+        digits = re.sub(r'\D', '', number or '')
+        if len(digits) > length:
+            # Preserve the document suffix when the source numbering scheme
+            # carries more digits than the official ARCIBA field allows.
+            digits = digits[-length:]
+        return digits
+
+    @api.model
     def _get_inv_data(self, perc_ids):
         """
         Iterates over invoices looking for perceptions and retrieve neccesary data
@@ -711,23 +855,33 @@ class CreateArcibaNcFile(models.TransientModel):
             denomination_name = inv.denomination.upper()
 
             # Internal number
-            internal_number = re.sub(r'\D', '', inv.internal_number)
+            internal_number = self._normalize_arciba_number(
+                inv.internal_number, HEAD_LINES_NC['nro_nc']['length']
+            )
+            if not internal_number:
+                errors.append(
+                    _(
+                        'ptl #%(per_id)s: Unable to build credit note number '
+                        'for %(per_name)s (Invoice ID %(inv_id)s)',
+                        per_id=perc.id,
+                        per_name=perc.name,
+                        inv_id=inv.id,
+                    )
+                )
+                continue
 
-            # Perception base
-            inv_base = (
-                perc.base
-                if inv.company_id.currency_id == inv.currency_id
-                else perc.base_secondary_currency
+            # ARCIBA expects perception values in company currency.
+            inv_base, ret_per_applied = self._get_arciba_perception_amounts(
+                perc
             )
 
             # Type of document partner
             nro_doc_retenido = inv.partner_id.vat.replace('-', '')
 
-            # Ret / Per applied
-            ret_per_applied = perc.amount
-
             # Alicuota
-            percentage = round(ret_per_applied / inv_base * 100, 2)
+            percentage = perc.percent or (
+                round(ret_per_applied / inv_base * 100, 2) if inv_base else 0.0
+            )
             if percentage < 0 or percentage > 99.99:
                 errors.append(
                     _(
@@ -740,16 +894,21 @@ class CreateArcibaNcFile(models.TransientModel):
                 )
                 continue
 
+            # Mismo criterio que en el archivo principal: informamos
+            # base x alicuota, que es lo que AGIP recalcula.
+            ret_per_applied = informed_amount(inv_base, percentage)
+
             # Origin Voucher
             origin_voucher = ''
-            date_val = ''
             # Date original percep
             if inv.associated_inv_ids:
-                origin_voucher = str(
-                    inv.associated_inv_ids[0].name.replace('-', '')[1:]
+                associated_inv = inv.associated_inv_ids[0]
+                origin_voucher = self._normalize_arciba_number(
+                    associated_inv.internal_number or associated_inv.name,
+                    HEAD_LINES_NC['nro_comprobante']['length'],
                 )
                 date_val = time.strptime(
-                    str(inv.associated_inv_ids[0].date), '%Y-%m-%d'
+                    str(associated_inv.invoice_date), '%Y-%m-%d'
                 )  # String(YYYY-MM-DD)->Datetime
             elif inv.inform_period_date_from:
                 origin_voucher = time.strptime(
@@ -759,6 +918,16 @@ class CreateArcibaNcFile(models.TransientModel):
                 origin_voucher = time.strftime(
                     '%d%m%Y', origin_voucher
                 )  # Datetime->String: ddmmyyyy
+            else:
+                errors.append(
+                    _(
+                        'ptl #%(per_id)s: Credit note %(inv_name)s has no '
+                        'associated invoice or informed period.',
+                        per_id=perc.id,
+                        inv_name=inv.display_name,
+                    )
+                )
+                continue
 
             date_val = time.strftime(
                 '%d/%m/%Y', date_val

@@ -112,19 +112,18 @@ class FiscalYearClosing(models.Model):
         default=lambda *a: 'new',
     )
 
-    _sql_constraints = [
-        (
-            'closing_id_uniq',
-            'unique(closing_id)',
-            'The closing fiscal year must be unique!',
-        ),
-        ('name_uniq', 'unique(name)', 'The name must be unique!'),
-        (
-            'opening_id_uniq',
-            'unique(opening_id)',
-            'The opening fiscal year must be unique!',
-        ),
-    ]
+    _closing_id_uniq = models.Constraint(
+        'UNIQUE(closing_id)',
+        'The closing fiscal year must be unique!',
+    )
+    _name_uniq = models.Constraint(
+        'UNIQUE(name)',
+        'The name must be unique!',
+    )
+    _opening_id_uniq = models.Constraint(
+        'UNIQUE(opening_id)',
+        'The opening fiscal year must be unique!',
+    )
 
     @api.model
     def _default_company_ids(self):

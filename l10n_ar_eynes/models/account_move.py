@@ -10,7 +10,12 @@ import qrcode
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import file_open
+from odoo.tools import (
+    file_open,
+    float_compare,
+    float_is_zero,
+    float_round,
+)
 from odoo.tools.safe_eval import safe_eval
 from odoo.tools.sql import (
     column_exists,
@@ -425,23 +430,22 @@ class AccountMove(models.Model):
         copy=True,
     )
 
-    _sql_constraints = [
-        (
-            'unique_move',
-            'unique(partner_id, supplier_move_reference, is_debit_note, move_type)',
-            _('This invoice was already entered.'),
-        ),
-        (
-            'unique_name_customers',
-            '',
-            _('Another entry with the same name already exists.'),
-        ),
-        (
-            'unique_name_suppliers',
-            '',
-            _('Another entry with the same name already exists.'),
-        ),
-    ]
+    _unique_move = models.Constraint(
+        'UNIQUE(partner_id, supplier_move_reference, is_debit_note, move_type)',
+        _('This invoice was already entered.'),
+    )
+    _unique_name_customers = models.UniqueIndex(
+        "(name, journal_id, move_type, is_debit_note) "
+        "WHERE (state = 'posted' AND name != '/' "
+        "AND move_type IN ('out_invoice', 'out_refund', 'out_receipt'))",
+        _('Another entry with the same name already exists.'),
+    )
+    _unique_name_suppliers = models.UniqueIndex(
+        "(name, partner_id, journal_id, move_type, is_debit_note) "
+        "WHERE (state = 'posted' AND name != '/' "
+        "AND move_type IN ('in_invoice', 'in_refund', 'in_receipt'))",
+        _('Another entry with the same name already exists.'),
+    )
 
     @api.constrains('invoice_date_due', 'invoice_date')
     def _check_invoice_date_due_after_invoice(self):
@@ -851,10 +855,17 @@ class AccountMove(models.Model):
     @api.onchange('currency_id')
     def _inverse_currency_id(self):
         currency_has_change = self._origin.currency_id != self.currency_id
+        multi_currency_is_stale = any(
+            move.is_multi_currency
+            != bool(
+                move.currency_id
+                and move.currency_id != move.env.company.currency_id
+            )
+            for move in self
+        )
         super()._inverse_currency_id()
-        if (
-            not self.env.context.get('force_rate', False)
-            and currency_has_change
+        if not self.env.context.get('force_rate', False) and (
+            currency_has_change or multi_currency_is_stale
         ):
             for move in self:
                 move._onchange_currency_id()
@@ -1020,6 +1031,114 @@ class AccountMove(models.Model):
         else:
             self._automatic_perception_calculation()
 
+    def _is_historical_refund(self):
+        """La NC/reverso proviene de un comprobante ya emitido."""
+        self.ensure_one()
+        return self.move_type in ('out_refund', 'in_refund') and bool(
+            self.reversed_entry_id
+        )
+
+    def _is_untouched_mirror(self):
+        """True si la NC no modifico las lineas respecto de la factura de
+        origen, es decir sigue siendo un espejo al 100%."""
+        self.ensure_one()
+        original = self.reversed_entry_id
+        if not original:
+            return False
+        currency = self.currency_id or self.company_id.currency_id
+        rounding = currency.rounding or 0.01
+        mine = self.invoice_line_ids
+        theirs = original.invoice_line_ids
+        if len(mine) != len(theirs):
+            return False
+        return (
+            float_compare(
+                abs(sum(mine.mapped('price_subtotal'))),
+                abs(sum(theirs.mapped('price_subtotal'))),
+                precision_rounding=rounding,
+            )
+            == 0
+        )
+
+    def _perception_fingerprint(self):
+        """Huella de las percepciones actuales, para detectar si un recalculo
+        realmente cambia algo."""
+        self.ensure_one()
+        currency = self.currency_id or self.company_id.currency_id
+        rounding = currency.rounding or 0.01
+        return sorted(
+            (
+                line.perception_id.id,
+                line.concept_id.id,
+                float_round(abs(line.base or 0.0), precision_rounding=rounding),
+                float_round(
+                    abs(line.amount or 0.0), precision_rounding=rounding
+                ),
+            )
+            for line in self.perception_ids
+        )
+
+    def _reverse_perception_ratio(self, original_line):
+        """Proporcion de la factura de origen que esta acreditando la NC,
+        medida con la misma base de calculo que uso la percepcion original."""
+        self.ensure_one()
+        original = self.reversed_entry_id
+        application = original_line.tax_app_id
+        rate = self.currency_rate or 1.0
+        if application:
+            base_now = application.compute_base(self.invoice_line_ids, rate)
+            base_origin = application.compute_base(
+                original.invoice_line_ids, rate
+            )
+        else:
+            # Percepciones por codigo python o de carga manual: no hay
+            # aplicacion con base configurada, usamos el neto del comprobante.
+            base_now = sum(self.invoice_line_ids.mapped('price_subtotal'))
+            base_origin = sum(
+                original.invoice_line_ids.mapped('price_subtotal')
+            )
+        if not base_origin:
+            return 0.0
+        return min(abs(base_now) / abs(base_origin), 1.0)
+
+    def _build_reverse_perception_lines(self):
+        """Percepciones de la NC calculadas a partir del comprobante de origen,
+        sin consultar el padron vigente."""
+        self.ensure_one()
+        currency = self.currency_id or self.company_id.currency_id
+        rounding = currency.rounding or 0.01
+        untouched = self._is_untouched_mirror()
+        new_lines = self.env['perception.tax.line']
+        for original_line in self.reversed_entry_id.perception_ids.sorted('id'):
+            base = abs(original_line.base or 0.0)
+            amount = abs(original_line.amount or 0.0)
+            if not untouched:
+                ratio = self._reverse_perception_ratio(original_line)
+                base = float_round(base * ratio, precision_rounding=rounding)
+                amount = float_round(
+                    amount * ratio, precision_rounding=rounding
+                )
+            if float_is_zero(amount, precision_rounding=rounding):
+                continue
+            new_lines += self.env['perception.tax.line'].new(
+                {
+                    'name': original_line.name,
+                    'date': self.invoice_date,
+                    'invoice_id': self.id,
+                    'partner_id': self.partner_id.id,
+                    'base': base,
+                    'amount': amount,
+                    'percent': original_line.percent,
+                    'perception_id': original_line.perception_id.id,
+                    'manual': original_line.manual,
+                    'tax_app_id': original_line.tax_app_id.id,
+                    'reg_code': original_line.reg_code,
+                    'concept_id': original_line.concept_id.id,
+                    'state_id': original_line.state_id.id,
+                }
+            )
+        return new_lines
+
     @api.onchange(
         'invoice_date',
         'currency_id',
@@ -1028,6 +1147,22 @@ class AccountMove(models.Model):
     )
     def _automatic_perception_calculation(self):
         if self.is_sale_document() and not self.disable_perceptions:
+            if self._is_historical_refund():
+                # NC generada desde una factura: las percepciones se heredan
+                # del comprobante de origen, sin volver a consultar el padron
+                # vigente ni recalcular por codigo. Si la NC no modifico las
+                # lineas es un espejo exacto; si es parcial, se prorratea.
+                previous = self._perception_fingerprint()
+                self.perception_ids = self._build_reverse_perception_lines()
+                if self._perception_fingerprint() == previous:
+                    # Ya tenia exactamente estas percepciones (espejo recien
+                    # creado por el reverso); no hay nada que actualizar.
+                    return
+                self.invoice_line_ids.link_perception_to_move_lines()
+                self.with_context(
+                    skip_invoice_line_sync=True
+                )._update_perception_move_line_amount()
+                return
             if self.partner_id:
                 # Se agrupan las líneas de la factura sobre las cuales se aplican las percepciones
                 # que corresponden (según concepto --> cuenta contable / posición fiscal --> partner)
@@ -1086,7 +1221,7 @@ class AccountMove(models.Model):
                 for application in perception_application_data.keys():
                     application_data = perception_application_data[application]
                     application_data['currency_rate'] = self.currency_rate
-                    base, amount = application.apply_perception(
+                    base, amount, percent = application.apply_perception(
                         application_data
                     )
                     if base > 0 and amount > 0:
@@ -1098,6 +1233,7 @@ class AccountMove(models.Model):
                                 'partner_id': self.partner_id.id,
                                 'base': base,
                                 'amount': amount,
+                                'percent': percent,
                                 'perception_id': application.perception_tax_id.id,
                                 'manual': False,
                                 'tax_app_id': application.id,
@@ -1116,6 +1252,8 @@ class AccountMove(models.Model):
                     perc_data = application.get_perception_data(
                         self.partner_id, self.invoice_date, tax_id=perception
                     )
+                    if perc_data.get('excluded_percent', 0.0) == 1.0:
+                        continue
                     perceptions_applications = (
                         perception.calculate_python_custom_tax(
                             self.partner_id, self, perc_data=perc_data
@@ -1158,19 +1296,35 @@ class AccountMove(models.Model):
             self.invoice_line_ids.link_perception_to_move_lines()
 
     def _get_perception_manual_base(self):
-        return sum(
+        base = sum(
             self.invoice_line_ids.filtered(
                 lambda line: line.tax_ids
                 and (True not in line.tax_ids.mapped('is_exempt'))
             ).mapped('price_subtotal')
         )
+        if not base and self.is_purchase_document(include_receipts=True):
+            # Comprobantes de compra sin IVA (ej. factura C o todo exento):
+            # la percepcion se carga igual, tomando como base el neto.
+            base = sum(
+                self.invoice_line_ids.filtered(
+                    lambda line: line.display_type == 'product'
+                ).mapped('price_subtotal')
+            )
+        return base
 
     @api.onchange('perception_ids', 'invoice_line_ids')
     def _onchange_perception_ids(self):
-        if self.is_purchase_document(include_receipts=True) or (
-            self.is_sale_document(include_receipts=True)
-            and self.disable_perceptions
+        if (
+            self.is_purchase_document(include_receipts=True)
+            or (
+                self.is_sale_document(include_receipts=True)
+                and self.disable_perceptions
+            )
+            or self._is_historical_refund()
         ):
+            # En una NC el importe de la percepcion no se deduce del porcentaje
+            # del impuesto (viene de la alicuota historica del comprobante de
+            # origen), asi que el apunte contable se toma de la linea.
             base = self._get_perception_manual_base()
             if base > 0:
                 self.perception_ids.autocomplete_base_amount(base)
@@ -1373,10 +1527,24 @@ class AccountMove(models.Model):
                     _("You must complete supplier move reference.")
                 )
 
+    def validate_currency_rate(self):
+        if (
+            self.is_invoice()
+            and self.currency_id != self.company_currency_id
+            and not self.currency_rate
+        ):
+            raise ValidationError(
+                _(
+                    "The currency rate cannot be 0 for invoices in foreign currency. "
+                    "Please set a valid exchange rate before confirming."
+                )
+            )
+
     def _post(self, soft=True):
         self._required_supplier_move_reference()
         for move in self:
             move.validate_period()
+            move.validate_currency_rate()
             if move.is_sale_document() and move.id:
                 move.validate_denomination()
 
@@ -1416,6 +1584,8 @@ class AccountMove(models.Model):
         if invalid_moves:
             raise ValidationError(_('The amount to validate cannot be $0.'))
 
+        self._check_final_consumer_max_amount()
+
         sale_invoices = self.filtered(lambda move: move.is_sale_document())
         electronic_invoices = sale_invoices.filtered(
             lambda move: move.fiscal_type == 'electronic'
@@ -1427,6 +1597,31 @@ class AccountMove(models.Model):
         return electronic_invoices.with_context(
             from_action_post=True
         )._validate_electronic_invoices()
+
+    def _check_final_consumer_max_amount(self):
+        for move in self.filtered(
+            lambda m: m.move_type == 'out_invoice'
+            and m.fiscal_type == 'electronic'
+        ):
+            max_amount = move.company_id.fcons_max_amount
+            partner = move.partner_id
+            if (
+                not max_amount
+                or move.fiscal_position_id.afip_code != 5
+                or abs(move.amount_total_signed) < max_amount
+            ):
+                continue
+            doc_type = partner.document_type_id.afip_code or '99'
+            if doc_type == '99' or not partner.vat:
+                raise ValidationError(
+                    _(
+                        'The invoice reaches the maximum amount for an unidentified '
+                        'Final Consumer (%(amount)s). Set the document type and '
+                        'number of the customer %(partner)s.',
+                        amount=move.company_currency_id.format(max_amount),
+                        partner=partner.display_name,
+                    )
+                )
 
     def validate_period(self):
         date = self.date or self.invoice_date or fields.Date.context_today(self)
@@ -1453,6 +1648,13 @@ class AccountMove(models.Model):
             if move.is_invoice(include_receipts=True):
                 if 'invoice_currency_rate' not in default:
                     data['invoice_currency_rate'] = move.invoice_currency_rate
+                # [T15263] En la v17 las percepciones de venta se limpian aca
+                # y se recalculan en copy(). En v19 NO se porta: la
+                # recalculacion (add_perceptions) no repone las lineas, asi
+                # que limpiarlas hace que la copia pierda las percepciones.
+                # El arrastre de una alicuota vieja queda cubierto por el
+                # fallback percent or amount/base de
+                # _compute_base_amount_second_cur.
                 data['perception_ids'] = [
                     (command, _id, line_vals)
                     for command, _id, line_vals in data['perception_ids']
@@ -1775,8 +1977,10 @@ class AccountMove(models.Model):
                         'manual': p.manual,
                         'name': p.name,
                         'partner_id': p.partner_id.id,
+                        'percent': p.percent,
                         'perception_id': p.perception_id.id,
                         'reg_code': p.reg_code,
+                        'state_id': p.state_id.id,
                         'tax_app_id': p.tax_app_id.id,
                     },
                 )

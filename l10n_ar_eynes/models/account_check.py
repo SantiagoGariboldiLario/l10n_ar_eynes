@@ -77,7 +77,11 @@ class AccountCheck(models.Model):
     def _get_default_journal(self):
         if self._context.get('default_internal_type') == 'third_party':
             return self.env['account.journal'].search(
-                [('type', '=', 'third_party_checks')]
+                [
+                    ('type', '=', 'third_party_checks'),
+                    ('company_id', '=', self.env.company.id),
+                ],
+                limit=1,
             )
         return False
 
@@ -230,9 +234,14 @@ class AccountCheck(models.Model):
                 )
             )
 
-        issued_checks = self.filtered(lambda c: c.internal_type == 'issued')
-        if issued_checks:
-            raise UserError(_("Check Error! You cannot delete an Issued Check"))
+        undeletable_issued = self.filtered(
+            lambda c: c.internal_type == 'issued'
+            and c.issued_check_state != 'draft'
+        )
+        if undeletable_issued:
+            raise UserError(
+                _("Check Error! You cannot delete a check that is not in Draft")
+            )
 
     def cancel_check(self, reason):
         """
@@ -477,6 +486,41 @@ class AccountCheck(models.Model):
                     check.accredited = True
                 else:
                     check.accredited = False
+
+    def action_check_operation_wizard(self):
+        """Open the debit or the deposit wizard depending on the kind of
+        checks the user selected.
+
+        Own checks are debited and third party checks are deposited, so a
+        single contextual action can serve both check lists. The dispatch is
+        done on the records themselves and not on the calling view because
+        contextual actions are bound to the model, not to the view.
+        """
+        if not self:
+            raise UserError(_("You must select at least one check."))
+
+        internal_types = set(self.mapped('internal_type'))
+        if len(internal_types) > 1:
+            raise UserError(
+                _(
+                    "You cannot mix own checks and third party checks in the "
+                    "same operation. Own checks are debited and third party "
+                    "checks are deposited."
+                )
+            )
+
+        if internal_types.pop() == 'third_party':
+            xml_id = 'l10n_ar_eynes.deposit_checks_wizard_action'
+        else:
+            xml_id = 'l10n_ar_eynes.debit_check_wizard_action'
+
+        action = self.env['ir.actions.act_window']._for_xml_id(xml_id)
+        action['context'] = {
+            'active_model': self._name,
+            'active_ids': self.ids,
+            'active_id': self.ids[0],
+        }
+        return action
 
     def debit_checks(self, date):
         """Method for issued checks debitation."""
@@ -984,10 +1028,7 @@ class AccountCheck(models.Model):
             ).id
         return res
 
-    _sql_constraints = [
-        (
-            "unique_record",
-            "unique(number, checkbook_id, journal_id, checkbook_format)",
-            _("This record already exists"),
-        ),
-    ]
+    _unique_record = models.Constraint(
+        "UNIQUE(number, checkbook_id, journal_id, checkbook_format)",
+        _("This record already exists"),
+    )

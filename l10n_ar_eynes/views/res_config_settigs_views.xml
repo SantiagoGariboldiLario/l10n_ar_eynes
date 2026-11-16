@@ -14,6 +14,20 @@
                 >
                     <field name="apportionable_vat" />
                 </setting>
+                <setting
+                    id="require_perception_concept"
+                    string="Require Perception Concept"
+                    help="Require Perception Concept Field in perception Supplier Invoice Lines."
+                >
+                    <field name="require_perception_concept" />
+                </setting>
+                <setting
+                    id="require_retention_concept"
+                    string="Require Retention Concept"
+                    help="Require Retention Concept Field in retention Customer Payment Lines."
+                >
+                    <field name="require_retention_concept" />
+                </setting>
                 <h2>ARBA Account Data</h2>
                 <group>
                     <group>

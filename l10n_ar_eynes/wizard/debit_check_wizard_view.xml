@@ -6,17 +6,26 @@
         <field name="model">debit.check.wizard</field>
         <field name="arch" type="xml">
             <form string="Debit Checks">
-                <group colspan="8" col="8">
+                <group>
                     <field name="multichecks" invisible="True" />
                     <field name="deposit_date" />
-                    <field
-                        name="issued_checks"
-                        widget="many2many_checkboxes"
-                        colspan="8"
-                        invisible="not multichecks"
-                    />
                     <field name="issued_check_id" invisible="multichecks" />
                 </group>
+                <separator string="Checks to Debit" invisible="not multichecks" />
+                <field
+                    name="issued_checks"
+                    nolabel="1"
+                    invisible="not multichecks"
+                    domain="[('internal_type', '=', 'issued'), ('issued_check_state', '=', 'waiting_debit')]"
+                >
+                    <list create="false">
+                        <field name="number" />
+                        <field name="checkbook_id" />
+                        <field name="bank_id" />
+                        <field name="payment_date" />
+                        <field name="amount" sum="Total" />
+                    </list>
+                </field>
                 <footer>
                     <button
                         type="object"
@@ -31,16 +40,16 @@
         </field>
     </record>
 
+    <!-- Debit several checks -->
     <record id="debit_check_wizard_action" model="ir.actions.act_window">
         <field name="name">Debit Checks</field>
         <field name="res_model">debit.check.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="binding_model_id" ref="l10n_ar_eynes.model_account_check" />
-        <field name="binding_view_types">list</field>
-        <field name="binding_type">action</field>
+        <field name="binding_model_id" eval="False" />
     </record>
 
+    <!-- Debit a single check, opened from the issued check form -->
     <record id="debit_one_check_wizard_action" model="ir.actions.act_window">
         <field name="name">Debit Checks</field>
         <field name="res_model">debit.check.wizard</field>

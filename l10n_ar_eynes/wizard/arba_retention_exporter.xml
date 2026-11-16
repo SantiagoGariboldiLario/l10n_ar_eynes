@@ -13,6 +13,7 @@
                 <field name="company_id" domain="company_id_domain" />
                 <field name="date_from" />
                 <field name="date_to" />
+                <field name="activity_code" />
                 <field name="mode" />
             </group>
             <footer>

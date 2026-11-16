@@ -546,11 +546,15 @@ class AccountPaymentOrder(models.Model):
 
             res = self.calculate_single_retention(partner_ret)
 
-            # Generamos la key
+            # [T15410] Generamos la key. Para "proportional_vat" cada factura
+            # genera su propia linea (necesario para el tope/arrastre por
+            # factura), asi que se agrega la factura a la key para no
+            # confundir eso con una duplicacion real.
             for ret in res:
                 key = (
                     ret['retention_id'],
                     ret['concept_id'],
+                    ret.get('invoice_id'),
                 )
                 if key not in retentions:
                     retentions[key] = ret
@@ -709,8 +713,18 @@ class AccountPaymentOrder(models.Model):
                 )
 
                 for (concept, _invoice), vals in retentions.items():
-                    # Agrupamos por concepto y factura
+                    # [T15410] Agrupamos por concepto y factura. El modo
+                    # "proportional_vat" se mantiene separado por factura
+                    # (no se mezcla con otras facturas del mismo pago),
+                    # porque el tope y el arrastre de excedente son
+                    # por factura.
                     key = (retention.id, concept)
+                    if (
+                        vals['taxapp']
+                        and vals['taxapp'].calculation_base
+                        == 'proportional_vat'
+                    ):
+                        key = (retention.id, concept, _invoice)
                     all_concepts.setdefault(
                         key,
                         {
@@ -718,10 +732,20 @@ class AccountPaymentOrder(models.Model):
                             'to_pay': 0.0,
                             'taxapp': vals['taxapp'],
                             'move_lines': self.env['account.move.line'],
+                            'vat_taxes': {},
+                            'invoice': _invoice,
+                            'payment_amount': 0.0,
                         },
                     )
                     all_concepts[key]['base'] += vals['base_unrec']
                     all_concepts[key]['to_pay'] += vals['base_to_pay']
+                    all_concepts[key]['vat_taxes'].update(
+                        vals.get('vat_taxes', {})
+                    )
+                    # Monto bruto que efectivamente se esta pagando ahora de
+                    # esta factura (no la base neta prorrateada), usado
+                    # para topear la retencion "proportional_vat".
+                    all_concepts[key]['payment_amount'] += abs(po_line.amount)
 
                     # Agregamos la move_line.
                     # En realidad nos interesa la voucher_line,
@@ -732,7 +756,11 @@ class AccountPaymentOrder(models.Model):
         # Ahora que tenemos las bases agrupadas por concepto
         # aplicamos el calculo de la retencion
         res = []
-        for (_ret, concept), vals in all_concepts.items():
+        for key, vals in all_concepts.items():
+            # [T15410] key es (retention_id, concept) o, para
+            # "proportional_vat", (retention_id, concept, invoice) -- se
+            # accede por posicion para admitir ambos largos de tupla.
+            concept = key[1]
             taxapp = vals['taxapp']
             if taxapp:
                 concept = concept.id
@@ -752,6 +780,12 @@ class AccountPaymentOrder(models.Model):
             if amount == 0.0:
                 continue
 
+            # La alicuota realmente aplicada puede venir del padron del
+            # partner y no de la configuracion de la aplicacion
+            percent_applied = 0.0
+            if taxapp and taxapp.aliq_type == 'percent':
+                percent_applied = taxapp.percent if percent == -1 else percent
+
             # Creamos las lineas de retencion
             # Creamos la retention.tax.line
             retention_line_vals = {
@@ -763,11 +797,19 @@ class AccountPaymentOrder(models.Model):
                 'base': base,
                 'amount': amount,
                 'base_amount': payment_order_base,
+                # [T15410] Necesario para el tope/arrastre por factura del
+                # modo "proportional_vat" (ver get_invoice_retained_amount).
+                'invoice_id': (
+                    all_concepts[key]['invoice'].id
+                    if all_concepts[key].get('invoice')
+                    else False
+                ),
                 'manual': False,  # La creamos por sistema
                 'retention_id': retention.id,
                 'certificate_no': '',
                 'taxapp_id': taxapp.id if taxapp else False,
                 'reg_code': taxapp.reg_code if taxapp else vals['reg_code'],
+                'percent_applied': percent_applied,
                 'state_id': retention.state_id.id,
                 'excluded_percent': excluded_percent,
                 'exclusion_date_certificate': exclusion_date_certificate,
@@ -1997,13 +2039,10 @@ class AccountPaymentOrder(models.Model):
             'context': ctx,
         }
 
-    _sql_constraints = [
-        (
-            "unique_number",
-            "unique(type, number, journal_id)",
-            _("Number must be unique"),
-        ),
-    ]
+    _unique_number = models.Constraint(
+        "UNIQUE(type, number, journal_id)",
+        _("Number must be unique"),
+    )
 
 
 class AccountPaymentOrderLine(models.Model):
@@ -2392,6 +2431,13 @@ class AccountPaymentOrderRetentionLine(models.Model):
         digits='Account',
         compute='_compute_total_retention_move_lines',
     )
+    require_concept = fields.Boolean(
+        default=lambda self: bool(
+            self.env['ir.config_parameter']
+            .sudo()
+            .get_param('l10n_ar_eynes.require_retention_concept')
+        )
+    )
     concept_id = fields.Many2one(
         comodel_name='retention.concept',
         string='Concept',
@@ -2404,10 +2450,16 @@ class AccountPaymentOrderRetentionLine(models.Model):
         digits='Account',
         related='taxapp_id.tax_allowance',
     )
+    percent_applied = fields.Float(
+        string='Applied percent',
+        digits='Account',
+        help="Aliquot used by the calculation. It can come from the partner "
+        + "padron instead of the Retention Application configuration.",
+    )
     applied_aliquot = fields.Float(
         string='Aliquot applied',
         digits='Account',
-        related='taxapp_id.percent',
+        compute='_compute_applied_aliquot',
     )
     total_month_retention = fields.Float(
         string='Total month retention',
@@ -2481,14 +2533,27 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 [('payment_order_line_id', 'in', retention_line.ids)]
             )
             for rml in retention_move_lines:
+                # [T14555] En NC el neto debe restar de la base acumulada de
+                # Ganancias; si viene positivo se le invierte el signo.
+                total_without_vat = rml.total_without_vat
+                if (
+                    rml.move_id.move_type in ('in_refund', 'out_refund')
+                    and total_without_vat > 0
+                ):
+                    total_without_vat *= -1
                 move_line_ids.append(
                     self.env['retention.move.line'].create(
                         {
                             'payment_order_line_id': self.id,
                             'move_id': rml.move_id.id,
                             'move_type': rml.move_type,
-                            'total_without_vat': rml.total_without_vat,
-                            'payment_order_reference': rml.payment_order_reference,
+                            'total_without_vat': total_without_vat,
+                            # La linea de origen se creo con la OP en borrador,
+                            # asi que puede no tener referencia: la tomamos de
+                            # la OP a la que pertenece, que ya esta posteada
+                            'payment_order_reference': rml.payment_order_reference
+                            or rml.payment_order_line_id.payment_order_id.number
+                            or '',
                         }
                     )
                 )
@@ -2523,6 +2588,9 @@ class AccountPaymentOrderRetentionLine(models.Model):
                             * line.payment_order_id.payment_rate
                         )
                     )
+                # Las NC imputadas al pago restan de la base del mes
+                if line.type == 'income':
+                    total_without_vat *= -1
                 move_line_ids.append(
                     self.env['retention.move.line'].create(
                         {
@@ -2564,38 +2632,74 @@ class AccountPaymentOrderRetentionLine(models.Model):
                 rec.retention_move_line_ids.mapped('total_without_vat')
             )
 
+    @api.depends('percent_applied', 'taxapp_id')
+    def _compute_applied_aliquot(self):
+        for rec in self:
+            # Las lineas manuales y las anteriores a que se guarde la
+            # alicuota aplicada caen a la configurada en la aplicacion
+            rec.applied_aliquot = rec.percent_applied or rec.taxapp_id.percent
+
+    def _get_taxable_month_total(self, total):
+        """Base mensual a la que se le aplica la alicuota
+
+        El minimo no imponible se detrae solo si la aplicacion de la
+        retencion esta configurada para excluirlo, igual que en el
+        calculo real de la retencion.
+        """
+        self.ensure_one()
+        allowance = self.concept_amount
+        if total <= allowance:
+            return 0.0
+        if self.taxapp_id.exclude_tax_allowance:
+            return total - allowance
+        return total
+
     @api.depends(
         'retention_move_lines_total',
         'concept_amount',
         'applied_aliquot',
+        'taxapp_id.exclude_tax_allowance',
     )
     def _compute_total_month_retention(self):
         for rec in self:
-            total = rec.retention_move_lines_total
-            amount = rec.concept_amount
-            total_month_retention = 0
-            if total > amount:
-                total_month_retention = (total - amount) * (
-                    rec.applied_aliquot / 100
-                )
-            rec.total_month_retention = total_month_retention
+            base = rec._get_taxable_month_total(rec.retention_move_lines_total)
+            rec.total_month_retention = base * (rec.applied_aliquot / 100)
 
-    @api.depends('retention_move_line_ids', 'applied_aliquot')
+    def _get_previous_payments_move_lines(self):
+        """Lineas del mes que corresponden a pagos anteriores
+
+        No alcanza con la referencia de la OP porque las lineas del propio
+        pago se crean con la OP en borrador, cuando todavia no tiene numero.
+        Asi que tambien las identificamos por las facturas que se estan
+        pagando en esta OP.
+        """
+        self.ensure_one()
+        own_invoices = self.payment_order_id.line_ids.filtered(
+            lambda pol: pol.amount > 0
+        ).mapped('invoice_id')
+        number = self.payment_order_id.number
+        return self.retention_move_line_ids.filtered(
+            lambda rtml: rtml.move_id not in own_invoices
+            or (
+                rtml.payment_order_reference
+                and rtml.payment_order_reference != number
+            )
+        )
+
+    @api.depends(
+        'retention_move_line_ids',
+        'applied_aliquot',
+        'concept_amount',
+        'taxapp_id.exclude_tax_allowance',
+        'payment_order_id.line_ids.invoice_id',
+    )
     def _compute_month_applied_retentions(self):
         for rec in self:
-            concept_amount = rec.concept_amount
-            total = sum(
-                rec.retention_move_line_ids.filtered(
-                    lambda rtml: rtml.payment_order_reference
-                    != rec.payment_order_id.number
-                ).mapped('total_without_vat')
+            previous = rec._get_previous_payments_move_lines()
+            base = rec._get_taxable_month_total(
+                sum(previous.mapped('total_without_vat'))
             )
-            if total == 0 or total < concept_amount:
-                rec.month_applied_retentions = 0
-            else:
-                rec.month_applied_retentions = (total - concept_amount) * (
-                    rec.applied_aliquot / 100
-                )
+            rec.month_applied_retentions = base * (rec.applied_aliquot / 100)
 
     @api.depends('total_month_retention', 'month_applied_retentions')
     def _compute_actual_payment_retention(self):
@@ -2778,13 +2882,13 @@ class AccountPaymentOrderConceptLine(models.Model):
     @api.onchange('journal_id')
     def change_journal_id(self):
         if self.journal_id:
-            self.account_id = self.journal_id.loss_account_id.id
+            self.account_id = self.journal_id.suspense_account_id.id
 
     @api.onchange('account_id')
     def change_account_id(self):
         if self.account_id:
             journal_ids = self.env['account.journal'].search(
-                [('loss_account_id', '=', self.account_id.id)]
+                [('suspense_account_id', '=', self.account_id.id)]
             )
             self.journal_id = journal_ids and journal_ids[0] or False
 

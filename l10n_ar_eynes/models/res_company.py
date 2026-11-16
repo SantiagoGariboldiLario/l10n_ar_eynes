@@ -8,7 +8,9 @@ from odoo import api, fields, models
 _logger = logging.getLogger(__name__)
 
 
-class ResCompany(models.Model):
+class ResCompany(
+    models.Model
+):  # pylint: disable=consider-merging-classes-inherited
     _inherit = "res.company"
 
     apartment = fields.Char(
@@ -17,6 +19,14 @@ class ResCompany(models.Model):
         store=True,
     )
     apportionable_vat = fields.Boolean()
+    retention_include_untaxed_lines = fields.Boolean(
+        string="Include untaxed lines in retention base",
+        default=False,
+        help=(
+            "When enabled, retention base parsing also considers untaxed "
+            "invoice lines."
+        ),
+    )
     cbu = fields.Char(
         string='CBU para Facturas A',
         size=32,
@@ -32,6 +42,12 @@ class ResCompany(models.Model):
         related="partner_id.door",
         size=3,
         store=True,
+    )
+    fcons_max_amount = fields.Float(
+        string='Monto Máximo Consumidor Final',
+        help="Maximum amount that can be invoiced to an unidentified Final Consumer. "
+        "Electronic invoices that reach this amount cannot be confirmed until the "
+        "customer document is set. Zero means no limit.",
     )
     fcred_cbu_emitter = fields.Char(string='CBU (FCE)')
     fcred_is_fce_emitter = fields.Boolean(string='FCE Emitter?', default=False)
@@ -61,6 +77,9 @@ class ResCompany(models.Model):
         size=5,
         store=True,
     )
+
+    def get_fc_max_amount(self):
+        return self.fcons_max_amount
 
 
 class AfipBigCompany(models.Model):

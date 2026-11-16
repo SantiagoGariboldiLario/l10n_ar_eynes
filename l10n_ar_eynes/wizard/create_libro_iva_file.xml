@@ -18,6 +18,7 @@
                     <field name="file_format" />
                     <field name="include_internal" />
                     <field name="is_simple_vat" />
+                    <field name="global_fiscal_credit_proration" />
                 </group>
                 <separator string="Validation Errors" colspan="4" />
                 <field name="notes" readonly="1" nolabel="1" colspan="4" />

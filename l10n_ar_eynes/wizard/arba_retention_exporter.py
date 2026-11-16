@@ -7,7 +7,6 @@
 
 import base64
 import calendar
-import hashlib
 import io
 import json
 import logging
@@ -35,6 +34,9 @@ class ArbaRetentionExporterWizard(models.TransientModel):
     )
     date_from = fields.Date(string='Date From')
     date_to = fields.Date(string='Date To')
+    activity_code = fields.Char(
+        string='Activity Code', required=True, default='6'
+    )
     mode = fields.Selection(
         [
             ('monthly', 'Monthly'),
@@ -53,13 +55,7 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         )
 
     def create_file(self):
-        if self.company_id.arba_a122r_enforced:
-            raise ValidationError(
-                _(
-                    'ARBA TXT export is disabled because ARBA A122R enforcement '
-                    'is enabled for this company.'
-                )
-            )
+        self._validate_export_configuration()
         query = (
             'SELECT rtl.id '
             'FROM account_payment_order_retention_line rtl '
@@ -93,10 +89,32 @@ class ArbaRetentionExporterWizard(models.TransientModel):
 
         retention_ids = [r[0] for r in res]
         result = self._check_retention_tax_line_data(retention_ids)
-        if isinstance(result, dict):
+        if result is not True:
             raise ValidationError(result)
 
         self._generate_retention_file(retention_ids)
+
+    def _validate_export_configuration(self):
+        # [T15698] En v19 se conserva el bloqueo introducido con A122R: si la
+        # compania informa por servicio, no se habilita ademas el TXT para
+        # evitar una doble presentacion. La v17 lo habia quitado en [T14612].
+        if self.company_id.arba_a122r_enforced:
+            raise ValidationError(
+                _(
+                    'ARBA TXT export is disabled because ARBA A122R enforcement '
+                    'is enabled for this company.'
+                )
+            )
+        company_vat = self._sanitize_vat(self.company_id.vat)
+        if len(company_vat) != 11:
+            raise ValidationError(
+                _('Company VAT must have 11 digits for ARBA export.')
+            )
+        activity_code = ''.join(filter(str.isdigit, self.activity_code or ''))
+        if not activity_code:
+            raise ValidationError(
+                _('Activity Code must contain only digits for ARBA export.')
+            )
 
     @api.model
     def _check_retention_tax_line_data(self, retention_ids):
@@ -108,14 +126,39 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         for line in lines:
             err_list = []
 
-            invoice = line.invoice_id
+            # invoice_id is not used by the A-122R export layout, so we keep
+            # this validation disabled to avoid blocking valid retention lines.
+            # invoice = line.invoice_id
             partner = line.partner_id
+            vat = self._sanitize_vat(partner.vat)
+            transaction_number = self._get_transaction_number(
+                line.certificate_no
+            )
+            branch_number, _issue_number = self._get_certificate_parts(
+                line.certificate_no
+            )
 
-            if not partner.vat:
+            if not vat:
                 err_list.append('VAT for partner {}'.format(partner.name))
+            elif len(vat) != 11:
+                err_list.append(
+                    'VAT for partner {} must have 11 digits'.format(
+                        partner.name
+                    )
+                )
 
-            if not invoice:
-                err_list.append('Invoice')
+            # if not invoice:
+            #     err_list.append('Invoice')
+
+            if not branch_number or int(branch_number or 0) <= 0:
+                err_list.append(
+                    'Certificate branch number must be greater than zero'
+                )
+
+            if not transaction_number or len(transaction_number) != 20:
+                err_list.append(
+                    'Certificate No. must provide a valid 20-digit transaction number'
+                )
 
             if err_list:
                 reference = 'Line ID: {} - Partner: {}]'.format(
@@ -124,21 +167,20 @@ class ArbaRetentionExporterWizard(models.TransientModel):
                 err_list.insert(0, reference)
                 errors.append(err_list)
 
-        errors.insert(0, 'The following retention tax lines have missing data:')
         if errors:
+            errors.insert(
+                0, 'The following retention tax lines have missing data:'
+            )
             return errors
 
         return True
 
     @api.model
     def _get_arba_filename(self):
-        activity_num = '6'  # 6 ~Alicuota gral
         company_vat = self._sanitize_vat(self.company_id.vat)
-        lot_name = 'RET'
         period = self._get_period_code()
-        filename = 'AR-{}-{}-{}-{}'.format(
-            company_vat, period, activity_num, lot_name
-        )
+        activity_code = ''.join(filter(str.isdigit, self.activity_code or ''))
+        filename = 'ER-{}-{}-{}'.format(company_vat, period, activity_code)
         if self.mode == 'first_fortnight':
             filename += '-LOTE1'
         elif self.mode == 'second_fortnight':
@@ -168,22 +210,28 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         last_day = calendar.monthrange(
             self.date_from.year, self.date_from.month
         )[1]
-        if self.mode == 'first_fortnight':
-            expected_from, expected_to, fortnight = 1, 15, '1'
-        elif self.mode == 'second_fortnight':
-            expected_from, expected_to, fortnight = 16, last_day, '2'
-        else:
-            expected_from, expected_to, fortnight = 1, last_day, '0'
-
-        if (
-            self.date_from.day != expected_from
-            or self.date_to.day != expected_to
-        ):
-            raise ValidationError(
-                _(
-                    'Selected mode does not match the date range for ARBA export.'
+        if self.mode == 'monthly':
+            if self.date_from.day != 1 or self.date_to.day != last_day:
+                raise ValidationError(
+                    _('Monthly mode requires a full month period.')
                 )
-            )
+            fortnight = '0'
+        elif self.mode == 'first_fortnight':
+            if self.date_from.day != 1 or self.date_to.day > 15:
+                raise ValidationError(
+                    _(
+                        'First fortnight mode requires a period from day 1 to day 15.'
+                    )
+                )
+            fortnight = '1'
+        else:
+            if self.date_from.day < 16 or self.date_to.day != last_day:
+                raise ValidationError(
+                    _(
+                        'Second fortnight mode requires a period from day 16 to the end of the month.'
+                    )
+                )
+            fortnight = '2'
 
         return '{}{:02d}{}'.format(
             self.date_from.year, self.date_from.month, fortnight
@@ -192,8 +240,7 @@ class ArbaRetentionExporterWizard(models.TransientModel):
     @api.model
     def _build_attachment_payload(self, txt_filename, txt_content):
         txt_bytes = txt_content.encode('latin-1')
-        md5_hash = hashlib.md5(txt_bytes).hexdigest().upper()
-        zip_basename = '{}_{}'.format(txt_filename[:-4], md5_hash)
+        zip_basename = txt_filename[:-4]
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(
             zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED
@@ -214,6 +261,15 @@ class ArbaRetentionExporterWizard(models.TransientModel):
         if len(digits) > 8:
             return digits[:-8], digits[-8:]
         return '1', digits
+
+    @api.model
+    def _get_transaction_number(self, certificate_no):
+        digits = ''.join(filter(str.isdigit, (certificate_no or '').strip()))
+        if not digits:
+            return ''
+        if len(digits) > 20:
+            return ''
+        return digits[-20:].zfill(20)
 
     @api.model
     def _generate_retention_file(self, retention_ids):
@@ -269,10 +325,7 @@ class ArbaRetentionExporterWizard(models.TransientModel):
             date = date.split('-')
             date = '{}/{}/{}'.format(date[2], date[1], date[0])
 
-            vat = ''
-            _vat = line['partner_vat']
-            if _vat:
-                vat = '{}-{}-{}'.format(_vat[:2], _vat[2:10], _vat[10])
+            vat = self._sanitize_vat(line['partner_vat'])
 
             base = line['base']
             amount = line['amount']
@@ -282,25 +335,24 @@ class ArbaRetentionExporterWizard(models.TransientModel):
             elif line['applied_aliquot']:
                 aliquot = round(abs(line['applied_aliquot']), 2)
 
-            branch_number, issue_number = self._get_certificate_parts(
+            branch_number, _issue_number = self._get_certificate_parts(
+                line['certificate_no']
+            )
+            transaction_number = self._get_transaction_number(
                 line['certificate_no']
             )
 
             vals = {
+                'numero_transaccion': transaction_number,
                 'cuit': vat,
                 'fecha_retencion': date,
                 'numero_sucursal': branch_number,
-                'numero_emision': issue_number,
                 'monto_imponible': moneyfmt(
-                    Decimal(str(base)), places=2, ndigits=12, dp=','
+                    Decimal(str(abs(base))), places=2, ndigits=13, dp='.'
                 ),
                 'alicuota': moneyfmt(
-                    Decimal(str(aliquot)), places=2, ndigits=4, dp=','
+                    Decimal(str(aliquot)), places=2, ndigits=2, dp='.'
                 ),
-                'importe_retencion': moneyfmt(
-                    Decimal(str(amount)), places=2, ndigits=11, dp=','
-                ),
-                'tipo_operacion': 'A',
             }
             fixed_width.update(**vals)
             head_regs.append(fixed_width.line)

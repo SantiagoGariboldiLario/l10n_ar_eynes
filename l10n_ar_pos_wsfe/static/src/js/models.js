@@ -194,7 +194,7 @@ patch(PosOrder.prototype, {
             const total = this.priceIncl;
             const self = this;
             this.data.orm.call("res.company", "get_fc_max_amount", [this.company.id]).then(function (max_fc) {
-                if (total > max_fc) {
+                if (max_fc && total > max_fc) {
                     self.dialog.add(AlertDialog, {
                         title: _t("Error"),
                         body: _t("You must inform Final Consumer data to ARCA, create new Customer"),

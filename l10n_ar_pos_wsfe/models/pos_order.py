@@ -309,6 +309,8 @@ class PosOrder(models.Model):
         # dicts de datos para crear las líneas de percepción.
         for application in perception_application_data.keys():
             application_data = perception_application_data[application]
-            _base, amount = application.apply_perception(application_data)
+            _base, amount, _percent = application.apply_perception(
+                application_data
+            )
             perceptions_amount += amount
         return perceptions_amount

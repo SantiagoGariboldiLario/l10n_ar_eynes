@@ -118,6 +118,7 @@
                     <group string="Tax Information">
                         <field name="tax_id" select="1" required="type == 'perceptions'" />
                         <field name="type_tax_use" select="1" />
+                        <field name="afip_code" />
                     </group>
                 </page>
                 <page name="retentions" string="Retentions" invisible="type != 'retentions'">

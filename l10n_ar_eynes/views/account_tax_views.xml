@@ -6,6 +6,9 @@
         <field name="model">account.tax</field>
         <field name="inherit_id" ref="account.view_tax_form" />
         <field name="arch" type="xml">
+            <field name="tax_group_id" position="after">
+                <field name="afip_code" />
+            </field>
             <notebook position="inside">
                 <field name="group_type" invisible="True" />
                 <page string="Retentions" invisible="group_type != 'retention'">
@@ -90,6 +93,16 @@
                                     <field name="name" />
                                     <field name="reg_code" />
                                 </group>
+                                <field
+                                    name="vat_tax_ids"
+                                    invisible="calculation_base != 'proportional_vat'"
+                                    context="{'default_application_id': id}"
+                                >
+                                    <list editable="bottom">
+                                        <field name="tax_id" />
+                                        <field name="rate" />
+                                    </list>
+                                </field>
                             </form>
                         </field>
                     </group>
@@ -135,6 +148,7 @@
                     <group col="6" string="Tax Application">
                         <field name="retention_type" />
                         <field name="apply_custom_code" />
+                        <field name="sicore_tax_code" />
                         <separator name="tax_application" />
                         <field
                             name="python_code"

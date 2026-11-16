@@ -85,6 +85,15 @@
                     string="Rejected"
                     domain="[('issued_check_state', '=', 'rejected')]"
                 />
+                <field name="company_id" groups="base.group_multi_company" />
+                <group>
+                    <filter
+                        name="group_by_company"
+                        string="Company"
+                        context="{'group_by': 'company_id'}"
+                        groups="base.group_multi_company"
+                    />
+                </group>
             </search>
         </field>
     </record>
@@ -333,6 +342,15 @@
                     string="Rejected"
                     domain="[('third_party_check_state', '=', 'rejected')]"
                 />
+                <field name="company_id" groups="base.group_multi_company" />
+                <group>
+                    <filter
+                        name="group_by_company"
+                        string="Company"
+                        context="{'group_by': 'company_id'}"
+                        groups="base.group_multi_company"
+                    />
+                </group>
             </search>
         </field>
     </record>
@@ -648,6 +666,21 @@
         (0, 0, {'view_mode': 'calendar', 'view_id': ref('account_third_check_view_calendar_endorsement')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('account_third_party_check_view_form')})]"
         />
+    </record>
+
+    <!-- Single contextual action for both check lists. Contextual actions are
+         bound to the model and own/third party checks share account.check, so
+         one action dispatches to the debit or the deposit wizard depending on
+         the selected checks. -->
+    <record id="check_operation_server_action" model="ir.actions.server">
+        <field name="name">Debit / Deposit Checks</field>
+        <field name="model_id" ref="l10n_ar_eynes.model_account_check" />
+        <field name="binding_model_id" ref="l10n_ar_eynes.model_account_check" />
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field
+            name="code"
+        >action = model.browse(env.context.get('active_ids', [])).action_check_operation_wizard()</field>
     </record>
 
 </odoo>

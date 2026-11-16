@@ -20,7 +20,7 @@
 
 {
     'name': 'l10n Argentina (Eynes v19)',
-    'version': '19.0.0.0.1',
+    'version': '19.0.0.2.7',
     'author': 'Eynes',
     'website': 'https://gitlab.eynes.com.ar/localization/l10n_ar_eynes/',
     'license': 'AGPL-3',
@@ -78,6 +78,7 @@
         'security/perception_ir_rule.xml',
         'security/retention_ir_rule.xml',
         'security/webservices_ir_rule.xml',
+        'security/account_check_ir_rule.xml',
         "wizard/fiscal_year_closing_operation_wizard_views.xml",
         "wizard/wsaa_config_renewal.xml",
         "views/account_views.xml",

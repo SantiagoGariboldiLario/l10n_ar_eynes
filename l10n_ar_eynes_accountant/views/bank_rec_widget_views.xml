@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_account_move_line_search_bank_rec_widget" model="ir.ui.view">
+        <field name="name">account.move.line.search.bank_rec_widget.journal.accounts</field>
+        <field name="model">account.move.line</field>
+        <field
+                name="inherit_id"
+                ref="account_accountant.view_account_move_line_search_bank_rec_widget"
+            />
+        <field name="arch" type="xml">
+            <separator name="inject_after" position="after">
+                <filter
+                        name="journal_accounts"
+                        string="Cuenta provisoria"
+                        domain="[('account_id', 'in', context.get('bank_rec_journal_account_ids'))]"
+                        invisible="not context.get('bank_rec_journal_account_ids')"
+                    />
+                <separator />
+                <filter
+                        name="account_group"
+                        string="Cuenta"
+                        context="{'group_by': 'account_id'}"
+                    />
+                <separator />
+            </separator>
+        </field>
+    </record>
+</odoo>

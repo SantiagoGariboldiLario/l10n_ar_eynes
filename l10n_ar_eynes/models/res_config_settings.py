@@ -42,6 +42,16 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
         implied_group="l10n_ar_eynes.group_check_cot",
     )
+    require_perception_concept = fields.Boolean(
+        string="Require Perception Concept",
+        config_parameter='l10n_ar_eynes.require_perception_concept',
+        readonly=False,
+    )
+    require_retention_concept = fields.Boolean(
+        string="Require Retention Concept",
+        config_parameter='l10n_ar_eynes.require_retention_concept',
+        readonly=False,
+    )
     special_partner_required_fields = fields.Boolean(
         string="Required Document Type, NIF, and Fiscal Position on partners",
         config_parameter='l10n_ar_eynes.special_partner_required_fields',

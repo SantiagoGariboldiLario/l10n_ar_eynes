@@ -18,6 +18,9 @@
                         </div>
                         <field name="company_id" />
                     </group>
+                    <group string="Warnings" invisible="not notes">
+                        <field name="notes" nolabel="1" colspan="2" />
+                    </group>
                 </sheet>
             </form>
         </field>

@@ -1,9 +1,68 @@
 import json
 import logging
+from collections import defaultdict
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
+from odoo.tools import date_utils, format_amount
 
 _logger = logging.getLogger(__name__)
+
+
+def get_vat_amount_by_line(env, move_ids):
+    """IVA en moneda de la compania por linea de producto.
+
+    El importe de cada linea de impuesto IVA del asiento se reparte entre
+    las lineas de producto que aplican ese impuesto, en proporcion a su
+    base. Asi el IVA coincide con el contabilizado (y con el subdiario) y no
+    incluye percepciones ni otros impuestos de la misma linea.
+    """
+    if not move_ids:
+        return {}
+    move_ids = tuple(move_ids)
+    env.cr.execute(
+        """
+        SELECT aml.id, aml.move_id, amlat.account_tax_id, aml.balance
+        FROM account_move_line aml
+        JOIN account_move_line_account_tax_rel amlat
+            ON amlat.account_move_line_id = aml.id
+        JOIN account_tax at ON at.id = amlat.account_tax_id
+        JOIN account_tax_group atg ON atg.id = at.tax_group_id
+        WHERE aml.move_id IN %s
+            AND aml.display_type = 'product'
+            AND atg.group_type = 'vat'
+        """,
+        (move_ids,),
+    )
+    bases = env.cr.fetchall()
+    env.cr.execute(
+        """
+        SELECT aml.move_id, aml.tax_line_id, SUM(aml.balance)
+        FROM account_move_line aml
+        JOIN account_tax at ON at.id = aml.tax_line_id
+        JOIN account_tax_group atg ON atg.id = at.tax_group_id
+        WHERE aml.move_id IN %s AND atg.group_type = 'vat'
+        GROUP BY aml.move_id, aml.tax_line_id
+        """,
+        (move_ids,),
+    )
+    vat_by_move_tax = {
+        (move_id, tax_id): amount
+        for move_id, tax_id, amount in env.cr.fetchall()
+    }
+    base_by_move_tax = defaultdict(float)
+    for _line_id, move_id, tax_id, balance in bases:
+        base_by_move_tax[(move_id, tax_id)] += balance
+    vat_by_line = defaultdict(float)
+    for line_id, move_id, tax_id, balance in bases:
+        total_base = base_by_move_tax[(move_id, tax_id)]
+        if total_base:
+            vat_by_line[line_id] += (
+                vat_by_move_tax.get((move_id, tax_id), 0.0)
+                * balance
+                / total_base
+            )
+    return vat_by_line
 
 
 class PurchaseVATWizard(models.TransientModel):
@@ -30,10 +89,8 @@ class PurchaseVATWizard(models.TransientModel):
             aml.move_id,
             aml.id,
             aml.fiscal_credit,
-            aml.price_subtotal,
-            aml.price_total,
+            aml.balance,
             amlat.account_tax_id as applied_tax_id,
-            am.currency_rate,
             am.move_type
         FROM account_move_line aml
         JOIN account_move am ON aml.move_id = am.id
@@ -99,6 +156,46 @@ class PurchaseVATWizard(models.TransientModel):
             'ni_nr_ex_mon_refund': 0.0,
         }
 
+        # Cada compania tiene sus propias posiciones fiscales e impuestos
+        # (solo la primera tiene los xmlid de la loc), por eso el RI se
+        # reconoce por codigo AFIP y la alicuota por los datos del impuesto.
+        fiscal_position_ri_ids = set(
+            self.env['account.fiscal.position']
+            .with_context(active_test=False)
+            .search(
+                [
+                    ('company_id', '=', self.company_id.id),
+                    ('afip_code', '=', 1),
+                ]
+            )
+            .ids
+        )
+        vat_taxes = (
+            self.env['account.tax']
+            .with_context(active_test=False)
+            .search(
+                [
+                    ('company_id', '=', self.company_id.id),
+                    ('type_tax_use', '=', 'purchase'),
+                    ('tax_group_id.group_type', '=', 'vat'),
+                ]
+            )
+        )
+        vat_type_by_amount = {10.5: '10.5', 21.0: '21', 27.0: '27'}
+        vat_type_by_tax = {}
+        for tax in vat_taxes:
+            if tax.is_exempt:
+                vat_type_by_tax[tax.id] = 'exempt'
+            elif (
+                tax.amount_type == 'percent'
+                and tax.amount in vat_type_by_amount
+            ):
+                vat_type_by_tax[tax.id] = vat_type_by_amount[tax.amount]
+
+        missing_fiscal_credit_ids = []
+        vat_by_line = get_vat_amount_by_line(
+            self.env, {line[1] for line in purchase_data}
+        )
         vat_type = None
         for i, line in enumerate(purchase_data):
             next_line = (
@@ -106,55 +203,55 @@ class PurchaseVATWizard(models.TransientModel):
             )
             next_is_same_aml = next_line[2] == line[2] if next_line else False
 
-            if line[0] == self.env.ref('l10n_ar_eynes.fiscal_position_ri').id:
-                if (
-                    line[6]
-                    == self.env.ref(
-                        'l10n_ar_eynes.10_50_percent_tax_purchase'
-                    ).id
-                ):
-                    vat_type = '10.5'
-                elif (
-                    line[6]
-                    == self.env.ref('l10n_ar_eynes.21_percent_tax_purchase').id
-                ):
-                    vat_type = '21'
-                elif (
-                    line[6]
-                    == self.env.ref('l10n_ar_eynes.27_percent_tax_purchase').id
-                ):
-                    vat_type = '27'
-                elif (
-                    line[6]
-                    == self.env.ref(
-                        'l10n_ar_eynes.exempt_percent_tax_purchase'
-                    ).id
-                ):
-                    vat_type = 'exempt'
+            if line[0] in fiscal_position_ri_ids:
+                if line[5] in vat_type_by_tax:
+                    vat_type = vat_type_by_tax[line[5]]
             else:
                 vat_type = 'ni_nr_ex_mon'
 
             if not next_is_same_aml:
-                total = line[5] * line[7]
+                net = line[4]
+                vat = vat_by_line.get(line[2], 0.0)
+                total = net + vat
                 if not vat_type:
                     vat_type = 'untaxed'
 
                 if vat_type in ['exempt', 'ni_nr_ex_mon', 'untaxed']:
-                    if line[8] == 'in_refund':
+                    if line[6] == 'in_refund':
                         vat_type = vat_type + '_refund'
-                        total = total * -1
                     by_fiscal_credit[vat_type] += total
+                elif not line[3]:
+                    missing_fiscal_credit_ids.append(line[2])
                 else:
                     fiscal_credit = line[3]
-                    net = line[4] * line[7]
-                    vat = total - net
-                    if line[8] == 'in_refund':
+                    if line[6] == 'in_refund':
                         fiscal_credit = fiscal_credit + '_refund'
-                        net = net * -1
-                        vat = vat * -1
                     by_fiscal_credit[fiscal_credit][vat_type][0] += net
                     by_fiscal_credit[fiscal_credit][vat_type][1] += vat
                 vat_type = None
+
+        if missing_fiscal_credit_ids:
+            missing_lines = self.env['account.move.line'].browse(
+                missing_fiscal_credit_ids
+            )
+            raise UserError(
+                _(
+                    'The following invoice lines have VAT but no Fiscal '
+                    'Credit set. Please complete it to print the report:\n%s',
+                    '\n'.join(
+                        '- %s (%s): %s (%s)'
+                        % (
+                            line.move_id.name,
+                            line.partner_id.name,
+                            line.name or line.product_id.display_name,
+                            format_amount(
+                                self.env, line.price_subtotal, line.currency_id
+                            ),
+                        )
+                        for line in missing_lines
+                    ),
+                )
+            )
 
         for fiscal_type in (
             'direct_taxed',
@@ -194,10 +291,16 @@ class PurchaseVATWizard(models.TransientModel):
 
     def _get_perception_data(self):
         perception_query = """
-        SELECT per.name, sum(p.amount) FROM perception_tax_line p
+        SELECT
+            per.name,
+            sum(
+                CASE WHEN i.move_type = 'in_refund'
+                THEN -p.amount ELSE p.amount END
+            )
+        FROM perception_tax_line p
         JOIN account_tax per ON p.perception_id = per.id
         JOIN account_move i ON p.invoice_id=i.id
-        WHERE p.date BETWEEN %(date_start)s AND %(date_end)s
+        WHERE i.date BETWEEN %(date_start)s AND %(date_end)s
         AND i.state = 'posted'
         AND per.type_tax_use LIKE 'purchase'
         AND p.company_id = %(company)s
@@ -213,6 +316,9 @@ class PurchaseVATWizard(models.TransientModel):
         return perception_res
 
     def _parse_retention_perception(self):
+        # (nombre, importe, codigo, es_percepcion): las retenciones de
+        # pagos se listan pero no suman al TOTAL RE ni al total del
+        # libro (el Subdiario solo tiene las percepciones de facturas).
         taxes_data_parsed = []
         taxes_data = self._get_retention_data()
         for line in taxes_data:
@@ -221,6 +327,7 @@ class PurchaseVATWizard(models.TransientModel):
                     line[0].get('es_AR', line[0].get('en_US', 'No name')),
                     line[1],
                     line[2],
+                    False,
                 )
             )
         taxes_data = self._get_perception_data()
@@ -230,11 +337,17 @@ class PurchaseVATWizard(models.TransientModel):
                     line[0].get('es_AR', line[0].get('en_US', 'No name')),
                     line[1],
                     '',
+                    True,
                 )
             )
         return taxes_data_parsed
 
     def run(self):
+        # Las fechas se eligen con un selector de mes/anio que guarda
+        # el dia 1: sin esto 'Hasta' 09/2026 queda en 01/09 y el
+        # reporte toma un solo dia en vez del mes completo.
+        self.date_start = date_utils.start_of(self.date_start, 'month')
+        self.date_end = date_utils.end_of(self.date_end, 'month')
         tax_credit_refunds = self._parse_tax_credit_refunds()
         retention_perception = self._parse_retention_perception()
 

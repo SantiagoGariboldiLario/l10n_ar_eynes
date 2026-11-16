@@ -151,9 +151,20 @@ class AccountChangeCurrency(models.TransientModel):
                 }
             )
 
+        # La tasa del core (moneda de la factura por 1 ARS) debe quedar igual
+        # a la del asistente: si no, al cambiar la moneda el core la
+        # recalcula con la cotizacion del dia y el asiento usa otra tasa.
+        if new_currency == company.currency_id:
+            invoice_currency_rate = 1.0
+        elif new_currency.preciated:
+            invoice_currency_rate = 1 / new_rate
+        else:
+            invoice_currency_rate = new_rate
+
         inv_vals = {
             'currency_id': new_currency.id,
             'currency_rate': new_rate,
+            'invoice_currency_rate': invoice_currency_rate,
             'is_multi_currency': True,
             'secondary_currency_rate': self.actual_currency_rate,
             'secondary_currency_id': self.actual_currency_id,

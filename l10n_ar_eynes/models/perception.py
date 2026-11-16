@@ -24,6 +24,7 @@ class PerceptionTaxLine(models.Model):
         size=64,
         compute='_compute_name',
         store=True,
+        readonly=False,
         copy=True,
     )
     date = fields.Date(index=True)
@@ -72,8 +73,9 @@ class PerceptionTaxLine(models.Model):
     state_id = fields.Many2one(
         'res.country.state',
         string="State/Province",
-        related='perception_id.state_id',
+        compute='_compute_state_id',
         store=True,
+        readonly=False,
     )
     aml_id = fields.Many2one(
         'account.move.line',
@@ -85,7 +87,20 @@ class PerceptionTaxLine(models.Model):
     tax_app_id = fields.Many2one(
         'perception.tax.application', 'Tax Application'
     )
-    concept_id = fields.Many2one('perception.concept', 'Concept')
+    concept_id = fields.Many2one('perception.concept', string='Concept')
+    require_concept = fields.Boolean(
+        default=lambda self: bool(
+            self.env['ir.config_parameter']
+            .sudo()
+            .get_param('l10n_ar_eynes.require_perception_concept')
+        )
+    )
+    percent = fields.Float(
+        string='Alícuota',
+        digits='Account',
+        help="Effective alícuota applied (percent × (1 − excluded_percent)). "
+        "Used to compute the company-currency amount without rounding drift.",
+    )
 
     @api.constrains('base')
     def _check_base_not_zero(self):
@@ -112,6 +127,11 @@ class PerceptionTaxLine(models.Model):
         for rec in self:
             rec.name = '' if not rec.perception_id else rec.perception_id.name
 
+    @api.depends('perception_id')
+    def _compute_state_id(self):
+        for rec in self:
+            rec.state_id = rec.perception_id.state_id
+
     @api.depends('invoice_id')
     def _compute_perception_id_domain(self):
         for rec in self:
@@ -126,6 +146,16 @@ class PerceptionTaxLine(models.Model):
                     domain.append(('type_tax_use', '=', 'sale'))
             rec.perception_id_domain = domain
 
+    @api.depends(
+        'base',
+        'amount',
+        'percent',
+        'invoice_id.is_multi_currency',
+        'invoice_id.currency_id',
+        'invoice_id.company_currency_id',
+        'invoice_id.currency_rate',
+        'invoice_id.secondary_currency_rate',
+    )
     def _compute_base_amount_second_cur(self):
         for rec in self:
             rec.base_secondary_currency = 0
@@ -136,10 +166,26 @@ class PerceptionTaxLine(models.Model):
                     != rec.invoice_id.currency_id
                 ):
                     currency_rate = rec.invoice_id.currency_rate
-                else:
+                elif rec.invoice_id.secondary_currency_rate:
                     currency_rate = 1 / rec.invoice_id.secondary_currency_rate
-                rec.base_secondary_currency = rec.base * currency_rate
-                rec.amount_secondary_currency = rec.amount * currency_rate
+                else:
+                    continue
+                base_company = round(rec.base * currency_rate, 2)
+                rec.base_secondary_currency = base_company
+                # percent no se completa para percepciones manuales ni para
+                # las generadas por código python según posición fiscal
+                # (ver account_move.py _automatic_perception_calculation).
+                # En esos casos cae a derivar la alícuota de amount/base,
+                # como se hacía antes de [T15263].
+                aliquot = rec.percent or (
+                    round(abs(rec.amount / rec.base) * 100, 2)
+                    if rec.base
+                    else 0.0
+                )
+                if rec.base and base_company and aliquot:
+                    rec.amount_secondary_currency = round(
+                        base_company * aliquot / 100, 2
+                    )
 
     def autocomplete_base_amount(self, amount_untaxed):
         for rec in self:
@@ -305,13 +351,10 @@ class PerceptionTaxApplication(models.Model):
         comodel_name='iibb.situation', string='Situation of IIBB'
     )
 
-    _sql_constraints = [
-        (
-            'concept_activity_uniq',
-            'unique (concept_id, activity_id, perception_tax_id)',
-            'The tuple of Concept, Activity must be unique per Perception !',
-        ),
-    ]
+    _concept_activity_uniq = models.Constraint(
+        'UNIQUE (concept_id, activity_id, perception_tax_id)',
+        'The tuple of Concept, Activity must be unique per Perception !',
+    )
 
     @api.depends('perception_tax_id')
     def _compute_concept_domain(self):
@@ -482,6 +525,22 @@ class PerceptionTaxApplication(models.Model):
                 }
             )
 
+        # Si el registro del período no tiene exclusión, buscar en todos los
+        # registros del partner si existe un certificado de exclusión con rango
+        # de fechas que cubra la fecha de factura (puede estar en otro período).
+        if data['excluded_percent'] != 1.0:
+            active_exclusion = partner_perception_lines.filtered(
+                lambda line: line.excluded_percent == 1.0
+                and line.ex_date_from
+                and line.ex_date_to
+                and line.ex_date_from <= invoice_date <= line.ex_date_to
+                and (not line.period or line.period <= invoice_date)
+            )
+            if active_exclusion:
+                data['excluded_percent'] = 1.0
+                data['ex_date_from'] = active_exclusion[0].ex_date_from
+                data['ex_date_to'] = active_exclusion[0].ex_date_to
+
         return data
 
     def _get_base_from_account_move_lines(self, field, lines):
@@ -533,7 +592,7 @@ class PerceptionTaxApplication(models.Model):
 
         base = self.compute_base(perception_data['lines'], currency_rate)
         if base == 0.0:
-            return 0.0, 0.0
+            return 0.0, 0.0, 0.0
         sign = -1 if base < 0 else 1
         base = base * sign
         # # TODO: Testear proportional_vat
@@ -553,7 +612,7 @@ class PerceptionTaxApplication(models.Model):
             self.tax_minimum / currency_rate if self.tax_minimum > 0 else 0.0
         )
         if amount < tax_minimum:
-            return 0.0, 0.0
+            return 0.0, 0.0, 0.0
 
         # Si la cantidad de la percepcion es 0.0, tambien lo sera
         # la base, para que de esta manera no se aplique percepcion
@@ -563,4 +622,8 @@ class PerceptionTaxApplication(models.Model):
         # Si tenemos excluded_percent, lo aplicamos
         amount *= 1 - excluded_percent
 
-        return base * sign, amount * sign
+        # Effective alícuota after exclusion, used by exporters to avoid
+        # rounding drift when converting FC amounts to company currency.
+        percent_effective = round(percent * (1 - excluded_percent), 2)
+
+        return base * sign, amount * sign, percent_effective

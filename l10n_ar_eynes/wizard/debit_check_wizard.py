@@ -32,10 +32,19 @@ class DebitCheckWizard(models.Model):
 
     @api.model
     def _get_issued_check_id(self):
-        return self.env.context.get("active_id", [])
+        return self.env.context.get("active_id", False)
+
+    def _get_checks_to_debit(self):
+        """Checks the wizard is going to operate on"""
+        if self.multichecks:
+            return self.issued_checks
+        return self.issued_check_id
 
     def button_debit_checks(self):
         """button that run debit checks action"""
         if not self.deposit_date:
             raise UserError(_('You must select a deposit date.'))
-        return self.issued_checks.debit_checks(self.deposit_date)
+        checks = self._get_checks_to_debit()
+        if not checks:
+            raise UserError(_("You must select at least one check."))
+        return checks.debit_checks(self.deposit_date)
